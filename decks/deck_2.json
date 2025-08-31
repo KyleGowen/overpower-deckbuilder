@@ -1,0 +1,15 @@
+{
+  "name": "hhhh",
+  "description": "Temporary workspace for experimenting with cards",
+  "cards": [
+    {
+      "cardId": "card_12",
+      "quantity": 1
+    }
+  ],
+  "isPublic": false,
+  "id": "deck_2",
+  "createdAt": "2025-08-31T19:05:09.788Z",
+  "updatedAt": "2025-08-31T19:05:09.788Z",
+  "userId": "anonymous"
+}
