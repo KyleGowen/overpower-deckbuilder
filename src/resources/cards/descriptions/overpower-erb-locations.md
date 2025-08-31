@@ -1,0 +1,10 @@
+| Name | Threat Level | Special Ability |
+|----|------------|---------------|
+| Dracula's Armory | 3 | At the beginning of the game, place three unique Basic Universe cards, excluding "Any-Power," under Dracula\'92s Armory. Once per battle, you may remove one of these cards to combine it with a legal attack or defense. |
+| Spartan Training Ground | 2 | At the beginning of the game, place three unique Training Universe cards, excluding "Any-Power," under Spartan Training Ground. Once per battle, you may remove one of these cards to combine it with a legal attack or defense. |
+| The Round Table | 0 | The Round Table's team may place 1 "Any Character" Special card to this homebase. The Round Table's team may not place any other kinds of Special cards to The Round Table. |
+| Barsoom | 0 | Whenever a character on your team offensively plays a non-numerical Special card that increases 1 or more of their grids, you may fetch 1 Power card from the Draw Pile, useable by the character playing the Special card. May not be duplicate. Reshuffle Draw Pile. All of these Special cards are now considered to have a "remainder of game" effect and have the "remainder of game" text. |
+| Asclepieion | 0 | Anytime an Asclepieion Character plays a card that successfully removes a hit(s) from permanent record, but not current battle, they may draw a card and may immediately make an attack. Discard duplicates. |
+| 221-B Baker St. | 0 | Any time the 221-B Baker St. team plays a card that Reveals, Sorts, or Looks at cards from Opponent\'92s hand or Draw Pile, you may choose one of those cards and discard it into the appropriate Discard Pile. |
+| Event Horizon: The Future | 1 | During each Event Phase, draw a replacement card for each Event card in hand instead of only 1 Event card. Once you have replaced all Event cards, choose 1 Event card that will take effect that battle. All other Event cards are discarded as normal. |
+| The Land That Time Forgot | 3 | During the Post-Concession Phase, The Land that Time Forgot team may make 1 Power card attack after Opponent has conceded. For this game, when determining victory, Character KO counts before Mission cards. |
