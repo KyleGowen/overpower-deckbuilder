@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, PowerCard, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,6 +15,7 @@ class InMemoryDatabase {
   private teamwork: Map<string, Teamwork> = new Map();
   private allyUniverse: Map<string, AllyUniverse> = new Map();
   private trainings: Map<string, TrainingCard> = new Map();
+  private powerCards: Map<string, PowerCard> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -28,6 +29,7 @@ class InMemoryDatabase {
   private nextTeamworkId = 1;
   private nextAllyUniverseId = 1;
   private nextTrainingId = 1;
+  private nextPowerCardId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -61,9 +63,12 @@ class InMemoryDatabase {
 
     // Load Training from the markdown file
     await this.loadTraining();
+
+    // Load Power Cards from the markdown file
+    await this.loadPowerCards();
     
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe, ${this.trainings.size} trainings`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe, ${this.trainings.size} trainings, ${this.powerCards.size} power cards`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -736,6 +741,10 @@ class InMemoryDatabase {
     return Array.from(this.trainings.values());
   }
 
+  getAllPowerCards(): PowerCard[] {
+    return Array.from(this.powerCards.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -1259,6 +1268,84 @@ class InMemoryDatabase {
       'brute_force_intelligence': '349_5_brute_force_5_intelligence_4.webp'
     };
     return map[pair] || 'unknown_training.webp';
+  }
+
+  private async loadPowerCards(): Promise<void> {
+    try {
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-powercards.md');
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Power cards file not found, skipping');
+        return;
+      }
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n');
+      let currentType: string | null = null;
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        
+        // Skip empty lines and table separators
+        if (trimmed === '' || trimmed === '|----------|-----|') continue;
+        
+        // Check for section headers
+        if (trimmed.startsWith('## ')) {
+          currentType = trimmed.replace('## ', '').trim();
+          continue;
+        }
+        
+        // Skip table headers
+        if (trimmed.includes('Power Type') || trimmed.includes('|--')) continue;
+        
+        // Parse table rows
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+          const cols = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+          if (cols.length >= 2 && currentType && !isNaN(parseInt(cols[1]))) {
+            const powerType = cols[0];
+            const value = parseInt(cols[1]);
+            
+            if (powerType && value && !isNaN(value)) {
+              const card: PowerCard = {
+                id: `power_${this.nextPowerCardId++}`,
+                power_type: powerType,
+                value: value,
+                image: this.getPowerCardImage(powerType, value)
+              };
+              this.powerCards.set(card.id, card);
+            }
+          }
+        }
+      }
+      console.log(`✅ Loaded ${this.powerCards.size} power cards`);
+    } catch (e) {
+      console.error('Error loading power cards:', e);
+    }
+  }
+
+  private getPowerCardImage(powerType: string, value: number): string {
+    const type = powerType.toLowerCase().replace(/\s+/g, '_');
+    if (type === 'any-power' || type === 'any_power') {
+      if (value === 5) return '473_5_any-power.webp';
+      if (value === 6) return '474_6_anypower.webp';
+      if (value === 7) return '475_7_anypower.webp';
+      if (value === 8) return '476_8_anypower.webp';
+    }
+    if (type === 'multi-power' || type === 'multi_power') {
+      if (value === 3) return '477_3_multipower.webp';
+      if (value === 4) return '478_4_multipower.webp';
+      if (value === 5) return '479_5_multipower.webp';
+    }
+    const baseMap: { [key: string]: number } = {
+      energy: 292,
+      combat: 300,
+      brute_force: 308,
+      intelligence: 316
+    };
+    const base = baseMap[type] || 0;
+    if (base > 0 && value >= 1 && value <= 8) {
+      const num = base + (8 - value); // images go descending 8..1
+      return `${num}_${value}_${type}.webp`;
+    }
+    return 'unknown_power.webp';
   }
 
   // Statistics

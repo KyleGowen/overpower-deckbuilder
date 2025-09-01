@@ -113,6 +113,15 @@ app.get('/api/training', (req, res) => {
   }
 });
 
+app.get('/api/power-cards', (req, res) => {
+  try {
+    const powerCards = database.getAllPowerCards();
+    res.json({ success: true, data: powerCards });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch power cards' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

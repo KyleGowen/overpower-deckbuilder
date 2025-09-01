@@ -42,13 +42,7 @@ export interface Card {
   data: Character | PowerCard | SpecialCard;
 }
 
-// Power card structure (placeholder for future)
-export interface PowerCard {
-  id: string;
-  name: string;
-  value: number;
-  type: string;
-}
+// (PowerCard defined later with full fields)
 
 // Special card structure (from overpower-erb-specials.md)
 export interface SpecialCard {
@@ -128,6 +122,13 @@ export interface TrainingCard {
   type_2: string;      // Energy | Combat | Brute Force | Intelligence
   value_to_use: string; // e.g., "5 or less"
   bonus: string;        // e.g., "+4"
+  image: string;
+}
+
+export interface PowerCard {
+  id: string;
+  power_type: string;   // Energy | Combat | Brute Force | Intelligence | Any-Power | Multi-Power
+  value: number;        // 1..8, or 3..5 for Multi-Power
   image: string;
 }
 

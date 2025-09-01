@@ -564,6 +564,87 @@
             padding: 10px 0;
             font-size: 1.2rem;
         }
+
+        /* Power Cards Filter Styles */
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #4ecdc4;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            font-weight: normal;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4ecdc4;
+            cursor: pointer;
+        }
+
+        .range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .range-inputs input[type="number"] {
+            padding: 6px 8px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .range-inputs input[type="number"]:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 6px rgba(78, 205, 196, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .range-inputs input[type="number"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .range-inputs span {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -625,6 +706,7 @@
                 <button class="tab-button" onclick="switchTab('teamwork')">Teamwork</button>
                 <button class="tab-button" onclick="switchTab('ally-universe')">Universe: Ally</button>
                 <button class="tab-button" onclick="switchTab('training')">Universe: Training</button>
+                <button class="tab-button" onclick="switchTab('power-cards')">Power Cards</button>
             </div>
             </div>
 
@@ -905,6 +987,45 @@
                     <tbody id="training-tbody">
                         <tr>
                             <td colspan="6" class="loading">Loading training...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="power-cards-tab" style="display: none;">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Power Type:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="Energy" checked> Energy</label>
+                            <label><input type="checkbox" value="Combat" checked> Combat</label>
+                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
+                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                            <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
+                            <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Value Range:</label>
+                        <div class="range-inputs">
+                            <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" style="width: 60px;">
+                            <span>-</span>
+                            <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" style="width: 60px;">
+                        </div>
+                    </div>
+                    <button class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                </div>
+                <table id="power-cards-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Power Type</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="power-cards-tbody">
+                        <tr>
+                            <td colspan="3" class="loading">Loading power cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1329,6 +1450,7 @@
             document.getElementById('teamwork-tab').style.display = 'none';
             document.getElementById('ally-universe-tab').style.display = 'none';
             document.getElementById('training-tab').style.display = 'none';
+            document.getElementById('power-cards-tab').style.display = 'none';
             
             // Hide search container for characters tab (uses inline filters)
             document.getElementById('search-container').style.display = 'none';
@@ -1362,6 +1484,8 @@
                     searchInput.placeholder = 'Search allies by name, stat, or text...';
                 } else if (tabName === 'training') {
                     searchInput.placeholder = 'Search training by name or types...';
+                } else if (tabName === 'power-cards') {
+                    searchInput.placeholder = 'Search power cards by type or value...';
                 }
             }
             
@@ -1389,6 +1513,8 @@
                 setupAllyUniverseSearch();
             } else if (tabName === 'training') {
                 setupTrainingSearch();
+            } else if (tabName === 'power-cards') {
+                setupPowerCardsSearch();
             }
         }
 
@@ -1997,6 +2123,112 @@
             });
         }
 
+        // Power Cards functions
+        async function loadPowerCards() {
+            try {
+                const resp = await fetch('/api/power-cards');
+                const data = await resp.json();
+                if (data.success) displayPowerCards(data.data);
+            } catch (e) { console.error('Error loading power cards:', e); }
+        }
+
+        function displayPowerCards(cards) {
+            const tbody = document.getElementById('power-cards-tbody');
+            if (!cards || cards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">No power cards found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = cards.map(card => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${card.image}" 
+                             alt="${card.power_type} ${card.value}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td>${card.power_type}</td>
+                    <td>${card.value}</td>
+                </tr>
+            `).join('');
+        }
+
+        function setupPowerCardsSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const term = e.target.value.toLowerCase();
+                if (term.length === 0) { 
+                    await applyPowerCardFilters(); 
+                    return; 
+                }
+                try {
+                    const resp = await fetch('/api/power-cards');
+                    const data = await resp.json();
+                    if (data.success) {
+                        const filtered = data.data.filter(c =>
+                            c.power_type.toLowerCase().includes(term) ||
+                            String(c.value).includes(term)
+                        );
+                        displayPowerCards(filtered);
+                    }
+                } catch (err) { console.error('Error searching power cards:', err); }
+            });
+
+            // Add event listeners for filters
+            document.querySelectorAll('#power-cards-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyPowerCardFilters);
+            });
+
+            document.getElementById('power-value-min').addEventListener('input', applyPowerCardFilters);
+            document.getElementById('power-value-max').addEventListener('input', applyPowerCardFilters);
+        }
+
+        async function applyPowerCardFilters() {
+            try {
+                const resp = await fetch('/api/power-cards');
+                const data = await resp.json();
+                if (!data.success) return;
+
+                let filtered = data.data;
+
+                // Filter by power type
+                const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                if (selectedTypes.length > 0) {
+                    filtered = filtered.filter(card => selectedTypes.includes(card.power_type));
+                }
+
+                // Filter by value range
+                const minValue = document.getElementById('power-value-min').value;
+                const maxValue = document.getElementById('power-value-max').value;
+                
+                if (minValue && !isNaN(minValue)) {
+                    filtered = filtered.filter(card => card.value >= parseInt(minValue));
+                }
+                if (maxValue && !isNaN(maxValue)) {
+                    filtered = filtered.filter(card => card.value <= parseInt(maxValue));
+                }
+
+                displayPowerCards(filtered);
+            } catch (err) {
+                console.error('Error applying power card filters:', err);
+            }
+        }
+
+        function clearPowerCardFilters() {
+            // Reset checkboxes
+            document.querySelectorAll('#power-cards-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            // Reset value inputs
+            document.getElementById('power-value-min').value = '';
+            document.getElementById('power-value-max').value = '';
+            
+            // Reload all cards
+            loadPowerCards();
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
@@ -2009,6 +2241,7 @@
             loadTeamwork();
             loadAllyUniverse();
             loadTraining();
+            loadPowerCards();
             setupSearch();
             
             // Update all stats after loading data
