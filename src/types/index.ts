@@ -121,6 +121,16 @@ export interface AllyUniverse {
   image: string;
 }
 
+export interface TrainingCard {
+  id: string;
+  card_name: string;
+  type_1: string;      // Energy | Combat | Brute Force | Intelligence
+  type_2: string;      // Energy | Combat | Brute Force | Intelligence
+  value_to_use: string; // e.g., "5 or less"
+  bonus: string;        // e.g., "+4"
+  image: string;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

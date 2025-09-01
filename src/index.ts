@@ -104,6 +104,15 @@ app.get('/api/ally-universe', (req, res) => {
   }
 });
 
+app.get('/api/training', (req, res) => {
+  try {
+    const training = database.getAllTraining();
+    res.json({ success: true, data: training });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch training cards' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

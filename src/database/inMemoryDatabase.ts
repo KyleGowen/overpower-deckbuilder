@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -14,6 +14,7 @@ class InMemoryDatabase {
   private advancedUniverse: Map<string, AdvancedUniverse> = new Map();
   private teamwork: Map<string, Teamwork> = new Map();
   private allyUniverse: Map<string, AllyUniverse> = new Map();
+  private trainings: Map<string, TrainingCard> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -26,6 +27,7 @@ class InMemoryDatabase {
   private nextAdvancedUniverseId = 1;
   private nextTeamworkId = 1;
   private nextAllyUniverseId = 1;
+  private nextTrainingId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -56,9 +58,12 @@ class InMemoryDatabase {
 
     // Load Ally Universe from the markdown file
     await this.loadAllyUniverse();
+
+    // Load Training from the markdown file
+    await this.loadTraining();
     
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe, ${this.trainings.size} trainings`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -727,6 +732,10 @@ class InMemoryDatabase {
     return Array.from(this.allyUniverse.values());
   }
 
+  getAllTraining(): TrainingCard[] {
+    return Array.from(this.trainings.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -1197,6 +1206,59 @@ class InMemoryDatabase {
     }
     // Fallback unknown
     return 'unknown_ally_universe.webp';
+  }
+
+  private async loadTraining(): Promise<void> {
+    try {
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-training.md');
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Training file not found, skipping');
+        return;
+      }
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n').filter(l => l.trim().length > 0);
+      for (const line of lines) {
+        if (line.startsWith('|') && !line.includes('---') && !line.includes('Card Name')) {
+          const cols = line.split('|').map(c => c.trim());
+          if (cols.length >= 6) {
+            const name = cols[1];
+            const type1 = cols[2];
+            const type2 = cols[3];
+            const training: TrainingCard = {
+              id: `training_${this.nextTrainingId++}`,
+              card_name: name,
+              type_1: type1,
+              type_2: type2,
+              value_to_use: cols[4],
+              bonus: cols[5],
+              image: this.getTrainingImage(type1, type2)
+            };
+            this.trainings.set(training.id, training);
+          }
+        }
+      }
+      console.log(`✅ Loaded ${this.trainings.size} Training cards`);
+    } catch (e) {
+      console.error('Error loading Training:', e);
+    }
+  }
+
+  private getTrainingImage(type1: string, type2: string): string {
+    // Map the two stats to one of the six combined 5+5 images (344-349)
+    // Build key like 'energy_combat', sorted to match filenames order
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '_');
+    const a = norm(type1);
+    const b = norm(type2);
+    const pair = [a, b].sort().join('_');
+    const map: { [key: string]: string } = {
+      'combat_energy': '344_5_energy_5_combat_4.webp',
+      'brute_force_energy': '345_5_energy_5_brute_force_4.webp',
+      'energy_intelligence': '346_5_energy_5_intelligence_4.webp',
+      'brute_force_combat': '347_5_combat_5_brute_force_4.webp',
+      'combat_intelligence': '348_5_combat_5_intelligence_4.webp',
+      'brute_force_intelligence': '349_5_brute_force_5_intelligence_4.webp'
+    };
+    return map[pair] || 'unknown_training.webp';
   }
 
   // Statistics

@@ -624,6 +624,7 @@
                 <button class="tab-button" onclick="switchTab('events')">Events</button>
                 <button class="tab-button" onclick="switchTab('teamwork')">Teamwork</button>
                 <button class="tab-button" onclick="switchTab('ally-universe')">Universe: Ally</button>
+                <button class="tab-button" onclick="switchTab('training')">Universe: Training</button>
             </div>
             </div>
 
@@ -884,6 +885,26 @@
                     <tbody id="ally-universe-tbody">
                         <tr>
                             <td colspan="8" class="loading">Loading allies...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="training-tab" style="display: none;">
+                <table id="training-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Card Name</th>
+                            <th>Type 1</th>
+                            <th>Type 2</th>
+                            <th>Value to Use</th>
+                            <th>Bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="training-tbody">
+                        <tr>
+                            <td colspan="6" class="loading">Loading training...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1307,6 +1328,7 @@
             document.getElementById('events-tab').style.display = 'none';
             document.getElementById('teamwork-tab').style.display = 'none';
             document.getElementById('ally-universe-tab').style.display = 'none';
+            document.getElementById('training-tab').style.display = 'none';
             
             // Hide search container for characters tab (uses inline filters)
             document.getElementById('search-container').style.display = 'none';
@@ -1338,6 +1360,8 @@
                     searchInput.placeholder = 'Search teamwork by requirements or effects...';
                 } else if (tabName === 'ally-universe') {
                     searchInput.placeholder = 'Search allies by name, stat, or text...';
+                } else if (tabName === 'training') {
+                    searchInput.placeholder = 'Search training by name or types...';
                 }
             }
             
@@ -1363,6 +1387,8 @@
                 setupTeamworkSearch();
             } else if (tabName === 'ally-universe') {
                 setupAllyUniverseSearch();
+            } else if (tabName === 'training') {
+                setupTrainingSearch();
             }
         }
 
@@ -1916,6 +1942,61 @@
             });
         }
 
+        // Training functions
+        async function loadTraining() {
+            try {
+                const response = await fetch('/api/training');
+                const data = await response.json();
+                if (data.success) displayTraining(data.data);
+            } catch (e) { console.error('Error loading training:', e); }
+        }
+
+        function displayTraining(cards) {
+            const tbody = document.getElementById('training-tbody');
+            if (!cards || cards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No training found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = cards.map(card => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${card.image}" 
+                             alt="${card.card_name}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${card.card_name}</strong></td>
+                    <td>${card.type_1}</td>
+                    <td>${card.type_2}</td>
+                    <td>${card.value_to_use}</td>
+                    <td>${card.bonus}</td>
+                </tr>
+            `).join('');
+        }
+
+        function setupTrainingSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                if (searchTerm.length === 0) { await loadTraining(); return; }
+                try {
+                    const resp = await fetch('/api/training');
+                    const data = await resp.json();
+                    if (data.success) {
+                        const filtered = data.data.filter(card =>
+                            card.card_name.toLowerCase().includes(searchTerm) ||
+                            card.type_1.toLowerCase().includes(searchTerm) ||
+                            card.type_2.toLowerCase().includes(searchTerm) ||
+                            card.value_to_use.toLowerCase().includes(searchTerm) ||
+                            card.bonus.toLowerCase().includes(searchTerm)
+                        );
+                        displayTraining(filtered);
+                    }
+                } catch (err) { console.error('Error searching training:', err); }
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
@@ -1927,6 +2008,7 @@
             loadEvents();
             loadTeamwork();
             loadAllyUniverse();
+            loadTraining();
             setupSearch();
             
             // Update all stats after loading data
