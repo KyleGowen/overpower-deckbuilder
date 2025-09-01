@@ -50,12 +50,15 @@ export interface PowerCard {
   type: string;
 }
 
-// Special card structure (placeholder for future)
+// Special card structure (from overpower-erb-specials.md)
 export interface SpecialCard {
   id: string;
   name: string;
-  effect: string;
-  type: string;
+  card_type: string;
+  character: string;
+  card_effect: string;
+  image: string;
+  is_cataclysm: boolean;
 }
 
 // API response wrapper

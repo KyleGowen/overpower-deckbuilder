@@ -184,6 +184,46 @@
             line-height: 1.4;
         }
 
+        /* Special cards controls styling */
+        .special-cards-controls {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .toggle-button {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 5px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-button:hover {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        /* Cataclysm column styling */
+        .cataclysm-yes {
+            color: #ff6b6b;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .cataclysm-no {
+            color: #6c757d;
+            text-align: center;
+        }
+
+        /* Hidden cataclysm column */
+        .cataclysm-column.hidden,
+        .cataclysm-cell.hidden {
+            display: none;
+        }
+
         .threat-high { color: #ff6b6b; font-weight: bold; }
         .threat-medium { color: #feca57; font-weight: bold; }
         .threat-low { color: #48dbfb; font-weight: bold; }
@@ -284,6 +324,14 @@
                 <div class="stat-label">Characters</div>
             </div>
             <div class="stat-card">
+                <div class="stat-number" id="total-special-cards">-</div>
+                <div class="stat-label">Special Cards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-locations">-</div>
+                <div class="stat-label">Locations</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-number" id="total-decks">-</div>
                 <div class="stat-label">Decks</div>
             </div>
@@ -296,10 +344,11 @@
         <div class="database-section">
             <div class="section-header">
                 <h2>📚 Database</h2>
-                <div class="tab-container">
-                    <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
-                    <button class="tab-button" onclick="switchTab('locations')">Locations</button>
-                </div>
+                            <div class="tab-container">
+                <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
+                <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
+                <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+            </div>
             </div>
 
             <div class="search-container" id="search-container">
@@ -323,6 +372,31 @@
                     <tbody id="characters-tbody">
                         <tr>
                             <td colspan="8" class="loading">Loading characters...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="special-cards-tab" style="display: none;">
+                <div class="special-cards-controls">
+                    <button id="toggle-cataclysm" class="toggle-button" onclick="toggleCataclysmColumn()">
+                        <span id="toggle-text">Show</span> Cataclysm Column
+                    </button>
+                </div>
+                <table id="special-cards-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Card Type</th>
+                            <th>Character</th>
+                            <th class="cataclysm-column hidden">Cataclysm</th>
+                            <th>Card Effect</th>
+                        </tr>
+                    </thead>
+                    <tbody id="special-cards-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading special cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -378,6 +452,24 @@
             }
         }
 
+        // Load and display special cards
+        async function loadSpecialCards() {
+            try {
+                const response = await fetch('/api/special-cards');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displaySpecialCards(data.data);
+                } else {
+                    throw new Error('Failed to load special cards');
+                }
+            } catch (error) {
+                console.error('Error loading special cards:', error);
+                document.getElementById('special-cards-tbody').innerHTML = 
+                    '<tr><td colspan="5" class="error">Error loading special cards. Please try again.</td></tr>';
+            }
+        }
+
         function displayCharacters(characters) {
             const tbody = document.getElementById('characters-tbody');
             tbody.innerHTML = '';
@@ -415,6 +507,56 @@
             document.getElementById('total-characters').textContent = characters.length;
             document.getElementById('total-decks').textContent = '0';
             document.getElementById('total-users').textContent = '0';
+        }
+
+        function updateAllStats() {
+            // This will be called after loading all data types
+            fetch('/api/special-cards')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('total-special-cards').textContent = data.data.length;
+                    }
+                });
+            
+            fetch('/api/locations')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('total-locations').textContent = data.data.length;
+                    }
+                });
+        }
+
+        function displaySpecialCards(specialCards) {
+            const tbody = document.getElementById('special-cards-tbody');
+            tbody.innerHTML = '';
+
+            specialCards.forEach(card => {
+                const row = document.createElement('tr');
+                
+                // Determine if this is a cataclysm card
+                const isCataclysm = card.is_cataclysm;
+                const cataclysmDisplay = isCataclysm ? '🔥 YES' : 'No';
+                const cataclysmClass = isCataclysm ? 'cataclysm-yes' : 'cataclysm-no';
+                
+                row.innerHTML = `
+                    <td>
+                        <img src="/src/resources/cards/images/${card.image}" 
+                             alt="${card.name}" 
+                             style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTIwIDE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${card.name}</strong></td>
+                    <td>${card.card_type}</td>
+                    <td>${card.character}</td>
+                    <td class="${cataclysmClass} cataclysm-cell hidden">${cataclysmDisplay}</td>
+                    <td>${card.card_effect}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
         }
 
         // Search functionality
@@ -543,6 +685,7 @@
         function switchTab(tabName) {
             // Hide all tabs
             document.getElementById('characters-tab').style.display = 'none';
+            document.getElementById('special-cards-tab').style.display = 'none';
             document.getElementById('locations-tab').style.display = 'none';
             
             // Remove active class from all buttons
@@ -560,6 +703,10 @@
                 searchInput.placeholder = 'Search characters by name, abilities, or stats...';
                 searchInput.oninput = null;
                 setupSearch();
+            } else if (tabName === 'special-cards') {
+                searchInput.placeholder = 'Search special cards by name, character, or effect...';
+                searchInput.oninput = null;
+                setupSpecialCardSearch();
             } else {
                 searchInput.placeholder = 'Search locations by name or abilities...';
                 searchInput.oninput = null;
@@ -596,11 +743,69 @@
             });
         }
 
+        // Special card search functionality
+        function setupSpecialCardSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all special cards
+                    await loadSpecialCards();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/special-cards');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredSpecialCards = data.data.filter(card => 
+                            card.name.toLowerCase().includes(searchTerm) ||
+                            card.character.toLowerCase().includes(searchTerm) ||
+                            card.card_effect.toLowerCase().includes(searchTerm) ||
+                            (searchTerm.includes('cataclysm') && card.is_cataclysm) ||
+                            (searchTerm.includes('yes') && card.is_cataclysm) ||
+                            (searchTerm.includes('no') && !card.is_cataclysm)
+                        );
+                        displaySpecialCards(filteredSpecialCards);
+                    }
+                } catch (error) {
+                    console.error('Error searching special cards:', error);
+                }
+            });
+        }
+
+        // Toggle cataclysm column visibility
+        function toggleCataclysmColumn() {
+            const cataclysmHeader = document.querySelector('.cataclysm-column');
+            const cataclysmCells = document.querySelectorAll('.cataclysm-cell');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleButton = document.getElementById('toggle-cataclysm');
+            
+            if (cataclysmHeader.classList.contains('hidden')) {
+                // Show the column
+                cataclysmHeader.classList.remove('hidden');
+                cataclysmCells.forEach(cell => cell.classList.remove('hidden'));
+                toggleText.textContent = 'Hide';
+                toggleButton.innerHTML = '<span id="toggle-text">Hide</span> Cataclysm Column';
+            } else {
+                // Hide the column
+                cataclysmHeader.classList.add('hidden');
+                cataclysmCells.forEach(cell => cell.classList.add('hidden'));
+                toggleText.textContent = 'Show';
+                toggleButton.innerHTML = '<span id="toggle-text">Show</span> Cataclysm Column';
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
+            loadSpecialCards();
             loadLocations();
             setupSearch();
+            // Update all stats after loading data
+            setTimeout(updateAllStats, 1000);
             // Make images clickable after they are loaded
             setTimeout(makeImagesClickable, 1000);
         });

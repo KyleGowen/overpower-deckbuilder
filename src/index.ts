@@ -41,6 +41,15 @@ app.get('/api/locations', (req, res) => {
   }
 });
 
+app.get('/api/special-cards', (req, res) => {
+  try {
+    const specialCards = database.getAllSpecialCards();
+    res.json({ success: true, data: specialCards });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch special cards' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();
