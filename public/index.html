@@ -265,6 +265,81 @@
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
         }
 
+        /* Filter Controls Styling */
+        .filters-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 120px;
+        }
+
+        .filter-group label {
+            color: #4ecdc4;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 8px rgba(78, 205, 196, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .filter-controls {
+            display: flex;
+            justify-content: center;
+        }
+
+        .clear-filters-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .clear-filters-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -365,6 +440,44 @@
 
             <div class="search-container" id="search-container">
                 <input type="text" class="search-input" id="search-input" placeholder="Search characters by name, abilities, or stats...">
+            </div>
+
+            <div class="filters-container" id="characters-filters" style="display: none;">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Energy:</label>
+                        <input type="number" class="filter-input equals" data-column="energy" placeholder="Equals">
+                        <input type="number" class="filter-input min" data-column="energy" placeholder="Min">
+                        <input type="number" class="filter-input max" data-column="energy" placeholder="Max">
+                    </div>
+                    <div class="filter-group">
+                        <label>Combat:</label>
+                        <input type="number" class="filter-input equals" data-column="combat" placeholder="Equals">
+                        <input type="number" class="filter-input min" data-column="combat" placeholder="Min">
+                        <input type="number" class="filter-input max" data-column="combat" placeholder="Max">
+                    </div>
+                    <div class="filter-group">
+                        <label>Brute Force:</label>
+                        <input type="number" class="filter-input equals" data-column="brute_force" placeholder="Equals">
+                        <input type="number" class="filter-input min" data-column="brute_force" placeholder="Min">
+                        <input type="number" class="filter-input max" data-column="brute_force" placeholder="Max">
+                    </div>
+                    <div class="filter-group">
+                        <label>Intelligence:</label>
+                        <input type="number" class="filter-input equals" data-column="intelligence" placeholder="Equals">
+                        <input type="number" class="filter-input min" data-column="intelligence" placeholder="Min">
+                        <input type="number" class="filter-input max" data-column="intelligence" placeholder="Max">
+                    </div>
+                    <div class="filter-group">
+                        <label>Threat Level:</label>
+                        <input type="number" class="filter-input equals" data-column="threat_level" placeholder="Equals">
+                        <input type="number" class="filter-input min" data-column="threat_level" placeholder="Min">
+                        <input type="number" class="filter-input max" data-column="threat_level" placeholder="Max">
+                    </div>
+                </div>
+                <div class="filter-controls">
+                    <button id="clear-filters" class="clear-filters-btn">Clear All Filters</button>
+                </div>
             </div>
 
             <div class="table-container" id="characters-tab">
@@ -623,39 +736,94 @@
             });
         }
 
-        // Search functionality
+        // Advanced filtering functionality
         function setupSearch() {
             const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', async (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                
-                if (searchTerm.length === 0) {
-                    // Reload all characters
-                    await loadCharacters();
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/characters');
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        const filteredCharacters = data.data.filter(character => 
-                            character.name.toLowerCase().includes(searchTerm) ||
-                            character.special_abilities.toLowerCase().includes(searchTerm) ||
-                            character.energy.toString().includes(searchTerm) ||
-                            character.combat.toString().includes(searchTerm) ||
-                            character.brute_force.toString().includes(searchTerm) ||
-                            character.intelligence.toString().includes(searchTerm) ||
-                            character.threat_level.toString().includes(searchTerm)
-                        );
-                        
-                        displayCharacters(filteredCharacters);
-                    }
-                } catch (error) {
-                    console.error('Search error:', error);
-                }
+            const filterInputs = document.querySelectorAll('.filter-input');
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            
+            // Setup text search
+            searchInput.addEventListener('input', applyFilters);
+            
+            // Setup numeric filters
+            filterInputs.forEach(input => {
+                input.addEventListener('input', applyFilters);
             });
+            
+            // Setup clear filters button
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
+        }
+
+        // Apply all active filters
+        async function applyFilters() {
+            try {
+                const response = await fetch('/api/characters');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let filteredCharacters = data.data;
+                    
+                    // Apply text search filter
+                    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                    if (searchTerm.length > 0) {
+                        filteredCharacters = filteredCharacters.filter(character => 
+                            character.name.toLowerCase().includes(searchTerm) ||
+                            character.special_abilities.toLowerCase().includes(searchTerm)
+                        );
+                    }
+                    
+                    // Apply numeric filters
+                    const numericColumns = ['energy', 'combat', 'brute_force', 'intelligence', 'threat_level'];
+                    
+                    numericColumns.forEach(column => {
+                        const equalsInput = document.querySelector(`.filter-input.equals[data-column="${column}"]`);
+                        const minInput = document.querySelector(`.filter-input.min[data-column="${column}"]`);
+                        const maxInput = document.querySelector(`.filter-input.max[data-column="${column}"]`);
+                        
+                        // Apply equals filter
+                        if (equalsInput.value !== '') {
+                            const equalsValue = parseInt(equalsInput.value);
+                            filteredCharacters = filteredCharacters.filter(character => 
+                                character[column] === equalsValue
+                            );
+                        }
+                        
+                        // Apply min filter
+                        if (minInput.value !== '') {
+                            const minValue = parseInt(minInput.value);
+                            filteredCharacters = filteredCharacters.filter(character => 
+                                character[column] >= minValue
+                            );
+                        }
+                        
+                        // Apply max filter
+                        if (maxInput.value !== '') {
+                            const maxValue = parseInt(maxInput.value);
+                            filteredCharacters = filteredCharacters.filter(character => 
+                                character[column] <= maxValue
+                            );
+                        }
+                    });
+                    
+                    displayCharacters(filteredCharacters);
+                }
+            } catch (error) {
+                console.error('Filter error:', error);
+            }
+        }
+
+        // Clear all filters and reload all characters
+        function clearAllFilters() {
+            // Clear text search
+            document.getElementById('search-input').value = '';
+            
+            // Clear all numeric filters
+            document.querySelectorAll('.filter-input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reload all characters
+            loadCharacters();
         }
 
         // Modal functionality
@@ -754,11 +922,19 @@
             document.getElementById('locations-tab').style.display = 'none';
             document.getElementById('events-tab').style.display = 'none';
             
+            // Hide filters container
+            document.getElementById('characters-filters').style.display = 'none';
+            
             // Remove active class from all buttons
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             
             // Show selected tab
             document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Show filters only for characters tab
+            if (tabName === 'characters') {
+                document.getElementById('characters-filters').style.display = 'block';
+            }
             
             // Add active class to clicked button
             event.target.classList.add('active');
@@ -1013,6 +1189,10 @@
             loadLocations();
             loadEvents();
             setupSearch();
+            
+            // Show filters for characters tab by default
+            document.getElementById('characters-filters').style.display = 'block';
+            
             // Update all stats after loading data
             setTimeout(updateAllStats, 1000);
             // Make images clickable after they are loaded
