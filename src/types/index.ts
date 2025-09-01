@@ -27,6 +27,14 @@ export interface Character {
   image: string;
 }
 
+export interface Location {
+  id: string;
+  name: string;
+  threat_level: number;
+  special_ability: string;
+  image: string;
+}
+
 // Card types for future expansion
 export interface Card {
   id: string;

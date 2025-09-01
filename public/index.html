@@ -79,7 +79,9 @@
         }
 
         .section-header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
@@ -89,16 +91,47 @@
             color: #4ecdc4;
         }
 
+        .tab-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-button.active {
+            background: #4ecdc4;
+            border-color: #4ecdc4;
+            color: #1a1a2e;
+        }
+
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
             background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9rem;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         th, td {
@@ -113,10 +146,42 @@
             font-weight: 600;
             position: sticky;
             top: 0;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.3);
         }
 
         tr:hover {
             background: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Enhanced table styling */
+        td {
+            vertical-align: top;
+        }
+
+        td img {
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 120px !important;
+            height: auto !important;
+            max-height: 180px !important;
+        }
+
+        td img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        /* Special abilities column styling */
+        td:last-child {
+            max-width: 300px;
+            word-wrap: break-word;
+            line-height: 1.4;
         }
 
         .threat-high { color: #ff6b6b; font-weight: bold; }
@@ -228,16 +293,20 @@
             </div>
         </div>
 
-        <div class="characters-section">
+        <div class="database-section">
             <div class="section-header">
-                <h2>📚 Character Database</h2>
+                <h2>📚 Database</h2>
+                <div class="tab-container">
+                    <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
+                    <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+                </div>
             </div>
 
-            <div class="search-container">
+            <div class="search-container" id="search-container">
                 <input type="text" class="search-input" id="search-input" placeholder="Search characters by name, abilities, or stats...">
             </div>
 
-            <div class="table-container">
+            <div class="table-container" id="characters-tab">
                 <table id="characters-table">
                     <thead>
                         <tr>
@@ -258,7 +327,27 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="table-container" id="locations-tab" style="display: none;">
+                <table id="locations-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Threat Level</th>
+                            <th>Special Ability</th>
+                        </tr>
+                    </thead>
+                    <tbody id="locations-tbody">
+                        <tr>
+                            <td colspan="4" class="loading">Loading locations...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+
     </div>
 
     <!-- Image Modal -->
@@ -403,9 +492,114 @@
             }
         });
 
+        // Load and display locations
+        async function loadLocations() {
+            try {
+                const response = await fetch('/api/locations');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayLocations(data.data);
+                } else {
+                    throw new Error('Failed to load locations');
+                }
+            } catch (error) {
+                console.error('Error loading locations:', error);
+                document.getElementById('locations-tbody').innerHTML = 
+                    '<tr><td colspan="4" class="error">Error loading locations. Please try again.</td></tr>';
+            }
+        }
+
+        function displayLocations(locations) {
+            const tbody = document.getElementById('locations-tbody');
+            tbody.innerHTML = '';
+
+            locations.forEach(location => {
+                const row = document.createElement('tr');
+                
+                // Determine threat level class
+                let threatClass = 'threat-low';
+                if (location.threat_level >= 3) threatClass = 'threat-high';
+                else if (location.threat_level >= 1) threatClass = 'threat-medium';
+
+                row.innerHTML = `
+                    <td>
+                        <img src="/src/resources/cards/images/${location.image}" 
+                             alt="${location.name}" 
+                             style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${location.name}</strong></td>
+                    <td class="${threatClass}">${location.threat_level}</td>
+                    <td>${location.special_ability || ''}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.getElementById('characters-tab').style.display = 'none';
+            document.getElementById('locations-tab').style.display = 'none';
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Update search placeholder and functionality
+            const searchInput = document.getElementById('search-input');
+            if (tabName === 'characters') {
+                searchInput.placeholder = 'Search characters by name, abilities, or stats...';
+                searchInput.oninput = null;
+                setupSearch();
+            } else {
+                searchInput.placeholder = 'Search locations by name or abilities...';
+                searchInput.oninput = null;
+                setupLocationSearch();
+            }
+        }
+
+        // Location search functionality
+        function setupLocationSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all locations
+                    await loadLocations();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/locations');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredLocations = data.data.filter(location => 
+                            location.name.toLowerCase().includes(searchTerm) ||
+                            location.special_ability.toLowerCase().includes(searchTerm)
+                        );
+                        displayLocations(filteredLocations);
+                    }
+                } catch (error) {
+                    console.error('Error searching locations:', error);
+                }
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
+            loadLocations();
             setupSearch();
             // Make images clickable after they are loaded
             setTimeout(makeImagesClickable, 1000);
