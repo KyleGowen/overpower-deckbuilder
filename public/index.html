@@ -266,28 +266,26 @@
         }
 
         /* Inline Filter Controls Styling */
-        .filter-controls {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
 
         .clear-filters-btn {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 15px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+            width: 100%;
+            max-width: 120px;
         }
 
         .clear-filters-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(135deg, #5fd8d0, #4ecdc4);
         }
 
         /* Table filter row styling */
@@ -313,6 +311,67 @@
             text-align: center;
             width: 50px;
             transition: all 0.3s ease;
+        }
+
+        /* Fixed column widths to prevent resizing during filtering */
+        #characters-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        #characters-table th,
+        #characters-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Specific column widths */
+        #characters-table th:nth-child(1), /* Image */
+        #characters-table td:nth-child(1) {
+            width: 140px;
+            text-align: center;
+        }
+
+        #characters-table td:nth-child(1) img {
+            max-width: 120px;
+            height: auto;
+            max-height: 180px;
+        }
+
+        #characters-table th:nth-child(2), /* Name */
+        #characters-table td:nth-child(2) {
+            width: 200px;
+        }
+
+        #characters-table th:nth-child(3), /* Energy */
+        #characters-table td:nth-child(3) {
+            width: 80px;
+        }
+
+        #characters-table th:nth-child(4), /* Combat */
+        #characters-table td:nth-child(4) {
+            width: 80px;
+        }
+
+        #characters-table th:nth-child(5), /* Brute Force */
+        #characters-table td:nth-child(5) {
+            width: 100px;
+        }
+
+        #characters-table th:nth-child(6), /* Intelligence */
+        #characters-table td:nth-child(6) {
+            width: 100px;
+        }
+
+        #characters-table th:nth-child(7), /* Threat Level */
+        #characters-table td:nth-child(7) {
+            width: 100px;
+        }
+
+        #characters-table th:nth-child(8), /* Special Abilities */
+        #characters-table td:nth-child(8) {
+            width: 300px;
         }
 
         .filter-input:focus {
@@ -349,6 +408,42 @@
         .header-filter::placeholder {
             color: rgba(255, 255, 255, 0.5);
             font-size: 0.7rem;
+        }
+
+        /* Inherent Abilities filter styling */
+        .inherent-abilities-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .ability-toggle {
+            width: 16px;
+            height: 16px;
+            accent-color: rgba(78, 205, 196, 0.3);
+            cursor: pointer;
+            filter: brightness(0.7) saturate(0.8);
+            opacity: 0.6;
+        }
+
+        .ability-toggle:checked {
+            filter: none;
+            opacity: 1;
+        }
+
+        .toggle-text {
+            white-space: nowrap;
         }
 
         /* Modal Styles */
@@ -458,9 +553,6 @@
 
 
             <div class="table-container" id="characters-tab">
-                <div class="filter-controls">
-                    <button id="clear-filters" class="clear-filters-btn">Clear All Filters</button>
-                </div>
                 <table id="characters-table">
                     <thead>
                         <tr>
@@ -471,39 +563,41 @@
                             <th>Brute Force</th>
                             <th>Intelligence</th>
                             <th>Threat Level</th>
-                            <th>Special Abilities</th>
+                            <th>Inherent Abilities</th>
                         </tr>
                         <tr class="filter-row">
-                            <th></th>
+                            <th>
+                                <button id="clear-filters" class="clear-filters-btn">Clear All Filters</button>
+                            </th>
                             <th>
                                 <input type="text" class="header-filter" placeholder="Search names...">
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="energy" placeholder="=" min="0">
-                                    <input type="number" class="filter-input min" data-column="energy" placeholder="Min" min="0">
-                                    <input type="number" class="filter-input max" data-column="energy" placeholder="Max" min="0">
+                                    <input type="number" class="filter-input equals" data-column="energy" placeholder="=" min="0" max="8">
+                                    <input type="number" class="filter-input min" data-column="energy" placeholder="Min" min="0" max="8">
+                                    <input type="number" class="filter-input max" data-column="energy" placeholder="Max" min="0" max="8">
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="combat" placeholder="=" min="0">
-                                    <input type="number" class="filter-input min" data-column="combat" placeholder="Min" min="0">
-                                    <input type="number" class="filter-input max" data-column="combat" placeholder="Max" min="0">
+                                    <input type="number" class="filter-input equals" data-column="combat" placeholder="=" min="0" max="8">
+                                    <input type="number" class="filter-input min" data-column="combat" placeholder="Min" min="0" max="8">
+                                    <input type="number" class="filter-input max" data-column="combat" placeholder="Max" min="0" max="8">
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="brute_force" placeholder="=" min="0">
-                                    <input type="number" class="filter-input min" data-column="brute_force" placeholder="Min" min="0">
-                                    <input type="number" class="filter-input max" data-column="brute_force" placeholder="Max" min="0">
+                                    <input type="number" class="filter-input equals" data-column="brute_force" placeholder="=" min="0" max="8">
+                                    <input type="number" class="filter-input min" data-column="brute_force" placeholder="Min" min="0" max="8">
+                                    <input type="number" class="filter-input max" data-column="brute_force" placeholder="Max" min="0" max="8">
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="intelligence" placeholder="=" min="0">
-                                    <input type="number" class="filter-input min" data-column="intelligence" placeholder="Min" min="0">
-                                    <input type="number" class="filter-input max" data-column="intelligence" placeholder="Max" min="0">
+                                    <input type="number" class="filter-input equals" data-column="intelligence" placeholder="=" min="0" max="8">
+                                    <input type="number" class="filter-input min" data-column="intelligence" placeholder="Min" min="0" max="8">
+                                    <input type="number" class="filter-input max" data-column="intelligence" placeholder="Max" min="0" max="8">
                                 </div>
                             </th>
                             <th>
@@ -514,7 +608,17 @@
                                 </div>
                             </th>
                             <th>
-                                <input type="text" class="header-filter" placeholder="Search abilities...">
+                                <div class="inherent-abilities-filters">
+                                    <label class="toggle-label">
+                                        <input type="checkbox" id="has-inherent-ability" class="ability-toggle">
+                                        <span class="toggle-text">Has Inherent Ability</span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <input type="checkbox" id="has-no-inherent-ability" class="ability-toggle">
+                                        <span class="toggle-text">Has No Inherent Ability</span>
+                                    </label>
+                                    <input type="text" class="header-filter" placeholder="Search abilities...">
+                                </div>
                             </th>
                         </tr>
                     </thead>
@@ -765,6 +869,8 @@
             const headerFilters = document.querySelectorAll('.header-filter');
             const filterInputs = document.querySelectorAll('.filter-input');
             const clearFiltersBtn = document.getElementById('clear-filters');
+            const hasInherentAbilityToggle = document.getElementById('has-inherent-ability');
+            const hasNoInherentAbilityToggle = document.getElementById('has-no-inherent-ability');
             
             // Setup header text search filters
             headerFilters.forEach(input => {
@@ -775,6 +881,14 @@
             filterInputs.forEach(input => {
                 input.addEventListener('input', applyFilters);
             });
+            
+            // Setup inherent ability toggles
+            if (hasInherentAbilityToggle) {
+                hasInherentAbilityToggle.addEventListener('change', applyFilters);
+            }
+            if (hasNoInherentAbilityToggle) {
+                hasNoInherentAbilityToggle.addEventListener('change', applyFilters);
+            }
             
             // Setup clear filters button
             clearFiltersBtn.addEventListener('click', clearAllFilters);
@@ -798,7 +912,23 @@
                         );
                     }
                     
-                    // Apply special abilities search filter
+                    // Apply inherent abilities toggle filters
+                    const hasInherentAbilityToggle = document.getElementById('has-inherent-ability');
+                    const hasNoInherentAbilityToggle = document.getElementById('has-no-inherent-ability');
+                    
+                    if (hasInherentAbilityToggle && hasInherentAbilityToggle.checked) {
+                        filteredCharacters = filteredCharacters.filter(character => 
+                            character.special_abilities.trim().length > 0
+                        );
+                    }
+                    
+                    if (hasNoInherentAbilityToggle && hasNoInherentAbilityToggle.checked) {
+                        filteredCharacters = filteredCharacters.filter(character => 
+                            character.special_abilities.trim().length === 0
+                        );
+                    }
+
+                    // Apply inherent abilities search filter
                     const abilitiesSearchInput = document.querySelector('.header-filter[placeholder="Search abilities..."]');
                     if (abilitiesSearchInput && abilitiesSearchInput.value.toLowerCase().length > 0) {
                         const searchTerm = abilitiesSearchInput.value.toLowerCase();
@@ -858,6 +988,16 @@
             document.querySelectorAll('.filter-input').forEach(input => {
                 input.value = '';
             });
+            
+            // Clear inherent ability toggles
+            const hasInherentAbilityToggle = document.getElementById('has-inherent-ability');
+            const hasNoInherentAbilityToggle = document.getElementById('has-no-inherent-ability');
+            if (hasInherentAbilityToggle) {
+                hasInherentAbilityToggle.checked = false;
+            }
+            if (hasNoInherentAbilityToggle) {
+                hasNoInherentAbilityToggle.checked = false;
+            }
             
             // Reload all characters
             loadCharacters();
