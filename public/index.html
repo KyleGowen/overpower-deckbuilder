@@ -118,6 +118,47 @@
             color: #1a1a2e;
         }
 
+        /* Top-level app tabs (Database View / Deck Builder) */
+        .app-tabs {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin: 10px 0 24px 0;
+            position: sticky;
+            top: 10px;
+            z-index: 50;
+            padding: 14px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        .app-tab-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+            border: 2px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            padding: 12px 22px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+        }
+        .app-tab-button.active {
+            background: linear-gradient(135deg, #4ecdc4, #2cb1a6);
+            border-color: #4ecdc4;
+            color: #1a1a2e;
+            box-shadow: 0 6px 18px rgba(78, 205, 196, 0.45);
+        }
+        .app-tab-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
@@ -535,38 +576,45 @@
             <p>Character Database & Deck Management System</p>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="total-characters">-</div>
-                <div class="stat-label">Characters</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-special-cards">-</div>
-                <div class="stat-label">Special Cards</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-missions">-</div>
-                <div class="stat-label">Missions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-events">-</div>
-                <div class="stat-label">Events</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-locations">-</div>
-                <div class="stat-label">Locations</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-decks">-</div>
-                <div class="stat-label">Decks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-users">-</div>
-                <div class="stat-label">Users</div>
-            </div>
+        
+
+        <!-- Top-level application tabs -->
+        <div class="app-tabs">
+            <button class="app-tab-button active" onclick="switchAppTab('database-view')">Database View</button>
+            <button class="app-tab-button" onclick="switchAppTab('deck-builder')">Deck Builder</button>
         </div>
 
-        <div class="database-section">
+        <div id="database-view" class="database-section">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-characters">-</div>
+                    <div class="stat-label">Characters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-special-cards">-</div>
+                    <div class="stat-label">Special Cards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-missions">-</div>
+                    <div class="stat-label">Missions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-events">-</div>
+                    <div class="stat-label">Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-locations">-</div>
+                    <div class="stat-label">Locations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-decks">-</div>
+                    <div class="stat-label">Decks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-users">-</div>
+                    <div class="stat-label">Users</div>
+                </div>
+            </div>
             <div class="section-header">
                 <h2>📚 Database</h2>
                             <div class="tab-container">
@@ -822,6 +870,16 @@
             </div>
         </div>
 
+        <!-- Deck Builder placeholder -->
+        <div id="deck-builder" class="database-section" style="display: none;">
+            <div class="section-header">
+                <h2>🃏 Deck Builder</h2>
+            </div>
+            <div class="table-container" style="padding: 40px; text-align: center;">
+                <div style="color: #bdc3c7; font-size: 1rem;">Deck Builder is coming soon.</div>
+            </div>
+        </div>
+
 
     </div>
 
@@ -834,6 +892,21 @@
     </div>
 
     <script>
+        // Top-level app tab switching
+        function switchAppTab(tabId) {
+            const databaseView = document.getElementById('database-view');
+            const deckBuilder = document.getElementById('deck-builder');
+
+            // Hide both, then show selected
+            databaseView.style.display = 'none';
+            deckBuilder.style.display = 'none';
+            document.getElementById(tabId).style.display = 'block';
+
+            // Update active styles
+            document.querySelectorAll('.app-tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
         // Load and display characters
         async function loadCharacters() {
             try {

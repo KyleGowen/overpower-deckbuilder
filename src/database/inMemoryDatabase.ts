@@ -857,7 +857,7 @@ class InMemoryDatabase {
 
       let loadedCount = 0;
       const totalLines = lines.length;
-
+      
       for (const line of lines) {
         // Skip header and separator lines
         if (line.startsWith('|') && !line.includes('----') && !line.includes('Card Name')) {
