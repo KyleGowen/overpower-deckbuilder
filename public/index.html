@@ -592,8 +592,8 @@
 
         .checkbox-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .checkbox-group label {
@@ -687,6 +687,49 @@
         #events-table th,
         #events-table td {
             text-align: center;
+        }
+
+        /* Ensure stable column widths for all tables */
+        #missions-table,
+        #events-table,
+        #locations-table,
+        #characters-table,
+        #special-cards-table,
+        #advanced-universe-table,
+        #aspects-table,
+        #teamwork-table,
+        #ally-universe-table,
+        #training-table,
+        #power-cards-table {
+            table-layout: fixed;
+        }
+
+        /* Prevent text wrapping and maintain column stability */
+        #missions-table th,
+        #missions-table td,
+        #events-table th,
+        #events-table td,
+        #locations-table th,
+        #locations-table td,
+        #characters-table th,
+        #characters-table td,
+        #special-cards-table th,
+        #special-cards-table td,
+        #advanced-universe-table th,
+        #advanced-universe-table td,
+        #aspects-table th,
+        #aspects-table td,
+        #teamwork-table th,
+        #teamwork-table td,
+        #ally-universe-table th,
+        #ally-universe-table td,
+        #training-table th,
+        #training-table td,
+        #power-cards-table th,
+        #power-cards-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         /* Teamwork table */
@@ -1049,23 +1092,17 @@
                             <th>
                                 <button class="clear-filters-btn" onclick="clearMissionsFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
                             <th>
                                 <div class="column-filters">
                                     <div class="checkbox-group">
                                         <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
-                                        <label><input type="checkbox" value="Chronicles of Mars" checked> Chronicles of Mars</label>
-                                        <label><input type="checkbox" value="The Shadow" checked> The Shadow</label>
-                                        <label><input type="checkbox" value="The Phantom" checked> The Phantom</label>
-                                        <label><input type="checkbox" value="Tarzan" checked> Tarzan</label>
-                                        <label><input type="checkbox" value="Doc Savage" checked> Doc Savage</label>
-                                        <label><input type="checkbox" value="The Spider" checked> The Spider</label>
-                                        <label><input type="checkbox" value="The Green Hornet" checked> The Green Hornet</label>
-                                        <label><input type="checkbox" value="The Lone Ranger" checked> The Lone Ranger</label>
-                                        <label><input type="checkbox" value="Zorro" checked> Zorro</label>
+                                        <label><input type="checkbox" value="King of the Jungle" checked> King of the Jungle</label>
+                                        <label><input type="checkbox" value="Warlord of Mars" checked> Warlord of Mars</label>
+                                        <label><input type="checkbox" value="Time Wars: Rise of the Gods" checked> Time Wars: Rise of the Gods</label>
                                     </div>
                                 </div>
                             </th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="missions-tbody">
@@ -1095,15 +1132,9 @@
                                 <div class="column-filters">
                                     <div class="checkbox-group">
                                         <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
-                                        <label><input type="checkbox" value="Chronicles of Mars" checked> Chronicles of Mars</label>
-                                        <label><input type="checkbox" value="The Shadow" checked> The Shadow</label>
-                                        <label><input type="checkbox" value="The Phantom" checked> The Phantom</label>
-                                        <label><input type="checkbox" value="Tarzan" checked> Tarzan</label>
-                                        <label><input type="checkbox" value="Doc Savage" checked> Doc Savage</label>
-                                        <label><input type="checkbox" value="The Spider" checked> The Spider</label>
-                                        <label><input type="checkbox" value="The Green Hornet" checked> The Green Hornet</label>
-                                        <label><input type="checkbox" value="The Lone Ranger" checked> The Lone Ranger</label>
-                                        <label><input type="checkbox" value="Zorro" checked> Zorro</label>
+                                        <label><input type="checkbox" value="King of the Jungle" checked> King of the Jungle</label>
+                                        <label><input type="checkbox" value="Warlord of Mars" checked> Warlord of Mars</label>
+                                        <label><input type="checkbox" value="Time Wars: Rise of the Gods" checked> Time Wars: Rise of the Gods</label>
                                     </div>
                                 </div>
                             </th>
@@ -1738,7 +1769,7 @@
             // Filter missions based on selected mission sets
             const missions = window.missionsData || [];
             const filteredMissions = missions.filter(mission => 
-                selectedMissionSets.includes(mission.missionSet)
+                selectedMissionSets.includes(mission.mission_set)
             );
             
             displayMissions(filteredMissions);
@@ -1767,7 +1798,7 @@
             // Filter events based on selected mission sets
             const events = window.eventsData || [];
             const filteredEvents = events.filter(event => 
-                selectedMissionSets.includes(event.missionSet)
+                selectedMissionSets.includes(event.mission_set)
             );
             
             displayEvents(filteredEvents);
