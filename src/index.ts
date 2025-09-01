@@ -86,6 +86,15 @@ app.get('/api/advanced-universe', (req, res) => {
   }
 });
 
+app.get('/api/teamwork', (req, res) => {
+  try {
+    const teamwork = database.getAllTeamwork();
+    res.json({ success: true, data: teamwork });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch teamwork' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

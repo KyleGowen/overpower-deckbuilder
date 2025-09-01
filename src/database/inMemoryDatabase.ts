@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,6 +12,7 @@ class InMemoryDatabase {
   private events: Map<string, Event> = new Map();
   private aspects: Map<string, Aspect> = new Map();
   private advancedUniverse: Map<string, AdvancedUniverse> = new Map();
+  private teamwork: Map<string, Teamwork> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -22,6 +23,7 @@ class InMemoryDatabase {
   private nextEventId = 1;
   private nextAspectId = 1;
   private nextAdvancedUniverseId = 1;
+  private nextTeamworkId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -47,8 +49,11 @@ class InMemoryDatabase {
     // Load advanced universe from the markdown file
     await this.loadAdvancedUniverse();
     
+    // Load teamwork from the markdown file
+    await this.loadTeamwork();
+    
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -703,6 +708,15 @@ class InMemoryDatabase {
     return Array.from(this.advancedUniverse.values());
   }
 
+  // Teamwork management
+  getTeamworkById(id: string): Teamwork | undefined {
+    return this.teamwork.get(id);
+  }
+
+  getAllTeamwork(): Teamwork[] {
+    return Array.from(this.teamwork.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -1001,6 +1015,125 @@ class InMemoryDatabase {
     return 'unknown_advanced_universe.webp';
   }
 
+  private async loadTeamwork(): Promise<void> {
+    try {
+      console.log('📖 Loading teamwork from file...');
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-universe-teamwork.md');
+      
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Teamwork file not found, skipping teamwork loading');
+        return;
+      }
+
+      console.log('📖 Reading teamwork data from file...');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      const totalLines = lines.length;
+
+      for (const line of lines) {
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Card Type')) {
+          const columns = line.split('|').map(col => col.trim());
+          
+          if (columns.length >= 7) { // Split by | creates 7+ elements for 6 columns
+            const teamwork: Teamwork = {
+              id: `teamwork_${this.nextTeamworkId++}`,
+              card_type: columns[1],
+              to_use: columns[2],
+              acts_as: columns[3],
+              followup_attack_types: columns[4],
+              first_attack_bonus: columns[5],
+              second_attack_bonus: columns[6],
+              image: this.getTeamworkImage(columns[2]) // Use the "To Use" field to determine image
+            };
+
+            this.teamwork.set(teamwork.id, teamwork);
+            loadedCount++;
+
+            if (loadedCount % 5 === 0) {
+              console.log(`   Loaded ${loadedCount}/${totalLines} teamwork cards...`);
+            }
+          }
+        }
+      }
+
+      console.log(`🎉 Successfully loaded ${loadedCount} teamwork cards into database!`);
+      console.log('✅ Teamwork loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading teamwork:', error);
+    }
+  }
+
+  private getTeamworkImage(toUse: string): string {
+    // Parse the "To Use" field to determine the image
+    // Format: "6 Brute Force", "7 Combat", "8 Energy", etc.
+    const parts = toUse.split(' ');
+    if (parts.length < 2) return 'unknown_teamwork.webp';
+    
+    const level = parts[0];
+    const statType = parts[1].toLowerCase();
+    
+    // Special handling for Power and Any-Power cards
+    if (statType === 'any-power' || statType === 'power') {
+      return '481_7_anypower.webp';
+    }
+    
+    // Map stat types to image ranges
+    const statTypeMapping: { [key: string]: string } = {
+      'energy': 'energy',
+      'combat': 'combat', 
+      'brute': 'brute_force',
+      'intelligence': 'intelligence'
+    };
+    
+    const mappedStatType = statTypeMapping[statType];
+    if (!mappedStatType) return 'unknown_teamwork.webp';
+    
+    // Find the appropriate image based on level and stat type
+    // The images follow the pattern: [number]_[level]_[stat_type]_[identifier].webp
+    const availableImages = this.getAvailableTeamworkImages();
+    
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      if (imageName.includes(level) && imageName.includes(mappedStatType)) {
+        return imageFile;
+      }
+    }
+    
+    return 'unknown_teamwork.webp';
+  }
+
+  private getAvailableTeamworkImages(): string[] {
+    // Return a list of available teamwork image files
+    // These are the Power cards from the image list you provided
+    return [
+      // Energy: 398-406
+      "398_6_energy_0c_1bf.webp", "399_6_energy_0c_1i.webp", "400_6_energy_0b_1i.webp",
+      "401_7_energy_1c_1bf.webp", "402_7_energy_1c_1i.webp", "403_7_energy_1bf_1i.webp",
+      "404_8_energy_1c_2bf.webp", "405_8_energy_1c_2i.webp", "406_8_energy_1bf_2i.webp",
+      
+      // Combat: 407-415
+      "407_6_combat_0e_1bf.webp", "408_6_combat_0e_1i.webp", "409_6_combat_0bf_1i.webp",
+      "410_7_combat_1e_1bf.webp", "411_7_combat_1e_1i.webp", "412_7_combat_1bf_1i.webp",
+      "413_8_combat_1e_2bf.webp", "414_8_combat_1e_2i.webp", "415_8_combat_1bf_2i.webp",
+      
+      // Brute Force: 416-424
+      "416_6_brute_force_0e_1c.webp", "417_6_brute_force_0e_1i.webp", "418_6_brute_force_0c_1i.webp",
+      "419_7_brute_force_1e_1c.webp", "420_7_brute_force_1e_1i.webp", "421_7_brute_force_1c_1i.webp",
+      "422_8_brute_force_1e_2c.webp", "423_8_brute_force_1e_2i.webp", "424_8_brute_force_1c_2bf.webp",
+      
+      // Intelligence: 425-433
+      "425_6_intelligence_0e_1c.webp", "426_6_intelligence_0e_1i.webp", "427_6_intelligence_0c_1i.webp",
+      "428_7_intelligence_1e_1c.webp", "429_7_intelligence_1e_1i.webp", "430_7_intelligence_1c_1i.webp",
+      "431_8_intelligence_1e_2c.webp", "432_8_intelligence_1e_2i.webp", "433_8_intelligence_1c_2bf.webp",
+      
+      // Any-Power: 481
+      "481_7_anypower.webp"
+    ];
+  }
+
   // Statistics
   getStats() {
     return {
@@ -1012,7 +1145,8 @@ class InMemoryDatabase {
       missions: this.missions.size,
       events: this.events.size,
       aspects: this.aspects.size,
-      advancedUniverse: this.advancedUniverse.size
+      advancedUniverse: this.advancedUniverse.size,
+      teamwork: this.teamwork.size
     };
   }
 }

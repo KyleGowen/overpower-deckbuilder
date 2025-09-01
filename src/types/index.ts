@@ -98,6 +98,17 @@ export interface AdvancedUniverse {
   is_one_per_deck: boolean;
 }
 
+export interface Teamwork {
+  id: string;
+  card_type: string;
+  to_use: string;
+  acts_as: string;
+  followup_attack_types: string;
+  first_attack_bonus: string;
+  second_attack_bonus: string;
+  image: string;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;
