@@ -234,6 +234,19 @@
             font-weight: bold;
         }
 
+        /* Advanced Universe controls styling */
+        .advanced-universe-controls {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        /* One Per Deck Advanced column styling */
+        .one-per-deck-advanced-column {
+            text-align: center;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
         .cataclysm-no {
             color: #6c757d;
             text-align: center;
@@ -559,6 +572,7 @@
                             <div class="tab-container">
                 <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
                 <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
+                <button class="tab-button" onclick="switchTab('advanced-universe')">Advanced Universe</button>
                 <button class="tab-button" onclick="switchTab('locations')">Locations</button>
                 <button class="tab-button" onclick="switchTab('aspects')">Aspects</button>
                 <button class="tab-button" onclick="switchTab('missions')">Missions</button>
@@ -672,6 +686,31 @@
                     <tbody id="special-cards-tbody">
                         <tr>
                             <td colspan="5" class="loading">Loading special cards...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="advanced-universe-tab" style="display: none;">
+                <div class="advanced-universe-controls">
+                    <button id="toggle-one-per-deck-advanced" class="toggle-button" onclick="toggleOnePerDeckAdvancedColumn()">
+                        <span id="one-per-deck-advanced-toggle-text">Hide</span> One Per Deck Column
+                    </button>
+                </div>
+                <table id="advanced-universe-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Card Type</th>
+                            <th>Character</th>
+                            <th>Card Effect</th>
+                            <th class="one-per-deck-advanced-column">One Per Deck</th>
+                        </tr>
+                    </thead>
+                    <tbody id="advanced-universe-tbody">
+                        <tr>
+                            <td colspan="6" class="loading">Loading advanced universe cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1146,6 +1185,7 @@
             // Hide all tabs
             document.getElementById('characters-tab').style.display = 'none';
             document.getElementById('special-cards-tab').style.display = 'none';
+            document.getElementById('advanced-universe-tab').style.display = 'none';
             document.getElementById('missions-tab').style.display = 'none';
             document.getElementById('locations-tab').style.display = 'none';
             document.getElementById('aspects-tab').style.display = 'none';
@@ -1167,6 +1207,8 @@
                 const searchInput = document.getElementById('search-input');
                 if (tabName === 'special-cards') {
                     searchInput.placeholder = 'Search special cards by name, character, or effect...';
+                } else if (tabName === 'advanced-universe') {
+                    searchInput.placeholder = 'Search advanced universe by name, character, or effect...';
                 } else if (tabName === 'locations') {
                     searchInput.placeholder = 'Search locations by name or abilities...';
                 } else if (tabName === 'aspects') {
@@ -1186,6 +1228,8 @@
                 setupSearch();
             } else if (tabName === 'special-cards') {
                 setupSpecialCardSearch();
+            } else if (tabName === 'advanced-universe') {
+                setupAdvancedUniverseSearch();
             } else if (tabName === 'locations') {
                 setupLocationSearch();
             } else if (tabName === 'aspects') {
@@ -1253,6 +1297,37 @@
                     }
                 } catch (error) {
                     console.error('Error searching aspects:', error);
+                }
+            });
+        }
+
+        // Advanced Universe search functionality
+        function setupAdvancedUniverseSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all advanced universe
+                    await loadAdvancedUniverse();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/advanced-universe');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredAdvancedUniverse = data.data.filter(card => 
+                            card.name.toLowerCase().includes(searchTerm) ||
+                            card.card_type.toLowerCase().includes(searchTerm) ||
+                            card.character.toLowerCase().includes(searchTerm) ||
+                            card.card_effect.toLowerCase().includes(searchTerm)
+                        );
+                        displayAdvancedUniverse(filteredAdvancedUniverse);
+                    }
+                } catch (error) {
+                    console.error('Error searching advanced universe:', error);
                 }
             });
         }
@@ -1518,10 +1593,67 @@
             }
         }
 
+        // Advanced Universe functions
+        async function loadAdvancedUniverse() {
+            try {
+                const response = await fetch('/api/advanced-universe');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAdvancedUniverse(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading advanced universe:', error);
+            }
+        }
+
+        function displayAdvancedUniverse(advancedUniverse) {
+            const tbody = document.getElementById('advanced-universe-tbody');
+            
+            if (advancedUniverse.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No advanced universe cards found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = advancedUniverse.map(card => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${card.image}" 
+                             alt="${card.name}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${card.name}</strong></td>
+                    <td>${card.card_type}</td>
+                    <td>${card.character}</td>
+                    <td>${card.card_effect}</td>
+                    <td class="one-per-deck-advanced-column">${card.is_one_per_deck ? 'Yes' : 'No'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleOnePerDeckAdvancedColumn() {
+            const onePerDeckAdvancedColumn = document.querySelectorAll('.one-per-deck-advanced-column');
+            const toggleButton = document.getElementById('toggle-one-per-deck-advanced');
+            const toggleText = document.getElementById('one-per-deck-advanced-toggle-text');
+            
+            onePerDeckAdvancedColumn.forEach(col => {
+                col.classList.toggle('hidden');
+            });
+            
+            if (onePerDeckAdvancedColumn[0].classList.contains('hidden')) {
+                toggleText.textContent = 'Show';
+            } else {
+                toggleText.textContent = 'Hide';
+            }
+            }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
             loadSpecialCards();
+            loadAdvancedUniverse();
             loadMissions();
             loadLocations();
             loadAspects();

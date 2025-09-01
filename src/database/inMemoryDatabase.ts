@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,6 +11,7 @@ class InMemoryDatabase {
   private missions: Map<string, Mission> = new Map();
   private events: Map<string, Event> = new Map();
   private aspects: Map<string, Aspect> = new Map();
+  private advancedUniverse: Map<string, AdvancedUniverse> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -20,6 +21,7 @@ class InMemoryDatabase {
   private nextMissionId = 1;
   private nextEventId = 1;
   private nextAspectId = 1;
+  private nextAdvancedUniverseId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -42,8 +44,11 @@ class InMemoryDatabase {
     // Load aspects from the markdown file
     await this.loadAspects();
     
+    // Load advanced universe from the markdown file
+    await this.loadAdvancedUniverse();
+    
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -689,6 +694,15 @@ class InMemoryDatabase {
     return Array.from(this.aspects.values());
   }
 
+  // Advanced Universe management
+  getAdvancedUniverseById(id: string): AdvancedUniverse | undefined {
+    return this.advancedUniverse.get(id);
+  }
+
+  getAllAdvancedUniverse(): AdvancedUniverse[] {
+    return Array.from(this.advancedUniverse.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -916,6 +930,77 @@ class InMemoryDatabase {
     ];
   }
 
+  private async loadAdvancedUniverse(): Promise<void> {
+    try {
+      console.log('📖 Loading advanced universe from file...');
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-advanced-universe.md');
+      
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Advanced universe file not found, skipping advanced universe loading');
+        return;
+      }
+
+      console.log('📖 Reading advanced universe data from file...');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      let currentCharacter = '';
+
+      for (const line of lines) {
+        // Check if this is a character header
+        if (line.startsWith('## ')) {
+          currentCharacter = line.replace('## ', '').trim();
+          continue;
+        }
+
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Card Name')) {
+          const columns = line.split('|').map(col => col.trim());
+          
+          if (columns.length >= 5) { // Split by | creates 5+ elements for 4 columns
+            const cardEffect = columns[4] || '';
+            const isOnePerDeck = cardEffect.includes('**One Per Deck**');
+            
+            const advancedUniverse: AdvancedUniverse = {
+              id: `advanced_universe_${this.nextAdvancedUniverseId++}`,
+              name: columns[1],
+              card_type: columns[2],
+              character: currentCharacter,
+              card_effect: cardEffect,
+              image: this.getAdvancedUniverseImage(columns[1]),
+              is_one_per_deck: isOnePerDeck
+            };
+
+            this.advancedUniverse.set(advancedUniverse.id, advancedUniverse);
+            loadedCount++;
+          }
+        }
+      }
+
+      console.log(`🎉 Successfully loaded ${loadedCount} advanced universe cards into database!`);
+      console.log('✅ Advanced universe loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading advanced universe:', error);
+    }
+  }
+
+  private getAdvancedUniverseImage(cardName: string): string {
+    // Direct mapping for advanced universe cards based on their specific names
+    const advancedUniverseImageMap: { [key: string]: string } = {
+      'Shards of the Staff': '192_shards_of_the_staff.webp',
+      'Staff Fragments': '193_staff_fragments.webp',
+      'Staff Head': '194_staff_head.webp'
+    };
+    
+    // Check if we have a direct match
+    if (advancedUniverseImageMap[cardName]) {
+      return advancedUniverseImageMap[cardName];
+    }
+    
+    return 'unknown_advanced_universe.webp';
+  }
+
   // Statistics
   getStats() {
     return {
@@ -926,7 +1011,8 @@ class InMemoryDatabase {
       specialCards: this.specialCards.size,
       missions: this.missions.size,
       events: this.events.size,
-      aspects: this.aspects.size
+      aspects: this.aspects.size,
+      advancedUniverse: this.advancedUniverse.size
     };
   }
 }

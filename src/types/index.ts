@@ -88,6 +88,16 @@ export interface Aspect {
   is_one_per_deck: boolean;
 }
 
+export interface AdvancedUniverse {
+  id: string;
+  name: string;
+  card_type: string;
+  character: string;
+  card_effect: string;
+  image: string;
+  is_one_per_deck: boolean;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

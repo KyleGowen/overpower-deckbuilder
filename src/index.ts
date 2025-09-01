@@ -77,6 +77,15 @@ app.get('/api/aspects', (req, res) => {
   }
 });
 
+app.get('/api/advanced-universe', (req, res) => {
+  try {
+    const advancedUniverse = database.getAllAdvancedUniverse();
+    res.json({ success: true, data: advancedUniverse });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch advanced universe' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();
