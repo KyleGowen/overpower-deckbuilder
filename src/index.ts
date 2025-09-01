@@ -50,6 +50,15 @@ app.get('/api/special-cards', (req, res) => {
   }
 });
 
+app.get('/api/missions', (req, res) => {
+  try {
+    const missions = database.getAllMissions();
+    res.json({ success: true, data: missions });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch missions' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

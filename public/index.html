@@ -328,6 +328,10 @@
                 <div class="stat-label">Special Cards</div>
             </div>
             <div class="stat-card">
+                <div class="stat-number" id="total-missions">-</div>
+                <div class="stat-label">Missions</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-number" id="total-locations">-</div>
                 <div class="stat-label">Locations</div>
             </div>
@@ -348,6 +352,7 @@
                 <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
                 <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
                 <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+                <button class="tab-button" onclick="switchTab('missions')">Missions</button>
             </div>
             </div>
 
@@ -415,6 +420,23 @@
                     <tbody id="locations-tbody">
                         <tr>
                             <td colspan="4" class="loading">Loading locations...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="missions-tab" style="display: none;">
+                <table id="missions-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Mission Set</th>
+                            <th>Card Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="missions-tbody">
+                        <tr>
+                            <td colspan="3" class="loading">Loading missions...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -516,6 +538,14 @@
                 .then(data => {
                     if (data.success) {
                         document.getElementById('total-special-cards').textContent = data.data.length;
+                    }
+                });
+            
+            fetch('/api/missions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('total-missions').textContent = data.data.length;
                     }
                 });
             
@@ -686,6 +716,7 @@
             // Hide all tabs
             document.getElementById('characters-tab').style.display = 'none';
             document.getElementById('special-cards-tab').style.display = 'none';
+            document.getElementById('missions-tab').style.display = 'none';
             document.getElementById('locations-tab').style.display = 'none';
             
             // Remove active class from all buttons
@@ -707,10 +738,14 @@
                 searchInput.placeholder = 'Search special cards by name, character, or effect...';
                 searchInput.oninput = null;
                 setupSpecialCardSearch();
-            } else {
+            } else if (tabName === 'locations') {
                 searchInput.placeholder = 'Search locations by name or abilities...';
                 searchInput.oninput = null;
                 setupLocationSearch();
+            } else if (tabName === 'missions') {
+                searchInput.placeholder = 'Search missions by name or mission set...';
+                searchInput.oninput = null;
+                setupMissionSearch();
             }
         }
 
@@ -798,10 +833,76 @@
             }
         }
 
+        // Mission functions
+        async function loadMissions() {
+            try {
+                const response = await fetch('/api/missions');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMissions(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading missions:', error);
+            }
+        }
+
+        function displayMissions(missions) {
+            const tbody = document.getElementById('missions-tbody');
+            
+            if (missions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3">No missions found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = missions.map(mission => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${mission.image}" 
+                             alt="${mission.card_name}" 
+                             onclick="openModal(this.src)"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; cursor: pointer;">
+                    </td>
+                    <td>${mission.mission_set}</td>
+                    <td>${mission.card_name}</td>
+                </tr>
+            `).join('');
+        }
+
+        function setupMissionSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all missions
+                    await loadMissions();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/missions');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredMissions = data.data.filter(mission => 
+                            mission.mission_set.toLowerCase().includes(searchTerm) ||
+                            mission.card_name.toLowerCase().includes(searchTerm)
+                        );
+                        displayMissions(filteredMissions);
+                    }
+                } catch (error) {
+                    console.error('Error searching missions:', error);
+                }
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
             loadSpecialCards();
+            loadMissions();
             loadLocations();
             setupSearch();
             // Update all stats after loading data

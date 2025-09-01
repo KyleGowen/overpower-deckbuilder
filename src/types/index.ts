@@ -61,6 +61,13 @@ export interface SpecialCard {
   is_cataclysm: boolean;
 }
 
+export interface Mission {
+  id: string;
+  mission_set: string;
+  card_name: string;
+  image: string;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

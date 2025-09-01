@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -8,12 +8,14 @@ class InMemoryDatabase {
   private characters: Map<string, Character> = new Map();
   private locations: Map<string, Location> = new Map();
   private specialCards: Map<string, SpecialCard> = new Map();
+  private missions: Map<string, Mission> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
   private nextCharacterId = 1;
   private nextLocationId = 1;
   private nextSpecialCardId = 1;
+  private nextMissionId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -27,8 +29,11 @@ class InMemoryDatabase {
     // Load special cards from the markdown file
     await this.loadSpecialCards();
     
+    // Load missions from the markdown file
+    await this.loadMissions();
+    
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -538,6 +543,124 @@ class InMemoryDatabase {
     return Array.from(this.specialCards.values());
   }
 
+  // Mission management
+  getMissionById(id: string): Mission | undefined {
+    return this.missions.get(id);
+  }
+
+  getAllMissions(): Mission[] {
+    return Array.from(this.missions.values());
+  }
+
+  private async loadMissions(): Promise<void> {
+    try {
+      console.log('📖 Loading missions from file...');
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-missions.md');
+      
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Missions file not found, skipping mission loading');
+        return;
+      }
+
+      console.log('📖 Reading mission data from file...');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      let currentMissionSet = '';
+      let missionIndex = 1;
+
+      for (const line of lines) {
+        // Check if this is a mission set header
+        if (line.startsWith('## ')) {
+          currentMissionSet = line.replace('## ', '').trim();
+          missionIndex = 1;
+          continue;
+        }
+
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Mission Set')) {
+          const columns = line.split('|').map(col => col.trim());
+          
+          if (columns.length >= 3) { // Split by | creates 3+ elements for 2 columns
+            const mission: Mission = {
+              id: `mission_${this.nextMissionId++}`,
+              mission_set: currentMissionSet,
+              card_name: columns[2],
+              image: this.getMissionImage(currentMissionSet, columns[2], missionIndex)
+            };
+
+            this.missions.set(mission.id, mission);
+            loadedCount++;
+            missionIndex++;
+          }
+        }
+      }
+
+      console.log(`🎉 Successfully loaded ${loadedCount} missions into database!`);
+      console.log('✅ Missions loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading missions:', error);
+    }
+  }
+
+  private getMissionImage(missionSet: string, cardName: string, index: number): string {
+    // Convert mission set and card name to snake_case for matching
+    const missionSetSnake = this.convertToSnakeCase(missionSet);
+    const cardNameSnake = this.convertToSnakeCase(cardName);
+    
+    // Map mission set names to their image prefixes
+    const missionSetMapping: { [key: string]: string } = {
+      'The Call of Cthulhu': 'call_of_cthulu',
+      'King of the Jungle': 'tarzan_king_of_the_jungle',
+      'Warlord of Mars': 'chronicles_of_mars',
+      'Time Wars: Rise of the Gods': 'world_legends'
+    };
+    
+    // Get the mapped image prefix for this mission set
+    const imagePrefix = missionSetMapping[missionSet];
+    if (!imagePrefix) {
+      return 'unknown_mission.webp';
+    }
+    
+    // Look for the specific image with the correct index
+    const availableImages = this.getAvailableMissionImages();
+    
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      
+      // Check if this image matches the mission set and index
+      if (imageName.includes(imagePrefix) && imageName.includes(`_${index}`)) {
+        return imageFile;
+      }
+    }
+    
+    // Fallback to unknown image
+    return 'unknown_mission.webp';
+  }
+
+  private getAvailableMissionImages(): string[] {
+    // Return a list of available mission image files
+    return [
+      // Call of Cthulhu missions (350-356)
+      "350_call_of_cthulu_1.webp", "351_call_of_cthulu_2.webp", "352_call_of_cthulu_3.webp",
+      "353_call_of_cthulu_4.webp", "354_call_of_cthulu_5.webp", "355_call_of_cthulu_6.webp",
+      "356_call_of_cthulu_7.webp",
+      // Tarzan King of the Jungle missions (362-368)
+      "362_tarzan_king_of_the_jungle_1.webp", "363_tarzan_king_of_the_jungle_2.webp", "364_tarzan_king_of_the_jungle_3.webp",
+      "365_tarzan_king_of_the_jungle_4.webp", "366_tarzan_king_of_the_jungle_5.webp", "367_tarzan_king_of_the_jungle_6.webp",
+      "368_tarzan_king_of_the_jungle_7.webp",
+      // Chronicles of Mars missions (374-380)
+      "374_chronicles_of_mars_1.webp", "375_chronicles_of_mars_2.webp", "376_chronicles_of_mars_3.webp",
+      "377_chronicles_of_mars_4.webp", "378_chronicles_of_mars_5.webp", "379_chronicles_of_mars_6.webp",
+      "380_chronicles_of_mars_7.webp",
+      // World Legends missions (386-392)
+      "386_world_legends_1.webp", "387_world_legends_2.webp", "388_world_legends_3.webp",
+      "389_world_legends_4.webp", "390_world_legends_5.webp", "391_world_legends_6.webp",
+      "392_world_legends_7.webp"
+    ];
+  }
+
   // Statistics
   getStats() {
     return {
@@ -545,7 +668,8 @@ class InMemoryDatabase {
       decks: this.decks.size,
       characters: this.characters.size,
       locations: this.locations.size,
-      specialCards: this.specialCards.size
+      specialCards: this.specialCards.size,
+      missions: this.missions.size
     };
   }
 }
