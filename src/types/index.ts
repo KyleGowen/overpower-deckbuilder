@@ -23,7 +23,7 @@ export interface Character {
   brute_force: number;
   intelligence: number;
   threat_level: number;
-  special_abilities: string;
+  special_abilities: string; // Can be empty string for no special ability
   image: string;
 }
 

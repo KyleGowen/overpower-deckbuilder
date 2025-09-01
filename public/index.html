@@ -159,6 +159,51 @@
             background: rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            padding-top: 20px;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 400px; /* 5x the table image width (80px * 5) */
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain; /* Ensures no cropping, maintains aspect ratio */
+        }
+
+
+
+        #modalCaption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -216,6 +261,14 @@
         </div>
     </div>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="Card Image">
+            <div id="modalCaption"></div>
+        </div>
+    </div>
+
     <script>
         // Load and display characters
         async function loadCharacters() {
@@ -252,8 +305,9 @@
                     <td>
                         <img src="/src/resources/cards/images/${character.image}" 
                              alt="${character.name}" 
-                             style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2);"
-                             onerror="this.style.display='none'">
+                             style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
                     </td>
                     <td><strong>${character.name}</strong></td>
                     <td>${character.energy}</td>
@@ -261,7 +315,7 @@
                     <td>${character.brute_force}</td>
                     <td>${character.intelligence}</td>
                     <td class="${threatClass}">${character.threat_level}</td>
-                    <td>${character.special_abilities}</td>
+                    <td>${character.special_abilities || ''}</td>
                 `;
                 
                 tbody.appendChild(row);
@@ -309,10 +363,52 @@
             });
         }
 
+        // Modal functionality
+        function openModal(imgElement) {
+            document.getElementById('modalImage').src = imgElement.src;
+            document.getElementById('modalCaption').textContent = imgElement.alt;
+            document.getElementById('imageModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Make all images clickable with modal behavior
+        function makeImagesClickable() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                // Skip images that already have click handlers
+                if (!img.onclick) {
+                    img.style.cursor = 'pointer';
+                    img.onclick = function() {
+                        openModal(this);
+                    };
+                }
+            });
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
             setupSearch();
+            // Make images clickable after they are loaded
+            setTimeout(makeImagesClickable, 1000);
         });
     </script>
 </body>

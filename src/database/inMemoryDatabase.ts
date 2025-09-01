@@ -41,20 +41,20 @@ class InMemoryDatabase {
       for (const line of lines) {
         // Skip header and separator lines
         if (line.startsWith('|') && !line.includes('----') && !line.includes('Name')) {
-          const columns = line.split('|').map(col => col.trim()).filter(col => col.length > 0);
+          const columns = line.split('|').map(col => col.trim());
           
-          if (columns.length >= 8) { // Now expecting 8 columns including Image
-            const character: Character = {
-              id: `char_${this.nextCharacterId++}`,
-              name: columns[0],
-              energy: parseInt(columns[1]) || 0,
-              combat: parseInt(columns[2]) || 0,
-              brute_force: parseInt(columns[3]) || 0,
-              intelligence: parseInt(columns[4]) || 0,
-              threat_level: parseInt(columns[5]) || 0,
-              special_abilities: columns[6],
-              image: columns[7]
-            };
+          if (columns.length >= 9) { // Split by | creates 9 elements for 8 columns
+                             const character: Character = {
+                   id: `char_${this.nextCharacterId++}`,
+                   name: columns[1],
+                   energy: parseInt(columns[2]) || 0,
+                   combat: parseInt(columns[3]) || 0,
+                   brute_force: parseInt(columns[4]) || 0,
+                   intelligence: parseInt(columns[5]) || 0,
+                   threat_level: parseInt(columns[6]) || 0,
+                   special_abilities: columns[7] || '',
+                   image: columns[8]
+                 };
 
             this.characters.set(character.id, character);
             loadedCount++;
