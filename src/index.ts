@@ -68,6 +68,15 @@ app.get('/api/events', (req, res) => {
   }
 });
 
+app.get('/api/aspects', (req, res) => {
+  try {
+    const aspects = database.getAllAspects();
+    res.json({ success: true, data: aspects });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch aspects' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

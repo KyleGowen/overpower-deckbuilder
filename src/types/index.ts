@@ -77,6 +77,17 @@ export interface Event {
   image: string;
 }
 
+export interface Aspect {
+  id: string;
+  card_name: string;
+  card_type: string;
+  location: string;
+  card_effect: string;
+  image: string;
+  is_fortification: boolean;
+  is_one_per_deck: boolean;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

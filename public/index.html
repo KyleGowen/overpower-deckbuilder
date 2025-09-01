@@ -213,6 +213,27 @@
             text-align: center;
         }
 
+        /* Aspects controls styling */
+        .aspects-controls {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        /* Hidden column styling */
+        .hidden {
+            display: none;
+        }
+
+        /* Fortifications and One Per Deck column styling */
+        .fortifications-column, .one-per-deck-column {
+            text-align: center;
+        }
+
+        .fortifications-column:not(.hidden), .one-per-deck-column:not(.hidden) {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
         .cataclysm-no {
             color: #6c757d;
             text-align: center;
@@ -539,6 +560,7 @@
                 <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
                 <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
                 <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+                <button class="tab-button" onclick="switchTab('aspects')">Aspects</button>
                 <button class="tab-button" onclick="switchTab('missions')">Missions</button>
                 <button class="tab-button" onclick="switchTab('events')">Events</button>
             </div>
@@ -668,6 +690,35 @@
                     <tbody id="locations-tbody">
                         <tr>
                             <td colspan="4" class="loading">Loading locations...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="aspects-tab" style="display: none;">
+                <div class="aspects-controls">
+                    <button id="toggle-fortifications" class="toggle-button" onclick="toggleFortificationsColumn()">
+                        <span id="fortifications-toggle-text">Show</span> Fortifications Column
+                    </button>
+                    <button id="toggle-one-per-deck" class="toggle-button" onclick="toggleOnePerDeckColumn()">
+                        <span id="one-per-deck-toggle-text">Show</span> One Per Deck Column
+                    </button>
+                </div>
+                <table id="aspects-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Card Name</th>
+                            <th>Card Type</th>
+                            <th>Location</th>
+                            <th>Card Effect</th>
+                            <th class="fortifications-column hidden">Fortifications</th>
+                            <th class="one-per-deck-column hidden">One Per Deck</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aspects-tbody">
+                        <tr>
+                            <td colspan="7" class="loading">Loading aspects...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1097,6 +1148,7 @@
             document.getElementById('special-cards-tab').style.display = 'none';
             document.getElementById('missions-tab').style.display = 'none';
             document.getElementById('locations-tab').style.display = 'none';
+            document.getElementById('aspects-tab').style.display = 'none';
             document.getElementById('events-tab').style.display = 'none';
             
             // Hide search container for characters tab (uses inline filters)
@@ -1117,6 +1169,8 @@
                     searchInput.placeholder = 'Search special cards by name, character, or effect...';
                 } else if (tabName === 'locations') {
                     searchInput.placeholder = 'Search locations by name or abilities...';
+                } else if (tabName === 'aspects') {
+                    searchInput.placeholder = 'Search aspects by name, type, or effect...';
                 } else if (tabName === 'missions') {
                     searchInput.placeholder = 'Search missions by name or mission set...';
                 } else if (tabName === 'events') {
@@ -1134,6 +1188,8 @@
                 setupSpecialCardSearch();
             } else if (tabName === 'locations') {
                 setupLocationSearch();
+            } else if (tabName === 'aspects') {
+                setupAspectSearch();
             } else if (tabName === 'missions') {
                 setupMissionSearch();
             } else if (tabName === 'events') {
@@ -1166,6 +1222,37 @@
                     }
                 } catch (error) {
                     console.error('Error searching locations:', error);
+                }
+            });
+        }
+
+        // Aspect search functionality
+        function setupAspectSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all aspects
+                    await loadAspects();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/aspects');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredAspects = data.data.filter(aspect => 
+                            aspect.card_name.toLowerCase().includes(searchTerm) ||
+                            aspect.card_type.toLowerCase().includes(searchTerm) ||
+                            aspect.location.toLowerCase().includes(searchTerm) ||
+                            aspect.card_effect.toLowerCase().includes(searchTerm)
+                        );
+                        displayAspects(filteredAspects);
+                    }
+                } catch (error) {
+                    console.error('Error searching aspects:', error);
                 }
             });
         }
@@ -1358,12 +1445,86 @@
             });
         }
 
+        // Aspect functions
+        async function loadAspects() {
+            try {
+                const response = await fetch('/api/aspects');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAspects(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading aspects:', error);
+            }
+        }
+
+        function displayAspects(aspects) {
+            const tbody = document.getElementById('aspects-tbody');
+            
+            if (aspects.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No aspects found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = aspects.map(aspect => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${aspect.image}" 
+                             alt="${aspect.card_name}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3ZnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${aspect.card_name}</strong></td>
+                    <td>${aspect.card_type}</td>
+                    <td>${aspect.location}</td>
+                    <td>${aspect.card_effect}</td>
+                    <td class="fortifications-column hidden">${aspect.is_fortification ? 'Yes' : 'No'}</td>
+                    <td class="one-per-deck-column hidden">${aspect.is_one_per_deck ? 'Yes' : 'No'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleFortificationsColumn() {
+            const fortificationsColumn = document.querySelectorAll('.fortifications-column');
+            const toggleButton = document.getElementById('toggle-fortifications');
+            const toggleText = document.getElementById('fortifications-toggle-text');
+            
+            fortificationsColumn.forEach(col => {
+                col.classList.toggle('hidden');
+            });
+            
+            if (fortificationsColumn[0].classList.contains('hidden')) {
+                toggleText.textContent = 'Show';
+            } else {
+                toggleText.textContent = 'Hide';
+            }
+        }
+
+        function toggleOnePerDeckColumn() {
+            const onePerDeckColumn = document.querySelectorAll('.one-per-deck-column');
+            const toggleButton = document.getElementById('toggle-one-per-deck');
+            const toggleText = document.getElementById('one-per-deck-toggle-text');
+            
+            onePerDeckColumn.forEach(col => {
+                col.classList.toggle('hidden');
+            });
+            
+            if (onePerDeckColumn[0].classList.contains('hidden')) {
+                toggleText.textContent = 'Show';
+            } else {
+                toggleText.textContent = 'Hide';
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
             loadSpecialCards();
             loadMissions();
             loadLocations();
+            loadAspects();
             loadEvents();
             setupSearch();
             

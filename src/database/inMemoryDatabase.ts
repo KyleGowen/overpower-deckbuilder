@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -10,6 +10,7 @@ class InMemoryDatabase {
   private specialCards: Map<string, SpecialCard> = new Map();
   private missions: Map<string, Mission> = new Map();
   private events: Map<string, Event> = new Map();
+  private aspects: Map<string, Aspect> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -18,6 +19,7 @@ class InMemoryDatabase {
   private nextSpecialCardId = 1;
   private nextMissionId = 1;
   private nextEventId = 1;
+  private nextAspectId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -37,8 +39,11 @@ class InMemoryDatabase {
     // Load events from the markdown file
     await this.loadEvents();
     
+    // Load aspects from the markdown file
+    await this.loadAspects();
+    
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -675,6 +680,15 @@ class InMemoryDatabase {
     return Array.from(this.events.values());
   }
 
+  // Aspect management
+  getAspectById(id: string): Aspect | undefined {
+    return this.aspects.get(id);
+  }
+
+  getAllAspects(): Aspect[] {
+    return Array.from(this.aspects.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -799,6 +813,109 @@ class InMemoryDatabase {
     ];
   }
 
+  private async loadAspects(): Promise<void> {
+    try {
+      console.log('📖 Loading aspects from file...');
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-aspects.md');
+      
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Aspects file not found, skipping aspects loading');
+        return;
+      }
+
+      console.log('📖 Reading aspects data from file...');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      const totalLines = lines.length;
+
+      for (const line of lines) {
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Card Name')) {
+          const columns = line.split('|').map(col => col.trim());
+          
+          if (columns.length >= 6) { // Split by | creates 6 elements for 5 columns
+            const cardEffect = columns[4] || '';
+            const isFortification = cardEffect.includes('**Fortifications!**');
+            const isOnePerDeck = cardEffect.includes('**One Per Deck**');
+            
+            const aspect: Aspect = {
+              id: `aspect_${this.nextAspectId++}`,
+              card_name: columns[1],
+              card_type: columns[2],
+              location: columns[3],
+              card_effect: cardEffect,
+              image: this.getAspectImage(columns[1]),
+              is_fortification: isFortification,
+              is_one_per_deck: isOnePerDeck
+            };
+
+            this.aspects.set(aspect.id, aspect);
+            loadedCount++;
+
+            if (loadedCount % 5 === 0) {
+              console.log(`   Loaded ${loadedCount}/${totalLines} aspects...`);
+            }
+          }
+        }
+      }
+
+      console.log(`🎉 Successfully loaded ${loadedCount} aspects into database!`);
+      console.log('✅ Aspects loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading aspects:', error);
+    }
+  }
+
+  private getAspectImage(cardName: string): string {
+    // Direct mapping for aspect cards based on their specific names
+    const aspectImageMap: { [key: string]: string } = {
+      'Amaru: Dragon Legend': '434_amaru_dragon_legend.webp',
+      'Mallku': '435_mallku.webp',
+      'Supay': '436_supay.webp',
+      'Cheshire Cat': '437_cheshire_cat.webp',
+      'Isis': '438_isis.webp'
+    };
+    
+    // Check if we have a direct match
+    if (aspectImageMap[cardName]) {
+      return aspectImageMap[cardName];
+    }
+    
+    // Fallback to fuzzy matching if no direct match
+    const cardNameSnake = this.convertToSnakeCase(cardName);
+    const availableImages = this.getAvailableAspectImages();
+    
+    // Try partial word matching
+    const words = cardNameSnake.split('_').filter(word => word.length > 2);
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      const matchingWords = words.filter(word => imageName.includes(word));
+      if (matchingWords.length >= words.length * 0.7) {
+        return imageFile;
+      }
+    }
+    
+    // Try fuzzy matching
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      if (this.levenshteinDistance(cardNameSnake, imageName) <= 3) {
+        return imageFile;
+      }
+    }
+    
+    return 'unknown_aspect.webp';
+  }
+
+  private getAvailableAspectImages(): string[] {
+    // Return a list of available aspect image files (IDs 434-438)
+    return [
+      "434_aspect_1.webp", "435_aspect_2.webp", "436_aspect_3.webp", 
+      "437_aspect_4.webp", "438_aspect_5.webp"
+    ];
+  }
+
   // Statistics
   getStats() {
     return {
@@ -808,7 +925,8 @@ class InMemoryDatabase {
       locations: this.locations.size,
       specialCards: this.specialCards.size,
       missions: this.missions.size,
-      events: this.events.size
+      events: this.events.size,
+      aspects: this.aspects.size
     };
   }
 }
