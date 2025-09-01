@@ -645,6 +645,103 @@
             color: rgba(255, 255, 255, 0.6);
             font-weight: 500;
         }
+
+        /* Center all table columns and filters for uniform appearance */
+        /* Characters table */
+        #characters-table th,
+        #characters-table td {
+            text-align: center;
+        }
+        
+        /* Special cards table */
+        #special-cards-table th,
+        #special-cards-table td {
+            text-align: center;
+        }
+        
+        /* Advanced universe table */
+        #advanced-universe-table th,
+        #advanced-universe-table td {
+            text-align: center;
+        }
+        
+        /* Locations table */
+        #locations-table th,
+        #locations-table td {
+            text-align: center;
+        }
+        
+        /* Aspects table */
+        #aspects-table th,
+        #aspects-table td {
+            text-align: center;
+        }
+        
+        /* Missions table */
+        #missions-table th,
+        #missions-table td {
+            text-align: center;
+        }
+        
+        /* Events table */
+        #events-table th,
+        #events-table td {
+            text-align: center;
+        }
+        
+        /* Teamwork table */
+        #teamwork-table th,
+        #teamwork-table td {
+            text-align: center;
+        }
+        
+        /* Ally universe table */
+        #ally-universe-table th,
+        #ally-universe-table td {
+            text-align: center;
+        }
+        
+        /* Training table */
+        #training-table th,
+        #training-table td {
+            text-align: center;
+        }
+        
+        /* Power cards table */
+        #power-cards-table th,
+        #power-cards-table td {
+            text-align: center;
+        }
+        
+        /* Center all filter rows */
+        .filter-row th {
+            text-align: center;
+        }
+        
+        /* Center all column filters */
+        .column-filters {
+            text-align: center;
+        }
+        
+        /* Center all filter inputs */
+        .filter-input {
+            text-align: center;
+        }
+        
+        /* Center all range inputs */
+        .range-inputs {
+            text-align: center;
+        }
+        
+        /* Center all checkbox groups */
+        .checkbox-group {
+            text-align: center;
+        }
+        
+        /* Center all filter groups */
+        .filter-group {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -812,10 +909,20 @@
                             <th class="cataclysm-column hidden">Cataclysm</th>
                             <th>Card Effect</th>
                         </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="cataclysm-column hidden"></th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody id="special-cards-tbody">
                         <tr>
-                            <td colspan="5" class="loading">Loading special cards...</td>
+                            <td colspan="6" class="loading">Loading special cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -837,6 +944,16 @@
                             <th>Card Effect</th>
                             <th class="one-per-deck-advanced-column">One Per Deck</th>
                         </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearAdvancedUniverseFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="one-per-deck-advanced-column"></th>
+                        </tr>
                     </thead>
                     <tbody id="advanced-universe-tbody">
                         <tr>
@@ -854,6 +971,22 @@
                             <th>Name</th>
                             <th>Threat Level</th>
                             <th>Special Ability</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearLocationFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="range-inputs">
+                                        <input type="number" id="location-threat-min" placeholder="Min" min="0" max="3" class="filter-input">
+                                        <span>-</span>
+                                        <input type="number" id="location-threat-max" placeholder="Max" min="0" max="3" class="filter-input">
+                                    </div>
+                                </div>
+                            </th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="locations-tbody">
@@ -884,6 +1017,17 @@
                             <th class="fortifications-column hidden">Fortifications</th>
                             <th class="one-per-deck-column hidden">One Per Deck</th>
                         </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearAspectsFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="fortifications-column hidden"></th>
+                            <th class="one-per-deck-column hidden"></th>
+                        </tr>
                     </thead>
                     <tbody id="aspects-tbody">
                         <tr>
@@ -900,6 +1044,13 @@
                             <th>Image</th>
                             <th>Mission Set</th>
                             <th>Card Name</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearMissionsFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="missions-tbody">
@@ -919,6 +1070,15 @@
                             <th>Mission Set</th>
                             <th>Game Effect</th>
                             <th>Flavor Text</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearEventsFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="events-tbody">
@@ -940,6 +1100,17 @@
                             <th>Followup Attack Types</th>
                             <th>1st Attack Bonus</th>
                             <th>2nd Attack Bonus</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearTeamworkFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="teamwork-tbody">
@@ -963,6 +1134,18 @@
                             <th>Attack Type</th>
                             <th>Card Text</th>
                         </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearAllyUniverseFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody id="ally-universe-tbody">
                         <tr>
@@ -983,6 +1166,16 @@
                             <th>Value to Use</th>
                             <th>Bonus</th>
                         </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
                     </thead>
                     <tbody id="training-tbody">
                         <tr>
@@ -993,34 +1186,38 @@
             </div>
 
             <div class="table-container" id="power-cards-tab" style="display: none;">
-                <div class="filter-bar">
-                    <div class="filter-group">
-                        <label>Power Type:</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" value="Energy" checked> Energy</label>
-                            <label><input type="checkbox" value="Combat" checked> Combat</label>
-                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
-                            <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
-                            <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>Value Range:</label>
-                        <div class="range-inputs">
-                            <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" style="width: 60px;">
-                            <span>-</span>
-                            <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" style="width: 60px;">
-                        </div>
-                    </div>
-                    <button class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
-                </div>
                 <table id="power-cards-table">
                     <thead>
                         <tr>
                             <th>Image</th>
                             <th>Power Type</th>
                             <th>Value</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" value="Energy" checked> Energy</label>
+                                        <label><input type="checkbox" value="Combat" checked> Combat</label>
+                                        <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
+                                        <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                        <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
+                                        <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="range-inputs">
+                                        <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" class="filter-input">
+                                        <span>-</span>
+                                        <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" class="filter-input">
+                                    </div>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="power-cards-tbody">
@@ -1425,7 +1622,7 @@
                         <img src="/src/resources/cards/images/${location.image}" 
                              alt="${location.name}" 
                              style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
                              onclick="openModal(this)">
                     </td>
                     <td><strong>${location.name}</strong></td>
@@ -1435,6 +1632,82 @@
                 
                 tbody.appendChild(row);
             });
+        }
+
+        // Location filtering functions
+        async function applyLocationFilters() {
+            try {
+                const resp = await fetch('/api/locations');
+                const data = await resp.json();
+                if (!data.success) return;
+
+                let filtered = data.data;
+
+                // Filter by threat level range
+                const minThreat = document.getElementById('location-threat-min').value;
+                const maxThreat = document.getElementById('location-threat-max').value;
+                
+                if (minThreat && !isNaN(minThreat)) {
+                    filtered = filtered.filter(location => location.threat_level >= parseInt(minThreat));
+                }
+                if (maxThreat && !isNaN(maxThreat)) {
+                    filtered = filtered.filter(location => location.threat_level <= parseInt(maxThreat));
+                }
+
+                displayLocations(filtered);
+            } catch (err) {
+                console.error('Error applying location filters:', err);
+            }
+        }
+
+        function clearLocationFilters() {
+            // Reset threat level inputs
+            document.getElementById('location-threat-min').value = '';
+            document.getElementById('location-threat-max').value = '';
+            
+            // Reload all locations
+            loadLocations();
+        }
+
+        // Clear filter functions for all tabs
+        function clearSpecialCardFilters() {
+            // Reset cataclysm toggle if needed
+            loadSpecialCards();
+        }
+
+        function clearAdvancedUniverseFilters() {
+            // Reset one per deck toggle if needed
+            loadAdvancedUniverse();
+        }
+
+        function clearAspectsFilters() {
+            // Reset fortifications and one per deck toggles if needed
+            loadAspects();
+        }
+
+        function clearMissionsFilters() {
+            // Reload all missions
+            loadMissions();
+        }
+
+        function clearEventsFilters() {
+            // Reload all events
+            loadEvents();
+        }
+
+        function clearTeamworkFilters() {
+            // Reload all teamwork
+            loadTeamwork();
+        }
+
+        function clearAllyUniverseFilters() {
+            // Reload all ally universe
+            loadAllyUniverse();
+        }
+
+        function clearTrainingFilters() {
+            // Reload all training
+            loadTraining();
         }
 
         // Tab switching functionality
@@ -2229,6 +2502,8 @@
             loadPowerCards();
         }
 
+
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
@@ -2243,6 +2518,10 @@
             loadTraining();
             loadPowerCards();
             setupSearch();
+            
+            // Add location filter event listeners
+            document.getElementById('location-threat-min').addEventListener('input', applyLocationFilters);
+            document.getElementById('location-threat-max').addEventListener('input', applyLocationFilters);
             
             // Update all stats after loading data
             setTimeout(updateAllStats, 1000);
