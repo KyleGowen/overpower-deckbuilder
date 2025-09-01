@@ -1050,7 +1050,22 @@
                                 <button class="clear-filters-btn" onclick="clearMissionsFilters()">Clear All Filters</button>
                             </th>
                             <th></th>
-                            <th></th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
+                                        <label><input type="checkbox" value="Chronicles of Mars" checked> Chronicles of Mars</label>
+                                        <label><input type="checkbox" value="The Shadow" checked> The Shadow</label>
+                                        <label><input type="checkbox" value="The Phantom" checked> The Phantom</label>
+                                        <label><input type="checkbox" value="Tarzan" checked> Tarzan</label>
+                                        <label><input type="checkbox" value="Doc Savage" checked> Doc Savage</label>
+                                        <label><input type="checkbox" value="The Spider" checked> The Spider</label>
+                                        <label><input type="checkbox" value="The Green Hornet" checked> The Green Hornet</label>
+                                        <label><input type="checkbox" value="The Lone Ranger" checked> The Lone Ranger</label>
+                                        <label><input type="checkbox" value="Zorro" checked> Zorro</label>
+                                    </div>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="missions-tbody">
@@ -1076,7 +1091,22 @@
                                 <button class="clear-filters-btn" onclick="clearEventsFilters()">Clear All Filters</button>
                             </th>
                             <th></th>
-                            <th></th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
+                                        <label><input type="checkbox" value="Chronicles of Mars" checked> Chronicles of Mars</label>
+                                        <label><input type="checkbox" value="The Shadow" checked> The Shadow</label>
+                                        <label><input type="checkbox" value="The Phantom" checked> The Phantom</label>
+                                        <label><input type="checkbox" value="Tarzan" checked> Tarzan</label>
+                                        <label><input type="checkbox" value="Doc Savage" checked> Doc Savage</label>
+                                        <label><input type="checkbox" value="The Spider" checked> The Spider</label>
+                                        <label><input type="checkbox" value="The Green Hornet" checked> The Green Hornet</label>
+                                        <label><input type="checkbox" value="The Lone Ranger" checked> The Lone Ranger</label>
+                                        <label><input type="checkbox" value="Zorro" checked> Zorro</label>
+                                    </div>
+                                </div>
+                            </th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -1686,13 +1716,61 @@
         }
 
         function clearMissionsFilters() {
+            // Reset checkboxes
+            document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
             // Reload all missions
             loadMissions();
         }
 
+        function applyMissionFilters() {
+            const selectedMissionSets = Array.from(document.querySelectorAll('#missions-tab input[type="checkbox"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedMissionSets.length === 0) {
+                // If no mission sets selected, show none
+                document.getElementById('missions-tbody').innerHTML = '<tr><td colspan="3" class="no-results">No mission sets selected</td></tr>';
+                return;
+            }
+            
+            // Filter missions based on selected mission sets
+            const missions = window.missionsData || [];
+            const filteredMissions = missions.filter(mission => 
+                selectedMissionSets.includes(mission.missionSet)
+            );
+            
+            displayMissions(filteredMissions);
+        }
+
         function clearEventsFilters() {
+            // Reset checkboxes
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
             // Reload all events
             loadEvents();
+        }
+
+        function applyEventsFilters() {
+            const selectedMissionSets = Array.from(document.querySelectorAll('#events-tab input[type="checkbox"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedMissionSets.length === 0) {
+                // If no mission sets selected, show none
+                document.getElementById('events-tbody').innerHTML = '<tr><td colspan="5" class="no-results">No mission sets selected</td></tr>';
+                return;
+            }
+            
+            // Filter events based on selected mission sets
+            const events = window.eventsData || [];
+            const filteredEvents = events.filter(event => 
+                selectedMissionSets.includes(event.missionSet)
+            );
+            
+            displayEvents(filteredEvents);
         }
 
         function clearTeamworkFilters() {
@@ -1977,6 +2055,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Store missions data globally for filtering
+                    window.missionsData = data.data;
                     displayMissions(data.data);
                 }
             } catch (error) {
@@ -1997,7 +2077,7 @@
                     <td>
                         <img src="/src/resources/cards/images/${mission.image}" 
                              alt="${mission.card_name}" 
-                             onclick="openModal(this.src)"
+                             onclick="openModal(this)"
                              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
                              style="width: 120px !important; height: auto !important; max-height: 180px !important; cursor: pointer;">
                     </td>
@@ -2033,6 +2113,11 @@
                     console.error('Error searching missions:', error);
                 }
             });
+
+            // Set up checkbox event listeners for mission set filtering
+            document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyMissionFilters);
+            });
         }
 
         // Event functions
@@ -2042,6 +2127,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Store events data globally for filtering
+                    window.eventsData = data.data;
                     displayEvents(data.data);
                 }
             } catch (error) {
@@ -2100,6 +2187,11 @@
                 } catch (error) {
                     console.error('Error searching events:', error);
                 }
+            });
+
+            // Set up checkbox event listeners for mission set filtering
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyEventsFilters);
             });
         }
 
