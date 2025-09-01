@@ -68,6 +68,15 @@ export interface Mission {
   image: string;
 }
 
+export interface Event {
+  id: string;
+  name: string;
+  mission_set: string;
+  game_effect: string;
+  flavor_text: string;
+  image: string;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

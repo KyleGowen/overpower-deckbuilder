@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -9,6 +9,7 @@ class InMemoryDatabase {
   private locations: Map<string, Location> = new Map();
   private specialCards: Map<string, SpecialCard> = new Map();
   private missions: Map<string, Mission> = new Map();
+  private events: Map<string, Event> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -16,6 +17,7 @@ class InMemoryDatabase {
   private nextLocationId = 1;
   private nextSpecialCardId = 1;
   private nextMissionId = 1;
+  private nextEventId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -32,8 +34,11 @@ class InMemoryDatabase {
     // Load missions from the markdown file
     await this.loadMissions();
     
+    // Load events from the markdown file
+    await this.loadEvents();
+    
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -661,6 +666,139 @@ class InMemoryDatabase {
     ];
   }
 
+  // Event management
+  getEventById(id: string): Event | undefined {
+    return this.events.get(id);
+  }
+
+  getAllEvents(): Event[] {
+    return Array.from(this.events.values());
+  }
+
+  private async loadEvents(): Promise<void> {
+    try {
+      console.log('📖 Loading events from file...');
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-events.md');
+      
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Events file not found, skipping event loading');
+        return;
+      }
+
+      console.log('📖 Reading event data from file...');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      let currentMissionSet = '';
+
+      for (const line of lines) {
+        // Check if this is a mission set header
+        if (line.startsWith('## ')) {
+          currentMissionSet = line.replace('## ', '').trim();
+          continue;
+        }
+
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Name')) {
+          const columns = line.split('|').map(col => col.trim());
+          
+          if (columns.length >= 5) { // Split by | creates 5+ elements for 4 columns
+            const event: Event = {
+              id: `event_${this.nextEventId++}`,
+              name: columns[1],
+              mission_set: currentMissionSet,
+              game_effect: columns[3],
+              flavor_text: columns[4],
+              image: this.getEventImage(currentMissionSet, columns[1])
+            };
+
+            this.events.set(event.id, event);
+            loadedCount++;
+          }
+        }
+      }
+
+      console.log(`🎉 Successfully loaded ${loadedCount} events into database!`);
+      console.log('✅ Events loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading events:', error);
+    }
+  }
+
+  private getEventImage(missionSet: string, eventName: string): string {
+    // Map mission set names to their image prefixes and find the event image
+    const missionSetMapping: { [key: string]: string } = {
+      'The Call of Cthulhu': 'call_of_cthulu',
+      'King of the Jungle': 'tarzan_king_of_the_jungle',
+      'Chronicles of Mars': 'chronicles_of_mars',
+      'Time Wars: Rise of the Gods': 'world_legends'
+    };
+    
+    // Get the mapped image prefix for this mission set
+    const imagePrefix = missionSetMapping[missionSet];
+    if (!imagePrefix) {
+      return 'unknown_event.webp';
+    }
+    
+    // Convert event name to snake_case for matching
+    const eventNameSnake = this.convertToSnakeCase(eventName);
+    
+    // Look for the event image that comes after the mission set images
+    const availableImages = this.getAvailableEventImages();
+    
+    // First try exact matching
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      
+      // Check if this image matches the event name
+      if (imageName.includes(eventNameSnake)) {
+        return imageFile;
+      }
+    }
+    
+    // Try partial word matching for cases like "The Giant Man of Mars" vs "giant_man_of_mars"
+    const words = eventNameSnake.split('_').filter(word => word.length > 2);
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      
+      // Check if most words match (at least 70% of words)
+      const matchingWords = words.filter(word =>
+        imageName.includes(word)
+      );
+      
+      if (matchingWords.length >= words.length * 0.7) {
+        return imageFile;
+      }
+    }
+    
+    // Try fuzzy matching for similar names
+    for (const imageFile of availableImages) {
+      const imageName = imageFile.replace('.webp', '');
+      if (this.levenshteinDistance(eventNameSnake, imageName) <= 3) {
+        return imageFile;
+      }
+    }
+    
+    // Fallback to unknown image
+    return 'unknown_event.webp';
+  }
+
+  private getAvailableEventImages(): string[] {
+    // Return a list of available event image files
+    // These come after the mission set images
+    return [
+      // Call of Cthulhu events (after 356_call_of_cthulu_7.webp)
+      "357_a_desperate_gamble.webp", "358_the_cost_of_knowledge_is_sanity.webp", "359_stars_align.webp",
+      // King of the Jungle events (after 368_tarzan_king_of_the_jungle_7.webp)
+      "369_the_lost_city_of_opar.webp", "370_tarzan_the_terrible.webp", "371_the_power_of_gonfal.webp",
+      // Chronicles of Mars events (after 380_chronicles_of_mars_7.webp)
+      "381_giant_man_of_mars.webp", "382_the_battle_with_zod.webp", "383_eyes_in_the_dark.webp",
+      // Time Wars: Rise of the Gods events (after 392_world_legends_7.webp)
+      "393_rally_our_allies.webp", "394_second_chances.webp", "395_heroes_we_need.webp"
+    ];
+  }
+
   // Statistics
   getStats() {
     return {
@@ -669,7 +807,8 @@ class InMemoryDatabase {
       characters: this.characters.size,
       locations: this.locations.size,
       specialCards: this.specialCards.size,
-      missions: this.missions.size
+      missions: this.missions.size,
+      events: this.events.size
     };
   }
 }

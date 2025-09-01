@@ -59,6 +59,15 @@ app.get('/api/missions', (req, res) => {
   }
 });
 
+app.get('/api/events', (req, res) => {
+  try {
+    const events = database.getAllEvents();
+    res.json({ success: true, data: events });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch events' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();

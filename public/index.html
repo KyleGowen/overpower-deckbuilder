@@ -332,6 +332,10 @@
                 <div class="stat-label">Missions</div>
             </div>
             <div class="stat-card">
+                <div class="stat-number" id="total-events">-</div>
+                <div class="stat-label">Events</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-number" id="total-locations">-</div>
                 <div class="stat-label">Locations</div>
             </div>
@@ -353,6 +357,7 @@
                 <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
                 <button class="tab-button" onclick="switchTab('locations')">Locations</button>
                 <button class="tab-button" onclick="switchTab('missions')">Missions</button>
+                <button class="tab-button" onclick="switchTab('events')">Events</button>
             </div>
             </div>
 
@@ -437,6 +442,25 @@
                     <tbody id="missions-tbody">
                         <tr>
                             <td colspan="3" class="loading">Loading missions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container" id="events-tab" style="display: none;">
+                <table id="events-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Mission Set</th>
+                            <th>Game Effect</th>
+                            <th>Flavor Text</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading events...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -546,6 +570,14 @@
                 .then(data => {
                     if (data.success) {
                         document.getElementById('total-missions').textContent = data.data.length;
+                    }
+                });
+            
+            fetch('/api/events')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('total-events').textContent = data.data.length;
                     }
                 });
             
@@ -718,6 +750,7 @@
             document.getElementById('special-cards-tab').style.display = 'none';
             document.getElementById('missions-tab').style.display = 'none';
             document.getElementById('locations-tab').style.display = 'none';
+            document.getElementById('events-tab').style.display = 'none';
             
             // Remove active class from all buttons
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -746,6 +779,10 @@
                 searchInput.placeholder = 'Search missions by name or mission set...';
                 searchInput.oninput = null;
                 setupMissionSearch();
+            } else if (tabName === 'events') {
+                searchInput.placeholder = 'Search events by name, mission set, or effect...';
+                searchInput.oninput = null;
+                setupEventSearch();
             }
         }
 
@@ -898,12 +935,81 @@
             });
         }
 
+        // Event functions
+        async function loadEvents() {
+            try {
+                const response = await fetch('/api/events');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayEvents(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        function displayEvents(events) {
+            const tbody = document.getElementById('events-tbody');
+            
+            if (events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No events found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = events.map(event => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${event.image}" 
+                             alt="${event.name}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${event.name}</strong></td>
+                    <td>${event.mission_set}</td>
+                    <td>${event.game_effect}</td>
+                    <td><em>${event.flavor_text}</em></td>
+                </tr>
+            `).join('');
+        }
+
+        function setupEventSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.length === 0) {
+                    // Reload all events
+                    await loadEvents();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/events');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const filteredEvents = data.data.filter(event => 
+                            event.name.toLowerCase().includes(searchTerm) ||
+                            event.mission_set.toLowerCase().includes(searchTerm) ||
+                            event.game_effect.toLowerCase().includes(searchTerm)
+                        );
+                        displayEvents(filteredEvents);
+                    }
+                } catch (error) {
+                    console.error('Error searching events:', error);
+                }
+            });
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadCharacters();
             loadSpecialCards();
             loadMissions();
             loadLocations();
+            loadEvents();
             setupSearch();
             // Update all stats after loading data
             setTimeout(updateAllStats, 1000);
