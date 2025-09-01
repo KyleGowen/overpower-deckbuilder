@@ -24,6 +24,7 @@ export interface Character {
   intelligence: number;
   threat_level: number;
   special_abilities: string;
+  image: string;
 }
 
 // Card types for future expansion

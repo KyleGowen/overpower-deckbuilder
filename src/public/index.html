@@ -196,6 +196,7 @@
                 <table id="characters-table">
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>Name</th>
                             <th>Energy</th>
                             <th>Combat</th>
@@ -207,7 +208,7 @@
                     </thead>
                     <tbody id="characters-tbody">
                         <tr>
-                            <td colspan="7" class="loading">Loading characters...</td>
+                            <td colspan="8" class="loading">Loading characters...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -231,7 +232,7 @@
             } catch (error) {
                 console.error('Error loading characters:', error);
                 document.getElementById('characters-tbody').innerHTML = 
-                    '<tr><td colspan="7" class="error">Error loading characters. Please try again.</td></tr>';
+                    '<tr><td colspan="8" class="error">Error loading characters. Please try again.</td></tr>';
             }
         }
 
@@ -248,6 +249,12 @@
                 else if (character.threat_level >= 18) threatClass = 'threat-medium';
 
                 row.innerHTML = `
+                    <td>
+                        <img src="/src/resources/cards/images/${character.image}" 
+                             alt="${character.name}" 
+                             style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2);"
+                             onerror="this.style.display='none'">
+                    </td>
                     <td><strong>${character.name}</strong></td>
                     <td>${character.energy}</td>
                     <td>${character.combat}</td>

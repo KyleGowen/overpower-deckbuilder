@@ -24,47 +24,50 @@ class InMemoryDatabase {
   private async loadCharacters(): Promise<void> {
     try {
       console.log('📖 Loading characters from file...');
-      
       const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-characters.md');
-      const fileContent = fs.readFileSync(filePath, 'utf8');
       
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Character file not found, skipping character loading');
+        return;
+      }
+
       console.log('📖 Reading character data from file...');
-      const lines = fileContent.split('\n').filter(line => line.trim());
-      
-      let characterCount = 0;
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const lines = fileContent.split('\n').filter(line => line.trim().length > 0);
+
+      let loadedCount = 0;
+      const totalLines = lines.length;
+
       for (const line of lines) {
-        if (line.startsWith('|') && !line.startsWith('|---')) {
-          const columns = line.split('|').map(col => col.trim()).filter(col => col);
+        // Skip header and separator lines
+        if (line.startsWith('|') && !line.includes('----') && !line.includes('Name')) {
+          const columns = line.split('|').map(col => col.trim()).filter(col => col.length > 0);
           
-          if (columns.length >= 7) {
-            const [name, energy, combat, bruteForce, intelligence, threatLevel, specialAbilities] = columns;
-            
-            if (name && name !== 'Name' && !isNaN(parseInt(energy))) {
-              const character: Character = {
-                id: `char_${this.nextCharacterId++}`,
-                name,
-                energy: parseInt(energy),
-                combat: parseInt(combat),
-                brute_force: parseInt(bruteForce),
-                intelligence: parseInt(intelligence),
-                threat_level: parseInt(threatLevel),
-                special_abilities: specialAbilities || ''
-              };
-              
-              this.characters.set(character.id, character);
-              characterCount++;
-              
-              if (characterCount % 10 === 0) {
-                console.log(`   Loaded ${characterCount}/${lines.length - 1} characters...`);
-              }
+          if (columns.length >= 8) { // Now expecting 8 columns including Image
+            const character: Character = {
+              id: `char_${this.nextCharacterId++}`,
+              name: columns[0],
+              energy: parseInt(columns[1]) || 0,
+              combat: parseInt(columns[2]) || 0,
+              brute_force: parseInt(columns[3]) || 0,
+              intelligence: parseInt(columns[4]) || 0,
+              threat_level: parseInt(columns[5]) || 0,
+              special_abilities: columns[6],
+              image: columns[7]
+            };
+
+            this.characters.set(character.id, character);
+            loadedCount++;
+
+            if (loadedCount % 10 === 0) {
+              console.log(`   Loaded ${loadedCount}/${totalLines} characters...`);
             }
           }
         }
       }
-      
-      console.log(`🎉 Successfully loaded ${characterCount} characters into database!`);
+
+      console.log(`🎉 Successfully loaded ${loadedCount} characters into database!`);
       console.log('✅ Characters loaded successfully');
-      
     } catch (error) {
       console.error('❌ Error loading characters:', error);
     }
