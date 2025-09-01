@@ -1,127 +1,58 @@
-// User types and interfaces
+// Clean, simple database schema
+
+// User table
 export interface User {
   id: string;
-  username: string;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateUserRequest {
-  username: string;
-  email: string;
-  password: string;
-}
-
-// Card types and interfaces
-export interface Card {
-  id: string;
   name: string;
-  type: CardType;
-  rarity: CardRarity;
-  cost: number;
-  power: number;
-  defense: number;
-  description: string;
-  imageUrl?: string;
-  set: string;
-  cardNumber: string;
-  // Character-specific stats
-  energy?: number;
-  combat?: number;
-  bruteForce?: number;
-  intelligence?: number;
-  threatLevel?: number;
-  specialAbilities?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  email: string;
 }
 
-export interface SpecialCard {
-  id: string;
-  cardName: string;
-  cardType: string;
-  character: string;
-  cardEffect: string;
-  imageUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface PowerCard {
-  id: string;
-  powerType: string;
-  value: number;
-  notes: string | undefined;
-  imageUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export enum CardType {
-  CHARACTER = 'character',
-  SPECIAL = 'special',
-  POWER = 'power',
-  VILLAIN = 'villain',
-  HERO = 'hero',
-  LOCATION = 'location',
-  EVENT = 'event',
-  SUPPORT = 'support'
-}
-
-export enum CardRarity {
-  COMMON = 'common',
-  UNCOMMON = 'uncommon',
-  RARE = 'rare',
-  EPIC = 'epic',
-  LEGENDARY = 'legendary'
-}
-
-// Deck types and interfaces
+// Deck table
 export interface Deck {
   id: string;
+  user_id: string;
   name: string;
-  description?: string;
-  cards: DeckCard[];
-  createdAt: Date;
-  updatedAt: Date;
-  isPublic: boolean;
-  userId: string;
 }
 
-export interface DeckCard {
-  cardId: string;
-  quantity: number;
-}
-
-export interface CreateDeckRequest {
+// Character table (from overpower-erb-characters.md)
+export interface Character {
+  id: string;
   name: string;
-  description?: string;
-  cards: DeckCard[];
-  isPublic?: boolean;
-  userId?: string;
+  energy: number;
+  combat: number;
+  brute_force: number;
+  intelligence: number;
+  threat_level: number;
+  special_abilities: string;
 }
 
-export interface UpdateDeckRequest {
-  name?: string;
-  description?: string;
-  cards?: DeckCard[];
-  isPublic?: boolean;
+// Card types for future expansion
+export interface Card {
+  id: string;
+  type: 'character' | 'power' | 'special';
+  data: Character | PowerCard | SpecialCard;
 }
 
-// API response types
+// Power card structure (placeholder for future)
+export interface PowerCard {
+  id: string;
+  name: string;
+  value: number;
+  type: string;
+}
+
+// Special card structure (placeholder for future)
+export interface SpecialCard {
+  id: string;
+  name: string;
+  effect: string;
+  type: string;
+}
+
+// API response wrapper
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
