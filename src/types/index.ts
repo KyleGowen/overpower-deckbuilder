@@ -109,6 +109,18 @@ export interface Teamwork {
   image: string;
 }
 
+export interface AllyUniverse {
+  id: string;
+  card_name: string;
+  card_type: string;
+  stat_to_use: string;          // e.g., "5 or less" or "7 or higher"
+  stat_type_to_use: string;     // Energy | Combat | Brute Force | Intelligence
+  attack_value: string;         // numeric as string to preserve formatting
+  attack_type: string;          // Combat | Brute Force | Intelligence
+  card_text: string;
+  image: string;
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;

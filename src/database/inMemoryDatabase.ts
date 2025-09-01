@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,6 +13,7 @@ class InMemoryDatabase {
   private aspects: Map<string, Aspect> = new Map();
   private advancedUniverse: Map<string, AdvancedUniverse> = new Map();
   private teamwork: Map<string, Teamwork> = new Map();
+  private allyUniverse: Map<string, AllyUniverse> = new Map();
   
   private nextUserId = 1;
   private nextDeckId = 1;
@@ -24,6 +25,7 @@ class InMemoryDatabase {
   private nextAspectId = 1;
   private nextAdvancedUniverseId = 1;
   private nextTeamworkId = 1;
+  private nextAllyUniverseId = 1;
 
   async initialize(): Promise<void> {
     console.log('🗄️ Initializing clean database schema...');
@@ -51,9 +53,12 @@ class InMemoryDatabase {
     
     // Load teamwork from the markdown file
     await this.loadTeamwork();
+
+    // Load Ally Universe from the markdown file
+    await this.loadAllyUniverse();
     
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -717,6 +722,11 @@ class InMemoryDatabase {
     return Array.from(this.teamwork.values());
   }
 
+  // Ally Universe management
+  getAllAllyUniverse(): AllyUniverse[] {
+    return Array.from(this.allyUniverse.values());
+  }
+
   private async loadEvents(): Promise<void> {
     try {
       console.log('📖 Loading events from file...');
@@ -1132,6 +1142,61 @@ class InMemoryDatabase {
       // Any-Power: 481
       "481_7_anypower.webp"
     ];
+  }
+
+  private async loadAllyUniverse(): Promise<void> {
+    try {
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-universe-ally.md');
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Ally Universe file not found, skipping');
+        return;
+      }
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n').filter(l => l.trim().length > 0);
+      for (const line of lines) {
+        if (line.startsWith('|') && !line.includes('---') && !line.includes('Card Name')) {
+          const cols = line.split('|').map(c => c.trim());
+          if (cols.length >= 8) {
+            const cardName = cols[1];
+            const ally: AllyUniverse = {
+              id: `ally_${this.nextAllyUniverseId++}`,
+              card_name: cardName,
+              card_type: cols[2],
+              stat_to_use: cols[3],
+              stat_type_to_use: cols[4],
+              attack_value: cols[5],
+              attack_type: cols[6],
+              card_text: cols[7],
+              image: this.getAllyUniverseImage(cardName, cols[4], cols[3])
+            };
+            this.allyUniverse.set(ally.id, ally);
+          }
+        }
+      }
+      console.log(`✅ Loaded ${this.allyUniverse.size} Ally Universe cards`);
+    } catch (e) {
+      console.error('Error loading Ally Universe:', e);
+    }
+  }
+
+  private getAllyUniverseImage(cardName: string, statType: string, statToUse: string): string {
+    // Try to map by stat first using known base set numbers (e.g., 324-331 shown)
+    const baseMap: { [key: string]: string[] } = {
+      'Energy': ['324_5_energy.webp', '325_7_energy.webp'],
+      'Combat': ['326_5_combat.webp', '327_7_combat.webp'],
+      'Brute Force': ['328_5_brute_force.webp', '329_7_brute_force.webp'],
+      'Intelligence': ['330_5_intelligence.webp', '331_7_intelligence.webp']
+    };
+    const candidates = baseMap[statType] || [];
+    if (candidates.length > 0) {
+      const prefersSeven = /7\s*or\s*higher/i.test(statToUse);
+      const prefersFive = /5\s*or\s*less/i.test(statToUse);
+      if (prefersSeven && candidates[1]) return candidates[1];
+      if (prefersFive && candidates[0]) return candidates[0];
+      return candidates[0];
+    }
+    // Fallback unknown
+    return 'unknown_ally_universe.webp';
   }
 
   // Statistics

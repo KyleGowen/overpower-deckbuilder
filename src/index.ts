@@ -95,6 +95,15 @@ app.get('/api/teamwork', (req, res) => {
   }
 });
 
+app.get('/api/ally-universe', (req, res) => {
+  try {
+    const ally = database.getAllAllyUniverse();
+    res.json({ success: true, data: ally });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch ally universe' });
+  }
+});
+
 app.get('/test', (req, res) => {
   const characters = database.getAllCharacters();
   const locations = database.getAllLocations();
