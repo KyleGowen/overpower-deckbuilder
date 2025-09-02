@@ -1,0 +1,177 @@
+# LEARN TO PLAY RULEBOOK
+
+---
+
+While sometimes a straightforward game, OverPower is also a game that can take a lifetime to master. Even though it's a player friendly game, it is still common for new and experienced players to make some mistakes.
+
+# CONTENTS 
+
+WELCOME TO OVERPOWER ..... 3
+HOW DO I WIN? ..... 3
+TYPES OF CARDS ..... 3
+Character Cards ..... 3
+Location Homebase Cards ..... 4
+Power Cards ..... 5
+Special Cards ..... 7
+Universe Cards ..... 8
+Mission Objective Cards ..... 10
+Event Cards ..... 11
+Aspect Cards ..... 11
+ORDER OF PLAY ..... 11
+THE PHASES ..... 12
+Phases 1: Draw ..... 12
+Phases 2: Events, 3: Discard ..... 13
+Phase 4: Placing ..... 14
+Phase 5: Venture ..... 15
+Phase 6: Battle ..... 16
+Phase 7: Post-concession ..... 18
+Phase 8: End-of-Battle ..... 19
+ASTRAL PLANE ..... 19
+MODES OF PLAY ..... 20
+Constructed Play - Venture, Brawl, Skirmish ..... 20
+Limited Play - Draft ..... 20
+Sealed Deck ..... 21
+
+---
+
+# WELCOME TO OVERPOWER 
+
+Where YOU control a team of legendary heroes and villains as they compete with an opposing team through a series of battles, each trying to complete their Mission! Battles include making attacks, defending against enemy attacks, and unleashing your team's skills to do damage or even KO your Opponent's characters. Build your deck of at least 51 cards (or 56 if using Event cards), and YOU will tell the story of a conflict for the ages and determine who succeeds at their mission first.
+
+## HOW DO I WIN?
+
+There are 3 ways to win a game of OverPower. First, knockout (KO) all 4 of the opposing characters on the Opponent's team. Second, if a player manages to advance all 7 of their Mission Objective cards to the completed pile, they win, regardless of how many characters the opponent still has. Third, if your opponent loses all of their Mission Objective cards, with all 7 in their defeated pile, then they've lost and you win!
+
+## TYPES OF CARDS
+
+There are 8 types of cards in OverPower, each of which has different roles during gameplay. Some of these cards begin in play, while others are shuffled into your deck. They are Character cards, Universe cards, Power cards, Special cards, Mission Objective cards, Event cards, Location Homebase cards and Aspect cards.
+
+## CHARACTER CARDS
+
+Your team consists of 4 Character cards, 3 Front Line, and 1 Reserve. These represent the legendary heroes or villains that you'll be controlling. The reserve character may not play any cards unless a card or effect allows them to. When a Front Line Character is KO'd, the Reserve Character moves to the Font Line at the beginning of the Draw Phase of the next battle. Each character has 4 Power Grid Values that represent their basic capabilities. These Power Grid Values range from 1-8, and determine the maximum value of Power cards that each character can use to attack or defend. Their Power grid also determines which Universe cards they can play and may interact with other card types.
+
+Additionally, each character has specific Special cards that only they can play. By including a character on your team, you may include any of their Special cards in your deck. Each Character card also has a Threat Value. Your team may not exceed a total Threat Value of 76, including your Homebase (described below).
+
+---
+
+# LOCATION HOMEBASE CARDS 
+
+Each team may begin the game with a single Homebase card that starts in play along with their Team of Characters. Homebase cards have Inherent Abilities that affect the game in ways described on each Homebase. Some Homebase cards have a Threat Value, just as characters do. Your team's total Threat Value is determined by your Character's Threat Value total added to the Threat Value of your Homebase.
+
+---
+
+# POWER CARDS 
+
+Power cards are the basic unit of attack and defense. There are 6 different types of Power cards that range in value of 1 - 8. Characters may use any Power card equal to or less than the Power Grid Value printed on their Character card as long as the Power card is the same Power Type as that Power Grid.
+
+MultiPower and Any-Power Power cards are the wild cards of Power cards. They are versatile and can act as any of the 4 basic Power types so long as the character can legally play the card.
+
+MultiPower Power cards contain all 4 Power Types. The owner declares 1 of the 4 Power Types they are choosing to attack or defend with. The Character playing the MultiPower Power card must still have the required Grid Value in order to declare that specific Power Type. Once a MultiPower Power card hits a hero, they are a wild card for determining Spectrum KO.
+
+Any-Power Power cards do not have a specific power type associated with them. Similar to MultiPower Power cards, when attacking with an Any-Power Power card a player declares 1 of the 4 Power Types it will act as, so long as the character has the required Grid in that type. They can be used by any character with at least 1 Power Grid of equal or greater value to the Any-Power Power card.
+
+## Energy Power Card (Yellow Atom Icon):
+
+Represents abilities that have to do with energy projection in the form of rays, blasts, and auras. Often involving magic, elemental barrages or even manipulating the laws of physics itself, energy attacks usually involve the use of technology or a super power.
+
+## Combat Power Card (Red Sword and Shield Icon)
+
+Represents a character's ability in direct combat. These attacks vary from using some type of melee or ranged weapon; usually guns, bows, martial arts, swords, other hand-held weapons, or fighting tactics and skill.
+
+---
+
+# Brute Force Power Card (Green Rock Icon): 
+
+Represents raw strength and destructive capability. Typically, these types of attacks involve feats of strength and smashing something OR represent large groups of people like an army or an Angry Mob.
+
+## Intelligence Power Card (Blue Book Icon):
+
+Represents attacks and defenses made by thinking, planning, or strategy; instead of physical interaction with an enemy. Characters who manipulate others or who have the brains to outthink their opponents often use intelligence to do so.
+
+## Any-Power Card (White Circle Icon)
+
+Represents a level of force or power that doesn't neatly fit into any of the other categories of Power types. They are universal attacks played by any Power type that has the numerical value high enough to play them. Once they hit, they do not contribute to Spectrum KO.
+
+## MultiPower Card (More Than One Power Icon):
+
+Represents attacks that combine multiple Power Types together and act as any one of them for the purposes of KO'ing a character. These cards can have two, three, or even four power icons on them.
+
+---
+
+# SPECIAL CARDS 
+
+Special cards are specific for each character and show off all their unique powers and cool abilities! A character may always play a Special card with their name on it. Special cards are played as either offensive actions or defensive actions which is determined by the icons in the bottom right corner. You may include any number of copies of most Special cards in your deck; however, certain Special cards (usually with powerful effects) have "One Per Deck" printed at the bottom of the card. Only a single copy of these Special cards can be included in your deck. Special cards used to attack and defend may have icons denoting Power Types and Values, just like the Power cards (mentioned above), while others may Target a Character on your Opponent's team, attach to a Character for a given duration, or go directly to the Astral Plane, all while creating a variety of different effects.
+
+## Function Icons
+
+Remainder of Game (Full Hourglass): Remainder of Game duration; these cards remain in play until the end of game, unless a card is played to remove it or its effects before its duration ends.
+
+Remainder of Battle (Half Full Hourglass): Remainder of Battle Duration; cards with this icon remain in play until the end of the Current Battle they were played in unless a card is played to remove it or its effects before its duration ends.
+
+Offensive Action (Crossed Swords): These cards may be played while it's your turn, as an offensive action. They cannot be played as a defensive action on your opponent's turn, unless they also have the Shield icon (below).
+
+Defensive Action (Shield): Cards with this icon may be played as a defensive action in response to an attack or action made during your opponent's turn. They cannot be played as an offensive action unless the card also has an offensive action icon (see above).
+
+NOTE: cards with both Offensive and Defensive icons may be used both ways.
+Attach to a Character (Paperclip): When used, cards with a paperclip are 'attached' to a Character who played it or another target, and remain there for their denoted duration. These cards will also have an hourglass icon of either type to determine their duration.
+
+1ST First Icon (1st): This icon means that this card can only be played if it's the first card you play on your turn.
+Astral Plane (Large A): Cards with this icon are placed in the Astral Plane when played. The Astral Plane is a special area where certain cards are placed while they are in effect. Cards in the Astral Plane are considered to be "in play" but are not attached to any character or location.
+
+## DECK BUILDING RULES
+
+Based on the Learn-to-Play rulebook, here are the key deck building requirements:
+
+1. **Deck Size**: Minimum 51 cards (or 56 if using Event cards)
+2. **Character Team**: Exactly 4 characters (3 Front Line, 1 Reserve)
+3. **Threat Level Limit**: Total team threat value cannot exceed 76 (including Homebase)
+4. **Special Card Restrictions**: "One Per Deck" cards can only have 1 copy
+5. **Character Special Cards**: You can only include special cards for characters in your team
+
+## MODES OF PLAY
+
+## CONSTRUCTED PLAY
+
+There are multiple game modes and game formats to play OverPower in. Each mode of play tweaks the rules of the game in order to have a slightly different play experience. The Constructed Play Modes below use the rules above, with any modifications listed in the game mode description.
+
+Venture - Normal Venture Play is the Standard game mode described throughout this Rule Book. Players will wager Objectives based on how many numerical hits they think they can score combined with cards that influence the Venture Total, and play continues until either player wins or loses all their Objectives, or a player loses by having their entire team KO'd.
+
+Brawl - For this mode of play, all cards that mention Venture or Objective cards are removed from decks; unless the effect is a secondary effect, in which case the effect is simply ignored. Additionally, players do not attempt to complete a Mission and do not play Event cards any may not concede battles. The only way to win a Brawl game is by completely KOing all four of your opponent's characters. This mode is generally just for fun or teaching the game, as characters are balanced for game modes that use Objective cards.
+
+Skirmish - When playing a Skirmish game, players remove Event cards from decks, and select between 5, 7 or 9 Mission Objective cards to be used for both players. All chosen Objective cards are placed in the Astral Plane and during each battle the player with the highest Venture Total takes 1 Objective card at the End of Battle phase. Players may also concede during Skirmish play, and give the Opponent the 1 Objective card.
+
+Each battle, another Objective card is given to the winning player. Should there ever be a tie in Venture Total, the Objective card is placed atop the next one in line and the next battle is fought for both Objective cards, and so on until a player wins the Venture Total. Once all the Objective cards have been claimed, the game is over and the player with the most Objective cards wins. Unlike normal Venture play, If at ANY point all characters on an Opponent's team are KO'd opponent IMMEDIATELY loses the game. This means even if a player has won every single Objective card the entire game, if all four of their characters are KO'd in the final battle, they still lose the game!
+
+A Skirmish game doesn't end until EVERY Objective card has been claimed or all characters on one player's team are KO'd. Even if a player has a Majority of Mission Objective cards, they must fight the entire Skirmish and not lose by having their characters KO'd.
+
+If at any point a player has the majority of total Mission Objective cards in a Skirmish game they may no longer concede battles.
+
+# LIMITED PLAY 
+
+Limited game modes use a limited pool of cards, from which players must construct their deck using ONLY those cards, with the exception of Basic Power cards. Basic Power cards are always allowed to be added to any limited deck in any quantity, however, note that MultiPower and Any-Power Power cards are not Basic.
+
+Draft - In Draft Mode Players will play in a pod of 8 or 10 Players. Players receive 3 sealed packs from the same set of OverPower. Each pack of OverPower has 2 Character cards and 5 set Special cards for each character. Those six cards are referred to in Draft as a "Character Stack." All Players will open 1 pack of OverPower and set their two Character Stacks of cards in the center of the table. All Uncommon and Rare cards are kept by the player who opened them and are kept secret from the rest of the Players. Those Uncommons will influence your choices on what Character Stacks you draft.
+
+Starting with the player sitting in position #1, each player will take a turn in numerical position order choosing 1 Character Stack (Hero and 5 specials), until the final position makes their pick. THEN the last player in position ( 8 or 10 ) will make a Second Pick in a row and the pick order will "Snake" back with players each picking a 2nd Character Stack in reverse numerical position order.
+
+Players will then open pack #2 and repeat this process, except in Pack Two, the player sitting in the last position will choose a Character Stack first and the picks will Snake back to position 1 in "reverse numerical order". Once position 1 makes both picks, players will pick a 2nd character from Pack 2 in numerical order, ending at position 8 or 10 depending on the size of your pod.
+
+Finally, Players will open Pack #3 and repeat the picking process exactly as they did in pack 1.
+NOTE: Players keep all Uncommon and Rare cards that they open in a draft event. They always keep those cards secret and ANY Uncommons and Rares opened may be used during deck construction.
+
+When building your deck in Draft you may ONLY use cards that you opened in your packs Uncommons and Rares slots, the Character Stacks that you drafted, and any number of Basic Power cards level 1 - 8 in their deck. NO OTHER CARDS from outside the draft may be used, including Universe, Event and Location cards.
+
+Sealed Deck - In Sealed Deck Mode there is no need to play in Pods like in a Draft and you can have any number of players like a standard tournament. In Sealed players receive 1 Starter Deck randomly, as well as either 3 or 6 Booster Packs. Players open their Starter Deck and packs and must construct their deck using ONLY the cards opened from these packs and decks, except for Basic Power cards. Players may put any number of Basic Power cards level 1 - 8 in their deck. ONLY cards you open and Basic Power cards may be used in your deck. NO OTHER CARDS from outside the product you opened may be used, including Universe, Event and Location cards.
+
+---
+
+# YOU'RE READY! 
+
+You now know how to play OverPower AND you have a number of different play modes to try out! Grab a friend, put a team of World Legends together and challenge your friend to see who has the ultimate team from across the Multiverse!!!
+
+When you're ready or when you have a question, the Comprehensive Rule Book and Term Sheet are available online. Remember, the Comprehensive Rule Book is dense and meant to be used by judges. If you are having trouble answering your question, you can always visit our discord or one of the sites and someone from The OverPower Card Game will answer any rules questions you have!
+
+---
+
+Source: Overpower Card Game Learn-to-Play Rulebook (March 2025)
+URL: https://overpowercardgame.com/wp-content/uploads/2025/03/Overpower_Rule-Book_Learn-to-Play_March_2025.pdf

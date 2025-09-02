@@ -5,26 +5,44 @@
       "name": "Test Edit Deck",
       "description": "Testing edit functionality",
       "created": "2025-09-02T02:58:27.378Z",
-      "lastModified": "2025-09-02T03:31:21.615Z",
-      "cardCount": 3
+      "lastModified": "2025-09-02T06:01:02.173Z",
+      "cardCount": 6
     },
     "cards": [
       {
-        "id": "deckcard_1756783881609_wt4upljna",
+        "id": "deckcard_1756792862158_xjlcf36w6",
         "type": "character",
         "cardId": "char_1",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756783881613_ua8o1wndu",
+        "id": "deckcard_1756792862161_1fnipuqy2",
         "type": "location",
         "cardId": "loc_2",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756783881615_msefq45bc",
+        "id": "deckcard_1756792862164_2l4lx59ew",
         "type": "mission",
         "cardId": "mission_4",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756792862166_9niygmw5f",
+        "type": "character",
+        "cardId": "char_6",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756792862169_p6y7p0djr",
+        "type": "character",
+        "cardId": "char_8",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756792862173_7fueva9fd",
+        "type": "character",
+        "cardId": "char_10",
         "quantity": 1
       }
     ]

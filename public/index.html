@@ -1727,6 +1727,79 @@
             overflow-y: auto;
         }
 
+        /* Deck Validation Styles - Compact */
+        .deck-validation {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+            font-family: 'Arial', sans-serif;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            align-self: flex-start;
+        }
+
+        .validation-errors-compact {
+            color: #ff6b6b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-warnings-compact {
+            color: #ffd93d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-success-compact {
+            color: #51cf66;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .validation-icon {
+            font-size: 1.1rem;
+        }
+
+        .validation-text {
+            font-weight: 500;
+        }
+
+        /* Deck validation badges in deck list */
+        .deck-validation-badge {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .deck-validation-badge.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .deck-validation-badge.warning {
+            background: rgba(255, 217, 61, 0.2);
+            color: #ffd93d;
+            border: 1px solid rgba(255, 217, 61, 0.3);
+        }
+
+        .deck-validation-badge.success {
+            background: rgba(81, 207, 102, 0.2);
+            color: #51cf66;
+            border: 1px solid rgba(81, 207, 102, 0.3);
+        }
+
         .card-item {
             padding: 8px 12px;
             margin: 4px 0;
@@ -1793,6 +1866,19 @@
             font-size: 1rem;
             line-height: 1;
             text-align: center;
+        }
+
+        /* Disabled character cards when limit reached */
+        .card-item.character-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-item.character-card.disabled:hover {
+            transform: none;
+            box-shadow: none;
         }
 
         .empty-deck-message {
@@ -4107,26 +4193,41 @@
                 return;
             }
 
-            deckList.innerHTML = decks.map(deck => `
-                <div class="deck-card" onclick="editDeck('${deck.id}')">
-                    <div class="deck-header">
-                        <div class="deck-info">
-                            <h4>${deck.name}</h4>
-                            ${deck.description ? `<div class="deck-description">${deck.description}</div>` : ''}
-                            <div class="deck-meta">
-                                <span>📊 ${deck.cardCount} cards</span>
-                                <span>📅 Created: ${new Date(deck.created).toLocaleDateString()}</span>
-                                <span>✏️ Modified: ${new Date(deck.lastModified).toLocaleDateString()}</span>
+            deckList.innerHTML = decks.map(deck => {
+                // Quick validation check for display
+                let validationStatus = '';
+                if (deck.cards && deck.cards.length > 0) {
+                    const validation = validateDeck(deck.cards);
+                    if (validation.errors.length > 0) {
+                        validationStatus = '<span class="deck-validation-badge error">⚠️ Not Legal</span>';
+                    } else if (validation.warnings.length > 0) {
+                        validationStatus = '<span class="deck-validation-badge warning">ℹ️ Has Warnings</span>';
+                    } else {
+                        validationStatus = '<span class="deck-validation-badge success">✅ Legal</span>';
+                    }
+                }
+                
+                return `
+                    <div class="deck-card" onclick="editDeck('${deck.id}')">
+                        <div class="deck-header">
+                            <div class="deck-info">
+                                <h4>${deck.name} ${validationStatus}</h4>
+                                ${deck.description ? `<div class="deck-description">${deck.description}</div>` : ''}
+                                <div class="deck-meta">
+                                    <span>📊 ${deck.cardCount} cards</span>
+                                    <span>📅 Created: ${new Date(deck.created).toLocaleDateString()}</span>
+                                    <span>✏️ Modified: ${new Date(deck.lastModified).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            <div class="deck-actions" onclick="event.stopPropagation()">
+                                <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
+                                <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
+                                <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
                             </div>
                         </div>
-                        <div class="deck-actions" onclick="event.stopPropagation()">
-                            <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
-                            <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
-                            <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
-                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function updateDeckStats() {
@@ -4568,6 +4669,152 @@
         let availableCardsMap = new Map(); // Cache for available cards data
         let currentDeckViewMode = 'preview'; // 'preview' or 'image'
 
+        // Deck validation rules based on Overpower rules
+        const DECK_RULES = {
+            MIN_DECK_SIZE: 51,
+            MIN_DECK_SIZE_WITH_EVENTS: 56,
+            MAX_CHARACTERS: 4,
+            MAX_TOTAL_THREAT: 76,
+            MAX_COPIES_ONE_PER_DECK: 1
+        };
+
+        // Function to validate deck according to Overpower rules
+        function validateDeck(deckCards) {
+            const errors = [];
+            const warnings = [];
+            
+            // Count card types
+            const cardCounts = {};
+            const characterCards = [];
+            const eventCards = [];
+            const onePerDeckCards = {};
+            
+            deckCards.forEach(card => {
+                const type = card.type;
+                cardCounts[type] = (cardCounts[type] || 0) + 1;
+                
+                if (type === 'character') {
+                    characterCards.push(card);
+                } else if (type === 'event') {
+                    eventCards.push(card);
+                }
+                
+                // Track "One Per Deck" cards
+                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                if (availableCard && availableCard.one_per_deck) {
+                    const cardKey = `${card.type}_${card.cardId}`;
+                    onePerDeckCards[cardKey] = (onePerDeckCards[cardKey] || 0) + 1;
+                }
+            });
+            
+            // Check deck size
+            const totalCards = deckCards.length;
+            const hasEvents = eventCards.length > 0;
+            const minSize = hasEvents ? DECK_RULES.MIN_DECK_SIZE_WITH_EVENTS : DECK_RULES.MIN_DECK_SIZE;
+            
+            if (totalCards < minSize) {
+                errors.push(`Deck must have at least ${minSize} cards (${totalCards}/${minSize})`);
+            }
+            
+            // Check character count
+            if (characterCards.length !== DECK_RULES.MAX_CHARACTERS) {
+                errors.push(`Deck must have exactly ${DECK_RULES.MAX_CHARACTERS} characters (${characterCards.length}/${DECK_RULES.MAX_CHARACTERS})`);
+            }
+            
+            // Check threat level
+            let totalThreat = 0;
+            characterCards.forEach(card => {
+                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                if (availableCard && availableCard.threat_level) {
+                    totalThreat += availableCard.threat_level;
+                }
+            });
+            
+            if (totalThreat > DECK_RULES.MAX_TOTAL_THREAT) {
+                errors.push(`Total character threat level cannot exceed ${DECK_RULES.MAX_TOTAL_THREAT} (${totalThreat}/${DECK_RULES.MAX_TOTAL_THREAT})`);
+            }
+            
+            // Check "One Per Deck" violations
+            Object.entries(onePerDeckCards).forEach(([cardKey, count]) => {
+                if (count > DECK_RULES.MAX_COPIES_ONE_PER_DECK) {
+                    const [cardType, cardId] = cardKey.split('_');
+                    const availableCard = availableCardsMap.get(cardKey);
+                    const cardName = availableCard ? availableCard.name || availableCard.card_name : cardId;
+                    errors.push(`"${cardName}" can only have ${DECK_RULES.MAX_COPIES_ONE_PER_DECK} copy in deck (${count} copies)`);
+                }
+            });
+            
+            // Check character special card restrictions
+            const characterNames = characterCards.map(card => {
+                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                return availableCard ? availableCard.name || availableCard.card_name : 'Unknown';
+            });
+            
+            deckCards.forEach(card => {
+                if (card.type === 'special_card' || card.type === 'advanced_universe' || card.type === 'teamwork' || 
+                    card.type === 'ally_universe' || card.type === 'training' || card.type === 'basic_universe') {
+                    const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    if (availableCard && availableCard.character && !characterNames.includes(availableCard.character)) {
+                        warnings.push(`"${availableCard.name || availableCard.card_name}" requires character "${availableCard.character}" in your team`);
+                    }
+                }
+            });
+            
+            return { errors, warnings, isValid: errors.length === 0 };
+        }
+
+        // Function to show deck validation results
+        function showDeckValidation(deckCards) {
+            const validation = validateDeck(deckCards);
+            const validationContainer = document.getElementById('deck-validation');
+            
+            if (!validationContainer) {
+                // Create validation container if it doesn't exist
+                const deckContentsPane = document.querySelector('.deck-pane');
+                if (deckContentsPane) {
+                    const validationDiv = document.createElement('div');
+                    validationDiv.id = 'deck-validation';
+                    validationDiv.className = 'deck-validation';
+                    deckContentsPane.insertBefore(validationDiv, deckContentsPane.firstChild);
+                }
+            }
+            
+            const container = document.getElementById('deck-validation');
+            if (!container) return;
+            
+            let html = '';
+            
+            if (validation.errors.length > 0) {
+                html += '<div class="validation-errors-compact">';
+                html += '<span class="validation-icon">⚠️</span>';
+                html += '<span class="validation-text">Deck has validation errors: </span>';
+                html += validation.errors.slice(0, 2).map(error => error.replace(/^Deck must have /, '')).join(', ');
+                if (validation.errors.length > 2) {
+                    html += ` (+${validation.errors.length - 2} more)`;
+                }
+                html += '</div>';
+            } else if (validation.warnings.length > 0) {
+                html += '<div class="validation-warnings-compact">';
+                html += '<span class="validation-icon">ℹ️</span>';
+                html += '<span class="validation-text">Deck has warnings</span>';
+                html += '</div>';
+            } else {
+                html += '<div class="validation-success-compact">';
+                html += '<span class="validation-icon">✅</span>';
+                html += '<span class="validation-text">Deck is valid according to Overpower rules</span>';
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            
+            // Always allow saving, but show validation status
+            const saveButton = document.querySelector('.deck-editor-actions .btn-primary');
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Changes';
+            }
+        }
+
         // Add event listeners for card search
         document.getElementById('cardTypeFilter').addEventListener('change', searchCards);
         document.getElementById('cardSearchInput').addEventListener('input', debounce(searchCards, 300));
@@ -4678,8 +4925,14 @@
                         <p>Drag cards from the right panel to add them!</p>
                     </div>
                 `;
+                
+                // Validate empty deck
+                showDeckValidation(deckEditorCards);
                 return;
             }
+            
+            // Validate deck and show results
+            showDeckValidation(deckEditorCards);
             
             // Group cards by type
             const cardsByType = {};
@@ -5023,7 +5276,7 @@
                     { type: 'event', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
-                    { type: 'teamwork', api: '/api/teamwork', nameField: 'name' },
+                    { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/ally-universe', nameField: 'name' },
                     { type: 'training', api: '/api/training', nameField: 'name' },
                     { type: 'basic-universe', api: '/api/basic-universe', nameField: 'name' },
@@ -5053,6 +5306,12 @@
             deckEditorCards.splice(index, 1);
             displayDeckCardsForEditing();
             updateDeckEditorCardCount();
+            
+            // Update character limit status without affecting collapse state
+            updateCharacterLimitStatus();
+            
+            // Validate deck after removing card
+            showDeckValidation(deckEditorCards);
         }
 
         function updateDeckEditorCardCount() {
@@ -5060,9 +5319,42 @@
             document.getElementById('deckEditorCardCount').textContent = totalCards;
         }
 
+        // Function to update just the character limit status without affecting collapse state
+        function updateCharacterLimitStatus() {
+            const characterCards = document.querySelectorAll('.card-item.character-card');
+            const currentCharacterCount = deckEditorCards
+                .filter(card => card.type === 'character')
+                .reduce((total, card) => total + card.quantity, 0);
+            
+            console.log('updateCharacterLimitStatus - Current character count:', currentCharacterCount, 'deckEditorCards:', deckEditorCards);
+            
+            const isCharacterLimitReached = currentCharacterCount >= 4;
+            
+            characterCards.forEach(card => {
+                if (isCharacterLimitReached) {
+                    card.classList.add('disabled');
+                    card.setAttribute('draggable', 'false');
+                    card.title = 'Character limit reached (max 4)';
+                } else {
+                    card.classList.remove('disabled');
+                    card.setAttribute('draggable', 'true');
+                    card.title = '';
+                }
+            });
+        }
+
         async function loadAvailableCards() {
             try {
                 const cardCategories = document.getElementById('cardCategories');
+                
+                // Save current collapse state before refreshing
+                const currentCollapseState = {};
+                const existingHeaders = cardCategories.querySelectorAll('.card-category-header');
+                existingHeaders.forEach(header => {
+                    const categoryName = header.textContent.split(' (')[0]; // Extract name without count
+                    currentCollapseState[categoryName] = header.classList.contains('collapsed');
+                });
+                
                 cardCategories.innerHTML = '<div class="drag-instructions">Loading available cards...</div>';
                 
                 const categories = [
@@ -5070,10 +5362,10 @@
                     { type: 'location', name: 'Locations', api: '/api/locations', nameField: 'name' },
                     { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
-                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'card_name' },
+                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
-                    { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'name' },
+                    { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'name' },
                     { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'name' },
@@ -5097,6 +5389,12 @@
                             
                             if (category.type === 'character') {
                                 // Special handling for characters with stats
+                                const currentCharacterCount = deckEditorCards
+                                    .filter(card => card.type === 'character')
+                                    .reduce((total, card) => total + card.quantity, 0);
+                                
+                                const isCharacterLimitReached = currentCharacterCount >= 4;
+                                
                                 cardsHtml = data.data.map(card => {
                                     const stats = [
                                         { label: 'TL:', value: card.threat_level || 0, color: '#808080' }, // Gray - Threat Level
@@ -5110,12 +5408,16 @@
                                         `<span class="character-stat"><span class="stat-label">${stat.label}</span><span class="stat-value" style="color: ${stat.color};">${stat.value}</span></span>`
                                     ).join(' ');
                                     
+                                    const disabledClass = isCharacterLimitReached ? 'disabled' : '';
+                                    const disabledTitle = isCharacterLimitReached ? 'Character limit reached (max 4)' : '';
+                                    
                                     return `
-                                        <div class="card-item character-card" 
-                                             draggable="true" 
+                                        <div class="card-item character-card ${disabledClass}" 
+                                             draggable="${!isCharacterLimitReached}" 
                                              data-type="${category.type}" 
                                              data-id="${card.id}"
-                                             data-name="${card[category.nameField]}">
+                                             data-name="${card[category.nameField]}"
+                                             title="${disabledTitle}">
                                             <div class="character-name">${card[category.nameField]}</div>
                                             <div class="character-stats">${statsHtml}</div>
                                         </div>
@@ -5134,13 +5436,19 @@
                                 `).join('');
                             }
                             
+                            // Apply saved collapse state or default to collapsed
+                            const isCollapsed = currentCollapseState[category.name] !== undefined ? 
+                                currentCollapseState[category.name] : true;
+                            const collapsedClass = isCollapsed ? 'collapsed' : '';
+                            const collapseIcon = isCollapsed ? '▼' : '▲';
+                            
                             categoriesHtml += `
                                 <div class="card-category">
-                                    <div class="card-category-header collapsed" onclick="toggleCategory(this)">
+                                    <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                         <span>${category.name} (${data.data.length})</span>
-                                        <span class="collapse-icon">▼</span>
+                                        <span class="collapse-icon">${collapseIcon}</span>
                                     </div>
-                                    <div class="card-category-content collapsed">
+                                    <div class="card-category-content ${collapsedClass}">
                                         ${cardsHtml}
                                     </div>
                                 </div>
@@ -5217,6 +5525,20 @@
         }
 
         function addCardToEditor(cardType, cardId, cardName) {
+            // Check character limit before adding
+            if (cardType === 'character') {
+                const currentCharacterCount = deckEditorCards
+                    .filter(card => card.type === 'character')
+                    .reduce((total, card) => total + card.quantity, 0);
+                
+                console.log('Adding character. Current count:', currentCharacterCount, 'deckEditorCards:', deckEditorCards);
+                
+                if (currentCharacterCount >= 4) {
+                    showNotification('Cannot add more than 4 characters to a deck', 'error');
+                    return;
+                }
+            }
+            
             // Check if card already exists in deck
             const existingCardIndex = deckEditorCards.findIndex(card => 
                 card.type === cardType && card.cardId === cardId
@@ -5238,6 +5560,12 @@
             
             displayDeckCardsForEditing();
             updateDeckEditorCardCount();
+            
+            // Update character limit status without affecting collapse state
+            updateCharacterLimitStatus();
+            
+            // Validate deck after adding card
+            showDeckValidation(deckEditorCards);
         }
 
         async function saveDeckChanges() {
@@ -5272,10 +5600,15 @@
                     });
                 }
                 
-                showNotification('Deck changes saved successfully!', 'success');
-                closeDeckEditor();
+                // Check validation status before saving
+                const validation = validateDeck(deckEditorCards);
+                if (validation.errors.length > 0) {
+                    showNotification('Deck saved with validation errors - not legal for tournament play', 'warning');
+                } else {
+                    showNotification('Deck changes saved successfully!', 'success');
+                }
                 
-                // Refresh deck list
+                // Don't close the editor - just refresh the deck list
                 loadDecks();
                 
             } catch (error) {
