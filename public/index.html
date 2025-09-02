@@ -5707,6 +5707,8 @@
                                              draggable="${!isCharacterLimitReached}" 
                                              data-type="${category.type}" 
                                              data-id="${card.id}"
+                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                             onmouseleave="hideCardHoverModal()"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
                                             <div class="character-name">${card[category.nameField]}</div>
@@ -5736,6 +5738,8 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseleave="hideCardHoverModal()"
                                          data-name="${card[category.nameField]}">
                                         ${card[category.nameField]}
                                     </div>
@@ -5760,6 +5764,8 @@
                                      draggable="true" 
                                      data-type="${category.type}" 
                                      data-id="${card.id}"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                     onmouseleave="hideCardHoverModal()"
                                      data-name="${card[category.nameField]}">
                                     ${card[category.nameField]}
                                 </div>
