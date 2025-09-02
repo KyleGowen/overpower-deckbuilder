@@ -863,12 +863,14 @@
             padding: 20px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .deck-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            border-color: rgba(78, 205, 196, 0.4);
+            border-color: rgba(78, 205, 196, 0.6);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .deck-header {
@@ -1318,6 +1320,48 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             padding-bottom: 10px;
         }
+        
+        .deck-pane-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .deck-pane-header h4 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 2px;
+        }
+        
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: #bdc3c7;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background: rgba(78, 205, 196, 0.3);
+            color: #ffffff;
+        }
+        
+        .toggle-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
 
         .deck-cards-editor {
             flex: 1;
@@ -1327,6 +1371,68 @@
             padding: 15px;
             background: rgba(255, 255, 255, 0.05);
             overflow-y: auto;
+        }
+        
+        .deck-cards-editor.image-mode {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+        
+        /* Deck Type Sections */
+        .deck-type-section {
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .deck-type-header {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .deck-type-header:hover {
+            background: rgba(78, 205, 196, 0.2);
+        }
+        
+        .deck-type-header.collapsed {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .deck-type-name {
+            font-weight: 600;
+            color: #4ecdc4;
+            font-size: 1rem;
+        }
+        
+        .deck-type-count {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .deck-type-toggle {
+            color: #4ecdc4;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .deck-type-header.collapsed .deck-type-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .deck-type-cards {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .deck-cards-editor.drag-over {
@@ -1364,6 +1470,137 @@
             color: #bdc3c7;
             font-size: 0.8rem;
             text-transform: capitalize;
+        }
+        
+        .deck-card-editor-stats {
+            margin-top: 8px;
+        }
+        
+        .deck-card-editor-stats .character-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .deck-card-editor-stats .stat-labels,
+        .deck-card-editor-stats .stat-values {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .deck-card-editor-stats .stat-label {
+            color: #bdc3c7;
+            font-size: 0.75rem;
+            font-weight: 500;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .deck-card-editor-stats .stat-value {
+            font-weight: bold;
+            min-width: 16px;
+            text-align: center;
+        }
+        
+        /* Card type specific stat styling */
+        .deck-card-editor-stats .location-stats,
+        .deck-card-editor-stats .mission-stats,
+        .deck-card-editor-stats .event-stats,
+        .deck-card-editor-stats .special-stats,
+        .deck-card-editor-stats .aspect-stats,
+        .deck-card-editor-stats .power-stats {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .deck-card-editor-stats .aspect-stats {
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .deck-card-editor-stats .aspect-stats > div {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .deck-card-editor-stats .basic-universe-stats,
+        .deck-card-editor-stats .teamwork-stats,
+        .deck-card-editor-stats .ally-universe-stats,
+        .deck-card-editor-stats .training-stats,
+        .deck-card-editor-stats .advanced-universe-stats {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Image view mode styling */
+        .deck-card-editor-item.image-view {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            min-height: 280px;
+            justify-content: space-between;
+        }
+        
+        .deck-card-editor-item.image-view .deck-card-editor-info {
+            width: 100%;
+        }
+        
+        .deck-card-editor-item.image-view .deck-card-editor-name {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .deck-card-editor-item.image-view .deck-card-editor-type {
+            margin-bottom: 10px;
+        }
+        
+        .deck-card-editor-item.image-view .deck-card-editor-stats {
+            margin-bottom: 10px;
+        }
+        
+        .deck-card-editor-item.image-view .deck-card-editor-actions {
+            margin-top: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .deck-card-editor-item.image-view .card-image {
+            max-width: 160px;
+            max-height: 224px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: block;
+        }
+        
+        .deck-card-editor-item.image-view .card-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 10px;
+            height: 230px;
+        }
+        
+        .deck-card-editor-item.preview-view {
+            flex-direction: row;
+            align-items: center;
+            text-align: left;
+            padding: 15px;
+            min-height: auto;
+            justify-content: space-between;
         }
 
         .deck-card-editor-actions {
@@ -1466,6 +1703,48 @@
         .card-item.dragging {
             opacity: 0.5;
             transform: rotate(5deg);
+        }
+        
+        .character-card {
+            padding: 16px;
+            background: rgba(78, 205, 196, 0.15);
+        }
+        
+        .character-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        
+        .character-stats {
+            display: flex;
+            gap: 16px;
+            align-items: baseline;
+            font-size: 0.9rem;
+            font-weight: 500;
+            justify-content: flex-start;
+        }
+        
+        .character-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 24px;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+            line-height: 1;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1;
+            text-align: center;
         }
 
         .empty-deck-message {
@@ -2198,16 +2477,22 @@
             </div>
             <div class="modal-body">
                 <div class="deck-editor-layout">
-                    <!-- Left Pane: Deck List View -->
-                    <div class="deck-pane">
-                        <h4>Deck Contents</h4>
-                        <div class="deck-cards-editor" id="deckCardsEditor">
-                            <!-- Deck cards will be displayed here -->
-                        </div>
-                        <div class="deck-summary">
-                            <span>Total Cards: <span id="deckEditorCardCount">0</span></span>
-                        </div>
-                    </div>
+                                           <!-- Left Pane: Deck List View -->
+                       <div class="deck-pane">
+                           <div class="deck-pane-header">
+                               <h4>Deck Contents</h4>
+                               <div class="view-toggle">
+                                   <button class="toggle-btn active" onclick="toggleDeckView('preview')" id="previewToggle">Preview</button>
+                                   <button class="toggle-btn" onclick="toggleDeckView('image')" id="imageToggle">Full Image</button>
+                               </div>
+                           </div>
+                           <div class="deck-cards-editor" id="deckCardsEditor">
+                               <!-- Deck cards will be displayed here -->
+                           </div>
+                           <div class="deck-summary">
+                               <span>Total Cards: <span id="deckEditorCardCount">0</span></span>
+                           </div>
+                       </div>
                     
                     <!-- Right Pane: Card Selector -->
                     <div class="card-selector-pane">
@@ -3767,7 +4052,7 @@
             }
 
             deckList.innerHTML = decks.map(deck => `
-                <div class="deck-card">
+                <div class="deck-card" onclick="editDeck('${deck.id}')">
                     <div class="deck-header">
                         <div class="deck-info">
                             <h4>${deck.name}</h4>
@@ -3778,7 +4063,7 @@
                                 <span>✏️ Modified: ${new Date(deck.lastModified).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <div class="deck-actions">
+                        <div class="deck-actions" onclick="event.stopPropagation()">
                             <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
                             <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
                             <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
@@ -4224,6 +4509,8 @@
         let currentDeckId = null;
         let currentDeckData = null;
         let deckEditorCards = []; // Working copy of deck cards
+        let availableCardsMap = new Map(); // Cache for available cards data
+        let currentDeckViewMode = 'preview'; // 'preview' or 'image'
 
         // Add event listeners for card search
         document.getElementById('cardTypeFilter').addEventListener('change', searchCards);
@@ -4246,6 +4533,26 @@
                 content.classList.add('collapsed');
                 icon.textContent = '▶';
             }
+        }
+        
+        // Toggle deck view mode (preview vs image)
+        function toggleDeckView(mode) {
+            currentDeckViewMode = mode;
+            
+            // Update toggle button states
+            document.getElementById('previewToggle').classList.toggle('active', mode === 'preview');
+            document.getElementById('imageToggle').classList.toggle('active', mode === 'image');
+            
+            // Update deck cards editor class for layout
+            const deckCardsEditor = document.getElementById('deckCardsEditor');
+            if (mode === 'image') {
+                deckCardsEditor.classList.add('image-mode');
+            } else {
+                deckCardsEditor.classList.remove('image-mode');
+            }
+            
+            // Redisplay deck cards with new view mode
+            displayDeckCardsForEditing();
         }
 
         // ===== DECK EDITOR FUNCTIONS =====
@@ -4288,11 +4595,11 @@
                     // Update modal title
                     document.getElementById('deckEditorTitle').textContent = `Edit Deck: ${currentDeckData.metadata.name}`;
                     
-                    // Display deck cards
-                    displayDeckCardsForEditing();
+                    // Load available cards first, then display deck cards
+                    await loadAvailableCards();
                     
-                    // Load available cards
-                    loadAvailableCards();
+                    // Display deck cards after available cards are loaded
+                    displayDeckCardsForEditing();
                     
                     // Update card count
                     updateDeckEditorCardCount();
@@ -4317,18 +4624,339 @@
                 `;
                 return;
             }
-
-            deckCardsEditor.innerHTML = deckEditorCards.map((card, index) => `
-                <div class="deck-card-editor-item" draggable="true" data-index="${index}">
-                    <div class="deck-card-editor-info">
-                        <div class="deck-card-editor-name">${getCardName(card)}</div>
-                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
-                    </div>
-                    <div class="deck-card-editor-actions">
-                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
-                    </div>
-                </div>
-            `).join('');
+            
+            // Group cards by type
+            const cardsByType = {};
+            deckEditorCards.forEach((card, index) => {
+                const type = card.type;
+                if (!cardsByType[type]) {
+                    cardsByType[type] = [];
+                }
+                cardsByType[type].push({ ...card, originalIndex: index });
+            });
+            
+            // Define type order and display names
+            const typeOrder = [
+                'character', 'location', 'mission', 'event', 'special', 
+                'aspect', 'advanced_universe', 'teamwork', 'ally_universe', 
+                'training', 'basic_universe', 'power'
+            ];
+            
+            const typeDisplayNames = {
+                'character': 'Characters',
+                'location': 'Locations', 
+                'mission': 'Missions',
+                'event': 'Events',
+                'special': 'Special Cards',
+                'aspect': 'Aspects',
+                'advanced_universe': 'Advanced Universe',
+                'teamwork': 'Universe: Teamwork',
+                'ally_universe': 'Universe: Ally',
+                'training': 'Universe: Training',
+                'basic_universe': 'Universe: Basic',
+                'power': 'Power Cards'
+            };
+            
+            let cardsHtml = '';
+            
+            // Render each type group
+            typeOrder.forEach(type => {
+                if (cardsByType[type] && cardsByType[type].length > 0) {
+                    const typeCards = cardsByType[type];
+                    const typeName = typeDisplayNames[type] || formatCardType(type);
+                    const cardCount = typeCards.length;
+                    
+                    cardsHtml += `
+                        <div class="deck-type-section">
+                            <div class="deck-type-header" onclick="toggleDeckTypeSection('${type}')">
+                                <span class="deck-type-name">${typeName}</span>
+                                <span class="deck-type-count">${cardCount} card${cardCount !== 1 ? 's' : ''}</span>
+                                <span class="deck-type-toggle">▼</span>
+                            </div>
+                            <div class="deck-type-cards" id="deck-type-${type}">
+                    `;
+                    
+                    typeCards.forEach(cardData => {
+                        const card = cardData;
+                        const index = cardData.originalIndex;
+                        const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                        
+                        if (!availableCard) {
+                            console.warn('Card not found in availableCardsMap:', card);
+                            return;
+                        }
+                        
+                        let cardDetails = '';
+                        if (card.type === 'character') {
+                            // Character stats
+                            const stats = [
+                                { label: 'TL:', value: availableCard.threat_level || 0, color: '#808080' },
+                                { label: 'E:', value: availableCard.energy || 0, color: '#FFD700' },
+                                { label: 'C:', value: availableCard.combat || 0, color: '#FF8C00' },
+                                { label: 'BF:', value: availableCard.brute_force || 0, color: '#32CD32' },
+                                { label: 'I:', value: availableCard.intelligence || 0, color: '#6495ED' }
+                            ];
+                            
+                            cardDetails = `
+                                <div class="character-stats">
+                                    <div class="stat-labels">${stats.map(stat => `<span class="stat-label">${stat.label}</span>`).join(' ')}</div>
+                                    <div class="stat-values">${stats.map(stat => `<span class="stat-value" style="color: ${stat.color};">${stat.value}</span>`).join(' ')}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'location') {
+                            // Location threat level
+                            cardDetails = `
+                                <div class="location-stats">
+                                    <div class="stat-label">Threat Level:</div>
+                                    <div class="stat-value" style="color: #FF6B6B;">${availableCard.threat_level || 0}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'mission') {
+                            // Mission set
+                            cardDetails = `
+                                <div class="mission-stats">
+                                    <div class="stat-label">Mission Set:</div>
+                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'event') {
+                            // Event mission set
+                            cardDetails = `
+                                <div class="event-stats">
+                                    <div class="stat-label">Mission Set:</div>
+                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'special') {
+                            // Special card type
+                            cardDetails = `
+                                <div class="special-stats">
+                                    <div class="stat-label">Type:</div>
+                                    <div class="stat-value" style="color: #F39C12;">${availableCard.card_type || 'Special'}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'aspect') {
+                            // Aspect fortifications
+                            const fortifications = availableCard.fortifications ? 'Yes' : 'No';
+                            const onePerDeck = availableCard.one_per_deck ? 'Yes' : 'No';
+                            cardDetails = `
+                                <div class="aspect-stats">
+                                    <div class="stat-label">Fortifications:</div>
+                                    <div class="stat-value" style="color: #E74C3C;">${fortifications}</div>
+                                    <div class="stat-label">One Per Deck:</div>
+                                    <div class="stat-value" style="color: #3498DB;">${onePerDeck}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'power') {
+                            // Power card details
+                            cardDetails = `
+                                <div class="power-stats">
+                                    <div class="stat-label">Type:</div>
+                                    <div class="stat-value" style="color: #1ABC9C;">${availableCard.power_type || 'Power'}</div>
+                                    <div class="stat-label">Value:</div>
+                                    <div class="stat-value" style="color: #E67E22;">${availableCard.power_value || 'N/A'}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'basic_universe') {
+                            // Basic universe details
+                            cardDetails = `
+                                <div class="basic-universe-stats">
+                                    <div class="stat-label">Type:</div>
+                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.type_value || 'Unknown'}</div>
+                                    <div class="stat-label">Value:</div>
+                                    <div class="stat-value" style="color: #FFAA00;">${availableCard.value_to_use || 'Unknown'}</div>
+                                    <div class="stat-label">Bonus:</div>
+                                    <div class="stat-value" style="color: #32CD32;">+${availableCard.bonus || 'Unknown'}</div>
+                                </div>
+                            `;
+                        } else if (card.type === 'teamwork') {
+                            // Teamwork details
+                            if (availableCard.one_per_deck) {
+                                cardDetails = `
+                                    <div class="teamwork-stats">
+                                        <div class="stat-label">One Per Deck:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                    </div>
+                                `;
+                            }
+                        } else if (card.type === 'ally_universe') {
+                            // Ally universe details
+                            if (availableCard.one_per_deck) {
+                                cardDetails = `
+                                    <div class="ally-universe-stats">
+                                        <div class="stat-label">One Per Deck:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                    </div>
+                                `;
+                            }
+                        } else if (card.type === 'training') {
+                            // Training details
+                            if (availableCard.one_per_deck) {
+                                cardDetails = `
+                                    <div class="training-stats">
+                                        <div class="stat-label">One Per Deck:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                    </div>
+                                `;
+                            }
+                        } else if (card.type === 'advanced_universe') {
+                            // Advanced universe details
+                            if (availableCard.one_per_deck) {
+                                cardDetails = `
+                                    <div class="advanced-universe-stats">
+                                        <div class="stat-label">One Per Deck:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        const cardImage = `<div class="card-image-container"><img src="/src/resources/cards/images/${getCardImagePath(availableCard, card.type)}" alt="${availableCard.name || availableCard.card_name || getCardName(card)}" class="card-image" onerror="this.style.display='none'"></div>`;
+                        
+                        if (currentDeckViewMode === 'image') {
+                            // Image view mode - just image and remove button
+                            cardsHtml += `
+                                <div class="deck-card-editor-item image-view" draggable="true" data-index="${index}">
+                                    ${cardImage}
+                                    <div class="deck-card-editor-actions">
+                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // Preview mode - show detailed info
+                            cardsHtml += `
+                                <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}">
+                                    <div class="deck-card-editor-info">
+                                        <div class="deck-card-editor-name">${availableCard.name || availableCard.card_name || getCardName(card)}</div>
+                                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                                        ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
+                                    </div>
+                                    <div class="deck-card-editor-actions">
+                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    cardsHtml += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            deckCardsEditor.innerHTML = cardsHtml;
+        }
+        
+        // Toggle deck type section visibility
+        function toggleDeckTypeSection(type) {
+            const section = document.getElementById(`deck-type-${type}`);
+            const header = section.previousElementSibling;
+            const toggle = header.querySelector('.deck-type-toggle');
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                toggle.textContent = '▼';
+                header.classList.remove('collapsed');
+            } else {
+                section.style.display = 'none';
+                toggle.textContent = '▶';
+                header.classList.add('collapsed');
+            }
+        }
+        
+        // Helper function to get card image path
+        function getCardImagePath(card, cardType) {
+            try {
+                if (cardType === 'character') {
+                    // Characters use the image field from the database
+                    if (card.image) {
+                        return card.image;
+                    }
+                    // Fallback: try to construct from name
+                    const characterName = card.name || card.card_name || '';
+                    if (characterName) {
+                        // Convert to snake_case and look for matching image
+                        const snakeCaseName = characterName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        return `${snakeCaseName}.webp`;
+                    }
+                } else if (cardType === 'location') {
+                    // Locations use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                } else if (cardType === 'mission') {
+                    // Missions use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                } else if (cardType === 'event') {
+                    // Events use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                } else if (cardType === 'special') {
+                    // Special cards use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                } else if (cardType === 'aspect') {
+                    // Aspects use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                } else if (cardType === 'power') {
+                    // Power cards use the image field
+                    if (card.image) {
+                        return card.image;
+                    }
+                }
+                
+                // If no image field found, return a placeholder
+                return `placeholder_${cardType}.webp`;
+            } catch (error) {
+                console.error('Error getting card image path:', error);
+                return `placeholder_${cardType}.webp`;
+            }
+        }
+        
+        // Helper function to load available cards data for lookup
+        async function loadAvailableCardsData() {
+            try {
+                const categories = [
+                    { type: 'character', api: '/api/characters', nameField: 'name' },
+                    { type: 'location', api: '/api/locations', nameField: 'name' },
+                    { type: 'special', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'mission', api: '/api/missions', nameField: 'name' },
+                    { type: 'event', api: '/api/events', nameField: 'name' },
+                    { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
+                    { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
+                    { type: 'teamwork', api: '/api/teamwork', nameField: 'name' },
+                    { type: 'ally-universe', api: '/api/ally-universe', nameField: 'name' },
+                    { type: 'training', api: '/api/training', nameField: 'name' },
+                    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'name' },
+                    { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
+                ];
+                
+                for (const category of categories) {
+                    try {
+                        const response = await fetch(category.api);
+                        const data = await response.json();
+                        
+                        if (data.success && data.data.length > 0) {
+                            data.data.forEach(card => {
+                                availableCardsMap.set(`${category.type}_${card.id}`, card);
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Error loading ${category.name} data:`, error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading available cards data:', error);
+            }
         }
 
         function removeCardFromEditor(index) {
@@ -4351,8 +4979,8 @@
                     { type: 'character', name: 'Characters', api: '/api/characters', nameField: 'name' },
                     { type: 'location', name: 'Locations', api: '/api/locations', nameField: 'name' },
                     { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
-                    { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'name' },
-                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
+                    { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
+                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'card_name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'name' },
@@ -4370,15 +4998,51 @@
                         const data = await response.json();
                         
                         if (data.success && data.data.length > 0) {
-                            const cardsHtml = data.data.map(card => `
-                                <div class="card-item" 
-                                     draggable="true" 
-                                     data-type="${category.type}" 
-                                     data-id="${card.id}"
-                                     data-name="${card[category.nameField]}">
-                                    ${card[category.nameField]}
-                                </div>
-                            `).join('');
+                            // Populate the global map for deck editor use
+                            data.data.forEach(card => {
+                                availableCardsMap.set(`${category.type}_${card.id}`, card);
+                            });
+                            
+                            let cardsHtml = '';
+                            
+                            if (category.type === 'character') {
+                                // Special handling for characters with stats
+                                cardsHtml = data.data.map(card => {
+                                    const stats = [
+                                        { label: 'TL:', value: card.threat_level || 0, color: '#808080' }, // Gray - Threat Level
+                                        { label: 'E:', value: card.energy || 0, color: '#FFD700' },      // Yellow - Energy
+                                        { label: 'C:', value: card.combat || 0, color: '#FF8C00' },     // Dark Orange - Combat (redder)
+                                        { label: 'BF:', value: card.brute_force || 0, color: '#32CD32' }, // Green - Brute Force
+                                        { label: 'I:', value: card.intelligence || 0, color: '#6495ED' } // Lighter Blue - Intelligence
+                                    ];
+                                    
+                                    const statsHtml = stats.map(stat => 
+                                        `<span class="character-stat"><span class="stat-label">${stat.label}</span><span class="stat-value" style="color: ${stat.color};">${stat.value}</span></span>`
+                                    ).join(' ');
+                                    
+                                    return `
+                                        <div class="card-item character-card" 
+                                             draggable="true" 
+                                             data-type="${category.type}" 
+                                             data-id="${card.id}"
+                                             data-name="${card[category.nameField]}">
+                                            <div class="character-name">${card[category.nameField]}</div>
+                                            <div class="character-stats">${statsHtml}</div>
+                                        </div>
+                                    `;
+                                }).join('');
+                            } else {
+                                // Regular handling for other card types
+                                cardsHtml = data.data.map(card => `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         data-name="${card[category.nameField]}">
+                                        ${card[category.nameField]}
+                                    </div>
+                                `).join('');
+                            }
                             
                             categoriesHtml += `
                                 <div class="card-category">

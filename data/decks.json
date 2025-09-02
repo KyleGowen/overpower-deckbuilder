@@ -1,24 +1,32 @@
 [
   {
     "metadata": {
-      "id": "deck_1756781022477_oum0bdycw",
-      "name": "test",
-      "description": "",
-      "created": "2025-09-02T02:43:42.477Z",
-      "lastModified": "2025-09-02T02:43:42.477Z",
-      "cardCount": 0
-    },
-    "cards": []
-  },
-  {
-    "metadata": {
       "id": "deck_1756781907378_v8yn0vkwo",
       "name": "Test Edit Deck",
       "description": "Testing edit functionality",
       "created": "2025-09-02T02:58:27.378Z",
-      "lastModified": "2025-09-02T02:58:27.378Z",
-      "cardCount": 0
+      "lastModified": "2025-09-02T03:31:21.615Z",
+      "cardCount": 3
     },
-    "cards": []
+    "cards": [
+      {
+        "id": "deckcard_1756783881609_wt4upljna",
+        "type": "character",
+        "cardId": "char_1",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756783881613_ua8o1wndu",
+        "type": "location",
+        "cardId": "loc_2",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756783881615_msefq45bc",
+        "type": "mission",
+        "cardId": "mission_4",
+        "quantity": 1
+      }
+    ]
   }
 ]
