@@ -2002,6 +2002,44 @@
                padding: 0 8px;
                overflow: hidden;
            }
+
+        /* Mission set groups within missions and events */
+        .mission-set-group {
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .mission-set-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .mission-set-group-header:hover {
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .mission-set-group-content {
+            padding: 8px;
+            max-height: none;
+            overflow-y: visible;
+            transition: all 0.3s ease;
+        }
+        
+        .mission-set-group-content.collapsed {
+            max-height: 0;
+            padding: 0 8px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -4969,6 +5007,22 @@
                 icon.textContent = '▶';
             }
         }
+
+        function toggleMissionSetGroup(headerElement) {
+            const group = headerElement.closest('.mission-set-group');
+            const content = group.querySelector('.mission-set-group-content');
+            const icon = headerElement.querySelector('.collapse-icon');
+            
+            if (content.classList.contains('collapsed')) {
+                // Expand
+                content.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                // Collapse
+                content.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
         
         // Toggle special cards character filter
         async function toggleSpecialCardsCharacterFilter() {
@@ -5716,6 +5770,88 @@
                                         </div>
                                     `;
                                 }).join('');
+                                                    } else if (category.type === 'mission') {
+                            // Special handling for missions - group by mission set
+                            const missionSetGroups = {};
+                            
+                            data.data.forEach(card => {
+                                const missionSet = card.mission_set || 'Unknown Mission Set';
+                                if (!missionSetGroups[missionSet]) {
+                                    missionSetGroups[missionSet] = [];
+                                }
+                                missionSetGroups[missionSet].push(card);
+                            });
+                            
+                            const missionSetNames = Object.keys(missionSetGroups).sort();
+                            cardsHtml = '';
+                            
+                            missionSetNames.forEach(missionSetName => {
+                                const cards = missionSetGroups[missionSetName];
+                                const cardItems = cards.map(card => `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${card[category.nameField]}">
+                                        ${card[category.nameField]}
+                                    </div>
+                                `).join('');
+                                
+                                cardsHtml += `
+                                    <div class="mission-set-group">
+                                        <div class="mission-set-group-header" onclick="toggleMissionSetGroup(this)">
+                                            <span>${missionSetName} (${cards.length})</span>
+                                            <span class="collapse-icon">▼</span>
+                                        </div>
+                                        <div class="mission-set-group-content collapsed">
+                                            ${cardItems}
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                                                    } else if (category.type === 'event') {
+                            // Special handling for events - group by mission set
+                            const missionSetGroups = {};
+                            
+                            data.data.forEach(card => {
+                                const missionSet = card.mission_set || 'Unknown Mission Set';
+                                if (!missionSetGroups[missionSet]) {
+                                    missionSetGroups[missionSet] = [];
+                                }
+                                missionSetGroups[missionSet].push(card);
+                            });
+                            
+                            const missionSetNames = Object.keys(missionSetGroups).sort();
+                            cardsHtml = '';
+                            
+                            missionSetNames.forEach(missionSetName => {
+                                const cards = missionSetGroups[missionSetName];
+                                const cardItems = cards.map(card => `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${card[category.nameField]}">
+                                        ${card[category.nameField]}
+                                    </div>
+                                `).join('');
+                                
+                                cardsHtml += `
+                                    <div class="mission-set-group">
+                                        <div class="mission-set-group-header" onclick="toggleMissionSetGroup(this)">
+                                            <span>${missionSetName} (${cards.length})</span>
+                                            <span class="collapse-icon">▼</span>
+                                        </div>
+                                        <div class="mission-set-group-content collapsed">
+                                            ${cardItems}
+                                        </div>
+                                    </div>
+                                `;
+                            });
                                                     } else if (category.type === 'special') {
                             // Special handling for special cards - group by character name
                             const characterGroups = {};
