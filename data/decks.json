@@ -1,0 +1,20 @@
+[
+  {
+    "metadata": {
+      "id": "deck_1756780685871_fkphkpkpx",
+      "name": "Test Deck",
+      "description": "A test deck to verify functionality",
+      "created": "2025-09-02T02:38:05.872Z",
+      "lastModified": "2025-09-02T02:40:13.279Z",
+      "cardCount": 1
+    },
+    "cards": [
+      {
+        "id": "deckcard_1756780813279_8zow213aq",
+        "type": "character",
+        "cardId": "111_john_carter_of_mars.webp",
+        "quantity": 1
+      }
+    ]
+  }
+]
