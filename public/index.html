@@ -241,6 +241,51 @@
             margin-bottom: 15px;
             text-align: right;
         }
+        
+        /* Special cards header with toggle */
+        .card-category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .category-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .category-header-controls {
+            display: flex;
+            align-items: center;
+            margin-left: 16px;
+        }
+        
+        .filter-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .filter-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4ECDC4;
+        }
+        
+        .toggle-label {
+            white-space: nowrap;
+        }
 
         .toggle-button {
             background: rgba(78, 205, 196, 0.2);
@@ -4925,6 +4970,106 @@
             }
         }
         
+        // Toggle special cards character filter
+        async function toggleSpecialCardsCharacterFilter() {
+            const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Special cards character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the special cards category by looking for the one with character groups
+            const allCategories = document.querySelectorAll('.card-category');
+            let specialCardsCategory = null;
+            
+            for (const category of allCategories) {
+                if (category.querySelector('.character-group')) {
+                    specialCardsCategory = category;
+                    break;
+                }
+            }
+            
+            if (!specialCardsCategory) {
+                console.error('Special cards category not found');
+                return;
+            }
+            
+            const characterGroups = specialCardsCategory.querySelectorAll('.character-group');
+            
+            // Get character names from current deck
+            // First, get all character data to map IDs to names
+            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const characterMap = {};
+            if (allCharacters.success) {
+                allCharacters.data.forEach(char => {
+                    characterMap[char.id] = char.name;
+                });
+            }
+            
+            const deckCharacterNames = deckEditorCards
+                .filter(card => card.type === 'character')
+                .map(card => characterMap[card.cardId] || card.name);
+            
+            console.log('=== FILTER DEBUG ===');
+            console.log('Filter checked:', isChecked);
+            console.log('Deck character names:', deckCharacterNames);
+            console.log('Found', characterGroups.length, 'character groups');
+            
+            characterGroups.forEach((group, index) => {
+                const header = group.querySelector('.character-group-header span');
+                if (!header) {
+                    console.log(`Group ${index}: No header found`);
+                    return;
+                }
+                
+                const characterName = header.textContent.split(' (')[0];
+                console.log(`Group ${index}: "${characterName}"`);
+                
+                if (isChecked) {
+                    // Show only characters that are in the current deck
+                    const isInDeck = deckCharacterNames.some(deckName => {
+                        // Exact match
+                        if (deckName === characterName) {
+                            console.log(`  ✓ Exact match: "${deckName}" === "${characterName}"`);
+                            return true;
+                        }
+                        
+                        // Handle "Any Character" special case
+                        if (characterName === 'Any Character') {
+                            console.log(`  ✓ Any Character special case`);
+                            return true;
+                        }
+                        
+                        // Handle partial matches (e.g., "Angry Mob (Middle Ages)" should match "Angry Mob")
+                        if (deckName.includes(characterName) || characterName.includes(deckName)) {
+                            console.log(`  ✓ Partial match: "${deckName}" includes "${characterName}" or vice versa`);
+                            return true;
+                        }
+                        
+                        // Handle special cases like "Angry Mob" vs "Angry Mob (Middle Ages)"
+                        const deckNameClean = deckName.split(' (')[0];
+                        if (deckNameClean === characterName) {
+                            console.log(`  ✓ Clean match: "${deckNameClean}" === "${characterName}"`);
+                            return true;
+                        }
+                        
+                        console.log(`  ✗ No match: "${deckName}" vs "${characterName}"`);
+                        return false;
+                    });
+                    
+                    console.log(`  Result: ${isInDeck ? 'SHOW' : 'HIDE'}`);
+                    group.style.display = isInDeck ? 'block' : 'none';
+                } else {
+                    // Show all character groups
+                    console.log(`  Result: SHOW (filter off)`);
+                    group.style.display = 'block';
+                }
+            });
+            console.log('=== END FILTER DEBUG ===');
+        }
+        
         // Toggle deck view mode (preview vs image)
         function toggleDeckView(mode) {
             currentDeckViewMode = mode;
@@ -4993,6 +5138,18 @@
                     
                     // Update card count
                     updateDeckEditorCardCount();
+                    
+                    // Auto-activate special cards character filter if deck has characters
+                    const hasCharacters = deckEditorCards.some(card => card.type === 'character');
+                    if (hasCharacters) {
+                        setTimeout(async () => {
+                            const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
+                            if (filterCheckbox && !filterCheckbox.checked) {
+                                filterCheckbox.checked = true;
+                                await toggleSpecialCardsCharacterFilter();
+                            }
+                        }, 100); // Small delay to ensure DOM is updated
+                    }
                 } else {
                     showNotification('Failed to load deck for editing: ' + data.error, 'error');
                 }
@@ -5568,17 +5725,41 @@
                             const collapsedClass = isCollapsed ? 'collapsed' : '';
                             const collapseIcon = isCollapsed ? '▼' : '▲';
                             
-                            categoriesHtml += `
-                                <div class="card-category">
-                                    <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
-                                        <span>${category.name} (${data.data.length})</span>
-                                        <span class="collapse-icon">${collapseIcon}</span>
+                            if (category.type === 'special') {
+                                // Special handling for special cards header with toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}">
+                                            <div class="category-header-content" onclick="toggleCategory(this)">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <label class="filter-toggle">
+                                                    <input type="checkbox" id="specialCardsCharacterFilter" onchange="toggleSpecialCardsCharacterFilter()">
+                                                    <span class="toggle-label">Show Only Deck Characters</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
                                     </div>
-                                    <div class="card-category-content ${collapsedClass}">
-                                        ${cardsHtml}
+                                `;
+                            } else {
+                                // Regular handling for other card types
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <span>${category.name} (${data.data.length})</span>
+                                            <span class="collapse-icon">${collapseIcon}</span>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
                                     </div>
-                                </div>
-                            `;
+                                `;
+                            }
                         }
                     } catch (error) {
                         console.error(`Error loading ${category.name}:`, error);
@@ -5663,6 +5844,15 @@
                     showNotification('Cannot add more than 4 characters to a deck', 'error');
                     return;
                 }
+                
+                // Auto-activate special cards character filter when character is added
+                setTimeout(async () => {
+                    const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
+                    if (filterCheckbox && !filterCheckbox.checked) {
+                        filterCheckbox.checked = true;
+                        await toggleSpecialCardsCharacterFilter();
+                    }
+                }, 100); // Small delay to ensure DOM is updated
             }
             
             // Check if card already exists in deck
