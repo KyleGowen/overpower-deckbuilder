@@ -1,10 +1,14 @@
 import express from 'express';
 import { database } from './database/inMemoryDatabase';
+import { DeckPersistenceService } from './services/deckPersistence';
 import { Character } from './types';
 import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize deck persistence service
+const deckService = new DeckPersistenceService();
 
 // Middleware
 app.use(express.json());
@@ -155,10 +159,105 @@ app.get('/api/users', (req, res) => {
 
 app.get('/api/decks', (req, res) => {
   try {
-    const decks = database.getAllDecks();
+    const decks = deckService.getAllDecks();
     res.json({ success: true, data: decks });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch decks' });
+  }
+});
+
+// Deck management API routes
+app.post('/api/decks', (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, error: 'Deck name is required' });
+    }
+    
+    const deck = deckService.createDeck(name, description);
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to create deck' });
+  }
+});
+
+app.get('/api/decks/:id', (req, res) => {
+  try {
+    const deck = deckService.getDeck(req.params.id);
+    if (!deck) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch deck' });
+  }
+});
+
+app.put('/api/decks/:id', (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const deck = deckService.updateDeckMetadata(req.params.id, { name, description });
+    if (!deck) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to update deck' });
+  }
+});
+
+app.delete('/api/decks/:id', (req, res) => {
+  try {
+    const success = deckService.deleteDeck(req.params.id);
+    if (!success) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, message: 'Deck deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to delete deck' });
+  }
+});
+
+app.post('/api/decks/:id/cards', (req, res) => {
+  try {
+    const { cardType, cardId, quantity } = req.body;
+    if (!cardType || !cardId) {
+      return res.status(400).json({ success: false, error: 'Card type and card ID are required' });
+    }
+    
+    const deck = deckService.addCardToDeck(req.params.id, cardType, cardId, quantity || 1);
+    if (!deck) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to add card to deck' });
+  }
+});
+
+app.delete('/api/decks/:id/cards', (req, res) => {
+  try {
+    const { cardType, cardId, quantity } = req.body;
+    if (!cardType || !cardId) {
+      return res.status(400).json({ success: false, error: 'Card type and card ID are required' });
+    }
+    
+    const deck = deckService.removeCardFromDeck(req.params.id, cardType, cardId, quantity || 1);
+    if (!deck) {
+      return res.status(404).json({ success: false, error: 'Deck not found' });
+    }
+    res.json({ success: true, data: deck });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to remove card from deck' });
+  }
+});
+
+app.get('/api/deck-stats', (req, res) => {
+  try {
+    const stats = deckService.getDeckStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch deck stats' });
   }
 });
 

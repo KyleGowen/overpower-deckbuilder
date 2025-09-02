@@ -141,6 +141,28 @@ export interface PowerCard {
   image: string;
 }
 
+// Deck management interfaces
+export interface DeckCard {
+  id: string;
+  type: 'character' | 'location' | 'special' | 'mission' | 'event' | 'aspect' | 'advanced-universe' | 'teamwork' | 'ally-universe' | 'training' | 'basic-universe' | 'power';
+  cardId: string; // The ID from the original card table
+  quantity: number; // How many copies of this card
+}
+
+export interface DeckMetadata {
+  id: string;
+  name: string;
+  description?: string;
+  created: string; // ISO date string
+  lastModified: string; // ISO date string
+  cardCount: number; // Total number of cards in deck
+}
+
+export interface DeckData {
+  metadata: DeckMetadata;
+  cards: DeckCard[];
+}
+
 // API response wrapper
 export interface ApiResponse<T> {
   success: boolean;
