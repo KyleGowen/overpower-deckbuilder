@@ -1520,6 +1520,13 @@
             font-weight: bold;
             transition: transform 0.3s ease;
         }
+
+        .deck-type-info {
+            color: #4ecdc4;
+            font-size: 0.8rem;
+            font-style: italic;
+            margin-left: 8px;
+        }
         
         .deck-type-header.collapsed .deck-type-toggle {
             transform: rotate(-90deg);
@@ -5364,11 +5371,30 @@
                     const typeName = typeDisplayNames[type] || formatCardType(type);
                     const cardCount = typeCards.length;
                     
+                    // For missions, find the most represented mission set
+                    let additionalInfo = '';
+                    if (type === 'mission' && typeCards.length > 0) {
+                        const missionSetCounts = {};
+                        typeCards.forEach(cardData => {
+                            const availableCard = availableCardsMap.get(`${cardData.type}_${cardData.cardId}`);
+                            if (availableCard && availableCard.mission_set) {
+                                missionSetCounts[availableCard.mission_set] = (missionSetCounts[availableCard.mission_set] || 0) + 1;
+                            }
+                        });
+                        
+                        if (Object.keys(missionSetCounts).length > 0) {
+                            const mostRepresentedSet = Object.entries(missionSetCounts)
+                                .sort(([,a], [,b]) => b - a)[0];
+                            additionalInfo = `<span class="deck-type-info">(${mostRepresentedSet[0]})</span>`;
+                        }
+                    }
+                    
                     cardsHtml += `
                         <div class="deck-type-section">
                             <div class="deck-type-header" onclick="toggleDeckTypeSection('${type}')">
                                 <span class="deck-type-name">${typeName}</span>
                                 <span class="deck-type-count">${cardCount} card${cardCount !== 1 ? 's' : ''}</span>
+                                ${additionalInfo}
                                 <span class="deck-type-toggle">▼</span>
                             </div>
                             <div class="deck-type-cards" id="deck-type-${type}">
