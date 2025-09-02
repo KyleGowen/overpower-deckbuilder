@@ -1359,6 +1359,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            height: calc(100vh - 250px);
+            max-height: calc(100vh - 250px);
         }
 
         .deck-pane h4, .card-selector-pane h4 {
@@ -1721,10 +1723,11 @@
             overflow: hidden;
         }
 
-        .card-category-content {
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
+        /* When a category is expanded, make it take up remaining space */
+        .card-category-content:not(.collapsed) {
+            flex: 1;
+            max-height: none;
+            min-height: 0;
         }
 
         /* Deck Validation Styles - Compact */
@@ -1893,6 +1896,28 @@
             color: #bdc3c7;
             padding: 20px;
             font-size: 0.9rem;
+        }
+
+        /* Card categories container should use remaining space */
+        #cardCategories {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 0;
+        }
+
+        /* Individual card categories should not grow by default */
+        .card-category {
+            flex-shrink: 0;
+        }
+
+        /* Expanded category content should grow to fill space */
+        .card-category-content.expanded {
+            flex: 1;
+            max-height: none;
+            min-height: 0;
         }
     </style>
 </head>
@@ -4834,11 +4859,13 @@
                 // Expand
                 headerElement.classList.remove('collapsed');
                 content.classList.remove('collapsed');
+                content.classList.add('expanded');
                 icon.textContent = '▼';
             } else {
                 // Collapse
                 headerElement.classList.add('collapsed');
                 content.classList.add('collapsed');
+                content.classList.remove('expanded');
                 icon.textContent = '▶';
             }
         }
