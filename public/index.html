@@ -1919,6 +1919,44 @@
             max-height: none;
             min-height: 0;
         }
+
+        /* Character groups within special cards */
+        .character-group {
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .character-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .character-group-header:hover {
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+                   .character-group-content {
+               padding: 8px;
+               max-height: none;
+               overflow-y: visible;
+               transition: all 0.3s ease;
+           }
+           
+           .character-group-content.collapsed {
+               max-height: 0;
+               padding: 0 8px;
+               overflow: hidden;
+           }
     </style>
 </head>
 <body>
@@ -4869,6 +4907,23 @@
                 icon.textContent = '▶';
             }
         }
+
+        // Toggle character group collapse/expand within special cards
+        function toggleCharacterGroup(headerElement) {
+            const group = headerElement.closest('.character-group');
+            const content = group.querySelector('.character-group-content');
+            const icon = headerElement.querySelector('.collapse-icon');
+            
+            if (content.classList.contains('collapsed')) {
+                // Expand
+                content.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                // Collapse
+                content.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
         
         // Toggle deck view mode (preview vs image)
         function toggleDeckView(mode) {
@@ -5455,9 +5510,24 @@
                                         </div>
                                     `;
                                 }).join('');
-                            } else {
-                                // Regular handling for other card types
-                                cardsHtml = data.data.map(card => `
+                                                    } else if (category.type === 'special') {
+                            // Special handling for special cards - group by character name
+                            const characterGroups = {};
+                            
+                            data.data.forEach(card => {
+                                const characterName = card.character || 'Any Character';
+                                if (!characterGroups[characterName]) {
+                                    characterGroups[characterName] = [];
+                                }
+                                characterGroups[characterName].push(card);
+                            });
+                            
+                            const characterNames = Object.keys(characterGroups).sort();
+                            cardsHtml = '';
+                            
+                            characterNames.forEach(characterName => {
+                                const cards = characterGroups[characterName];
+                                const cardItems = cards.map(card => `
                                     <div class="card-item" 
                                          draggable="true" 
                                          data-type="${category.type}" 
@@ -5466,7 +5536,31 @@
                                         ${card[category.nameField]}
                                     </div>
                                 `).join('');
-                            }
+                                
+                                cardsHtml += `
+                                    <div class="character-group">
+                                        <div class="character-group-header" onclick="toggleCharacterGroup(this)">
+                                            <span>${characterName} (${cards.length})</span>
+                                            <span class="collapse-icon">▶</span>
+                                        </div>
+                                        <div class="character-group-content collapsed">
+                                            ${cardItems}
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            // Regular handling for other card types
+                            cardsHtml = data.data.map(card => `
+                                <div class="card-item" 
+                                     draggable="true" 
+                                     data-type="${category.type}" 
+                                     data-id="${card.id}"
+                                     data-name="${card[category.nameField]}">
+                                    ${card[category.nameField]}
+                                </div>
+                            `).join('');
+                        }
                             
                             // Apply saved collapse state or default to collapsed
                             const isCollapsed = currentCollapseState[category.name] !== undefined ? 
