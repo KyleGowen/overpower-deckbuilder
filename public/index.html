@@ -2024,6 +2024,29 @@
             font-weight: 500;
         }
 
+        .mission-set-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-all-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .add-all-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
         .mission-set-group-header:hover {
             background: rgba(78, 205, 196, 0.2);
         }
@@ -5023,6 +5046,30 @@
                 icon.textContent = '▶';
             }
         }
+
+        function addAllMissionSetCards(missionSetName, cards) {
+            console.log(`Adding all cards from mission set: ${missionSetName}`, cards);
+            
+            let addedCount = 0;
+            
+            cards.forEach(card => {
+                // Check if card is already in deck
+                const existingCard = deckEditorCards.find(deckCard => 
+                    deckCard.type === 'mission' && deckCard.cardId === card.id
+                );
+                
+                if (!existingCard) {
+                    addCardToEditor('mission', card.id, card.card_name || card.name);
+                    addedCount++;
+                }
+            });
+            
+            if (addedCount > 0) {
+                showNotification(`Added ${addedCount} cards from ${missionSetName}`, 'success');
+            } else {
+                showNotification(`All cards from ${missionSetName} are already in the deck`, 'info');
+            }
+        }
         
         // Toggle special cards character filter
         async function toggleSpecialCardsCharacterFilter() {
@@ -5803,7 +5850,10 @@
                                     <div class="mission-set-group">
                                         <div class="mission-set-group-header" onclick="toggleMissionSetGroup(this)">
                                             <span>${missionSetName} (${cards.length})</span>
-                                            <span class="collapse-icon">▼</span>
+                                            <div class="mission-set-controls">
+                                                <button class="add-all-btn" onclick="event.stopPropagation(); addAllMissionSetCards('${missionSetName}', ${JSON.stringify(cards).replace(/"/g, '&quot;')})">Add All</button>
+                                                <span class="collapse-icon">▼</span>
+                                            </div>
                                         </div>
                                         <div class="mission-set-group-content collapsed">
                                             ${cardItems}
