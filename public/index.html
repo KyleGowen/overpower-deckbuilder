@@ -1402,6 +1402,38 @@
             font-weight: 600;
             font-size: 0.9rem;
             text-transform: capitalize;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-category-header:hover {
+            background: rgba(78, 205, 196, 0.3);
+        }
+
+        .card-category-header .collapse-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card-category-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .card-category-content {
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .card-category-content.collapsed {
+            max-height: 0;
+            padding: 0 10px;
+            overflow: hidden;
         }
 
         .card-category-content {
@@ -4188,15 +4220,50 @@
             }
         }
 
+        // Global variables for deck management
+        let currentDeckId = null;
+        let currentDeckData = null;
+        let deckEditorCards = []; // Working copy of deck cards
+
         // Add event listeners for card search
         document.getElementById('cardTypeFilter').addEventListener('change', searchCards);
         document.getElementById('cardSearchInput').addEventListener('input', debounce(searchCards, 300));
 
+        // Toggle category collapse/expand
+        function toggleCategory(headerElement) {
+            const category = headerElement.closest('.card-category');
+            const content = category.querySelector('.card-category-content');
+            const icon = headerElement.querySelector('.collapse-icon');
+            
+            if (headerElement.classList.contains('collapsed')) {
+                // Expand
+                headerElement.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+                icon.textContent = '▼';
+            } else {
+                // Collapse
+                headerElement.classList.add('collapsed');
+                content.classList.add('collapsed');
+                icon.textContent = '▶';
+            }
+        }
+
         // ===== DECK EDITOR FUNCTIONS =====
 
         function showDeckEditor() {
-            document.getElementById('deckEditorModal').style.display = 'flex';
-            setupDragAndDrop();
+            console.log('showDeckEditor called');
+            try {
+                const modal = document.getElementById('deckEditorModal');
+                if (!modal) {
+                    console.error('deckEditorModal not found');
+                    return;
+                }
+                modal.style.display = 'flex';
+                console.log('Modal displayed, setting up drag and drop');
+                setupDragAndDrop();
+            } catch (error) {
+                console.error('Error in showDeckEditor:', error);
+            }
         }
 
         function closeDeckEditor() {
@@ -4207,13 +4274,16 @@
         }
 
         async function loadDeckForEditing(deckId) {
+            console.log('loadDeckForEditing called with deckId:', deckId);
             try {
                 const response = await fetch(`/api/decks/${deckId}`);
                 const data = await response.json();
+                console.log('Deck data loaded:', data);
                 
                 if (data.success) {
                     currentDeckData = data.data;
                     deckEditorCards = [...data.data.cards]; // Create working copy
+                    console.log('Working copy created:', deckEditorCards);
                     
                     // Update modal title
                     document.getElementById('deckEditorTitle').textContent = `Edit Deck: ${currentDeckData.metadata.name}`;
@@ -4312,8 +4382,11 @@
                             
                             categoriesHtml += `
                                 <div class="card-category">
-                                    <div class="card-category-header">${category.name} (${data.data.length})</div>
-                                    <div class="card-category-content">
+                                    <div class="card-category-header collapsed" onclick="toggleCategory(this)">
+                                        <span>${category.name} (${data.data.length})</span>
+                                        <span class="collapse-icon">▼</span>
+                                    </div>
+                                    <div class="card-category-content collapsed">
                                         ${cardsHtml}
                                     </div>
                                 </div>
@@ -4332,7 +4405,15 @@
         }
 
         function setupDragAndDrop() {
-            const deckCardsEditor = document.getElementById('deckCardsEditor');
+            console.log('setupDragAndDrop called');
+            try {
+                const deckCardsEditor = document.getElementById('deckCardsEditor');
+                if (!deckCardsEditor) {
+                    console.error('deckCardsEditor element not found');
+                    return;
+                }
+                
+                console.log('Setting up drag and drop for deckCardsEditor');
             
             // Drag over effects
             deckCardsEditor.addEventListener('dragover', (e) => {
@@ -4369,11 +4450,16 @@
                 }
             });
             
-            document.addEventListener('dragend', (e) => {
-                if (e.target.classList.contains('card-item')) {
-                    e.target.classList.remove('dragging');
-                }
-            });
+                            document.addEventListener('dragend', (e) => {
+                    if (e.target.classList.contains('card-item')) {
+                        e.target.classList.remove('dragging');
+                    }
+                });
+                
+                console.log('Drag and drop setup complete');
+            } catch (error) {
+                console.error('Error in setupDragAndDrop:', error);
+            }
         }
 
         function addCardToEditor(cardType, cardId, cardName) {
@@ -4444,10 +4530,7 @@
             }
         }
 
-        // Global variable to track current deck
-        let currentDeckId = null;
-        let currentDeckData = null;
-        let deckEditorCards = []; // Working copy of deck cards
+
     </script>
 </body>
 </html>
