@@ -5029,9 +5029,22 @@
             console.log('=== FILTER DEBUG ===');
             console.log('Filter checked:', isChecked);
             console.log('Deck character names:', deckCharacterNames);
+            console.log('Character map:', characterMap);
             console.log('Found', characterGroups.length, 'character groups');
             
-            characterGroups.forEach((group, index) => {
+            // First, collect all groups and sort them to put "Any Character" at the top
+            const groupsArray = Array.from(characterGroups);
+            const anyCharacterGroup = groupsArray.find(group => {
+                const header = group.querySelector('.character-group-header span');
+                return header && header.textContent.split(' (')[0] === 'Any Character';
+            });
+            
+            // Remove "Any Character" from the array and add it back at the beginning
+            const otherGroups = groupsArray.filter(group => group !== anyCharacterGroup);
+            const sortedGroups = anyCharacterGroup ? [anyCharacterGroup, ...otherGroups] : otherGroups;
+            
+            // Now process each group
+            sortedGroups.forEach((group, index) => {
                 const header = group.querySelector('.character-group-header span');
                 if (!header) {
                     console.log(`Group ${index}: No header found`);
@@ -5042,6 +5055,13 @@
                 console.log(`Group ${index}: "${characterName}"`);
                 
                 if (isChecked) {
+                    // Always show "Any Character" group
+                    if (characterName === 'Any Character') {
+                        console.log(`  ✓ Any Character - always shown`);
+                        group.style.display = 'block';
+                        return;
+                    }
+                    
                     // Show only characters that are in the current deck
                     const isInDeck = deckCharacterNames.some(deckName => {
                         // Exact match
@@ -5050,22 +5070,16 @@
                             return true;
                         }
                         
-                        // Handle "Any Character" special case
-                        if (characterName === 'Any Character') {
-                            console.log(`  ✓ Any Character special case`);
+                        // Handle special cases like "Angry Mob" vs "Angry Mob (Middle Ages)"
+                        const deckNameClean = deckName.split(' (')[0];
+                        if (deckNameClean === characterName) {
+                            console.log(`  ✓ Clean match: "${deckNameClean}" === "${characterName}"`);
                             return true;
                         }
                         
                         // Handle partial matches (e.g., "Angry Mob (Middle Ages)" should match "Angry Mob")
                         if (deckName.includes(characterName) || characterName.includes(deckName)) {
                             console.log(`  ✓ Partial match: "${deckName}" includes "${characterName}" or vice versa`);
-                            return true;
-                        }
-                        
-                        // Handle special cases like "Angry Mob" vs "Angry Mob (Middle Ages)"
-                        const deckNameClean = deckName.split(' (')[0];
-                        if (deckNameClean === characterName) {
-                            console.log(`  ✓ Clean match: "${deckNameClean}" === "${characterName}"`);
                             return true;
                         }
                         
@@ -5081,6 +5095,14 @@
                     group.style.display = 'block';
                 }
             });
+            
+            // Reorder the DOM elements to match our sorted order
+            if (anyCharacterGroup && sortedGroups.length > 1) {
+                const container = specialCardsCategory.querySelector('.card-category-content');
+                sortedGroups.forEach(group => {
+                    container.appendChild(group);
+                });
+            }
             console.log('=== END FILTER DEBUG ===');
         }
         
