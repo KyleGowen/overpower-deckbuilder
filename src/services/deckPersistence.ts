@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { DeckData, DeckMetadata, DeckCard } from '../types';
+import { DeckData, DeckMetadata, DeckCard, CardTypeOrAll } from '../types';
 
 export class DeckPersistenceService {
   private readonly decksFilePath: string;
@@ -131,9 +131,19 @@ export class DeckPersistenceService {
   }
 
   // Remove a card from a deck
-  removeCardFromDeck(deckId: string, cardType: DeckCard['type'], cardId: string, quantity: number = 1): DeckData | null {
+  removeCardFromDeck(deckId: string, cardType: CardTypeOrAll, cardId: string, quantity: number = 1): DeckData | null {
     const deck = this.decks.get(deckId);
     if (!deck) return null;
+
+    // Special case: remove all cards
+    if (cardType === 'all' && cardId === 'all') {
+      deck.cards = [];
+      deck.metadata.cardCount = 0;
+      deck.metadata.lastModified = new Date().toISOString();
+      this.saveDecks();
+      console.log(`✅ Removed all cards from deck: ${deck.metadata.name}`);
+      return deck;
+    }
 
     const existingCardIndex = deck.cards.findIndex(card => 
       card.type === cardType && card.cardId === cardId

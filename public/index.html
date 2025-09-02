@@ -1291,6 +1291,164 @@
             transform: none;
             box-shadow: none;
         }
+
+        /* Deck Editor Styles */
+        .deck-editor-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .deck-editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .deck-pane, .card-selector-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .deck-pane h4, .card-selector-pane h4 {
+            margin: 0;
+            color: #4ecdc4;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .deck-cards-editor {
+            flex: 1;
+            min-height: 300px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            overflow-y: auto;
+        }
+
+        .deck-cards-editor.drag-over {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .deck-card-editor-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .deck-card-editor-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .deck-card-editor-info {
+            flex: 1;
+        }
+
+        .deck-card-editor-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 3px;
+        }
+
+        .deck-card-editor-type {
+            color: #bdc3c7;
+            font-size: 0.8rem;
+            text-transform: capitalize;
+        }
+
+        .deck-card-editor-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .deck-summary {
+            text-align: center;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            padding: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-categories {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card-category {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .card-category-header {
+            background: rgba(78, 205, 196, 0.2);
+            padding: 10px 15px;
+            color: #4ecdc4;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+
+        .card-category-content {
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .card-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            color: #ffffff;
+            font-size: 0.85rem;
+        }
+
+        .card-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .card-item:active {
+            cursor: grabbing;
+        }
+
+        .card-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .empty-deck-message {
+            text-align: center;
+            color: #bdc3c7;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        .drag-instructions {
+            text-align: center;
+            color: #bdc3c7;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -1990,6 +2148,41 @@
                     </div>
                     <div class="card-results" id="cardResults">
                         <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deck Editor Modal -->
+    <div id="deckEditorModal" class="modal" onclick="closeDeckEditor()">
+        <div class="modal-content large-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="deckEditorTitle">Edit Deck</h3>
+                <div class="deck-editor-actions">
+                    <button class="btn-secondary" onclick="closeDeckEditor()">Cancel</button>
+                    <button class="btn-primary" onclick="saveDeckChanges()">Save Changes</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="deck-editor-layout">
+                    <!-- Left Pane: Deck List View -->
+                    <div class="deck-pane">
+                        <h4>Deck Contents</h4>
+                        <div class="deck-cards-editor" id="deckCardsEditor">
+                            <!-- Deck cards will be displayed here -->
+                        </div>
+                        <div class="deck-summary">
+                            <span>Total Cards: <span id="deckEditorCardCount">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Pane: Card Selector -->
+                    <div class="card-selector-pane">
+                        <h4>Available Cards</h4>
+                        <div class="card-categories" id="cardCategories">
+                            <!-- Card categories will be loaded here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3622,8 +3815,9 @@
 
         // Deck actions
         function editDeck(deckId) {
-            // For now, just view the deck - edit functionality can be added later
-            viewDeck(deckId);
+            currentDeckId = deckId;
+            showDeckEditor();
+            loadDeckForEditing(deckId);
         }
 
         function viewDeck(deckId) {
@@ -3998,8 +4192,262 @@
         document.getElementById('cardTypeFilter').addEventListener('change', searchCards);
         document.getElementById('cardSearchInput').addEventListener('input', debounce(searchCards, 300));
 
+        // ===== DECK EDITOR FUNCTIONS =====
+
+        function showDeckEditor() {
+            document.getElementById('deckEditorModal').style.display = 'flex';
+            setupDragAndDrop();
+        }
+
+        function closeDeckEditor() {
+            document.getElementById('deckEditorModal').style.display = 'none';
+            currentDeckId = null;
+            currentDeckData = null;
+            deckEditorCards = [];
+        }
+
+        async function loadDeckForEditing(deckId) {
+            try {
+                const response = await fetch(`/api/decks/${deckId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentDeckData = data.data;
+                    deckEditorCards = [...data.data.cards]; // Create working copy
+                    
+                    // Update modal title
+                    document.getElementById('deckEditorTitle').textContent = `Edit Deck: ${currentDeckData.metadata.name}`;
+                    
+                    // Display deck cards
+                    displayDeckCardsForEditing();
+                    
+                    // Load available cards
+                    loadAvailableCards();
+                    
+                    // Update card count
+                    updateDeckEditorCardCount();
+                } else {
+                    showNotification('Failed to load deck for editing: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error loading deck for editing:', error);
+                showNotification('Failed to load deck for editing', 'error');
+            }
+        }
+
+        function displayDeckCardsForEditing() {
+            const deckCardsEditor = document.getElementById('deckCardsEditor');
+            
+            if (deckEditorCards.length === 0) {
+                deckCardsEditor.innerHTML = `
+                    <div class="empty-deck-message">
+                        <p>No cards in this deck yet.</p>
+                        <p>Drag cards from the right panel to add them!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            deckCardsEditor.innerHTML = deckEditorCards.map((card, index) => `
+                <div class="deck-card-editor-item" draggable="true" data-index="${index}">
+                    <div class="deck-card-editor-info">
+                        <div class="deck-card-editor-name">${getCardName(card)}</div>
+                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                    </div>
+                    <div class="deck-card-editor-actions">
+                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeCardFromEditor(index) {
+            deckEditorCards.splice(index, 1);
+            displayDeckCardsForEditing();
+            updateDeckEditorCardCount();
+        }
+
+        function updateDeckEditorCardCount() {
+            const totalCards = deckEditorCards.reduce((total, card) => total + card.quantity, 0);
+            document.getElementById('deckEditorCardCount').textContent = totalCards;
+        }
+
+        async function loadAvailableCards() {
+            try {
+                const cardCategories = document.getElementById('cardCategories');
+                cardCategories.innerHTML = '<div class="drag-instructions">Loading available cards...</div>';
+                
+                const categories = [
+                    { type: 'character', name: 'Characters', api: '/api/characters', nameField: 'name' },
+                    { type: 'location', name: 'Locations', api: '/api/locations', nameField: 'name' },
+                    { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'name' },
+                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
+                    { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
+                    { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
+                    { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'name' },
+                    { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'name' },
+                    { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'name' },
+                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'name' },
+                    { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
+                ];
+                
+                let categoriesHtml = '';
+                
+                for (const category of categories) {
+                    try {
+                        const response = await fetch(category.api);
+                        const data = await response.json();
+                        
+                        if (data.success && data.data.length > 0) {
+                            const cardsHtml = data.data.map(card => `
+                                <div class="card-item" 
+                                     draggable="true" 
+                                     data-type="${category.type}" 
+                                     data-id="${card.id}"
+                                     data-name="${card[category.nameField]}">
+                                    ${card[category.nameField]}
+                                </div>
+                            `).join('');
+                            
+                            categoriesHtml += `
+                                <div class="card-category">
+                                    <div class="card-category-header">${category.name} (${data.data.length})</div>
+                                    <div class="card-category-content">
+                                        ${cardsHtml}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error(`Error loading ${category.name}:`, error);
+                    }
+                }
+                
+                cardCategories.innerHTML = categoriesHtml;
+            } catch (error) {
+                console.error('Error loading available cards:', error);
+                cardCategories.innerHTML = '<div class="error">Error loading available cards</div>';
+            }
+        }
+
+        function setupDragAndDrop() {
+            const deckCardsEditor = document.getElementById('deckCardsEditor');
+            
+            // Drag over effects
+            deckCardsEditor.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                deckCardsEditor.classList.add('drag-over');
+            });
+            
+            deckCardsEditor.addEventListener('dragleave', () => {
+                deckCardsEditor.classList.remove('drag-over');
+            });
+            
+            // Drop handling
+            deckCardsEditor.addEventListener('drop', (e) => {
+                e.preventDefault();
+                deckCardsEditor.classList.remove('drag-over');
+                
+                const cardType = e.dataTransfer.getData('text/plain').split('|')[0];
+                const cardId = e.dataTransfer.getData('text/plain').split('|')[1];
+                const cardName = e.dataTransfer.getData('text/plain').split('|')[2];
+                
+                if (cardType && cardId) {
+                    addCardToEditor(cardType, cardId, cardName);
+                }
+            });
+            
+            // Setup card item drag events
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('card-item')) {
+                    e.target.classList.add('dragging');
+                    const cardType = e.target.dataset.type;
+                    const cardId = e.target.dataset.id;
+                    const cardName = e.target.dataset.name;
+                    e.dataTransfer.setData('text/plain', `${cardType}|${cardId}|${cardName}`);
+                }
+            });
+            
+            document.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('card-item')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+        }
+
+        function addCardToEditor(cardType, cardId, cardName) {
+            // Check if card already exists in deck
+            const existingCardIndex = deckEditorCards.findIndex(card => 
+                card.type === cardType && card.cardId === cardId
+            );
+            
+            if (existingCardIndex >= 0) {
+                // Increase quantity
+                deckEditorCards[existingCardIndex].quantity += 1;
+            } else {
+                // Add new card
+                const newCard = {
+                    id: `deckcard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    type: cardType,
+                    cardId: cardId,
+                    quantity: 1
+                };
+                deckEditorCards.push(newCard);
+            }
+            
+            displayDeckCardsForEditing();
+            updateDeckEditorCardCount();
+        }
+
+        async function saveDeckChanges() {
+            if (!currentDeckId || !currentDeckData) return;
+            
+            try {
+                // Clear existing cards
+                const clearResponse = await fetch(`/api/decks/${currentDeckId}/cards`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cardType: 'all',
+                        cardId: 'all',
+                        quantity: 999 // Remove all
+                    })
+                });
+                
+                // Add new cards
+                for (const card of deckEditorCards) {
+                    await fetch(`/api/decks/${currentDeckId}/cards`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cardType: card.type,
+                            cardId: card.cardId,
+                            quantity: card.quantity
+                        })
+                    });
+                }
+                
+                showNotification('Deck changes saved successfully!', 'success');
+                closeDeckEditor();
+                
+                // Refresh deck list
+                loadDecks();
+                
+            } catch (error) {
+                console.error('Error saving deck changes:', error);
+                showNotification('Failed to save deck changes', 'error');
+            }
+        }
+
         // Global variable to track current deck
         let currentDeckId = null;
+        let currentDeckData = null;
+        let deckEditorCards = []; // Working copy of deck cards
     </script>
 </body>
 </html>

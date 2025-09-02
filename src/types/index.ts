@@ -149,6 +149,9 @@ export interface DeckCard {
   quantity: number; // How many copies of this card
 }
 
+// Extended type for API operations that includes special cases
+export type CardTypeOrAll = DeckCard['type'] | 'all';
+
 export interface DeckMetadata {
   id: string;
   name: string;
