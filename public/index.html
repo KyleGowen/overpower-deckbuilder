@@ -2466,7 +2466,7 @@
 
 
         <!-- Deck Builder Section -->
-        <div id="deck-builder" class="database-section" style="display: none;">
+        <div id="deck-builder" class="deck-builder-section">
             <div class="section-header">
                 <h2>🃏 Deck Builder</h2>
                 <button class="create-deck-btn" onclick="showCreateDeckModal()">Create New Deck</button>
@@ -4160,6 +4160,11 @@
             setTimeout(updateAllStats, 1000);
             // Make images clickable after they are loaded
             setTimeout(makeImagesClickable, 1000);
+            
+            // Load decks for deck builder (default tab)
+            setTimeout(() => {
+                loadDecks();
+            }, 1500); // Wait for database data to load first
         });
 
         // ===== DECK MANAGEMENT FUNCTIONS =====
