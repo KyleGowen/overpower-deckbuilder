@@ -113,6 +113,15 @@ app.get('/api/training', (req, res) => {
   }
 });
 
+app.get('/api/basic-universe', (req, res) => {
+  try {
+    const basicUniverse = database.getAllBasicUniverse();
+    res.json({ success: true, data: basicUniverse });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch basic universe cards' });
+  }
+});
+
 app.get('/api/power-cards', (req, res) => {
   try {
     const powerCards = database.getAllPowerCards();

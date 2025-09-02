@@ -125,6 +125,15 @@ export interface TrainingCard {
   image: string;
 }
 
+export interface BasicUniverse {
+  id: string;
+  card_name: string;
+  type: string;         // Energy | Combat | Brute Force | Intelligence
+  value_to_use: string; // e.g., "6 or greater", "7 or greater"
+  bonus: string;        // e.g., "+2", "+3"
+  image: string;
+}
+
 export interface PowerCard {
   id: string;
   power_type: string;   // Energy | Combat | Brute Force | Intelligence | Any-Power | Multi-Power

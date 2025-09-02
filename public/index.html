@@ -93,18 +93,32 @@
 
         .tab-container {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .tab-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .tab-button {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
+            min-width: 130px;
+            text-align: center;
         }
 
         .tab-button:hover {
@@ -613,6 +627,22 @@
             cursor: pointer;
         }
 
+        /* Power Cards specific checkbox layout */
+        .power-cards-checkbox-group {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 20px !important;
+            justify-content: center !important;
+            align-items: flex-start !important;
+        }
+
+        .checkbox-column {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            min-width: 80px !important;
+        }
+
         .range-inputs {
             display: flex;
             align-items: center;
@@ -750,6 +780,12 @@
             text-align: center;
         }
         
+        /* Basic Universe table */
+        #basic-universe-table th,
+        #basic-universe-table td {
+            text-align: center;
+        }
+        
         /* Power cards table */
         #power-cards-table th,
         #power-cards-table td {
@@ -834,20 +870,25 @@
                 </div>
             </div>
             <div class="section-header">
-                <h2>📚 Database</h2>
-                            <div class="tab-container">
-                <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
-                <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
-                <button class="tab-button" onclick="switchTab('advanced-universe')">Advanced Universe</button>
-                <button class="tab-button" onclick="switchTab('locations')">Locations</button>
-                <button class="tab-button" onclick="switchTab('aspects')">Aspects</button>
-                <button class="tab-button" onclick="switchTab('missions')">Missions</button>
-                <button class="tab-button" onclick="switchTab('events')">Events</button>
-                <button class="tab-button" onclick="switchTab('teamwork')">Teamwork</button>
-                <button class="tab-button" onclick="switchTab('ally-universe')">Universe: Ally</button>
-                <button class="tab-button" onclick="switchTab('training')">Universe: Training</button>
-                <button class="tab-button" onclick="switchTab('power-cards')">Power Cards</button>
             </div>
+            
+            <div class="tab-container">
+                <div class="tab-row">
+                    <button class="tab-button active" onclick="switchTab('characters')">Characters</button>
+                    <button class="tab-button" onclick="switchTab('special-cards')">Special Cards</button>
+                    <button class="tab-button" onclick="switchTab('advanced-universe')">Advanced Universe</button>
+                    <button class="tab-button" onclick="switchTab('locations')">Locations</button>
+                    <button class="tab-button" onclick="switchTab('aspects')">Aspects</button>
+                    <button class="tab-button" onclick="switchTab('missions')">Missions</button>
+                </div>
+                <div class="tab-row">
+                    <button class="tab-button" onclick="switchTab('events')">Events</button>
+                    <button class="tab-button" onclick="switchTab('teamwork')">Universe: Teamwork</button>
+                    <button class="tab-button" onclick="switchTab('ally-universe')">Universe: Ally</button>
+                    <button class="tab-button" onclick="switchTab('training')">Universe: Training</button>
+                    <button class="tab-button" onclick="switchTab('basic-universe')">Universe: Basic</button>
+                    <button class="tab-button" onclick="switchTab('power-cards')">Power Cards</button>
+                </div>
             </div>
 
             <div class="search-container" id="search-container" style="display: none;">
@@ -1246,6 +1287,61 @@
                 </table>
             </div>
 
+            <div class="table-container" id="basic-universe-tab" style="display: none;">
+                <table id="basic-universe-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Card Name</th>
+                            <th>Type</th>
+                            <th>Value to Use</th>
+                            <th>Bonus</th>
+                        </tr>
+                        <tr class="filter-row">
+                            <th>
+                                <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" value="Energy" checked> Energy</label>
+                                        <label><input type="checkbox" value="Combat" checked> Combat</label>
+                                        <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
+                                        <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <input type="number" class="filter-input equals" data-column="value" placeholder="=" min="6" max="7">
+                                    <div class="range-inputs">
+                                        <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input">
+                                        <span>-</span>
+                                        <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input">
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <input type="number" class="filter-input equals" data-column="bonus" placeholder="=" min="2" max="3">
+                                    <div class="range-inputs">
+                                        <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input">
+                                        <span>-</span>
+                                        <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input">
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="basic-universe-tbody">
+                        <tr>
+                            <td colspan="5" class="loading">Loading basic universe...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="table-container" id="power-cards-tab" style="display: none;">
                 <table id="power-cards-table">
                     <thead>
@@ -1260,13 +1356,17 @@
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <div class="checkbox-group">
-                                        <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                        <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                        <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                        <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
-                                        <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
-                                        <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
+                                    <div class="checkbox-group power-cards-checkbox-group">
+                                        <div class="checkbox-column">
+                                            <label><input type="checkbox" value="Energy" checked> Energy</label>
+                                            <label><input type="checkbox" value="Combat" checked> Combat</label>
+                                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
+                                        </div>
+                                        <div class="checkbox-column">
+                                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                            <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
+                                            <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
+                                        </div>
                                     </div>
                                 </div>
                             </th>
@@ -1832,6 +1932,7 @@
             document.getElementById('teamwork-tab').style.display = 'none';
             document.getElementById('ally-universe-tab').style.display = 'none';
             document.getElementById('training-tab').style.display = 'none';
+            document.getElementById('basic-universe-tab').style.display = 'none';
             document.getElementById('power-cards-tab').style.display = 'none';
             
             // Hide search container for characters tab (uses inline filters)
@@ -1866,6 +1967,8 @@
                     searchInput.placeholder = 'Search allies by name, stat, or text...';
                 } else if (tabName === 'training') {
                     searchInput.placeholder = 'Search training by name or types...';
+                } else if (tabName === 'basic-universe') {
+                    searchInput.placeholder = 'Search basic universe by name, type, or bonus...';
                 } else if (tabName === 'power-cards') {
                     searchInput.placeholder = 'Search power cards by type or value...';
                 }
@@ -1895,6 +1998,8 @@
                 setupAllyUniverseSearch();
             } else if (tabName === 'training') {
                 setupTrainingSearch();
+            } else if (tabName === 'basic-universe') {
+                setupBasicUniverseSearch();
             } else if (tabName === 'power-cards') {
                 setupPowerCardsSearch();
             }
@@ -2519,6 +2624,168 @@
             });
         }
 
+        // Basic Universe functions
+        async function loadBasicUniverse() {
+            try {
+                const resp = await fetch('/api/basic-universe');
+                const data = await resp.json();
+                if (data.success) displayBasicUniverse(data.data);
+            } catch (e) { console.error('Error loading basic universe:', e); }
+        }
+
+        function displayBasicUniverse(cards) {
+            const tbody = document.getElementById('basic-universe-tbody');
+            if (!cards || cards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No basic universe cards found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = cards.map(card => `
+                <tr>
+                    <td>
+                        <img src="/src/resources/cards/images/${card.image}" 
+                             alt="${card.card_name}" 
+                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                             onclick="openModal(this)">
+                    </td>
+                    <td><strong>${card.card_name}</strong></td>
+                    <td>${card.type}</td>
+                    <td>${card.value_to_use}</td>
+                    <td>${card.bonus}</td>
+                </tr>
+            `).join('');
+        }
+
+        function setupBasicUniverseSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', async (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                if (searchTerm.length === 0) { await applyBasicUniverseFilters(); return; }
+                try {
+                    const resp = await fetch('/api/basic-universe');
+                    const data = await resp.json();
+                    if (data.success) {
+                        const filtered = data.data.filter(card =>
+                            card.card_name.toLowerCase().includes(searchTerm) ||
+                            card.type.toLowerCase().includes(searchTerm) ||
+                            card.value_to_use.toLowerCase().includes(searchTerm) ||
+                            card.bonus.toLowerCase().includes(searchTerm)
+                        );
+                        displayBasicUniverse(filtered);
+                    }
+                } catch (err) { console.error('Error searching basic universe:', err); }
+            });
+
+            // Add event listeners for filters
+            document.querySelectorAll('#basic-universe-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyBasicUniverseFilters);
+            });
+
+            document.querySelector('#basic-universe-tab input[data-column="value"].equals').addEventListener('input', applyBasicUniverseFilters);
+            document.getElementById('basic-value-min').addEventListener('input', applyBasicUniverseFilters);
+            document.getElementById('basic-value-max').addEventListener('input', applyBasicUniverseFilters);
+            document.querySelector('#basic-universe-tab input[data-column="bonus"].equals').addEventListener('input', applyBasicUniverseFilters);
+            document.getElementById('basic-bonus-min').addEventListener('input', applyBasicUniverseFilters);
+            document.getElementById('basic-bonus-max').addEventListener('input', applyBasicUniverseFilters);
+        }
+
+        function clearBasicUniverseFilters() {
+            // Reset checkboxes
+            document.querySelectorAll('#basic-universe-tab input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            // Reset value inputs
+            document.querySelectorAll('#basic-universe-tab input[data-column="value"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset bonus inputs
+            document.querySelectorAll('#basic-universe-tab input[data-column="bonus"]').forEach(input => {
+                input.value = '';
+            });
+            
+            // Reload all cards
+            loadBasicUniverse();
+        }
+
+        async function applyBasicUniverseFilters() {
+            try {
+                const resp = await fetch('/api/basic-universe');
+                const data = await resp.json();
+                if (!data.success) return;
+
+                let filtered = data.data;
+
+                // Filter by type
+                const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                if (selectedTypes.length > 0) {
+                    filtered = filtered.filter(card => selectedTypes.includes(card.type));
+                }
+
+                // Filter by value range
+                const equalsValue = document.querySelector('#basic-universe-tab input[data-column="value"].equals').value;
+                const minValue = document.getElementById('basic-value-min').value;
+                const maxValue = document.getElementById('basic-value-max').value;
+                
+                if (equalsValue && !isNaN(equalsValue)) {
+                    const equalsNum = parseInt(equalsValue);
+                    filtered = filtered.filter(card => {
+                        const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+                        return cardValue === equalsNum;
+                    });
+                } else {
+                    if (minValue && !isNaN(minValue)) {
+                        const minNum = parseInt(minValue);
+                        filtered = filtered.filter(card => {
+                            const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+                            return cardValue >= minNum;
+                        });
+                    }
+                    if (maxValue && !isNaN(maxValue)) {
+                        const maxNum = parseInt(maxValue);
+                        filtered = filtered.filter(card => {
+                            const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+                            return cardValue <= maxNum;
+                        });
+                    }
+                }
+
+                // Filter by bonus range
+                const equalsBonus = document.querySelector('#basic-universe-tab input[data-column="bonus"].equals').value;
+                const minBonus = document.getElementById('basic-bonus-min').value;
+                const maxBonus = document.getElementById('basic-bonus-max').value;
+                
+                if (equalsBonus && !isNaN(equalsBonus)) {
+                    const equalsBonusNum = parseInt(equalsBonus);
+                    filtered = filtered.filter(card => {
+                        const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+                        return cardBonus === equalsBonusNum;
+                    });
+                } else {
+                    if (minBonus && !isNaN(minBonus)) {
+                        const minBonusNum = parseInt(minBonus);
+                        filtered = filtered.filter(card => {
+                            const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+                            return cardBonus >= minBonusNum;
+                        });
+                    }
+                    if (maxBonus && !isNaN(maxBonus)) {
+                        const maxBonusNum = parseInt(maxBonus);
+                        filtered = filtered.filter(card => {
+                            const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+                            return cardBonus <= maxBonusNum;
+                        });
+                    }
+                }
+
+                displayBasicUniverse(filtered);
+            } catch (err) {
+                console.error('Error applying basic universe filters:', err);
+            }
+        }
+
         // Power Cards functions
         async function loadPowerCards() {
             try {
@@ -2639,6 +2906,7 @@
             loadTeamwork();
             loadAllyUniverse();
             loadTraining();
+            loadBasicUniverse();
             loadPowerCards();
             setupSearch();
             

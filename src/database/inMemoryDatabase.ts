@@ -1,4 +1,4 @@
-import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, PowerCard, ApiResponse } from '../types';
+import { User, Deck, Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse, PowerCard, ApiResponse } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,6 +15,7 @@ class InMemoryDatabase {
   private teamwork: Map<string, Teamwork> = new Map();
   private allyUniverse: Map<string, AllyUniverse> = new Map();
   private trainings: Map<string, TrainingCard> = new Map();
+  private basicUniverse: Map<string, BasicUniverse> = new Map();
   private powerCards: Map<string, PowerCard> = new Map();
   
   private nextUserId = 1;
@@ -29,6 +30,7 @@ class InMemoryDatabase {
   private nextTeamworkId = 1;
   private nextAllyUniverseId = 1;
   private nextTrainingId = 1;
+  private nextBasicUniverseId = 1;
   private nextPowerCardId = 1;
 
   async initialize(): Promise<void> {
@@ -64,11 +66,14 @@ class InMemoryDatabase {
     // Load Training from the markdown file
     await this.loadTraining();
 
+    // Load Basic Universe from the markdown file
+    await this.loadBasicUniverse();
+
     // Load Power Cards from the markdown file
     await this.loadPowerCards();
     
     console.log('✅ Database initialization complete');
-    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe, ${this.trainings.size} trainings, ${this.powerCards.size} power cards`);
+    console.log(`📊 Database loaded: ${this.characters.size} characters, ${this.locations.size} locations, ${this.specialCards.size} special cards, ${this.missions.size} missions, ${this.events.size} events, ${this.aspects.size} aspects, ${this.advancedUniverse.size} advanced universe, ${this.teamwork.size} teamwork, ${this.allyUniverse.size} ally universe, ${this.trainings.size} trainings, ${this.basicUniverse.size} basic universe, ${this.powerCards.size} power cards`);
   }
 
   private async loadCharacters(): Promise<void> {
@@ -741,6 +746,10 @@ class InMemoryDatabase {
     return Array.from(this.trainings.values());
   }
 
+  getAllBasicUniverse(): BasicUniverse[] {
+    return Array.from(this.basicUniverse.values());
+  }
+
   getAllPowerCards(): PowerCard[] {
     return Array.from(this.powerCards.values());
   }
@@ -1268,6 +1277,84 @@ class InMemoryDatabase {
       'brute_force_intelligence': '349_5_brute_force_5_intelligence_4.webp'
     };
     return map[pair] || 'unknown_training.webp';
+  }
+
+  private async loadBasicUniverse(): Promise<void> {
+    try {
+      const filePath = path.join(process.cwd(), 'src/resources/cards/descriptions/overpower-erb-universe-basic.md');
+      if (!fs.existsSync(filePath)) {
+        console.log('❌ Basic Universe file not found, skipping');
+        return;
+      }
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n').filter(l => l.trim().length > 0);
+      for (const line of lines) {
+        if (line.startsWith('|') && !line.includes('---') && !line.includes('Card Name')) {
+          const cols = line.split('|').map(c => c.trim());
+          if (cols.length >= 5) {
+            const name = cols[1];
+            const type = cols[2];
+            const valueToUse = cols[3];
+            const bonus = cols[4];
+            const basicUniverse: BasicUniverse = {
+              id: `basic_${this.nextBasicUniverseId++}`,
+              card_name: name,
+              type: type,
+              value_to_use: valueToUse,
+              bonus: bonus,
+              image: this.getBasicUniverseImage(valueToUse, type, bonus)
+            };
+            this.basicUniverse.set(basicUniverse.id, basicUniverse);
+          }
+        }
+      }
+      console.log(`✅ Loaded ${this.basicUniverse.size} Basic Universe cards`);
+    } catch (e) {
+      console.error('Error loading Basic Universe:', e);
+    }
+  }
+
+  private getBasicUniverseImage(valueToUse: string, type: string, bonus: string): string {
+    // Extract the numeric value and bonus from the strings
+    // valueToUse: "6 or greater" -> extract "6"
+    // bonus: "+2" -> extract "2"
+    const valueMatch = valueToUse.match(/(\d+)/);
+    const bonusMatch = bonus.match(/(\d+)/);
+    
+    if (valueMatch && bonusMatch) {
+      const value = valueMatch[1];
+      const bonusValue = bonusMatch[1];
+      const typeLower = type.toLowerCase().replace(/\s+/g, '_');
+      
+      // Map to the correct image IDs based on the pattern
+      // Format: [ID]_[valueToUse]_[type]_[bonus].webp
+      const imageMap: { [key: string]: string } = {
+        // Energy cards
+        '6_energy_2': '332_6_energy_2.webp',  // Ray Gun
+        '6_energy_3': '333_6_energy_3.webp',  // Merlin's Wand
+        '7_energy_3': '334_7_energy_3.webp',  // Lightning Bolt
+        
+        // Combat cards
+        '6_combat_2': '335_6_combat_2.webp',  // Flintlock
+        '6_combat_3': '336_6_combat_3.webp',  // Rapier
+        '7_combat_3': '337_7_combat_3.webp',  // Longbow
+        
+        // Brute Force cards
+        '6_brute_force_2': '338_6_brute_force_2.webp',  // Hyde's Serum
+        '6_brute_force_3': '339_6_brute_force_3.webp',  // Trident
+        '7_brute_force_3': '340_7_brute_force_3.webp',  // Tribuchet
+        
+        // Intelligence cards
+        '6_intelligence_2': '341_6_intelligence_2.webp',  // Secret Identity
+        '6_intelligence_3': '342_6_intelligence_3.webp',  // Advanced Technology
+        '7_intelligence_3': '343_7_intelligence_3.webp'   // Magic Spell
+      };
+      
+      const key = `${value}_${typeLower}_${bonusValue}`;
+      return imageMap[key] || 'unknown_basic_universe.webp';
+    }
+    
+    return 'unknown_basic_universe.webp';
   }
 
   private async loadPowerCards(): Promise<void> {
