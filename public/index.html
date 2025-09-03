@@ -5809,7 +5809,7 @@
                     { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/ally-universe', nameField: 'card_name' },
                     { type: 'training', api: '/api/training', nameField: 'card_name' },
-                    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'name' },
+                    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
                     { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
                 ];
                 
@@ -6002,7 +6002,7 @@
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'card_name' },
-                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'name' },
+                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
                     { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
                 ];
                 
@@ -6280,6 +6280,22 @@
                             // Special handling for training cards - show summary with types and bonus
                             cardsHtml = data.data.map(card => {
                                 const summary = `${card.card_name} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → +${card.bonus})`;
+                                return `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${summary}">
+                                        ${summary}
+                                    </div>
+                                `;
+                            }).join('');
+                        } else if (category.type === 'basic-universe') {
+                            // Special handling for basic universe cards - show summary with type, value, and bonus
+                            cardsHtml = data.data.map(card => {
+                                const summary = `${card.card_name} - ${card.type} (${card.value_to_use} → +${card.bonus})`;
                                 return `
                                     <div class="card-item" 
                                          draggable="true" 
