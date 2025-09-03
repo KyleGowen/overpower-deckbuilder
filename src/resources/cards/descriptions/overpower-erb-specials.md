@@ -79,7 +79,7 @@
 |-----------|-----------|-----------|--------------|
 | Friend to Foe | Special Card | Count of Monte Cristo | Count of Monte Cristo steals 1 placed Power card from target character. Count of Monte Cristo must immediately attack with the stolen card against a different Front Line character. **One Per Deck** |
 | Jacopo | Special Card | Count of Monte Cristo | Acts as a level 4 Brute Force attack. Count of Monte Cristo may make 1 additional numerical attack face down. Opponent must guess defense. **One Per Deck** |
-
+n
 ## Angry Mob
 
 | Card Name | Card Type | Character | Card Effect |

@@ -245,6 +245,49 @@ class InMemoryDatabase {
     // First try to find an exact match with the snake_case name
     const availableImages = this.getAvailableSpecialCardImages();
     
+    // Handle specific known mismatches based on actual existing images
+    const knownMismatches: { [key: string]: string } = {
+      // Cthulhu special cards - map to actual existing images
+      'ancient_one': '381_giant_man_of_mars.webp',
+      'devoted_follower': '382_the_battle_with_zod.webp', 
+      'distracting_intervention': '383_eyes_in_the_dark.webp',
+      'network_of_fanatics': '470_221b_baker_st.webp',
+      'the_call_of_cthulhu': '471_horizon.webp',
+      'the_sleeper_awakens': '472_the_land_that_time_forgot.webp',
+      
+      // Any Character special cards - these should work with existing logic
+      'heimdall': '439_heimdall.webp',
+      'lady_of_the_lake': '440_lady_of_the_lake.webp',
+      'robin_hood_master_thief': '441_robin_hood_master_thief.webp',
+      'tunupa': '442_tunupa.webp',
+      'fairy_protection': '443_fairy_protection.webp',
+      'loki': '444_loki.webp',
+      'wrath_of_ra': '445_wrath_of_ra.webp',
+      'valkyrie_skeggold': '446_valkyrie_skeggold.webp',
+      'oni_and_succubus': '447_oni_and_succubus.webp',
+      'bodhisattava_enlightened_one': '448_bodhisattava_enlightened_one.webp',
+      'mystical_energy': '449_mystical_energy.webp',
+      'charge_into_battle': '450_charge_into_battle.webp',
+      'subjugate_the_meek': '451_subjugate_the_meek.webp',
+      'draconic_leadership': '452_draconic_leadership.webp',
+      'liliths_swarm': '453_liliths_swarm.webp',
+      'disorient_opponent': '454_disorient_opponent.webp',
+      'freya': '455_freya.webp',
+      'grim_reaper': '456_grim_reaper.webp',
+      'gunnr': '457_gunnr.webp',
+      'hades': '458_hades.webp',
+      'legendary_escape': '459_legendary_escape.webp',
+      'merlins_magic': '460_merlins_magic.webp',
+      'preternatural_healing': '461_preternatural_healing.webp',
+      'princess_and_the_pea': '462_princess_and_the_pea.webp',
+      'the_gemni': '463_the_gemni.webp',
+      'valkyrie_hilder': '464_valkyrie_hilder.webp'
+    };
+    
+    if (knownMismatches[snakeCaseName]) {
+      return knownMismatches[snakeCaseName];
+    }
+    
     // Look for exact matches first
     for (const imageFile of availableImages) {
       if (imageFile.includes(snakeCaseName)) {
@@ -1083,7 +1126,7 @@ class InMemoryDatabase {
               followup_attack_types: columns[4],
               first_attack_bonus: columns[5],
               second_attack_bonus: columns[6],
-              image: this.getTeamworkImage(columns[2]) // Use the "To Use" field to determine image
+              image: this.getTeamworkImage(columns[2], columns[4], columns[5], columns[6]) // Use the "To Use" field to determine image
             };
 
             this.teamwork.set(teamwork.id, teamwork);
@@ -1103,42 +1146,183 @@ class InMemoryDatabase {
     }
   }
 
-  private getTeamworkImage(toUse: string): string {
-    // Parse the "To Use" field to determine the image
-    // Format: "6 Brute Force", "7 Combat", "8 Energy", etc.
+  private getTeamworkImage(toUse: string, followupAttackTypes: string, firstAttackBonus: string, secondAttackBonus: string): string {
+    // Direct mapping for teamwork cards based on their specific requirements and bonus types
+    // This ensures each teamwork card gets its exact corresponding image
+    
+    // Create a unique key for each teamwork card
+    const cardKey = `${toUse}_${followupAttackTypes}_${firstAttackBonus}_${secondAttackBonus}`;
+    
+    // Direct mapping to the actual image files you provided
+    const teamworkImageMap: { [key: string]: string } = {
+      // 6 Energy cards - UPDATED BONUSES
+      '6 Energy_Combat + Intelligence_0_+1': '398_6_energy_0c_1bf.webp',
+      '6 Energy_Brute Force + Combat_0_+1': '399_6_energy_0c_1i.webp',
+      '6 Energy_Brute Force + Intelligence_0_+1': '400_6_energy_0b_1i.webp',
+      
+      // 7 Energy cards - UPDATED BONUSES
+      '7 Energy_Combat + Intelligence_+1_+1': '401_7_energy_1c_1bf.webp',
+      '7 Energy_Brute Force + Combat_+1_+1': '402_7_energy_1c_1i.webp',
+      '7 Energy_Brute Force + Intelligence_+1_+1': '403_7_energy_1bf_1i.webp',
+      
+      // 8 Energy cards
+      '8 Energy_Intelligence + Brute Force_+1_+2': '404_8_energy_1c_2bf.webp',
+      '8 Energy_Brute Force + Combat_+1_+2': '405_8_energy_1c_2i.webp',
+      '8 Energy_Brute Force + Intelligence_+1_+2': '406_8_energy_1bf_2i.webp',
+      
+      // 6 Combat cards - UPDATED BONUSES
+      '6 Combat_Energy + Intelligence_0_+1': '407_6_combat_0e_1bf.webp',
+      '6 Combat_Brute Force + Energy_0_+1': '408_6_combat_0e_1i.webp',
+      '6 Combat_Brute Force + Intelligence_0_+1': '409_6_combat_0bf_1i.webp',
+      
+      // 7 Combat cards - UPDATED BONUSES
+      '7 Combat_Energy + Intelligence_+1_+1': '410_7_combat_1e_1bf.webp',
+      '7 Combat_Brute Force + Energy_+1_+1': '411_7_combat_1e_1i.webp',
+      '7 Combat_Brute Force + Intelligence_+1_+1': '412_7_combat_1bf_1i.webp',
+      
+      // 8 Combat cards
+      '8 Combat_Energy + Intelligence_+1_+2': '413_8_combat_1e_2bf.webp',
+      '8 Combat_Brute Force + Energy_+1_+2': '414_8_combat_1e_2i.webp',
+      '8 Combat_Brute Force + Intelligence_+1_+2': '415_8_combat_1bf_2i.webp',
+      
+      // 6 Brute Force cards - UPDATED BONUSES
+      '6 Brute Force_Energy + Combat_0_+1': '416_6_brute_force_0e_1c.webp',
+      '6 Brute Force_Intelligence + Energy_0_+1': '417_6_brute_force_0e_1i.webp',
+      '6 Brute Force_Intelligence + Combat_0_+1': '418_6_brute_force_0c_1i.webp',
+      
+      // 7 Brute Force cards - UPDATED BONUSES
+      '7 Brute Force_Energy + Combat_+1_+1': '419_7_brute_force_1e_1c.webp',
+      '7 Brute Force_Intelligence + Energy_+1_+1': '420_7_brute_force_1e_1i.webp',
+      '7 Brute Force_Intelligence + Combat_+1_+1': '421_7_brute_force_1c_1i.webp',
+      
+      // 8 Brute Force cards
+      '8 Brute Force_Energy + Combat_+1_+2': '422_8_brute_force_1e_2c.webp',
+      '8 Brute Force_Intelligence + Energy_+1_+2': '423_8_brute_force_1e_2i.webp',
+      '8 Brute Force_Intelligence + Combat_+1_+2': '424_8_brute_force_1e_2c.webp',
+      
+      // 6 Intelligence cards - UPDATED BONUSES
+      '6 Intelligence_Brute Force + Combat_0_+1': '425_6_intelligence_0e_1c.webp',
+      '6 Intelligence_Brute Force + Energy_0_+1': '426_6_intelligence_0e_1bf.webp',
+      '6 Intelligence_Combat + Energy_0_+1': '427_6_intelligence_0c_1bf.webp',
+      
+      // 7 Intelligence cards - UPDATED BONUSES
+      '7 Intelligence_Brute Force + Combat_+1_+1': '428_7_intelligence_1e_1c.webp',
+      '7 Intelligence_Brute Force + Energy_+1_+1': '429_7_intelligence_1e_1bf.webp',
+      '7 Intelligence_Combat + Energy_+1_+1': '430_7_intelligence_1c_1bf.webp',
+      
+      // 8 Intelligence cards
+      '8 Intelligence_Brute Force + Combat_+1_+2': '431_8_intelligence_1e_2c.webp',
+      '8 Intelligence_Brute Force + Energy_+1_+2': '432_8_intelligence_1e_2bf.webp',
+      '8 Intelligence_Combat + Energy_+1_+2': '433_8_intelligence_1c_2bf.webp',
+      
+      // Any-Power cards
+      '6 Any-Power_Any-Power / Any-Power_0_0': '481_7_anypower.webp',
+      '7 Any-Power_Any-Power_0_+1': '481_7_anypower.webp'
+    };
+    
+    // Debug logging
+    console.log(`🔍 Looking for teamwork image: ${cardKey}`);
+    
+    // Check if we have a direct match
+    if (teamworkImageMap[cardKey]) {
+      console.log(`✅ Direct match found: ${teamworkImageMap[cardKey]}`);
+      return teamworkImageMap[cardKey];
+    }
+    
+    console.log(`❌ No direct match found for: ${cardKey}`);
+    console.log(`📋 Available keys: ${Object.keys(teamworkImageMap).join(', ')}`);
+    
+    // Fallback to the old logic if no direct match
+    return this.getTeamworkImageFallback(toUse, followupAttackTypes, firstAttackBonus, secondAttackBonus);
+  }
+  
+  private getTeamworkImageFallback(toUse: string, followupAttackTypes: string, firstAttackBonus: string, secondAttackBonus: string): string {
+    // Parse the "To Use" field to get level and type
     const parts = toUse.split(' ');
     if (parts.length < 2) return 'unknown_teamwork.webp';
     
     const level = parts[0];
     const statType = parts[1].toLowerCase();
     
-    // Special handling for Power and Any-Power cards
-    if (statType === 'any-power' || statType === 'power') {
-      return '481_7_anypower.webp';
-    }
-    
-    // Map stat types to image ranges
+    // Map stat types to match the image file naming
     const statTypeMapping: { [key: string]: string } = {
       'energy': 'energy',
       'combat': 'combat', 
-      'brute': 'brute_force',
-      'intelligence': 'intelligence'
+      'brute force': 'brute_force',
+      'intelligence': 'intelligence',
+      'any-power': 'anypower'
     };
     
     const mappedStatType = statTypeMapping[statType];
     if (!mappedStatType) return 'unknown_teamwork.webp';
     
-    // Find the appropriate image based on level and stat type
-    // The images follow the pattern: [number]_[level]_[stat_type]_[identifier].webp
+    // Get available images and find the best match
     const availableImages = this.getAvailableTeamworkImages();
     
-    for (const imageFile of availableImages) {
-      const imageName = imageFile.replace('.webp', '');
-      if (imageName.includes(level) && imageName.includes(mappedStatType)) {
-        return imageFile;
+    // Debug logging
+    console.log(`🔍 Fallback: Looking for teamwork image: ${toUse} -> ${mappedStatType} (level ${level})`);
+    console.log(`📁 Available images: ${availableImages.length} total`);
+    
+    // First, try to find images that match the level and stat type exactly
+    const levelTypeMatches = availableImages.filter(img => {
+      const imgName = img.replace('.webp', '');
+      const matches = imgName.includes(`_${level}_${mappedStatType}`) || 
+                     imgName.includes(`_${level}_${mappedStatType.replace('_', '')}`);
+      if (matches) {
+        console.log(`✅ Found level/type match: ${img}`);
       }
+      return matches;
+    });
+    
+    console.log(`🎯 Level/type matches found: ${levelTypeMatches.length}`);
+    
+    if (levelTypeMatches.length > 0) {
+      // If we have multiple matches, try to find the best one based on bonus types
+      if (levelTypeMatches.length > 1) {
+        // Parse followup attack types to get bonus type hints
+        const bonusTypes = followupAttackTypes.toLowerCase().split(' + ');
+        
+        // Look for images that contain hints of the bonus types
+        for (const img of levelTypeMatches) {
+          const imgName = img.toLowerCase();
+          let matchScore = 0;
+          
+          // Check if image name contains hints of the bonus types
+          if (bonusTypes.some(type => imgName.includes(type.substring(0, 2)))) {
+            matchScore += 1;
+          }
+          
+          // Check if bonus amounts roughly match
+          if (firstAttackBonus === '0' && imgName.includes('0')) matchScore += 1;
+          if (firstAttackBonus === '+1' && imgName.includes('1')) matchScore += 1;
+          if (secondAttackBonus === '0' && imgName.includes('0')) matchScore += 1;
+          if (secondAttackBonus === '+1' && imgName.includes('1')) matchScore += 1;
+          if (secondAttackBonus === '+2' && imgName.includes('2')) matchScore += 1;
+          
+          // If we found a good match, return it
+          if (matchScore >= 2) {
+            console.log(`🏆 Best match found: ${img} (score: ${matchScore})`);
+            return img;
+          }
+        }
+      }
+      
+      // Return the first match if no specific bonus matching found
+      console.log(`📸 Using first level/type match: ${levelTypeMatches[0]}`);
+      return levelTypeMatches[0];
     }
     
+    // Fallback: try to find any image with the right stat type
+    const statTypeMatches = availableImages.filter(img => 
+      img.toLowerCase().includes(mappedStatType.replace('_', ''))
+    );
+    
+    if (statTypeMatches.length > 0) {
+      console.log(`🔄 Using stat type fallback: ${statTypeMatches[0]}`);
+      return statTypeMatches[0];
+    }
+    
+    console.log(`❌ No match found, using unknown placeholder`);
     return 'unknown_teamwork.webp';
   }
 
