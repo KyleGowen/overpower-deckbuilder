@@ -1427,47 +1427,7 @@
             padding-bottom: 12px;
         }
         
-        .deck-pane-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .deck-pane-header h4 {
-            border-bottom: none;
-            padding-bottom: 0;
-            margin-bottom: 0;
-        }
-        
-        .view-toggle {
-            display: flex;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            padding: 2px;
-        }
-        
-        .toggle-btn {
-            background: transparent;
-            border: none;
-            color: #bdc3c7;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-        
-        .toggle-btn.active {
-            background: rgba(78, 205, 196, 0.3);
-            color: #ffffff;
-        }
-        
-        .toggle-btn:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
+
 
         .deck-cards-editor {
             flex: 1;
@@ -1479,12 +1439,7 @@
             overflow-y: auto;
         }
         
-        .deck-cards-editor.image-mode {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            align-items: start;
-        }
+
         
         /* Deck Type Sections */
         .deck-type-section {
@@ -1772,13 +1727,7 @@
             align-items: center;
         }
 
-        .deck-summary {
-            text-align: center;
-            color: #bdc3c7;
-            font-size: 0.9rem;
-            padding: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
+
 
         .card-categories {
             flex: 1;
@@ -2871,19 +2820,10 @@
                 <div class="deck-editor-layout">
                                            <!-- Left Pane: Deck List View -->
                        <div class="deck-pane">
-                           <div class="deck-pane-header">
-                               <h4>Deck Contents</h4>
-                               <div class="view-toggle">
-                                   <button class="toggle-btn active" onclick="toggleDeckView('preview')" id="previewToggle">Preview</button>
-                                   <button class="toggle-btn" onclick="toggleDeckView('image')" id="imageToggle">Full Image</button>
-                               </div>
-                           </div>
                            <div class="deck-cards-editor" id="deckCardsEditor">
                                <!-- Deck cards will be displayed here -->
                            </div>
-                           <div class="deck-summary">
-                               <span>Total Cards: <span id="deckEditorCardCount">0</span></span>
-                           </div>
+
                        </div>
                     
                     <!-- Right Pane: Card Selector -->
@@ -4922,7 +4862,7 @@
         let currentDeckData = null;
         let deckEditorCards = []; // Working copy of deck cards
         let availableCardsMap = new Map(); // Cache for available cards data
-        let currentDeckViewMode = 'preview'; // 'preview' or 'image'
+
 
         // Deck validation rules based on Overpower rules
         const DECK_RULES = {
@@ -5506,25 +5446,7 @@
             }
         }
         
-        // Toggle deck view mode (preview vs image)
-        function toggleDeckView(mode) {
-            currentDeckViewMode = mode;
-            
-            // Update toggle button states
-            document.getElementById('previewToggle').classList.toggle('active', mode === 'preview');
-            document.getElementById('imageToggle').classList.toggle('active', mode === 'image');
-            
-            // Update deck cards editor class for layout
-            const deckCardsEditor = document.getElementById('deckCardsEditor');
-            if (mode === 'image') {
-                deckCardsEditor.classList.add('image-mode');
-            } else {
-                deckCardsEditor.classList.remove('image-mode');
-            }
-            
-            // Redisplay deck cards with new view mode
-            displayDeckCardsForEditing();
-        }
+
 
         // ===== DECK EDITOR FUNCTIONS =====
 
@@ -5573,7 +5495,7 @@
                     displayDeckCardsForEditing();
                     
                     // Update card count
-                    updateDeckEditorCardCount();
+
                     
                     // Auto-activate special cards character filter if deck has characters
                     const hasCharacters = deckEditorCards.some(card => card.type === 'character');
@@ -5830,35 +5752,21 @@
                             }
                         }
                         
-                        const cardImage = `<div class="card-image-container"><img src="/${getCardImagePath(availableCard, card.type)}" alt="${availableCard.name || availableCard.card_name || getCardName(card)}" class="card-image" onerror="this.style.display='none'"></div>`;
-                        
-                        if (currentDeckViewMode === 'image') {
-                            // Image view mode - just image and remove button
-                            cardsHtml += `
-                                <div class="deck-card-editor-item image-view" draggable="true" data-index="${index}">
-                                    ${cardImage}
-                                    <div class="deck-card-editor-actions">
-                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
-                                    </div>
+                        // Preview mode - show detailed info with hover effect
+                        cardsHtml += `
+                            <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}" 
+                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
+                                 onmouseleave="hideCardHoverModal()">
+                                <div class="deck-card-editor-info">
+                                    <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
+                                    <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                                    ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
-                            `;
-                        } else {
-                            // Preview mode - show detailed info with hover effect
-                            cardsHtml += `
-                                <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}" 
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
-                                     onmouseleave="hideCardHoverModal()">
-                                    <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
-                                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
-                                        ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
-                                    </div>
-                                    <div class="deck-card-editor-actions">
-                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
-                                    </div>
+                                <div class="deck-card-editor-actions">
+                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                 </div>
-                            `;
-                        }
+                            </div>
+                        `;
                     });
                     
                     cardsHtml += `
@@ -6135,10 +6043,7 @@
                 });
         }
 
-        function updateDeckEditorCardCount() {
-            const totalCards = deckEditorCards.reduce((total, card) => total + card.quantity, 0);
-            document.getElementById('deckEditorCardCount').textContent = totalCards;
-        }
+
 
         // Function to update just the character limit status without affecting collapse state
         function updateCharacterLimitStatus() {
