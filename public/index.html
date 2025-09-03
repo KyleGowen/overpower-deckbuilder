@@ -1126,6 +1126,20 @@
             letter-spacing: 0.5px;
         }
 
+        .deck-editor-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .deck-description {
+            margin: 0;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
         .close-btn {
             background: none;
             border: none;
@@ -2810,7 +2824,10 @@
     <div id="deckEditorModal" class="modal" onclick="closeDeckEditor()">
         <div class="modal-content large-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3 id="deckEditorTitle">Edit Deck</h3>
+                <div class="deck-editor-title-section">
+                    <h3 id="deckEditorTitle">Edit Deck</h3>
+                    <p id="deckEditorDescription" class="deck-description"></p>
+                </div>
                 <div class="deck-editor-actions">
                     <button class="btn-secondary" onclick="closeDeckEditor()">Cancel</button>
                     <button class="btn-primary" onclick="saveDeckChanges()">Save Changes</button>
@@ -5485,8 +5502,15 @@
                     deckEditorCards = [...data.data.cards]; // Create working copy
                     console.log('Working copy created:', deckEditorCards);
                     
-                    // Update modal title
-                    document.getElementById('deckEditorTitle').textContent = `Edit Deck: ${currentDeckData.metadata.name}`;
+                    // Update modal title and description
+                    document.getElementById('deckEditorTitle').textContent = currentDeckData.metadata.name;
+                    const descriptionElement = document.getElementById('deckEditorDescription');
+                    if (currentDeckData.metadata.description) {
+                        descriptionElement.textContent = currentDeckData.metadata.description;
+                        descriptionElement.style.display = 'block';
+                    } else {
+                        descriptionElement.style.display = 'none';
+                    }
                     
                     // Load available cards first, then display deck cards
                     await loadAvailableCards();
