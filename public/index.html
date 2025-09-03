@@ -5625,7 +5625,7 @@
                             }
                         }
                         
-                        const cardImage = `<div class="card-image-container"><img src="/src/resources/cards/images/${getCardImagePath(availableCard, card.type)}" alt="${availableCard.name || availableCard.card_name || getCardName(card)}" class="card-image" onerror="this.style.display='none'"></div>`;
+                        const cardImage = `<div class="card-image-container"><img src="/${getCardImagePath(availableCard, card.type)}" alt="${availableCard.name || availableCard.card_name || getCardName(card)}" class="card-image" onerror="this.style.display='none'"></div>`;
                         
                         if (currentDeckViewMode === 'image') {
                             // Image view mode - just image and remove button
@@ -5673,7 +5673,7 @@
             const caption = document.getElementById('cardHoverCaption');
             
             if (modal && image && caption) {
-                image.src = `/src/resources/cards/images/${imagePath}`;
+                image.src = `/${imagePath}`;
                 caption.textContent = cardName;
                 
                 // Position the modal near the mouse cursor
@@ -5721,7 +5721,7 @@
                 if (cardType === 'character') {
                     // Characters use the image field from the database
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                     // Fallback: try to construct from name
                     const characterName = card.name || card.card_name || '';
@@ -5733,57 +5733,57 @@
                 } else if (cardType === 'location') {
                     // Locations use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'mission') {
                     // Missions use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'event') {
                     // Events use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'special') {
                     // Special cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'aspect') {
                     // Aspects use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'power') {
                     // Power cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'advanced-universe') {
                     // Advanced universe cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'teamwork') {
                     // Teamwork cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'ally-universe') {
                     // Ally universe cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'training') {
                     // Training cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'basic-universe') {
                     // Basic universe cards use the image field
                     if (card.image) {
-                        return card.image;
+                        return `src/resources/cards/images/${card.image}`;
                     }
                 }
                 
@@ -5807,8 +5807,8 @@
                     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
-                    { type: 'ally-universe', api: '/api/ally-universe', nameField: 'name' },
-                    { type: 'training', api: '/api/training', nameField: 'name' },
+                    { type: 'ally-universe', api: '/api/ally-universe', nameField: 'card_name' },
+                    { type: 'training', api: '/api/training', nameField: 'card_name' },
                     { type: 'basic-universe', api: '/api/basic-universe', nameField: 'name' },
                     { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
                 ];
@@ -6000,8 +6000,8 @@
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },
-                    { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'name' },
-                    { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'name' },
+                    { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'card_name' },
+                    { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'card_name' },
                     { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'name' },
                     { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
                 ];
@@ -6260,6 +6260,38 @@
                                     </div>
                                 `;
                             });
+                        } else if (category.type === 'ally-universe') {
+                            // Special handling for ally cards - show summary with stat requirements and attack info
+                            cardsHtml = data.data.map(card => {
+                                const summary = `${card.card_name} - ${card.stat_to_use} ${card.stat_type_to_use} → ${card.attack_value} ${card.attack_type}`;
+                                return `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${summary}">
+                                        ${summary}
+                                    </div>
+                                `;
+                            }).join('');
+                        } else if (category.type === 'training') {
+                            // Special handling for training cards - show summary with types and bonus
+                            cardsHtml = data.data.map(card => {
+                                const summary = `${card.card_name} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → +${card.bonus})`;
+                                return `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${summary}">
+                                        ${summary}
+                                    </div>
+                                `;
+                            }).join('');
                         } else {
                             // Regular handling for other card types
                             cardsHtml = data.data.map(card => `

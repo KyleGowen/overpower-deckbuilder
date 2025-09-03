@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Serve card images from resources directory
-app.use('/src/resources/cards/images', express.static(path.join(__dirname, 'resources/cards/images')));
+app.use('/src/resources/cards/images', express.static(path.join(process.cwd(), 'src/resources/cards/images')));
 
 // Initialize database
 database.initialize().then(() => {
