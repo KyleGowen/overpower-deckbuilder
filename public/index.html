@@ -5156,6 +5156,30 @@
                 showNotification(`All cards from ${missionSetName} are already in the deck`, 'info');
             }
         }
+
+        function addAllPowerCards(powerType, cards) {
+            console.log(`Adding all ${powerType} power cards:`, cards);
+            
+            let addedCount = 0;
+            
+            cards.forEach(card => {
+                // Check if card is already in deck
+                const existingCard = deckEditorCards.find(deckCard => 
+                    deckCard.type === 'power' && deckCard.cardId === card.id
+                );
+                
+                if (!existingCard) {
+                    addCardToEditor('power', card.id, `${card.value} - ${card.power_type}`);
+                    addedCount++;
+                }
+            });
+            
+            if (addedCount > 0) {
+                showNotification(`Added ${addedCount} ${powerType} power cards to deck`, 'success');
+            } else {
+                showNotification(`All ${powerType} power cards are already in the deck`, 'info');
+            }
+        }
         
         // Toggle special cards character filter
         async function toggleSpecialCardsCharacterFilter() {
@@ -5568,7 +5592,7 @@
                                     <div class="stat-label">Type:</div>
                                     <div class="stat-value" style="color: #1ABC9C;">${availableCard.power_type || 'Power'}</div>
                                     <div class="stat-label">Value:</div>
-                                    <div class="stat-value" style="color: #E67E22;">${availableCard.power_value || 'N/A'}</div>
+                                    <div class="stat-value" style="color: #E67E22;">${availableCard.value || 'N/A'}</div>
                                 </div>
                             `;
                         } else if (card.type === 'basic_universe') {
@@ -5641,10 +5665,10 @@
                             // Preview mode - show detailed info with hover effect
                             cardsHtml += `
                                 <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}" 
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${availableCard.name || availableCard.card_name || getCardName(card)}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
                                      onmouseleave="hideCardHoverModal()">
                                     <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${availableCard.name || availableCard.card_name || getCardName(card)}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
                                         <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
                                         ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                     </div>
@@ -6308,6 +6332,74 @@
                                     </div>
                                 `;
                             }).join('');
+                        } else if (category.type === 'power') {
+                            // Special handling for power cards - group by power type and show value - type format
+                            const typeGroups = {};
+                            
+                            data.data.forEach(card => {
+                                const powerType = card.power_type;
+                                if (!typeGroups[powerType]) {
+                                    typeGroups[powerType] = [];
+                                }
+                                typeGroups[powerType].push(card);
+                            });
+                            
+                            // Define the preferred order for power types
+                            const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Any-Power', 'Multi-Power'];
+                            const typeNames = Object.keys(typeGroups).sort((a, b) => {
+                                const aIndex = preferredOrder.indexOf(a);
+                                const bIndex = preferredOrder.indexOf(b);
+                                // If both are in preferred order, sort by their position
+                                if (aIndex !== -1 && bIndex !== -1) {
+                                    return aIndex - bIndex;
+                                }
+                                // If only one is in preferred order, prioritize it
+                                if (aIndex !== -1) return -1;
+                                if (bIndex !== -1) return 1;
+                                // If neither is in preferred order, sort alphabetically
+                                return a.localeCompare(b);
+                            });
+                            cardsHtml = '';
+                            
+                            typeNames.forEach(typeName => {
+                                const cards = typeGroups[typeName];
+                                // Sort cards within each type by value
+                                cards.sort((a, b) => a.value - b.value);
+                                
+                                const cardItems = cards.map(card => {
+                                    const summary = `${card.value} - ${card.power_type}`;
+                                    return `
+                                        <div class="card-item" 
+                                             draggable="true" 
+                                             data-type="${category.type}" 
+                                             data-id="${card.id}"
+                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                             onmouseleave="hideCardHoverModal()"
+                                             data-name="${summary}">
+                                            ${summary}
+                                        </div>
+                                    `;
+                                }).join('');
+                                
+                                // Add "Add All" button for Multi-Power and Any-Power subsections
+                                const addAllButton = (typeName === 'Multi-Power' || typeName === 'Any-Power') ? 
+                                    `<button class="add-all-btn" onclick="event.stopPropagation(); addAllPowerCards('${typeName}', ${JSON.stringify(cards).replace(/"/g, '&quot;')})">Add All</button>` : '';
+                                
+                                cardsHtml += `
+                                    <div class="character-group">
+                                        <div class="character-group-header" onclick="toggleCharacterGroup(this)">
+                                            <span>${typeName} (${cards.length})</span>
+                                            <div class="mission-set-controls">
+                                                ${addAllButton}
+                                                <span class="collapse-icon">▶</span>
+                                            </div>
+                                        </div>
+                                        <div class="character-group-content collapsed">
+                                            ${cardItems}
+                                        </div>
+                                    </div>
+                                `;
+                            });
                         } else {
                             // Regular handling for other card types
                             cardsHtml = data.data.map(card => `
