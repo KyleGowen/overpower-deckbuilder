@@ -287,6 +287,17 @@
             white-space: nowrap;
         }
 
+        /* Power Cards filter active indicator */
+        .power-cards-filter-active .card-category-header {
+            border-left: 4px solid #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .power-cards-filter-active .toggle-label {
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+
         .toggle-button {
             background: rgba(78, 205, 196, 0.2);
             color: #4ecdc4;
@@ -5324,6 +5335,176 @@
                 toggleSpecialCardsCharacterFilter();
             }
         }
+
+        // Toggle power cards character filter
+        async function togglePowerCardsCharacterFilter() {
+            const filterCheckbox = document.getElementById('powerCardsCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Power cards character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the power cards category
+            const allCategories = document.querySelectorAll('.card-category');
+            let powerCardsCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Power Cards')) {
+                    powerCardsCategory = category;
+                    break;
+                }
+            }
+            
+            if (!powerCardsCategory) {
+                console.error('Power cards category not found');
+                return;
+            }
+            
+            // Ensure the power cards category is expanded when filter is applied
+            if (isChecked) {
+                const header = powerCardsCategory.querySelector('.card-category-header');
+                const content = powerCardsCategory.querySelector('.card-category-content');
+                const icon = header.querySelector('.collapse-icon');
+                
+                if (header.classList.contains('collapsed')) {
+                    header.classList.remove('collapsed');
+                    content.classList.remove('collapsed');
+                    content.classList.add('expanded');
+                    icon.textContent = '▼';
+                }
+                
+                // Add visual indicator class
+                powerCardsCategory.classList.add('power-cards-filter-active');
+            } else {
+                // Remove visual indicator class
+                powerCardsCategory.classList.remove('power-cards-filter-active');
+            }
+            
+            // Get character data from current deck
+            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const characterMap = {};
+            if (allCharacters.success) {
+                allCharacters.data.forEach(char => {
+                    characterMap[char.id] = char;
+                });
+            }
+            
+            const deckCharacters = deckEditorCards
+                .filter(card => card.type === 'character')
+                .map(card => characterMap[card.cardId])
+                .filter(char => char); // Remove undefined entries
+            
+            console.log('=== POWER CARDS FILTER DEBUG ===');
+            console.log('Filter checked:', isChecked);
+            console.log('Deck characters:', deckCharacters);
+            
+            // Get all power card groups
+            const powerGroups = powerCardsCategory.querySelectorAll('.character-group');
+            let totalVisibleCards = 0;
+            
+            powerGroups.forEach(group => {
+                const header = group.querySelector('.character-group-header span');
+                if (!header) return;
+                
+                const powerType = header.textContent.split(' (')[0];
+                console.log(`Processing power type: "${powerType}"`);
+                
+                if (isChecked) {
+                    // Filter power cards based on character stats
+                    const cardItems = group.querySelectorAll('.card-item');
+                    let visibleCount = 0;
+                    
+                    cardItems.forEach(cardItem => {
+                        const cardText = cardItem.textContent.trim();
+                        const match = cardText.match(/^(\d+) - (.+)$/);
+                        
+                        if (match) {
+                            const cardValue = parseInt(match[1]);
+                            const cardType = match[2];
+                            
+                            // Check if any deck character can use this power card
+                            const canUse = deckCharacters.some(char => {
+                                let characterStat = 0;
+                                
+                                switch (cardType) {
+                                    case 'Energy':
+                                        characterStat = char.energy;
+                                        break;
+                                    case 'Combat':
+                                        characterStat = char.combat;
+                                        break;
+                                    case 'Brute Force':
+                                        characterStat = char.brute_force;
+                                        break;
+                                    case 'Intelligence':
+                                        characterStat = char.intelligence;
+                                        break;
+                                    case 'Any-Power':
+                                    case 'Multi-Power':
+                                        // These can be used by any character with any stat >= card value
+                                        characterStat = Math.max(char.energy, char.combat, char.brute_force, char.intelligence);
+                                        break;
+                                }
+                                
+                                const usable = characterStat >= cardValue;
+                                console.log(`  ${char.name} (${cardType}: ${characterStat}) can use ${cardValue} ${cardType}: ${usable}`);
+                                return usable;
+                            });
+                            
+                            cardItem.style.display = canUse ? 'block' : 'none';
+                            if (canUse) visibleCount++;
+                        }
+                    });
+                    
+                    // Update the group header count
+                    const originalText = header.textContent;
+                    const newText = originalText.replace(/\(\d+\)/, `(${visibleCount})`);
+                    header.textContent = newText;
+                    
+                    // Show/hide the entire group based on whether any cards are visible
+                    group.style.display = visibleCount > 0 ? 'block' : 'none';
+                    totalVisibleCards += visibleCount;
+                    console.log(`  ${powerType}: ${visibleCount} cards visible`);
+                } else {
+                    // Show all power cards and restore original counts
+                    const cardItems = group.querySelectorAll('.card-item');
+                    cardItems.forEach(cardItem => {
+                        cardItem.style.display = 'block';
+                    });
+                    group.style.display = 'block';
+                    
+                    // Restore original count in header
+                    const originalCount = cardItems.length;
+                    const originalText = header.textContent;
+                    const newText = originalText.replace(/\(\d+\)/, `(${originalCount})`);
+                    header.textContent = newText;
+                    totalVisibleCards += originalCount;
+                    console.log(`  ${powerType}: all ${originalCount} cards shown`);
+                }
+            });
+            
+            // Update the main Power Cards header count
+            const mainHeader = powerCardsCategory.querySelector('.card-category-header span');
+            if (mainHeader) {
+                const originalText = mainHeader.textContent;
+                const newText = originalText.replace(/\(\d+\)/, `(${totalVisibleCards})`);
+                mainHeader.textContent = newText;
+                console.log(`Updated main header count to: ${totalVisibleCards}`);
+            }
+            
+            console.log('=== END POWER CARDS FILTER DEBUG ===');
+        }
+
+        // Update power cards filter when deck changes
+        function updatePowerCardsFilter() {
+            const filterCheckbox = document.getElementById('powerCardsCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                togglePowerCardsCharacterFilter();
+            }
+        }
         
         // Toggle deck view mode (preview vs image)
         function toggleDeckView(mode) {
@@ -5870,6 +6051,9 @@
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
             
+            // Update power cards filter if it's active
+            updatePowerCardsFilter();
+            
             // Validate deck after removing card
             showDeckValidation(deckEditorCards);
         }
@@ -5893,6 +6077,9 @@
             
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
+            
+            // Update power cards filter if it's active
+            updatePowerCardsFilter();
             
             // Validate deck after removing missions
             showDeckValidation(deckEditorCards);
@@ -6442,6 +6629,27 @@
                                         </div>
                                     </div>
                                 `;
+                            } else if (category.type === 'power') {
+                                // Special handling for power cards header with character filter toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}">
+                                            <div class="category-header-content" onclick="toggleCategory(this)">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <label class="filter-toggle">
+                                                    <input type="checkbox" id="powerCardsCharacterFilter" onchange="togglePowerCardsCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unusables</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
                             } else {
                                 // Regular handling for other card types
                                 categoriesHtml += `
@@ -6595,6 +6803,9 @@
             
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
+            
+            // Update power cards filter if it's active
+            updatePowerCardsFilter();
             
             // Validate deck after adding card
             showDeckValidation(deckEditorCards);
