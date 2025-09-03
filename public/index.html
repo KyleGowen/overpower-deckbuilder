@@ -5201,12 +5201,16 @@
                 });
             }
             
-            const deckCharacterNames = deckEditorCards
-                .filter(card => card.type === 'character')
-                .map(card => characterMap[card.cardId] || card.name);
+            const deckCharacterCards = deckEditorCards.filter(card => card.type === 'character');
+            const deckCharacterNames = deckCharacterCards.map(card => {
+                const characterName = characterMap[card.cardId];
+                console.log(`Mapping cardId ${card.cardId} to character name: ${characterName}`);
+                return characterName;
+            }).filter(name => name); // Remove any undefined names
             
             console.log('=== FILTER DEBUG ===');
             console.log('Filter checked:', isChecked);
+            console.log('Deck character cards:', deckCharacterCards);
             console.log('Deck character names:', deckCharacterNames);
             console.log('Character map:', characterMap);
             console.log('Found', characterGroups.length, 'character groups');
@@ -5285,11 +5289,35 @@
             console.log('=== END FILTER DEBUG ===');
         }
         
+        // Update deck editor card count display
+        function updateDeckEditorCardCount() {
+            const totalCards = deckEditorCards.reduce((total, card) => total + card.quantity, 0);
+            const characterCount = deckEditorCards.filter(card => card.type === 'character').length;
+            const powerCardCount = deckEditorCards.filter(card => card.type === 'power').reduce((total, card) => total + card.quantity, 0);
+            const specialCardCount = deckEditorCards.filter(card => card.type === 'special').reduce((total, card) => total + card.quantity, 0);
+            
+            // Update any card count displays in the deck editor
+            const cardCountElements = document.querySelectorAll('.deck-card-count');
+            cardCountElements.forEach(element => {
+                element.textContent = totalCards;
+            });
+            
+            console.log(`Deck card count updated: ${totalCards} total (${characterCount} characters, ${powerCardCount} power cards, ${specialCardCount} special cards)`);
+        }
+
         // Update special cards filter when deck changes
         function updateSpecialCardsFilter() {
+            console.log('updateSpecialCardsFilter called');
+            console.log('Current deckEditorCards:', deckEditorCards);
             const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
             if (filterCheckbox && filterCheckbox.checked) {
-                toggleSpecialCardsCharacterFilter();
+                console.log('Filter is checked, calling toggleSpecialCardsCharacterFilter');
+                // Add a small delay to ensure DOM is fully updated
+                setTimeout(() => {
+                    toggleSpecialCardsCharacterFilter();
+                }, 50);
+            } else {
+                console.log('Filter is not checked or checkbox not found');
             }
         }
 
