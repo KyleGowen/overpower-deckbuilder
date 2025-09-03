@@ -260,12 +260,15 @@
             justify-content: space-between;
             align-items: center;
             flex: 1;
+            padding-right: 8px;
+            gap: 12px;
         }
         
         .category-header-controls {
             display: flex;
             align-items: center;
-            margin-left: 16px;
+            justify-content: center;
+            min-width: 24px;
         }
         
         .filter-toggle {
@@ -273,8 +276,15 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
             font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .filter-toggle:hover {
+            background-color: rgba(78, 205, 196, 0.1);
         }
         
         .filter-toggle input[type="checkbox"] {
@@ -6572,13 +6582,13 @@
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <span class="collapse-icon">${collapseIcon}</span>
-                                            </div>
-                                            <div class="category-header-controls">
                                                 <label class="filter-toggle">
                                                     <input type="checkbox" id="specialCardsCharacterFilter" onchange="toggleSpecialCardsCharacterFilter()">
                                                     <span class="toggle-label">Show Only Deck Characters</span>
                                                 </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
                                         </div>
                                         <div class="card-category-content ${collapsedClass}">
@@ -6593,13 +6603,13 @@
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <span class="collapse-icon">${collapseIcon}</span>
-                                            </div>
-                                            <div class="category-header-controls">
                                                 <label class="filter-toggle">
                                                     <input type="checkbox" id="powerCardsCharacterFilter" onchange="togglePowerCardsCharacterFilter()">
                                                     <span class="toggle-label">Hide Unusables</span>
                                                 </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
                                         </div>
                                         <div class="card-category-content ${collapsedClass}">
