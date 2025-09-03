@@ -5025,13 +5025,13 @@
                 headerElement.classList.remove('collapsed');
                 content.classList.remove('collapsed');
                 content.classList.add('expanded');
-                icon.textContent = '▼';
+                icon.textContent = '▲';
             } else {
                 // Collapse
                 headerElement.classList.add('collapsed');
                 content.classList.add('collapsed');
                 content.classList.remove('expanded');
-                icon.textContent = '▶';
+                icon.textContent = '▼';
             }
         }
 
@@ -6517,8 +6517,8 @@
                                 // Special handling for special cards header with toggle
                                 categoriesHtml += `
                                     <div class="card-category">
-                                        <div class="card-category-header ${collapsedClass}">
-                                            <div class="category-header-content" onclick="toggleCategory(this)">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
@@ -6538,8 +6538,8 @@
                                 // Special handling for power cards header with character filter toggle
                                 categoriesHtml += `
                                     <div class="card-category">
-                                        <div class="card-category-header ${collapsedClass}">
-                                            <div class="category-header-content" onclick="toggleCategory(this)">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
