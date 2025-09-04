@@ -1592,6 +1592,7 @@
             justify-content: space-between;
             align-items: center;
             cursor: move;
+            position: relative;
         }
 
         .deck-card-editor-item:hover {
@@ -1794,6 +1795,7 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            z-index: 10;
         }
 
 
@@ -5702,10 +5704,12 @@
                         }
                     }
                     
-                    // Add remove all button for missions
+                    // Add remove all button for all card types
                     let removeAllButton = '';
                     if (type === 'mission') {
                         removeAllButton = `<button class="remove-all-btn" onclick="event.stopPropagation(); removeAllMissionsFromDeck()">Remove All</button>`;
+                    } else {
+                        removeAllButton = `<button class="remove-all-btn" onclick="event.stopPropagation(); removeAllCardsFromDeck('${type}')">Remove All</button>`;
                     }
                     
                     cardsHtml += `
@@ -6128,6 +6132,43 @@
             showDeckValidation(deckEditorCards);
             
             showNotification(`Removed ${missionCount} mission cards from deck`, 'success');
+        }
+
+        function removeAllCardsFromDeck(cardType) {
+            const cardCount = deckEditorCards.filter(card => card.type === cardType).length;
+            
+            if (cardCount === 0) {
+                showNotification(`No ${cardType} cards to remove`, 'info');
+                return;
+            }
+            
+            // Remove all cards of this type
+            deckEditorCards = deckEditorCards.filter(card => card.type !== cardType);
+            
+            displayDeckCardsForEditing();
+            updateDeckEditorCardCount();
+            
+            // Update character limit status if removing characters
+            if (cardType === 'character') {
+                updateCharacterLimitStatus();
+            }
+            
+            // Update mission limit status if removing missions
+            if (cardType === 'mission') {
+                updateMissionLimitStatus();
+            }
+            
+            // Update special cards filter if it's active
+            updateSpecialCardsFilter();
+            
+            // Update power cards filter if it's active
+            updatePowerCardsFilter();
+            
+            // Validate deck after removing cards
+            showDeckValidation(deckEditorCards);
+            
+            const typeName = formatCardType(cardType);
+            showNotification(`Removed ${cardCount} ${typeName.toLowerCase()} from deck`, 'success');
         }
 
         function addAllSpecialCardsForCharacter(characterName) {
