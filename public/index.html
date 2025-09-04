@@ -1149,6 +1149,65 @@
             gap: 4px;
         }
 
+        /* Deck Summary Section */
+        .deck-summary-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 25px;
+            margin-bottom: 20px;
+        }
+
+        .deck-summary-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .deck-summary-stats {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .summary-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            font-size: 1.46rem;
+            color: #888;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2.93rem;
+            color: #4ecdc4;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .deck-summary-validation {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .deck-summary-validation .validation-errors-compact,
+        .deck-summary-validation .validation-warnings-compact,
+        .deck-summary-validation .validation-success-compact {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         .deck-description {
             margin: 0;
             color: #bdc3c7;
@@ -2897,6 +2956,38 @@
                     <button class="btn-primary" onclick="saveDeckChanges()">Save Changes</button>
                 </div>
             </div>
+            
+            <!-- Deck Summary Section -->
+            <div class="deck-summary-section">
+                <div class="deck-summary-content">
+                    <div class="deck-summary-stats">
+                        <div class="summary-stat">
+                            <span class="stat-label">Total Cards:</span>
+                            <span class="stat-value" id="deckTotalCards">0</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="stat-label">Max Energy:</span>
+                            <span class="stat-value" id="deckMaxEnergy">0</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="stat-label">Max Combat:</span>
+                            <span class="stat-value" id="deckMaxCombat">0</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="stat-label">Max Brute Force:</span>
+                            <span class="stat-value" id="deckMaxBruteForce">0</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="stat-label">Max Intelligence:</span>
+                            <span class="stat-value" id="deckMaxIntelligence">0</span>
+                        </div>
+                    </div>
+                    <div class="deck-summary-validation" id="deckSummaryValidation">
+                        <!-- Validation content will be displayed here -->
+                    </div>
+                </div>
+            </div>
+            
             <div class="modal-body">
                 <div class="deck-editor-layout">
                                            <!-- Left Pane: Deck List View -->
@@ -5080,24 +5171,53 @@
             return { errors, warnings, isValid: errors.length === 0 };
         }
 
-        // Function to show deck validation results
-        function showDeckValidation(deckCards) {
-            const validation = validateDeck(deckCards);
-            const validationContainer = document.getElementById('deck-validation');
+        // Function to update deck summary with stats and validation
+        async function updateDeckSummary(deckCards) {
+            // Update total card count
+            const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
+            document.getElementById('deckTotalCards').textContent = totalCards;
             
-            if (!validationContainer) {
-                // Create validation container if it doesn't exist
-                const deckContentsPane = document.querySelector('.deck-pane');
-                if (deckContentsPane) {
-                    const validationDiv = document.createElement('div');
-                    validationDiv.id = 'deck-validation';
-                    validationDiv.className = 'deck-validation';
-                    deckContentsPane.insertBefore(validationDiv, deckContentsPane.firstChild);
+            // Calculate maximum character stats by fetching character data
+            const characterCards = deckCards.filter(card => card.type === 'character');
+            let maxEnergy = 0, maxCombat = 0, maxBruteForce = 0, maxIntelligence = 0;
+            
+            if (characterCards.length > 0) {
+                try {
+                    // Fetch character data from the API
+                    const response = await fetch('/api/characters');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const characterMap = {};
+                        data.data.forEach(char => {
+                            characterMap[char.id] = char;
+                        });
+                        
+                        characterCards.forEach(card => {
+                            const characterData = characterMap[card.cardId];
+                            if (characterData) {
+                                if (characterData.energy > maxEnergy) maxEnergy = characterData.energy;
+                                if (characterData.combat > maxCombat) maxCombat = characterData.combat;
+                                if (characterData.brute_force > maxBruteForce) maxBruteForce = characterData.brute_force;
+                                if (characterData.intelligence > maxIntelligence) maxIntelligence = characterData.intelligence;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching character data for summary:', error);
                 }
             }
             
-            const container = document.getElementById('deck-validation');
-            if (!container) return;
+            document.getElementById('deckMaxEnergy').textContent = maxEnergy;
+            document.getElementById('deckMaxCombat').textContent = maxCombat;
+            document.getElementById('deckMaxBruteForce').textContent = maxBruteForce;
+            document.getElementById('deckMaxIntelligence').textContent = maxIntelligence;
+            
+            // Update validation in summary
+            const validation = validateDeck(deckCards);
+            const summaryValidationContainer = document.getElementById('deckSummaryValidation');
+            
+            if (!summaryValidationContainer) return;
             
             let html = '';
             
@@ -5122,7 +5242,13 @@
                 html += '</div>';
             }
             
-            container.innerHTML = html;
+            summaryValidationContainer.innerHTML = html;
+        }
+
+        // Function to show deck validation results
+        async function showDeckValidation(deckCards) {
+            // Update the deck summary (this now handles all validation display)
+            await updateDeckSummary(deckCards);
             
             // Always allow saving, but show validation status
             const saveButton = document.querySelector('.deck-editor-actions .btn-primary');
@@ -5648,7 +5774,7 @@
                     await loadAvailableCards();
                     
                     // Display deck cards after available cards are loaded
-                    displayDeckCardsForEditing();
+                    await displayDeckCardsForEditing();
                     
                     // Update card count
 
@@ -5673,7 +5799,7 @@
             }
         }
 
-        function displayDeckCardsForEditing() {
+        async function displayDeckCardsForEditing() {
             const deckCardsEditor = document.getElementById('deckCardsEditor');
             
             if (deckEditorCards.length === 0) {
@@ -5685,12 +5811,12 @@
                 `;
                 
                 // Validate empty deck
-                showDeckValidation(deckEditorCards);
+                await showDeckValidation(deckEditorCards);
                 return;
             }
             
             // Validate deck and show results
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
             
             // Group cards by type
             const cardsByType = {};
@@ -6210,9 +6336,9 @@
             }
         }
 
-        function removeCardFromEditor(index) {
+        async function removeCardFromEditor(index) {
             deckEditorCards.splice(index, 1);
-            displayDeckCardsForEditing();
+            await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
             
             // Update character limit status without affecting collapse state
@@ -6229,10 +6355,10 @@
             
             
             // Validate deck after removing card
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
         }
 
-        function removeAllMissionsFromDeck() {
+        async function removeAllMissionsFromDeck() {
             const missionCount = deckEditorCards.filter(card => card.type === 'mission').length;
             
             if (missionCount === 0) {
@@ -6243,7 +6369,7 @@
             // Remove all mission cards
             deckEditorCards = deckEditorCards.filter(card => card.type !== 'mission');
             
-            displayDeckCardsForEditing();
+            await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
             
             // Update mission limit status
@@ -6257,12 +6383,12 @@
             
             
             // Validate deck after removing missions
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
             
             showNotification(`Removed ${missionCount} mission cards from deck`, 'success');
         }
 
-        function removeAllCardsFromDeck(cardType) {
+        async function removeAllCardsFromDeck(cardType) {
             const cardCount = deckEditorCards.filter(card => card.type === cardType).length;
             
             if (cardCount === 0) {
@@ -6273,7 +6399,7 @@
             // Remove all cards of this type
             deckEditorCards = deckEditorCards.filter(card => card.type !== cardType);
             
-            displayDeckCardsForEditing();
+            await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
             
             // Update character limit status if removing characters
@@ -6294,13 +6420,13 @@
             
             
             // Validate deck after removing cards
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
             
             const typeName = formatCardType(cardType);
             showNotification(`Removed ${cardCount} ${typeName.toLowerCase()} from deck`, 'success');
         }
 
-        function removeUnusableSpecialCards() {
+        async function removeUnusableSpecialCards() {
             // Get all selected characters
             const selectedCharacters = deckEditorCards.filter(card => card.type === 'character');
             
@@ -6354,7 +6480,7 @@
                 deckEditorCards.splice(index, 1);
             });
             
-            displayDeckCardsForEditing();
+            await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
             
             // Update special cards filter if it's active
@@ -6362,7 +6488,7 @@
             
             
             // Validate deck after removing cards
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
             
             showNotification(`Removed ${unusableCards.length} unusable special cards`, 'success');
         }
@@ -7029,7 +7155,7 @@
             }
         }
 
-        function addCardToEditor(cardType, cardId, cardName) {
+        async function addCardToEditor(cardType, cardId, cardName) {
             // Check character limit before adding
             if (cardType === 'character') {
                 const currentCharacterCount = deckEditorCards
@@ -7086,7 +7212,7 @@
                 deckEditorCards.push(newCard);
             }
             
-            displayDeckCardsForEditing();
+            await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
             
             // Update character limit status without affecting collapse state
@@ -7103,7 +7229,7 @@
             
             
             // Validate deck after adding card
-            showDeckValidation(deckEditorCards);
+            await showDeckValidation(deckEditorCards);
         }
 
         async function saveDeckChanges() {
