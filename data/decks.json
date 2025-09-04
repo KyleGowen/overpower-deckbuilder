@@ -5,104 +5,110 @@
       "name": "New Deck",
       "description": "The new new",
       "created": "2025-09-03T06:34:00.509Z",
-      "lastModified": "2025-09-03T16:49:44.177Z",
-      "cardCount": 16
+      "lastModified": "2025-09-04T06:20:17.245Z",
+      "cardCount": 17
     },
     "cards": [
       {
-        "id": "deckcard_1756918184139_as2rv1qmy",
-        "type": "character",
-        "cardId": "char_1",
-        "quantity": 1
-      },
-      {
-        "id": "deckcard_1756918184141_nuw3msv9u",
+        "id": "deckcard_1756966817205_mwwfg10xk",
         "type": "character",
         "cardId": "char_42",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184143_wnmf1uodo",
+        "id": "deckcard_1756966817209_qliagszxl",
         "type": "power",
         "cardId": "power_29",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184146_3xz2su91s",
+        "id": "deckcard_1756966817211_qu8h3l1l0",
         "type": "power",
         "cardId": "power_37",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184148_cnm7iv236",
+        "id": "deckcard_1756966817213_106jhp52c",
         "type": "power",
         "cardId": "power_38",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184149_69jxs3zq1",
+        "id": "deckcard_1756966817214_smptinb66",
         "type": "power",
         "cardId": "power_39",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184151_3c0z4gyh1",
+        "id": "deckcard_1756966817216_cvzlqs5gv",
         "type": "power",
         "cardId": "power_33",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184154_gsiip1edq",
+        "id": "deckcard_1756966817218_9x2kb4bz4",
         "type": "power",
         "cardId": "power_34",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184157_qygfbg5zn",
+        "id": "deckcard_1756966817220_6rau9wyzm",
         "type": "power",
         "cardId": "power_35",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184159_gyzxg8hj8",
+        "id": "deckcard_1756966817222_j0ya03smy",
         "type": "character",
         "cardId": "char_5",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184162_jdczevrs6",
+        "id": "deckcard_1756966817224_eol9twlab",
         "type": "special",
         "cardId": "special_33",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184165_ao5421xy6",
+        "id": "deckcard_1756966817228_htfpbhqak",
         "type": "special",
         "cardId": "special_34",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184168_4ftksehss",
+        "id": "deckcard_1756966817231_jkj9rgfmc",
         "type": "special",
         "cardId": "special_35",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184171_sdefc0e6g",
+        "id": "deckcard_1756966817234_s213tvd1g",
         "type": "special",
         "cardId": "special_36",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184174_bgy0pwgow",
+        "id": "deckcard_1756966817237_k87ezpt0e",
         "type": "special",
         "cardId": "special_37",
         "quantity": 1
       },
       {
-        "id": "deckcard_1756918184177_5ysdau4zv",
+        "id": "deckcard_1756966817239_cgdg0h9zj",
         "type": "special",
         "cardId": "special_38",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756966817242_rd8zl1ihc",
+        "type": "character",
+        "cardId": "char_23",
+        "quantity": 1
+      },
+      {
+        "id": "deckcard_1756966817245_hgj7q45ew",
+        "type": "character",
+        "cardId": "char_20",
         "quantity": 1
       }
     ]

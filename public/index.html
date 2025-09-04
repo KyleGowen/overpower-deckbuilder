@@ -1745,7 +1745,52 @@
             justify-content: space-between;
         }
 
+        /* Character background styling for deck editor tiles */
+        .deck-card-editor-item.character-card {
+            background: linear-gradient(to right, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deck-card-editor-item.character-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 100% auto;
+            background-position: right 10%;
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
+        }
+
+        .deck-card-editor-item.character-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, 
+                rgba(54, 54, 54, 0.8) 0%, 
+                rgba(54, 54, 54, 0.4) 50%, 
+                rgba(54, 54, 54, 0.1) 100%);
+            z-index: -1;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
         .deck-card-editor-actions {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
             display: flex;
             gap: 8px;
             align-items: center;
@@ -5815,8 +5860,13 @@
                         }
                         
                         // Preview mode - show detailed info with hover effect
+                        const isCharacter = card.type === 'character';
+                        const characterClass = isCharacter ? 'character-card' : '';
+                        const bgImageData = isCharacter ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                        
                         cardsHtml += `
-                            <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}" 
+                            <div class="deck-card-editor-item preview-view ${characterClass}" draggable="true" data-index="${index}" 
+                                 ${bgImageData}
                                  onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
                                  onmouseleave="hideCardHoverModal()">
                                 <div class="deck-card-editor-info">
@@ -5839,6 +5889,29 @@
             });
             
             deckCardsEditor.innerHTML = cardsHtml;
+            
+            // Apply character background images
+            applyCharacterBackgroundsToEditor();
+        }
+        
+        // Apply background images to character cards in deck editor
+        function applyCharacterBackgroundsToEditor() {
+            const characterCards = document.querySelectorAll('.deck-card-editor-item.character-card');
+            characterCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        card.style.setProperty('--bg-image', `url(${bgImage})`);
+                    };
+                    img.onerror = function() {
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
         }
         
         // Show card hover modal
