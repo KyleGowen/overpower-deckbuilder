@@ -997,6 +997,13 @@
             margin-bottom: 10px;
         }
 
+        .deck-characters {
+            color: #4ecdc4;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
         .deck-meta {
             display: flex;
             gap: 20px;
@@ -4434,22 +4441,21 @@
         // ===== DECK MANAGEMENT FUNCTIONS =====
 
         // Load decks when switching to deck builder tab
-        function loadDecks() {
-            fetch('/api/decks')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        displayDecks(data.data);
-                        updateDeckStats();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading decks:', error);
-                    document.getElementById('deck-list').innerHTML = '<div class="error">Failed to load decks</div>';
-                });
+        async function loadDecks() {
+            try {
+                const response = await fetch('/api/decks');
+                const data = await response.json();
+                if (data.success) {
+                    await displayDecks(data.data);
+                    updateDeckStats();
+                }
+            } catch (error) {
+                console.error('Error loading decks:', error);
+                document.getElementById('deck-list').innerHTML = '<div class="error">Failed to load decks</div>';
+            }
         }
 
-        function displayDecks(decks) {
+        async function displayDecks(decks) {
             const deckList = document.getElementById('deck-list');
             
             if (decks.length === 0) {
@@ -4462,7 +4468,35 @@
                 return;
             }
 
-            deckList.innerHTML = decks.map(deck => {
+            // Fetch character data to get character names
+            let characterMap = {};
+            try {
+                const characterResponse = await fetch('/api/characters');
+                const characterData = await characterResponse.json();
+                if (characterData.success) {
+                    characterData.data.forEach(char => {
+                        characterMap[char.id] = char;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching character data:', error);
+            }
+
+            // Fetch full deck data for each deck to get character information
+            const decksWithCharacters = await Promise.all(decks.map(async (deck) => {
+                try {
+                    const response = await fetch(`/api/decks/${deck.id}`);
+                    const data = await response.json();
+                    if (data.success) {
+                        return { ...deck, cards: data.data.cards };
+                    }
+                } catch (error) {
+                    console.error(`Error fetching deck ${deck.id}:`, error);
+                }
+                return deck;
+            }));
+
+            deckList.innerHTML = decksWithCharacters.map(deck => {
                 // Quick validation check for display
                 let validationStatus = '';
                 if (deck.cards && deck.cards.length > 0) {
@@ -4476,12 +4510,26 @@
                     }
                 }
                 
+                // Get character names from deck cards
+                let characterList = '';
+                if (deck.cards && deck.cards.length > 0) {
+                    const characterCards = deck.cards.filter(card => card.type === 'character');
+                    if (characterCards.length > 0) {
+                        const characterNames = characterCards.map(card => {
+                            const character = characterMap[card.cardId];
+                            return character ? character.name : 'Unknown Character';
+                        });
+                        characterList = `<div class="deck-characters">👥 Characters: ${characterNames.join(', ')}</div>`;
+                    }
+                }
+                
                 return `
                     <div class="deck-card" onclick="editDeck('${deck.id}')">
                         <div class="deck-header">
                             <div class="deck-info">
                                 <h4>${deck.name} ${validationStatus}</h4>
                                 ${deck.description ? `<div class="deck-description">${deck.description}</div>` : ''}
+                                ${characterList}
                                 <div class="deck-meta">
                                     <span>📊 ${deck.cardCount} cards</span>
                                     <span>📅 Created: ${new Date(deck.created).toLocaleDateString()}</span>
