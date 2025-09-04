@@ -6839,7 +6839,7 @@
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <label class="filter-toggle">
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="specialCardsCharacterFilter" onchange="toggleSpecialCardsCharacterFilter()">
                                                     <span class="toggle-label">Show Only Deck Characters</span>
                                                 </label>
@@ -6860,7 +6860,7 @@
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <label class="filter-toggle">
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="powerCardsCharacterFilter" onchange="togglePowerCardsCharacterFilter()">
                                                     <span class="toggle-label">Hide Unusables</span>
                                                 </label>
