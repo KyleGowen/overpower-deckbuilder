@@ -5731,162 +5731,236 @@
                             <div class="deck-type-cards" id="deck-type-${type}">
                     `;
                     
-                    typeCards.forEach(cardData => {
-                        const card = cardData;
-                        const index = cardData.originalIndex;
-                        const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    if (type === 'special') {
+                        // Special handling for special cards - group by character
+                        const characterGroups = {};
                         
-                        if (!availableCard) {
-                            console.warn('Card not found in availableCardsMap:', card);
-                            return;
-                        }
-                        
-                        let cardDetails = '';
-                        if (card.type === 'character') {
-                            // Character stats
-                            const stats = [
-                                { label: 'TL:', value: availableCard.threat_level || 0, color: '#808080' },
-                                { label: 'E:', value: availableCard.energy || 0, color: '#FFD700' },
-                                { label: 'C:', value: availableCard.combat || 0, color: '#FF8C00' },
-                                { label: 'BF:', value: availableCard.brute_force || 0, color: '#32CD32' },
-                                { label: 'I:', value: availableCard.intelligence || 0, color: '#6495ED' }
-                            ];
+                        typeCards.forEach(cardData => {
+                            const card = cardData;
+                            const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
                             
-                            cardDetails = `
-                                <div class="character-stats">
-                                    <div class="stat-labels">${stats.map(stat => `<span class="stat-label">${stat.label}</span>`).join(' ')}</div>
-                                    <div class="stat-values">${stats.map(stat => `<span class="stat-value" style="color: ${stat.color};">${stat.value}</span>`).join(' ')}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'location') {
-                            // Location threat level
-                            cardDetails = `
-                                <div class="location-stats">
-                                    <div class="stat-label">Threat Level:</div>
-                                    <div class="stat-value" style="color: #FF6B6B;">${availableCard.threat_level || 0}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'mission') {
-                            // Mission set
-                            cardDetails = `
-                                <div class="mission-stats">
-                                    <div class="stat-label">Mission Set:</div>
-                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'event') {
-                            // Event mission set
-                            cardDetails = `
-                                <div class="event-stats">
-                                    <div class="stat-label">Mission Set:</div>
-                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'special') {
-                            // Special card type
-                            cardDetails = `
-                                <div class="special-stats">
-                                    <div class="stat-label">Type:</div>
-                                    <div class="stat-value" style="color: #F39C12;">${availableCard.card_type || 'Special'}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'aspect') {
-                            // Aspect fortifications
-                            const fortifications = availableCard.fortifications ? 'Yes' : 'No';
-                            const onePerDeck = availableCard.one_per_deck ? 'Yes' : 'No';
-                            cardDetails = `
-                                <div class="aspect-stats">
-                                    <div class="stat-label">Fortifications:</div>
-                                    <div class="stat-value" style="color: #E74C3C;">${fortifications}</div>
-                                    <div class="stat-label">One Per Deck:</div>
-                                    <div class="stat-value" style="color: #3498DB;">${onePerDeck}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'power') {
-                            // Power card details
-                            cardDetails = `
-                                <div class="power-stats">
-                                    <div class="stat-label">Type:</div>
-                                    <div class="stat-value" style="color: #1ABC9C;">${availableCard.power_type || 'Power'}</div>
-                                    <div class="stat-label">Value:</div>
-                                    <div class="stat-value" style="color: #E67E22;">${availableCard.value || 'N/A'}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'basic_universe') {
-                            // Basic universe details
-                            cardDetails = `
-                                <div class="basic-universe-stats">
-                                    <div class="stat-label">Type:</div>
-                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.type_value || 'Unknown'}</div>
-                                    <div class="stat-label">Value:</div>
-                                    <div class="stat-value" style="color: #FFAA00;">${availableCard.value_to_use || 'Unknown'}</div>
-                                    <div class="stat-label">Bonus:</div>
-                                    <div class="stat-value" style="color: #32CD32;">+${availableCard.bonus || 'Unknown'}</div>
-                                </div>
-                            `;
-                        } else if (card.type === 'teamwork') {
-                            // Teamwork details
-                            if (availableCard.one_per_deck) {
-                                cardDetails = `
-                                    <div class="teamwork-stats">
-                                        <div class="stat-label">One Per Deck:</div>
-                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
-                                    </div>
-                                `;
+                            if (!availableCard) {
+                                console.warn('Card not found in availableCardsMap:', card);
+                                return;
                             }
-                        } else if (card.type === 'ally_universe') {
-                            // Ally universe details
-                            if (availableCard.one_per_deck) {
-                                cardDetails = `
-                                    <div class="ally-universe-stats">
-                                        <div class="stat-label">One Per Deck:</div>
-                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
-                                    </div>
-                                `;
+                            
+                            const characterName = availableCard.character || availableCard.character_name || 'Any Character';
+                            if (!characterGroups[characterName]) {
+                                characterGroups[characterName] = [];
                             }
-                        } else if (card.type === 'training') {
-                            // Training details
-                            if (availableCard.one_per_deck) {
-                                cardDetails = `
-                                    <div class="training-stats">
-                                        <div class="stat-label">One Per Deck:</div>
-                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
-                                    </div>
-                                `;
-                            }
-                        } else if (card.type === 'advanced_universe') {
-                            // Advanced universe details
-                            if (availableCard.one_per_deck) {
-                                cardDetails = `
-                                    <div class="advanced-universe-stats">
-                                        <div class="stat-label">One Per Deck:</div>
-                                        <div class="stat-value" style="color: #4ECDC4;">Yes</div>
-                                    </div>
-                                `;
-                            }
-                        }
+                            characterGroups[characterName].push(cardData);
+                        });
                         
-                        // Preview mode - show detailed info with hover effect
-                        const isCharacter = card.type === 'character';
-                        const characterClass = isCharacter ? 'character-card' : '';
-                        const bgImageData = isCharacter ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                        // Sort character names alphabetically, but put "Any Character" first
+                        const sortedCharacterNames = Object.keys(characterGroups).sort((a, b) => {
+                            if (a === 'Any Character') return -1;
+                            if (b === 'Any Character') return 1;
+                            return a.localeCompare(b);
+                        });
                         
-                        cardsHtml += `
-                            <div class="deck-card-editor-item preview-view ${characterClass}" draggable="true" data-index="${index}" 
-                                 ${bgImageData}
-                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
-                                 onmouseleave="hideCardHoverModal()">
-                                <div class="deck-card-editor-info">
-                                    <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
-                                    <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
-                                    ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
+                        sortedCharacterNames.forEach(characterName => {
+                            const characterCards = characterGroups[characterName];
+                            const cardCount = characterCards.length;
+                            
+                            cardsHtml += `
+                                <div class="character-group">
+                                    <div class="character-group-header" onclick="toggleCharacterGroup(this)">
+                                        <span>${characterName} (${cardCount})</span>
+                                        <span class="collapse-icon">▶</span>
+                                    </div>
+                                    <div class="character-group-content collapsed">
+                            `;
+                            
+                            characterCards.forEach(cardData => {
+                                const card = cardData;
+                                const index = cardData.originalIndex;
+                                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                                
+                                if (!availableCard) {
+                                    console.warn('Card not found in availableCardsMap:', card);
+                                    return;
+                                }
+                                
+                                // Special card type
+                                const cardDetails = `
+                                    <div class="special-stats">
+                                        <div class="stat-label">Type:</div>
+                                        <div class="stat-value" style="color: #F39C12;">${availableCard.card_type || 'Special'}</div>
+                                    </div>
+                                `;
+                                
+                                cardsHtml += `
+                                    <div class="deck-card-editor-item preview-view" draggable="true" data-index="${index}" 
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${availableCard.name || availableCard.card_name || getCardName(card)}')"
+                                         onmouseleave="hideCardHoverModal()">
+                                        <div class="deck-card-editor-info">
+                                            <div class="deck-card-editor-name">${availableCard.name || availableCard.card_name || getCardName(card)}</div>
+                                            <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                                            <div class="deck-card-editor-stats">${cardDetails}</div>
+                                        </div>
+                                        <div class="deck-card-editor-actions">
+                                            <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            cardsHtml += `
+                                    </div>
                                 </div>
-                                <div class="deck-card-editor-actions">
-                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                            `;
+                        });
+                    } else {
+                        // Regular handling for all other card types
+                        typeCards.forEach(cardData => {
+                            const card = cardData;
+                            const index = cardData.originalIndex;
+                            const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                            
+                            if (!availableCard) {
+                                console.warn('Card not found in availableCardsMap:', card);
+                                return;
+                            }
+                            
+                            let cardDetails = '';
+                            if (card.type === 'character') {
+                                // Character stats
+                                const stats = [
+                                    { label: 'TL:', value: availableCard.threat_level || 0, color: '#808080' },
+                                    { label: 'E:', value: availableCard.energy || 0, color: '#FFD700' },
+                                    { label: 'C:', value: availableCard.combat || 0, color: '#FF8C00' },
+                                    { label: 'BF:', value: availableCard.brute_force || 0, color: '#32CD32' },
+                                    { label: 'I:', value: availableCard.intelligence || 0, color: '#6495ED' }
+                                ];
+                                
+                                cardDetails = `
+                                    <div class="character-stats">
+                                        <div class="stat-labels">${stats.map(stat => `<span class="stat-label">${stat.label}</span>`).join(' ')}</div>
+                                        <div class="stat-values">${stats.map(stat => `<span class="stat-value" style="color: ${stat.color};">${stat.value}</span>`).join(' ')}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'location') {
+                                // Location threat level
+                                cardDetails = `
+                                    <div class="location-stats">
+                                        <div class="stat-label">Threat Level:</div>
+                                        <div class="stat-value" style="color: #FF6B6B;">${availableCard.threat_level || 0}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'mission') {
+                                // Mission set
+                                cardDetails = `
+                                    <div class="mission-stats">
+                                        <div class="stat-label">Mission Set:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'event') {
+                                // Event mission set
+                                cardDetails = `
+                                    <div class="event-stats">
+                                        <div class="stat-label">Mission Set:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">${availableCard.mission_set || 'Unknown'}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'aspect') {
+                                // Aspect fortifications
+                                const fortifications = availableCard.fortifications ? 'Yes' : 'No';
+                                const onePerDeck = availableCard.one_per_deck ? 'Yes' : 'No';
+                                cardDetails = `
+                                    <div class="aspect-stats">
+                                        <div class="stat-label">Fortifications:</div>
+                                        <div class="stat-value" style="color: #E74C3C;">${fortifications}</div>
+                                        <div class="stat-label">One Per Deck:</div>
+                                        <div class="stat-value" style="color: #3498DB;">${onePerDeck}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'power') {
+                                // Power card details
+                                cardDetails = `
+                                    <div class="power-stats">
+                                        <div class="stat-label">Type:</div>
+                                        <div class="stat-value" style="color: #1ABC9C;">${availableCard.power_type || 'Power'}</div>
+                                        <div class="stat-label">Value:</div>
+                                        <div class="stat-value" style="color: #E67E22;">${availableCard.value || 'N/A'}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'basic_universe') {
+                                // Basic universe details
+                                cardDetails = `
+                                    <div class="basic-universe-stats">
+                                        <div class="stat-label">Type:</div>
+                                        <div class="stat-value" style="color: #4ECDC4;">${availableCard.type_value || 'Unknown'}</div>
+                                        <div class="stat-label">Value:</div>
+                                        <div class="stat-value" style="color: #FFAA00;">${availableCard.value_to_use || 'Unknown'}</div>
+                                        <div class="stat-label">Bonus:</div>
+                                        <div class="stat-value" style="color: #32CD32;">+${availableCard.bonus || 'Unknown'}</div>
+                                    </div>
+                                `;
+                            } else if (card.type === 'teamwork') {
+                                // Teamwork details
+                                if (availableCard.one_per_deck) {
+                                    cardDetails = `
+                                        <div class="teamwork-stats">
+                                            <div class="stat-label">One Per Deck:</div>
+                                            <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                        </div>
+                                    `;
+                                }
+                            } else if (card.type === 'ally_universe') {
+                                // Ally universe details
+                                if (availableCard.one_per_deck) {
+                                    cardDetails = `
+                                        <div class="ally-universe-stats">
+                                            <div class="stat-label">One Per Deck:</div>
+                                            <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                        </div>
+                                    `;
+                                }
+                            } else if (card.type === 'training') {
+                                // Training details
+                                if (availableCard.one_per_deck) {
+                                    cardDetails = `
+                                        <div class="training-stats">
+                                            <div class="stat-label">One Per Deck:</div>
+                                            <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                        </div>
+                                    `;
+                                }
+                            } else if (card.type === 'advanced_universe') {
+                                // Advanced universe details
+                                if (availableCard.one_per_deck) {
+                                    cardDetails = `
+                                        <div class="advanced-universe-stats">
+                                            <div class="stat-label">One Per Deck:</div>
+                                            <div class="stat-value" style="color: #4ECDC4;">Yes</div>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            
+                            // Preview mode - show detailed info with hover effect
+                            const isCharacter = card.type === 'character';
+                            const characterClass = isCharacter ? 'character-card' : '';
+                            const bgImageData = isCharacter ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                            
+                            cardsHtml += `
+                                <div class="deck-card-editor-item preview-view ${characterClass}" draggable="true" data-index="${index}" 
+                                     ${bgImageData}
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
+                                     onmouseleave="hideCardHoverModal()">
+                                    <div class="deck-card-editor-info">
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
+                                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                                        ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
+                                    </div>
+                                    <div class="deck-card-editor-actions">
+                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                    });
+                            `;
+                        });
+                    }
                     
                     cardsHtml += `
                             </div>
