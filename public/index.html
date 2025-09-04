@@ -5546,148 +5546,6 @@
             }
         }
 
-        // Toggle basic universe combat requirement filter
-        async function toggleBasicUniverseCombatFilter() {
-            const filterCheckbox = document.getElementById('basicUniverseCombatFilter');
-            if (!filterCheckbox) {
-                console.error('Basic universe combat filter checkbox not found');
-                return;
-            }
-            
-            const isChecked = filterCheckbox.checked;
-            
-            // Find the basic universe category
-            const allCategories = document.querySelectorAll('.card-category');
-            let basicUniverseCategory = null;
-            
-            for (const category of allCategories) {
-                const header = category.querySelector('.card-category-header span');
-                if (header && header.textContent.includes('Universe: Basic')) {
-                    basicUniverseCategory = category;
-                    break;
-                }
-            }
-            
-            if (!basicUniverseCategory) {
-                console.error('Basic universe category not found');
-                return;
-            }
-            
-            // Ensure the basic universe category is expanded when filter is applied or removed
-            const header = basicUniverseCategory.querySelector('.card-category-header');
-            const content = basicUniverseCategory.querySelector('.card-category-content');
-            const icon = header.querySelector('.collapse-icon');
-            
-            if (header.classList.contains('collapsed')) {
-                header.classList.remove('collapsed');
-                content.classList.remove('collapsed');
-                content.classList.add('expanded');
-                icon.textContent = '▼';
-            }
-            
-            if (isChecked) {
-                // Add visual indicator class
-                basicUniverseCategory.classList.add('basic-universe-filter-active');
-            } else {
-                // Remove visual indicator class
-                basicUniverseCategory.classList.remove('basic-universe-filter-active');
-            }
-            
-            // Get character data from current deck
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
-            const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
-                    characterMap[char.id] = char;
-                });
-            }
-            
-            const deckCharacterCards = deckEditorCards.filter(card => card.type === 'character');
-            const deckCharacters = deckCharacterCards.map(card => {
-                return characterMap[card.cardId];
-            }).filter(char => char);
-            
-            // Check if any selected character has 6+ in each stat
-            const hasHighEnergyCharacter = deckCharacters.some(char => char.energy >= 6);
-            const hasHighCombatCharacter = deckCharacters.some(char => char.combat >= 6);
-            const hasHighBruteForceCharacter = deckCharacters.some(char => char.brute_force >= 6);
-            const hasHighIntelligenceCharacter = deckCharacters.some(char => char.intelligence >= 6);
-            
-            console.log('=== BASIC UNIVERSE FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck characters:', deckCharacters);
-            console.log('Has high energy character (6+):', hasHighEnergyCharacter);
-            console.log('Has high combat character (6+):', hasHighCombatCharacter);
-            console.log('Has high brute force character (6+):', hasHighBruteForceCharacter);
-            console.log('Has high intelligence character (6+):', hasHighIntelligenceCharacter);
-            
-            // Get basic universe card data from API
-            const basicUniverseResponse = await fetch('/api/basic-universe');
-            const basicUniverseData = await basicUniverseResponse.json();
-            const basicUniverseCards = basicUniverseData.success ? basicUniverseData.data : [];
-            
-            // Get all basic universe card elements
-            const allBasicUniverseCards = basicUniverseCategory.querySelectorAll('.card-item');
-            
-            allBasicUniverseCards.forEach(cardElement => {
-                const cardId = cardElement.getAttribute('data-id');
-                const cardName = cardElement.getAttribute('data-name');
-                
-                // Find the corresponding card data
-                const cardData = basicUniverseCards.find(card => card.id === cardId);
-                
-                if (!cardData) {
-                    console.log(`Card data not found for: ${cardName}`);
-                    return;
-                }
-                
-                // Extract stat requirement from value_to_use field
-                // value_to_use format: "6 or greater", "7 or greater", etc.
-                const valueMatch = cardData.value_to_use.match(/(\d+)/);
-                const statRequirement = valueMatch ? parseInt(valueMatch[1]) : 0;
-                
-                // Check if any character has the required stat level for this card type
-                let hasRequiredStat = false;
-                const cardType = cardData.type.toLowerCase();
-                
-                if (cardType === 'energy') {
-                    hasRequiredStat = hasHighEnergyCharacter;
-                } else if (cardType === 'combat') {
-                    hasRequiredStat = hasHighCombatCharacter;
-                } else if (cardType === 'brute force') {
-                    hasRequiredStat = hasHighBruteForceCharacter;
-                } else if (cardType === 'intelligence') {
-                    hasRequiredStat = hasHighIntelligenceCharacter;
-                }
-                
-                console.log(`Card: ${cardName}, type: ${cardType}, value_to_use: ${cardData.value_to_use}, stat requirement: ${statRequirement}, has required stat: ${hasRequiredStat}`);
-                
-                if (isChecked) {
-                    // Hide cards that require 6+ in any stat if no character has 6+ in that stat
-                    if (statRequirement >= 6 && !hasRequiredStat) {
-                        console.log(`  HIDING: ${cardName} (requires ${statRequirement} ${cardType}, no character has 6+ ${cardType})`);
-                        cardElement.style.display = 'none';
-                    } else {
-                        console.log(`  SHOWING: ${cardName} (requires ${statRequirement} ${cardType}, has high ${cardType} character: ${hasRequiredStat})`);
-                        cardElement.style.display = 'block';
-                    }
-                } else {
-                    // Show all cards
-                    console.log(`  SHOWING: ${cardName} (filter off)`);
-                    cardElement.style.display = 'block';
-                }
-            });
-            
-            console.log('=== END BASIC UNIVERSE FILTER DEBUG ===');
-        }
-
-        // Update basic universe filter when deck changes
-        function updateBasicUniverseFilter() {
-            const filterCheckbox = document.getElementById('basicUniverseCombatFilter');
-            if (filterCheckbox && filterCheckbox.checked) {
-                toggleBasicUniverseCombatFilter();
-            }
-        }
         
 
 
@@ -6321,8 +6179,6 @@
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
-            // Update basic universe filter if it's active
-            updateBasicUniverseFilter();
             
             // Validate deck after removing card
             showDeckValidation(deckEditorCards);
@@ -6351,8 +6207,6 @@
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
-            // Update basic universe filter if it's active
-            updateBasicUniverseFilter();
             
             // Validate deck after removing missions
             showDeckValidation(deckEditorCards);
@@ -6390,8 +6244,6 @@
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
-            // Update basic universe filter if it's active
-            updateBasicUniverseFilter();
             
             // Validate deck after removing cards
             showDeckValidation(deckEditorCards);
@@ -6460,8 +6312,6 @@
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
             
-            // Update basic universe filter if it's active
-            updateBasicUniverseFilter();
             
             // Validate deck after removing cards
             showDeckValidation(deckEditorCards);
@@ -7030,16 +6880,12 @@
                                     </div>
                                 `;
                             } else if (category.type === 'basic-universe') {
-                                // Special handling for basic universe header with combat requirement filter toggle
+                                // Basic universe category - no special filter toggle
                                 categoriesHtml += `
                                     <div class="card-category">
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <label class="filter-toggle" onclick="event.stopPropagation()">
-                                                    <input type="checkbox" id="basicUniverseCombatFilter" onchange="toggleBasicUniverseCombatFilter()">
-                                                    <span class="toggle-label">Hide Unusables</span>
-                                                </label>
                                             </div>
                                             <div class="category-header-controls">
                                                 <span class="collapse-icon">${collapseIcon}</span>
@@ -7207,8 +7053,6 @@
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
-            // Update basic universe filter if it's active
-            updateBasicUniverseFilter();
             
             // Validate deck after adding card
             showDeckValidation(deckEditorCards);
