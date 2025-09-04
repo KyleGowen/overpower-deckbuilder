@@ -5232,18 +5232,16 @@
                 return;
             }
             
-            // Ensure the special cards category is expanded when filter is applied
-            if (isChecked) {
-                const header = specialCardsCategory.querySelector('.card-category-header');
-                const content = specialCardsCategory.querySelector('.card-category-content');
-                const icon = header.querySelector('.collapse-icon');
-                
-                if (header.classList.contains('collapsed')) {
-                    header.classList.remove('collapsed');
-                    content.classList.remove('collapsed');
-                    content.classList.add('expanded');
-                    icon.textContent = '▼';
-                }
+            // Ensure the special cards category is expanded when filter is applied or removed
+            const header = specialCardsCategory.querySelector('.card-category-header');
+            const content = specialCardsCategory.querySelector('.card-category-content');
+            const icon = header.querySelector('.collapse-icon');
+            
+            if (header.classList.contains('collapsed')) {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.textContent = '▼';
             }
             
             const characterGroups = specialCardsCategory.querySelectorAll('.character-group');
@@ -5708,6 +5706,11 @@
                     let removeAllButton = '';
                     if (type === 'mission') {
                         removeAllButton = `<button class="remove-all-btn" onclick="event.stopPropagation(); removeAllMissionsFromDeck()">Remove All</button>`;
+                    } else if (type === 'special') {
+                        removeAllButton = `
+                            <button class="remove-all-btn" onclick="event.stopPropagation(); removeUnusableSpecialCards()">Remove Unusables</button>
+                            <button class="remove-all-btn" onclick="event.stopPropagation(); removeAllCardsFromDeck('${type}')">Remove All</button>
+                        `;
                     } else {
                         removeAllButton = `<button class="remove-all-btn" onclick="event.stopPropagation(); removeAllCardsFromDeck('${type}')">Remove All</button>`;
                     }
@@ -6169,6 +6172,72 @@
             
             const typeName = formatCardType(cardType);
             showNotification(`Removed ${cardCount} ${typeName.toLowerCase()} from deck`, 'success');
+        }
+
+        function removeUnusableSpecialCards() {
+            // Get all selected characters
+            const selectedCharacters = deckEditorCards.filter(card => card.type === 'character');
+            
+            if (selectedCharacters.length === 0) {
+                showNotification('No characters selected - cannot determine usable special cards', 'info');
+                return;
+            }
+            
+            // Get character names
+            const characterNames = selectedCharacters.map(charCard => {
+                const availableCard = availableCardsMap.get(`${charCard.type}_${charCard.cardId}`);
+                return availableCard ? (availableCard.name || availableCard.card_name) : null;
+            }).filter(name => name);
+            
+            // Get all special cards
+            const specialCards = deckEditorCards.filter(card => card.type === 'special');
+            
+            if (specialCards.length === 0) {
+                showNotification('No special cards to check', 'info');
+                return;
+            }
+            
+            // Find unusable special cards (those that don't belong to any selected character)
+            const unusableCards = specialCards.filter(specialCard => {
+                const availableCard = availableCardsMap.get(`${specialCard.type}_${specialCard.cardId}`);
+                if (!availableCard) return true; // Remove if card not found
+                
+                // Check if this special card belongs to any selected character
+                const belongsToCharacter = characterNames.some(charName => {
+                    return availableCard.character === charName || 
+                           availableCard.character_name === charName ||
+                           (availableCard.characters && availableCard.characters.includes(charName));
+                });
+                
+                return !belongsToCharacter;
+            });
+            
+            if (unusableCards.length === 0) {
+                showNotification('All special cards are usable with selected characters', 'info');
+                return;
+            }
+            
+            // Remove unusable special cards
+            const unusableIndices = unusableCards.map(card => 
+                deckEditorCards.findIndex(deckCard => 
+                    deckCard.type === card.type && deckCard.cardId === card.cardId
+                )
+            ).sort((a, b) => b - a); // Sort in descending order to remove from end first
+            
+            unusableIndices.forEach(index => {
+                deckEditorCards.splice(index, 1);
+            });
+            
+            displayDeckCardsForEditing();
+            updateDeckEditorCardCount();
+            
+            // Update special cards filter if it's active
+            updateSpecialCardsFilter();
+            
+            // Validate deck after removing cards
+            showDeckValidation(deckEditorCards);
+            
+            showNotification(`Removed ${unusableCards.length} unusable special cards`, 'success');
         }
 
         function addAllSpecialCardsForCharacter(characterName) {
