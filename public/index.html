@@ -1153,7 +1153,7 @@
         .deck-summary-section {
             background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px 25px;
+            padding: 18px 25px;
             margin-bottom: 20px;
         }
 
@@ -1237,9 +1237,9 @@
         }
 
         .modal-body {
-            overflow-y: auto;
+            overflow: hidden;
             max-height: calc(90vh - 120px);
-            padding: 0 10px;
+            padding: 0 10px 20px 10px;
         }
 
         /* Deck Info Section */
@@ -1499,15 +1499,18 @@
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             height: 100%;
+            overflow: hidden;
         }
 
         .deck-pane, .card-selector-pane {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            height: calc(100vh - 250px);
-            max-height: calc(100vh - 250px);
+            height: calc(100vh - 300px);
+            max-height: calc(100vh - 300px);
+            overflow: hidden;
         }
+
 
         .deck-pane h4, .card-selector-pane h4 {
             margin: 0 0 15px 0;
@@ -1522,11 +1525,13 @@
         .deck-cards-editor {
             flex: 1;
             min-height: 300px;
+            max-height: calc(100vh - 420px);
             border: 2px dashed rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
             overflow-y: auto;
+            overflow-x: hidden;
+            background: rgba(255, 255, 255, 0.05);
         }
         
 
@@ -1868,10 +1873,13 @@
 
         .card-categories {
             flex: 1;
+            max-height: calc(100vh - 420px);
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            padding-bottom: 30px;
         }
 
         .card-category {
@@ -3011,6 +3019,19 @@
     </div>
 
     <script>
+        // Utility function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         // Top-level app tab switching
         function switchAppTab(tabId) {
             const databaseView = document.getElementById('database-view');
