@@ -5136,14 +5136,10 @@
                 }
             });
             
-            // Check deck size
+            // Check deck size - removed from validation errors since it's shown in Total Cards metadata
             const totalCards = deckCards.length;
             const hasEvents = eventCards.length > 0;
             const minSize = hasEvents ? DECK_RULES.MIN_DECK_SIZE_WITH_EVENTS : DECK_RULES.MIN_DECK_SIZE;
-            
-            if (totalCards < minSize) {
-                errors.push(`Deck must have at least ${minSize} cards (${totalCards}/${minSize})`);
-            }
             
             // Check character count - only show error if more than 4 characters
             if (characterCards.length > DECK_RULES.MAX_CHARACTERS) {
