@@ -2989,6 +2989,10 @@
                             <span class="stat-label">Max Intelligence:</span>
                             <span class="stat-value" id="deckMaxIntelligence">0</span>
                         </div>
+                        <div class="summary-stat">
+                            <span class="stat-label">Total Threat:</span>
+                            <span class="stat-value" id="deckTotalThreat">0</span>
+                        </div>
                     </div>
                     <div class="deck-summary-validation" id="deckSummaryValidation">
                         <!-- Validation content will be displayed here -->
@@ -5146,7 +5150,7 @@
                 errors.push(`Deck must have exactly ${DECK_RULES.MAX_CHARACTERS} characters (${characterCards.length}/${DECK_RULES.MAX_CHARACTERS})`);
             }
             
-            // Check threat level
+            // Check threat level (characters + locations)
             let totalThreat = 0;
             characterCards.forEach(card => {
                 const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
@@ -5155,9 +5159,16 @@
                 }
             });
             
-            if (totalThreat > DECK_RULES.MAX_TOTAL_THREAT) {
-                errors.push(`Total character threat level cannot exceed ${DECK_RULES.MAX_TOTAL_THREAT} (${totalThreat}/${DECK_RULES.MAX_TOTAL_THREAT})`);
-            }
+            // Add location threat levels
+            const locationCards = deckCards.filter(card => card.type === 'location');
+            locationCards.forEach(card => {
+                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                if (availableCard && availableCard.threat_level) {
+                    totalThreat += availableCard.threat_level;
+                }
+            });
+            
+            // Threat level validation removed - now shown in Total Threat metadata view
             
             // Check "One Per Deck" violations
             Object.entries(onePerDeckCards).forEach(([cardKey, count]) => {
@@ -5207,9 +5218,11 @@
             
             document.getElementById('deckTotalCards').textContent = totalCardsDisplay;
             
-            // Calculate maximum character stats by fetching character data
+            // Calculate maximum character stats and total threat level
             const characterCards = deckCards.filter(card => card.type === 'character');
+            const locationCards = deckCards.filter(card => card.type === 'location');
             let maxEnergy = 0, maxCombat = 0, maxBruteForce = 0, maxIntelligence = 0;
+            let totalThreat = 0;
             
             if (characterCards.length > 0) {
                 try {
@@ -5230,6 +5243,7 @@
                                 if (characterData.combat > maxCombat) maxCombat = characterData.combat;
                                 if (characterData.brute_force > maxBruteForce) maxBruteForce = characterData.brute_force;
                                 if (characterData.intelligence > maxIntelligence) maxIntelligence = characterData.intelligence;
+                                if (characterData.threat_level) totalThreat += characterData.threat_level;
                             }
                         });
                     }
@@ -5238,10 +5252,44 @@
                 }
             }
             
+            // Add location threat levels
+            if (locationCards.length > 0) {
+                try {
+                    // Fetch location data from the API
+                    const response = await fetch('/api/locations');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const locationMap = {};
+                        data.data.forEach(loc => {
+                            locationMap[loc.id] = loc;
+                        });
+                        
+                        locationCards.forEach(card => {
+                            const locationData = locationMap[card.cardId];
+                            if (locationData && locationData.threat_level) {
+                                totalThreat += locationData.threat_level;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching location data for summary:', error);
+                }
+            }
+            
             document.getElementById('deckMaxEnergy').textContent = maxEnergy;
             document.getElementById('deckMaxCombat').textContent = maxCombat;
             document.getElementById('deckMaxBruteForce').textContent = maxBruteForce;
             document.getElementById('deckMaxIntelligence').textContent = maxIntelligence;
+            
+            // Display total threat with denominator if it exceeds maximum
+            let totalThreatDisplay;
+            if (totalThreat > DECK_RULES.MAX_TOTAL_THREAT) {
+                totalThreatDisplay = `${totalThreat}/${DECK_RULES.MAX_TOTAL_THREAT}`;
+            } else {
+                totalThreatDisplay = totalThreat.toString();
+            }
+            document.getElementById('deckTotalThreat').textContent = totalThreatDisplay;
             
             // Update validation in summary
             const validation = validateDeck(deckCards);
@@ -5265,12 +5313,8 @@
                 html += '<span class="validation-icon">ℹ️</span>';
                 html += '<span class="validation-text">Deck has warnings</span>';
                 html += '</div>';
-            } else {
-                html += '<div class="validation-success-compact">';
-                html += '<span class="validation-icon">✅</span>';
-                html += '<span class="validation-text">Deck is valid according to Overpower rules</span>';
-                html += '</div>';
             }
+            // Success message removed - no need to display when deck is valid
             
             summaryValidationContainer.innerHTML = html;
         }
