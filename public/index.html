@@ -5145,8 +5145,8 @@
                 errors.push(`Deck must have at least ${minSize} cards (${totalCards}/${minSize})`);
             }
             
-            // Check character count
-            if (characterCards.length !== DECK_RULES.MAX_CHARACTERS) {
+            // Check character count - only show error if more than 4 characters
+            if (characterCards.length > DECK_RULES.MAX_CHARACTERS) {
                 errors.push(`Deck must have exactly ${DECK_RULES.MAX_CHARACTERS} characters (${characterCards.length}/${DECK_RULES.MAX_CHARACTERS})`);
             }
             
@@ -5911,12 +5911,24 @@
                         removeAllButton = `<button class="remove-all-btn" onclick="event.stopPropagation(); removeAllCardsFromDeck('${type}')">Remove All</button>`;
                     }
                     
+                    // Special formatting for character count
+                    let countDisplay = '';
+                    if (type === 'character') {
+                        if (cardCount === 4) {
+                            countDisplay = ''; // Hide count when exactly 4 characters
+                        } else {
+                            countDisplay = `${cardCount}/4 Characters Selected`;
+                        }
+                    } else {
+                        countDisplay = `${cardCount} card${cardCount !== 1 ? 's' : ''}`;
+                    }
+                    
                     cardsHtml += `
                         <div class="deck-type-section">
                             <div class="deck-type-header" onclick="toggleDeckTypeSection('${type}')">
                                 <div class="deck-type-left">
                                     <span class="deck-type-name">${typeName}</span>
-                                    <span class="deck-type-count">${cardCount} card${cardCount !== 1 ? 's' : ''}</span>
+                                    <span class="deck-type-count">${countDisplay}</span>
                                     ${additionalInfo}
                                 </div>
                                 <div class="deck-type-right">
