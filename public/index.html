@@ -6266,15 +6266,54 @@
                 image.src = `/${imagePath}`;
                 caption.textContent = cardName;
                 
-                // Position the modal near the mouse cursor
-                const event = window.event || arguments.callee.caller.arguments[0];
-                if (event) {
-                    const x = event.clientX + 20;
-                    const y = event.clientY - 20;
+                // Function to position modal based on mouse position
+                function positionModal(event) {
+                    let x = event.clientX + 20;
+                    let y = event.clientY - 20;
+                    
+                    // Check if we're near a Remove button and adjust position
+                    const target = event.target;
+                    const cardElement = target.closest('.deck-card-editor-item');
+                    if (cardElement) {
+                        const actionsContainer = cardElement.querySelector('.deck-card-editor-actions');
+                        if (actionsContainer) {
+                            const rect = actionsContainer.getBoundingClientRect();
+                            const modalWidth = 320; // Approximate modal width
+                            const modalHeight = 450; // Approximate modal height
+                            
+                            // If mouse is in the bottom-right area where Remove button is, position modal to the left
+                            if (event.clientX > rect.left - 50 && event.clientY > rect.top - 50) {
+                                x = event.clientX - modalWidth - 20;
+                                y = event.clientY - modalHeight / 2;
+                            }
+                            
+                            // Ensure modal doesn't go off screen
+                            if (x < 10) x = 10;
+                            if (y < 10) y = 10;
+                            if (x + modalWidth > window.innerWidth - 10) {
+                                x = window.innerWidth - modalWidth - 10;
+                            }
+                            if (y + modalHeight > window.innerHeight - 10) {
+                                y = window.innerHeight - modalHeight - 10;
+                            }
+                        }
+                    }
                     
                     modal.style.left = x + 'px';
                     modal.style.top = y + 'px';
                 }
+                
+                // Position initially
+                const event = window.event || arguments.callee.caller.arguments[0];
+                if (event) {
+                    positionModal(event);
+                }
+                
+                // Add mousemove listener to follow mouse
+                modal._mouseMoveHandler = function(e) {
+                    positionModal(e);
+                };
+                document.addEventListener('mousemove', modal._mouseMoveHandler);
                 
                 modal.style.display = 'block';
             }
@@ -6284,6 +6323,11 @@
         function hideCardHoverModal() {
             const modal = document.getElementById('cardHoverModal');
             if (modal) {
+                // Remove mousemove listener
+                if (modal._mouseMoveHandler) {
+                    document.removeEventListener('mousemove', modal._mouseMoveHandler);
+                    modal._mouseMoveHandler = null;
+                }
                 modal.style.display = 'none';
             }
         }
