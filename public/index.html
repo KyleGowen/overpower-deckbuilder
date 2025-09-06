@@ -3357,7 +3357,7 @@
 
                 row.innerHTML = `
                     <td>
-                        <img src="/src/resources/cards/images/${character.image}" 
+                        <img src="/src/resources/cards/images/characters/${character.image}" 
                              alt="${character.name}" 
                              style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                              onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
@@ -7271,14 +7271,14 @@
                 if (cardType === 'character') {
                     // Characters use the image field from the database
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `src/resources/cards/images/characters/${card.image}`;
                     }
                     // Fallback: try to construct from name
                     const characterName = card.name || card.card_name || '';
                     if (characterName) {
                         // Convert to snake_case and look for matching image
                         const snakeCaseName = characterName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        return `${snakeCaseName}.webp`;
+                        return `src/resources/cards/images/characters/${snakeCaseName}.webp`;
                     }
                 } else if (cardType === 'location') {
                     // Locations use the image field
