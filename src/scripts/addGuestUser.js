@@ -4,12 +4,12 @@ const path = require('path');
 // Script to add a guest user
 async function addGuestUser() {
     try {
-        const usersFilePath = path.join(process.cwd(), 'src/persistence/users/users.json');
+        const usersFilePath = path.join(process.cwd(), 'data/users.json');
         
         // Ensure the directory exists
-        const usersDir = path.dirname(usersFilePath);
-        if (!fs.existsSync(usersDir)) {
-            fs.mkdirSync(usersDir, { recursive: true });
+        const dataDir = path.dirname(usersFilePath);
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
         }
         
         let users = [];

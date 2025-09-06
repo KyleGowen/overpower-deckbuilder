@@ -22,8 +22,8 @@ export class UserPersistenceService {
   private sessionsFilePath: string;
 
   constructor() {
-    this.usersFilePath = path.join(process.cwd(), 'src/persistence/users/users.json');
-    this.sessionsFilePath = path.join(process.cwd(), 'src/persistence/users/sessions.json');
+    this.usersFilePath = path.join(process.cwd(), 'data/users.json');
+    this.sessionsFilePath = path.join(process.cwd(), 'data/sessions.json');
     this.loadUsers();
     this.loadSessions();
   }
