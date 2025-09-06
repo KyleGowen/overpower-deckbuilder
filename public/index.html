@@ -1677,7 +1677,8 @@
         .deck-card-editor-name {
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 3px;
+            margin-bottom: 8px;
+            font-size: 1.3rem;
         }
 
         .deck-card-editor-type {
@@ -1691,16 +1692,17 @@
         }
         
         .deck-card-editor-stats .character-stats {
-            display: grid;
-            grid-template-columns: repeat(5, auto);
-            gap: 16px;
-            font-size: 0.9rem;
-            justify-content: start;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
         
         .deck-card-editor-stats .stat-labels,
         .deck-card-editor-stats .stat-values {
-            display: contents;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-size: 0.9rem;
         }
         
         .deck-card-editor-stats .stat-label,
@@ -1728,10 +1730,12 @@
             color: #ffffff;
             font-size: 0.8rem;
             font-weight: 400;
-            margin-top: 8px;
             line-height: 1.3;
             text-align: left;
             opacity: 0.9;
+            margin-top: 4px;
+            margin-left: 0;
+            min-height: 1.3em;
         }
         
         /* Card type specific stat styling */
@@ -6111,7 +6115,6 @@
                                          onmouseleave="hideCardHoverModal()">
                                         <div class="deck-card-editor-info">
                                             <div class="deck-card-editor-name">${availableCard.name || availableCard.card_name || getCardName(card)}</div>
-                                            <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -6149,17 +6152,17 @@
                                     { label: 'I:', value: availableCard.intelligence || 0, color: '#6495ED' }
                                 ];
                                 
-                                // Special abilities
+                                // Special abilities - always reserve space
                                 const specialAbilities = availableCard.special_abilities || '';
-                                const specialAbilitiesHtml = specialAbilities ? 
-                                    `<div class="character-special-ability">${specialAbilities}</div>` : '';
+                                const specialAbilitiesHtml = 
+                                    `<div class="character-special-ability">${specialAbilities}</div>`;
                                 
                                 cardDetails = `
                                     <div class="character-stats">
                                         <div class="stat-labels">${stats.map(stat => `<span class="stat-label">${stat.label}</span>`).join(' ')}</div>
                                         <div class="stat-values">${stats.map(stat => `<span class="stat-value" style="color: ${stat.color};">${stat.value}</span>`).join(' ')}</div>
+                                        ${specialAbilitiesHtml}
                                     </div>
-                                    ${specialAbilitiesHtml}
                                 `;
                             } else if (card.type === 'location') {
                                 // Location threat level
@@ -6268,7 +6271,6 @@
                                      onmouseleave="hideCardHoverModal()">
                                     <div class="deck-card-editor-info">
                                         <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
-                                        ${card.type !== 'power' ? `<div class="deck-card-editor-type">${formatCardType(card.type)}</div>` : ''}
                                         ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                     </div>
                                     <div class="deck-card-editor-actions">
