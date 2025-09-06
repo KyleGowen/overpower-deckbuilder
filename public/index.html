@@ -2021,6 +2021,7 @@
             font-weight: 400;
         }
 
+
         .deck-card-editor-actions {
             position: absolute;
             bottom: 8px;
@@ -6204,13 +6205,8 @@
                                     return;
                                 }
                                 
-                                // Special card type
-                                const cardDetails = `
-                                    <div class="special-stats">
-                                        <div class="stat-label">Type:</div>
-                                        <div class="stat-value" style="color: #F39C12;">${availableCard.card_type || 'Special'}</div>
-                                    </div>
-                                `;
+                                // Special card - no additional details
+                                const cardDetails = '';
                                 
                                 cardsHtml += `
                                     <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
