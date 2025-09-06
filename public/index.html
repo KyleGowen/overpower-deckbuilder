@@ -6207,6 +6207,333 @@
             }
         }
 
+        // Toggle training character filter
+        async function toggleTrainingCharacterFilter() {
+            const filterCheckbox = document.getElementById('trainingCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Training character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the training category
+            const allCategories = document.querySelectorAll('.card-category');
+            let trainingCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Universe: Training')) {
+                    trainingCategory = category;
+                    break;
+                }
+            }
+            
+            if (!trainingCategory) {
+                console.error('Training category not found');
+                return;
+            }
+            
+            // Ensure the training category is expanded when filter is applied or removed
+            const header = trainingCategory.querySelector('.card-category-header');
+            const content = trainingCategory.querySelector('.card-category-content');
+            const icon = header.querySelector('.collapse-icon');
+            
+            if (header.classList.contains('collapsed')) {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.textContent = '▼';
+            }
+            
+            if (isChecked) {
+                // Add visual indicator class
+                trainingCategory.classList.add('power-cards-filter-active');
+            } else {
+                // Remove visual indicator class
+                trainingCategory.classList.remove('power-cards-filter-active');
+            }
+            
+            // Get character data from current deck
+            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const characterMap = {};
+            if (allCharacters.success) {
+                allCharacters.data.forEach(char => {
+                    characterMap[char.id] = char;
+                });
+            }
+            
+            const deckCharacters = deckEditorCards
+                .filter(card => card.type === 'character')
+                .map(card => characterMap[card.cardId])
+                .filter(char => char); // Remove undefined entries
+            
+            console.log('=== TRAINING FILTER DEBUG ===');
+            console.log('Filter checked:', isChecked);
+            console.log('Deck characters:', deckCharacters);
+            
+            // Get all training cards
+            const cardItems = trainingCategory.querySelectorAll('.card-item');
+            let totalVisibleCards = 0;
+            
+            cardItems.forEach(cardItem => {
+                // Get the card data from the data attributes
+                const cardType = cardItem.dataset.type;
+                const cardId = cardItem.dataset.id;
+                
+                if (cardType === 'training') {
+                    // Get the card data from the available cards map
+                    const availableCard = availableCardsMap.get(`${cardType}_${cardId}`);
+                    
+                    if (availableCard) {
+                        const cardName = availableCard.card_name;
+                        const type1 = availableCard.type_1;
+                        const type2 = availableCard.type_2;
+                        const valueToUse = availableCard.value_to_use;
+                        
+                        // Parse the value requirement (e.g., "5 or less", "6 or less")
+                        const valueMatch = valueToUse.match(/(\d+) or less/);
+                        const requiredValue = valueMatch ? parseInt(valueMatch[1]) : 0;
+                        
+                        if (isChecked) {
+                            // Check if any deck character can use this training card
+                            // A character can use the card if they have EITHER type1 OR type2 with the required value
+                            const canUse = deckCharacters.some(char => {
+                                let type1Stat = 0;
+                                let type2Stat = 0;
+                                
+                                // Get stats for both types
+                                switch (type1) {
+                                    case 'Energy':
+                                        type1Stat = char.energy;
+                                        break;
+                                    case 'Combat':
+                                        type1Stat = char.combat;
+                                        break;
+                                    case 'Brute Force':
+                                        type1Stat = char.brute_force;
+                                        break;
+                                    case 'Intelligence':
+                                        type1Stat = char.intelligence;
+                                        break;
+                                }
+                                
+                                switch (type2) {
+                                    case 'Energy':
+                                        type2Stat = char.energy;
+                                        break;
+                                    case 'Combat':
+                                        type2Stat = char.combat;
+                                        break;
+                                    case 'Brute Force':
+                                        type2Stat = char.brute_force;
+                                        break;
+                                    case 'Intelligence':
+                                        type2Stat = char.intelligence;
+                                        break;
+                                }
+                                
+                                // Card is usable if EITHER type meets the requirement
+                                const type1Usable = type1Stat <= requiredValue;
+                                const type2Usable = type2Stat <= requiredValue;
+                                const usable = type1Usable || type2Usable;
+                                
+                                console.log(`  ${char.name} (${type1}: ${type1Stat}, ${type2}: ${type2Stat}) can use ${cardName} (${valueToUse}): ${usable} (${type1Usable} || ${type2Usable})`);
+                                return usable;
+                            });
+                            
+                            cardItem.style.display = canUse ? 'block' : 'none';
+                            if (canUse) totalVisibleCards++;
+                        } else {
+                            // Show all training cards
+                            cardItem.style.display = 'block';
+                            totalVisibleCards++;
+                        }
+                    } else {
+                        // If card data not found, show the card
+                        cardItem.style.display = 'block';
+                        totalVisibleCards++;
+                    }
+                } else {
+                    // For non-training cards, always show them
+                    cardItem.style.display = 'block';
+                    totalVisibleCards++;
+                }
+            });
+            
+            // Update the category header count
+            const categoryHeader = trainingCategory.querySelector('.card-category-header span');
+            if (categoryHeader) {
+                const originalText = categoryHeader.textContent;
+                const newText = originalText.replace(/\(\d+\)/, `(${totalVisibleCards})`);
+                categoryHeader.textContent = newText;
+            }
+            
+            console.log(`Training filter applied: ${totalVisibleCards} cards visible`);
+        }
+
+        // Update training filter when deck changes
+        function updateTrainingFilter() {
+            const filterCheckbox = document.getElementById('trainingCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                toggleTrainingCharacterFilter();
+            }
+        }
+
+        // Toggle ally universe character filter
+        async function toggleAllyUniverseCharacterFilter() {
+            const filterCheckbox = document.getElementById('allyUniverseCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Ally universe character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the ally universe category
+            const allCategories = document.querySelectorAll('.card-category');
+            let allyUniverseCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Universe: Ally')) {
+                    allyUniverseCategory = category;
+                    break;
+                }
+            }
+            
+            if (!allyUniverseCategory) {
+                console.error('Ally universe category not found');
+                return;
+            }
+            
+            // Ensure the ally universe category is expanded when filter is applied or removed
+            const header = allyUniverseCategory.querySelector('.card-category-header');
+            const content = allyUniverseCategory.querySelector('.card-category-content');
+            const icon = header.querySelector('.collapse-icon');
+            
+            if (header.classList.contains('collapsed')) {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.textContent = '▼';
+            }
+            
+            if (isChecked) {
+                // Add visual indicator class
+                allyUniverseCategory.classList.add('power-cards-filter-active');
+            } else {
+                // Remove visual indicator class
+                allyUniverseCategory.classList.remove('power-cards-filter-active');
+            }
+            
+            // Get character data from current deck
+            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const characterMap = {};
+            if (allCharacters.success) {
+                allCharacters.data.forEach(char => {
+                    characterMap[char.id] = char;
+                });
+            }
+            
+            const deckCharacters = deckEditorCards
+                .filter(card => card.type === 'character')
+                .map(card => characterMap[card.cardId])
+                .filter(char => char); // Remove undefined entries
+            
+            console.log('=== ALLY UNIVERSE FILTER DEBUG ===');
+            console.log('Filter checked:', isChecked);
+            console.log('Deck characters:', deckCharacters);
+            
+            // Get all ally universe cards
+            const cardItems = allyUniverseCategory.querySelectorAll('.card-item');
+            let totalVisibleCards = 0;
+            
+            cardItems.forEach(cardItem => {
+                // Get the card data from the data attributes
+                const cardType = cardItem.dataset.type;
+                const cardId = cardItem.dataset.id;
+                
+                if (cardType === 'ally-universe') {
+                    // Get the card data from the available cards map
+                    const availableCard = availableCardsMap.get(`${cardType}_${cardId}`);
+                    
+                    if (availableCard) {
+                        const cardName = availableCard.card_name;
+                        const statToUse = availableCard.stat_to_use;
+                        const statTypeToUse = availableCard.stat_type_to_use;
+                        
+                        // Parse the value requirement (e.g., "5 or less", "7 or higher")
+                        const valueMatch = statToUse.match(/(\d+) or (less|higher)/);
+                        const requiredValue = valueMatch ? parseInt(valueMatch[1]) : 0;
+                        const isLessThan = valueMatch && valueMatch[2] === 'less';
+                        
+                        if (isChecked) {
+                            // Check if any deck character can use this ally universe card
+                            const canUse = deckCharacters.some(char => {
+                                let characterStat = 0;
+                                
+                                // Get the character's stat for the required type
+                                switch (statTypeToUse) {
+                                    case 'Energy':
+                                        characterStat = char.energy;
+                                        break;
+                                    case 'Combat':
+                                        characterStat = char.combat;
+                                        break;
+                                    case 'Brute Force':
+                                        characterStat = char.brute_force;
+                                        break;
+                                    case 'Intelligence':
+                                        characterStat = char.intelligence;
+                                        break;
+                                }
+                                
+                                // Check if the character meets the requirement
+                                const usable = isLessThan ? characterStat <= requiredValue : characterStat >= requiredValue;
+                                
+                                console.log(`  ${char.name} (${statTypeToUse}: ${characterStat}) can use ${cardName} (${statToUse}): ${usable}`);
+                                return usable;
+                            });
+                            
+                            cardItem.style.display = canUse ? 'block' : 'none';
+                            if (canUse) totalVisibleCards++;
+                        } else {
+                            // Show all ally universe cards
+                            cardItem.style.display = 'block';
+                            totalVisibleCards++;
+                        }
+                    } else {
+                        // If card data not found, show the card
+                        cardItem.style.display = 'block';
+                        totalVisibleCards++;
+                    }
+                } else {
+                    // For non-ally-universe cards, always show them
+                    cardItem.style.display = 'block';
+                    totalVisibleCards++;
+                }
+            });
+            
+            // Update the category header count
+            const categoryHeader = allyUniverseCategory.querySelector('.card-category-header span');
+            if (categoryHeader) {
+                const originalText = categoryHeader.textContent;
+                const newText = originalText.replace(/\(\d+\)/, `(${totalVisibleCards})`);
+                categoryHeader.textContent = newText;
+            }
+            
+            console.log(`Ally universe filter applied: ${totalVisibleCards} cards visible`);
+        }
+
+        // Update ally universe filter when deck changes
+        function updateAllyUniverseFilter() {
+            const filterCheckbox = document.getElementById('allyUniverseCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                toggleAllyUniverseCharacterFilter();
+            }
+        }
+
         // ===== DECK EDITOR FUNCTIONS =====
 
         function showDeckEditor() {
@@ -7075,6 +7402,12 @@
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
             
+            // Update training filter if it's active
+            updateTrainingFilter();
+            
+            // Update ally universe filter if it's active
+            updateAllyUniverseFilter();
+            
             
             // Validate deck after removing card
             await showDeckValidation(deckEditorCards);
@@ -7105,6 +7438,12 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update training filter if it's active
+            updateTrainingFilter();
+            
+            // Update ally universe filter if it's active
+            updateAllyUniverseFilter();
             
             
             // Validate deck after removing missions
@@ -7145,6 +7484,12 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update training filter if it's active
+            updateTrainingFilter();
+            
+            // Update ally universe filter if it's active
+            updateAllyUniverseFilter();
             
             
             // Validate deck after removing cards
@@ -7802,6 +8147,48 @@
                                         </div>
                                     </div>
                                 `;
+                            } else if (category.type === 'training') {
+                                // Training category - with filter toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
+                                                    <input type="checkbox" id="trainingCharacterFilter" onchange="toggleTrainingCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unusables</span>
+                                                </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (category.type === 'ally-universe') {
+                                // Ally universe category - with filter toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
+                                                    <input type="checkbox" id="allyUniverseCharacterFilter" onchange="toggleAllyUniverseCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unusables</span>
+                                                </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
                             } else {
                                 // Regular handling for other card types
                                 categoriesHtml += `
@@ -7974,6 +8361,12 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update training filter if it's active
+            updateTrainingFilter();
+            
+            // Update ally universe filter if it's active
+            updateAllyUniverseFilter();
             
             
             // Validate deck after adding card
