@@ -6211,10 +6211,10 @@
                                 cardsHtml += `
                                     <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
                                          data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${availableCard.name || availableCard.card_name || getCardName(card)}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${(availableCard.name || availableCard.card_name || getCardName(card)).replace(/\\'92/g, "'")}')"
                                          onmouseleave="hideCardHoverModal()">
                                         <div class="deck-card-editor-info">
-                                            <div class="deck-card-editor-name">${availableCard.name || availableCard.card_name || getCardName(card)}</div>
+                                            <div class="deck-card-editor-name">${(availableCard.name || availableCard.card_name || getCardName(card)).replace(/\\'92/g, "'")}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -6373,10 +6373,10 @@
                             cardsHtml += `
                                 <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card)).replace(/\\'92/g, "'")}')"
                                      onmouseleave="hideCardHoverModal()">
                                     <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card)).replace(/\\'92/g, "'")}</div>
                                         ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                     </div>
                                     <div class="deck-card-editor-actions">

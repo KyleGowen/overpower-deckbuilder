@@ -3,11 +3,11 @@
 | Mission Set | Card Name |
 |-----------|---------|
 | The Call of Cthulhu | The Dreams of Men |
-| The Call of Cthulhu | Professor Angell\'92s Investigation |
+| The Call of Cthulhu | Professor Angell's Investigation |
 | The Call of Cthulhu | New Orleans, 1918 |
 | The Call of Cthulhu | Worshipping the Great Old One |
 | The Call of Cthulhu | The Alert |
-| The Call of Cthulhu | Johansen\'92s Window |
+| The Call of Cthulhu | Johansen's Window |
 | The Call of Cthulhu | Gone Too Far |
 
 ## King of the Jungle
@@ -16,9 +16,9 @@
 | King of the Jungle | Tarzan of the Apes |
 | King of the Jungle | Beasts of Tarzan |
 | King of the Jungle | Tarzan and the Golden Lion |
-| King of the Jungle | Tarzan at the Earth\'92s Core |
+| King of the Jungle | Tarzan at the Earth's Core |
 | King of the Jungle | Tarzan and the City of Gold |
-| King of the Jungle | Tarzan\'92s Quest |
+| King of the Jungle | Tarzan's Quest |
 | King of the Jungle | Tarzan and the Castaways |
 
 ## Warlord of Mars

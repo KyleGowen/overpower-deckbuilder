@@ -36,7 +36,7 @@
 | Tars Tarkas | 2 | 7 | 6 | 3 | 20 | May have 1 placed Basic Universe card that does not take up a placing slot. | 223_tars_tarkas.webp |
 | Tarzan | 1 | 7 | 5 | 4 | 19 | May avoid Brute Force attacks with Intelligence Power cards playable by Tarzan. | 230_tarzan.webp |
 | The Mummy | 6 | 2 | 7 | 2 | 18 | Must have a hit with an Energy icon to be KO'd. | 237_the_mummy.webp |
-| The Three Musketeers | 2 | 7 | 5 | 5 | 20 | May not use Spectrum or Cumulative KO\'92d with Teamwork cards. | 244_three_musketeers.webp |
+| The Three Musketeers | 2 | 7 | 5 | 5 | 20 | May not use Spectrum or Cumulative KO'd with Teamwork cards. | 244_three_musketeers.webp |
 | Time Traveler | 5 | 3 | 2 | 6 | 18 | May play level 7 and 8 Intelligence Power cards defensively. | 251_time_traveler.webp |
 | Van Helsing | 3 | 7 | 4 | 5 | 20 | Van Helsing is +4 to attacks made against Dracula. | 258_van_helsing.webp |
 | Victory Harben | 5 | 5 | 3 | 7 | 18 | Threat level is 20 if she starts the game in Reserve. | 265_victory_harben.webp |
