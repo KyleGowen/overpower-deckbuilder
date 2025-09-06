@@ -21,7 +21,7 @@
 | King Arthur | 3 | 7 | 4 | 6 | 20 | Team is +1 to Venture Total each battle. | 118_king_arthur.webp |
 | Korak | 2 | 6 | 5 | 6 | 17 |  | 125_korak.webp |
 | Lancelot | 2 | 7 | 5 | 4 | 18 | Start the game with "Sword and Shield" placed; does not take up placing slot. | 132_lancelot.webp |
-| Leonidas | 6 | 8 | 5 | 4 | 21 |  | 139_leonidis.webp |
+| Leonidas | 1 | 8 | 5 | 4 | 21 |  | 139_leonidis.webp |
 | Merlin | 7 | 2 | 2 | 6 | 21 | After Venture Phase may look at top card of Draw Pile & optionally bottom it. | 146_merlin.webp |
 | Mina Harker | 6 | 2 | 6 | 2 | 18 |  | 153_mina_harker.webp |
 | Morgan le Fay | 7 | 2 | 3 | 5 | 19 | Counts as 20 points for deck-skulling if she starts in Reserve. | 160_morgan_le_fay.webp |
