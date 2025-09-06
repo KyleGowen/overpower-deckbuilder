@@ -1859,6 +1859,39 @@
             pointer-events: none;
         }
 
+        /* Power card background images in deck contents */
+        .deck-card-editor-item.power-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 100% auto;
+            background-position: right top; /* Aligned to upper right */
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
+        }
+
+        .deck-card-editor-item.power-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, 
+                rgba(54, 54, 54, 0.8) 0%, 
+                rgba(54, 54, 54, 0.4) 50%, 
+                rgba(54, 54, 54, 0.1) 100%);
+            z-index: -1;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
         .deck-card-editor-actions {
             position: absolute;
             bottom: 8px;
@@ -6202,11 +6235,13 @@
                             
                             // Preview mode - show detailed info with hover effect
                             const isCharacter = card.type === 'character';
+                            const isPower = card.type === 'power';
                             const characterClass = isCharacter ? 'character-card' : '';
-                            const bgImageData = isCharacter ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                            const powerClass = isPower ? 'power-card' : '';
+                            const bgImageData = (isCharacter || isPower) ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
                             
                             cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass}" draggable="true" data-index="${index}" 
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}')"
                                      onmouseleave="hideCardHoverModal()">
@@ -6236,10 +6271,30 @@
             applyCharacterBackgroundsToEditor();
         }
         
-        // Apply background images to character cards in deck editor
+        // Apply background images to character and power cards in deck editor
         function applyCharacterBackgroundsToEditor() {
             const characterCards = document.querySelectorAll('.deck-card-editor-item.character-card');
+            const powerCards = document.querySelectorAll('.deck-card-editor-item.power-card');
+            
+            // Apply to character cards
             characterCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        card.style.setProperty('--bg-image', `url(${bgImage})`);
+                    };
+                    img.onerror = function() {
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
+            
+            // Apply to power cards
+            powerCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
                 if (bgImage) {
                     // Test if image loads successfully
