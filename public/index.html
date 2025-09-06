@@ -1892,6 +1892,12 @@
             pointer-events: none;
         }
 
+        /* Power card title styling */
+        .deck-card-editor-item.power-card .deck-card-editor-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
         .deck-card-editor-actions {
             position: absolute;
             bottom: 8px;
@@ -6170,15 +6176,8 @@
                                     </div>
                                 `;
                             } else if (card.type === 'power') {
-                                // Power card details
-                                cardDetails = `
-                                    <div class="power-stats">
-                                        <div class="stat-label">Type:</div>
-                                        <div class="stat-value" style="color: #1ABC9C;">${availableCard.power_type || 'Power'}</div>
-                                        <div class="stat-label">Value:</div>
-                                        <div class="stat-value" style="color: #E67E22;">${availableCard.value || 'N/A'}</div>
-                                    </div>
-                                `;
+                                // Power card details - no additional details needed
+                                cardDetails = '';
                             } else if (card.type === 'basic_universe') {
                                 // Basic universe details
                                 cardDetails = `
