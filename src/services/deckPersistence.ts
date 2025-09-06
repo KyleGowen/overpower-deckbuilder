@@ -49,7 +49,7 @@ export class DeckPersistenceService {
   }
 
   // Create a new deck
-  createDeck(name: string, description?: string): DeckData {
+  createDeck(name: string, userId: string, description?: string): DeckData {
     const id = `deck_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
     
@@ -60,14 +60,15 @@ export class DeckPersistenceService {
         description: description || '',
         created: now,
         lastModified: now,
-        cardCount: 0
+        cardCount: 0,
+        userId
       },
       cards: []
     };
 
     this.decks.set(id, deck);
     this.saveDecks();
-    console.log(`✅ Created new deck: ${name} (${id})`);
+    console.log(`✅ Created new deck: ${name} (${id}) for user: ${userId}`);
     return deck;
   }
 
@@ -76,9 +77,22 @@ export class DeckPersistenceService {
     return Array.from(this.decks.values()).map(deck => deck.metadata);
   }
 
+  // Get decks for a specific user
+  getDecksByUser(userId: string): DeckMetadata[] {
+    return Array.from(this.decks.values())
+      .filter(deck => deck.metadata.userId === userId)
+      .map(deck => deck.metadata);
+  }
+
   // Get a specific deck by ID
   getDeck(id: string): DeckData | null {
     return this.decks.get(id) || null;
+  }
+
+  // Check if a user owns a deck
+  userOwnsDeck(deckId: string, userId: string): boolean {
+    const deck = this.decks.get(deckId);
+    return deck ? deck.metadata.userId === userId : false;
   }
 
   // Update deck metadata

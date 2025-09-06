@@ -1,18 +1,33 @@
 import express from 'express';
 import { database } from './database/inMemoryDatabase';
 import { DeckPersistenceService } from './services/deckPersistence';
+import { UserPersistenceService } from './persistence/userPersistence';
 import { Character } from './types';
 import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize deck persistence service
+// Initialize services
 const deckService = new DeckPersistenceService();
+const userService = new UserPersistenceService();
 
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+
+// Cookie parser middleware
+app.use((req: any, res: any, next: any) => {
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    req.cookies = {};
+    cookieHeader.split(';').forEach((cookie: string) => {
+      const [name, value] = cookie.trim().split('=');
+      req.cookies[name] = value;
+    });
+  }
+  next();
+});
 
 // Serve card images from resources directory
 app.use('/src/resources/cards/images', express.static(path.join(process.cwd(), 'src/resources/cards/images')));
@@ -24,6 +39,90 @@ database.initialize().then(() => {
   
   const stats = database.getStats();
   console.log('🔍 Database loaded:', stats.characters, 'characters,', stats.locations, 'locations');
+});
+
+// Authentication middleware
+const authenticateUser = (req: any, res: any, next: any) => {
+  const sessionId = req.cookies?.sessionId;
+  
+  if (!sessionId) {
+    return res.status(401).json({ success: false, error: 'No session found. Please log in.' });
+  }
+  
+  const session = userService.validateSession(sessionId);
+  if (!session) {
+    return res.status(401).json({ success: false, error: 'Invalid or expired session. Please log in again.' });
+  }
+  
+  req.user = session;
+  next();
+};
+
+// User authentication endpoints
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Username and password are required' });
+    }
+    
+    const user = userService.authenticateUser(username, password);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Invalid username or password' });
+    }
+    
+    const sessionId = userService.createSession(user);
+    
+    // Set session cookie (2 hours expiration)
+    res.cookie('sessionId', sessionId, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      sameSite: 'lax'
+    });
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        userId: user.id, 
+        username: user.username 
+      } 
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, error: 'Login failed' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    const sessionId = req.cookies?.sessionId;
+    
+    if (sessionId) {
+      userService.logout(sessionId);
+    }
+    
+    res.clearCookie('sessionId');
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ success: false, error: 'Logout failed' });
+  }
+});
+
+app.get('/api/auth/me', authenticateUser, (req: any, res) => {
+  try {
+    res.json({ 
+      success: true, 
+      data: { 
+        userId: req.user.userId, 
+        username: req.user.username 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to get user info' });
+  }
 });
 
 // API Routes
@@ -157,9 +256,9 @@ app.get('/api/users', (req, res) => {
   }
 });
 
-app.get('/api/decks', (req, res) => {
+app.get('/api/decks', authenticateUser, (req: any, res) => {
   try {
-    const decks = deckService.getAllDecks();
+    const decks = deckService.getDecksByUser(req.user.userId);
     res.json({ success: true, data: decks });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch decks' });
@@ -167,35 +266,47 @@ app.get('/api/decks', (req, res) => {
 });
 
 // Deck management API routes
-app.post('/api/decks', (req, res) => {
+app.post('/api/decks', authenticateUser, (req: any, res) => {
   try {
     const { name, description } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, error: 'Deck name is required' });
     }
     
-    const deck = deckService.createDeck(name, description);
+    const deck = deckService.createDeck(name, req.user.userId, description);
     res.json({ success: true, data: deck });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to create deck' });
   }
 });
 
-app.get('/api/decks/:id', (req, res) => {
+app.get('/api/decks/:id', authenticateUser, (req: any, res) => {
   try {
     const deck = deckService.getDeck(req.params.id);
     if (!deck) {
       return res.status(404).json({ success: false, error: 'Deck not found' });
     }
+    
+    // Check if user owns this deck
+    if (!deckService.userOwnsDeck(req.params.id, req.user.userId)) {
+      return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
+    }
+    
     res.json({ success: true, data: deck });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch deck' });
   }
 });
 
-app.put('/api/decks/:id', (req, res) => {
+app.put('/api/decks/:id', authenticateUser, (req: any, res) => {
   try {
     const { name, description } = req.body;
+    
+    // Check if user owns this deck
+    if (!deckService.userOwnsDeck(req.params.id, req.user.userId)) {
+      return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
+    }
+    
     const deck = deckService.updateDeckMetadata(req.params.id, { name, description });
     if (!deck) {
       return res.status(404).json({ success: false, error: 'Deck not found' });
@@ -206,8 +317,13 @@ app.put('/api/decks/:id', (req, res) => {
   }
 });
 
-app.delete('/api/decks/:id', (req, res) => {
+app.delete('/api/decks/:id', authenticateUser, (req: any, res) => {
   try {
+    // Check if user owns this deck
+    if (!deckService.userOwnsDeck(req.params.id, req.user.userId)) {
+      return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
+    }
+    
     const success = deckService.deleteDeck(req.params.id);
     if (!success) {
       return res.status(404).json({ success: false, error: 'Deck not found' });
@@ -218,11 +334,16 @@ app.delete('/api/decks/:id', (req, res) => {
   }
 });
 
-app.post('/api/decks/:id/cards', (req, res) => {
+app.post('/api/decks/:id/cards', authenticateUser, (req: any, res) => {
   try {
     const { cardType, cardId, quantity } = req.body;
     if (!cardType || !cardId) {
       return res.status(400).json({ success: false, error: 'Card type and card ID are required' });
+    }
+    
+    // Check if user owns this deck
+    if (!deckService.userOwnsDeck(req.params.id, req.user.userId)) {
+      return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
     
     const deck = deckService.addCardToDeck(req.params.id, cardType, cardId, quantity || 1);
@@ -235,11 +356,16 @@ app.post('/api/decks/:id/cards', (req, res) => {
   }
 });
 
-app.delete('/api/decks/:id/cards', (req, res) => {
+app.delete('/api/decks/:id/cards', authenticateUser, (req: any, res) => {
   try {
     const { cardType, cardId, quantity } = req.body;
     if (!cardType || !cardId) {
       return res.status(400).json({ success: false, error: 'Card type and card ID are required' });
+    }
+    
+    // Check if user owns this deck
+    if (!deckService.userOwnsDeck(req.params.id, req.user.userId)) {
+      return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
     
     const deck = deckService.removeCardFromDeck(req.params.id, cardType, cardId, quantity || 1);
@@ -252,9 +378,11 @@ app.delete('/api/decks/:id/cards', (req, res) => {
   }
 });
 
-app.get('/api/deck-stats', (req, res) => {
+app.get('/api/deck-stats', authenticateUser, (req: any, res) => {
   try {
-    const stats = deckService.getDeckStats();
+    const userDecks = deckService.getDecksByUser(req.user.userId);
+    const totalCards = userDecks.reduce((total, deck) => total + deck.cardCount, 0);
+    const stats = { totalDecks: userDecks.length, totalCards };
     res.json({ success: true, data: stats });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch deck stats' });

@@ -159,6 +159,8 @@ export interface DeckMetadata {
   created: string; // ISO date string
   lastModified: string; // ISO date string
   cardCount: number; // Total number of cards in deck
+  userId: string; // Owner of the deck
+  uiState?: { expansionState: Record<string, boolean>; }; // UI state persistence
 }
 
 export interface DeckData {

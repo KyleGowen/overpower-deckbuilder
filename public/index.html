@@ -2488,13 +2488,176 @@
             padding: 0 8px;
             overflow: hidden;
         }
+
+        /* Login Modal Styles */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            margin: 0 0 30px 0;
+            color: #bdc3c7;
+            font-size: 1.1rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4ecdc4;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+
+        .form-group input::placeholder {
+            color: #bdc3c7;
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .user-info span {
+            color: #bdc3c7;
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-modal-content">
+            <div class="login-header">
+                <h2>🏰 Welcome to Overpower Deckbuilder</h2>
+                <p>Please log in to access your decks</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <button type="submit" class="login-btn">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
             <h1>🏰 Overpower Deckbuilder</h1>
             <p>Character Database & Deck Management System</p>
+            <div class="user-info">
+                <span id="userWelcome">Welcome, <span id="currentUsername"></span>!</span>
+                <button id="logoutBtn" class="logout-btn">Log Out</button>
+            </div>
         </div>
 
         
@@ -3271,6 +3434,7 @@
             </div>
         </div>
     </div>
+    </div> <!-- Close mainContainer -->
 
     <script>
         // Utility function
@@ -4785,20 +4949,134 @@
 
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
+        // Authentication functions
+        let currentUser = null;
+
+        async function checkAuthentication() {
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.data;
+                    showMainApp();
+                } else {
+                    showLoginModal();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                showLoginModal();
+            }
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+        }
+
+        function showMainApp() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('currentUsername').textContent = currentUser.username;
+        }
+
+        async function login(username, password) {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.data;
+                    showMainApp();
+                    // Load user's data
+                    loadUserData();
+                } else {
+                    showLoginError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showLoginError('Login failed. Please try again.');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                currentUser = null;
+                showLoginModal();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideLoginError() {
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        async function loadUserData() {
+            // Load user-specific data
             loadCharacters();
             loadSpecialCards();
             loadAdvancedUniverse();
             loadMissions();
             loadLocations();
-            loadAspects();
             loadEvents();
+            loadAspects();
             loadTeamwork();
             loadAllyUniverse();
             loadTraining();
             loadBasicUniverse();
             loadPowerCards();
-            setupSearch();
+            loadDecks();
+            updateStats();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication first
+            checkAuthentication();
+            
+            // Login form event listener
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideLoginError();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (!username || !password) {
+                    showLoginError('Please enter both username and password');
+                    return;
+                }
+                
+                await login(username, password);
+            });
+            
+            // Logout button event listener
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Load data only if authenticated
+            if (currentUser) {
+                loadAspects();
+                loadEvents();
+                loadTeamwork();
+                loadAllyUniverse();
+                loadTraining();
+                loadBasicUniverse();
+                loadPowerCards();
+                setupSearch();
+            }
             
             // Add location filter event listeners
             document.getElementById('location-threat-min').addEventListener('input', applyLocationFilters);
