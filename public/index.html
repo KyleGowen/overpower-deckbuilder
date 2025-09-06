@@ -6558,35 +6558,72 @@
                 
                 // Function to position modal based on mouse position
                 function positionModal(event) {
-                    let x = event.clientX + 20;
-                    let y = event.clientY - 20;
+                    let x = event.clientX + 50;  // Increased offset to avoid cursor area
+                    let y = event.clientY + 50;  // Increased offset to avoid cursor area
                     
-                    // Check if we're near a Remove button and adjust position
+                    const modalWidth = 320; // Approximate modal width
+                    const modalHeight = 450; // Approximate modal height
+                    
+                    // Check if we're near any buttons and adjust position
                     const target = event.target;
                     const cardElement = target.closest('.deck-card-editor-item');
                     if (cardElement) {
                         const actionsContainer = cardElement.querySelector('.deck-card-editor-actions');
                         if (actionsContainer) {
                             const rect = actionsContainer.getBoundingClientRect();
-                            const modalWidth = 320; // Approximate modal width
-                            const modalHeight = 450; // Approximate modal height
                             
-                            // If mouse is in the bottom-right area where Remove button is, position modal to the left
-                            if (event.clientX > rect.left - 50 && event.clientY > rect.top - 50) {
-                                x = event.clientX - modalWidth - 20;
-                                y = event.clientY - modalHeight / 2;
-                            }
-                            
-                            // Ensure modal doesn't go off screen
-                            if (x < 10) x = 10;
-                            if (y < 10) y = 10;
-                            if (x + modalWidth > window.innerWidth - 10) {
-                                x = window.innerWidth - modalWidth - 10;
-                            }
-                            if (y + modalHeight > window.innerHeight - 10) {
-                                y = window.innerHeight - modalHeight - 10;
+                            // If mouse is near the Remove button area, position modal to avoid it
+                            if (event.clientX > rect.left - 100 && event.clientY > rect.top - 100) {
+                                // Try positioning to the left first with larger offset
+                                x = event.clientX - modalWidth - 50;
+                                y = event.clientY + 50;
+                                
+                                // If that would go off screen, try positioning below and to the right
+                                if (x < 10) {
+                                    x = event.clientX + 50;
+                                    y = event.clientY + modalHeight + 50;
+                                }
                             }
                         }
+                        
+                        // Also check for any buttons in the card element
+                        const buttons = cardElement.querySelectorAll('.quantity-btn, .remove-all-btn');
+                        buttons.forEach(button => {
+                            const buttonRect = button.getBoundingClientRect();
+                            
+                            // If modal would overlap with button, move it away
+                            if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
+                                y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
+                                // Try positioning to the left of the button with larger offset
+                                x = buttonRect.left - modalWidth - 50;
+                                y = buttonRect.top - modalHeight / 2;
+                                
+                                // If that goes off screen, try positioning below with larger offset
+                                if (x < 10) {
+                                    x = buttonRect.left + 50;
+                                    y = buttonRect.bottom + 50;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Final safety check: ensure modal is never too close to cursor
+                    const minDistanceFromCursor = 40;
+                    if (Math.abs(x - event.clientX) < minDistanceFromCursor) {
+                        x = event.clientX + minDistanceFromCursor;
+                    }
+                    if (Math.abs(y - event.clientY) < minDistanceFromCursor) {
+                        y = event.clientY + minDistanceFromCursor;
+                    }
+                    
+                    // Ensure modal doesn't go off screen
+                    if (x < 10) x = 10;
+                    if (y < 10) y = 10;
+                    if (x + modalWidth > window.innerWidth - 10) {
+                        x = window.innerWidth - modalWidth - 10;
+                    }
+                    if (y + modalHeight > window.innerHeight - 10) {
+                        y = window.innerHeight - modalHeight - 10;
                     }
                     
                     modal.style.left = x + 'px';
