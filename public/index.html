@@ -5318,6 +5318,8 @@
         let currentDeckData = null;
         let deckEditorCards = []; // Working copy of deck cards
         let availableCardsMap = new Map(); // Cache for available cards data
+        let deckEditorExpansionState = {}; // Track expansion state of deck type sections
+        let lastAddedCardType = null; // Track which card type was just added
 
 
         // Deck validation rules based on Overpower rules
@@ -6448,6 +6450,9 @@
             
             deckCardsEditor.innerHTML = cardsHtml;
             
+            // Apply expansion state
+            applyDeckEditorExpansionState();
+            
             // Apply character background images
             applyCharacterBackgroundsToEditor();
         }
@@ -6544,6 +6549,60 @@
                     img.src = bgImage;
                 }
             });
+        }
+        
+        // Apply expansion state to deck editor sections
+        function applyDeckEditorExpansionState() {
+            // If no expansion state is set, expand all sections by default
+            if (Object.keys(deckEditorExpansionState).length === 0) {
+                const sections = document.querySelectorAll('.deck-type-section');
+                sections.forEach(section => {
+                    const type = section.id.replace('deck-type-', '');
+                    deckEditorExpansionState[type] = true;
+                });
+            } else {
+                // Ensure all existing sections have a state defined
+                const sections = document.querySelectorAll('.deck-type-section');
+                sections.forEach(section => {
+                    const type = section.id.replace('deck-type-', '');
+                    if (deckEditorExpansionState[type] === undefined) {
+                        deckEditorExpansionState[type] = false; // Collapse by default
+                    }
+                });
+            }
+            
+            // Apply the expansion state to each section
+            Object.keys(deckEditorExpansionState).forEach(type => {
+                const section = document.getElementById(`deck-type-${type}`);
+                if (section) {
+                    const cardsDiv = section.querySelector('.deck-type-cards');
+                    const header = section.previousElementSibling;
+                    const toggle = header.querySelector('.deck-type-toggle');
+                    
+                    if (cardsDiv && header && toggle) {
+                        if (!deckEditorExpansionState[type]) {
+                            // Collapse the section
+                            cardsDiv.style.display = 'none';
+                            toggle.textContent = '▶';
+                            header.classList.add('collapsed');
+                        } else {
+                            // Expand the section (default state)
+                            cardsDiv.style.display = 'block';
+                            toggle.textContent = '▼';
+                            header.classList.remove('collapsed');
+                        }
+                    }
+                }
+            });
+            
+            // Scroll to the added card type if it was just added
+            if (lastAddedCardType) {
+                const addedSection = document.getElementById(`deck-type-${lastAddedCardType}`);
+                if (addedSection) {
+                    addedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                lastAddedCardType = null; // Reset after scrolling
+            }
         }
         
         // Show card hover modal
@@ -6669,10 +6728,12 @@
                 section.style.display = 'block';
                 toggle.textContent = '▼';
                 header.classList.remove('collapsed');
+                deckEditorExpansionState[type] = true; // Update global state
             } else {
                 section.style.display = 'none';
                 toggle.textContent = '▶';
                 header.classList.add('collapsed');
+                deckEditorExpansionState[type] = false; // Update global state
             }
         }
         
@@ -7668,6 +7729,19 @@
                 };
                 deckEditorCards.push(newCard);
             }
+            
+            // Set expansion state: expand only the added card type, collapse all others
+            lastAddedCardType = cardType;
+            
+            // Get all existing section types and collapse them
+            const allTypes = ['character', 'location', 'mission', 'event', 'special', 
+                             'aspect', 'advanced_universe', 'teamwork', 'ally_universe', 
+                             'training', 'basic_universe', 'power'];
+            
+            // Collapse all sections except the one being added
+            allTypes.forEach(type => {
+                deckEditorExpansionState[type] = (type === cardType);
+            });
             
             await displayDeckCardsForEditing();
             updateDeckEditorCardCount();
