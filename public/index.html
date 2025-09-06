@@ -1691,23 +1691,21 @@
         }
         
         .deck-card-editor-stats .character-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            font-size: 0.9rem;
         }
         
         .deck-card-editor-stats .stat-labels,
         .deck-card-editor-stats .stat-values {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            font-size: 0.9rem;
+            display: contents;
         }
         
         .deck-card-editor-stats .stat-label,
         .deck-card-editor-stats .stat-value {
-            min-width: 20px;
             text-align: center;
+            display: block;
         }
         
         .deck-card-editor-stats .stat-label {
