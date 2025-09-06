@@ -1692,9 +1692,10 @@
         
         .deck-card-editor-stats .character-stats {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(5, auto);
+            gap: 16px;
             font-size: 0.9rem;
+            justify-content: start;
         }
         
         .deck-card-editor-stats .stat-labels,
@@ -1706,6 +1707,7 @@
         .deck-card-editor-stats .stat-value {
             text-align: center;
             display: block;
+            min-width: 20px;
         }
         
         .deck-card-editor-stats .stat-label {
