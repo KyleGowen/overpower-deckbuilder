@@ -6246,7 +6246,7 @@
                                      onmouseleave="hideCardHoverModal()">
                                     <div class="deck-card-editor-info">
                                         <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card))}</div>
-                                        <div class="deck-card-editor-type">${formatCardType(card.type)}</div>
+                                        ${card.type !== 'power' ? `<div class="deck-card-editor-type">${formatCardType(card.type)}</div>` : ''}
                                         ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                     </div>
                                     <div class="deck-card-editor-actions">
