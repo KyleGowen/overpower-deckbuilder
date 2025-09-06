@@ -6057,8 +6057,155 @@
             }
         }
 
-        
+        // Toggle basic universe character filter
+        async function toggleBasicUniverseCharacterFilter() {
+            const filterCheckbox = document.getElementById('basicUniverseCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Basic universe character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the basic universe category
+            const allCategories = document.querySelectorAll('.card-category');
+            let basicUniverseCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Universe: Basic')) {
+                    basicUniverseCategory = category;
+                    break;
+                }
+            }
+            
+            if (!basicUniverseCategory) {
+                console.error('Basic universe category not found');
+                return;
+            }
+            
+            // Ensure the basic universe category is expanded when filter is applied or removed
+            const header = basicUniverseCategory.querySelector('.card-category-header');
+            const content = basicUniverseCategory.querySelector('.card-category-content');
+            const icon = header.querySelector('.collapse-icon');
+            
+            if (header.classList.contains('collapsed')) {
+                header.classList.remove('collapsed');
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.textContent = '▼';
+            }
+            
+            if (isChecked) {
+                // Add visual indicator class
+                basicUniverseCategory.classList.add('power-cards-filter-active');
+            } else {
+                // Remove visual indicator class
+                basicUniverseCategory.classList.remove('power-cards-filter-active');
+            }
+            
+            // Get character data from current deck
+            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const characterMap = {};
+            if (allCharacters.success) {
+                allCharacters.data.forEach(char => {
+                    characterMap[char.id] = char;
+                });
+            }
+            
+            const deckCharacters = deckEditorCards
+                .filter(card => card.type === 'character')
+                .map(card => characterMap[card.cardId])
+                .filter(char => char); // Remove undefined entries
+            
+            console.log('=== BASIC UNIVERSE FILTER DEBUG ===');
+            console.log('Filter checked:', isChecked);
+            console.log('Deck characters:', deckCharacters);
+            
+            // Get all basic universe cards
+            const cardItems = basicUniverseCategory.querySelectorAll('.card-item');
+            let totalVisibleCards = 0;
+            
+            cardItems.forEach(cardItem => {
+                // Get the card data from the data attributes
+                const cardType = cardItem.dataset.type;
+                const cardId = cardItem.dataset.id;
+                
+                if (cardType === 'basic-universe') {
+                    // Get the card data from the available cards map
+                    const availableCard = availableCardsMap.get(`${cardType}_${cardId}`);
+                    
+                    if (availableCard) {
+                        const cardName = availableCard.card_name;
+                        const cardTypeValue = availableCard.type;
+                        const valueToUse = availableCard.value_to_use;
+                        
+                        // Parse the value requirement (e.g., "6 or greater", "7 or greater")
+                        const valueMatch = valueToUse.match(/(\d+) or greater/);
+                        const requiredValue = valueMatch ? parseInt(valueMatch[1]) : 0;
+                        
+                        if (isChecked) {
+                            // Check if any deck character can use this basic universe card
+                            const canUse = deckCharacters.some(char => {
+                                let characterStat = 0;
+                                
+                                switch (cardTypeValue) {
+                                    case 'Energy':
+                                        characterStat = char.energy;
+                                        break;
+                                    case 'Combat':
+                                        characterStat = char.combat;
+                                        break;
+                                    case 'Brute Force':
+                                        characterStat = char.brute_force;
+                                        break;
+                                    case 'Intelligence':
+                                        characterStat = char.intelligence;
+                                        break;
+                                }
+                                
+                                const usable = characterStat >= requiredValue;
+                                console.log(`  ${char.name} (${cardTypeValue}: ${characterStat}) can use ${cardName} (${valueToUse}): ${usable}`);
+                                return usable;
+                            });
+                            
+                            cardItem.style.display = canUse ? 'block' : 'none';
+                            if (canUse) totalVisibleCards++;
+                        } else {
+                            // Show all basic universe cards
+                            cardItem.style.display = 'block';
+                            totalVisibleCards++;
+                        }
+                    } else {
+                        // If card data not found, show the card
+                        cardItem.style.display = 'block';
+                        totalVisibleCards++;
+                    }
+                } else {
+                    // For non-basic-universe cards, always show them
+                    cardItem.style.display = 'block';
+                    totalVisibleCards++;
+                }
+            });
+            
+            // Update the category header count
+            const categoryHeader = basicUniverseCategory.querySelector('.card-category-header span');
+            if (categoryHeader) {
+                const originalText = categoryHeader.textContent;
+                const newText = originalText.replace(/\(\d+\)/, `(${totalVisibleCards})`);
+                categoryHeader.textContent = newText;
+            }
+            
+            console.log(`Basic universe filter applied: ${totalVisibleCards} cards visible`);
+        }
 
+        // Update basic universe filter when deck changes
+        function updateBasicUniverseFilter() {
+            const filterCheckbox = document.getElementById('basicUniverseCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                toggleBasicUniverseCharacterFilter();
+            }
+        }
 
         // ===== DECK EDITOR FUNCTIONS =====
 
@@ -6925,6 +7072,9 @@
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
+            // Update basic universe filter if it's active
+            updateBasicUniverseFilter();
+            
             
             // Validate deck after removing card
             await showDeckValidation(deckEditorCards);
@@ -6952,6 +7102,9 @@
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
+            
+            // Update basic universe filter if it's active
+            updateBasicUniverseFilter();
             
             
             // Validate deck after removing missions
@@ -6989,6 +7142,9 @@
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
+            
+            // Update basic universe filter if it's active
+            updateBasicUniverseFilter();
             
             
             // Validate deck after removing cards
@@ -7626,12 +7782,16 @@
                                     </div>
                                 `;
                             } else if (category.type === 'basic-universe') {
-                                // Basic universe category - no special filter toggle
+                                // Basic universe category - with filter toggle
                                 categoriesHtml += `
                                     <div class="card-category">
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
+                                                    <input type="checkbox" id="basicUniverseCharacterFilter" onchange="toggleBasicUniverseCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unusables</span>
+                                                </label>
                                             </div>
                                             <div class="category-header-controls">
                                                 <span class="collapse-icon">${collapseIcon}</span>
@@ -7811,6 +7971,9 @@
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
+            
+            // Update basic universe filter if it's active
+            updateBasicUniverseFilter();
             
             
             // Validate deck after adding card
