@@ -1740,7 +1740,25 @@
         }
         
         /* Card type specific stat styling */
-        .deck-card-editor-stats .location-stats,
+        .deck-card-editor-stats .location-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .deck-card-editor-stats .location-stats .stat-labels,
+        .deck-card-editor-stats .location-stats .stat-values {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .deck-card-editor-stats .location-stats .stat-label,
+        .deck-card-editor-stats .location-stats .stat-value {
+            text-align: center;
+            display: block;
+            min-width: 20px;
+            width: 20px;
+        }
         .deck-card-editor-stats .mission-stats,
         .deck-card-editor-stats .event-stats,
         .deck-card-editor-stats .special-stats,
@@ -6169,8 +6187,12 @@
                                 // Location threat level
                                 cardDetails = `
                                     <div class="location-stats">
-                                        <div class="stat-label">Threat Level:</div>
-                                        <div class="stat-value" style="color: #FF6B6B;">${availableCard.threat_level || 0}</div>
+                                        <div class="stat-labels">
+                                            <span class="stat-label">TL:</span>
+                                        </div>
+                                        <div class="stat-values">
+                                            <span class="stat-value" style="color: #FF6B6B;">${availableCard.threat_level || 0}</span>
+                                        </div>
                                     </div>
                                 `;
                             } else if (card.type === 'mission') {
