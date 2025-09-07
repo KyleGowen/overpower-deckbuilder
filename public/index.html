@@ -2392,7 +2392,8 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            margin-left: 8px;
+            margin-left: auto;
+            margin-right: 8px;
             flex-shrink: 0;
         }
 
@@ -6141,17 +6142,6 @@
                 return;
             }
             
-            // Ensure the special cards category is expanded when filter is applied or removed
-                const header = specialCardsCategory.querySelector('.card-category-header');
-                const content = specialCardsCategory.querySelector('.card-category-content');
-                const icon = header.querySelector('.collapse-icon');
-                
-                if (header.classList.contains('collapsed')) {
-                    header.classList.remove('collapsed');
-                    content.classList.remove('collapsed');
-                    content.classList.add('expanded');
-                    icon.textContent = '▼';
-            }
             
             const characterGroups = specialCardsCategory.querySelectorAll('.character-group');
             
@@ -6380,17 +6370,6 @@
                 return;
             }
             
-            // Ensure the power cards category is expanded when filter is applied or removed
-                const header = powerCardsCategory.querySelector('.card-category-header');
-                const content = powerCardsCategory.querySelector('.card-category-content');
-                const icon = header.querySelector('.collapse-icon');
-                
-                if (header.classList.contains('collapsed')) {
-                    header.classList.remove('collapsed');
-                    content.classList.remove('collapsed');
-                    content.classList.add('expanded');
-                    icon.textContent = '▼';
-                }
                 
             if (isChecked) {
                 // Add visual indicator class
@@ -6550,17 +6529,6 @@
                 return;
             }
             
-            // Ensure the basic universe category is expanded when filter is applied or removed
-            const header = basicUniverseCategory.querySelector('.card-category-header');
-            const content = basicUniverseCategory.querySelector('.card-category-content');
-            const icon = header.querySelector('.collapse-icon');
-            
-            if (header.classList.contains('collapsed')) {
-                header.classList.remove('collapsed');
-                content.classList.remove('collapsed');
-                content.classList.add('expanded');
-                icon.textContent = '▼';
-            }
             
             if (isChecked) {
                 // Add visual indicator class
@@ -6824,17 +6792,6 @@
                 return;
             }
             
-            // Ensure the training category is expanded when filter is applied or removed
-            const header = trainingCategory.querySelector('.card-category-header');
-            const content = trainingCategory.querySelector('.card-category-content');
-            const icon = header.querySelector('.collapse-icon');
-            
-            if (header.classList.contains('collapsed')) {
-                header.classList.remove('collapsed');
-                content.classList.remove('collapsed');
-                content.classList.add('expanded');
-                icon.textContent = '▼';
-            }
             
             if (isChecked) {
                 // Add visual indicator class
@@ -6997,17 +6954,6 @@
                 return;
             }
             
-            // Ensure the ally universe category is expanded when filter is applied or removed
-            const header = allyUniverseCategory.querySelector('.card-category-header');
-            const content = allyUniverseCategory.querySelector('.card-category-content');
-            const icon = header.querySelector('.collapse-icon');
-            
-            if (header.classList.contains('collapsed')) {
-                header.classList.remove('collapsed');
-                content.classList.remove('collapsed');
-                content.classList.add('expanded');
-                icon.textContent = '▼';
-            }
             
             if (isChecked) {
                 // Add visual indicator class
@@ -8862,9 +8808,8 @@
                             `).join('');
                         }
                             
-                            // Apply saved collapse state or default to collapsed
-                            const isCollapsed = currentCollapseState[category.name] !== undefined ? 
-                                currentCollapseState[category.name] : true;
+                            // Always collapse all available card categories by default
+                            const isCollapsed = true;
                             const collapsedClass = isCollapsed ? 'collapsed' : '';
                             const collapseIcon = isCollapsed ? '▼' : '▲';
                             
