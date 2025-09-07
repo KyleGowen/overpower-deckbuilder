@@ -2152,6 +2152,47 @@
             font-weight: 400;
         }
 
+        .deck-card-editor-item.teamwork-card {
+            overflow: hidden;
+        }
+        
+        .deck-card-editor-item.teamwork-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 125% auto;
+            background-position: right center; /* Middle right of image aligned to middle right of tile */
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
+        }
+
+        .deck-card-editor-item.teamwork-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to left, 
+                rgba(54, 54, 54, 0.4) 0%, 
+                rgba(54, 54, 54, 0.2) 50%, 
+                rgba(54, 54, 54, 0.05) 100%);
+            z-index: -1;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
+        .deck-card-editor-item.teamwork-card .deck-card-editor-name {
+            font-size: 1.3rem;
+            font-weight: 400;
+        }
+
 
         .deck-card-editor-actions {
             position: absolute;
@@ -7245,16 +7286,18 @@
                             const isMission = card.type === 'mission';
                             const isEvent = card.type === 'event';
                             const isAspect = card.type === 'aspect';
+                            const isTeamwork = card.type === 'teamwork';
                             const characterClass = isCharacter ? 'character-card' : '';
                             const powerClass = isPower ? 'power-card' : '';
                             const locationClass = isLocation ? 'location-card' : '';
                             const missionClass = isMission ? 'mission-card' : '';
                             const eventClass = isEvent ? 'event-card' : '';
                             const aspectClass = isAspect ? 'aspect-card' : '';
-                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect) ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                            const teamworkClass = isTeamwork ? 'teamwork-card' : '';
+                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork) ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
                             
                         cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass}" draggable="true" data-index="${index}" 
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (availableCard.name || availableCard.card_name || getCardName(card)).replace(/\\'92/g, "'")}')"
                                  onmouseleave="hideCardHoverModal()">
@@ -7295,6 +7338,7 @@
             const missionCards = document.querySelectorAll('.deck-card-editor-item.mission-card');
             const eventCards = document.querySelectorAll('.deck-card-editor-item.event-card');
             const aspectCards = document.querySelectorAll('.deck-card-editor-item.aspect-card');
+            const teamworkCards = document.querySelectorAll('.deck-card-editor-item.teamwork-card');
             
             // Apply to character cards
             characterCards.forEach(card => {
@@ -7383,6 +7427,23 @@
 
             // Apply to event cards
             eventCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        card.style.setProperty('--bg-image', `url(${bgImage})`);
+                    };
+                    img.onerror = function() {
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
+
+            // Apply to teamwork cards
+            teamworkCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
                 if (bgImage) {
                     // Test if image loads successfully
@@ -7639,6 +7700,11 @@
                     }
                 } else if (cardType === 'aspect') {
                     // Aspects use the image field (which already includes the directory)
+                    if (card.image) {
+                        return `src/resources/cards/images/${card.image}`;
+                    }
+                } else if (cardType === 'teamwork') {
+                    // Teamwork cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `src/resources/cards/images/${card.image}`;
                     }
