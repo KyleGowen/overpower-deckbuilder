@@ -989,9 +989,9 @@
         /* Character display in deck cards */
         .deck-character-display {
             margin: 0;
-            padding: 0;
+            padding: 0 0 0 5px;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             flex: 2;
             position: relative;
@@ -1039,7 +1039,7 @@
 
         /* Hover effect for deck character cards */
         .deck-character-card-display:hover {
-            transform: rotateY(0deg) rotateX(0deg) translateY(-12px) scale(1.15);
+            transform: rotateY(0deg) rotateX(0deg) translateY(-12px) scale(1.5);
             z-index: 10;
             box-shadow: 0 12px 24px rgba(78, 205, 196, 0.4);
             border-color: rgba(78, 205, 196, 0.8);
@@ -1068,7 +1068,7 @@
             justify-content: center;
             align-items: flex-start;
             flex: 1;
-            padding-right: 20px;
+            padding-right: 60px;
             min-width: 0;
             height: 100%;
         }
@@ -1076,7 +1076,8 @@
         .deck-info h4 {
             margin: 0 0 8px 0;
             color: #4ecdc4;
-            font-size: 1.2rem;
+            font-size: 1.8rem;
+            font-weight: 700;
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
