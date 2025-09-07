@@ -6285,6 +6285,74 @@
             }
         }
 
+        // Toggle advanced universe character filter
+        async function toggleAdvancedUniverseCharacterFilter() {
+            const filterCheckbox = document.getElementById('advancedUniverseCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Advanced universe character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the advanced universe category
+            const allCategories = document.querySelectorAll('.card-category');
+            let advancedUniverseCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Advanced Universe')) {
+                    advancedUniverseCategory = category;
+                    break;
+                }
+            }
+            
+            if (!advancedUniverseCategory) {
+                console.error('Advanced universe category not found');
+                return;
+            }
+            
+            // Get all character groups in the advanced universe category
+            const characterGroups = advancedUniverseCategory.querySelectorAll('.character-group');
+            
+            if (isChecked) {
+                // Filter to show only cards for characters in the deck
+                const deckCharacterNames = deckEditorCards
+                    .filter(card => card.type === 'character')
+                    .map(card => {
+                        const availableCard = availableCardsMap.get(`character_${card.cardId}`);
+                        return availableCard ? availableCard.name : null;
+                    })
+                    .filter(name => name !== null);
+                
+                characterGroups.forEach(group => {
+                    const header = group.querySelector('.character-group-header span');
+                    if (header) {
+                        const characterName = header.textContent.split(' (')[0]; // Extract character name
+                        
+                        if (deckCharacterNames.includes(characterName) || characterName === 'Any Character') {
+                            group.style.display = 'block';
+                        } else {
+                            group.style.display = 'none';
+                        }
+                    }
+                });
+            } else {
+                // Show all character groups
+                characterGroups.forEach(group => {
+                    group.style.display = 'block';
+                });
+            }
+        }
+
+        // Update advanced universe filter when deck changes
+        function updateAdvancedUniverseFilter() {
+            const filterCheckbox = document.getElementById('advancedUniverseCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                toggleAdvancedUniverseCharacterFilter();
+            }
+        }
+
         // Toggle power cards character filter
         async function togglePowerCardsCharacterFilter() {
             const filterCheckbox = document.getElementById('powerCardsCharacterFilter');
@@ -7991,6 +8059,9 @@
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
             
+            // Update advanced universe filter if it's active
+            updateAdvancedUniverseFilter();
+            
             // Update power cards filter if it's active
             updatePowerCardsFilter();
             
@@ -8030,6 +8101,9 @@
             
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
+            
+            // Update advanced universe filter if it's active
+            updateAdvancedUniverseFilter();
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
@@ -8079,6 +8153,9 @@
             
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
+            
+            // Update advanced universe filter if it's active
+            updateAdvancedUniverseFilter();
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
@@ -8215,6 +8292,54 @@
                 .catch(error => {
                     console.error('Error fetching special cards:', error);
                     showNotification('Error loading special cards', 'error');
+                });
+        }
+
+        function addAllAdvancedUniverseCardsForCharacter(characterName) {
+            console.log(`Adding all advanced universe cards for character: ${characterName}`);
+            
+            // Fetch advanced universe cards data to get the cards for this character
+            fetch('/api/advanced-universe')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success || !data.data) {
+                        showNotification('Error loading advanced universe cards', 'error');
+                        return;
+                    }
+                    
+                    // Filter cards for the specific character
+                    const characterCards = data.data.filter(card => 
+                        (card.character || 'Any Character') === characterName
+                    );
+                    
+                    if (characterCards.length === 0) {
+                        showNotification(`No advanced universe cards found for ${characterName}`, 'info');
+                        return;
+                    }
+                    
+                    let addedCount = 0;
+                    
+                    characterCards.forEach(card => {
+                        // Check if card is already in deck
+                        const existingCard = deckEditorCards.find(deckCard => 
+                            deckCard.type === 'advanced-universe' && deckCard.cardId === card.id
+                        );
+                        
+                        if (!existingCard) {
+                            addCardToEditor('advanced-universe', card.id, card.name || card.card_name);
+                            addedCount++;
+                        }
+                    });
+                    
+                    if (addedCount === 0) {
+                        showNotification(`All advanced universe cards for ${characterName} are already in the deck`, 'info');
+                    } else {
+                        showNotification(`Added ${addedCount} advanced universe cards for ${characterName} to deck`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching advanced universe cards:', error);
+                    showNotification('Error loading advanced universe cards', 'error');
                 });
         }
 
@@ -8496,6 +8621,49 @@
                                     </div>
                                 `;
                             });
+                        } else if (category.type === 'advanced-universe') {
+                            // Special handling for advanced universe cards - group by character name
+                            const characterGroups = {};
+                            
+                            data.data.forEach(card => {
+                                const characterName = card.character || 'Any Character';
+                                if (!characterGroups[characterName]) {
+                                    characterGroups[characterName] = [];
+                                }
+                                characterGroups[characterName].push(card);
+                            });
+                            
+                            const characterNames = Object.keys(characterGroups).sort();
+                            cardsHtml = '';
+                            
+                            characterNames.forEach(characterName => {
+                                const cards = characterGroups[characterName];
+                                const cardItems = cards.map(card => `
+                                    <div class="card-item" 
+                                         draggable="true" 
+                                         data-type="${category.type}" 
+                                         data-id="${card.id}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseleave="hideCardHoverModal()"
+                                         data-name="${card[category.nameField]}">
+                                        <div class="card-item-content">${card[category.nameField]}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                    </div>
+                                `).join('');
+                                
+                                cardsHtml += `
+                                    <div class="character-group">
+                                        <div class="character-group-header" onclick="toggleCharacterGroup(this)">
+                                            <span>${characterName} (${cards.length})</span>
+                                            <button class="add-all-special-btn" onclick="event.stopPropagation(); addAllAdvancedUniverseCardsForCharacter('${characterName}')">Add All</button>
+                                            <span class="collapse-icon">▶</span>
+                                        </div>
+                                        <div class="character-group-content collapsed">
+                                            ${cardItems}
+                                        </div>
+                                    </div>
+                                `;
+                            });
                         } else if (category.type === 'teamwork') {
                             // Special handling for teamwork cards - group by "To Use" type
                             const typeGroups = {};
@@ -8709,7 +8877,28 @@
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="specialCardsCharacterFilter" onchange="toggleSpecialCardsCharacterFilter()">
-                                                    <span class="toggle-label">Show Only Deck Characters</span>
+                                                    <span class="toggle-label">Hide Unselected Characters</span>
+                                                </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
+                            } else if (category.type === 'advanced-universe') {
+                                // Special handling for advanced universe cards header with character filter toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
+                                                    <input type="checkbox" id="advancedUniverseCharacterFilter" onchange="toggleAdvancedUniverseCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unselected Characters</span>
                                                 </label>
                                             </div>
                                             <div class="category-header-controls">
@@ -8998,6 +9187,9 @@
             
             // Update special cards filter if it's active
             updateSpecialCardsFilter();
+            
+            // Update advanced universe filter if it's active
+            updateAdvancedUniverseFilter();
             
             // Update power cards filter if it's active
             updatePowerCardsFilter();
