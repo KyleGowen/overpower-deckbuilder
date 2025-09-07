@@ -971,6 +971,12 @@
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             cursor: pointer;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: space-between;
+            min-height: 140px;
+            overflow: visible;
         }
 
         .deck-card:hover {
@@ -980,17 +986,99 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* Character display in deck cards */
+        .deck-character-display {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 2;
+            position: relative;
+            min-width: 0;
+            height: 100%;
+        }
+
+        .deck-character-cards-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+            gap: 0;
+            overflow: visible;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .deck-character-card-display {
+            position: relative;
+            width: 160px;
+            height: 120px;
+            margin-left: -32px;
+            border-radius: 16px;
+            border: 3px solid rgba(78, 205, 196, 0.4);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom center;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .deck-character-card-display:first-child {
+            margin-left: 0;
+        }
+
+        /* Rotating file effect for deck cards */
+        .deck-character-card-display:nth-child(1) { transform: rotateY(-12deg) rotateX(4deg); z-index: 1; }
+        .deck-character-card-display:nth-child(2) { transform: rotateY(-8deg) rotateX(2deg); z-index: 2; }
+        .deck-character-card-display:nth-child(3) { transform: rotateY(-4deg) rotateX(1deg); z-index: 3; }
+        .deck-character-card-display:nth-child(4) { transform: rotateY(0deg) rotateX(0deg); z-index: 4; }
+
+        /* Hover effect for deck character cards */
+        .deck-character-card-display:hover {
+            transform: rotateY(0deg) rotateX(0deg) translateY(-12px) scale(1.15);
+            z-index: 10;
+            box-shadow: 0 12px 24px rgba(78, 205, 196, 0.4);
+            border-color: rgba(78, 205, 196, 0.8);
+        }
+
+        /* When hovering over one card, others recede */
+        .deck-character-cards-row:hover .deck-character-card-display:not(:hover) {
+            transform: rotateY(-25deg) rotateX(10deg) translateY(6px) scale(0.85);
+            opacity: 1;
+        }
+
+        .deck-character-card-display.empty {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(78, 205, 196, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(78, 205, 196, 0.5);
+            font-size: 0.6rem;
+            text-align: center;
+        }
+
         .deck-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: flex-start;
-            margin-bottom: 15px;
+            flex: 1;
+            padding-right: 20px;
+            min-width: 0;
+            height: 100%;
         }
 
         .deck-info h4 {
             margin: 0 0 8px 0;
             color: #4ecdc4;
             font-size: 1.2rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .deck-description {
@@ -1015,7 +1103,13 @@
 
         .deck-actions {
             display: flex;
+            flex-direction: column;
             gap: 10px;
+            flex: 0.5;
+            justify-content: center;
+            padding-left: 20px;
+            min-width: 120px;
+            height: 100%;
         }
 
         .deck-action-btn {
@@ -5317,6 +5411,7 @@
                 
                 // Get character names from deck cards
                 let characterList = '';
+                let characterDisplay = '';
                 if (deck.cards && deck.cards.length > 0) {
                     const characterCards = deck.cards.filter(card => card.type === 'character');
                     if (characterCards.length > 0) {
@@ -5325,6 +5420,32 @@
                             return character ? character.name : 'Unknown Character';
                         });
                         characterList = `<div class="deck-characters">👥 Characters: ${characterNames.join(', ')}</div>`;
+                        
+                        // Create character display with rotating file effect
+                        const characterDisplayCards = characterCards.slice(0, 4); // Max 4 characters
+                        let characterDisplayHTML = characterDisplayCards.map(card => {
+                            const character = characterMap[card.cardId];
+                            if (character && character.image) {
+                                const imagePath = `/src/resources/cards/images/characters/${character.image}`;
+                                return `<div class="deck-character-card-display" style="background-image: url('${imagePath}')" title="${character.name}"></div>`;
+                            } else {
+                                return `<div class="deck-character-card-display empty">?</div>`;
+                            }
+                        }).join('');
+                        
+                        // Add empty slots if less than 4 characters
+                        const emptySlots = 4 - characterDisplayCards.length;
+                        for (let i = 0; i < emptySlots; i++) {
+                            characterDisplayHTML += '<div class="deck-character-card-display empty">Empty</div>';
+                        }
+                        
+                        characterDisplay = `
+                            <div class="deck-character-display">
+                                <div class="deck-character-cards-row">
+                                    ${characterDisplayHTML}
+                                </div>
+                            </div>
+                        `;
                     }
                 }
                 
@@ -5341,11 +5462,12 @@
                                     <span>✏️ Modified: ${new Date(deck.lastModified).toLocaleDateString()}</span>
                                 </div>
                             </div>
-                            <div class="deck-actions" onclick="event.stopPropagation()">
-                                <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
-                                <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
-                                <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
-                            </div>
+                        </div>
+                        ${characterDisplay}
+                        <div class="deck-actions" onclick="event.stopPropagation()">
+                            <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
+                            <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
+                            <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
                         </div>
                     </div>
                 `;
