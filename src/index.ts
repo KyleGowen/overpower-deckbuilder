@@ -271,12 +271,12 @@ app.get('/api/decks', authenticateUser, (req: any, res) => {
 // Deck management API routes
 app.post('/api/decks', authenticateUser, (req: any, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, characters } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, error: 'Deck name is required' });
     }
     
-    const deck = deckService.createDeck(name, req.user.userId, description);
+    const deck = deckService.createDeck(name, req.user.userId, description, characters);
     res.json({ success: true, data: deck });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to create deck' });

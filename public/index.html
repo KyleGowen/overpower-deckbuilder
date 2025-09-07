@@ -1181,6 +1181,129 @@
             justify-content: flex-end;
         }
 
+        /* Create Deck Modal Styling */
+        .create-deck-modal {
+            max-width: 450px;
+            width: 90%;
+            padding: 25px 20px 30px 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #4ecdc4;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .character-dropdown {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .character-dropdown:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 6px rgba(78, 205, 196, 0.4);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+            margin-bottom: 0;
+        }
+
+        .character-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .character-dropdown {
+            width: 100%;
+        }
+
+        .selected-characters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 50px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .character-tag {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid rgba(78, 205, 196, 0.4);
+            border-radius: 16px;
+            padding: 4px 10px;
+            color: #4ecdc4;
+            font-size: 0.85rem;
+            gap: 6px;
+        }
+
+        .character-tag .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .character-tag .remove-btn:hover {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ffffff;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, #4ecdc4, #2cb1a6);
             color: #1a1a2e;
@@ -3505,20 +3628,39 @@
 
     <!-- Create Deck Modal -->
     <div id="createDeckModal" class="modal" onclick="closeCreateDeckModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-content create-deck-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
             <h3>Create New Deck</h3>
+            </div>
             <form id="createDeckForm">
+                <div class="form-row">
                 <div class="form-group">
                     <label for="deckName">Deck Name:</label>
                     <input type="text" id="deckName" name="deckName" required placeholder="Enter deck name">
                 </div>
+                </div>
+                <div class="form-row">
                 <div class="form-group">
-                    <label for="deckDescription">Description (optional):</label>
+                        <label for="deckDescription">Deck Description:</label>
                     <textarea id="deckDescription" name="deckDescription" placeholder="Enter deck description"></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="characterSelect">Characters:</label>
+                        <div class="character-selection">
+                            <select id="characterSelect" class="character-dropdown">
+                                <option value="">Select a character to add...</option>
+                            </select>
+                            <div id="selectedCharacters" class="selected-characters">
+                                <!-- Selected characters will appear here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" onclick="closeCreateDeckModal()" class="btn-secondary">Cancel</button>
-                    <button type="submit" class="btn-primary">Create Deck</button>
+                    <button type="submit" class="btn-primary">Save</button>
                 </div>
             </form>
         </div>
@@ -5465,10 +5607,10 @@
                             </div>
                         </div>
                         ${characterDisplay}
-                        <div class="deck-actions" onclick="event.stopPropagation()">
-                            <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
-                            <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
-                            <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
+                            <div class="deck-actions" onclick="event.stopPropagation()">
+                                <button class="deck-action-btn" onclick="editDeck('${deck.id}')">Edit</button>
+                                <button class="deck-action-btn" onclick="viewDeck('${deck.id}')">View</button>
+                                <button class="deck-action-btn danger" onclick="deleteDeck('${deck.id}')">Delete</button>
                         </div>
                     </div>
                 `;
@@ -5490,15 +5632,105 @@
         }
 
         // Modal functions
-        function showCreateDeckModal() {
+        async function showCreateDeckModal() {
             document.getElementById('createDeckModal').style.display = 'flex';
             document.getElementById('deckName').focus();
+            
+            // Load characters into dropdown
+            await loadCharactersForDeckCreation();
+        }
+
+        async function loadCharactersForDeckCreation() {
+            try {
+                const response = await fetch('/api/characters');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const characters = result.data;
+                    const characterSelect = document.getElementById('characterSelect');
+                    characterSelect.innerHTML = '<option value="">Select a character to add...</option>';
+                    
+                    characters.forEach(character => {
+                        const option = document.createElement('option');
+                        option.value = character.id;
+                        option.textContent = character.name;
+                        characterSelect.appendChild(option);
+                    });
+                }
+                
+                // Clear selected characters
+                document.getElementById('selectedCharacters').innerHTML = '';
+            } catch (error) {
+                console.error('Error loading characters:', error);
+            }
         }
 
         function closeCreateDeckModal() {
             document.getElementById('createDeckModal').style.display = 'none';
             document.getElementById('createDeckForm').reset();
+            document.getElementById('selectedCharacters').innerHTML = '';
+            selectedCharacterIds = [];
         }
+
+        // Character selection functionality
+        let selectedCharacterIds = [];
+
+        function addCharacterToDeck() {
+            const characterSelect = document.getElementById('characterSelect');
+            const selectedValue = characterSelect.value;
+            
+            if (!selectedValue) return;
+            
+            // Check if character is already selected
+            if (selectedCharacterIds.includes(selectedValue)) {
+                alert('This character is already selected!');
+                return;
+            }
+            
+            // Check if we already have 4 characters
+            if (selectedCharacterIds.length >= 4) {
+                alert('You can only select up to 4 characters!');
+                return;
+            }
+            
+            const selectedText = characterSelect.options[characterSelect.selectedIndex].text;
+            selectedCharacterIds.push(selectedValue);
+            
+            // Add character tag to display
+            const selectedCharactersDiv = document.getElementById('selectedCharacters');
+            const characterTag = document.createElement('div');
+            characterTag.className = 'character-tag';
+            characterTag.innerHTML = `
+                <span>${selectedText}</span>
+                <button type="button" class="remove-btn" onclick="removeCharacterFromDeck('${selectedValue}')">×</button>
+            `;
+            selectedCharactersDiv.appendChild(characterTag);
+            
+            // Reset dropdown
+            characterSelect.value = '';
+        }
+
+        function removeCharacterFromDeck(characterId) {
+            selectedCharacterIds = selectedCharacterIds.filter(id => id !== characterId);
+            
+            // Remove character tag from display
+            const selectedCharactersDiv = document.getElementById('selectedCharacters');
+            const tags = selectedCharactersDiv.querySelectorAll('.character-tag');
+            tags.forEach(tag => {
+                const removeBtn = tag.querySelector('.remove-btn');
+                if (removeBtn && removeBtn.onclick.toString().includes(characterId)) {
+                    tag.remove();
+                }
+            });
+        }
+
+        // Add event listener for character dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            const characterSelect = document.getElementById('characterSelect');
+            if (characterSelect) {
+                characterSelect.addEventListener('change', addCharacterToDeck);
+            }
+        });
 
         // Create deck form submission
         document.getElementById('createDeckForm').addEventListener('submit', async (e) => {
@@ -5515,7 +5747,11 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ name, description })
+                    body: JSON.stringify({ 
+                        name, 
+                        description,
+                        characters: selectedCharacterIds 
+                    })
                 });
 
                 const data = await response.json();

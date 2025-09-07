@@ -58,9 +58,21 @@ export class DeckPersistenceService {
   }
 
   // Create a new deck
-  createDeck(name: string, userId: string, description?: string): DeckData {
+  createDeck(name: string, userId: string, description?: string, characterIds?: string[]): DeckData {
     const id = `deck_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
+    
+    // Create initial cards array with selected characters
+    const initialCards: DeckCard[] = [];
+    if (characterIds && characterIds.length > 0) {
+      characterIds.forEach(characterId => {
+        initialCards.push({
+          type: 'character',
+          cardId: characterId,
+          quantity: 1
+        });
+      });
+    }
     
     const deck: DeckData = {
       metadata: {
@@ -69,15 +81,15 @@ export class DeckPersistenceService {
         description: description || '',
         created: now,
         lastModified: now,
-        cardCount: 0,
+        cardCount: initialCards.length,
         userId
       },
-      cards: []
+      cards: initialCards
     };
 
     this.decks.set(id, deck);
     this.saveDecks();
-    console.log(`✅ Created new deck: ${name} (${id}) for user: ${userId}`);
+    console.log(`✅ Created new deck: ${name} (${id}) for user: ${userId} with ${initialCards.length} characters`);
     return deck;
   }
 
@@ -216,6 +228,15 @@ export class DeckPersistenceService {
       }
     }
     this.saveDecks();
+  }
+
+  // Get deck statistics
+  getDeckStats(): { totalDecks: number; totalCards: number } {
+    const totalDecks = this.decks.size;
+    const totalCards = Array.from(this.decks.values())
+      .reduce((total, deck) => total + deck.metadata.cardCount, 0);
+    
+    return { totalDecks, totalCards };
   }
 
   // Get deck statistics
