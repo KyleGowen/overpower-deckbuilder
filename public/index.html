@@ -2752,7 +2752,7 @@
     <div id="loginModal" class="login-modal">
         <div class="login-modal-content">
             <div class="login-header">
-                <h2>🏰 Welcome to Overpower Deckbuilder</h2>
+                <img src="src/resources/images/op-logo.png" alt="Overpower Deckbuilder" style="max-width: 300px; height: auto; display: block; margin: 0 auto;">
                 <p>Please log in to access your decks</p>
             </div>
             <form id="loginForm" class="login-form">
@@ -2772,7 +2772,7 @@
 
     <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
-            <h1>🏰 Overpower Deckbuilder</h1>
+            <img src="src/resources/images/op-logo.png" alt="Overpower Deckbuilder" style="max-width: 400px; height: auto; display: block; margin: 0 auto;">
             <p>Character Database & Deck Management System</p>
             <div class="user-info">
                 <span id="userWelcome">Welcome, <span id="currentUsername"></span>!</span>
@@ -6605,6 +6605,130 @@
             }
         }
 
+        // Toggle teamwork character filter
+        async function toggleTeamworkCharacterFilter() {
+            const filterCheckbox = document.getElementById('teamworkCharacterFilter');
+            if (!filterCheckbox) {
+                console.error('Teamwork character filter checkbox not found');
+                return;
+            }
+            
+            const isChecked = filterCheckbox.checked;
+            
+            // Find the teamwork category
+            const allCategories = document.querySelectorAll('.card-category');
+            let teamworkCategory = null;
+            
+            for (const category of allCategories) {
+                const header = category.querySelector('.card-category-header span');
+                if (header && header.textContent.includes('Universe: Teamwork')) {
+                    teamworkCategory = category;
+                    break;
+                }
+            }
+            
+            if (!teamworkCategory) {
+                console.error('Teamwork category not found');
+                return;
+            }
+            
+            // Get all card items in the teamwork category
+            const cardItems = teamworkCategory.querySelectorAll('.card-item');
+            let visibleCount = 0;
+            
+            if (isChecked) {
+                // Filter out unusable cards
+                cardItems.forEach(cardItem => {
+                    const cardText = cardItem.querySelector('.card-item-content').textContent;
+                    
+                    // Extract the "To Use" requirement (e.g., "6 Energy", "7 Combat")
+                    const toUseMatch = cardText.match(/(\d+)\s+(Energy|Combat|Brute Force|Intelligence|Any-Power)/);
+                    if (!toUseMatch) {
+                        cardItem.style.display = 'none';
+                        return;
+                    }
+                    
+                    const requiredValue = parseInt(toUseMatch[1]);
+                    const requiredType = toUseMatch[2];
+                    
+                    // Check if any character in the deck meets this requirement
+                    const hasUsableCharacter = deckEditorCards.some(deckCard => {
+                        if (deckCard.type !== 'character') return false;
+                        
+                        const availableCard = availableCardsMap.get(`character_${deckCard.cardId}`);
+                        if (!availableCard) return false;
+                        
+                        // Check the specific stat type
+                        let characterValue = 0;
+                        switch (requiredType) {
+                            case 'Energy':
+                                characterValue = availableCard.energy || 0;
+                                break;
+                            case 'Combat':
+                                characterValue = availableCard.combat || 0;
+                                break;
+                            case 'Brute Force':
+                                characterValue = availableCard.brute_force || 0;
+                                break;
+                            case 'Intelligence':
+                                characterValue = availableCard.intelligence || 0;
+                                break;
+                            case 'Any-Power':
+                                // For Any-Power, check if character has any power stat >= required value
+                                const maxPower = Math.max(
+                                    availableCard.energy || 0,
+                                    availableCard.combat || 0,
+                                    availableCard.brute_force || 0,
+                                    availableCard.intelligence || 0
+                                );
+                                return maxPower >= requiredValue;
+                        }
+                        
+                        return characterValue >= requiredValue;
+                    });
+                    
+                    if (!hasUsableCharacter) {
+                        cardItem.style.display = 'none';
+                    } else {
+                        cardItem.style.display = 'flex';
+                        visibleCount++;
+                    }
+                });
+            } else {
+                // Show all cards
+                cardItems.forEach(cardItem => {
+                    cardItem.style.display = 'flex';
+                    visibleCount++;
+                });
+            }
+            
+            // Update category totals for all subcategories
+            const characterGroups = teamworkCategory.querySelectorAll('.character-group');
+            characterGroups.forEach(group => {
+                const header = group.querySelector('.character-group-header span');
+                if (header) {
+                    const originalText = header.textContent;
+                    const match = originalText.match(/^(.+?)\s*\((\d+)\)$/);
+                    if (match) {
+                        const categoryName = match[1];
+                        const groupCardItems = group.querySelectorAll('.card-item');
+                        const groupVisibleCount = Array.from(groupCardItems).filter(item => 
+                            item.style.display !== 'none'
+                        ).length;
+                        header.textContent = `${categoryName} (${groupVisibleCount})`;
+                    }
+                }
+            });
+        }
+
+        // Update teamwork filter when deck changes
+        function updateTeamworkFilter() {
+            const filterCheckbox = document.getElementById('teamworkCharacterFilter');
+            if (filterCheckbox && filterCheckbox.checked) {
+                toggleTeamworkCharacterFilter();
+            }
+        }
+
         // Toggle training character filter
         async function toggleTrainingCharacterFilter() {
             const filterCheckbox = document.getElementById('trainingCharacterFilter');
@@ -7228,7 +7352,7 @@
                                 const specialAbilities = availableCard.special_abilities || '';
                                 const specialAbilitiesHtml = 
                                     `<div class="character-special-ability">${specialAbilities}</div>`;
-                                
+                            
                             cardDetails = `
                                 <div class="character-stats">
                                     <div class="stat-labels">${stats.map(stat => `<span class="stat-label">${stat.label}</span>`).join(' ')}</div>
@@ -7873,6 +7997,9 @@
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
             
+            // Update teamwork filter if it's active
+            updateTeamworkFilter();
+            
             // Update training filter if it's active
             updateTrainingFilter();
             
@@ -7909,6 +8036,9 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update teamwork filter if it's active
+            updateTeamworkFilter();
             
             // Update training filter if it's active
             updateTrainingFilter();
@@ -7955,6 +8085,9 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update teamwork filter if it's active
+            updateTeamworkFilter();
             
             // Update training filter if it's active
             updateTrainingFilter();
@@ -8213,8 +8346,8 @@
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
                                             <div class="card-item-content">
-                                                <div class="character-name">${card[category.nameField]}</div>
-                                                <div class="character-stats">${statsHtml}</div>
+                                            <div class="character-name">${card[category.nameField]}</div>
+                                            <div class="character-stats">${statsHtml}</div>
                                             </div>
                                             <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                         </div>
@@ -8609,6 +8742,27 @@
                                         </div>
                                     </div>
                                 `;
+                            } else if (category.type === 'teamwork') {
+                                // Teamwork category - with filter toggle
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <label class="filter-toggle" onclick="event.stopPropagation()">
+                                                    <input type="checkbox" id="teamworkCharacterFilter" onchange="toggleTeamworkCharacterFilter()">
+                                                    <span class="toggle-label">Hide Unusables</span>
+                                                </label>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
                             } else if (category.type === 'basic-universe') {
                                 // Basic universe category - with filter toggle
                                 categoriesHtml += `
@@ -8850,6 +9004,9 @@
             
             // Update basic universe filter if it's active
             updateBasicUniverseFilter();
+            
+            // Update teamwork filter if it's active
+            updateTeamworkFilter();
             
             // Update training filter if it's active
             updateTrainingFilter();

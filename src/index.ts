@@ -32,6 +32,9 @@ app.use((req: any, res: any, next: any) => {
 // Serve card images from resources directory
 app.use('/src/resources/cards/images', express.static(path.join(process.cwd(), 'src/resources/cards/images')));
 
+// Serve general images from resources directory
+app.use('/src/resources/images', express.static(path.join(process.cwd(), 'src/resources/images')));
+
 // Initialize database
 database.initialize().then(() => {
   console.log('🚀 Overpower Deckbuilder server running on port', PORT);
