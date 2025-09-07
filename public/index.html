@@ -2355,6 +2355,9 @@
             transition: all 0.2s ease;
             color: #ffffff;
             font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .card-item:hover {
@@ -2369,6 +2372,38 @@
         .card-item.dragging {
             opacity: 0.5;
             transform: rotate(5deg);
+        }
+
+        .card-item-content {
+            flex: 1;
+        }
+
+        .card-item-plus {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid rgba(78, 205, 196, 0.4);
+            border-radius: 3px;
+            color: #4ECDC4;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            height: 20px;
+            width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+
+        .card-item-plus:hover {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: rgba(78, 205, 196, 0.6);
+            transform: scale(1.1);
+        }
+
+        .card-item-plus:active {
+            transform: scale(0.95);
         }
         
         .character-card {
@@ -7543,57 +7578,90 @@
                 
                 // Function to position modal based on mouse position
                 function positionModal(event) {
-                    let x = event.clientX + 50;  // Increased offset to avoid cursor area
-                    let y = event.clientY + 50;  // Increased offset to avoid cursor area
+                    let x = event.clientX + 80;  // Larger offset to avoid cursor area
+                    let y = event.clientY + 80;  // Larger offset to avoid cursor area
                     
                     const modalWidth = 320; // Approximate modal width
                     const modalHeight = 450; // Approximate modal height
                     
                     // Check if we're near any buttons and adjust position
                     const target = event.target;
-                    const cardElement = target.closest('.deck-card-editor-item');
+                    const cardElement = target.closest('.deck-card-editor-item, .card-item');
                     if (cardElement) {
-                        const actionsContainer = cardElement.querySelector('.deck-card-editor-actions');
-                        if (actionsContainer) {
-                            const rect = actionsContainer.getBoundingClientRect();
-                            
-                            // If mouse is near the Remove button area, position modal to avoid it
-                            if (event.clientX > rect.left - 100 && event.clientY > rect.top - 100) {
-                                // Try positioning to the left first with larger offset
-                                x = event.clientX - modalWidth - 50;
-                                y = event.clientY + 50;
+                        // Handle deck editor cards
+                        if (cardElement.classList.contains('deck-card-editor-item')) {
+                            const actionsContainer = cardElement.querySelector('.deck-card-editor-actions');
+                            if (actionsContainer) {
+                                const rect = actionsContainer.getBoundingClientRect();
                                 
-                                // If that would go off screen, try positioning below and to the right
-                                if (x < 10) {
-                                    x = event.clientX + 50;
-                                    y = event.clientY + modalHeight + 50;
+                                // If mouse is near the Remove button area, position modal to avoid it
+                                if (event.clientX > rect.left - 100 && event.clientY > rect.top - 100) {
+                                    // Try positioning to the left first with larger offset
+                                    x = event.clientX - modalWidth - 50;
+                                    y = event.clientY + 50;
+                                    
+                                    // If that would go off screen, try positioning below and to the right
+                                    if (x < 10) {
+                                        x = event.clientX + 50;
+                                        y = event.clientY + modalHeight + 50;
+                                    }
+                                }
+                            }
+                            
+                            // Also check for any buttons in the deck editor card element
+                            const buttons = cardElement.querySelectorAll('.quantity-btn, .remove-all-btn');
+                            buttons.forEach(button => {
+                                const buttonRect = button.getBoundingClientRect();
+                                
+                                // If modal would overlap with button, move it away
+                                if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
+                                    y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
+                                    // Try positioning to the left of the button with larger offset
+                                    x = buttonRect.left - modalWidth - 50;
+                                    y = buttonRect.top - modalHeight / 2;
+                                    
+                                    // If that goes off screen, try positioning below with larger offset
+                                    if (x < 10) {
+                                        x = buttonRect.left + 50;
+                                        y = buttonRect.bottom + 50;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Handle available cards (card-item)
+                        if (cardElement.classList.contains('card-item')) {
+                            // Check for plus button in available cards
+                            const plusButton = cardElement.querySelector('.card-item-plus');
+                            if (plusButton) {
+                                const buttonRect = plusButton.getBoundingClientRect();
+                                
+                                // Always position modal to avoid plus button area with larger buffer
+                                const buffer = 60; // Larger buffer zone
+                                if (event.clientX > buttonRect.left - buffer && event.clientX < buttonRect.right + buffer &&
+                                    event.clientY > buttonRect.top - buffer && event.clientY < buttonRect.bottom + buffer) {
+                                    
+                                    // Position to the left of the plus button with larger offset
+                                    x = buttonRect.left - modalWidth - 80;
+                                    y = buttonRect.top - modalHeight / 2;
+                                    
+                                    // If that goes off screen, try positioning below with larger offset
+                                    if (x < 10) {
+                                        x = buttonRect.left + 80;
+                                        y = buttonRect.bottom + 80;
+                                    }
+                                    
+                                    // If still off screen, try positioning above
+                                    if (y + modalHeight > window.innerHeight - 10) {
+                                        y = buttonRect.top - modalHeight - 80;
+                                    }
                                 }
                             }
                         }
-                        
-                        // Also check for any buttons in the card element
-                        const buttons = cardElement.querySelectorAll('.quantity-btn, .remove-all-btn');
-                        buttons.forEach(button => {
-                            const buttonRect = button.getBoundingClientRect();
-                            
-                            // If modal would overlap with button, move it away
-                            if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
-                                y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
-                                // Try positioning to the left of the button with larger offset
-                                x = buttonRect.left - modalWidth - 50;
-                                y = buttonRect.top - modalHeight / 2;
-                                
-                                // If that goes off screen, try positioning below with larger offset
-                                if (x < 10) {
-                                    x = buttonRect.left + 50;
-                                    y = buttonRect.bottom + 50;
-                                }
-                            }
-                        });
                     }
                     
                     // Final safety check: ensure modal is never too close to cursor
-                    const minDistanceFromCursor = 40;
+                    const minDistanceFromCursor = 100; // Increased distance
                     if (Math.abs(x - event.clientX) < minDistanceFromCursor) {
                         x = event.clientX + minDistanceFromCursor;
                     }
@@ -8144,8 +8212,11 @@
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
-                                            <div class="character-name">${card[category.nameField]}</div>
-                                            <div class="character-stats">${statsHtml}</div>
+                                            <div class="card-item-content">
+                                                <div class="character-name">${card[category.nameField]}</div>
+                                                <div class="character-stats">${statsHtml}</div>
+                                            </div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -8186,7 +8257,8 @@
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
-                                            ${card[category.nameField]}
+                                            <div class="card-item-content">${card[category.nameField]}</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -8231,7 +8303,8 @@
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${card[category.nameField]}">
-                                        ${card[category.nameField]}
+                                        <div class="card-item-content">${card[category.nameField]}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                     </div>
                                 `).join('');
                                 
@@ -8272,7 +8345,8 @@
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${card[category.nameField]}">
-                                        ${card[category.nameField]}
+                                        <div class="card-item-content">${card[category.nameField]}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                     </div>
                                 `).join('');
                                 
@@ -8333,7 +8407,8 @@
                                              onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
-                                            ${summary}
+                                            <div class="card-item-content">${summary}</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -8362,7 +8437,8 @@
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
-                                        ${summary}
+                                        <div class="card-item-content">${summary}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -8378,7 +8454,8 @@
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
-                                        ${summary}
+                                        <div class="card-item-content">${summary}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -8394,7 +8471,8 @@
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
-                                        ${summary}
+                                        <div class="card-item-content">${summary}</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -8442,7 +8520,8 @@
                                              onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
-                                            ${summary}
+                                            <div class="card-item-content">${summary}</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -8476,7 +8555,8 @@
                                      onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                      onmouseleave="hideCardHoverModal()"
                                      data-name="${card[category.nameField]}">
-                                    ${card[category.nameField]}
+                                    <div class="card-item-content">${card[category.nameField]}</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
                                 </div>
                             `).join('');
                         }
@@ -8675,6 +8755,12 @@
             } catch (error) {
                 console.error('Error in setupDragAndDrop:', error);
             }
+        }
+
+        // Function to handle plus button clicks
+        function handlePlusButtonClick(event, cardType, cardId, cardName) {
+            event.stopPropagation(); // Prevent drag event
+            addCardToEditor(cardType, cardId, cardName);
         }
 
         async function addCardToEditor(cardType, cardId, cardName) {
