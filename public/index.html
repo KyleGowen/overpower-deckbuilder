@@ -5825,7 +5825,9 @@
             });
             
             // Check deck size - removed from validation errors since it's shown in Total Cards metadata
-            const totalCards = deckCards.length;
+            const totalCards = deckCards
+                .filter(card => !['mission', 'character', 'location'].includes(card.type))
+                .reduce((sum, card) => sum + card.quantity, 0);
             const hasEvents = eventCards.length > 0;
             const minSize = hasEvents ? DECK_RULES.MIN_DECK_SIZE_WITH_EVENTS : DECK_RULES.MIN_DECK_SIZE;
             
@@ -5885,8 +5887,10 @@
 
         // Function to update deck summary with stats and validation
         async function updateDeckSummary(deckCards) {
-            // Update total card count - show denominator if invalid
-            const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
+            // Update total card count - exclude mission, character, and location cards
+            const totalCards = deckCards
+                .filter(card => !['mission', 'character', 'location'].includes(card.type))
+                .reduce((sum, card) => sum + card.quantity, 0);
             
             // Check if deck size is invalid to determine display format
             const eventCards = deckCards.filter(card => card.type === 'event');

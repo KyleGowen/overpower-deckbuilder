@@ -6,10 +6,19 @@ export class DeckPersistenceService {
   private readonly decksFilePath: string;
   private decks: Map<string, DeckData> = new Map();
 
+  // Helper method to calculate card count excluding mission, character, and location cards
+  private calculateCardCount(cards: DeckCard[]): number {
+    return cards
+      .filter(card => !['mission', 'character', 'location'].includes(card.type))
+      .reduce((total, card) => total + card.quantity, 0);
+  }
+
   constructor() {
     this.decksFilePath = path.join(process.cwd(), 'data', 'decks.json');
     this.ensureDataDirectory();
     this.loadDecks();
+    // Recalculate card counts to fix any existing decks with incorrect counts
+    this.recalculateAllDeckCounts();
   }
 
   private ensureDataDirectory(): void {
@@ -135,8 +144,8 @@ export class DeckPersistenceService {
       deck.cards.push(newCard);
     }
 
-    // Update metadata
-    deck.metadata.cardCount = deck.cards.reduce((total, card) => total + card.quantity, 0);
+    // Update metadata - exclude mission, character, and location cards from count
+    deck.metadata.cardCount = this.calculateCardCount(deck.cards);
     deck.metadata.lastModified = new Date().toISOString();
 
     this.saveDecks();
@@ -173,8 +182,8 @@ export class DeckPersistenceService {
         existingCard.quantity -= quantity;
       }
 
-      // Update metadata
-      deck.metadata.cardCount = deck.cards.reduce((total, card) => total + card.quantity, 0);
+      // Update metadata - exclude mission, character, and location cards from count
+      deck.metadata.cardCount = this.calculateCardCount(deck.cards);
       deck.metadata.lastModified = new Date().toISOString();
 
       this.saveDecks();
@@ -194,6 +203,19 @@ export class DeckPersistenceService {
     this.saveDecks();
     console.log(`✅ Deleted deck: ${deck.metadata.name}`);
     return true;
+  }
+
+  // Recalculate card counts for all decks (useful for fixing existing data)
+  recalculateAllDeckCounts(): void {
+    for (const deck of this.decks.values()) {
+      const newCount = this.calculateCardCount(deck.cards);
+      if (deck.metadata.cardCount !== newCount) {
+        console.log(`🔄 Recalculating deck "${deck.metadata.name}": ${deck.metadata.cardCount} → ${newCount}`);
+        deck.metadata.cardCount = newCount;
+        deck.metadata.lastModified = new Date().toISOString();
+      }
+    }
+    this.saveDecks();
   }
 
   // Get deck statistics
