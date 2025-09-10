@@ -138,6 +138,19 @@ app.get('/api/characters', (req, res) => {
   }
 });
 
+app.get('/api/characters/:id/alternate-images', (req, res) => {
+  try {
+    const character = database.getCharacterById(req.params.id);
+    if (!character) {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    
+    res.json({ success: true, data: character.alternateImages || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch alternate images' });
+  }
+});
+
 app.get('/api/locations', (req, res) => {
   try {
     const locations = database.getAllLocations();
@@ -339,7 +352,7 @@ app.delete('/api/decks/:id', authenticateUser, (req: any, res) => {
 
 app.post('/api/decks/:id/cards', authenticateUser, (req: any, res) => {
   try {
-    const { cardType, cardId, quantity } = req.body;
+    const { cardType, cardId, quantity, selectedAlternateImage } = req.body;
     if (!cardType || !cardId) {
       return res.status(400).json({ success: false, error: 'Card type and card ID are required' });
     }
@@ -349,7 +362,7 @@ app.post('/api/decks/:id/cards', authenticateUser, (req: any, res) => {
       return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
     
-    const deck = deckService.addCardToDeck(req.params.id, cardType, cardId, quantity || 1);
+    const deck = deckService.addCardToDeck(req.params.id, cardType, cardId, quantity || 1, selectedAlternateImage);
     if (!deck) {
       return res.status(404).json({ success: false, error: 'Deck not found' });
     }

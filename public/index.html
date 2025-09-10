@@ -2135,6 +2135,126 @@
             pointer-events: none;
         }
 
+        /* Alternate Art Selection Modal */
+        .alternate-art-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .alternate-art-content {
+            background: #2c3e50;
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .alternate-art-content h3 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .alternate-art-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .art-option {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .art-option:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .art-option.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .art-option img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .art-option span {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .alternate-art-actions {
+            text-align: center;
+        }
+
+        .alternate-art-actions button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .alternate-art-actions button:hover {
+            background: #c0392b;
+        }
+
+        /* Deck Card Editor Actions Column */
+        .deck-card-editor-actions-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* Change Art Button */
+        .alternate-art-btn {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+
+        .alternate-art-btn:hover {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: rgba(78, 205, 196, 0.5);
+            color: #ffffff;
+        }
+
         /* Power card background images in deck contents */
         .deck-card-editor-item.power-card::before {
             content: '';
@@ -5572,7 +5692,8 @@
                         let characterDisplayHTML = characterDisplayCards.map(card => {
                             const character = characterMap[card.cardId];
                             if (character && character.image) {
-                                const imagePath = `/src/resources/cards/images/characters/${character.image}`;
+                                // Use getCardImagePath to handle alternate images
+                                const imagePath = getCardImagePath(character, 'character', card.selectedAlternateImage);
                                 return `<div class="deck-character-card-display" style="background-image: url('${imagePath}')" title="${character.name}"></div>`;
                             } else {
                                 return `<div class="deck-character-card-display empty">?</div>`;
@@ -7861,19 +7982,30 @@
                             const eventClass = isEvent ? 'event-card' : '';
                             const aspectClass = isAspect ? 'aspect-card' : '';
                             const teamworkClass = isTeamwork ? 'teamwork-card' : '';
-                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork) ? `data-bg-image="${getCardImagePath(availableCard, card.type)}"` : '';
+                            const selectedAlternateImage = card.selectedAlternateImage;
+                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork) ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
+                            
+                            // Add alternate art button for characters with alternate images
+                            let alternateArtButton = '';
+                            if (isCharacter && availableCard.alternateImages && availableCard.alternateImages.length > 0) {
+                                const characterName = (availableCard.name || availableCard.card_name || getCardName(card)).replace(/'/g, "\\'");
+                                alternateArtButton = `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>`;
+                            }
                             
                         cardsHtml += `
                                 <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
                                  onmouseleave="hideCardHoverModal()">
                                 <div class="deck-card-editor-info">
                                         <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
-                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    <div class="deck-card-editor-actions-column">
+                                        ${alternateArtButton}
+                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -8264,9 +8396,14 @@
         }
         
         // Helper function to get card image path
-        function getCardImagePath(card, cardType) {
+        function getCardImagePath(card, cardType, selectedAlternateImage = null) {
             try {
                 if (cardType === 'character') {
+                    // If a specific alternate image is selected, use it
+                    if (selectedAlternateImage && card.alternateImages && card.alternateImages.includes(selectedAlternateImage)) {
+                        return `src/resources/cards/images/characters/alternate/${selectedAlternateImage}`;
+                    }
+                    
                     // Characters use the image field from the database
                     if (card.image) {
                         return `src/resources/cards/images/characters/${card.image}`;
@@ -9445,7 +9582,87 @@
             addCardToEditor(cardType, cardId, cardName);
         }
 
-        async function addCardToEditor(cardType, cardId, cardName) {
+        // Function to show alternate art selection modal
+        function showAlternateArtSelection(character, cardId, cardName, cardIndex = null) {
+            // Get current selected image
+            let currentSelectedImage = character.image;
+            if (cardIndex !== null && deckEditorCards[cardIndex] && deckEditorCards[cardIndex].selectedAlternateImage) {
+                currentSelectedImage = deckEditorCards[cardIndex].selectedAlternateImage;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'alternate-art-modal';
+            modal.innerHTML = `
+                <div class="alternate-art-content">
+                    <h3>Select Art for ${character.name}</h3>
+                    <div class="alternate-art-options">
+                        <div class="art-option ${currentSelectedImage === character.image ? 'selected' : ''}" data-image="${character.image}">
+                            <img src="/src/resources/cards/images/characters/${character.image}" alt="Default Art">
+                            <span>Default Art</span>
+                        </div>
+                        ${character.alternateImages.map(altImage => `
+                            <div class="art-option ${currentSelectedImage === altImage ? 'selected' : ''}" data-image="${altImage}">
+                                <img src="/src/resources/cards/images/characters/alternate/${altImage}" alt="Alternate Art">
+                                <span>Alternate Art</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="alternate-art-actions">
+                        <button onclick="closeAlternateArtModal()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add click handlers for art options
+            modal.addEventListener('click', (e) => {
+                if (e.target.closest('.art-option')) {
+                    const selectedImage = e.target.closest('.art-option').dataset.image;
+                    
+                    if (cardIndex !== null) {
+                        // Update existing card in deck editor
+                        updateCardAlternateImage(cardIndex, selectedImage);
+                    } else {
+                        // Add new card
+                        addCardToEditor('character', cardId, cardName, selectedImage);
+                    }
+                    closeAlternateArtModal();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        // Function to update alternate image for existing card
+        function updateCardAlternateImage(cardIndex, selectedImage) {
+            if (deckEditorCards[cardIndex]) {
+                deckEditorCards[cardIndex].selectedAlternateImage = selectedImage;
+                displayDeckCardsForEditing();
+                updateDeckEditorCardCount();
+            }
+        }
+
+        // Function to show alternate art selection for existing card
+        function showAlternateArtSelectionForExistingCard(cardId, cardIndex) {
+            // Get character data from availableCardsMap
+            const character = availableCardsMap.get(`character_${cardId}`);
+            if (!character) {
+                console.error('Character not found in availableCardsMap:', cardId);
+                return;
+            }
+            
+            const cardName = character.name || character.card_name || 'Unknown';
+            showAlternateArtSelection(character, cardId, cardName, cardIndex);
+        }
+
+        // Function to close alternate art modal
+        function closeAlternateArtModal() {
+            const modal = document.querySelector('.alternate-art-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        async function addCardToEditor(cardType, cardId, cardName, selectedAlternateImage = null) {
             // Check character limit before adding
             if (cardType === 'character') {
                 const currentCharacterCount = deckEditorCards
@@ -9456,6 +9673,13 @@
                 
                 if (currentCharacterCount >= 4) {
                     showNotification('Cannot add more than 4 characters to a deck', 'error');
+                    return;
+                }
+                
+                // Check if character has alternate images and none selected
+                const character = availableCardsMap.get(`character_${cardId}`);
+                if (character && character.alternateImages && character.alternateImages.length > 0 && !selectedAlternateImage) {
+                    showAlternateArtSelection(character, cardId, cardName);
                     return;
                 }
                 
@@ -9489,8 +9713,11 @@
             );
             
             if (existingCardIndex >= 0) {
-                // Increase quantity
+                // Increase quantity and update alternate image if provided
                 deckEditorCards[existingCardIndex].quantity += 1;
+                if (selectedAlternateImage && cardType === 'character') {
+                    deckEditorCards[existingCardIndex].selectedAlternateImage = selectedAlternateImage;
+                }
             } else {
                 // Add new card
                 const newCard = {
@@ -9499,6 +9726,10 @@
                     cardId: cardId,
                     quantity: 1
                 };
+                // Add selected alternate image if provided
+                if (selectedAlternateImage && cardType === 'character') {
+                    newCard.selectedAlternateImage = selectedAlternateImage;
+                }
                 deckEditorCards.push(newCard);
             }
             
@@ -9569,16 +9800,23 @@
                 
                 // Add new cards
                 for (const card of deckEditorCards) {
+                    const cardData = {
+                        cardType: card.type,
+                        cardId: card.cardId,
+                        quantity: card.quantity
+                    };
+                    
+                    // Include selectedAlternateImage if it exists
+                    if (card.selectedAlternateImage) {
+                        cardData.selectedAlternateImage = card.selectedAlternateImage;
+                    }
+                    
                     await fetch(`/api/decks/${currentDeckId}/cards`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            cardType: card.type,
-                            cardId: card.cardId,
-                            quantity: card.quantity
-                        })
+                        body: JSON.stringify(cardData)
                     });
                 }
                 

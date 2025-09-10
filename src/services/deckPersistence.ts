@@ -133,7 +133,7 @@ export class DeckPersistenceService {
   }
 
   // Add a card to a deck
-  addCardToDeck(deckId: string, cardType: DeckCard['type'], cardId: string, quantity: number = 1): DeckData | null {
+  addCardToDeck(deckId: string, cardType: DeckCard['type'], cardId: string, quantity: number = 1, selectedAlternateImage?: string): DeckData | null {
     const deck = this.decks.get(deckId);
     if (!deck) return null;
 
@@ -143,15 +143,19 @@ export class DeckPersistenceService {
     );
 
     if (existingCardIndex >= 0) {
-      // Update existing card quantity
+      // Update existing card quantity and alternate image if provided
       deck.cards[existingCardIndex].quantity += quantity;
+      if (selectedAlternateImage && cardType === 'character') {
+        deck.cards[existingCardIndex].selectedAlternateImage = selectedAlternateImage;
+      }
     } else {
       // Add new card
       const newCard: DeckCard = {
         id: `deckcard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: cardType,
         cardId,
-        quantity
+        quantity,
+        selectedAlternateImage: (cardType === 'character' && selectedAlternateImage) ? selectedAlternateImage : undefined
       };
       deck.cards.push(newCard);
     }

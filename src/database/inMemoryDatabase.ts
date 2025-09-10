@@ -99,17 +99,21 @@ class InMemoryDatabase {
           const columns = line.split('|').map(col => col.trim());
           
           if (columns.length >= 9) { // Split by | creates 9 elements for 8 columns
-                             const character: Character = {
-                   id: `char_${this.nextCharacterId++}`,
-                   name: columns[1],
-                   energy: parseInt(columns[2]) || 0,
-                   combat: parseInt(columns[3]) || 0,
-                   brute_force: parseInt(columns[4]) || 0,
-                   intelligence: parseInt(columns[5]) || 0,
-                   threat_level: parseInt(columns[6]) || 0,
-                   special_abilities: columns[7] || '',
-                   image: columns[8]
-                 };
+            const characterName = columns[1];
+            const alternateImages = this.getCharacterAlternateImages(characterName);
+            
+            const character: Character = {
+              id: `char_${this.nextCharacterId++}`,
+              name: characterName,
+              energy: parseInt(columns[2]) || 0,
+              combat: parseInt(columns[3]) || 0,
+              brute_force: parseInt(columns[4]) || 0,
+              intelligence: parseInt(columns[5]) || 0,
+              threat_level: parseInt(columns[6]) || 0,
+              special_abilities: columns[7] || '',
+              image: columns[8],
+              ...(alternateImages.length > 0 && { alternateImages })
+            };
 
             this.characters.set(character.id, character);
             loadedCount++;
@@ -236,6 +240,49 @@ class InMemoryDatabase {
     } catch (error) {
       console.error('❌ Error loading special cards:', error);
     }
+  }
+
+  private getCharacterAlternateImages(characterName: string): string[] {
+    const alternateImages: string[] = [];
+    const alternateDir = path.join(process.cwd(), 'src/resources/cards/images/characters/alternate');
+    
+    if (!fs.existsSync(alternateDir)) {
+      return alternateImages;
+    }
+    
+    try {
+      const files = fs.readdirSync(alternateDir);
+      const characterNameLower = characterName.toLowerCase();
+      
+      for (const file of files) {
+        if (file.endsWith('.webp')) {
+          const fileName = file.toLowerCase().replace('.webp', '');
+          // Check if the filename matches the character name (case insensitive)
+          if (fileName === characterNameLower) {
+            alternateImages.push(file);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error reading alternate images directory:', error);
+    }
+    
+    return alternateImages;
+  }
+
+  public getCharacterEffectiveImage(characterId: string, selectedAlternateImage?: string): string {
+    const character = this.characters.get(characterId);
+    if (!character) {
+      return '';
+    }
+    
+    // If a specific alternate image is selected, use it
+    if (selectedAlternateImage && character.alternateImages?.includes(selectedAlternateImage)) {
+      return `characters/alternate/${selectedAlternateImage}`;
+    }
+    
+    // Otherwise, use the default image
+    return character.image;
   }
 
   private getSpecialCardImage(cardName: string): string {

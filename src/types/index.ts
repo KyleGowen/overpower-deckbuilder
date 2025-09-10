@@ -25,6 +25,7 @@ export interface Character {
   threat_level: number;
   special_abilities: string; // Can be empty string for no special ability
   image: string;
+  alternateImages?: string[]; // Array of alternate image filenames
 }
 
 export interface Location {
@@ -147,6 +148,7 @@ export interface DeckCard {
   type: 'character' | 'location' | 'special' | 'mission' | 'event' | 'aspect' | 'advanced-universe' | 'teamwork' | 'ally-universe' | 'training' | 'basic-universe' | 'power';
   cardId: string; // The ID from the original card table
   quantity: number; // How many copies of this card
+  selectedAlternateImage?: string; // For characters, stores the selected alternate image filename
 }
 
 // Extended type for API operations that includes special cases
