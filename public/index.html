@@ -1759,41 +1759,48 @@
         /* Resizable divider */
         .resizable-divider {
             width: 4px;
-            background: linear-gradient(to bottom, 
-                rgba(78, 205, 196, 0.3) 0%, 
-                rgba(78, 205, 196, 0.6) 50%, 
-                rgba(78, 205, 196, 0.3) 100%);
+            background: transparent;
             cursor: col-resize;
             position: relative;
-            transition: background 0.2s ease;
+            transition: all 0.2s ease;
             min-width: 4px;
             flex-shrink: 0;
         }
 
+
+        .resizable-divider {
+            background: linear-gradient(to bottom, 
+                transparent 0px,
+                rgba(78, 205, 196, 0.1) 6px,
+                rgba(78, 205, 196, 0.3) 20px,
+                rgba(78, 205, 196, 0.5) 50%,
+                rgba(78, 205, 196, 0.3) calc(100% - 20px),
+                rgba(78, 205, 196, 0.1) calc(100% - 6px),
+                transparent 100%);
+        }
+
+
         .resizable-divider:hover {
             background: linear-gradient(to bottom, 
-                rgba(78, 205, 196, 0.6) 0%, 
-                rgba(78, 205, 196, 0.9) 50%, 
-                rgba(78, 205, 196, 0.6) 100%);
+                transparent 0px,
+                rgba(78, 205, 196, 0.2) 6px,
+                rgba(78, 205, 196, 0.5) 20px,
+                rgba(78, 205, 196, 0.7) 50%,
+                rgba(78, 205, 196, 0.5) calc(100% - 20px),
+                rgba(78, 205, 196, 0.2) calc(100% - 6px),
+                transparent 100%);
         }
+
 
         .resizable-divider:active {
             background: linear-gradient(to bottom, 
-                rgba(78, 205, 196, 0.8) 0%, 
-                rgba(78, 205, 196, 1) 50%, 
-                rgba(78, 205, 196, 0.8) 100%);
-        }
-
-        .resizable-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 2px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 1px;
+                transparent 0px,
+                rgba(78, 205, 196, 0.3) 6px,
+                rgba(78, 205, 196, 0.6) 20px,
+                rgba(78, 205, 196, 0.8) 50%,
+                rgba(78, 205, 196, 0.6) calc(100% - 20px),
+                rgba(78, 205, 196, 0.3) calc(100% - 6px),
+                transparent 100%);
         }
 
 
