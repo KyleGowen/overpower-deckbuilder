@@ -7803,7 +7803,35 @@
         
         function createTwoColumnLayout() {
             const deckCardsEditor = document.querySelector('.deck-cards-editor');
-            if (!deckCardsEditor || deckCardsEditor.querySelector('.deck-column')) return;
+            if (!deckCardsEditor) return;
+            
+            // If already in two-column mode, just redistribute existing content
+            if (deckCardsEditor.querySelector('.deck-column')) {
+                // Redistribute sections between existing columns
+                const leftColumn = deckCardsEditor.querySelector('.deck-column:first-child');
+                const rightColumn = deckCardsEditor.querySelector('.deck-column:last-child');
+                
+                if (leftColumn && rightColumn) {
+                    // Collect all sections from both columns
+                    const allSections = [];
+                    leftColumn.querySelectorAll('.deck-type-section').forEach(section => allSections.push(section));
+                    rightColumn.querySelectorAll('.deck-type-section').forEach(section => allSections.push(section));
+                    
+                    // Clear columns
+                    leftColumn.innerHTML = '';
+                    rightColumn.innerHTML = '';
+                    
+                    // Redistribute sections
+                    allSections.forEach((section, index) => {
+                        if (index % 2 === 0) {
+                            leftColumn.appendChild(section);
+                        } else {
+                            rightColumn.appendChild(section);
+                        }
+                    });
+                }
+                return;
+            }
             
             const sections = Array.from(deckCardsEditor.children);
             if (sections.length === 0) return;
@@ -8300,6 +8328,20 @@
             });
             
             deckCardsEditor.innerHTML = cardsHtml;
+            
+            // Check if we should maintain two-column layout
+            const layout = document.querySelector('.deck-editor-layout');
+            const deckPane = document.querySelector('.deck-pane');
+            if (layout && deckPane) {
+                const layoutWidth = layout.offsetWidth;
+                const deckWidth = deckPane.offsetWidth;
+                const deckPercentage = (deckWidth / layoutWidth) * 100;
+                
+                if (deckPercentage > 58) {
+                    // Recreate two-column layout after content update
+                    createTwoColumnLayout();
+                }
+            }
             
             // Apply expansion state
             applyDeckEditorExpansionState();
