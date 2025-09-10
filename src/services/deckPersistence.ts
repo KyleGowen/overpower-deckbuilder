@@ -67,6 +67,7 @@ export class DeckPersistenceService {
     if (characterIds && characterIds.length > 0) {
       characterIds.forEach(characterId => {
         initialCards.push({
+          id: `char_${characterId}_${Date.now()}`,
           type: 'character',
           cardId: characterId,
           quantity: 1
@@ -155,7 +156,7 @@ export class DeckPersistenceService {
         type: cardType,
         cardId,
         quantity,
-        selectedAlternateImage: (cardType === 'character' && selectedAlternateImage) ? selectedAlternateImage : undefined
+        ...(cardType === 'character' && selectedAlternateImage && { selectedAlternateImage })
       };
       deck.cards.push(newCard);
     }
@@ -232,15 +233,6 @@ export class DeckPersistenceService {
       }
     }
     this.saveDecks();
-  }
-
-  // Get deck statistics
-  getDeckStats(): { totalDecks: number; totalCards: number } {
-    const totalDecks = this.decks.size;
-    const totalCards = Array.from(this.decks.values())
-      .reduce((total, deck) => total + deck.metadata.cardCount, 0);
-    
-    return { totalDecks, totalCards };
   }
 
   // Get deck statistics

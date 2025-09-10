@@ -2119,6 +2119,11 @@
             border-radius: 6px;
         }
 
+        /* Special positioning for alternate art backgrounds */
+        .deck-card-editor-item.character-card[data-bg-image*="/alternate/"]::before {
+            background-position: right 5%;
+        }
+
         .deck-card-editor-item.character-card::after {
             content: '';
             position: absolute;
