@@ -1828,6 +1828,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             background: rgba(255, 255, 255, 0.05);
+            transition: none; /* Prevent transitions during resize */
         }
         
         /* Two-column layout when deck pane is wide */
@@ -1859,6 +1860,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             overflow: hidden;
+            transition: none; /* Prevent transitions during resize */
         }
         
         .deck-type-header {
@@ -7766,8 +7768,8 @@
                 deckPane.style.flex = `0 0 ${constrainedWidth}px`;
                 cardSelectorPane.style.flex = '1';
                 
-                // Check if we should use two-column layout (deck pane > 66% of total width)
-                updateDeckLayout(constrainedWidth, layoutWidth);
+                // Update layout during dragging with throttling to prevent stuttering
+                updateDeckLayoutThrottled(constrainedWidth, layoutWidth);
                 
                 // Store the slider position for persistence
                 storeSliderPosition(constrainedWidth, layoutWidth);
@@ -7775,6 +7777,13 @@
 
             function handleMouseUp() {
                 isResizing = false;
+                
+                // Clear any pending throttled updates
+                if (layoutUpdateTimeout) {
+                    clearTimeout(layoutUpdateTimeout);
+                    layoutUpdateTimeout = null;
+                }
+                
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
             }
@@ -7783,6 +7792,23 @@
             divider.addEventListener('selectstart', (e) => {
                 e.preventDefault();
             });
+        }
+
+        // Throttled version of updateDeckLayout to prevent stuttering during drag
+        let layoutUpdateTimeout;
+        function updateDeckLayoutThrottled(deckWidth, totalWidth) {
+            // Clear any pending update
+            if (layoutUpdateTimeout) {
+                clearTimeout(layoutUpdateTimeout);
+            }
+            
+            // Update immediately but throttle subsequent calls
+            updateDeckLayout(deckWidth, totalWidth);
+            
+            // Set a small delay before allowing the next update
+            layoutUpdateTimeout = setTimeout(() => {
+                layoutUpdateTimeout = null;
+            }, 16); // ~60fps throttling
         }
 
         // Update deck layout based on width
@@ -7805,32 +7831,9 @@
             const deckCardsEditor = document.querySelector('.deck-cards-editor');
             if (!deckCardsEditor) return;
             
-            // If already in two-column mode, just redistribute existing content
+            // If already in two-column mode, don't redistribute - keep categories stable
             if (deckCardsEditor.querySelector('.deck-column')) {
-                // Redistribute sections between existing columns
-                const leftColumn = deckCardsEditor.querySelector('.deck-column:first-child');
-                const rightColumn = deckCardsEditor.querySelector('.deck-column:last-child');
-                
-                if (leftColumn && rightColumn) {
-                    // Collect all sections from both columns
-                    const allSections = [];
-                    leftColumn.querySelectorAll('.deck-type-section').forEach(section => allSections.push(section));
-                    rightColumn.querySelectorAll('.deck-type-section').forEach(section => allSections.push(section));
-                    
-                    // Clear columns
-                    leftColumn.innerHTML = '';
-                    rightColumn.innerHTML = '';
-                    
-                    // Redistribute sections
-                    allSections.forEach((section, index) => {
-                        if (index % 2 === 0) {
-                            leftColumn.appendChild(section);
-                        } else {
-                            rightColumn.appendChild(section);
-                        }
-                    });
-                }
-                return;
+                return; // Don't redistribute existing content to prevent shaking
             }
             
             const sections = Array.from(deckCardsEditor.children);
@@ -7842,9 +7845,13 @@
             const rightColumn = document.createElement('div');
             rightColumn.className = 'deck-column';
             
-            // Distribute sections between columns
+            // Distribute sections between columns based on category count
+            // Left column gets the first half (with carry-over), right column gets the second half
+            const totalSections = sections.length;
+            const leftColumnCount = Math.ceil(totalSections / 2);
+            
             sections.forEach((section, index) => {
-                if (index % 2 === 0) {
+                if (index < leftColumnCount) {
                     leftColumn.appendChild(section);
                 } else {
                     rightColumn.appendChild(section);
@@ -8338,8 +8345,11 @@
                 const deckPercentage = (deckWidth / layoutWidth) * 100;
                 
                 if (deckPercentage > 58) {
-                    // Recreate two-column layout after content update
-                    createTwoColumnLayout();
+                    // Only create two-column layout if it doesn't already exist
+                    const deckCardsEditor = document.querySelector('.deck-cards-editor');
+                    if (!deckCardsEditor.querySelector('.deck-column')) {
+                        createTwoColumnLayout();
+                    }
                 }
             }
             
