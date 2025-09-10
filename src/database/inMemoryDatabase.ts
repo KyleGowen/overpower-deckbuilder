@@ -257,8 +257,9 @@ class InMemoryDatabase {
       for (const file of files) {
         if (file.endsWith('.webp') || file.endsWith('.png')) {
           const fileName = file.toLowerCase().replace(/\.(webp|png)$/, '');
-          // Check if the filename matches the character name (case insensitive)
-          if (fileName === characterNameLower) {
+          // Check if the filename starts with the character name (case insensitive)
+          // This handles cases like "dracula.webp", "dracula2.webp", etc.
+          if (fileName === characterNameLower || fileName.startsWith(characterNameLower)) {
             alternateImages.push(file);
           }
         }
