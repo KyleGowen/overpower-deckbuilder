@@ -1593,10 +1593,10 @@
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3.3px 6.6px;
+            border-radius: 3.3px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             transition: all 0.3s ease;
         }
 
@@ -1730,9 +1730,7 @@
         }
 
         .deck-editor-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
+            display: flex;
             height: 100%;
             overflow: hidden;
             flex: 1;
@@ -1746,6 +1744,56 @@
             max-height: 100%;
             overflow: hidden;
             min-height: 0;
+            min-width: 10%;
+            padding: 0 20px;
+        }
+
+        .deck-pane {
+            flex: 1;
+        }
+
+        .card-selector-pane {
+            flex: 1;
+        }
+
+        /* Resizable divider */
+        .resizable-divider {
+            width: 4px;
+            background: linear-gradient(to bottom, 
+                rgba(78, 205, 196, 0.3) 0%, 
+                rgba(78, 205, 196, 0.6) 50%, 
+                rgba(78, 205, 196, 0.3) 100%);
+            cursor: col-resize;
+            position: relative;
+            transition: background 0.2s ease;
+            min-width: 4px;
+            flex-shrink: 0;
+        }
+
+        .resizable-divider:hover {
+            background: linear-gradient(to bottom, 
+                rgba(78, 205, 196, 0.6) 0%, 
+                rgba(78, 205, 196, 0.9) 50%, 
+                rgba(78, 205, 196, 0.6) 100%);
+        }
+
+        .resizable-divider:active {
+            background: linear-gradient(to bottom, 
+                rgba(78, 205, 196, 0.8) 0%, 
+                rgba(78, 205, 196, 1) 50%, 
+                rgba(78, 205, 196, 0.8) 100%);
+        }
+
+        .resizable-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 1px;
         }
 
 
@@ -2239,10 +2287,10 @@
             background: rgba(78, 205, 196, 0.2);
             color: #4ecdc4;
             border: 1px solid rgba(78, 205, 196, 0.3);
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
+            padding: 0.352rem 0.704rem;
+            border-radius: 3.3px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.704rem;
             transition: all 0.3s ease;
             width: 100%;
             text-align: center;
@@ -3932,6 +3980,9 @@
                            </div>
 
                        </div>
+                    
+                    <!-- Resizable Divider -->
+                    <div class="resizable-divider" id="resizableDivider"></div>
                     
                     <!-- Right Pane: Card Selector -->
                     <div class="card-selector-pane">
@@ -7598,6 +7649,11 @@
                 modal.style.display = 'flex';
                 console.log('Modal displayed, setting up drag and drop');
                 setupDragAndDrop();
+                
+                // Initialize the resizable divider after the modal is shown
+                setTimeout(() => {
+                    initializeResizableDivider();
+                }, 100);
             } catch (error) {
                 console.error('Error in showDeckEditor:', error);
             }
@@ -7608,6 +7664,65 @@
             currentDeckId = null;
             currentDeckData = null;
             deckEditorCards = [];
+        }
+
+        // Resizable divider functionality
+        function initializeResizableDivider() {
+            const divider = document.getElementById('resizableDivider');
+            const deckPane = document.querySelector('.deck-pane');
+            const cardSelectorPane = document.querySelector('.card-selector-pane');
+            const layout = document.querySelector('.deck-editor-layout');
+            
+            if (!divider || !deckPane || !cardSelectorPane || !layout) {
+                return;
+            }
+
+            let isResizing = false;
+            let startX = 0;
+            let startDeckWidth = 0;
+
+            divider.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startDeckWidth = deckPane.offsetWidth;
+                
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
+                
+                e.preventDefault();
+            });
+
+            function handleMouseMove(e) {
+                if (!isResizing) return;
+                
+                const deltaX = e.clientX - startX;
+                const newDeckWidth = startDeckWidth + deltaX;
+                const layoutWidth = layout.offsetWidth;
+                const dividerWidth = divider.offsetWidth;
+                const availableWidth = layoutWidth - dividerWidth;
+                
+                // Calculate minimum widths (10% of total width)
+                const minWidth = availableWidth * 0.1;
+                const maxWidth = availableWidth * 0.9;
+                
+                // Constrain the new width
+                const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newDeckWidth));
+                
+                // Update the flex-basis to maintain the width
+                deckPane.style.flex = `0 0 ${constrainedWidth}px`;
+                cardSelectorPane.style.flex = '1';
+            }
+
+            function handleMouseUp() {
+                isResizing = false;
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+
+            // Prevent text selection while dragging
+            divider.addEventListener('selectstart', (e) => {
+                e.preventDefault();
+            });
         }
 
         async function loadDeckForEditing(deckId) {
@@ -8002,8 +8117,8 @@
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
-                                    ${alternateArtButton}
                                     <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    ${alternateArtButton}
                                 </div>
                             </div>
                         `;
