@@ -292,6 +292,8 @@
             transition: background-color 0.2s ease;
             font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.8);
+            flex-shrink: 0; /* Prevent shrinking */
+            min-width: fit-content;
         }
         
         .filter-toggle:hover {
@@ -1744,7 +1746,7 @@
             max-height: 100%;
             overflow: hidden;
             min-height: 0;
-            min-width: 10%;
+            min-width: 23%;
             padding: 0 20px;
         }
 
@@ -1754,6 +1756,8 @@
 
         .card-selector-pane {
             flex: 1;
+            min-width: 0; /* Allow flex shrinking */
+            overflow: hidden; /* Prevent content overflow */
         }
 
         /* Resizable divider */
@@ -1824,6 +1828,27 @@
             overflow-y: auto;
             overflow-x: hidden;
             background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Two-column layout when deck pane is wide */
+        .deck-cards-editor.two-column {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .deck-cards-editor.two-column .deck-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .deck-cards-editor.two-column .deck-type-section {
+            width: 100%;
+            margin-bottom: 0;
         }
         
 
@@ -2649,6 +2674,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            min-width: 0; /* Allow flex shrinking */
+        }
+        
+        .card-category-header span {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
         }
 
         .card-category-header:hover {
@@ -2658,6 +2693,8 @@
         .card-category-header .collapse-icon {
             font-size: 1.2rem;
             transition: transform 0.3s ease;
+            flex-shrink: 0; /* Prevent shrinking */
+            min-width: 20px; /* Ensure minimum width */
         }
 
         .card-category-header.collapsed .collapse-icon {
@@ -7660,6 +7697,16 @@
                 // Initialize the resizable divider after the modal is shown
                 setTimeout(() => {
                     initializeResizableDivider();
+                    // Restore slider position after a short delay to ensure layout is ready
+                    setTimeout(() => {
+                        restoreSliderPosition();
+                        // Also check initial layout
+                        const layout = document.querySelector('.deck-editor-layout');
+                        const deckPane = document.querySelector('.deck-pane');
+                        if (layout && deckPane) {
+                            updateDeckLayout(deckPane.offsetWidth, layout.offsetWidth);
+                        }
+                    }, 200);
                 }, 100);
             } catch (error) {
                 console.error('Error in showDeckEditor:', error);
@@ -7708,9 +7755,9 @@
                 const dividerWidth = divider.offsetWidth;
                 const availableWidth = layoutWidth - dividerWidth;
                 
-                // Calculate minimum widths (10% of total width)
-                const minWidth = availableWidth * 0.1;
-                const maxWidth = availableWidth * 0.9;
+                // Calculate minimum widths (23% of total width)
+                const minWidth = availableWidth * 0.23;
+                const maxWidth = availableWidth * 0.77;
                 
                 // Constrain the new width
                 const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newDeckWidth));
@@ -7718,6 +7765,12 @@
                 // Update the flex-basis to maintain the width
                 deckPane.style.flex = `0 0 ${constrainedWidth}px`;
                 cardSelectorPane.style.flex = '1';
+                
+                // Check if we should use two-column layout (deck pane > 66% of total width)
+                updateDeckLayout(constrainedWidth, layoutWidth);
+                
+                // Store the slider position for persistence
+                storeSliderPosition(constrainedWidth, layoutWidth);
             }
 
             function handleMouseUp() {
@@ -7730,6 +7783,113 @@
             divider.addEventListener('selectstart', (e) => {
                 e.preventDefault();
             });
+        }
+
+        // Update deck layout based on width
+        function updateDeckLayout(deckWidth, totalWidth) {
+            const deckCardsEditor = document.querySelector('.deck-cards-editor');
+            if (!deckCardsEditor) return;
+            
+            const deckPercentage = (deckWidth / totalWidth) * 100;
+            
+            if (deckPercentage > 58) {
+                deckCardsEditor.classList.add('two-column');
+                createTwoColumnLayout();
+            } else {
+                deckCardsEditor.classList.remove('two-column');
+                restoreSingleColumnLayout();
+            }
+        }
+        
+        function createTwoColumnLayout() {
+            const deckCardsEditor = document.querySelector('.deck-cards-editor');
+            if (!deckCardsEditor || deckCardsEditor.querySelector('.deck-column')) return;
+            
+            const sections = Array.from(deckCardsEditor.children);
+            if (sections.length === 0) return;
+            
+            // Create two columns
+            const leftColumn = document.createElement('div');
+            leftColumn.className = 'deck-column';
+            const rightColumn = document.createElement('div');
+            rightColumn.className = 'deck-column';
+            
+            // Distribute sections between columns
+            sections.forEach((section, index) => {
+                if (index % 2 === 0) {
+                    leftColumn.appendChild(section);
+                } else {
+                    rightColumn.appendChild(section);
+                }
+            });
+            
+            // Clear and add columns
+            deckCardsEditor.innerHTML = '';
+            deckCardsEditor.appendChild(leftColumn);
+            deckCardsEditor.appendChild(rightColumn);
+        }
+        
+        function restoreSingleColumnLayout() {
+            const deckCardsEditor = document.querySelector('.deck-cards-editor');
+            if (!deckCardsEditor) return;
+            
+            const columns = deckCardsEditor.querySelectorAll('.deck-column');
+            if (columns.length === 0) return;
+            
+            // Move all sections back to main container
+            const allSections = [];
+            columns.forEach(column => {
+                allSections.push(...Array.from(column.children));
+            });
+            
+            // Clear and add sections back
+            deckCardsEditor.innerHTML = '';
+            allSections.forEach(section => {
+                deckCardsEditor.appendChild(section);
+            });
+        }
+
+        // Store slider position for persistence
+        function storeSliderPosition(deckWidth, totalWidth) {
+            if (currentDeckId) {
+                const percentage = (deckWidth / totalWidth) * 100;
+                localStorage.setItem(`slider_position_${currentDeckId}`, percentage.toString());
+            }
+        }
+
+        // Restore slider position from storage
+        function restoreSliderPosition() {
+            if (currentDeckId) {
+                const savedPosition = localStorage.getItem(`slider_position_${currentDeckId}`);
+                const percentage = savedPosition ? parseFloat(savedPosition) : 50; // Default to 50%
+                const layout = document.querySelector('.deck-editor-layout');
+                const deckPane = document.querySelector('.deck-pane');
+                const cardSelectorPane = document.querySelector('.card-selector-pane');
+                
+                if (layout && deckPane && cardSelectorPane) {
+                    const layoutWidth = layout.offsetWidth;
+                    const dividerWidth = 4; // Width of the divider
+                    const availableWidth = layoutWidth - dividerWidth;
+                    const minWidth = availableWidth * 0.23;
+                    const maxWidth = availableWidth * 0.77;
+                    
+                    // Calculate desired width from percentage
+                    const desiredWidth = (percentage / 100) * layoutWidth;
+                    const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, desiredWidth));
+                    
+                    // Apply the position
+                    deckPane.style.flex = `0 0 ${constrainedWidth}px`;
+                    cardSelectorPane.style.flex = '1';
+                    
+                    // Check if we should use two-column layout
+                    updateDeckLayout(constrainedWidth, layoutWidth);
+                    
+                    // Store the position if it was the default
+                    if (!savedPosition) {
+                        storeSliderPosition(constrainedWidth, layoutWidth);
+                    }
+                }
+            }
         }
 
         async function loadDeckForEditing(deckId) {
@@ -8166,11 +8326,15 @@
                     // Test if image loads successfully
                     const img = new Image();
                     img.onload = function() {
-                        card.style.setProperty('--bg-image', `url(${bgImage})`);
+                        // URL encode the path for CSS
+                        const encodedPath = encodeURI(bgImage);
+                        card.style.setProperty('--bg-image', `url(${encodedPath})`);
+                        console.log('Applied background image:', encodedPath);
                     };
                     img.onerror = function() {
                         // Fallback: use default gradient without background image
                         card.style.setProperty('--bg-image', 'none');
+                        console.log('Failed to load background image:', bgImage);
                     };
                     img.src = bgImage;
                 }
@@ -9473,7 +9637,7 @@
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="specialCardsCharacterFilter" onchange="toggleSpecialCardsCharacterFilter()">
-                                                    <span class="toggle-label">Hide Unselected Characters</span>
+                                                    <span class="toggle-label">Hide Unusables</span>
                                                 </label>
                                             </div>
                                             <div class="category-header-controls">
@@ -9494,7 +9658,7 @@
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="advancedUniverseCharacterFilter" onchange="toggleAdvancedUniverseCharacterFilter()">
-                                                    <span class="toggle-label">Hide Unselected Characters</span>
+                                                    <span class="toggle-label">Hide Unusables</span>
                                                 </label>
                                             </div>
                                             <div class="category-header-controls">
