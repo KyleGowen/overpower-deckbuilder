@@ -2228,12 +2228,6 @@
         }
 
         /* Deck Card Editor Actions Column */
-        .deck-card-editor-actions-column {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: center;
-        }
 
         /* Change Art Button */
         .alternate-art-btn {
@@ -2556,8 +2550,9 @@
             bottom: 8px;
             right: 8px;
             display: flex;
-            gap: 8px;
-            align-items: center;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
             z-index: 10;
         }
 
@@ -8002,10 +7997,8 @@
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
-                                    <div class="deck-card-editor-actions-column">
-                                        ${alternateArtButton}
-                                        <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
-                                    </div>
+                                    ${alternateArtButton}
+                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                 </div>
                             </div>
                         `;
