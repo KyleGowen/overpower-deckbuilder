@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { DeckData, DeckMetadata, DeckCard, CardTypeOrAll } from '../types';
 
 export class DeckPersistenceService {
@@ -59,7 +60,7 @@ export class DeckPersistenceService {
 
   // Create a new deck
   createDeck(name: string, userId: string, description?: string, characterIds?: string[]): DeckData {
-    const id = `deck_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = uuidv4();
     const now = new Date().toISOString();
     
     // Create initial cards array with selected characters
@@ -152,7 +153,7 @@ export class DeckPersistenceService {
     } else {
       // Add new card
       const newCard: DeckCard = {
-        id: `deckcard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: uuidv4(),
         type: cardType,
         cardId,
         quantity,
