@@ -10121,8 +10121,12 @@
                                 categoriesHtml += `
                                     <div class="card-category">
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
-                                            <span>${category.name} (${data.data.length})</span>
-                                            <span class="collapse-icon">${collapseIcon}</span>
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
                                         </div>
                                         <div class="card-category-content ${collapsedClass}">
                                             ${cardsHtml}
