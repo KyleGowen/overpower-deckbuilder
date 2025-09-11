@@ -310,6 +310,29 @@
             white-space: nowrap;
         }
 
+        /* Character name search input */
+        .character-name-search {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 4px;
+            color: white;
+            padding: 6px 8px;
+            font-size: 0.85rem;
+            width: 200px;
+            margin-left: 12px;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .character-name-search::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .character-name-search:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         /* Power Cards filter active indicator */
         .power-cards-filter-active .card-category-header {
             border-left: 4px solid #4ecdc4;
@@ -10068,6 +10091,26 @@
                                         </div>
                                     </div>
                                 `;
+                            } else if (category.type === 'character') {
+                                // Special handling for characters with name search
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <input type="text" class="character-name-search" placeholder="Search character names..." 
+                                                       onkeyup="filterCharactersByName(this.value)" 
+                                                       onclick="event.stopPropagation()">
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
                             } else {
                                 // Regular handling for other card types
                                 categoriesHtml += `
@@ -10093,6 +10136,28 @@
                 console.error('Error loading available cards:', error);
                 cardCategories.innerHTML = '<div class="error">Error loading available cards</div>';
             }
+        }
+
+        // Filter characters by name in the Available Cards section
+        function filterCharactersByName(searchTerm) {
+            // Find the character category specifically
+            const characterCategory = document.querySelector('.card-category');
+            if (!characterCategory) return;
+            
+            const characterCards = characterCategory.querySelectorAll('.character-card');
+            const searchLower = searchTerm.toLowerCase();
+            
+            characterCards.forEach(card => {
+                const characterName = card.querySelector('.character-name');
+                if (characterName) {
+                    const name = characterName.textContent.toLowerCase();
+                    if (searchLower === '' || name.includes(searchLower)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
         }
 
         function setupDragAndDrop() {
