@@ -4101,10 +4101,12 @@
         // Navigate to deck builder with current user's ID
         function goToDeckBuilder() {
             const currentUser = getCurrentUser();
-            if (currentUser && currentUser.userId) {
-                window.location.href = `/users/${currentUser.userId}/decks`;
+            
+            if (currentUser && (currentUser.userId || currentUser.id)) {
+                const userId = currentUser.userId || currentUser.id;
+                window.location.href = `/users/${userId}/decks`;
             } else {
-                console.error('No current user found');
+                console.error('No current user found, falling back to guest');
                 // Fallback to guest if no user
                 window.location.href = '/users/guest/decks';
             }
@@ -5699,9 +5701,9 @@
                     currentUser = data.data;
                     // Store user data in localStorage for navigation
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    showMainApp();
-                    // Load user's data
-                    loadUserData();
+                    
+                    // Redirect to user's deck page
+                    window.location.href = `/users/${currentUser.userId}/decks`;
                 } else {
                     showLoginError(data.error || 'Login failed');
                 }
@@ -5717,7 +5719,8 @@
                 currentUser = null;
                 // Clear stored user data
                 localStorage.removeItem('currentUser');
-                showLoginModal();
+                // Redirect to root page
+                window.location.href = '/';
             } catch (error) {
                 console.error('Logout error:', error);
             }

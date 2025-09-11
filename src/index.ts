@@ -46,6 +46,16 @@ database.initialize().then(() => {
 // Authentication middleware
 const authenticateUser = (req: any, res: any, next: any) => {
   const sessionId = req.cookies?.sessionId;
+  const { userId } = req.params;
+  
+  // Special handling for guest user - allow access without session
+  if (userId === 'guest') {
+    const guestUser = userService.getUserById('guest-001');
+    if (guestUser) {
+      req.user = guestUser;
+      return next();
+    }
+  }
   
   if (!sessionId) {
     return res.status(401).json({ success: false, error: 'No session found. Please log in.' });
@@ -405,9 +415,9 @@ app.get('/api/deck-stats', authenticateUser, (req: any, res) => {
 });
 
 // Main page route - displays characters table
-// Login screen route
+// Main application route - serves the app with login modal
 app.get('/', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public/login.html'));
+  res.sendFile(path.join(process.cwd(), 'public/index.html'));
 });
 
 // Deck Builder route (Image 2)
@@ -415,7 +425,14 @@ app.get('/users/:userId/decks', authenticateUser, (req: any, res) => {
   const { userId } = req.params;
   
   // Verify user is accessing their own decks
-  if (req.user.userId !== userId) {
+  // Handle both userId (from session) and id (from direct user lookup)
+  const userIdentifier = req.user.userId || req.user.id;
+  
+  // Special case for guest user - allow both 'guest' and 'guest-001' URLs
+  const isGuestAccess = (userId === 'guest' && userIdentifier === 'guest-001') || 
+                       (userIdentifier === userId);
+  
+  if (!isGuestAccess) {
     return res.status(403).json({ success: false, error: 'Access denied' });
   }
   
