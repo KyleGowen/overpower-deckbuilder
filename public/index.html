@@ -1558,6 +1558,17 @@
             gap: 15px;
         }
 
+        .deck-card-image {
+            width: 60px;
+            height: 45px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            flex-shrink: 0;
+        }
+
         .deck-card-info {
             flex: 1;
         }
@@ -3265,11 +3276,11 @@
 
         <!-- Top-level application tabs -->
         <div class="app-tabs">
-            <button class="app-tab-button" onclick="switchAppTab('database-view')">Database View</button>
-            <button class="app-tab-button active" onclick="switchAppTab('deck-builder')">Deck Builder</button>
+            <button class="app-tab-button" onclick="window.location.href='/data'">Database View</button>
+            <button class="app-tab-button active" onclick="window.location.href='/users/kyle-001/decks'">Deck Builder</button>
         </div>
 
-        <div id="database-view" class="database-section" style="display: none;">
+        <div id="database-view" class="database-section" style="display: block;">
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-number" id="total-characters">-</div>
@@ -4087,15 +4098,42 @@
             }
         }
 
+        // Load database view data
+        async function loadDatabaseViewData() {
+            console.log('Starting database view data load...');
+            try {
+                await Promise.all([
+                    loadCharacters(),
+                    loadSpecialCards(),
+                    loadAdvancedUniverse(),
+                    loadMissions(),
+                    loadLocations(),
+                    loadEvents(),
+                    loadAspects(),
+                    loadTeamwork(),
+                    loadAllyUniverse(),
+                    loadTraining(),
+                    loadBasicUniverse(),
+                    loadPowerCards()
+                ]);
+                console.log('Database view data loaded successfully');
+            } catch (error) {
+                console.error('Error loading database view data:', error);
+            }
+        }
+
         // Load and display characters
         async function loadCharacters() {
+            console.log('Loading characters...');
             try {
                 const response = await fetch('/api/characters');
                 const data = await response.json();
+                console.log('Characters response:', data);
                 
                 if (data.success) {
                     displayCharacters(data.data);
                     updateStats(data.data);
+                    console.log('Characters loaded successfully:', data.data.length);
                 } else {
                     throw new Error('Failed to load characters');
                 }
@@ -4158,20 +4196,38 @@
         }
 
         function updateStats(characters) {
-            document.getElementById('total-characters').textContent = characters.length;
+            console.log('Updating stats with', characters.length, 'characters');
+            const totalCharactersEl = document.getElementById('total-characters');
+            if (totalCharactersEl) {
+                totalCharactersEl.textContent = characters.length;
+                console.log('Updated total-characters to:', characters.length);
+            } else {
+                console.error('total-characters element not found');
+            }
+            
             // Load deck stats to get actual deck count
             fetch('/api/deck-stats')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('db-total-decks').textContent = data.data.totalDecks;
+                        const totalDecksEl = document.getElementById('db-total-decks');
+                        if (totalDecksEl) {
+                            totalDecksEl.textContent = data.data.totalDecks;
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error loading deck stats:', error);
-                    document.getElementById('db-total-decks').textContent = '0';
+                    const totalDecksEl = document.getElementById('db-total-decks');
+                    if (totalDecksEl) {
+                        totalDecksEl.textContent = '0';
+                    }
                 });
-            document.getElementById('total-users').textContent = '0';
+            
+            const totalUsersEl = document.getElementById('total-users');
+            if (totalUsersEl) {
+                totalUsersEl.textContent = '0';
+            }
         }
 
         function updateAllStats() {
@@ -5661,6 +5717,31 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Check if we're on the database view route
+            if (window.location.pathname === '/data') {
+                // Show database view and hide deck builder
+                document.getElementById('database-view').style.display = 'block';
+                document.getElementById('deck-builder').style.display = 'none';
+                
+                // Update tab buttons
+                document.querySelectorAll('.app-tab-button').forEach(btn => btn.classList.remove('active'));
+                const dbViewBtn = document.querySelector('.app-tab-button[onclick*="/data"]');
+                if (dbViewBtn) dbViewBtn.classList.add('active');
+                
+                // Load database view data immediately
+                console.log('Loading database view data...');
+                loadDatabaseViewData();
+            } else {
+                // Show deck builder and hide database view
+                document.getElementById('database-view').style.display = 'none';
+                document.getElementById('deck-builder').style.display = 'block';
+                
+                // Update tab buttons
+                document.querySelectorAll('.app-tab-button').forEach(btn => btn.classList.remove('active'));
+                const deckBuilderBtn = document.querySelector('.app-tab-button[onclick*="/users/kyle-001/decks"]');
+                if (deckBuilderBtn) deckBuilderBtn.classList.add('active');
+            }
+            
             // Check authentication first
             checkAuthentication();
             
@@ -5801,8 +5882,10 @@
                             if (character && character.image) {
                                 // Use getCardImagePath to handle alternate images
                                 const imagePath = getCardImagePath(character, 'character', card.selectedAlternateImage);
+                                console.log('Character:', character.name, 'Image path:', imagePath);
                                 return `<div class="deck-character-card-display" style="background-image: url('${imagePath}')" title="${character.name}"></div>`;
                             } else {
+                                console.log('Character not found or no image for card:', card.cardId, 'Character:', character);
                                 return `<div class="deck-character-card-display empty">?</div>`;
                             }
                         }).join('');
@@ -6145,7 +6228,7 @@
             }
         }
 
-        function displayDeckCards(cards) {
+        async function displayDeckCards(cards) {
             const deckCardsList = document.getElementById('deckCardsList');
             
             if (cards.length === 0) {
@@ -6158,23 +6241,56 @@
                 return;
             }
 
-            deckCardsList.innerHTML = cards.map(card => `
-                <div class="deck-card-item">
-                    <div class="deck-card-info">
-                        <div class="deck-card-name">${getCardName(card)}</div>
-                        <div class="deck-card-type">${formatCardType(card.type)}</div>
-                    </div>
-                    <div class="deck-card-quantity">×${card.quantity}</div>
-                    <div class="deck-card-actions">
-                        <div class="quantity-controls">
-                            <button class="quantity-btn" onclick="changeCardQuantity('${card.id}', -1)">-</button>
-                            <span>${card.quantity}</span>
-                            <button class="quantity-btn" onclick="changeCardQuantity('${card.id}', 1)">+</button>
+            // Load character data for character cards
+            let characterMap = {};
+            const characterCards = cards.filter(card => card.type === 'character');
+            if (characterCards.length > 0) {
+                try {
+                    const response = await fetch('/api/characters');
+                    const result = await response.json();
+                    if (result.success) {
+                        characterMap = result.data.reduce((map, char) => {
+                            map[char.id] = char;
+                            return map;
+                        }, {});
+                    }
+                } catch (error) {
+                    console.error('Error loading character data:', error);
+                }
+            }
+
+            deckCardsList.innerHTML = cards.map(card => {
+                let cardImage = '';
+                let cardName = getCardName(card);
+                
+                if (card.type === 'character') {
+                    const character = characterMap[card.cardId];
+                    if (character && character.image) {
+                        const imagePath = getCardImagePath(character, 'character', card.selectedAlternateImage);
+                        cardImage = `<div class="deck-card-image" style="background-image: url('${imagePath}')" title="${character.name}"></div>`;
+                        cardName = character.name;
+                    }
+                }
+                
+                return `
+                    <div class="deck-card-item">
+                        ${cardImage}
+                        <div class="deck-card-info">
+                            <div class="deck-card-name">${cardName}</div>
+                            <div class="deck-card-type">${formatCardType(card.type)}</div>
                         </div>
-                        <button class="quantity-btn danger" onclick="removeCardFromDeck('${card.id}')">Remove</button>
+                        <div class="deck-card-quantity">×${card.quantity}</div>
+                        <div class="deck-card-actions">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="changeCardQuantity('${card.id}', -1)">-</button>
+                                <span>${card.quantity}</span>
+                                <button class="quantity-btn" onclick="changeCardQuantity('${card.id}', 1)">+</button>
+                            </div>
+                            <button class="quantity-btn danger" onclick="removeCardFromDeck('${card.id}')">Remove</button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Card management functions
@@ -8370,7 +8486,9 @@
             applyDeckEditorExpansionState();
             
             // Apply character background images
-            applyCharacterBackgroundsToEditor();
+            setTimeout(() => {
+                applyCharacterBackgroundsToEditor();
+            }, 100);
         }
         
         // Apply background images to character, power, location, special, mission, and aspect cards in deck editor
@@ -8394,7 +8512,7 @@
                         // URL encode the path for CSS
                         const encodedPath = encodeURI(bgImage);
                         card.style.setProperty('--bg-image', `url(${encodedPath})`);
-                        console.log('Applied background image:', encodedPath);
+                        console.log('Applied background image:', encodedPath, 'to card:', card);
                     };
                     img.onerror = function() {
                         // Fallback: use default gradient without background image
@@ -8784,79 +8902,79 @@
                 if (cardType === 'character') {
                     // If a specific alternate image is selected, use it
                     if (selectedAlternateImage && card.alternateImages && card.alternateImages.includes(selectedAlternateImage)) {
-                        return `src/resources/cards/images/characters/alternate/${selectedAlternateImage}`;
+                        return `/src/resources/cards/images/characters/alternate/${selectedAlternateImage}`;
                     }
                     
                     // Characters use the image field from the database
                     if (card.image) {
-                        return `src/resources/cards/images/characters/${card.image}`;
+                        return `/src/resources/cards/images/characters/${card.image}`;
                     }
                     // Fallback: try to construct from name
                     const characterName = card.name || card.card_name || '';
                     if (characterName) {
                         // Convert to snake_case and look for matching image
                         const snakeCaseName = characterName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        return `src/resources/cards/images/characters/${snakeCaseName}.webp`;
+                        return `/src/resources/cards/images/characters/${snakeCaseName}.webp`;
                     }
                 } else if (cardType === 'location') {
                     // Locations use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'mission') {
                     // Missions use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'event') {
                     // Events use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'special') {
                     // Special cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'aspect') {
                     // Aspects use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'teamwork') {
                     // Teamwork cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'power') {
                     // Power cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'advanced-universe') {
                     // Advanced universe cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'teamwork') {
                     // Teamwork cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'ally-universe') {
                     // Ally universe cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'training') {
                     // Training cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'basic-universe') {
                     // Basic universe cards use the image field (which already includes the directory)
                     if (card.image) {
-                        return `src/resources/cards/images/${card.image}`;
+                        return `/src/resources/cards/images/${card.image}`;
                     }
                 }
                 
