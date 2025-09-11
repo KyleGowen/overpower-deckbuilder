@@ -5780,6 +5780,27 @@
                 // Load database view data immediately
                 console.log('Loading database view data...');
                 loadDatabaseViewData();
+            } else if (window.location.pathname.match(/\/users\/[^\/]+\/decks\/[^\/]+/)) {
+                // Check if we're on a deck editor route
+                const pathMatch = window.location.pathname.match(/\/users\/[^\/]+\/decks\/([^\/]+)/);
+                if (pathMatch) {
+                    const deckId = pathMatch[1];
+                    console.log('Detected deck editor route for deck:', deckId);
+                    
+                    // Show deck builder (which contains the deck editor)
+                    document.getElementById('database-view').style.display = 'none';
+                    document.getElementById('deck-builder').style.display = 'block';
+                    
+                    // Update tab buttons
+                    document.querySelectorAll('.app-tab-button').forEach(btn => btn.classList.remove('active'));
+                    const deckBuilderBtn = document.getElementById('deckBuilderBtn');
+                    if (deckBuilderBtn) deckBuilderBtn.classList.add('active');
+                    
+                    // Load the deck for editing
+                    currentDeckId = deckId;
+                    showDeckEditor();
+                    loadDeckForEditing(deckId);
+                }
             } else {
                 // Show deck builder and hide database view
                 document.getElementById('database-view').style.display = 'none';
@@ -6132,9 +6153,15 @@
 
         // Deck actions
         function editDeck(deckId) {
-            currentDeckId = deckId;
-            showDeckEditor();
-            loadDeckForEditing(deckId);
+            // Get current user to construct the URL
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                // Navigate to the deck editor URL
+                window.location.href = `/users/${currentUser.userId}/decks/${deckId}`;
+            } else {
+                // Fallback to guest if no user found
+                window.location.href = `/users/guest/decks/${deckId}`;
+            }
         }
 
         function viewDeck(deckId) {

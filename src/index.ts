@@ -439,6 +439,25 @@ app.get('/users/:userId/decks', authenticateUser, (req: any, res) => {
   res.sendFile(path.join(process.cwd(), 'public/index.html'));
 });
 
+// Deck Editor route - serve deck editor for specific deck
+app.get('/users/:userId/decks/:deckId', authenticateUser, (req: any, res) => {
+  const { userId, deckId } = req.params;
+  
+  // Verify user is accessing their own decks
+  // Handle both userId (from session) and id (from direct user lookup)
+  const userIdentifier = req.user.userId || req.user.id;
+  
+  // Special case for guest user - allow both 'guest' and 'guest-001' URLs
+  const isGuestAccess = (userId === 'guest' && userIdentifier === 'guest-001') || 
+                       (userIdentifier === userId);
+  
+  if (!isGuestAccess) {
+    return res.status(403).json({ success: false, error: 'Access denied' });
+  }
+  
+  res.sendFile(path.join(process.cwd(), 'public/index.html'));
+});
+
 // Database View route (Image 3) - serve original database view
 app.get('/data', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'public/index.html'));
