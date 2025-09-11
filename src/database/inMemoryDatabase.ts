@@ -296,12 +296,12 @@ class InMemoryDatabase {
     // Handle specific known mismatches based on actual existing images
     const knownMismatches: { [key: string]: string } = {
       // Cthulhu special cards - map to actual existing images
-      'ancient_one': 'specials/381_giant_man_of_mars.webp',
-      'devoted_follower': 'specials/382_the_battle_with_zod.webp', 
-      'distracting_intervention': 'specials/383_eyes_in_the_dark.webp',
-      'network_of_fanatics': 'events/470_221b_baker_st.webp',
-      'the_call_of_cthulhu': 'events/471_horizon.webp',
-      'the_sleeper_awakens': 'events/472_the_land_that_time_forgot.webp',
+      'ancient_one': 'specials/049_ancient_one.webp',
+      'devoted_follower': 'specials/050_devoted_follower.webp', 
+      'distracting_intervention': 'specials/051_distracting_intervention.webp',
+      'network_of_fanatics': 'specials/052_network_of_fanatics.webp',
+      'the_call_of_cthulhu': 'specials/053_call_of_cthulhu.webp',
+      'the_sleeper_awakens': 'specials/054_the_sleeper_awakens.webp',
       
       // Carson of Venus special cards - map to correct image files
       'janjong_duare_mintep': 'specials/036_janjong_duare_mintep.webp',
