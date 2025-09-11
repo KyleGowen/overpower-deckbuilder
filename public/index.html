@@ -316,11 +316,11 @@
             border: 1px solid rgba(78, 205, 196, 0.3);
             border-radius: 4px;
             color: white;
-            padding: 6px 8px;
-            font-size: 0.85rem;
-            width: 200px;
+            padding: 4px 6px;
+            font-size: 0.8rem;
+            width: 150px;
             margin-left: 12px;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
+            transition: border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
         }
 
         .character-name-search::placeholder {
@@ -332,6 +332,7 @@
             border-color: #4ECDC4;
             background: rgba(255, 255, 255, 0.15);
         }
+
 
         /* Power Cards filter active indicator */
         .power-cards-filter-active .card-category-header {
@@ -10098,9 +10099,9 @@
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
-                                                <input type="text" class="character-name-search" placeholder="Search character names..." 
+                                                <input type="text" class="character-name-search" placeholder="Search names..." 
                                                        onkeyup="filterCharactersByName(this.value)" 
-                                                       onclick="event.stopPropagation()">
+                                                       onclick="expandCharacterCategoryIfNeeded(this); event.stopPropagation()">
                                             </div>
                                             <div class="category-header-controls">
                                                 <span class="collapse-icon">${collapseIcon}</span>
@@ -10135,6 +10136,16 @@
             } catch (error) {
                 console.error('Error loading available cards:', error);
                 cardCategories.innerHTML = '<div class="error">Error loading available cards</div>';
+            }
+        }
+
+        // Expand character category if it's collapsed when search input is clicked
+        function expandCharacterCategoryIfNeeded(searchInput) {
+            const category = searchInput.closest('.card-category');
+            const header = category.querySelector('.card-category-header');
+            
+            if (header.classList.contains('collapsed')) {
+                toggleCategory(header);
             }
         }
 
