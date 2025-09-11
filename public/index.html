@@ -9548,6 +9548,7 @@
                                              data-id="${card.id}"
                                              onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                              onmouseleave="hideCardHoverModal()"
+                                             onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
                                             <div class="card-item-content">
@@ -9593,6 +9594,7 @@
                                              data-id="${card.id}"
                                              onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                              onmouseleave="hideCardHoverModal()"
+                                             onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
                                             <div class="card-item-content">${card[category.nameField]}</div>
@@ -9640,6 +9642,8 @@
                                          data-id="${card.id}"
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                          onmouseleave="hideCardHoverModal()"
+                                         onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
+                                         onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
                                         <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
@@ -9682,6 +9686,7 @@
                                          data-id="${card.id}"
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                          onmouseleave="hideCardHoverModal()"
+                                         onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
                                         <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
@@ -9725,6 +9730,7 @@
                                          data-id="${card.id}"
                                          onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
                                          onmouseleave="hideCardHoverModal()"
+                                         onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
                                         <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
@@ -10247,6 +10253,22 @@
         // Function to handle plus button clicks
         function handlePlusButtonClick(event, cardType, cardId, cardName) {
             event.stopPropagation(); // Prevent drag event
+            addCardToEditor(cardType, cardId, cardName);
+        }
+
+        function handleCardClick(event, cardType, cardId, cardName) {
+            // Only add card if it's not disabled and the click wasn't on the plus button
+            if (event.target.classList.contains('card-item-plus')) {
+                return; // Let the plus button handle its own click
+            }
+            
+            // Check if the card is disabled
+            const cardElement = event.currentTarget;
+            if (cardElement.classList.contains('disabled')) {
+                return; // Don't add disabled cards
+            }
+            
+            // Add the card to the editor
             addCardToEditor(cardType, cardId, cardName);
         }
 
