@@ -3277,7 +3277,7 @@
         <!-- Top-level application tabs -->
         <div class="app-tabs">
             <button class="app-tab-button" onclick="window.location.href='/data'">Database View</button>
-            <button class="app-tab-button active" onclick="window.location.href='/users/kyle-001/decks'">Deck Builder</button>
+            <button class="app-tab-button active" id="deckBuilderBtn" onclick="goToDeckBuilder()">Deck Builder</button>
         </div>
 
         <div id="database-view" class="database-section" style="display: block;">
@@ -4095,6 +4095,37 @@
             // Load decks when switching to deck builder tab
             if (tabId === 'deck-builder') {
                 loadDecks();
+            }
+        }
+
+        // Navigate to deck builder with current user's ID
+        function goToDeckBuilder() {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.userId) {
+                window.location.href = `/users/${currentUser.userId}/decks`;
+            } else {
+                console.error('No current user found');
+                // Fallback to guest if no user
+                window.location.href = '/users/guest/decks';
+            }
+        }
+
+        // Get current user from localStorage or session
+        function getCurrentUser() {
+            try {
+                const userData = localStorage.getItem('currentUser');
+                if (userData) {
+                    return JSON.parse(userData);
+                }
+                // Fallback: check if we're on a user-specific route
+                const pathMatch = window.location.pathname.match(/\/users\/([^\/]+)/);
+                if (pathMatch) {
+                    return { userId: pathMatch[1] };
+                }
+                return null;
+            } catch (error) {
+                console.error('Error getting current user:', error);
+                return null;
             }
         }
 
@@ -5666,6 +5697,8 @@
                 
                 if (data.success) {
                     currentUser = data.data;
+                    // Store user data in localStorage for navigation
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     showMainApp();
                     // Load user's data
                     loadUserData();
@@ -5682,6 +5715,8 @@
             try {
                 await fetch('/api/auth/logout', { method: 'POST' });
                 currentUser = null;
+                // Clear stored user data
+                localStorage.removeItem('currentUser');
                 showLoginModal();
             } catch (error) {
                 console.error('Logout error:', error);
@@ -5717,6 +5752,17 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Load current user from localStorage
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                try {
+                    currentUser = JSON.parse(storedUser);
+                } catch (error) {
+                    console.error('Error parsing stored user data:', error);
+                    localStorage.removeItem('currentUser');
+                }
+            }
+            
             // Check if we're on the database view route
             if (window.location.pathname === '/data') {
                 // Show database view and hide deck builder
@@ -5738,7 +5784,7 @@
                 
                 // Update tab buttons
                 document.querySelectorAll('.app-tab-button').forEach(btn => btn.classList.remove('active'));
-                const deckBuilderBtn = document.querySelector('.app-tab-button[onclick*="/users/kyle-001/decks"]');
+                const deckBuilderBtn = document.getElementById('deckBuilderBtn');
                 if (deckBuilderBtn) deckBuilderBtn.classList.add('active');
             }
             
