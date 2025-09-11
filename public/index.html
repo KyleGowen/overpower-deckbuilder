@@ -10101,7 +10101,11 @@
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <input type="text" class="character-name-search" placeholder="Search names..." 
                                                        onkeyup="filterCharactersByName(this.value)" 
-                                                       onclick="expandCharacterCategoryIfNeeded(this); event.stopPropagation()">
+                                                       onclick="expandCharacterCategoryIfNeeded(this); event.stopPropagation()"
+                                                       onmousedown="preventCategoryCollapse(event)"
+                                                       onselect="preventCategoryCollapse(event)"
+                                                       onfocus="preventCategoryCollapse(event)"
+                                                       onblur="preventCategoryCollapse(event)">
                                             </div>
                                             <div class="category-header-controls">
                                                 <span class="collapse-icon">${collapseIcon}</span>
@@ -10147,6 +10151,11 @@
             if (header.classList.contains('collapsed')) {
                 toggleCategory(header);
             }
+        }
+
+        // Prevent search input from collapsing the category when text is selected
+        function preventCategoryCollapse(event) {
+            event.stopPropagation();
         }
 
         // Filter characters by name in the Available Cards section
