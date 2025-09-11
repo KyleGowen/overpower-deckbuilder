@@ -919,7 +919,7 @@ class InMemoryDatabase {
     
     // First try exact matching
     for (const imageFile of availableImages) {
-      const imageName = imageFile.replace('.webp', '');
+      const imageName = imageFile.replace(/\.(webp|jpg)$/, '');
       
       // Check if this image matches the event name
       if (imageName.includes(eventNameSnake)) {
@@ -930,7 +930,7 @@ class InMemoryDatabase {
     // Try partial word matching for cases like "The Giant Man of Mars" vs "giant_man_of_mars"
     const words = eventNameSnake.split('_').filter(word => word.length > 2);
     for (const imageFile of availableImages) {
-      const imageName = imageFile.replace('.webp', '');
+      const imageName = imageFile.replace(/\.(webp|jpg)$/, '');
       
       // Check if most words match (at least 70% of words)
       const matchingWords = words.filter(word =>
@@ -944,7 +944,7 @@ class InMemoryDatabase {
     
     // Try fuzzy matching for similar names
     for (const imageFile of availableImages) {
-      const imageName = imageFile.replace('.webp', '');
+      const imageName = imageFile.replace(/\.(webp|jpg)$/, '');
       if (this.levenshteinDistance(eventNameSnake, imageName) <= 3) {
         return imageFile;
       }
@@ -960,6 +960,7 @@ class InMemoryDatabase {
     return [
       // Call of Cthulhu events (after 356_call_of_cthulu_7.webp)
       "events/357_a_desperate_gamble.webp", "events/358_the_cost_of_knowledge_is_sanity.webp", "events/359_stars_align.webp",
+      "events/who_can_you_trust.jpg", "events/healed_by_a_dark_power.jpg",
       // King of the Jungle events (after 368_tarzan_king_of_the_jungle_7.webp)
       "events/369_the_lost_city_of_opar.webp", "events/370_tarzan_the_terrible.webp", "events/371_the_power_of_gonfal.webp",
       // Chronicles of Mars events (after 380_chronicles_of_mars_7.webp)
