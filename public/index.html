@@ -8311,7 +8311,7 @@
                             const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
                             
                             if (!availableCard) {
-                                console.warn('Card not found in availableCardsMap:', card);
+                                console.warn('Special card not found in availableCardsMap:', card);
                                 return;
                             }
                             
@@ -8780,7 +8780,7 @@
             const caption = document.getElementById('cardHoverCaption');
             
             if (modal && image && caption) {
-                image.src = `/${imagePath}`;
+                image.src = imagePath;
                 caption.textContent = cardName;
                 
                 // Function to position modal based on mouse position

@@ -5,250 +5,250 @@
       "name": "New Deck",
       "description": "The new new",
       "created": "2025-09-03T06:34:00.509Z",
-      "lastModified": "2025-09-10T07:27:30.615Z",
+      "lastModified": "2025-09-11T02:49:01.463Z",
       "cardCount": 28,
       "userId": "kyle-001"
     },
     "cards": [
       {
-        "id": "bf3c5970-a790-478f-b2df-484c1f27420c",
+        "id": "b2dda137-6610-4cce-b133-f5933f0ceedf",
         "type": "character",
         "cardId": "char_42",
         "quantity": 1,
         "selectedAlternateImage": "Zeus.webp"
       },
       {
-        "id": "58775ce0-e1d0-4819-8c6d-494e2ff4293e",
+        "id": "fc759243-ded6-481d-aee2-0ab89963c5f7",
         "type": "power",
         "cardId": "power_33",
         "quantity": 1
       },
       {
-        "id": "dd141049-46df-4f63-9bdb-a2f336e1ee13",
+        "id": "b497712f-6f3d-4b6e-b59a-91e3c37d79d9",
         "type": "power",
         "cardId": "power_34",
         "quantity": 1
       },
       {
-        "id": "3617ba8c-ca7f-4378-8a45-8a710528681c",
+        "id": "822d79db-8163-4a3b-ba52-84b338b14e36",
         "type": "power",
         "cardId": "power_35",
         "quantity": 1
       },
       {
-        "id": "6d953aa8-6cde-4836-8ee7-997c3d6bb741",
+        "id": "29649c77-fedf-4d81-a9fd-29e32578f978",
         "type": "character",
         "cardId": "char_23",
         "quantity": 1,
         "selectedAlternateImage": "Merlin.png"
       },
       {
-        "id": "6a19c1d1-5062-4f26-87de-dc207c61ebd3",
+        "id": "dc210c2b-c67d-4d7b-b2c2-86d560628a94",
         "type": "special",
         "cardId": "special_143",
         "quantity": 1
       },
       {
-        "id": "b9e7d79a-a450-4211-9d1a-6551973346c5",
+        "id": "9fe7f636-dd1d-40cb-bacd-d523ef6b49d7",
         "type": "special",
         "cardId": "special_144",
         "quantity": 1
       },
       {
-        "id": "29b50e71-4efe-4c99-9d41-e17f51dfb265",
+        "id": "4a8c6e6a-9c8c-47e5-b0b7-bd31fa4d15c8",
         "type": "special",
         "cardId": "special_145",
         "quantity": 1
       },
       {
-        "id": "644841b2-9b1f-4b69-9b21-f0198a34c81b",
+        "id": "3d1dfd98-92cf-44fb-93d2-ddf43974e381",
         "type": "special",
         "cardId": "special_146",
         "quantity": 1
       },
       {
-        "id": "9833b691-c94f-4748-9bc8-34c4c263cb38",
+        "id": "778fc3e7-bd39-46d1-b4e7-f080b920c463",
         "type": "special",
         "cardId": "special_147",
         "quantity": 1
       },
       {
-        "id": "61182cd8-7e8c-4a9f-9b5b-97437eb7fc9e",
+        "id": "f61c62ea-7efa-4fc9-b1c1-0ff7370b5182",
         "type": "special",
         "cardId": "special_148",
         "quantity": 1
       },
       {
-        "id": "16f3caf5-c96a-4410-bd71-564a9dada66e",
+        "id": "5b1e887a-702e-47da-9574-08ca2489fdcf",
         "type": "special",
         "cardId": "special_77",
         "quantity": 1
       },
       {
-        "id": "e707b321-2ba5-4647-b713-43d965e93fd4",
+        "id": "a1d5b59c-98f5-4bb5-b26c-7ccf7d57cbfb",
         "type": "special",
         "cardId": "special_78",
         "quantity": 1
       },
       {
-        "id": "88eb5053-8f67-47c6-a230-2ee2cef9c1e5",
+        "id": "cb88434e-1287-49aa-959a-994752e7ea9c",
         "type": "special",
         "cardId": "special_79",
         "quantity": 1
       },
       {
-        "id": "2ead7691-1aaf-442f-9926-eafce214e12a",
+        "id": "22c0ec77-9421-45d4-9791-4a4735b1feb3",
         "type": "special",
         "cardId": "special_80",
         "quantity": 1
       },
       {
-        "id": "aff05854-6602-4b5c-89cb-05e009ef33cb",
+        "id": "4a3f38be-f4cf-4f79-b119-44b42044f5b8",
         "type": "special",
         "cardId": "special_81",
         "quantity": 1
       },
       {
-        "id": "0036b565-9253-48f0-9c65-e6d0e4a16b7f",
+        "id": "5c761f87-9965-489e-9247-80e8ee0a3d47",
         "type": "special",
         "cardId": "special_82",
         "quantity": 1
       },
       {
-        "id": "f315a143-1f11-47dc-9b4c-80ec402352fc",
+        "id": "3a2dd7f9-0538-4e78-92c4-d2cb2d82a3b5",
         "type": "location",
         "cardId": "loc_7",
         "quantity": 1
       },
       {
-        "id": "d85cb02d-5ce3-48b0-b583-78ff99446fa6",
+        "id": "7ec31603-4a24-4de8-bcdb-a406ffe59e06",
         "type": "power",
         "cardId": "power_11",
         "quantity": 1
       },
       {
-        "id": "3dbcc450-6270-4160-b48c-b3396704332a",
+        "id": "04491cd0-a23a-483c-8508-3adfaa5b4192",
         "type": "power",
         "cardId": "power_13",
         "quantity": 1
       },
       {
-        "id": "892d2636-de56-45de-991b-61e08600abc7",
+        "id": "ea8fb74e-bba6-472c-b04d-0405fef16f7d",
         "type": "mission",
         "cardId": "mission_15",
         "quantity": 1
       },
       {
-        "id": "919528a0-0706-4a7c-b65f-654de51105ca",
+        "id": "7e2898f4-de82-4404-a37a-d53adcec7776",
         "type": "mission",
         "cardId": "mission_16",
         "quantity": 1
       },
       {
-        "id": "f87bb9af-4329-4552-90ca-73df180b346d",
+        "id": "3974453e-79f1-4b5d-97d5-2b2ca01fa7fb",
         "type": "mission",
         "cardId": "mission_17",
         "quantity": 1
       },
       {
-        "id": "92ccfb07-768f-49dc-99cf-95d480dbe2c2",
+        "id": "b5af6646-f344-4464-869c-526007c02b72",
         "type": "mission",
         "cardId": "mission_18",
         "quantity": 1
       },
       {
-        "id": "9eb1ea9d-ec26-4a7d-8f24-62bb6ff6bf97",
+        "id": "677ad8e4-14d0-4c64-b881-e4c13568927e",
         "type": "mission",
         "cardId": "mission_19",
         "quantity": 1
       },
       {
-        "id": "bcfbe426-6657-439b-ba8b-9137b08d7993",
+        "id": "000304ac-11c1-4e37-8f7a-db774a2cd1ae",
         "type": "mission",
         "cardId": "mission_20",
         "quantity": 1
       },
       {
-        "id": "504a32fe-2354-49f3-a8a7-2a23a958b4a5",
+        "id": "bfe7566a-05c9-472a-9408-1a203fbd8461",
         "type": "mission",
         "cardId": "mission_21",
         "quantity": 1
       },
       {
-        "id": "8f4bdef5-8bed-4988-bf0f-bc6d216934f9",
+        "id": "d6a12acc-a3bc-4da3-8260-d7bc3c5f1d17",
         "type": "aspect",
         "cardId": "aspect_2",
         "quantity": 1
       },
       {
-        "id": "3501d578-dc46-4772-9044-6f3e4eb5181f",
+        "id": "8d58db8a-5968-416c-acd8-a565513345f7",
         "type": "power",
         "cardId": "power_26",
         "quantity": 1
       },
       {
-        "id": "56bbdf18-89c3-4e8b-91f4-e3df2a77da48",
+        "id": "7e430a03-7303-4b3a-abbd-141b6e4bf7ae",
         "type": "power",
         "cardId": "power_17",
         "quantity": 1
       },
       {
-        "id": "1a376eb6-3285-4aa6-a8e8-b9f2e74b318c",
+        "id": "c6b0253e-da52-4279-b02d-29e85b4494f9",
         "type": "power",
         "cardId": "power_9",
         "quantity": 1
       },
       {
-        "id": "ac7ff67b-c03b-4b5c-8685-76eba99df3ac",
+        "id": "ded06108-06ed-43d3-bced-cada33ef3adc",
         "type": "teamwork",
         "cardId": "teamwork_20",
         "quantity": 1
       },
       {
-        "id": "620b3439-8165-4d34-9350-d1fcd56febf0",
+        "id": "f81443bf-29c1-4301-97c1-3120a10573a6",
         "type": "teamwork",
         "cardId": "teamwork_21",
         "quantity": 1
       },
       {
-        "id": "84f74c89-25c5-4c16-89a9-e38f67addbe6",
+        "id": "aaac3ca9-c604-4ed6-b3f3-3ea37762367d",
         "type": "special",
         "cardId": "special_260",
         "quantity": 1
       },
       {
-        "id": "8b7cb025-82fd-46a2-9f69-4c8919a23537",
+        "id": "42111c47-57b1-4e96-bb91-849ea7c20a05",
         "type": "teamwork",
         "cardId": "teamwork_28",
         "quantity": 1
       },
       {
-        "id": "ec859215-6994-44a3-bab6-17300359bef3",
+        "id": "67990495-4b8c-4115-9473-1287e12bbafc",
         "type": "teamwork",
         "cardId": "teamwork_38",
         "quantity": 1
       },
       {
-        "id": "63eb9fbe-d5b7-4385-92f3-0e2c366cbc2f",
+        "id": "7b727c6e-8894-45d7-a8ca-1a024b0025c3",
         "type": "ally-universe",
         "cardId": "ally_2",
         "quantity": 1
       },
       {
-        "id": "fce21947-9d3f-4881-841e-e53b74d55fb1",
+        "id": "937ca35d-99cc-4986-b8cd-7e1efe7a0688",
         "type": "character",
         "cardId": "char_22",
         "quantity": 1,
         "selectedAlternateImage": "Leonidas.webp"
       },
       {
-        "id": "3f9faf5e-f6c7-46fe-88cf-cdae55e45eb8",
+        "id": "5596e6bf-787f-4432-a54b-d575fc437817",
         "type": "power",
         "cardId": "power_1",
         "quantity": 1
       },
       {
-        "id": "7a9b7f64-d0f9-4ff5-a9f3-9998362d30c1",
+        "id": "80377e00-ac99-4225-9f46-2b86fd9f0f6a",
         "type": "character",
         "cardId": "char_11",
         "quantity": 1,
