@@ -58,12 +58,14 @@ const authenticateUser = (req: any, res: any, next: any) => {
   }
   
   if (!sessionId) {
-    return res.status(401).json({ success: false, error: 'No session found. Please log in.' });
+    console.log('Authentication failed: No session found for user', userId, 'at', req.originalUrl);
+    return res.redirect('/');
   }
   
   const session = userService.validateSession(sessionId);
   if (!session) {
-    return res.status(401).json({ success: false, error: 'Invalid or expired session. Please log in again.' });
+    console.log('Authentication failed: Invalid or expired session for user', userId, 'at', req.originalUrl);
+    return res.redirect('/');
   }
   
   req.user = session;
