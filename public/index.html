@@ -2278,6 +2278,13 @@
             justify-content: space-between;
         }
 
+        /* Special card tiles need more height to accommodate the Change Art button */
+        .deck-card-editor-item.preview-view.special-card {
+            min-height: 50px;
+            align-items: flex-start;
+            padding-top: 10px;
+        }
+
         /* Character background styling for deck editor tiles */
         .deck-card-editor-item.character-card {
             background: linear-gradient(to right, 
@@ -8462,10 +8469,17 @@
                                 // Special card - no additional details
                                 const cardDetails = '';
                                 
+                                // Add alternate art button for special cards with alternate images
+                                let alternateArtButton = '';
+                                if (availableCard.alternateImages && availableCard.alternateImages.length > 0) {
+                                    const cardName = (availableCard.name || availableCard.card_name || getCardName(card)).replace(/'/g, "\\'");
+                                    alternateArtButton = `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>`;
+                                }
+                                
                                 cardsHtml += `
                                     <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
-                                         data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
+                                         data-bg-image="${getCardImagePath(availableCard, card.type, card.selectedAlternateImage)}"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, card.selectedAlternateImage)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          ondragstart="handleDeckCardDragStart(event)"
                                          ondragend="handleDeckCardDragEnd(event)"
@@ -8477,6 +8491,7 @@
                                         </div>
                                         <div class="deck-card-editor-actions">
                                             <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                            ${alternateArtButton}
                                         </div>
                                     </div>
                                 `;
@@ -10770,8 +10785,8 @@
                         // Update existing card in deck editor
                         updateCardAlternateImage(cardIndex, selectedImage);
                     } else {
-                        // Add new card
-                        addCardToEditor('character', cardId, cardName, selectedImage);
+                        // Add new card - use the cardType parameter passed to the function
+                        addCardToEditor(cardType, cardId, cardName, selectedImage);
                     }
                     closeAlternateArtModal();
                 }
@@ -10879,7 +10894,7 @@
             if (existingCardIndex >= 0) {
                 // Increase quantity and update alternate image if provided
                 deckEditorCards[existingCardIndex].quantity += 1;
-                if (selectedAlternateImage && cardType === 'character') {
+                if (selectedAlternateImage && (cardType === 'character' || cardType === 'special')) {
                     deckEditorCards[existingCardIndex].selectedAlternateImage = selectedAlternateImage;
                 }
                 // Show notification for adding additional copies
@@ -10895,7 +10910,7 @@
                     quantity: 1
                 };
                 // Add selected alternate image if provided
-                if (selectedAlternateImage && cardType === 'character') {
+                if (selectedAlternateImage && (cardType === 'character' || cardType === 'special')) {
                     newCard.selectedAlternateImage = selectedAlternateImage;
                 }
                 deckEditorCards.push(newCard);
