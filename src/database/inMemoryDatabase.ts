@@ -290,6 +290,11 @@ class InMemoryDatabase {
     // Convert card name to snake_case for intelligent matching
     const snakeCaseName = this.convertToSnakeCase(cardName);
     
+    // Debug Victory Harben cards
+    if (cardName.includes('Abner Perry') || cardName.includes('Archery') || cardName.includes('Chamston')) {
+      console.log(`🔍 Debugging Victory Harben card: ${cardName}`);
+      console.log(`  Snake case: ${snakeCaseName}`);
+    }
     
     // First try to find an exact match with the snake_case name
     const availableImages = this.getAvailableSpecialCardImages();
@@ -316,7 +321,7 @@ class InMemoryDatabase {
       'heimdall': 'specials/439_heimdall.webp',
       'lady_of_the_lake': 'specials/440_lady_of_the_lake.webp',
       'robin_hood_master_thief': 'specials/441_robin_hood_master_thief.webp',
-      'tunupa': 'specials/442_tunupa.webp',
+      'tunupa_mountain_god': 'specials/442_tunupa_mountain_god.webp',
       'fairy_protection': 'specials/443_fairy_protection.webp',
       'loki': 'specials/444_loki.webp',
       'wrath_of_ra': 'specials/445_wrath_of_ra.webp',
@@ -329,19 +334,27 @@ class InMemoryDatabase {
       'draconic_leadership': 'specials/452_draconic_leadership.webp',
       'liliths_swarm': 'specials/453_liliths_swarm.webp',
       'disorient_opponent': 'specials/454_disorient_opponent.webp',
-      'freya': 'specials/455_freya.webp',
+      'freya_goddess_of_protection': 'specials/455_freya_goddess_of_protection.webp',
       'grim_reaper': 'specials/456_grim_reaper.webp',
       'gunnr': 'specials/457_gunnr.webp',
-      'hades': 'specials/458_hades.webp',
+      'hades_lord_of_the_underworld': 'specials/458_hades_lord_of_the_underworld.webp',
       'legendary_escape': 'specials/459_legendary_escape.webp',
       'merlins_magic': 'specials/460_merlins_magic.webp',
       'preternatural_healing': 'specials/461_preternatural_healing.webp',
       'princess_and_the_pea': 'specials/462_princess_and_the_pea.webp',
       'the_gemni': 'specials/463_the_gemni.webp',
-      'valkyrie_hilder': 'specials/464_valkyrie_hilder.webp'
+      'valkyrie_hilder': 'specials/464_valkyrie_hilder.webp',
+      
+      // Victory Harben special cards - map to correct image files
+      'abner_perrys_lab_assistant': 'specials/266_abner_perrys_lab_assistant.webp',
+      'archery_knives_jiujitsu': 'specials/267_archery_knives_and_jiu_jitsu.webp',
+      'chamstonhedding_estate': 'specials/268_chamston-hedding_estate.webp'
     };
     
     if (knownMismatches[snakeCaseName]) {
+      if (cardName.includes('Abner Perry') || cardName.includes('Archery') || cardName.includes('Chamston')) {
+        console.log(`  ✅ Found in knownMismatches: ${knownMismatches[snakeCaseName]}`);
+      }
       return knownMismatches[snakeCaseName];
     }
     
@@ -493,11 +506,11 @@ class InMemoryDatabase {
     return [
       // Any Character special cards (439-464)
       "specials/439_heimdall.webp", "specials/440_lady_of_the_lake.webp", "specials/441_robin_hood_master_thief.webp",
-      "specials/442_tunupa.webp", "specials/443_fairy_protection.webp", "specials/444_loki.webp", "specials/445_wrath_of_ra.webp",
+      "specials/442_tunupa_mountain_god.webp", "specials/443_fairy_protection.webp", "specials/444_loki.webp", "specials/445_wrath_of_ra.webp",
       "specials/446_valkyrie_skeggold.webp", "specials/447_oni_and_succubus.webp", "specials/448_bodhisattava_enlightened_one.webp",
       "specials/449_mystical_energy.webp", "specials/450_charge_into_battle.webp", "specials/451_subjugate_the_meek.webp",
       "specials/452_draconic_leadership.webp", "specials/453_liliths_swarm.webp", "specials/454_disorient_opponent.webp",
-      "specials/455_freya.webp", "specials/456_grim_reaper.webp", "specials/457_gunnr.webp", "specials/458_hades.webp",
+      "specials/455_freya_goddess_of_protection.webp", "specials/456_grim_reaper.webp", "specials/457_gunnr.webp", "specials/458_hades_lord_of_the_underworld.webp",
       "specials/459_legendary_escape.webp", "specials/460_merlins_magic.webp", "specials/461_preternatural_healing.webp",
       "specials/462_princess_and_the_pea.webp", "specials/463_the_gemni.webp", "specials/464_valkyrie_hilder.webp",
       
@@ -577,7 +590,7 @@ class InMemoryDatabase {
       "specials/255_knowledge_of_tomorrow.webp", "specials/256_harbingers_warning.webp", "specials/257_the_tomorrow_doctor.webp",
       "specials/259_doctor_profesor.webp", "specials/260_monster_hunting_expert.webp", "specials/261_crossbow_expert.webp",
       "specials/262_right_tool_for_the_job.webp", "specials/263_sacred_wafers_of_amsterdam.webp", "specials/264_world_renowned_doctor.webp",
-      "specials/266_abner_perrys_lab_assistant.webp", "specials/267_knives_archery_and_jiu_jitsu.webp",       "specials/268_channing-hedding_estate.webp",
+      "specials/266_abner_perrys_lab_assistant.webp", "specials/267_archery_knives_and_jiu_jitsu.webp",       "specials/268_chamston-hedding_estate.webp",
       "specials/269_department_of_theoretical_physics.webp", "specials/270_fires_of_halos.webp",       "specials/271_practical_physics.webp",
       "specials/273_aquaphobic.webp", "specials/274_feard_by_all_witches.webp", "specials/275_i_will_have_those_silver_shoes.webp",
       "specials/276_one_eye.webp", "specials/277_harness_the_wind.webp",       "specials/278_wolves_crows_black_birds_en_237.webp",
