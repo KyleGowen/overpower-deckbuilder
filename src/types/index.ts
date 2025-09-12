@@ -54,6 +54,7 @@ export interface SpecialCard {
   card_effect: string;
   image: string;
   is_cataclysm: boolean;
+  alternateImages?: string[]; // Array of alternate image filenames
 }
 
 export interface Mission {

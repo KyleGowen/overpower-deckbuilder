@@ -215,14 +215,18 @@ class InMemoryDatabase {
           const columns = line.split('|').map(col => col.trim());
           
                       if (columns.length >= 5) { // Split by | creates 5+ elements for 4 columns
+              const cardName = columns[1];
+              const alternateImages = this.getSpecialCardAlternateImages(cardName);
+              
               const specialCard: SpecialCard = {
                 id: `special_${this.nextSpecialCardId++}`,
-                name: columns[1],
+                name: cardName,
                 card_type: columns[2],
                 character: columns[3],
                 card_effect: columns[4],
-                image: this.getSpecialCardImage(columns[1]),
-                is_cataclysm: columns[4].includes('**Cataclysm!**')
+                image: this.getSpecialCardImage(cardName),
+                is_cataclysm: columns[4].includes('**Cataclysm!**'),
+                ...(alternateImages.length > 0 && { alternateImages })
               };
 
             this.specialCards.set(specialCard.id, specialCard);
@@ -271,6 +275,37 @@ class InMemoryDatabase {
     return alternateImages;
   }
 
+  private getSpecialCardAlternateImages(cardName: string): string[] {
+    const alternateImages: string[] = [];
+    const alternateDir = path.join(process.cwd(), 'src/resources/cards/images/specials/alternate');
+    
+    if (!fs.existsSync(alternateDir)) {
+      return alternateImages;
+    }
+    
+    try {
+      const files = fs.readdirSync(alternateDir);
+      const cardNameLower = cardName.toLowerCase();
+      const snakeCaseName = this.convertToSnakeCase(cardName);
+      
+      for (const file of files) {
+        if (file.endsWith('.webp') || file.endsWith('.png')) {
+          const fileName = file.toLowerCase().replace(/\.(webp|png)$/, '');
+          // Check if the filename matches the card name (case insensitive)
+          // This handles cases like "the_gemini.webp" for "The Gemini"
+          if (fileName === cardNameLower || fileName === snakeCaseName || 
+              fileName.includes(cardNameLower) || fileName.includes(snakeCaseName)) {
+            alternateImages.push(file);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error reading special card alternate images directory:', error);
+    }
+    
+    return alternateImages;
+  }
+
   public getCharacterEffectiveImage(characterId: string, selectedAlternateImage?: string): string {
     const character = this.characters.get(characterId);
     if (!character) {
@@ -284,6 +319,21 @@ class InMemoryDatabase {
     
     // Otherwise, use the default image
     return character.image;
+  }
+
+  public getSpecialCardEffectiveImage(specialCardId: string, selectedAlternateImage?: string): string {
+    const specialCard = this.specialCards.get(specialCardId);
+    if (!specialCard) {
+      return '';
+    }
+    
+    // If a specific alternate image is selected, use it
+    if (selectedAlternateImage && specialCard.alternateImages?.includes(selectedAlternateImage)) {
+      return `specials/alternate/${selectedAlternateImage}`;
+    }
+    
+    // Otherwise, use the default image
+    return specialCard.image;
   }
 
   private getSpecialCardImage(cardName: string): string {
@@ -652,6 +702,15 @@ class InMemoryDatabase {
     return Array.from(this.characters.values());
   }
 
+  // Special card management
+  getSpecialCardById(id: string): SpecialCard | undefined {
+    return this.specialCards.get(id);
+  }
+
+  getAllSpecialCards(): SpecialCard[] {
+    return Array.from(this.specialCards.values());
+  }
+
   // Location management
   getLocationById(id: string): Location | undefined {
     return this.locations.get(id);
@@ -661,14 +720,6 @@ class InMemoryDatabase {
     return Array.from(this.locations.values());
   }
 
-  // Special Card management
-  getSpecialCardById(id: string): SpecialCard | undefined {
-    return this.specialCards.get(id);
-  }
-
-  getAllSpecialCards(): SpecialCard[] {
-    return Array.from(this.specialCards.values());
-  }
 
   // Mission management
   getMissionById(id: string): Mission | undefined {

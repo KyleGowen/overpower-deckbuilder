@@ -8618,10 +8618,10 @@
                             const selectedAlternateImage = card.selectedAlternateImage;
                             const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork) ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
                             
-                            // Add alternate art button for characters with alternate images
+                            // Add alternate art button for characters and special cards with alternate images
                             let alternateArtButton = '';
-                            if (isCharacter && availableCard.alternateImages && availableCard.alternateImages.length > 0) {
-                                const characterName = (availableCard.name || availableCard.card_name || getCardName(card)).replace(/'/g, "\\'");
+                            if ((isCharacter || card.type === 'special') && availableCard.alternateImages && availableCard.alternateImages.length > 0) {
+                                const cardName = (availableCard.name || availableCard.card_name || getCardName(card)).replace(/'/g, "\\'");
                                 alternateArtButton = `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>`;
                             }
                             
@@ -9210,6 +9210,11 @@
                         return `/src/resources/cards/images/${card.image}`;
                     }
                 } else if (cardType === 'special') {
+                    // If a specific alternate image is selected, use it
+                    if (selectedAlternateImage && card.alternateImages && card.alternateImages.includes(selectedAlternateImage)) {
+                        return `/src/resources/cards/images/specials/alternate/${selectedAlternateImage}`;
+                    }
+                    
                     // Special cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
@@ -10715,28 +10720,36 @@
         }
 
         // Function to show alternate art selection modal
-        function showAlternateArtSelection(character, cardId, cardName, cardIndex = null) {
+        function showAlternateArtSelection(card, cardId, cardName, cardIndex = null, cardType = 'character') {
             // Get current selected image
-            let currentSelectedImage = character.image;
+            let currentSelectedImage = card.image;
             if (cardIndex !== null && deckEditorCards[cardIndex] && deckEditorCards[cardIndex].selectedAlternateImage) {
                 currentSelectedImage = deckEditorCards[cardIndex].selectedAlternateImage;
             }
+            
+            // Determine image paths based on card type
+            const defaultImagePath = cardType === 'character' 
+                ? `/src/resources/cards/images/characters/${card.image}`
+                : `/src/resources/cards/images/${card.image}`;
+            const alternateImagePath = cardType === 'character'
+                ? '/src/resources/cards/images/characters/alternate/'
+                : '/src/resources/cards/images/specials/alternate/';
             
             const modal = document.createElement('div');
             modal.className = 'alternate-art-modal';
             modal.innerHTML = `
                 <div class="alternate-art-content">
-                    <h3>Select Art for ${character.name}</h3>
+                    <h3>Select Art for ${card.name}</h3>
                     <div class="alternate-art-options">
-                        <div class="art-option ${currentSelectedImage === character.image ? 'selected' : ''}" data-image="${character.image}">
-                            <img src="/src/resources/cards/images/characters/${character.image}" alt="Default Art">
+                        <div class="art-option ${currentSelectedImage === card.image ? 'selected' : ''}" data-image="${card.image}">
+                            <img src="${defaultImagePath}" alt="Default Art">
                             <span>Default Art</span>
                         </div>
-                        ${character.alternateImages.map((altImage, index) => {
-                            const imageNumber = character.alternateImages.length > 1 ? ` ${index + 1}` : '';
+                        ${card.alternateImages.map((altImage, index) => {
+                            const imageNumber = card.alternateImages.length > 1 ? ` ${index + 1}` : '';
                             return `
                                 <div class="art-option ${currentSelectedImage === altImage ? 'selected' : ''}" data-image="${altImage}">
-                                    <img src="/src/resources/cards/images/characters/alternate/${altImage}" alt="Alternate Art${imageNumber}">
+                                    <img src="${alternateImagePath}${altImage}" alt="Alternate Art${imageNumber}">
                                     <span>Alternate Art${imageNumber}</span>
                                 </div>
                             `;
@@ -10778,15 +10791,22 @@
 
         // Function to show alternate art selection for existing card
         function showAlternateArtSelectionForExistingCard(cardId, cardIndex) {
-            // Get character data from availableCardsMap
-            const character = availableCardsMap.get(`character_${cardId}`);
-            if (!character) {
-                console.error('Character not found in availableCardsMap:', cardId);
+            // Get card data from availableCardsMap (try both character and special)
+            let card = availableCardsMap.get(`character_${cardId}`);
+            let cardType = 'character';
+            
+            if (!card) {
+                card = availableCardsMap.get(`special_${cardId}`);
+                cardType = 'special';
+            }
+            
+            if (!card) {
+                console.error('Card not found in availableCardsMap:', cardId);
                 return;
             }
             
-            const cardName = character.name || character.card_name || 'Unknown';
-            showAlternateArtSelection(character, cardId, cardName, cardIndex);
+            const cardName = card.name || card.card_name || 'Unknown';
+            showAlternateArtSelection(card, cardId, cardName, cardIndex, cardType);
         }
 
         // Function to close alternate art modal
@@ -10814,7 +10834,7 @@
                 // Check if character has alternate images and none selected
                 const character = availableCardsMap.get(`character_${cardId}`);
                 if (character && character.alternateImages && character.alternateImages.length > 0 && !selectedAlternateImage) {
-                    showAlternateArtSelection(character, cardId, cardName);
+                    showAlternateArtSelection(character, cardId, cardName, null, 'character');
                     return;
                 }
                 
@@ -10838,6 +10858,15 @@
                 
                 if (currentMissionCount >= 7) {
                     showNotification('Cannot add more than 7 missions to a deck', 'error');
+                    return;
+                }
+            }
+            
+            // Check if special card has alternate images and none selected
+            if (cardType === 'special') {
+                const specialCard = availableCardsMap.get(`special_${cardId}`);
+                if (specialCard && specialCard.alternateImages && specialCard.alternateImages.length > 0 && !selectedAlternateImage) {
+                    showAlternateArtSelection(specialCard, cardId, cardName, null, 'special');
                     return;
                 }
             }

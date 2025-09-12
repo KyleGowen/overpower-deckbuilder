@@ -162,6 +162,19 @@ app.get('/api/characters/:id/alternate-images', (req, res) => {
   }
 });
 
+app.get('/api/special-cards/:id/alternate-images', (req, res) => {
+  try {
+    const specialCard = database.getSpecialCardById(req.params.id);
+    if (!specialCard) {
+      return res.status(404).json({ success: false, error: 'Special card not found' });
+    }
+    
+    res.json({ success: true, data: specialCard.alternateImages || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch alternate images' });
+  }
+});
+
 app.get('/api/locations', (req, res) => {
   try {
     const locations = database.getAllLocations();
