@@ -262,96 +262,102 @@
       "name": "Dr. Acula",
       "description": "Dracula and Sherlock Holmes found themselves unlikely allies when London was threatened by a shadowy mastermind who commanded both science and sorcery.",
       "created": "2025-09-11T03:25:02.252Z",
-      "lastModified": "2025-09-12T01:31:53.295Z",
-      "cardCount": 2,
+      "lastModified": "2025-09-12T15:43:45.338Z",
+      "cardCount": 3,
       "userId": "kyle-001"
     },
     "cards": [
       {
-        "id": "fa2eedcb-e095-4c6c-a36f-db2160416d16",
+        "id": "607f98a5-b5f6-4abf-b232-de4ddf336ea4",
         "type": "character",
         "cardId": "char_12",
         "quantity": 1,
         "selectedAlternateImage": "dracula2.webp"
       },
       {
-        "id": "3d1310ad-1c44-40bc-acd1-df214d0638fe",
+        "id": "f9b1c2c2-8c09-4885-8e98-74b6e3faaadc",
         "type": "character",
         "cardId": "char_32",
         "quantity": 1,
         "selectedAlternateImage": "Sherlock Holmes.webp"
       },
       {
-        "id": "5bf086e9-9fd3-45ed-b700-92af2d22a858",
+        "id": "0af52d49-7b51-4aec-a1dc-28b66c52834c",
         "type": "mission",
         "cardId": "mission_1",
         "quantity": 1
       },
       {
-        "id": "0f079942-e89a-4b44-a2d0-fd916a81f618",
+        "id": "4c84ef44-1154-4794-abd3-95e10434c098",
         "type": "mission",
         "cardId": "mission_2",
         "quantity": 1
       },
       {
-        "id": "9f07b865-411d-4afe-bc41-457160535343",
+        "id": "f926fb61-e6ea-43fb-bf81-08ed9b3a4994",
         "type": "mission",
         "cardId": "mission_3",
         "quantity": 1
       },
       {
-        "id": "0af213c0-3b70-4a4c-a778-5019804204ba",
+        "id": "078c449b-8b28-46af-bef8-ccfcc7dd61d4",
         "type": "mission",
         "cardId": "mission_4",
         "quantity": 1
       },
       {
-        "id": "28a74c04-39eb-4941-ba24-a1391b313a0d",
+        "id": "f1587c97-24f3-4567-af41-379b6bad6b3f",
         "type": "mission",
         "cardId": "mission_5",
         "quantity": 1
       },
       {
-        "id": "b36ad3a5-eaad-4936-8641-9936d3a1fe6f",
+        "id": "d8bd6b4d-6af7-4f1f-904b-b14a51342e21",
         "type": "mission",
         "cardId": "mission_6",
         "quantity": 1
       },
       {
-        "id": "3e450b97-6beb-4cd0-8c50-f4ae936fb823",
+        "id": "4359aaa7-3370-486b-ab45-9442b5e53978",
         "type": "mission",
         "cardId": "mission_7",
         "quantity": 1
       },
       {
-        "id": "577148cc-96f7-40e0-b351-b52be260d0ca",
+        "id": "bdb5081f-637a-4692-8dd8-d05e1d351aa0",
         "type": "event",
         "cardId": "event_4",
         "quantity": 1
       },
       {
-        "id": "37e35f08-2067-44da-b460-81696f8aa665",
+        "id": "41c69815-107b-4572-b452-54f4e6ed45b0",
         "type": "aspect",
         "cardId": "aspect_5",
         "quantity": 1
       },
       {
-        "id": "b9305c3a-5b6a-406a-8b43-e95396ccadb1",
+        "id": "c05d4b9d-425f-4d67-8db8-9af91e8a175d",
         "type": "character",
         "cardId": "char_40",
         "quantity": 1
       },
       {
-        "id": "9fad7825-f491-4c66-ad70-c8d97a8eb2e7",
+        "id": "b3eb9920-6d3b-474a-b2fc-98421f0fb9a1",
         "type": "character",
         "cardId": "char_11",
         "quantity": 1,
         "selectedAlternateImage": "dr. watson.png"
       },
       {
-        "id": "4514e3fc-f6e8-489d-b9c4-4a90852b9eb5",
+        "id": "b51a838d-58fc-4f52-a130-5fe7f49cfd3e",
         "type": "location",
         "cardId": "loc_6",
+        "quantity": 1
+      },
+      {
+        "id": "182aed57-0679-44d7-9d1c-3237eed79676",
+        "type": "teamwork",
+        "cardId": "teamwork_33",
         "quantity": 1
       }
     ]

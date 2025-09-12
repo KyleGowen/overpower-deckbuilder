@@ -2733,7 +2733,7 @@
         }
 
         .deck-card-editor-item.teamwork-card .deck-card-editor-name {
-            font-size: 1.3rem;
+            font-size: 1.0rem;
             font-weight: 400;
         }
 
@@ -8606,14 +8606,14 @@
                         cardsHtml += `
                                 <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
                                  onmouseleave="hideCardHoverModal()"
                                  ondragstart="handleDeckCardDragStart(event)"
                                  ondragend="handleDeckCardDragEnd(event)"
                                  ondragover="handleDeckCardDragOver(event)"
                                  ondrop="handleDeckCardDrop(event)">
                                 <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
@@ -8780,13 +8780,18 @@
             // Apply to teamwork cards
             teamworkCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
+                console.log('Processing teamwork card background:', bgImage);
                 if (bgImage) {
                     // Test if image loads successfully
                     const img = new Image();
                     img.onload = function() {
-                        card.style.setProperty('--bg-image', `url(${bgImage})`);
+                        console.log('Teamwork background image loaded successfully:', bgImage);
+                        // URL encode the path for CSS
+                        const encodedPath = encodeURI(bgImage);
+                        card.style.setProperty('--bg-image', `url(${encodedPath})`);
                     };
                     img.onerror = function() {
+                        console.log('Failed to load teamwork background image:', bgImage);
                         // Fallback: use default gradient without background image
                         card.style.setProperty('--bg-image', 'none');
                     };
@@ -8874,13 +8879,31 @@
                 return;
             }
             
+            console.log('showCardHoverModal called with:', imagePath, cardName);
+            
             const modal = document.getElementById('cardHoverModal');
             const image = document.getElementById('cardHoverImage');
             const caption = document.getElementById('cardHoverCaption');
             
             if (modal && image && caption) {
+                console.log('Setting image src to:', imagePath);
                 image.src = imagePath;
                 caption.textContent = cardName;
+                
+                // Add error handler to see if image fails to load
+                image.onerror = function() {
+                    console.log('Image failed to load:', imagePath);
+                };
+                image.onload = function() {
+                    console.log('Image loaded successfully:', imagePath);
+                };
+                
+                // Check what the image src actually is after setting it
+                setTimeout(() => {
+                    console.log('Image src after setting:', image.src);
+                    console.log('Image complete:', image.complete);
+                    console.log('Image naturalWidth:', image.naturalWidth);
+                }, 100);
                 
                 // Function to position modal based on mouse position
                 function positionModal(event) {
@@ -9124,8 +9147,11 @@
                     }
                 } else if (cardType === 'teamwork') {
                     // Teamwork cards use the image field (which already includes the directory)
+                    console.log('Teamwork card image path check:', card, 'image field:', card.image);
                     if (card.image) {
-                        return `/src/resources/cards/images/${card.image}`;
+                        const imagePath = `/src/resources/cards/images/${card.image}`;
+                        console.log('Teamwork image path:', imagePath);
+                        return imagePath;
                     }
                 } else if (cardType === 'power') {
                     // Power cards use the image field (which already includes the directory)
@@ -9134,11 +9160,6 @@
                     }
                 } else if (cardType === 'advanced-universe') {
                     // Advanced universe cards use the image field (which already includes the directory)
-                    if (card.image) {
-                        return `/src/resources/cards/images/${card.image}`;
-                    }
-                } else if (cardType === 'teamwork') {
-                    // Teamwork cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
                     }

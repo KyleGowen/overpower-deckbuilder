@@ -1241,7 +1241,7 @@ class InMemoryDatabase {
       '8 Intelligence_Combat + Energy_+1_+2': 'teamwork-universe/433_8_intelligence_1c_2bf.webp',
       
       // Any-Power cards
-      '6 Any-Power_Any-Power / Any-Power_0_0': 'teamwork-universe/481_7_anypower.webp',
+      '6 Any-Power_Any-Power / Any-Power_0_0': 'teamwork-universe/480_6_anypower.webp',
       '7 Any-Power_Any-Power_0_+1': 'teamwork-universe/481_7_anypower.webp'
     };
     
@@ -1368,15 +1368,15 @@ class InMemoryDatabase {
       // Brute Force: 416-424
       "teamwork-universe/416_6_brute_force_0e_1c.webp", "teamwork-universe/417_6_brute_force_0e_1i.webp", "teamwork-universe/418_6_brute_force_0c_1i.webp",
       "teamwork-universe/419_7_brute_force_1e_1c.webp", "teamwork-universe/420_7_brute_force_1e_1i.webp", "teamwork-universe/421_7_brute_force_1c_1i.webp",
-      "teamwork-universe/422_8_brute_force_1e_2c.webp", "teamwork-universe/423_8_brute_force_1e_2i.webp", "teamwork-universe/424_8_brute_force_1c_2bf.webp",
+      "teamwork-universe/422_8_brute_force_1e_2c.webp", "teamwork-universe/423_8_brute_force_1e_2i.webp", "teamwork-universe/424_8_brute_force_1e_2c.webp",
       
       // Intelligence: 425-433
-      "teamwork-universe/425_6_intelligence_0e_1c.webp", "teamwork-universe/426_6_intelligence_0e_1i.webp", "teamwork-universe/427_6_intelligence_0c_1i.webp",
-      "teamwork-universe/428_7_intelligence_1e_1c.webp", "teamwork-universe/429_7_intelligence_1e_1i.webp", "teamwork-universe/430_7_intelligence_1c_1i.webp",
-      "teamwork-universe/431_8_intelligence_1e_2c.webp", "teamwork-universe/432_8_intelligence_1e_2i.webp", "teamwork-universe/433_8_intelligence_1c_2bf.webp",
+      "teamwork-universe/425_6_intelligence_0e_1c.webp", "teamwork-universe/426_6_intelligence_0e_1bf.webp", "teamwork-universe/427_6_intelligence_0c_1bf.webp",
+      "teamwork-universe/428_7_intelligence_1e_1c.webp", "teamwork-universe/429_7_intelligence_1e_1bf.webp", "teamwork-universe/430_7_intelligence_1c_1bf.webp",
+      "teamwork-universe/431_8_intelligence_1e_2c.webp", "teamwork-universe/432_8_intelligence_1e_2bf.webp", "teamwork-universe/433_8_intelligence_1c_2bf.webp",
       
-      // Any-Power: 481
-      "teamwork-universe/481_7_anypower.webp"
+      // Any-Power: 480, 481
+      "teamwork-universe/480_6_anypower.webp", "teamwork-universe/481_7_anypower.webp"
     ];
   }
 
@@ -1478,12 +1478,12 @@ class InMemoryDatabase {
     const b = norm(type2);
     const pair = [a, b].sort().join('_');
     const map: { [key: string]: string } = {
-      'combat_energy': 'specials/344_5_energy_5_combat_4.webp',
-      'brute_force_energy': 'specials/345_5_energy_5_brute_force_4.webp',
-      'energy_intelligence': 'specials/346_5_energy_5_intelligence_4.webp',
-      'brute_force_combat': 'specials/347_5_combat_5_brute_force_4.webp',
-      'combat_intelligence': 'specials/348_5_combat_5_intelligence_4.webp',
-      'brute_force_intelligence': 'specials/349_5_brute_force_5_intelligence_4.webp'
+      'combat_energy': 'training-universe/344_5_energy_5_combat_4.webp',
+      'brute_force_energy': 'training-universe/345_5_energy_5_brute_force_4.webp',
+      'energy_intelligence': 'training-universe/346_5_energy_5_intelligence_4.webp',
+      'brute_force_combat': 'training-universe/347_5_combat_5_brute_force_4.webp',
+      'combat_intelligence': 'training-universe/348_5_combat_5_intelligence_4.webp',
+      'brute_force_intelligence': 'training-universe/349_5_brute_force_5_intelligence_4.webp'
     };
     return map[pair] || 'unknown_training.webp';
   }
@@ -1539,24 +1539,24 @@ class InMemoryDatabase {
       // Format: [ID]_[valueToUse]_[type]_[bonus].webp
       const imageMap: { [key: string]: string } = {
         // Energy cards
-        '6_energy_2': 'specials/332_6_energy_2.webp',  // Ray Gun
-        '6_energy_3': 'specials/333_6_energy_3.webp',  // Merlin's Wand
-        '7_energy_3': 'specials/334_7_energy_3.webp',  // Lightning Bolt
+        '6_energy_2': 'basic-universe/332_6_energy_2.webp',  // Ray Gun
+        '6_energy_3': 'basic-universe/333_6_energy_3.webp',  // Merlin's Wand
+        '7_energy_3': 'basic-universe/334_7_energy_3.webp',  // Lightning Bolt
         
         // Combat cards
-        '6_combat_2': 'specials/335_6_combat_2.webp',  // Flintlock
-        '6_combat_3': 'specials/336_6_combat_3.webp',  // Rapier
-        '7_combat_3': 'specials/337_7_combat_3.webp',  // Longbow
+        '6_combat_2': 'basic-universe/335_6_combat_2.webp',  // Flintlock
+        '6_combat_3': 'basic-universe/336_6_combat_3.webp',  // Rapier
+        '7_combat_3': 'basic-universe/337_7_combat_3.webp',  // Longbow
         
         // Brute Force cards
-        '6_brute_force_2': 'specials/338_6_brute_force_2.webp',  // Hyde's Serum
-        '6_brute_force_3': 'specials/339_6_brute_force_3.webp',  // Trident
-        '7_brute_force_3': 'specials/340_7_brute_force_3.webp',  // Tribuchet
+        '6_brute_force_2': 'basic-universe/338_6_brute_force_2.webp',  // Hyde's Serum
+        '6_brute_force_3': 'basic-universe/339_6_brute_force_3.webp',  // Trident
+        '7_brute_force_3': 'basic-universe/340_7_brute_force_3.webp',  // Tribuchet
         
         // Intelligence cards
-        '6_intelligence_2': 'specials/341_6_intelligence_2.webp',  // Secret Identity
-        '6_intelligence_3': 'specials/342_6_intelligence_3.webp',  // Advanced Technology
-        '7_intelligence_3': 'specials/343_7_intelligence_3.webp'   // Magic Spell
+        '6_intelligence_2': 'basic-universe/341_6_intelligence_2.webp',  // Secret Identity
+        '6_intelligence_3': 'basic-universe/342_6_intelligence_3.webp',  // Advanced Technology
+        '7_intelligence_3': 'basic-universe/343_7_intelligence_3.webp'   // Magic Spell
       };
       
       const key = `${value}_${typeLower}_${bonusValue}`;
@@ -1620,15 +1620,15 @@ class InMemoryDatabase {
   private getPowerCardImage(powerType: string, value: number): string {
     const type = powerType.toLowerCase().replace(/\s+/g, '_');
     if (type === 'any-power' || type === 'any_power') {
-      if (value === 5) return 'specials/473_5_any-power.webp';
-      if (value === 6) return 'specials/474_6_anypower.webp';
-      if (value === 7) return 'specials/475_7_anypower.webp';
-      if (value === 8) return 'specials/476_8_anypower.webp';
+      if (value === 5) return 'power-cards/473_5_any-power.webp';
+      if (value === 6) return 'power-cards/474_6_anypower.webp';
+      if (value === 7) return 'power-cards/475_7_anypower.webp';
+      if (value === 8) return 'power-cards/476_8_anypower.webp';
     }
     if (type === 'multi-power' || type === 'multi_power') {
-      if (value === 3) return 'specials/477_3_multipower.webp';
-      if (value === 4) return 'specials/478_4_multipower.webp';
-      if (value === 5) return 'specials/479_5_multipower.webp';
+      if (value === 3) return 'power-cards/477_3_multipower.webp';
+      if (value === 4) return 'power-cards/478_4_multipower.webp';
+      if (value === 5) return 'power-cards/479_5_multipower.webp';
     }
     const baseMap: { [key: string]: number } = {
       energy: 292,
