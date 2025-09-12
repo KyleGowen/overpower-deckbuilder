@@ -290,6 +290,7 @@ class InMemoryDatabase {
     // Convert card name to snake_case for intelligent matching
     const snakeCaseName = this.convertToSnakeCase(cardName);
     
+    
     // First try to find an exact match with the snake_case name
     const availableImages = this.getAvailableSpecialCardImages();
     
@@ -521,7 +522,7 @@ class InMemoryDatabase {
       "specials/059_head_of_martian_science.webp", "specials/060_protector_of_barsoom.webp", "specials/061_champions_of_barsoom.webp",
       "specials/063_all_chips_on_the_table.webp", "specials/064_blackheath_rugby_star.webp", "specials/065_british_army_surgeon.webp",
       "specials/066_english_gentleman.webp", "specials/067_not_a_bad_detective.webp", "specials/068_always_there_for_a_friend.webp",
-      "specials/070_crimson_restoration.webp", "specials/071_veil_of_deciept.webp", "specials/072_lord_of_the_vampires.webp",
+      "specials/070_crimson_restoration.webp", "specials/071_veil_of_deceit.webp", "specials/072_lord_of_the_vampires.webp",
       "specials/073_paralyzing_gaze.webp", "specials/074_to_the_last_man.webp", "specials/075_undead_flesh.webp",
       "specials/077_decapitate.webp", "specials/078_human_spine_whip.webp", "specials/079_mark_of_the_headless.webp",
       "specials/080_pumpkin_head.webp", "specials/081_relentless_hessian.webp",       "specials/082_vissage_of_terror.webp",
