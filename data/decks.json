@@ -262,118 +262,118 @@
       "name": "Dr. Acula",
       "description": "Dracula and Sherlock Holmes found themselves unlikely allies when London was threatened by a shadowy mastermind who commanded both science and sorcery.",
       "created": "2025-09-11T03:25:02.252Z",
-      "lastModified": "2025-09-12T18:22:44.971Z",
+      "lastModified": "2025-09-12T18:32:14.975Z",
       "cardCount": 6,
       "userId": "kyle-001"
     },
     "cards": [
       {
-        "id": "a5d0719b-f128-4398-9833-d87157503fd4",
+        "id": "74a4eccf-997c-4e42-900f-30af4334d64f",
         "type": "character",
         "cardId": "char_12",
         "quantity": 1,
         "selectedAlternateImage": "dracula2.webp"
       },
       {
-        "id": "96e4303c-caba-4e60-a36d-c11e0a00634f",
+        "id": "5cc0c198-7b88-4cd8-a5a0-3b68306a2e5e",
         "type": "mission",
         "cardId": "mission_1",
         "quantity": 1
       },
       {
-        "id": "e1a5f40e-5035-4c54-8764-dd663235e696",
+        "id": "50856d93-5dc1-4c07-bad5-d6626f00b645",
         "type": "mission",
         "cardId": "mission_2",
         "quantity": 1
       },
       {
-        "id": "6d327534-a6ff-4ed7-85d8-a9343e1ac6a7",
+        "id": "b4de7e90-e9d4-4784-ac43-af044cb5168c",
         "type": "mission",
         "cardId": "mission_3",
         "quantity": 1
       },
       {
-        "id": "bc1d72f5-49b1-4964-8354-5a7624020ed8",
+        "id": "b471ee40-c4b3-48f1-bc3d-87f8c7a0681d",
         "type": "mission",
         "cardId": "mission_4",
         "quantity": 1
       },
       {
-        "id": "b41b25c9-0db8-4174-a696-ea9fcc52848b",
+        "id": "66c73c4b-19a1-46d7-a217-381cebd27eac",
         "type": "mission",
         "cardId": "mission_5",
         "quantity": 1
       },
       {
-        "id": "7c2f51e3-e77f-4ae4-ae55-414144d0ef63",
+        "id": "ef5b6876-846d-4056-8871-7920c6a3c38f",
         "type": "mission",
         "cardId": "mission_6",
         "quantity": 1
       },
       {
-        "id": "1984add8-75cd-41ba-a015-47297c011182",
+        "id": "1eabdafa-7b92-4aa1-89cd-5c51ddc003e6",
         "type": "mission",
         "cardId": "mission_7",
         "quantity": 1
       },
       {
-        "id": "028288db-8fb3-4861-adb4-9f1e571ed719",
+        "id": "99e08be0-6270-4392-9a69-138626d0241c",
         "type": "event",
         "cardId": "event_4",
         "quantity": 1
       },
       {
-        "id": "66b68b98-1b96-4ab7-991a-8347b5ce7f81",
+        "id": "63296b7a-fef6-43c6-b108-13b00b972815",
         "type": "aspect",
         "cardId": "aspect_5",
         "quantity": 1
       },
       {
-        "id": "c872693d-ffd1-4fa8-b164-017a695e51ad",
+        "id": "74be119a-bf7c-4a9a-997c-8faae1267d48",
         "type": "character",
         "cardId": "char_40",
         "quantity": 1
       },
       {
-        "id": "e7cbc15e-5a4d-41a8-9d41-fddd836634bd",
+        "id": "fb629d55-06e2-4373-9b76-40e82ddb4662",
         "type": "character",
         "cardId": "char_32",
         "quantity": 1,
         "selectedAlternateImage": "Sherlock Holmes.webp"
       },
       {
-        "id": "d944bc37-dcee-4582-b08d-b2fb029ebe84",
+        "id": "7256f3fa-7aa5-4181-b701-99ddb4bf8364",
         "type": "character",
         "cardId": "char_11",
         "quantity": 1,
         "selectedAlternateImage": "dr. watson.png"
       },
       {
-        "id": "ec5f0149-6a68-428d-b1bd-bf41da8b603c",
+        "id": "802b666f-62ad-4c15-86cd-a47a3f008ca1",
         "type": "location",
         "cardId": "loc_6",
         "quantity": 1
       },
       {
-        "id": "34edb47a-10f1-4a9e-b526-f446ee8abcdf",
+        "id": "e33cb4e6-1e67-4e69-af29-a7f25359221a",
         "type": "teamwork",
         "cardId": "teamwork_33",
         "quantity": 1
       },
       {
-        "id": "bac1d14c-36ce-43ea-92b1-cf32e2b8d35c",
+        "id": "9be6a600-58e6-46be-8b3e-971177bf9809",
         "type": "teamwork",
         "cardId": "teamwork_37",
         "quantity": 1
       },
       {
-        "id": "c1ac4845-1c33-41f0-b314-ffeccb68cb5f",
+        "id": "8e2c88a8-23ca-49c7-86a1-0c954a122f28",
         "type": "teamwork",
         "cardId": "teamwork_38",
         "quantity": 1
       },
       {
-        "id": "8742f3b3-e3fc-424b-ac29-1d6b7d3823ce",
+        "id": "31421edb-48dc-42c5-ac52-b00993f9c10e",
         "type": "special",
         "cardId": "special_83",
         "quantity": 1

@@ -6663,6 +6663,7 @@
         let deckEditorCards = []; // Working copy of deck cards
         let availableCardsMap = new Map(); // Cache for available cards data
         let deckEditorExpansionState = {}; // Track expansion state of deck type sections
+        let characterGroupExpansionState = {}; // Track expansion state of character groups within special cards
         let lastAddedCardType = null; // Track which card type was just added
 
 
@@ -6930,16 +6931,22 @@
             const group = headerElement.closest('.character-group');
             const content = group.querySelector('.character-group-content');
             const icon = headerElement.querySelector('.collapse-icon');
+            const characterName = headerElement.querySelector('span').textContent.split(' (')[0]; // Extract character name
             
             if (content.classList.contains('collapsed')) {
                 // Expand
                 content.classList.remove('collapsed');
                 icon.textContent = '▼';
+                characterGroupExpansionState[characterName] = true;
             } else {
                 // Collapse
                 content.classList.add('collapsed');
                 icon.textContent = '▶';
+                characterGroupExpansionState[characterName] = false;
             }
+            
+            // Save character group expansion state
+            saveCharacterGroupExpansionState();
         }
 
         function toggleMissionSetGroup(headerElement) {
@@ -8248,6 +8255,7 @@
                     
                     // Load expansion state before displaying deck cards
                     loadDeckExpansionState();
+                    loadCharacterGroupExpansionState();
                     
                     // Display deck cards after available cards are loaded
                     await displayDeckCardsForEditing();
@@ -8425,13 +8433,18 @@
                             const characterCards = characterGroups[characterName];
                             const cardCount = characterCards.length;
                             
+                            // Check if this character group should be expanded
+                            const isExpanded = characterGroupExpansionState[characterName] === true;
+                            const collapsedClass = isExpanded ? '' : 'collapsed';
+                            const iconText = isExpanded ? '▼' : '▶';
+                            
                             cardsHtml += `
                                 <div class="character-group">
                                     <div class="character-group-header" onclick="toggleCharacterGroup(this)">
                                         <span>${characterName} (${cardCount})</span>
-                                        <span class="collapse-icon">▶</span>
+                                        <span class="collapse-icon">${iconText}</span>
                                     </div>
-                                    <div class="character-group-content collapsed">
+                                    <div class="character-group-content ${collapsedClass}">
                             `;
                             
                             characterCards.forEach(cardData => {
@@ -9125,6 +9138,37 @@
             } else {
                 console.log('No currentDeckId, using empty expansion state');
                 deckEditorExpansionState = {};
+            }
+        }
+        
+        // Save character group expansion state to localStorage
+        function saveCharacterGroupExpansionState() {
+            if (currentDeckId) {
+                console.log('Saving character group expansion state for deck:', currentDeckId, 'state:', characterGroupExpansionState);
+                localStorage.setItem(`characterGroupExpansionState_${currentDeckId}`, JSON.stringify(characterGroupExpansionState));
+            }
+        }
+        
+        // Load character group expansion state from localStorage
+        function loadCharacterGroupExpansionState() {
+            if (currentDeckId) {
+                const savedState = localStorage.getItem(`characterGroupExpansionState_${currentDeckId}`);
+                console.log('Loading character group expansion state for deck:', currentDeckId, 'saved state:', savedState);
+                if (savedState) {
+                    try {
+                        characterGroupExpansionState = JSON.parse(savedState);
+                        console.log('Loaded character group expansion state:', characterGroupExpansionState);
+                    } catch (error) {
+                        console.error('Error loading character group expansion state:', error);
+                        characterGroupExpansionState = {};
+                    }
+                } else {
+                    console.log('No saved character group expansion state found, using empty object');
+                    characterGroupExpansionState = {};
+                }
+            } else {
+                console.log('No currentDeckId, using empty character group expansion state');
+                characterGroupExpansionState = {};
             }
         }
         
