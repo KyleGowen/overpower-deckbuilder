@@ -2028,9 +2028,11 @@
         }
 
         .deck-card-editor-item.dragging {
-            opacity: 0.5;
-            transform: rotate(5deg);
+            opacity: 0.8;
+            transform: rotate(3deg) scale(1.05);
             z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #4ecdc4;
         }
 
         .deck-card-editor-item.drag-over {
@@ -2042,6 +2044,26 @@
         .deck-type-section.drag-over {
             background: rgba(78, 205, 196, 0.1);
             border-color: #4ecdc4;
+        }
+
+        .deck-card-editor-item.drag-placeholder {
+            opacity: 0.3;
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px dashed #4ecdc4;
+            transform: scale(0.95);
+        }
+
+        .deck-card-editor-item.drag-target {
+            transform: translateY(0);
+            transition: transform 0.2s ease;
+        }
+
+        .deck-card-editor-item.drag-target.drag-above {
+            transform: translateY(-10px);
+        }
+
+        .deck-card-editor-item.drag-target.drag-below {
+            transform: translateY(10px);
         }
 
         .deck-card-editor-info {
@@ -10298,27 +10320,41 @@
             addCardToEditor(cardType, cardId, cardName);
         }
 
-        // Drag and drop functionality for deck cards
+        // Enhanced drag and drop functionality for deck cards
         let draggedCardIndex = null;
         let draggedCardType = null;
+        let draggedCardElement = null;
+        let dropTargetIndex = null;
 
         function handleDeckCardDragStart(event) {
             draggedCardIndex = parseInt(event.target.dataset.index);
             draggedCardType = deckEditorCards[draggedCardIndex].type;
+            draggedCardElement = event.target;
+            
             event.target.classList.add('dragging');
             event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/html', event.target.outerHTML);
+            event.dataTransfer.setData('text/plain', draggedCardIndex.toString());
+            
+            // Add drag target classes to other cards of the same type
+            updateDragTargets();
         }
 
         function handleDeckCardDragEnd(event) {
             event.target.classList.remove('dragging');
-            draggedCardIndex = null;
-            draggedCardType = null;
             
-            // Remove drag-over classes from all elements
-            document.querySelectorAll('.deck-card-editor-item, .deck-type-section').forEach(el => {
+            // Clean up all drag classes
+            document.querySelectorAll('.deck-card-editor-item').forEach(el => {
+                el.classList.remove('drag-over', 'drag-target', 'drag-above', 'drag-below', 'drag-placeholder');
+            });
+            
+            document.querySelectorAll('.deck-type-section').forEach(el => {
                 el.classList.remove('drag-over');
             });
+            
+            draggedCardIndex = null;
+            draggedCardType = null;
+            draggedCardElement = null;
+            dropTargetIndex = null;
         }
 
         function handleDeckCardDragOver(event) {
@@ -10328,18 +10364,26 @@
             const targetCard = event.target.closest('.deck-card-editor-item');
             const targetSection = event.target.closest('.deck-type-section');
             
-            if (targetCard && targetCard !== event.target) {
-                // Remove drag-over from all cards
-                document.querySelectorAll('.deck-card-editor-item').forEach(el => {
-                    el.classList.remove('drag-over');
-                });
-                targetCard.classList.add('drag-over');
+            if (targetCard && targetCard !== draggedCardElement) {
+                const targetIndex = parseInt(targetCard.dataset.index);
+                const targetType = deckEditorCards[targetIndex].type;
+                
+                // Only allow reordering within the same card type
+                if (draggedCardType === targetType) {
+                    dropTargetIndex = targetIndex;
+                    updateDragTargets(event.clientY);
+                }
             } else if (targetSection) {
-                // Remove drag-over from all sections
-                document.querySelectorAll('.deck-type-section').forEach(el => {
-                    el.classList.remove('drag-over');
+                // Highlight the section if it contains cards of the same type
+                const sectionCards = targetSection.querySelectorAll('.deck-card-editor-item');
+                const hasMatchingType = Array.from(sectionCards).some(card => {
+                    const cardIndex = parseInt(card.dataset.index);
+                    return deckEditorCards[cardIndex].type === draggedCardType;
                 });
-                targetSection.classList.add('drag-over');
+                
+                if (hasMatchingType) {
+                    targetSection.classList.add('drag-over');
+                }
             }
         }
 
@@ -10347,26 +10391,63 @@
             event.preventDefault();
             
             const targetCard = event.target.closest('.deck-card-editor-item');
-            const targetSection = event.target.closest('.deck-type-section');
             
-            if (!targetCard && !targetSection) return;
-            
-            if (targetCard) {
-                const targetIndex = parseInt(targetCard.dataset.index);
-                const targetType = deckEditorCards[targetIndex].type;
-                
-                // Only allow reordering within the same card type
-                if (draggedCardType === targetType && draggedCardIndex !== targetIndex) {
-                    reorderDeckCards(draggedCardIndex, targetIndex);
-                }
-            } else if (targetSection) {
-                // This would be for moving between sections, but we'll keep cards in their type groups
-                // For now, just prevent the drop
+            if (targetCard && dropTargetIndex !== null && draggedCardIndex !== dropTargetIndex) {
+                reorderDeckCards(draggedCardIndex, dropTargetIndex);
             }
             
-            // Clean up drag-over classes
+            // Clean up all drag classes
             document.querySelectorAll('.deck-card-editor-item, .deck-type-section').forEach(el => {
-                el.classList.remove('drag-over');
+                el.classList.remove('drag-over', 'drag-target', 'drag-above', 'drag-below', 'drag-placeholder');
+            });
+        }
+
+        function updateDragTargets(mouseY = null) {
+            // Remove all existing drag classes
+            document.querySelectorAll('.deck-card-editor-item').forEach(el => {
+                el.classList.remove('drag-target', 'drag-above', 'drag-below', 'drag-placeholder');
+            });
+            
+            if (draggedCardIndex === null || draggedCardType === null) return;
+            
+            // Find all cards of the same type
+            const sameTypeCards = [];
+            deckEditorCards.forEach((card, index) => {
+                if (card.type === draggedCardType && index !== draggedCardIndex) {
+                    const element = document.querySelector(`[data-index="${index}"]`);
+                    if (element) {
+                        sameTypeCards.push({ index, element });
+                    }
+                }
+            });
+            
+            // Add drag target classes based on position relative to dragged card
+            sameTypeCards.forEach(({ index, element }) => {
+                element.classList.add('drag-target');
+                
+                if (dropTargetIndex !== null) {
+                    if (index === dropTargetIndex) {
+                        // Determine if we're dropping above or below based on mouse position
+                        const rect = element.getBoundingClientRect();
+                        const cardCenterY = rect.top + rect.height / 2;
+                        
+                        if (mouseY !== null && mouseY < cardCenterY) {
+                            element.classList.add('drag-above');
+                        } else if (mouseY !== null && mouseY >= cardCenterY) {
+                            element.classList.add('drag-below');
+                        } else {
+                            // Default to below if no mouse position
+                            element.classList.add('drag-below');
+                        }
+                    }
+                } else {
+                    // Show placeholder effect for all cards of the same type
+                    if (index > draggedCardIndex) {
+                        element.classList.add('drag-above');
+                    } else {
+                        element.classList.add('drag-below');
+                    }
+                }
             });
         }
 
