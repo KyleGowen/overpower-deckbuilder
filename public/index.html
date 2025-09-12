@@ -2763,6 +2763,25 @@
             z-index: 10;
         }
 
+        /* Remove One button styling */
+        .remove-one-btn {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6464;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .remove-one-btn:hover {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: #ff6464;
+            color: #ffffff;
+        }
+
 
 
         .card-categories {
@@ -8491,6 +8510,7 @@
                                         </div>
                                         <div class="deck-card-editor-actions">
                                             <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                            ${card.quantity > 1 ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
                                             ${alternateArtButton}
                                         </div>
                                     </div>
@@ -8655,6 +8675,7 @@
                                 </div>
                                 <div class="deck-card-editor-actions">
                                     <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
+                                    ${card.quantity > 1 ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
                                     ${alternateArtButton}
                                 </div>
                             </div>
@@ -9354,6 +9375,44 @@
             
             // Validate deck after removing card
             await showDeckValidation(deckEditorCards);
+        }
+
+        async function removeOneCardFromEditor(index) {
+            if (deckEditorCards[index] && deckEditorCards[index].quantity > 1) {
+                deckEditorCards[index].quantity -= 1;
+                await displayDeckCardsForEditing();
+                updateDeckEditorCardCount();
+                
+                // Update character limit status without affecting collapse state
+                updateCharacterLimitStatus();
+                
+                // Update mission limit status without affecting collapse state
+                updateMissionLimitStatus();
+                
+                // Update special cards filter if it's active
+                updateSpecialCardsFilter();
+                
+                // Update advanced universe filter if it's active
+                updateAdvancedUniverseFilter();
+                
+                // Update power cards filter if it's active
+                updatePowerCardsFilter();
+                
+                // Update basic universe filter if it's active
+                updateBasicUniverseFilter();
+                
+                // Update teamwork filter if it's active
+                updateTeamworkFilter();
+                
+                // Update training filter if it's active
+                updateTrainingFilter();
+                
+                // Update ally universe filter if it's active
+                updateAllyUniverseFilter();
+                
+                // Validate deck after removing card
+                await showDeckValidation(deckEditorCards);
+            }
         }
 
         async function removeAllMissionsFromDeck() {
