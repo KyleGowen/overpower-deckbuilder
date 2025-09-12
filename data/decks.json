@@ -262,102 +262,114 @@
       "name": "Dr. Acula",
       "description": "Dracula and Sherlock Holmes found themselves unlikely allies when London was threatened by a shadowy mastermind who commanded both science and sorcery.",
       "created": "2025-09-11T03:25:02.252Z",
-      "lastModified": "2025-09-12T15:43:45.338Z",
-      "cardCount": 3,
+      "lastModified": "2025-09-12T16:58:16.416Z",
+      "cardCount": 5,
       "userId": "kyle-001"
     },
     "cards": [
       {
-        "id": "607f98a5-b5f6-4abf-b232-de4ddf336ea4",
+        "id": "71e45824-62c2-4056-9e36-015bbe9e81a5",
         "type": "character",
         "cardId": "char_12",
         "quantity": 1,
         "selectedAlternateImage": "dracula2.webp"
       },
       {
-        "id": "f9b1c2c2-8c09-4885-8e98-74b6e3faaadc",
+        "id": "8ee38a83-53f3-4fd8-8347-a0768ede63e4",
         "type": "character",
         "cardId": "char_32",
         "quantity": 1,
         "selectedAlternateImage": "Sherlock Holmes.webp"
       },
       {
-        "id": "0af52d49-7b51-4aec-a1dc-28b66c52834c",
+        "id": "6e67a5aa-1a6b-4d06-91c3-6838f594204b",
         "type": "mission",
         "cardId": "mission_1",
         "quantity": 1
       },
       {
-        "id": "4c84ef44-1154-4794-abd3-95e10434c098",
+        "id": "dfcbedaa-ba19-49b4-b02d-52de25c748d4",
         "type": "mission",
         "cardId": "mission_2",
         "quantity": 1
       },
       {
-        "id": "f926fb61-e6ea-43fb-bf81-08ed9b3a4994",
+        "id": "56756a71-8b52-4674-b1f9-7e61ad5a0a4a",
         "type": "mission",
         "cardId": "mission_3",
         "quantity": 1
       },
       {
-        "id": "078c449b-8b28-46af-bef8-ccfcc7dd61d4",
+        "id": "992d4f02-9f69-4dfd-aaec-1a359ba67999",
         "type": "mission",
         "cardId": "mission_4",
         "quantity": 1
       },
       {
-        "id": "f1587c97-24f3-4567-af41-379b6bad6b3f",
+        "id": "8256ba23-5bf8-4df5-9fad-873e49363ddc",
         "type": "mission",
         "cardId": "mission_5",
         "quantity": 1
       },
       {
-        "id": "d8bd6b4d-6af7-4f1f-904b-b14a51342e21",
+        "id": "5da9aced-1b0a-46ab-9218-78e72ae09aed",
         "type": "mission",
         "cardId": "mission_6",
         "quantity": 1
       },
       {
-        "id": "4359aaa7-3370-486b-ab45-9442b5e53978",
+        "id": "cb53c147-8a45-41fe-8a25-70838e59dab8",
         "type": "mission",
         "cardId": "mission_7",
         "quantity": 1
       },
       {
-        "id": "bdb5081f-637a-4692-8dd8-d05e1d351aa0",
+        "id": "7e5be0ae-fd55-4043-9f3a-87e173ffa05e",
         "type": "event",
         "cardId": "event_4",
         "quantity": 1
       },
       {
-        "id": "41c69815-107b-4572-b452-54f4e6ed45b0",
+        "id": "dce782ea-30bc-4133-8076-922e09dd96b4",
         "type": "aspect",
         "cardId": "aspect_5",
         "quantity": 1
       },
       {
-        "id": "c05d4b9d-425f-4d67-8db8-9af91e8a175d",
+        "id": "da23c3ca-f30d-4521-b875-80addbb1b24e",
         "type": "character",
         "cardId": "char_40",
         "quantity": 1
       },
       {
-        "id": "b3eb9920-6d3b-474a-b2fc-98421f0fb9a1",
+        "id": "f04d465c-7b52-4e70-8719-c52e87596333",
         "type": "character",
         "cardId": "char_11",
         "quantity": 1,
         "selectedAlternateImage": "dr. watson.png"
       },
       {
-        "id": "b51a838d-58fc-4f52-a130-5fe7f49cfd3e",
+        "id": "7ef3a072-9119-4175-b81b-3f34334473e5",
         "type": "location",
         "cardId": "loc_6",
         "quantity": 1
       },
       {
-        "id": "182aed57-0679-44d7-9d1c-3237eed79676",
+        "id": "a47384b7-fd98-4799-9440-f47960c6b625",
         "type": "teamwork",
         "cardId": "teamwork_33",
+        "quantity": 1
+      },
+      {
+        "id": "5d863c99-593c-4890-a298-618645f6ccbb",
+        "type": "teamwork",
+        "cardId": "teamwork_37",
+        "quantity": 1
+      },
+      {
+        "id": "029c8c14-c55b-42c7-bfd9-7c1b8123f18d",
+        "type": "teamwork",
+        "cardId": "teamwork_38",
         "quantity": 1
       }
     ]

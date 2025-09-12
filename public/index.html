@@ -2031,8 +2031,15 @@
             opacity: 1;
             transform: rotate(3deg) scale(1.05);
             z-index: 1000;
+        }
+
+        /* Available cards drop zone styling */
+        .card-category-content.available-drop-zone {
+            background: rgba(78, 205, 196, 0.2);
+            border: 2px dashed #4ecdc4;
+            border-radius: 8px;
+            transition: all 0.2s ease;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            border-color: #4ecdc4;
         }
 
         .deck-card-editor-item.drag-over {
@@ -8919,43 +8926,64 @@
                     if (cardElement) {
                         // Handle deck editor cards
                         if (cardElement.classList.contains('deck-card-editor-item')) {
-                            const actionsContainer = cardElement.querySelector('.deck-card-editor-actions');
-                            if (actionsContainer) {
-                                const rect = actionsContainer.getBoundingClientRect();
-                                
-                                // If mouse is near the Remove button area, position modal to avoid it
-                                if (event.clientX > rect.left - 100 && event.clientY > rect.top - 100) {
-                                    // Try positioning to the left first with larger offset
-                                    x = event.clientX - modalWidth - 50;
-                                    y = event.clientY + 50;
-                                    
-                                    // If that would go off screen, try positioning below and to the right
-                                    if (x < 10) {
-                                        x = event.clientX + 50;
-                                        y = event.clientY + modalHeight + 50;
-                                    }
-                                }
-                            }
-                            
-                            // Also check for any buttons in the deck editor card element
+                            // Check for any buttons in the deck editor card element first
                             const buttons = cardElement.querySelectorAll('.quantity-btn, .remove-all-btn');
+                            let buttonAvoided = false;
+                            
                             buttons.forEach(button => {
                                 const buttonRect = button.getBoundingClientRect();
                                 
-                                // If modal would overlap with button, move it away
-                                if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
-                                    y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
-                                    // Try positioning to the left of the button with larger offset
-                                    x = buttonRect.left - modalWidth - 50;
+                                // Check if mouse is near the button area (larger detection zone)
+                                const buffer = 120; // Larger buffer zone for detection
+                                if (event.clientX > buttonRect.left - buffer && event.clientX < buttonRect.right + buffer &&
+                                    event.clientY > buttonRect.top - buffer && event.clientY < buttonRect.bottom + buffer) {
+                                    
+                                    // Position modal to the left of the button with large offset
+                                    x = buttonRect.left - modalWidth - 80;
                                     y = buttonRect.top - modalHeight / 2;
                                     
-                                    // If that goes off screen, try positioning below with larger offset
+                                    // If that goes off screen, try positioning below with large offset
                                     if (x < 10) {
-                                        x = buttonRect.left + 50;
-                                        y = buttonRect.bottom + 50;
+                                        x = buttonRect.right + 80;
+                                        y = buttonRect.top - modalHeight / 2;
                                     }
+                                    
+                                    // If still off screen, try positioning above
+                                    if (y < 10) {
+                                        x = buttonRect.left - modalWidth / 2;
+                                        y = buttonRect.top - modalHeight - 80;
+                                    }
+                                    
+                                    // If still off screen, try positioning to the right
+                                    if (x + modalWidth > window.innerWidth - 10) {
+                                        x = buttonRect.left - modalWidth - 80;
+                                        y = buttonRect.bottom + 80;
+                                    }
+                                    
+                                    buttonAvoided = true;
                                 }
                             });
+                            
+                            // If no button was avoided, use default positioning but check for overlap
+                            if (!buttonAvoided) {
+                                buttons.forEach(button => {
+                                    const buttonRect = button.getBoundingClientRect();
+                                    
+                                    // If modal would overlap with button, move it away
+                                    if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
+                                        y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
+                                        // Try positioning to the left of the button with larger offset
+                                        x = buttonRect.left - modalWidth - 80;
+                                        y = buttonRect.top - modalHeight / 2;
+                                        
+                                        // If that goes off screen, try positioning below with larger offset
+                                        if (x < 10) {
+                                            x = buttonRect.right + 80;
+                                            y = buttonRect.bottom + 80;
+                                        }
+                                    }
+                                });
+                            }
                         }
                         
                         // Handle available cards (card-item)
@@ -10219,7 +10247,10 @@
                                                 <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
                                         </div>
-                                        <div class="card-category-content ${collapsedClass}">
+                                        <div class="card-category-content ${collapsedClass}" 
+                                             ondragover="handleAvailableCardDragOver(event)" 
+                                             ondragleave="handleAvailableCardDragLeave(event)"
+                                             ondrop="handleAvailableCardDrop(event)">
                                             ${cardsHtml}
                                         </div>
                                     </div>
@@ -10236,7 +10267,10 @@
                                                 <span class="collapse-icon">${collapseIcon}</span>
                                             </div>
                                         </div>
-                                        <div class="card-category-content ${collapsedClass}">
+                                        <div class="card-category-content ${collapsedClass}" 
+                                             ondragover="handleAvailableCardDragOver(event)" 
+                                             ondragleave="handleAvailableCardDragLeave(event)"
+                                             ondrop="handleAvailableCardDrop(event)">
                                             ${cardsHtml}
                                         </div>
                                     </div>
@@ -10504,6 +10538,62 @@
             document.querySelectorAll('.drag-space').forEach(el => {
                 el.remove();
             });
+        }
+
+        // Handle drag over available cards section (for removing cards from deck)
+        function handleAvailableCardDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            
+            // Add visual feedback to show this is a drop zone
+            const targetSection = event.target.closest('.card-category-content');
+            if (targetSection) {
+                targetSection.classList.add('available-drop-zone');
+            }
+        }
+
+        // Handle drag leave from available cards section
+        function handleAvailableCardDragLeave(event) {
+            // Only remove the visual feedback if we're actually leaving the section
+            const targetSection = event.target.closest('.card-category-content');
+            const relatedTarget = event.relatedTarget;
+            
+            if (targetSection && (!relatedTarget || !targetSection.contains(relatedTarget))) {
+                targetSection.classList.remove('available-drop-zone');
+            }
+        }
+
+        // Handle drop on available cards section (remove card from deck)
+        function handleAvailableCardDrop(event) {
+            event.preventDefault();
+            
+            // Remove visual feedback
+            const targetSection = event.target.closest('.card-category-content');
+            if (targetSection) {
+                targetSection.classList.remove('available-drop-zone');
+            }
+            
+            // Check if we have a valid dragged card from deck content
+            if (draggedCardIndex !== null && draggedCardIndex >= 0 && draggedCardIndex < deckEditorCards.length) {
+                // Remove the card from the deck
+                deckEditorCards.splice(draggedCardIndex, 1);
+                
+                // Refresh the display
+                displayDeckCardsForEditing();
+                updateDeckEditorCardCount();
+                
+                // Update character limit status
+                updateCharacterLimitStatus();
+                
+                console.log('Card removed from deck via drag to available cards');
+            }
+            
+            // Clean up
+            draggedCardIndex = null;
+            draggedCardType = null;
+            draggedCardElement = null;
+            dropTargetIndex = null;
+            dropPosition = null;
         }
 
         function updateDragLayout() {
