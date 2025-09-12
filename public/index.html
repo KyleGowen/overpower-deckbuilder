@@ -8870,6 +8870,7 @@
         function showCardHoverModal(imagePath, cardName) {
             // Don't show hover modal while dragging
             if (isDragging) {
+                console.log('Hover modal blocked - isDragging:', isDragging);
                 return;
             }
             
@@ -9006,19 +9007,20 @@
 
         // Hide card hover modal
         function hideCardHoverModal() {
-            // Don't hide hover modal while dragging (it shouldn't be shown anyway)
-            if (isDragging) {
-                return;
-            }
+            // Always hide the modal, regardless of drag state
+            console.log('hideCardHoverModal called');
             
             const modal = document.getElementById('cardHoverModal');
             if (modal) {
+                console.log('Modal found, hiding it');
                 // Remove mousemove listener
                 if (modal._mouseMoveHandler) {
                     document.removeEventListener('mousemove', modal._mouseMoveHandler);
                     modal._mouseMoveHandler = null;
                 }
                 modal.style.display = 'none';
+            } else {
+                console.log('Modal not found!');
             }
         }
 
@@ -10363,11 +10365,15 @@
             draggedCardElement = event.target;
             isDragging = true;
             
+            // Hide any existing hover modal immediately
+            console.log('About to hide modal in drag start');
+            hideCardHoverModal();
+            
             event.target.classList.add('dragging');
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', draggedCardIndex.toString());
             
-            console.log('Drag started:', draggedCardIndex, draggedCardType);
+            console.log('Drag started:', draggedCardIndex, draggedCardType, 'isDragging set to:', isDragging);
             
             // Update the visual layout
             updateDragLayout();
@@ -10378,6 +10384,8 @@
             event.target.style.display = '';
             event.target.classList.remove('dragging');
             isDragging = false;
+            
+            console.log('Drag ended - isDragging set to:', isDragging);
             
             // Clean up all drag classes and spaces
             document.querySelectorAll('.deck-card-editor-item').forEach(el => {
@@ -10410,6 +10418,13 @@
             
             if (targetCard && targetCard !== draggedCardElement) {
                 const targetIndex = parseInt(targetCard.dataset.index);
+                
+                // Check if targetIndex is valid and card exists
+                if (isNaN(targetIndex) || !deckEditorCards[targetIndex]) {
+                    console.log('Invalid target index:', targetIndex, 'deckEditorCards length:', deckEditorCards.length);
+                    return;
+                }
+                
                 const targetType = deckEditorCards[targetIndex].type;
                 
                 console.log('Drag over card:', targetIndex, targetType, 'dragged type:', draggedCardType);
@@ -10476,7 +10491,7 @@
             // Find all cards of the same type
             const sameTypeCards = [];
             deckEditorCards.forEach((card, index) => {
-                if (card.type === draggedCardType && index !== draggedCardIndex) {
+                if (card && card.type === draggedCardType && index !== draggedCardIndex) {
                     const element = document.querySelector(`[data-index="${index}"]`);
                     if (element) {
                         sameTypeCards.push({ index, element });

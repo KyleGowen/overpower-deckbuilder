@@ -258,46 +258,102 @@
   },
   {
     "metadata": {
-      "id": "898e62fa-c01e-4a13-be83-eb02b4aebfe7",
-      "name": "MyNewDeck",
-      "description": "This\nis\na\ndescription!",
-      "created": "2025-09-10T00:29:41.827Z",
-      "lastModified": "2025-09-10T07:46:37.321Z",
-      "cardCount": 0,
+      "id": "74eef658-877d-4bdb-bb35-a6cf7c289301",
+      "name": "Dr. Acula",
+      "description": "Dracula and Sherlock Holmes found themselves unlikely allies when London was threatened by a shadowy mastermind who commanded both science and sorcery.",
+      "created": "2025-09-11T03:25:02.252Z",
+      "lastModified": "2025-09-12T01:31:53.295Z",
+      "cardCount": 2,
       "userId": "kyle-001"
     },
     "cards": [
       {
-        "id": "daa76c62-4ff5-4cf0-b54e-c460482a8140",
-        "type": "character",
-        "cardId": "char_33",
-        "quantity": 1
-      },
-      {
-        "id": "577a7ea7-f73f-4fd4-94c6-8ae82e861081",
-        "type": "character",
-        "cardId": "char_32",
-        "quantity": 1
-      },
-      {
-        "id": "66fd5ef4-77d8-4704-8de3-ca4e13402e58",
+        "id": "fa2eedcb-e095-4c6c-a36f-db2160416d16",
         "type": "character",
         "cardId": "char_12",
         "quantity": 1,
         "selectedAlternateImage": "dracula2.webp"
+      },
+      {
+        "id": "3d1310ad-1c44-40bc-acd1-df214d0638fe",
+        "type": "character",
+        "cardId": "char_32",
+        "quantity": 1,
+        "selectedAlternateImage": "Sherlock Holmes.webp"
+      },
+      {
+        "id": "5bf086e9-9fd3-45ed-b700-92af2d22a858",
+        "type": "mission",
+        "cardId": "mission_1",
+        "quantity": 1
+      },
+      {
+        "id": "0f079942-e89a-4b44-a2d0-fd916a81f618",
+        "type": "mission",
+        "cardId": "mission_2",
+        "quantity": 1
+      },
+      {
+        "id": "9f07b865-411d-4afe-bc41-457160535343",
+        "type": "mission",
+        "cardId": "mission_3",
+        "quantity": 1
+      },
+      {
+        "id": "0af213c0-3b70-4a4c-a778-5019804204ba",
+        "type": "mission",
+        "cardId": "mission_4",
+        "quantity": 1
+      },
+      {
+        "id": "28a74c04-39eb-4941-ba24-a1391b313a0d",
+        "type": "mission",
+        "cardId": "mission_5",
+        "quantity": 1
+      },
+      {
+        "id": "b36ad3a5-eaad-4936-8641-9936d3a1fe6f",
+        "type": "mission",
+        "cardId": "mission_6",
+        "quantity": 1
+      },
+      {
+        "id": "3e450b97-6beb-4cd0-8c50-f4ae936fb823",
+        "type": "mission",
+        "cardId": "mission_7",
+        "quantity": 1
+      },
+      {
+        "id": "577148cc-96f7-40e0-b351-b52be260d0ca",
+        "type": "event",
+        "cardId": "event_4",
+        "quantity": 1
+      },
+      {
+        "id": "37e35f08-2067-44da-b460-81696f8aa665",
+        "type": "aspect",
+        "cardId": "aspect_5",
+        "quantity": 1
+      },
+      {
+        "id": "b9305c3a-5b6a-406a-8b43-e95396ccadb1",
+        "type": "character",
+        "cardId": "char_40",
+        "quantity": 1
+      },
+      {
+        "id": "9fad7825-f491-4c66-ad70-c8d97a8eb2e7",
+        "type": "character",
+        "cardId": "char_11",
+        "quantity": 1,
+        "selectedAlternateImage": "dr. watson.png"
+      },
+      {
+        "id": "4514e3fc-f6e8-489d-b9c4-4a90852b9eb5",
+        "type": "location",
+        "cardId": "loc_6",
+        "quantity": 1
       }
     ]
-  },
-  {
-    "metadata": {
-      "id": "c948f5b4-76fe-432b-b0ac-83f6e4fd77d8",
-      "name": "Third Deck",
-      "description": "",
-      "created": "2025-09-10T00:30:23.226Z",
-      "lastModified": "2025-09-10T00:30:23.226Z",
-      "cardCount": 0,
-      "userId": "kyle-001"
-    },
-    "cards": []
   }
 ]
