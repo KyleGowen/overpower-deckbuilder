@@ -10355,8 +10355,7 @@
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', draggedCardIndex.toString());
             
-            // Hide the dragged card from the list temporarily
-            event.target.style.display = 'none';
+            console.log('Drag started:', draggedCardIndex, draggedCardType);
             
             // Update the visual layout
             updateDragLayout();
@@ -10400,6 +10399,8 @@
                 const targetIndex = parseInt(targetCard.dataset.index);
                 const targetType = deckEditorCards[targetIndex].type;
                 
+                console.log('Drag over card:', targetIndex, targetType, 'dragged type:', draggedCardType);
+                
                 // Only allow reordering within the same card type
                 if (draggedCardType === targetType) {
                     // Determine drop position based on mouse position
@@ -10409,6 +10410,8 @@
                     
                     dropTargetIndex = targetIndex;
                     dropPosition = mouseY < cardCenterY ? 'above' : 'below';
+                    
+                    console.log('Drop position:', dropPosition, 'target:', dropTargetIndex);
                     
                     updateDragLayout();
                 }
@@ -10429,6 +10432,8 @@
         function handleDeckCardDrop(event) {
             event.preventDefault();
             
+            console.log('Drop event:', dropTargetIndex, draggedCardIndex, dropPosition);
+            
             if (dropTargetIndex !== null && draggedCardIndex !== dropTargetIndex) {
                 // Calculate the actual target index based on drop position
                 let actualTargetIndex = dropTargetIndex;
@@ -10436,6 +10441,7 @@
                     actualTargetIndex = dropTargetIndex + 1;
                 }
                 
+                console.log('Reordering from', draggedCardIndex, 'to', actualTargetIndex);
                 reorderDeckCards(draggedCardIndex, actualTargetIndex);
             }
             
