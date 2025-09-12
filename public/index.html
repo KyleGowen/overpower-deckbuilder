@@ -2757,29 +2757,27 @@
             bottom: 8px;
             right: 8px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 0.5rem;
-            align-items: flex-end;
+            align-items: center;
             z-index: 10;
         }
 
-        /* Remove One button styling */
+        /* Remove One button styling - exactly matches quantity-btn */
         .remove-one-btn {
-            background: rgba(255, 100, 100, 0.2);
-            color: #ff6464;
-            border: 1px solid rgba(255, 100, 100, 0.3);
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 3.3px;
+            padding: 3.3px 6.6px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
         }
 
         .remove-one-btn:hover {
-            background: rgba(255, 100, 100, 0.3);
-            border-color: #ff6464;
-            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
         }
 
 
@@ -8509,8 +8507,8 @@
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
-                                            <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                             ${card.quantity > 1 ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
+                                            <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                             ${alternateArtButton}
                                         </div>
                                     </div>
@@ -8674,8 +8672,8 @@
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
-                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                     ${card.quantity > 1 ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
+                                    <button class="quantity-btn" onclick="removeCardFromEditor(${index})">Remove</button>
                                     ${alternateArtButton}
                                 </div>
                             </div>
