@@ -2028,7 +2028,7 @@
         }
 
         .deck-card-editor-item.dragging {
-            opacity: 0.8;
+            opacity: 1;
             transform: rotate(3deg) scale(1.05);
             z-index: 1000;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -8868,6 +8868,11 @@
         
         // Show card hover modal
         function showCardHoverModal(imagePath, cardName) {
+            // Don't show hover modal while dragging
+            if (isDragging) {
+                return;
+            }
+            
             const modal = document.getElementById('cardHoverModal');
             const image = document.getElementById('cardHoverImage');
             const caption = document.getElementById('cardHoverCaption');
@@ -9001,6 +9006,11 @@
 
         // Hide card hover modal
         function hideCardHoverModal() {
+            // Don't hide hover modal while dragging (it shouldn't be shown anyway)
+            if (isDragging) {
+                return;
+            }
+            
             const modal = document.getElementById('cardHoverModal');
             if (modal) {
                 // Remove mousemove listener
@@ -10345,11 +10355,13 @@
         let draggedCardElement = null;
         let dropTargetIndex = null;
         let dropPosition = null; // 'above' or 'below'
+        let isDragging = false; // Track if currently dragging
 
         function handleDeckCardDragStart(event) {
             draggedCardIndex = parseInt(event.target.dataset.index);
             draggedCardType = deckEditorCards[draggedCardIndex].type;
             draggedCardElement = event.target;
+            isDragging = true;
             
             event.target.classList.add('dragging');
             event.dataTransfer.effectAllowed = 'move';
@@ -10365,6 +10377,7 @@
             // Restore the dragged card
             event.target.style.display = '';
             event.target.classList.remove('dragging');
+            isDragging = false;
             
             // Clean up all drag classes and spaces
             document.querySelectorAll('.deck-card-editor-item').forEach(el => {
