@@ -70,5 +70,17 @@
     "userId": "kyle-001",
     "username": "kyle",
     "expiresAt": "2025-09-12T18:53:19.002Z"
+  },
+  {
+    "sessionId": "sess_ajk9g2fac_mfh752df",
+    "userId": "kyle-001",
+    "username": "kyle",
+    "expiresAt": "2025-09-12T20:54:23.811Z"
+  },
+  {
+    "sessionId": "sess_sfvy6nkez_mfhg2h3o",
+    "userId": "kyle-001",
+    "username": "kyle",
+    "expiresAt": "2025-09-13T01:04:19.476Z"
   }
 ]

@@ -296,6 +296,12 @@ class InMemoryDatabase {
       console.log(`  Snake case: ${snakeCaseName}`);
     }
     
+    // Debug Merlin's Magic card
+    if (cardName.includes('Merlin') || cardName.includes('merlin')) {
+      console.log(`🔍 Debugging Merlin card: ${cardName}`);
+      console.log(`  Snake case: ${snakeCaseName}`);
+    }
+    
     // First try to find an exact match with the snake_case name
     const availableImages = this.getAvailableSpecialCardImages();
     

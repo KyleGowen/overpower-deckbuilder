@@ -2959,7 +2959,9 @@
             margin-left: auto;
             margin-right: 8px;
             flex-shrink: 0;
+            position: relative;
         }
+        
 
         .card-item-plus:hover {
             background: rgba(78, 205, 196, 0.3);
@@ -6614,7 +6616,7 @@
                         <div class="card-result-type">${formatCardType(card.type)}</div>
                     </div>
                     <button class="add-card-btn" onclick="addCardToDeck('${card.type}', '${card.id}')">
-                        Add to Deck
+                        ${card.type === 'character' ? 'Add to Deck' : 'Add to Deck (+)'}
                     </button>
                 </div>
             `).join('');
@@ -8463,14 +8465,14 @@
                                 cardsHtml += `
                                     <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
                                          data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          ondragstart="handleDeckCardDragStart(event)"
                                          ondragend="handleDeckCardDragEnd(event)"
                                          ondragover="handleDeckCardDragOver(event)"
                                          ondrop="handleDeckCardDrop(event)">
                                         <div class="deck-card-editor-info">
-                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
+                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -8626,14 +8628,14 @@
                         cardsHtml += `
                                 <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
                                  ondragstart="handleDeckCardDragStart(event)"
                                  ondragend="handleDeckCardDragEnd(event)"
                                  ondragover="handleDeckCardDragOver(event)"
                                  ondrop="handleDeckCardDrop(event)">
                                 <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
@@ -9718,7 +9720,7 @@
                                              draggable="${!isCharacterLimitReached}" 
                                              data-type="${category.type}" 
                                              data-id="${card.id}"
-                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                              data-name="${card[category.nameField]}"
@@ -9727,7 +9729,7 @@
                                             <div class="character-name">${card[category.nameField]}</div>
                                             <div class="character-stats">${statsHtml}</div>
                                             </div>
-                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -9764,13 +9766,13 @@
                                              draggable="${!isMissionLimitReached}" 
                                              data-type="${category.type}" 
                                              data-id="${card.id}"
-                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                              data-name="${card[category.nameField]}"
                                              title="${disabledTitle}">
                                             <div class="card-item-content">${card[category.nameField]}</div>
-                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -9812,13 +9814,13 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `).join('');
                                 
@@ -9856,12 +9858,12 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `).join('');
                                 
@@ -9900,12 +9902,12 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          onclick="handleCardClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')"
                                          data-name="${card[category.nameField]}">
                                         <div class="card-item-content">${card[category.nameField]}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `).join('');
                                 
@@ -9967,7 +9969,7 @@
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
                                             <div class="card-item-content">${summary}</div>
-                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -9997,7 +9999,7 @@
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -10014,7 +10016,7 @@
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -10031,7 +10033,7 @@
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
-                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
+                                        <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                     </div>
                                 `;
                             }).join('');
@@ -10080,7 +10082,7 @@
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
                                             <div class="card-item-content">${summary}</div>
-                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')">+</div>
+                                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                         </div>
                                     `;
                                 }).join('');
@@ -10111,11 +10113,11 @@
                                      draggable="true" 
                                      data-type="${category.type}" 
                                      data-id="${card.id}"
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${card.name.replace(/'/g, "\\'")}')"
                                      onmouseleave="hideCardHoverModal()"
                                      data-name="${card[category.nameField]}">
                                     <div class="card-item-content">${card[category.nameField]}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `).join('');
                         }
@@ -10851,6 +10853,10 @@
                 if (selectedAlternateImage && cardType === 'character') {
                     deckEditorCards[existingCardIndex].selectedAlternateImage = selectedAlternateImage;
                 }
+                // Show notification for adding additional copies
+                if (cardType !== 'character') {
+                    showNotification(`Added another copy of ${cardName}`, 'success');
+                }
             } else {
                 // Add new card
                 const newCard = {
@@ -10864,6 +10870,11 @@
                     newCard.selectedAlternateImage = selectedAlternateImage;
                 }
                 deckEditorCards.push(newCard);
+                
+                // Show notification for adding first copy
+                if (cardType !== 'character') {
+                    showNotification(`Added ${cardName} to deck`, 'success');
+                }
             }
             
             // Set expansion state: expand only the added card type, collapse all others
