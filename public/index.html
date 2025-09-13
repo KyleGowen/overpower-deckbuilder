@@ -3011,6 +3011,80 @@
             font-size: 0.9rem;
         }
         
+        /* Ally universe cards in deck editor */
+        .deck-card-editor-item[data-type="ally_universe"] {
+            position: relative;
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            border: 2px solid #2C7A7B;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 4px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .deck-card-editor-item[data-type="ally_universe"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 125% auto;
+            background-position: right top;
+            background-repeat: no-repeat;
+            border-radius: 6px;
+            z-index: 1;
+        }
+        
+        .deck-card-editor-item[data-type="ally_universe"] > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Basic universe cards in deck editor */
+        .deck-card-editor-item[data-type="basic_universe"] {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #5A67D8;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 4px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .deck-card-editor-item[data-type="basic_universe"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 125% auto;
+            background-position: right top;
+            background-repeat: no-repeat;
+            border-radius: 6px;
+            z-index: 1;
+        }
+        
+        .deck-card-editor-item[data-type="basic_universe"] > * {
+            position: relative;
+            z-index: 2;
+        }
+        
         .character-card {
             padding: 16px;
             background: rgba(78, 205, 196, 0.15);
@@ -6070,10 +6144,8 @@
                             if (character && character.image) {
                                 // Use getCardImagePath to handle alternate images
                                 const imagePath = getCardImagePath(character, 'character', card.selectedAlternateImage);
-                                console.log('Character:', character.name, 'Image path:', imagePath);
                                 return `<div class="deck-character-card-display" style="background-image: url('${imagePath}')" title="${character.name}"></div>`;
                             } else {
-                                console.log('Character not found or no image for card:', card.cardId, 'Character:', character);
                                 return `<div class="deck-character-card-display empty">?</div>`;
                             }
                         }).join('');
@@ -6724,7 +6796,16 @@
                 }
                 
                 // Track "One Per Deck" cards
-                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                 if (availableCard && availableCard.one_per_deck) {
                     const cardKey = `${card.type}_${card.cardId}`;
                     onePerDeckCards[cardKey] = (onePerDeckCards[cardKey] || 0) + 1;
@@ -6746,7 +6827,16 @@
             // Check threat level (characters + locations)
             let totalThreat = 0;
             characterCards.forEach(card => {
-                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                 if (availableCard && availableCard.threat_level) {
                     totalThreat += availableCard.threat_level;
                 }
@@ -6755,7 +6845,16 @@
             // Add location threat levels
             const locationCards = deckCards.filter(card => card.type === 'location');
             locationCards.forEach(card => {
-                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                 if (availableCard && availableCard.threat_level) {
                     totalThreat += availableCard.threat_level;
                 }
@@ -6775,14 +6874,32 @@
             
             // Check character special card restrictions
             const characterNames = characterCards.map(card => {
-                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                 return availableCard ? availableCard.name || availableCard.card_name : 'Unknown';
             });
             
             deckCards.forEach(card => {
                 if (card.type === 'special_card' || card.type === 'advanced_universe' || card.type === 'teamwork' || 
                     card.type === 'ally_universe' || card.type === 'training' || card.type === 'basic_universe') {
-                    const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                     if (availableCard && availableCard.character && !characterNames.includes(availableCard.character)) {
                         warnings.push(`"${availableCard.name || availableCard.card_name}" requires character "${availableCard.character}" in your team`);
                     }
@@ -7097,16 +7214,9 @@
             const deckCharacterCards = deckEditorCards.filter(card => card.type === 'character');
             const deckCharacterNames = deckCharacterCards.map(card => {
                 const characterName = characterMap[card.cardId];
-                console.log(`Mapping cardId ${card.cardId} to character name: ${characterName}`);
                 return characterName;
             }).filter(name => name); // Remove any undefined names
             
-            console.log('=== FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck character cards:', deckCharacterCards);
-            console.log('Deck character names:', deckCharacterNames);
-            console.log('Character map:', characterMap);
-            console.log('Found', characterGroups.length, 'character groups');
             
             // First, collect all groups and sort them to put "Any Character" at the top
             const groupsArray = Array.from(characterGroups);
@@ -7123,17 +7233,14 @@
             sortedGroups.forEach((group, index) => {
                 const header = group.querySelector('.character-group-header span');
                 if (!header) {
-                    console.log(`Group ${index}: No header found`);
                     return;
                 }
                 
                 const characterName = header.textContent.split(' (')[0];
-                console.log(`Group ${index}: "${characterName}"`);
                 
                 if (isChecked) {
                     // Always show "Any Character" group
                     if (characterName === 'Any Character') {
-                        console.log(`  ✓ Any Character - always shown`);
                         group.style.display = 'block';
                         return;
                     }
@@ -7142,32 +7249,26 @@
                     const isInDeck = deckCharacterNames.some(deckName => {
                         // Exact match
                         if (deckName === characterName) {
-                            console.log(`  ✓ Exact match: "${deckName}" === "${characterName}"`);
                             return true;
                         }
                         
                         // Handle special cases like "Angry Mob" vs "Angry Mob (Middle Ages)"
                         const deckNameClean = deckName.split(' (')[0];
                         if (deckNameClean === characterName) {
-                            console.log(`  ✓ Clean match: "${deckNameClean}" === "${characterName}"`);
                             return true;
                         }
                         
                         // Handle partial matches (e.g., "Angry Mob (Middle Ages)" should match "Angry Mob")
                         if (deckName.includes(characterName) || characterName.includes(deckName)) {
-                            console.log(`  ✓ Partial match: "${deckName}" includes "${characterName}" or vice versa`);
                             return true;
                         }
                         
-                        console.log(`  ✗ No match: "${deckName}" vs "${characterName}"`);
                         return false;
                     });
                     
-                    console.log(`  Result: ${isInDeck ? 'SHOW' : 'HIDE'}`);
                     group.style.display = isInDeck ? 'block' : 'none';
                 } else {
                     // Show all character groups
-                    console.log(`  Result: SHOW (filter off)`);
                     group.style.display = 'block';
                 }
             });
@@ -7179,7 +7280,6 @@
                     container.appendChild(group);
                 });
             }
-            console.log('=== END FILTER DEBUG ===');
         }
         
         // Update deck editor card count display
@@ -7200,17 +7300,12 @@
 
         // Update special cards filter when deck changes
         function updateSpecialCardsFilter() {
-            console.log('updateSpecialCardsFilter called');
-            console.log('Current deckEditorCards:', deckEditorCards);
             const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
             if (filterCheckbox && filterCheckbox.checked) {
-                console.log('Filter is checked, calling toggleSpecialCardsCharacterFilter');
                 // Add a small delay to ensure DOM is fully updated
                 setTimeout(() => {
                     toggleSpecialCardsCharacterFilter();
                 }, 50);
-            } else {
-                console.log('Filter is not checked or checkbox not found');
             }
         }
 
@@ -7332,9 +7427,6 @@
                 .map(card => characterMap[card.cardId])
                 .filter(char => char); // Remove undefined entries
             
-            console.log('=== POWER CARDS FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck characters:', deckCharacters);
             
             // Get all power card groups
             const powerGroups = powerCardsCategory.querySelectorAll('.character-group');
@@ -7345,7 +7437,6 @@
                 if (!header) return;
                 
                 const powerType = header.textContent.split(' (')[0];
-                console.log(`Processing power type: "${powerType}"`);
                 
                 if (isChecked) {
                     // Filter power cards based on character stats
@@ -7427,10 +7518,8 @@
                 const originalText = mainHeader.textContent;
                 const newText = originalText.replace(/\(\d+\)/, `(${totalVisibleCards})`);
                 mainHeader.textContent = newText;
-                console.log(`Updated main header count to: ${totalVisibleCards}`);
             }
             
-            console.log('=== END POWER CARDS FILTER DEBUG ===');
         }
 
         // Update power cards filter when deck changes
@@ -7491,9 +7580,6 @@
                 .map(card => characterMap[card.cardId])
                 .filter(char => char); // Remove undefined entries
             
-            console.log('=== BASIC UNIVERSE FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck characters:', deckCharacters);
             
             // Get all basic universe cards
             const cardItems = basicUniverseCategory.querySelectorAll('.card-item');
@@ -7754,9 +7840,6 @@
                 .map(card => characterMap[card.cardId])
                 .filter(char => char); // Remove undefined entries
             
-            console.log('=== TRAINING FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck characters:', deckCharacters);
             
             // Get all training cards
             const cardItems = trainingCategory.querySelectorAll('.card-item');
@@ -7916,9 +7999,6 @@
                 .map(card => characterMap[card.cardId])
                 .filter(char => char); // Remove undefined entries
             
-            console.log('=== ALLY UNIVERSE FILTER DEBUG ===');
-            console.log('Filter checked:', isChecked);
-            console.log('Deck characters:', deckCharacters);
             
             // Get all ally universe cards
             const cardItems = allyUniverseCategory.querySelectorAll('.card-item');
@@ -8434,7 +8514,16 @@
                         
                         typeCards.forEach(cardData => {
                             const card = cardData;
-                            const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                            // Convert internal type format to map key format
+                            let mapKeyType = card.type;
+                            if (card.type === 'ally_universe') {
+                                mapKeyType = 'ally-universe';
+                            } else if (card.type === 'basic_universe') {
+                                mapKeyType = 'basic-universe';
+                            } else if (card.type === 'advanced_universe') {
+                                mapKeyType = 'advanced-universe';
+                            }
+                            const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                             
                             if (!availableCard) {
                                 console.warn('Special card not found in availableCardsMap:', card);
@@ -8476,7 +8565,16 @@
                             characterCards.forEach(cardData => {
                                 const card = cardData;
                                 const index = cardData.originalIndex;
-                                const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                                // Convert internal type format to map key format
+                let mapKeyType = card.type;
+                if (card.type === 'ally_universe') {
+                    mapKeyType = 'ally-universe';
+                } else if (card.type === 'basic_universe') {
+                    mapKeyType = 'basic-universe';
+                } else if (card.type === 'advanced_universe') {
+                    mapKeyType = 'advanced-universe';
+                }
+                const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                                 
                                 if (!availableCard) {
                                     console.warn('Card not found in availableCardsMap:', card);
@@ -8494,7 +8592,7 @@
                                 }
                                 
                                 cardsHtml += `
-                                    <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
+                                    <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" data-type="${card.type}"
                                          data-bg-image="${getCardImagePath(availableCard, card.type, card.selectedAlternateImage)}"
                                          onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, card.selectedAlternateImage)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
@@ -8503,7 +8601,7 @@
                                          ondragover="handleDeckCardDragOver(event)"
                                          ondrop="handleDeckCardDrop(event)">
                                         <div class="deck-card-editor-info">
-                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.value_to_use} ${availableCard.type} → ${availableCard.bonus}` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -8522,10 +8620,19 @@
                         });
                     } else {
                         // Regular handling for all other card types
-                    typeCards.forEach(cardData => {
-                        const card = cardData;
-                        const index = cardData.originalIndex;
-                        const availableCard = availableCardsMap.get(`${card.type}_${card.cardId}`);
+                        typeCards.forEach(cardData => {
+                            const card = cardData;
+                            const index = cardData.originalIndex;
+                            // Convert internal type format to map key format
+                            let mapKeyType = card.type;
+                            if (card.type === 'ally_universe') {
+                                mapKeyType = 'ally-universe';
+                            } else if (card.type === 'basic_universe') {
+                                mapKeyType = 'basic-universe';
+                            } else if (card.type === 'advanced_universe') {
+                                mapKeyType = 'advanced-universe';
+                            }
+                            const availableCard = availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                         
                         if (!availableCard) {
                             console.warn('Card not found in availableCardsMap:', card);
@@ -8649,7 +8756,7 @@
                             const aspectClass = isAspect ? 'aspect-card' : '';
                             const teamworkClass = isTeamwork ? 'teamwork-card' : '';
                             const selectedAlternateImage = card.selectedAlternateImage;
-                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork) ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
+                            const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || card.type === 'ally_universe' || card.type === 'basic_universe' || card.type === 'advanced_universe' || card.type === 'training') ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
                             
                             // Add alternate art button for characters and special cards with alternate images
                             let alternateArtButton = '';
@@ -8659,7 +8766,7 @@
                             }
                             
                         cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" data-type="${card.type}"
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
@@ -8668,7 +8775,7 @@
                                  ondragover="handleDeckCardDragOver(event)"
                                  ondrop="handleDeckCardDrop(event)">
                                 <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.value_to_use} ${availableCard.type} → ${availableCard.bonus}` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
@@ -8737,12 +8844,10 @@
                         // URL encode the path for CSS
                         const encodedPath = encodeURI(bgImage);
                         card.style.setProperty('--bg-image', `url(${encodedPath})`);
-                        console.log('Applied background image:', encodedPath, 'to card:', card);
                     };
                     img.onerror = function() {
                         // Fallback: use default gradient without background image
                         card.style.setProperty('--bg-image', 'none');
-                        console.log('Failed to load background image:', bgImage);
                     };
                     img.src = bgImage;
                 }
@@ -8836,18 +8941,55 @@
             // Apply to teamwork cards
             teamworkCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
-                console.log('Processing teamwork card background:', bgImage);
                 if (bgImage) {
                     // Test if image loads successfully
                     const img = new Image();
                     img.onload = function() {
-                        console.log('Teamwork background image loaded successfully:', bgImage);
                         // URL encode the path for CSS
                         const encodedPath = encodeURI(bgImage);
                         card.style.setProperty('--bg-image', `url(${encodedPath})`);
                     };
                     img.onerror = function() {
-                        console.log('Failed to load teamwork background image:', bgImage);
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
+            
+            // Apply to ally-universe cards
+            const allyUniverseCards = document.querySelectorAll('.deck-card-editor-item[data-type="ally_universe"]');
+            allyUniverseCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        // URL encode the path for CSS
+                        const encodedPath = encodeURI(bgImage);
+                        card.style.setProperty('--bg-image', `url(${encodedPath})`);
+                    };
+                    img.onerror = function() {
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
+            
+            // Apply to basic-universe cards
+            const basicUniverseCards = document.querySelectorAll('.deck-card-editor-item[data-type="basic_universe"]');
+            basicUniverseCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        // URL encode the path for CSS
+                        const encodedPath = encodeURI(bgImage);
+                        card.style.setProperty('--bg-image', `url(${encodedPath})`);
+                    };
+                    img.onerror = function() {
                         // Fallback: use default gradient without background image
                         card.style.setProperty('--bg-image', 'none');
                     };
@@ -8942,24 +9084,17 @@
             const caption = document.getElementById('cardHoverCaption');
             
             if (modal && image && caption) {
-                console.log('Setting image src to:', imagePath);
                 image.src = imagePath;
                 caption.textContent = cardName;
                 
                 // Add error handler to see if image fails to load
                 image.onerror = function() {
-                    console.log('Image failed to load:', imagePath);
+                    // Image failed to load
                 };
                 image.onload = function() {
-                    console.log('Image loaded successfully:', imagePath);
+                    // Image loaded successfully
                 };
                 
-                // Check what the image src actually is after setting it
-                setTimeout(() => {
-                    console.log('Image src after setting:', image.src);
-                    console.log('Image complete:', image.complete);
-                    console.log('Image naturalWidth:', image.naturalWidth);
-                }, 100);
                 
                 // Function to position modal based on mouse position
                 function positionModal(event) {
@@ -9180,7 +9315,6 @@
         // Save character group expansion state to localStorage
         function saveCharacterGroupExpansionState() {
             if (currentDeckId) {
-                console.log('Saving character group expansion state for deck:', currentDeckId, 'state:', characterGroupExpansionState);
                 localStorage.setItem(`characterGroupExpansionState_${currentDeckId}`, JSON.stringify(characterGroupExpansionState));
             }
         }
@@ -9189,21 +9323,17 @@
         function loadCharacterGroupExpansionState() {
             if (currentDeckId) {
                 const savedState = localStorage.getItem(`characterGroupExpansionState_${currentDeckId}`);
-                console.log('Loading character group expansion state for deck:', currentDeckId, 'saved state:', savedState);
                 if (savedState) {
                     try {
                         characterGroupExpansionState = JSON.parse(savedState);
-                        console.log('Loaded character group expansion state:', characterGroupExpansionState);
                     } catch (error) {
                         console.error('Error loading character group expansion state:', error);
                         characterGroupExpansionState = {};
                     }
                 } else {
-                    console.log('No saved character group expansion state found, using empty object');
                     characterGroupExpansionState = {};
                 }
             } else {
-                console.log('No currentDeckId, using empty character group expansion state');
                 characterGroupExpansionState = {};
             }
         }
@@ -9260,10 +9390,8 @@
                     }
                 } else if (cardType === 'teamwork') {
                     // Teamwork cards use the image field (which already includes the directory)
-                    console.log('Teamwork card image path check:', card, 'image field:', card.image);
                     if (card.image) {
                         const imagePath = `/src/resources/cards/images/${card.image}`;
-                        console.log('Teamwork image path:', imagePath);
                         return imagePath;
                     }
                 } else if (cardType === 'power') {
@@ -9271,12 +9399,12 @@
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
                     }
-                } else if (cardType === 'advanced-universe') {
+                } else if (cardType === 'advanced-universe' || cardType === 'advanced_universe') {
                     // Advanced universe cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
                     }
-                } else if (cardType === 'ally-universe') {
+                } else if (cardType === 'ally-universe' || cardType === 'ally_universe') {
                     // Ally universe cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
@@ -9286,7 +9414,7 @@
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
                     }
-                } else if (cardType === 'basic-universe') {
+                } else if (cardType === 'basic-universe' || cardType === 'basic_universe') {
                     // Basic universe cards use the image field (which already includes the directory)
                     if (card.image) {
                         return `/src/resources/cards/images/${card.image}`;
@@ -9683,7 +9811,6 @@
                 .filter(card => card.type === 'character')
                 .reduce((total, card) => total + card.quantity, 0);
             
-            console.log('updateCharacterLimitStatus - Current character count:', currentCharacterCount, 'deckEditorCards:', deckEditorCards);
             
             const isCharacterLimitReached = currentCharacterCount >= 4;
             
@@ -10896,7 +11023,6 @@
                     .filter(card => card.type === 'character')
                     .reduce((total, card) => total + card.quantity, 0);
                 
-                console.log('Adding character. Current count:', currentCharacterCount, 'deckEditorCards:', deckEditorCards);
                 
                 if (currentCharacterCount >= 4) {
                     showNotification('Cannot add more than 4 characters to a deck', 'error');
@@ -10943,9 +11069,19 @@
                 }
             }
             
+            // Convert cardType to internal format for comparison
+            let internalCardType = cardType;
+            if (cardType === 'ally-universe') {
+                internalCardType = 'ally_universe';
+            } else if (cardType === 'basic-universe') {
+                internalCardType = 'basic_universe';
+            } else if (cardType === 'advanced-universe') {
+                internalCardType = 'advanced_universe';
+            }
+            
             // Check if card already exists in deck
             const existingCardIndex = deckEditorCards.findIndex(card => 
-                card.type === cardType && card.cardId === cardId
+                card.type === internalCardType && card.cardId === cardId
             );
             
             if (existingCardIndex >= 0) {
@@ -10962,7 +11098,7 @@
                 // Add new card
                 const newCard = {
                     id: `deckcard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                    type: cardType,
+                    type: internalCardType,
                     cardId: cardId,
                     quantity: 1
                 };
@@ -10986,9 +11122,11 @@
                              'aspect', 'advanced_universe', 'teamwork', 'ally_universe', 
                              'training', 'basic_universe', 'power'];
             
+            // Use the already declared internalCardType variable
+            
             // Collapse all sections except the one being added
             allTypes.forEach(type => {
-                deckEditorExpansionState[type] = (type === cardType);
+                deckEditorExpansionState[type] = (type === internalCardType);
             });
             
             await displayDeckCardsForEditing();
