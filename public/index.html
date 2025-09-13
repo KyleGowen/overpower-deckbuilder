@@ -2751,6 +2751,11 @@
             font-weight: 400;
         }
 
+        .deck-card-editor-item.ally-universe-card .deck-card-editor-name {
+            font-size: 1.0rem;
+            font-weight: 400;
+        }
+
 
         .deck-card-editor-actions {
             position: absolute;
@@ -3011,41 +3016,41 @@
             font-size: 0.9rem;
         }
         
-        /* Ally universe cards in deck editor */
-        .deck-card-editor-item[data-type="ally_universe"] {
-            position: relative;
-            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
-            border: 2px solid #2C7A7B;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 4px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* Ally universe cards in deck editor - match teamwork card styling */
+        .deck-card-editor-item.ally-universe-card {
+            overflow: hidden;
         }
         
-        .deck-card-editor-item[data-type="ally_universe"]::before {
+        .deck-card-editor-item.ally-universe-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 125% auto;
+            background-position: right center; /* Middle right of image aligned to middle right of tile */
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
+        }
+
+        .deck-card-editor-item.ally-universe-card::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: var(--bg-image, none);
-            background-size: 125% auto;
-            background-position: right top;
-            background-repeat: no-repeat;
+            background: linear-gradient(to left, 
+                rgba(54, 54, 54, 0.4) 0%, 
+                rgba(54, 54, 54, 0.2) 50%, 
+                rgba(54, 54, 54, 0.05) 100%);
+            z-index: -1;
             border-radius: 6px;
-            z-index: 1;
-        }
-        
-        .deck-card-editor-item[data-type="ally_universe"] > * {
-            position: relative;
-            z-index: 2;
+            pointer-events: none;
         }
         
         /* Basic universe cards in deck editor */
@@ -8748,6 +8753,7 @@
                             const isEvent = card.type === 'event';
                             const isAspect = card.type === 'aspect';
                             const isTeamwork = card.type === 'teamwork';
+                            const isAllyUniverse = card.type === 'ally_universe';
                             const characterClass = isCharacter ? 'character-card' : '';
                             const powerClass = isPower ? 'power-card' : '';
                             const locationClass = isLocation ? 'location-card' : '';
@@ -8755,6 +8761,7 @@
                             const eventClass = isEvent ? 'event-card' : '';
                             const aspectClass = isAspect ? 'aspect-card' : '';
                             const teamworkClass = isTeamwork ? 'teamwork-card' : '';
+                            const allyUniverseClass = isAllyUniverse ? 'ally-universe-card' : '';
                             const selectedAlternateImage = card.selectedAlternateImage;
                             const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || card.type === 'ally_universe' || card.type === 'basic_universe' || card.type === 'advanced_universe' || card.type === 'training') ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
                             
@@ -8766,7 +8773,7 @@
                             }
                             
                         cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" data-type="${card.type}"
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass}" draggable="true" data-index="${index}" data-type="${card.type}"
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
@@ -8958,7 +8965,7 @@
             });
             
             // Apply to ally-universe cards
-            const allyUniverseCards = document.querySelectorAll('.deck-card-editor-item[data-type="ally_universe"]');
+            const allyUniverseCards = document.querySelectorAll('.deck-card-editor-item.ally-universe-card');
             allyUniverseCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
                 if (bgImage) {
