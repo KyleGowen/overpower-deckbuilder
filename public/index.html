@@ -2756,6 +2756,11 @@
             font-weight: 400;
         }
 
+        .deck-card-editor-item.basic-universe-card .deck-card-editor-name {
+            font-size: 1.0rem;
+            font-weight: 400;
+        }
+
 
         .deck-card-editor-actions {
             position: absolute;
@@ -3053,41 +3058,41 @@
             pointer-events: none;
         }
         
-        /* Basic universe cards in deck editor */
-        .deck-card-editor-item[data-type="basic_universe"] {
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid #5A67D8;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 4px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* Basic universe cards in deck editor - match teamwork card styling */
+        .deck-card-editor-item.basic-universe-card {
+            overflow: hidden;
         }
         
-        .deck-card-editor-item[data-type="basic_universe"]::before {
+        .deck-card-editor-item.basic-universe-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: var(--bg-image, none);
+            background-size: 125% auto;
+            background-position: right center; /* Middle right of image aligned to middle right of tile */
+            background-repeat: no-repeat;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
+        }
+
+        .deck-card-editor-item.basic-universe-card::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: var(--bg-image, none);
-            background-size: 125% auto;
-            background-position: right top;
-            background-repeat: no-repeat;
+            background: linear-gradient(to left, 
+                rgba(54, 54, 54, 0.4) 0%, 
+                rgba(54, 54, 54, 0.2) 50%, 
+                rgba(54, 54, 54, 0.05) 100%);
+            z-index: -1;
             border-radius: 6px;
-            z-index: 1;
-        }
-        
-        .deck-card-editor-item[data-type="basic_universe"] > * {
-            position: relative;
-            z-index: 2;
+            pointer-events: none;
         }
         
         .character-card {
@@ -8606,7 +8611,7 @@
                                          ondragover="handleDeckCardDragOver(event)"
                                          ondrop="handleDeckCardDrop(event)">
                                         <div class="deck-card-editor-info">
-                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.value_to_use} ${availableCard.type} → ${availableCard.bonus}` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -8692,17 +8697,8 @@
                                 // Power card details - no additional details needed
                                 cardDetails = '';
                         } else if (card.type === 'basic_universe') {
-                            // Basic universe details
-                            cardDetails = `
-                                <div class="basic-universe-stats">
-                                    <div class="stat-label">Type:</div>
-                                    <div class="stat-value" style="color: #4ECDC4;">${availableCard.type_value || 'Unknown'}</div>
-                                    <div class="stat-label">Value:</div>
-                                    <div class="stat-value" style="color: #FFAA00;">${availableCard.value_to_use || 'Unknown'}</div>
-                                    <div class="stat-label">Bonus:</div>
-                                    <div class="stat-value" style="color: #32CD32;">+${availableCard.bonus || 'Unknown'}</div>
-                                </div>
-                            `;
+                            // Basic universe - no additional details (simple display)
+                            cardDetails = '';
                         } else if (card.type === 'teamwork') {
                             // Teamwork details
                             if (availableCard.one_per_deck) {
@@ -8754,6 +8750,7 @@
                             const isAspect = card.type === 'aspect';
                             const isTeamwork = card.type === 'teamwork';
                             const isAllyUniverse = card.type === 'ally_universe';
+                            const isBasicUniverse = card.type === 'basic_universe';
                             const characterClass = isCharacter ? 'character-card' : '';
                             const powerClass = isPower ? 'power-card' : '';
                             const locationClass = isLocation ? 'location-card' : '';
@@ -8762,6 +8759,7 @@
                             const aspectClass = isAspect ? 'aspect-card' : '';
                             const teamworkClass = isTeamwork ? 'teamwork-card' : '';
                             const allyUniverseClass = isAllyUniverse ? 'ally-universe-card' : '';
+                            const basicUniverseClass = isBasicUniverse ? 'basic-universe-card' : '';
                             const selectedAlternateImage = card.selectedAlternateImage;
                             const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || card.type === 'ally_universe' || card.type === 'basic_universe' || card.type === 'advanced_universe' || card.type === 'training') ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
                             
@@ -8773,7 +8771,7 @@
                             }
                             
                         cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass}" draggable="true" data-index="${index}" data-type="${card.type}"
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass}" draggable="true" data-index="${index}" data-type="${card.type}"
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
@@ -8782,7 +8780,7 @@
                                  ondragover="handleDeckCardDragOver(event)"
                                  ondrop="handleDeckCardDrop(event)">
                                 <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.value_to_use} ${availableCard.type} → ${availableCard.bonus}` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
@@ -8985,7 +8983,7 @@
             });
             
             // Apply to basic-universe cards
-            const basicUniverseCards = document.querySelectorAll('.deck-card-editor-item[data-type="basic_universe"]');
+            const basicUniverseCards = document.querySelectorAll('.deck-card-editor-item.basic-universe-card');
             basicUniverseCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
                 if (bgImage) {
@@ -10234,7 +10232,7 @@
                         } else if (category.type === 'basic-universe') {
                             // Special handling for basic universe cards - show summary with type, value, and bonus
                             cardsHtml = data.data.map(card => {
-                                const summary = `${card.card_name} - ${card.type} (${card.value_to_use} → +${card.bonus})`;
+                                const summary = `${card.card_name} - ${card.type} (${card.value_to_use} → ${card.bonus})`;
                                 return `
                                     <div class="card-item" 
                                          draggable="true" 
