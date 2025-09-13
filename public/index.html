@@ -8751,6 +8751,7 @@
                             const isTeamwork = card.type === 'teamwork';
                             const isAllyUniverse = card.type === 'ally_universe';
                             const isBasicUniverse = card.type === 'basic_universe';
+                            const isAdvancedUniverse = card.type === 'advanced_universe';
                             const characterClass = isCharacter ? 'character-card' : '';
                             const powerClass = isPower ? 'power-card' : '';
                             const locationClass = isLocation ? 'location-card' : '';
@@ -8760,6 +8761,7 @@
                             const teamworkClass = isTeamwork ? 'teamwork-card' : '';
                             const allyUniverseClass = isAllyUniverse ? 'ally-universe-card' : '';
                             const basicUniverseClass = isBasicUniverse ? 'basic-universe-card' : '';
+                            const advancedUniverseClass = isAdvancedUniverse ? 'advanced-universe-card' : '';
                             const selectedAlternateImage = card.selectedAlternateImage;
                             const bgImageData = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || card.type === 'ally_universe' || card.type === 'basic_universe' || card.type === 'advanced_universe' || card.type === 'training') ? `data-bg-image="${getCardImagePath(availableCard, card.type, selectedAlternateImage)}"` : '';
                             
@@ -8771,7 +8773,7 @@
                             }
                             
                         cardsHtml += `
-                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass}" draggable="true" data-index="${index}" data-type="${card.type}"
+                                <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass} ${advancedUniverseClass}" draggable="true" data-index="${index}" data-type="${card.type}"
                                      ${bgImageData}
                                      onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type, selectedAlternateImage)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'").replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
@@ -8838,6 +8840,7 @@
             const eventCards = document.querySelectorAll('.deck-card-editor-item.event-card');
             const aspectCards = document.querySelectorAll('.deck-card-editor-item.aspect-card');
             const teamworkCards = document.querySelectorAll('.deck-card-editor-item.teamwork-card');
+            const advancedUniverseCards = document.querySelectorAll('.deck-card-editor-item.advanced-universe-card');
             
             // Apply to character cards
             characterCards.forEach(card => {
@@ -8985,6 +8988,25 @@
             // Apply to basic-universe cards
             const basicUniverseCards = document.querySelectorAll('.deck-card-editor-item.basic-universe-card');
             basicUniverseCards.forEach(card => {
+                const bgImage = card.getAttribute('data-bg-image');
+                if (bgImage) {
+                    // Test if image loads successfully
+                    const img = new Image();
+                    img.onload = function() {
+                        // URL encode the path for CSS
+                        const encodedPath = encodeURI(bgImage);
+                        card.style.setProperty('--bg-image', `url(${encodedPath})`);
+                    };
+                    img.onerror = function() {
+                        // Fallback: use default gradient without background image
+                        card.style.setProperty('--bg-image', 'none');
+                    };
+                    img.src = bgImage;
+                }
+            });
+            
+            // Apply to advanced-universe cards
+            advancedUniverseCards.forEach(card => {
                 const bgImage = card.getAttribute('data-bg-image');
                 if (bgImage) {
                     // Test if image loads successfully
