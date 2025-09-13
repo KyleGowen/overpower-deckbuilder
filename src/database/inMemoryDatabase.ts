@@ -1544,7 +1544,7 @@ class InMemoryDatabase {
   private getTrainingImage(type1: string, type2: string): string {
     // Map the two stats to one of the six combined 5+5 images (344-349)
     // Build key like 'energy_combat', sorted to match filenames order
-    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '_');
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
     const a = norm(type1);
     const b = norm(type2);
     const pair = [a, b].sort().join('_');
@@ -1555,7 +1555,7 @@ class InMemoryDatabase {
       'brute_force_combat': 'training-universe/347_5_combat_5_brute_force_4.webp',
       'combat_intelligence': 'training-universe/348_5_combat_5_intelligence_4.webp',
       'brute_force_intelligence': 'training-universe/349_5_brute_force_5_intelligence_4.webp',
-      'any-power_any-power': 'training-universe/5_any_power_5_sekhmet.webp'
+      'any_power_any_power': 'training-universe/5_any_power_5_sekhmet.webp'
     };
     return map[pair] || 'unknown_training.webp';
   }
