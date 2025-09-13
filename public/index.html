@@ -2803,7 +2803,7 @@
             font-weight: 400;
         }
         
-        /* Training cards in deck editor - match teamwork card styling */
+        /* Training cards in deck editor - match mission card styling */
         .deck-card-editor-item.training-card {
             overflow: hidden;
         }
@@ -2811,18 +2811,20 @@
         .deck-card-editor-item.training-card::before {
             content: '';
             position: absolute;
-            top: -60%;
+            top: -500%;
             left: 0;
             right: 0;
             bottom: 0;
             background-image: var(--bg-image, none);
             background-size: 125% auto;
-            background-position: right center; /* Middle right of image aligned to middle right of tile */
+            background-position: right top; /* Aligned to upper right */
             background-repeat: no-repeat;
-            opacity: 0.8;
-            z-index: 1;
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 6px;
         }
         
+        /* Training card gradient overlay */
         .deck-card-editor-item.training-card::after {
             content: '';
             position: absolute;
@@ -2830,10 +2832,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%);
-            z-index: 2;
+            background: linear-gradient(to right, 
+                rgba(54, 54, 54, 0.4) 0%, 
+                rgba(54, 54, 54, 0.2) 50%, 
+                rgba(54, 54, 54, 0.05) 100%);
+            z-index: -1;
+            border-radius: 6px;
+            pointer-events: none;
         }
         
+        /* Training card title styling */
         .deck-card-editor-item.training-card .deck-card-editor-name {
             font-size: 1.0rem;
             font-weight: 400;
@@ -5633,7 +5641,7 @@
                              onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                              onclick="openModal(this)">
                     </td>
-                    <td><strong>${card.card_name}</strong></td>
+                    <td><strong>${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')}</strong></td>
                     <td>${card.type_1}</td>
                     <td>${card.type_2}</td>
                     <td>${card.value_to_use}</td>
@@ -8689,7 +8697,7 @@
                                          ondragover="handleDeckCardDragOver(event)"
                                          ondrop="handleDeckCardDrop(event)">
                                         <div class="deck-card-editor-info">
-                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (card.type === 'training' ? `${availableCard.card_name} - ${availableCard.type_1} + ${availableCard.type_2} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card)))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                            <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (card.type === 'training' ? `${availableCard.card_name.replace(/^Training \(/, '').replace(/\)$/, '')} - ${availableCard.type_1} + ${availableCard.type_2} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card)))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                             <div class="deck-card-editor-stats">${cardDetails}</div>
                                         </div>
                                         <div class="deck-card-editor-actions">
@@ -8862,7 +8870,7 @@
                                  ondragover="handleDeckCardDragOver(event)"
                                  ondrop="handleDeckCardDrop(event)">
                                 <div class="deck-card-editor-info">
-                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (card.type === 'training' ? `${availableCard.card_name} - ${availableCard.type_1} + ${availableCard.type_2} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card)))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
+                                        <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? `${availableCard.card_type} ${availableCard.to_use} -> ${availableCard.followup_attack_types} (${availableCard.first_attack_bonus}/${availableCard.second_attack_bonus})` : (card.type === 'ally_universe' ? `${availableCard.card_name} - ${availableCard.stat_to_use} ${availableCard.stat_type_to_use} → ${availableCard.attack_value} ${availableCard.attack_type}` : (card.type === 'basic_universe' ? `${availableCard.card_name} - ${availableCard.type} (${availableCard.value_to_use} → ${availableCard.bonus})` : (card.type === 'training' ? `${availableCard.card_name.replace(/^Training \(/, '').replace(/\)$/, '')} - ${availableCard.type_1} + ${availableCard.type_2} (${availableCard.value_to_use} → ${availableCard.bonus})` : (availableCard.name || availableCard.card_name || getCardName(card)))))).replace(/\\'92/g, "'").replace(/'/g, "\\'")} ${card.quantity > 1 ? `(${card.quantity})` : ''}</div>
                                     ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
                                 </div>
                                 <div class="deck-card-editor-actions">
@@ -10337,7 +10345,7 @@
                         } else if (category.type === 'training') {
                             // Special handling for training cards - show summary with types and bonus
                             cardsHtml = data.data.map(card => {
-                                const summary = `${card.card_name} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → +${card.bonus})`;
+                                const summary = `${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → ${card.bonus})`;
                                 return `
                                     <div class="card-item" 
                                          draggable="true" 
