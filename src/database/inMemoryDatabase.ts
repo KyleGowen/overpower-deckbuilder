@@ -1554,7 +1554,8 @@ class InMemoryDatabase {
       'energy_intelligence': 'training-universe/346_5_energy_5_intelligence_4.webp',
       'brute_force_combat': 'training-universe/347_5_combat_5_brute_force_4.webp',
       'combat_intelligence': 'training-universe/348_5_combat_5_intelligence_4.webp',
-      'brute_force_intelligence': 'training-universe/349_5_brute_force_5_intelligence_4.webp'
+      'brute_force_intelligence': 'training-universe/349_5_brute_force_5_intelligence_4.webp',
+      'any-power_any-power': 'training-universe/5_any_power_5_sekhmet.webp'
     };
     return map[pair] || 'unknown_training.webp';
   }
