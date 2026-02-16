@@ -535,7 +535,7 @@ describe('Deck Export Component - Comprehensive Tests', () => {
             expect(result.total_threat).toBe(19); // Adjusted from 18 to 19
         });
 
-        it('should apply reserve character threat adjustment for Morgan Le Fay', async () => {
+        it('should apply reserve character threat adjustment for Morgan le Fay', async () => {
             mockDeckEditorCards = [
                 { cardId: 'morgan', type: 'character', quantity: 1 }
             ];
@@ -547,7 +547,7 @@ describe('Deck Export Component - Comprehensive Tests', () => {
             };
 
             mockAvailableCardsMap.set('morgan', { 
-                name: 'Morgan Le Fay', 
+                name: 'Morgan le Fay', 
                 threat_level: 19,
                 energy: 5,
                 combat: 4,

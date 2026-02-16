@@ -166,8 +166,8 @@ async function exportDeckAsJson() {
                     else if (character.name === 'Carson of Venus') {
                         threatLevel = 19;
                     }
-                    // Morgan Le Fay: 19 -> 20 when reserve (+1)
-                    else if (character.name === 'Morgan Le Fay') {
+                    // Morgan le Fay: 19 -> 20 when reserve (+1)
+                    else if (character.name === 'Morgan le Fay') {
                         threatLevel = 20;
                     }
                 }
