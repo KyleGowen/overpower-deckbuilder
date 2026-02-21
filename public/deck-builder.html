@@ -11252,8 +11252,11 @@
                 }
                 
                 const img = document.createElement('img');
-                img.src = card.imagePath;
+                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                img.src = displayPath;
                 img.alt = card.name;
+                img.loading = 'lazy';
+                img.decoding = 'async';
                 
                 const label = document.createElement('span');
                 label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;
@@ -11814,8 +11817,11 @@
                 }
                 
                 const img = document.createElement('img');
-                img.src = card.imagePath;
+                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                img.src = displayPath;
                 img.alt = card.name;
+                img.loading = 'lazy';
+                img.decoding = 'async';
                 
                 const label = document.createElement('span');
                 label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;
@@ -12376,8 +12382,11 @@
                 }
                 
                 const img = document.createElement('img');
-                img.src = card.imagePath;
+                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                img.src = displayPath;
                 img.alt = card.name;
+                img.loading = 'lazy';
+                img.decoding = 'async';
                 
                 const label = document.createElement('span');
                 label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;
@@ -12938,8 +12947,11 @@
                 }
                 
                 const img = document.createElement('img');
-                img.src = card.imagePath;
+                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                img.src = displayPath;
                 img.alt = card.name;
+                img.loading = 'lazy';
+                img.decoding = 'async';
                 
                 const label = document.createElement('span');
                 label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;

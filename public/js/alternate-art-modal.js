@@ -1,6 +1,15 @@
 // alternate-art-modal.js - Alternate art selection modal
 // Extracted from public/index.html
 
+// ===== Helper: resolve thumbnail path for display-optimized loading =====
+function maybeThumbnailForDisplay(imagePath, cardType) {
+    if (!imagePath || typeof imagePath !== 'string') return imagePath;
+    if (cardType === 'character' && imagePath.startsWith('/src/resources/cards/images/characters/') && !imagePath.includes('/thumb/')) {
+        return typeof window.toThumbnailPath === 'function' ? window.toThumbnailPath(imagePath) : imagePath;
+    }
+    return imagePath;
+}
+
 // ===== showAlternateArtSelectionModal, showAlternateArtSelectionForExistingCard =====
 
 window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(cardType, cardName, allCards) {
@@ -83,8 +92,10 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
         }
         
         const img = document.createElement('img');
-        img.src = card.imagePath;
+        img.src = maybeThumbnailForDisplay(card.imagePath, cardType);
         img.alt = card.name;
+        img.loading = 'lazy';
+        img.decoding = 'async';
         
         const label = document.createElement('span');
         label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;
@@ -347,8 +358,10 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
         }
         
         const img = document.createElement('img');
-        img.src = card.imagePath;
+        img.src = maybeThumbnailForDisplay(card.imagePath, cardType);
         img.alt = card.name;
+        img.loading = 'lazy';
+        img.decoding = 'async';
         
         const label = document.createElement('span');
         // Label: first non-alternate is "Original Art", alternates are numbered sequentially

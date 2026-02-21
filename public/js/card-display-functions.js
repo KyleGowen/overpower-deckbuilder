@@ -23,6 +23,8 @@ function displayMissions(missions) {
             <td>
                 <img src="/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image)}" 
                      alt="${mission.card_name}" 
+                     loading="lazy"
+                     decoding="async"
                      onmouseenter="showCardHoverModal('/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image)}', '${mission.card_name.replace(/'/g, "\\'")}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)"
@@ -70,6 +72,8 @@ function displayEvents(events) {
             <td>
                 <img src="/src/resources/cards/images/events/${mapImagePathToActualFile(event.image)}" 
                      alt="${event.name}" 
+                     loading="lazy"
+                     decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onmouseenter="showCardHoverModal('/src/resources/cards/images/events/${mapImagePathToActualFile(event.image)}', '${event.name.replace(/'/g, "\\'")}')"
@@ -122,6 +126,8 @@ function displayAspects(aspects) {
             <td>
                 <img src="/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image)}" 
                      alt="${aspect.card_name}" 
+                     loading="lazy"
+                     decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onmouseenter="showCardHoverModal('/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image)}', '${aspect.card_name.replace(/'/g, "\\'")}')"
@@ -221,6 +227,8 @@ function displayAdvancedUniverse(advancedUniverse) {
                 <img src="/src/resources/cards/images/${card.image}" 
                      alt="${card.name}" 
                      class="card-image"
+                     loading="lazy"
+                     decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onclick="openModal(this)"

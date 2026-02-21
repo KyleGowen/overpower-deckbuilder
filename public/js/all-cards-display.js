@@ -320,6 +320,7 @@ function renderCardCell(card) {
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
                      loading="lazy"
+                     decoding="async"
                      onload="${imageOnLoad}"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='; this.style.cursor='default';"
                      onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}')"

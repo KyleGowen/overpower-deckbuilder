@@ -1152,7 +1152,7 @@ function renderDeckCardsCardView() {
                              data-instance="${i + 1}"
                              onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}')"
                              onmouseleave="hideCardHoverModal()">
-                            <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image">
+                            <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="lazy" decoding="async">
                             <div class="card-view-actions">
                                 ${instanceChangeArtButton}
                                 ${quantityButtons}

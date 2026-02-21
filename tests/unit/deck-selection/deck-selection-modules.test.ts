@@ -16,6 +16,7 @@ function loadDeckSelectionModules() {
   // Load in dependency order
   loadScriptIntoWindow('public/js/deck-selection/deckTileImages.js');
   loadScriptIntoWindow('public/js/deck-selection/deckTileTimestamps.js');
+  loadScriptIntoWindow('public/js/deck-selection/deckTileLazyLoader.js');
   loadScriptIntoWindow('public/js/deck-selection/deckTilesRenderer.js');
   loadScriptIntoWindow('public/js/deck-selection/deckTileMenu.js');
   loadScriptIntoWindow('public/js/deck-selection/index.js');
@@ -137,8 +138,8 @@ describe('deck selection modules (public/js/deck-selection/*)', () => {
         cards: [
           { type: 'character', name: 'Tarzan', defaultImage: 'characters/tarzan.webp' },
           { type: 'character', name: 'Jane', defaultImage: 'characters/alternate/jane_porter.webp' },
-          { type: 'location', name: 'Danger Room', defaultImage: 'locations/danger_room.webp' },
-          { type: 'mission', name: 'Save The World', defaultImage: 'missions/save_the_world.webp' },
+          { type: 'location', name: 'Danger Room', defaultImage: 'danger_room.webp' },
+          { type: 'mission', name: 'Save The World', defaultImage: 'save_the_world.webp' },
         ],
       },
     ];
@@ -146,13 +147,12 @@ describe('deck selection modules (public/js/deck-selection/*)', () => {
     await (window as any).DeckSelection.displayDecks(decks);
 
     const deckListHtml = document.getElementById('deck-list')?.innerHTML ?? '';
-    // Character paths should use thumbnails (faster production load)
+    // Character, location, and mission paths use thumbnails for faster production load
     expect(deckListHtml).toContain('/thumb/');
     expect(deckListHtml).toContain('characters/thumb/tarzan.webp');
     expect(deckListHtml).toContain('characters/thumb/alternate/jane_porter.webp');
-    // Location and mission stay full-res (no thumbnail)
-    expect(deckListHtml).toContain('locations/danger_room.webp');
-    expect(deckListHtml).toContain('missions/save_the_world.webp');
+    expect(deckListHtml).toContain('locations/thumb/danger_room.webp');
+    expect(deckListHtml).toContain('missions/thumb/save_the_world.webp');
   });
 
   test('menu behavior: toggle open/close + outside click + escape', async () => {

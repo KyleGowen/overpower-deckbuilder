@@ -52,7 +52,7 @@
                     const imagePath = window.DeckSelection.getDeckCardImagePath(card);
                     const title = card.name || 'Unknown Character';
                     if (imagePath) {
-                        html += `<div class="deck-character-card-display" style="background-image: url('${imagePath}')" title="${title}"></div>`;
+                        html += `<div class="deck-character-card-display deck-tile-lazy-bg" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
                     } else {
                         html += `<div class="deck-character-card-display empty">?</div>`;
                     }
@@ -74,9 +74,9 @@
                 const imagePath = window.DeckSelection.getDeckCardImagePath(locationCard);
                 const title = locationCard.name ? `Location: ${locationCard.name}` : 'Location';
                 if (!imagePath) {
-                    return `<div class="deck-tile-preview-card deck-tile-location-preview deck-tile-preview-card--empty" title="${title}"></div>`;
+                    return `<div class="deck-tile-preview-card deck-tile-location-preview deck-tile-preview-card--empty" title="${title.replace(/"/g, '&quot;')}"></div>`;
                 }
-                return `<div class="deck-tile-preview-card deck-tile-location-preview" style="background-image: url('${imagePath}')" title="${title}"></div>`;
+                return `<div class="deck-tile-preview-card deck-tile-location-preview deck-tile-lazy-bg" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
             })();
 
             // Mission preview: first mission card in the deck (if any)
@@ -87,9 +87,9 @@
                 const imagePath = window.DeckSelection.getDeckCardImagePath(missionCard);
                 const title = missionCard.name ? `Mission: ${missionCard.name}` : 'Mission';
                 if (!imagePath) {
-                    return `<div class="deck-tile-preview-card deck-tile-mission-preview deck-tile-preview-card--empty" title="${title}"></div>`;
+                    return `<div class="deck-tile-preview-card deck-tile-mission-preview deck-tile-preview-card--empty" title="${title.replace(/"/g, '&quot;')}"></div>`;
                 }
-                return `<div class="deck-tile-preview-card deck-tile-mission-preview" style="background-image: url('${imagePath}')" title="${title}"></div>`;
+                return `<div class="deck-tile-preview-card deck-tile-mission-preview deck-tile-lazy-bg" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
             })();
 
             const updatedDate = window.DeckSelection.formatDeckTimestamp(deck.metadata.lastModified);
@@ -185,6 +185,11 @@
 
         // Set the deck list HTML
         deckList.innerHTML = deckCardsHTML;
+
+        // Lazy-load background images when tiles enter viewport
+        if (typeof window.DeckSelection.observeDeckTileImages === 'function') {
+            window.DeckSelection.observeDeckTileImages(deckList);
+        }
     };
 })();
 

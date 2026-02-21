@@ -39,9 +39,9 @@ function mapImagePathToActualFile(imagePath) {
     return imagePath;
 }
 
-// Convert full-res path to thumbnail path (character images only).
+// Convert full-res path to thumbnail path (characters, missions, locations).
 // e.g. /src/resources/cards/images/characters/foo.webp → .../characters/thumb/foo.webp
-// e.g. .../characters/alternate/bar.png → .../characters/thumb/alternate/bar.webp
+// e.g. .../missions/setname/card.webp → .../missions/thumb/setname/card.webp
 function toThumbnailPath(fullPath) {
     if (!fullPath || typeof fullPath !== 'string') return fullPath;
     const base = '/src/resources/cards/images/characters/';
@@ -54,13 +54,32 @@ function toThumbnailPath(fullPath) {
     return base + 'thumb/' + dir + baseName + '.webp';
 }
 
+function toThumbnailPathForType(fullPath, type) {
+    if (!fullPath || typeof fullPath !== 'string') return fullPath;
+    const base = '/src/resources/cards/images/' + type + '/';
+    if (!fullPath.startsWith(base) || fullPath.includes('/thumb/')) return fullPath;
+    const afterBase = fullPath.slice(base.length);
+    const lastSlash = afterBase.lastIndexOf('/');
+    const dir = lastSlash >= 0 ? afterBase.slice(0, lastSlash + 1) : '';
+    const filename = lastSlash >= 0 ? afterBase.slice(lastSlash + 1) : afterBase;
+    const baseName = filename.replace(/\.[^.]+$/, '');
+    return base + 'thumb/' + dir + baseName + '.webp';
+}
+
 // Helper function to get card image path
 // options: { useThumbnail: boolean } - when true, return thumbnail path for character images
 function getCardImagePath(card, cardType, options) {
     const useThumbnail = options && options.useThumbnail === true;
     function maybeThumbnail(path) {
-        if (useThumbnail && cardType === 'character' && path && path.startsWith('/src/resources/cards/images/characters/') && !path.includes('/thumb/')) {
+        if (!useThumbnail || !path) return path;
+        if (cardType === 'character' && path.startsWith('/src/resources/cards/images/characters/')) {
             return toThumbnailPath(path);
+        }
+        if (cardType === 'mission' && path.startsWith('/src/resources/cards/images/missions/')) {
+            return toThumbnailPathForType(path, 'missions');
+        }
+        if (cardType === 'location' && path.startsWith('/src/resources/cards/images/locations/')) {
+            return toThumbnailPathForType(path, 'locations');
         }
         return path;
     }

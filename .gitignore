@@ -148,6 +148,8 @@ Thumbs.db
 
 # Generated card image thumbnails (created by npm run generate:thumbnails; generated in CI)
 src/resources/cards/images/characters/thumb/
+src/resources/cards/images/missions/thumb/
+src/resources/cards/images/locations/thumb/
 
 # Backup files
 *_backup_*/

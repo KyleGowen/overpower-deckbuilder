@@ -130,6 +130,8 @@ function displayTeamwork(teamwork) {
             <td>
                 <img src="/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image)}" 
                      alt="${card.card_type || ''}" 
+                     loading="lazy"
+                     decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onmouseenter="showCardHoverModal('/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_type || '').replace(/'/g, "\\'")}')"
@@ -202,6 +204,8 @@ function displayAllyUniverse(allies) {
             <td>
                 <img src="/src/resources/cards/images/ally-universe/${mapImagePathToActualFile(card.image)}" 
                      alt="${card.card_name}" 
+                     loading="lazy"
+                     decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onmouseenter="showCardHoverModal('/src/resources/cards/images/ally-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_name || '').replace(/'/g, "\\'")}')"

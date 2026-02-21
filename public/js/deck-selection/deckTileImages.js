@@ -4,24 +4,32 @@
 (function initDeckTileImages() {
     window.DeckSelection = window.DeckSelection || {};
 
-    // Convert full-res character path to thumbnail path (mirrors card-image-utils.js).
+    // Convert full-res path to thumbnail path (characters, missions, locations).
     // e.g. .../characters/foo.webp → .../characters/thumb/foo.webp
-    // e.g. .../characters/alternate/bar.png → .../characters/thumb/alternate/bar.webp
-    function toThumbnailPath(fullPath) {
+    // e.g. .../missions/setname/card.webp → .../missions/thumb/setname/card.webp
+    // e.g. .../locations/alternate/foo.png → .../locations/thumb/alternate/foo.webp
+    function toThumbnailPathForType(fullPath, type) {
         if (!fullPath || typeof fullPath !== 'string') return fullPath;
-        const base = '/src/resources/cards/images/characters/';
-        if (!fullPath.startsWith(base)) return fullPath;
-        const afterChars = fullPath.slice(base.length);
-        const lastSlash = afterChars.lastIndexOf('/');
-        const dir = lastSlash >= 0 ? afterChars.slice(0, lastSlash + 1) : '';
-        const filename = lastSlash >= 0 ? afterChars.slice(lastSlash + 1) : afterChars;
+        const base = '/src/resources/cards/images/' + type + '/';
+        if (!fullPath.startsWith(base) || fullPath.includes('/thumb/')) return fullPath;
+        const afterBase = fullPath.slice(base.length);
+        const lastSlash = afterBase.lastIndexOf('/');
+        const dir = lastSlash >= 0 ? afterBase.slice(0, lastSlash + 1) : '';
+        const filename = lastSlash >= 0 ? afterBase.slice(lastSlash + 1) : afterBase;
         const baseName = filename.replace(/\.[^.]+$/, '');
         return base + 'thumb/' + dir + baseName + '.webp';
     }
 
-    function maybeThumbnailForCharacter(imagePath, card) {
-        if (card.type === 'character' && imagePath && imagePath.startsWith('/src/resources/cards/images/characters/') && !imagePath.includes('/thumb/')) {
-            return toThumbnailPath(imagePath);
+    function maybeThumbnailForDeckTile(imagePath, card) {
+        if (!imagePath) return imagePath;
+        if (card.type === 'character' && imagePath.startsWith('/src/resources/cards/images/characters/')) {
+            return toThumbnailPathForType(imagePath, 'characters');
+        }
+        if (card.type === 'mission' && imagePath.startsWith('/src/resources/cards/images/missions/')) {
+            return toThumbnailPathForType(imagePath, 'missions');
+        }
+        if (card.type === 'location' && imagePath.startsWith('/src/resources/cards/images/locations/')) {
+            return toThumbnailPathForType(imagePath, 'locations');
         }
         return imagePath;
     }
@@ -38,22 +46,24 @@
             // For locations, image_path may include subdirs like "alternate/221_b_baker_st.png".
             const defaultImage = String(card.defaultImage);
             if (card.type === 'location') {
-                return `/src/resources/cards/images/locations/${defaultImage}`;
+                const path = `/src/resources/cards/images/locations/${defaultImage}`;
+                return maybeThumbnailForDeckTile(path, card);
             }
             if (defaultImage.includes('/')) {
                 const path = `/src/resources/cards/images/${defaultImage}`;
-                return maybeThumbnailForCharacter(path, card);
+                return maybeThumbnailForDeckTile(path, card);
             }
             if (card.type === 'character') {
                 const path = `/src/resources/cards/images/characters/${defaultImage}`;
-                return maybeThumbnailForCharacter(path, card);
+                return maybeThumbnailForDeckTile(path, card);
             }
             if (card.type === 'mission') {
-                return `/src/resources/cards/images/missions/${defaultImage}`;
+                const path = `/src/resources/cards/images/missions/${defaultImage}`;
+                return maybeThumbnailForDeckTile(path, card);
             }
             // Fallback for any other type (should be rare in deck list metadata)
             const path = `/src/resources/cards/images/${defaultImage}`;
-            return maybeThumbnailForCharacter(path, card);
+            return maybeThumbnailForDeckTile(path, card);
         }
 
         // Fallback: construct from card name
@@ -62,13 +72,15 @@
 
         const snakeCaseName = cardName.replace(/[^a-z0-9]/g, '_');
         if (card.type === 'location') {
-            return `/src/resources/cards/images/locations/${snakeCaseName}.webp`;
+            const path = `/src/resources/cards/images/locations/${snakeCaseName}.webp`;
+            return maybeThumbnailForDeckTile(path, card);
         }
         if (card.type === 'mission') {
-            return `/src/resources/cards/images/missions/${snakeCaseName}.webp`;
+            const path = `/src/resources/cards/images/missions/${snakeCaseName}.webp`;
+            return maybeThumbnailForDeckTile(path, card);
         }
         const path = `/src/resources/cards/images/characters/${snakeCaseName}.webp`;
-        return maybeThumbnailForCharacter(path, card);
+        return maybeThumbnailForDeckTile(path, card);
     };
 
     // Optional deck background image (same path format used by deck editor background manager)
