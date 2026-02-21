@@ -4,8 +4,15 @@
 // ===== Helper: resolve thumbnail path for display-optimized loading =====
 function maybeThumbnailForDisplay(imagePath, cardType) {
     if (!imagePath || typeof imagePath !== 'string') return imagePath;
-    if (cardType === 'character' && imagePath.startsWith('/src/resources/cards/images/characters/') && !imagePath.includes('/thumb/')) {
+    if (imagePath.includes('/thumb/')) return imagePath;
+    if (cardType === 'character' && imagePath.startsWith('/src/resources/cards/images/characters/')) {
         return typeof window.toThumbnailPath === 'function' ? window.toThumbnailPath(imagePath) : imagePath;
+    }
+    if (cardType === 'location' && imagePath.startsWith('/src/resources/cards/images/locations/')) {
+        return typeof window.toThumbnailPathForType === 'function' ? window.toThumbnailPathForType(imagePath, 'locations') : imagePath;
+    }
+    if (cardType === 'mission' && imagePath.startsWith('/src/resources/cards/images/missions/')) {
+        return typeof window.toThumbnailPathForType === 'function' ? window.toThumbnailPathForType(imagePath, 'missions') : imagePath;
     }
     return imagePath;
 }

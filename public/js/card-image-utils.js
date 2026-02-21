@@ -195,4 +195,5 @@ window.mapDatabaseIdToDeckCardId = mapDatabaseIdToDeckCardId;
 window.mapCardIdToDatabaseId = mapCardIdToDatabaseId;
 window.mapImagePathToActualFile = mapImagePathToActualFile;
 window.toThumbnailPath = toThumbnailPath;
+window.toThumbnailPathForType = toThumbnailPathForType;
 window.getCardImagePath = getCardImagePath;

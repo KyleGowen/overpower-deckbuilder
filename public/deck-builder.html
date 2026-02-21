@@ -11252,7 +11252,12 @@
                 }
                 
                 const img = document.createElement('img');
-                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                let displayPath = card.imagePath;
+                if (displayPath && !displayPath.includes('/thumb/')) {
+                    if (cardType === 'character' && displayPath.startsWith('/src/resources/cards/images/characters/') && typeof window.toThumbnailPath === 'function') displayPath = window.toThumbnailPath(displayPath);
+                    else if (cardType === 'location' && displayPath.startsWith('/src/resources/cards/images/locations/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'locations');
+                    else if (cardType === 'mission' && displayPath.startsWith('/src/resources/cards/images/missions/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'missions');
+                }
                 img.src = displayPath;
                 img.alt = card.name;
                 img.loading = 'lazy';
@@ -11817,7 +11822,12 @@
                 }
                 
                 const img = document.createElement('img');
-                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                let displayPath = card.imagePath;
+                if (displayPath && !displayPath.includes('/thumb/')) {
+                    if (cardType === 'character' && displayPath.startsWith('/src/resources/cards/images/characters/') && typeof window.toThumbnailPath === 'function') displayPath = window.toThumbnailPath(displayPath);
+                    else if (cardType === 'location' && displayPath.startsWith('/src/resources/cards/images/locations/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'locations');
+                    else if (cardType === 'mission' && displayPath.startsWith('/src/resources/cards/images/missions/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'missions');
+                }
                 img.src = displayPath;
                 img.alt = card.name;
                 img.loading = 'lazy';
@@ -12382,7 +12392,12 @@
                 }
                 
                 const img = document.createElement('img');
-                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                let displayPath = card.imagePath;
+                if (displayPath && !displayPath.includes('/thumb/')) {
+                    if (cardType === 'character' && displayPath.startsWith('/src/resources/cards/images/characters/') && typeof window.toThumbnailPath === 'function') displayPath = window.toThumbnailPath(displayPath);
+                    else if (cardType === 'location' && displayPath.startsWith('/src/resources/cards/images/locations/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'locations');
+                    else if (cardType === 'mission' && displayPath.startsWith('/src/resources/cards/images/missions/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'missions');
+                }
                 img.src = displayPath;
                 img.alt = card.name;
                 img.loading = 'lazy';
@@ -12947,7 +12962,12 @@
                 }
                 
                 const img = document.createElement('img');
-                const displayPath = (cardType === 'character' && card.imagePath && card.imagePath.startsWith('/src/resources/cards/images/characters/') && !card.imagePath.includes('/thumb/') && typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(card.imagePath) : card.imagePath;
+                let displayPath = card.imagePath;
+                if (displayPath && !displayPath.includes('/thumb/')) {
+                    if (cardType === 'character' && displayPath.startsWith('/src/resources/cards/images/characters/') && typeof window.toThumbnailPath === 'function') displayPath = window.toThumbnailPath(displayPath);
+                    else if (cardType === 'location' && displayPath.startsWith('/src/resources/cards/images/locations/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'locations');
+                    else if (cardType === 'mission' && displayPath.startsWith('/src/resources/cards/images/missions/') && typeof window.toThumbnailPathForType === 'function') displayPath = window.toThumbnailPathForType(displayPath, 'missions');
+                }
                 img.src = displayPath;
                 img.alt = card.name;
                 img.loading = 'lazy';
