@@ -106,7 +106,7 @@ resource "aws_ssm_parameter" "firebase_api_key" {
   type        = "String"
   value       = var.firebase_api_key
   description = "Firebase API key for web client"
-  tags        = { Name = "${var.project_name}-firebase-api-key"; Environment = var.environment }
+  tags        = { Name = "${var.project_name}-firebase-api-key", Environment = var.environment }
 }
 
 resource "aws_ssm_parameter" "firebase_auth_domain" {
@@ -115,7 +115,7 @@ resource "aws_ssm_parameter" "firebase_auth_domain" {
   type        = "String"
   value       = var.firebase_auth_domain
   description = "Firebase auth domain"
-  tags        = { Name = "${var.project_name}-firebase-auth-domain"; Environment = var.environment }
+  tags        = { Name = "${var.project_name}-firebase-auth-domain", Environment = var.environment }
 }
 
 resource "aws_ssm_parameter" "firebase_project_id" {
@@ -124,7 +124,7 @@ resource "aws_ssm_parameter" "firebase_project_id" {
   type        = "String"
   value       = var.firebase_project_id
   description = "Firebase project ID"
-  tags        = { Name = "${var.project_name}-firebase-project-id"; Environment = var.environment }
+  tags        = { Name = "${var.project_name}-firebase-project-id", Environment = var.environment }
 }
 
 resource "aws_ssm_parameter" "firebase_app_id" {
@@ -133,7 +133,7 @@ resource "aws_ssm_parameter" "firebase_app_id" {
   type        = "String"
   value       = var.firebase_app_id
   description = "Firebase web app ID"
-  tags        = { Name = "${var.project_name}-firebase-app-id"; Environment = var.environment }
+  tags        = { Name = "${var.project_name}-firebase-app-id", Environment = var.environment }
 }
 
 resource "aws_ssm_parameter" "firebase_service_account_json" {
@@ -142,7 +142,7 @@ resource "aws_ssm_parameter" "firebase_service_account_json" {
   type        = "SecureString"
   value       = var.firebase_service_account_json
   description = "Firebase Admin SDK service account JSON"
-  tags        = { Name = "${var.project_name}-firebase-service-account"; Environment = var.environment }
+  tags        = { Name = "${var.project_name}-firebase-service-account", Environment = var.environment }
 }
 
 # Application port

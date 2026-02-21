@@ -619,7 +619,12 @@ jobs:
             "echo NODE_TLS_REJECT_UNAUTHORIZED=0 >> /opt/app/.env",
             "echo FLYWAY_URL=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require >> /opt/app/.env",
             "echo FLYWAY_USER=postgres >> /opt/app/.env",
-            "echo FLYWAY_PASSWORD=TempPassword123! >> /opt/app/.env"
+            "echo FLYWAY_PASSWORD=TempPassword123! >> /opt/app/.env",
+            "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/api_key --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_API_KEY=\"$v\" >> /opt/app/.env'",
+            "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/auth_domain --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_AUTH_DOMAIN=\"$v\" >> /opt/app/.env'",
+            "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/project_id --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_PROJECT_ID=\"$v\" >> /opt/app/.env'",
+            "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/app_id --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_APP_ID=\"$v\" >> /opt/app/.env'",
+            "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/service_account_json --with-decryption --region us-west-2 --query Parameter.Value --output text 2>/dev/null | jq -c . 2>/dev/null); [ -n \"$v\" ] && printf \"FIREBASE_SERVICE_ACCOUNT_JSON=%s\\n\" \"$v\" >> /opt/app/.env'"
           ]' \
           --output text --query 'Command.CommandId'
 
