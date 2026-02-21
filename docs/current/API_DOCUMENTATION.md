@@ -5,7 +5,7 @@
 - **Production**: `https://your-domain.com`
 
 ## Authentication
-Most endpoints require authentication via session cookies. The API uses cookie-based authentication with the following roles:
+Most endpoints require authentication via session cookies. The API supports three login methods: **username/password**, **Google Sign-In**, and **Guest**. The API uses cookie-based authentication with the following roles:
 - **ADMIN**: Full access to all features
 - **USER**: Standard user access
 - **GUEST**: Read-only access to decks
@@ -38,6 +38,31 @@ Authenticate a user and create a session.
 }
 ```
 
+### POST /api/auth/google
+Authenticate a user via Google Sign-In and create a session. Accepts a Firebase ID token from the client. For new Google users, creates an account; for existing users with the same email (non-guest), links the Google account so either credentials or Google can be used to sign in.
+
+**Request Body:**
+```json
+{
+  "idToken": "string"
+}
+```
+
+**Response (success):** Same as `POST /api/auth/login`:
+```json
+{
+  "success": true,
+  "user": {
+    "id": "string",
+    "username": "string",
+    "email": "string",
+    "role": "USER|ADMIN|GUEST"
+  }
+}
+```
+
+**Response (error):** `400` or `429` (rate limited) with error message.
+
 ### POST /api/auth/logout
 Logout the current user and destroy the session.
 
@@ -64,6 +89,21 @@ Get the current authenticated user's information.
   }
 }
 ```
+
+### GET /api/config/firebase
+Returns the Firebase client configuration for the web app (API key, auth domain, project ID, app ID). Used by the frontend to initialize the Firebase SDK. No authentication required; these are public client config values (domain-restricted by Firebase).
+
+**Response:**
+```json
+{
+  "apiKey": "string",
+  "authDomain": "string",
+  "projectId": "string",
+  "appId": "string"
+}
+```
+
+Returns empty values or 404 if Firebase is not configured.
 
 ---
 

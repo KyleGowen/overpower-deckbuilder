@@ -59,6 +59,13 @@ echo "Database URL retrieved successfully"
 echo "Application environment: $APP_ENV"
 echo "Application port: $APP_PORT"
 
+# Get Firebase config from SSM (optional - params may not exist yet)
+FIREBASE_API_KEY=$(aws ssm get-parameter --name "/${project_name}/${environment}/firebase/api_key" --region ${aws_region} --query 'Parameter.Value' --output text 2>/dev/null || echo "")
+FIREBASE_AUTH_DOMAIN=$(aws ssm get-parameter --name "/${project_name}/${environment}/firebase/auth_domain" --region ${aws_region} --query 'Parameter.Value' --output text 2>/dev/null || echo "")
+FIREBASE_PROJECT_ID=$(aws ssm get-parameter --name "/${project_name}/${environment}/firebase/project_id" --region ${aws_region} --query 'Parameter.Value' --output text 2>/dev/null || echo "")
+FIREBASE_APP_ID=$(aws ssm get-parameter --name "/${project_name}/${environment}/firebase/app_id" --region ${aws_region} --query 'Parameter.Value' --output text 2>/dev/null || echo "")
+FIREBASE_SERVICE_ACCOUNT=$(aws ssm get-parameter --name "/${project_name}/${environment}/firebase/service_account_json" --with-decryption --region ${aws_region} --query 'Parameter.Value' --output text 2>/dev/null || echo "")
+
 # Pull the latest application image
 echo "Pulling application image from ECR..."
 docker pull ${ecr_repository_url}:latest
@@ -124,6 +131,11 @@ docker run -d \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   -e PORT=3000 \
   -e SKIP_MIGRATIONS=false \
+  -e FIREBASE_API_KEY="$FIREBASE_API_KEY" \
+  -e FIREBASE_AUTH_DOMAIN="$FIREBASE_AUTH_DOMAIN" \
+  -e FIREBASE_PROJECT_ID="$FIREBASE_PROJECT_ID" \
+  -e FIREBASE_APP_ID="$FIREBASE_APP_ID" \
+  -e FIREBASE_SERVICE_ACCOUNT_JSON="$FIREBASE_SERVICE_ACCOUNT" \
   ${ecr_repository_url}:latest
 
 # Wait a moment for the container to start

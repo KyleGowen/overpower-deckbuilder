@@ -277,6 +277,20 @@ mockUserRepository.getUserById.mockImplementation(async (id: string) => {
 mockUserRepository.getUserByUsername.mockImplementation(async (username: string) => {
   return mockUsers.find(user => user.name === username);
 });
+mockUserRepository.getUserByEmail.mockImplementation(async (email: string) => {
+  return mockUsers.find(user => user.email === email);
+});
+mockUserRepository.getUserByFirebaseUid.mockImplementation(async () => undefined);
+mockUserRepository.createGoogleUser.mockImplementation(async (email: string, name: string, firebaseUid: string) => {
+  const newUser: User = {
+    id: `user-google-${Date.now()}`,
+    name: name || email.split('@')[0] || 'Google User',
+    email,
+    role: 'USER' as UserRole
+  };
+  return newUser;
+});
+mockUserRepository.linkGoogleToUser.mockResolvedValue(undefined);
 mockUserRepository.authenticateUser.mockImplementation(async (username: string, password: string) => {
   // Mock authentication logic
   if (username === 'kyle' && password === 'test') {

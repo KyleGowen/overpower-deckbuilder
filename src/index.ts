@@ -18,6 +18,9 @@ import { execSync } from 'child_process';
 export const app = express();
 const PORT = process.env.PORT || 8085;
 
+// Trust proxy for correct req.ip when behind nginx/load balancer (see src/middleware/README.md)
+app.set('trust proxy', 1);
+
 // Deck building rules constants
 const DECK_RULES = {
   MIN_DECK_SIZE: 51,
@@ -506,8 +509,18 @@ const authenticateUser = authService.createAuthMiddleware();
 
 // User authentication endpoints
 app.post('/api/auth/login', (req, res) => authService.handleLogin(req, res));
+app.post('/api/auth/google', (req, res) => authService.handleGoogleLogin(req, res));
 app.post('/api/auth/logout', (req, res) => authService.handleLogout(req, res));
 app.get('/api/auth/me', (req, res) => authService.handleSessionValidation(req, res));
+
+// Firebase client config (public, no secrets)
+app.get('/api/config/firebase', (req, res) => {
+  const apiKey = process.env.FIREBASE_API_KEY || '';
+  const authDomain = process.env.FIREBASE_AUTH_DOMAIN || '';
+  const projectId = process.env.FIREBASE_PROJECT_ID || '';
+  const appId = process.env.FIREBASE_APP_ID || '';
+  res.json({ apiKey, authDomain, projectId, appId });
+});
 
 // API Routes
 app.get('/api/characters', async (req, res) => {

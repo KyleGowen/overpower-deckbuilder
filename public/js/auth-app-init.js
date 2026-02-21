@@ -41,6 +41,7 @@ async function showLoginModal() {
                                 <div id="loginError" class="error-message" style="display: none; color: #e74c3c; margin-bottom: 10px;"></div>
                                 <button type="submit" class="login-btn" style="width: 100%; padding: 12px; background: #4ecdc4; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 10px;">Log In</button>
                             </form>
+                            <button type="button" id="googleLoginBtn" class="google-btn" style="width: 100%; padding: 10px; background: #4285f4; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">Sign in with Google</button>
                             <button type="button" id="guestLoginBtn" class="guest-btn" style="width: 100%; padding: 10px; background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; border-radius: 5px; cursor: pointer;">Continue as Guest</button>
                         </div>
                     </div>
@@ -59,6 +60,16 @@ async function showLoginModal() {
                             await login(username, password);
                         } else if (typeof window.login === 'function') {
                             await window.login(username, password);
+                        }
+                    });
+                }
+                const googleLoginBtn = document.getElementById('googleLoginBtn');
+                if (googleLoginBtn) {
+                    googleLoginBtn.addEventListener('click', async () => {
+                        if (typeof handleGoogleLogin === 'function') {
+                            await handleGoogleLogin();
+                        } else if (typeof window.handleGoogleLogin === 'function') {
+                            await window.handleGoogleLogin();
                         }
                     });
                 }

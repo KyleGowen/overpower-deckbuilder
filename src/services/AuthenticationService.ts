@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { UserRepository } from '../repository/UserRepository';
 import { User, UserRole } from '../types';
 import crypto from 'crypto';
+import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdmin';
+import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
 
 export interface LoginCredentials {
   username: string;
@@ -28,6 +30,7 @@ export class AuthenticationService {
 
   constructor(userRepository: UserRepository) {
     this.userRepository = userRepository;
+    initializeFirebaseAdmin();
   }
 
   /**
@@ -162,6 +165,84 @@ export class AuthenticationService {
     } catch (error) {
       console.error('Logout error:', error);
       res.status(500).json({ success: false, error: 'Logout failed' });
+    }
+  }
+
+  /**
+   * Handle Google login request.
+   * Verifies Firebase ID token, finds or creates user, creates session.
+   */
+  public async handleGoogleLogin(req: Request, res: Response): Promise<void> {
+    try {
+      const { idToken } = req.body;
+      if (!idToken || typeof idToken !== 'string') {
+        res.status(400).json({ success: false, error: 'idToken is required' });
+        return;
+      }
+
+      const firebaseAdmin = getFirebaseAdmin();
+      if (!firebaseAdmin) {
+        res.status(503).json({ success: false, error: 'Google sign-in is not configured' });
+        return;
+      }
+
+      let decodedToken: { uid: string; email?: string; name?: string };
+      try {
+        decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+      } catch (err) {
+        console.error('Firebase token verification failed:', err);
+        res.status(401).json({ success: false, error: 'Invalid or expired token' });
+        return;
+      }
+
+      const firebaseUid = decodedToken.uid;
+      const email = decodedToken.email || '';
+      const name = decodedToken.name || decodedToken.email?.split('@')[0] || 'Google User';
+
+      // 1. Lookup by Firebase UID first
+      let user = await this.userRepository.getUserByFirebaseUid(firebaseUid);
+
+      // 2. If no user by Firebase UID, lookup by email for linking (exclude GUEST)
+      if (!user && email) {
+        const existingByEmail = await this.userRepository.getUserByEmail(email);
+        if (existingByEmail && existingByEmail.role !== 'GUEST') {
+          await this.userRepository.linkGoogleToUser(existingByEmail.id, firebaseUid);
+          user = existingByEmail;
+        }
+      }
+
+      // 3. If no user, create new Google user (with rate limit check)
+      if (!user) {
+        const ip = (req as any).ip || (req as any).connection?.remoteAddress || 'unknown';
+        if (!checkLimit(ip)) {
+          res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
+          return;
+        }
+        recordCreation(ip);
+        user = await this.userRepository.createGoogleUser(email, name, firebaseUid);
+      }
+
+      const sessionId = this.createSession(user);
+      res.cookie('sessionId', sessionId, {
+        httpOnly: true,
+        secure: process.env.COOKIE_SECURE === 'true',
+        maxAge: 2 * 60 * 60 * 1000,
+        sameSite: 'lax'
+      });
+
+      try {
+        await this.userRepository.updateLastLoginAt(user.id);
+      } catch (e) {
+        console.error('Warning: failed to update last_login_at:', e);
+      }
+
+      res.json({
+        success: true,
+        data: { userId: user.id, username: user.name }
+      });
+    } catch (error) {
+      console.error('Google login error:', error);
+      res.status(500).json({ success: false, error: 'Google sign-in failed' });
     }
   }
 

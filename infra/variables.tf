@@ -108,6 +108,38 @@ variable "forward_to_email" {
   default     = "kyle.gowen@gmail.com"
 }
 
+# Firebase (for Google Sign-In)
+variable "firebase_api_key" {
+  description = "Firebase API key for web client"
+  type        = string
+  default     = ""
+}
+
+variable "firebase_auth_domain" {
+  description = "Firebase auth domain"
+  type        = string
+  default     = ""
+}
+
+variable "firebase_project_id" {
+  description = "Firebase project ID"
+  type        = string
+  default     = ""
+}
+
+variable "firebase_app_id" {
+  description = "Firebase web app ID"
+  type        = string
+  default     = ""
+}
+
+variable "firebase_service_account_json" {
+  description = "Firebase Admin SDK service account JSON (from infra/firebase-service-account.json)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"

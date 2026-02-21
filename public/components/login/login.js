@@ -51,6 +51,7 @@ function createFallbackLoginModal() {
                     <div id="loginError" class="error-message" style="display: none;"></div>
                     <button type="submit" class="login-btn">Log In</button>
                 </form>
+                <button type="button" id="googleLoginBtn" class="google-btn">Sign in with Google</button>
                 <button type="button" id="guestLoginBtn" class="guest-btn">Continue as Guest</button>
                 <div class="login-contact" aria-label="Contact">
                     For questions or account creation requests, email
@@ -91,6 +92,10 @@ function setupLoginEventListeners() {
         loginForm.addEventListener('submit', handleLoginSubmit);
     }
     
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', handleGoogleLogin);
+    }
     if (guestLoginBtn) {
         guestLoginBtn.addEventListener('click', handleGuestLogin);
     }
@@ -157,6 +162,50 @@ async function handleGuestLogin() {
         }
     }
 }
+
+/**
+ * Handle Google login button click
+ */
+async function handleGoogleLogin() {
+    if (typeof window.hideLoginError === 'function') {
+        window.hideLoginError();
+    }
+    try {
+        const auth = await (typeof initializeFirebase === 'function' ? initializeFirebase() : null);
+        if (!auth) {
+            if (typeof window.showLoginError === 'function') {
+                window.showLoginError('Google sign-in is not available');
+            }
+            return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const idToken = result.user ? await result.user.getIdToken() : null;
+        if (!idToken) {
+            if (typeof window.showLoginError === 'function') {
+                window.showLoginError('Could not get Google credentials');
+            }
+            return;
+        }
+        const result2 = await window.authService.loginWithGoogle(idToken);
+        if (result2.success) {
+            const user = result2.data;
+            if (typeof currentUser !== 'undefined') currentUser = user;
+            if (typeof updateUserWelcome === 'function') updateUserWelcome();
+            window.location.href = `/users/${(user && user.userId) || (user && user.id) || ''}/decks`;
+        } else {
+            if (typeof window.showLoginError === 'function') {
+                window.showLoginError(result2.error || 'Google sign-in failed');
+            }
+        }
+    } catch (err) {
+        console.error('Google login error:', err);
+        if (typeof window.showLoginError === 'function') {
+            window.showLoginError(err.message || 'Google sign-in failed');
+        }
+    }
+}
+
 
 // Note: showLoginError and hideLoginError are defined in auth-app-init.js
 // We don't redefine them here to avoid recursion issues

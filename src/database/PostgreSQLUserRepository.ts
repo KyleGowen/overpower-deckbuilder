@@ -78,16 +78,99 @@ export class PostgreSQLUserRepository implements UserRepository {
       }
       
       const user = result.rows[0];
-      return {
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role,
-        lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
-      };
+      return this.mapRowToUser(user);
     } finally {
       client.release();
     }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM users WHERE email = $1',
+        [email]
+      );
+      
+      if (result.rows.length === 0) {
+        return undefined;
+      }
+      
+      return this.mapRowToUser(result.rows[0]);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM users WHERE firebase_uid = $1',
+        [firebaseUid]
+      );
+      
+      if (result.rows.length === 0) {
+        return undefined;
+      }
+      
+      return this.mapRowToUser(result.rows[0]);
+    } finally {
+      client.release();
+    }
+  }
+
+  async createGoogleUser(email: string, name: string, firebaseUid: string): Promise<User> {
+    const client = await this.pool.connect();
+    try {
+      let username = name || email.split('@')[0] || 'Google User';
+      username = username.trim() || 'Google User';
+
+      let finalUsername = username;
+      let suffix = 2;
+      while (true) {
+        const existing = await client.query(
+          'SELECT id FROM users WHERE username = $1',
+          [finalUsername]
+        );
+        if (existing.rows.length === 0) break;
+        finalUsername = `${username}${suffix}`;
+        suffix++;
+      }
+
+      const result = await client.query(
+        `INSERT INTO users (username, email, password_hash, role, auth_provider, firebase_uid)
+         VALUES ($1, $2, NULL, 'USER', 'google', $3)
+         RETURNING *`,
+        [finalUsername, email, firebaseUid]
+      );
+
+      return this.mapRowToUser(result.rows[0]);
+    } finally {
+      client.release();
+    }
+  }
+
+  async linkGoogleToUser(userId: string, firebaseUid: string): Promise<void> {
+    const client = await this.pool.connect();
+    try {
+      await client.query(
+        'UPDATE users SET firebase_uid = $1, auth_provider = $2, updated_at = NOW() WHERE id = $3',
+        [firebaseUid, 'google', userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  private mapRowToUser(user: any): User {
+    return {
+      id: user.id,
+      name: user.username,
+      email: user.email,
+      role: user.role,
+      lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
+    };
   }
 
   async authenticateUser(username: string, password: string): Promise<User | undefined> {
@@ -104,6 +187,9 @@ export class PostgreSQLUserRepository implements UserRepository {
       }
       
       const user = result.rows[0];
+
+      // Google/OAuth users have no password_hash
+      if (!user.password_hash) return undefined;
       
       // Compare the provided password with the stored hash using bcrypt
       const isPasswordValid = await PasswordUtils.comparePassword(password, user.password_hash);

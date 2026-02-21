@@ -3,10 +3,20 @@ import { UserRepository } from '../../src/repository/UserRepository';
 import { UserPersistenceService } from '../../src/persistence/userPersistence';
 import { User, UserRole } from '../../src/types';
 import { Request, Response, NextFunction } from 'express';
+import { getFirebaseAdmin } from '../../src/config/firebaseAdmin';
+import { checkLimit, recordCreation } from '../../src/middleware/newAccountRateLimiter';
 
 // Mock dependencies
 jest.mock('../../src/repository/UserRepository');
 jest.mock('../../src/persistence/userPersistence');
+jest.mock('../../src/config/firebaseAdmin', () => ({
+  getFirebaseAdmin: jest.fn(),
+  initializeFirebaseAdmin: jest.fn()
+}));
+jest.mock('../../src/middleware/newAccountRateLimiter', () => ({
+  checkLimit: jest.fn(() => true),
+  recordCreation: jest.fn()
+}));
 
 describe('AuthenticationService', () => {
   let authService: AuthenticationService;
@@ -25,7 +35,11 @@ describe('AuthenticationService', () => {
       authenticateUser: jest.fn(),
       getUserById: jest.fn(),
       getUserByUsername: jest.fn(),
+      getUserByEmail: jest.fn(),
+      getUserByFirebaseUid: jest.fn(),
       createUser: jest.fn(),
+      createGoogleUser: jest.fn(),
+      linkGoogleToUser: jest.fn(),
       getAllUsers: jest.fn(),
       updateUser: jest.fn(),
       updateLastLoginAt: jest.fn(),
@@ -406,6 +420,263 @@ describe('AuthenticationService', () => {
         success: false,
         error: 'User not found'
       });
+    });
+  });
+
+  describe('handleGoogleLogin', () => {
+    beforeEach(() => {
+      jest.mocked(checkLimit).mockReturnValue(true);
+      jest.mocked(recordCreation).mockImplementation(() => {});
+    });
+
+    it('should return 400 when idToken is missing', async () => {
+      mockRequest.body = {};
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'idToken is required'
+      });
+    });
+
+    it('should return 400 when idToken is not a string', async () => {
+      mockRequest.body = { idToken: 12345 };
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'idToken is required'
+      });
+    });
+
+    it('should return 503 when Firebase is not configured', async () => {
+      mockRequest.body = { idToken: 'fake-token' };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(null as any);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(503);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Google sign-in is not configured'
+      });
+    });
+
+    it('should return 401 when token verification fails', async () => {
+      mockRequest.body = { idToken: 'invalid-token' };
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockRejectedValue(new Error('Invalid token'))
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Invalid or expired token'
+      });
+    });
+
+    it('should return 429 when rate limit exceeded', async () => {
+      mockRequest.body = { idToken: 'valid-token' };
+      (mockRequest as any).ip = '192.168.1.1';
+      jest.mocked(checkLimit).mockReturnValue(false);
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-123',
+            email: 'new@example.com',
+            name: 'New User'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(429);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Too many new accounts. Please try again later.'
+      });
+      expect(mockUserRepository.createGoogleUser).not.toHaveBeenCalled();
+    });
+
+    it('should create session for existing user by firebase_uid', async () => {
+      const existingUser: User = {
+        id: 'existing-id',
+        name: 'Existing User',
+        email: 'existing@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { idToken: 'valid-token' };
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-123',
+            email: 'existing@example.com',
+            name: 'Existing User'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(existingUser);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.getUserByFirebaseUid).toHaveBeenCalledWith('firebase-uid-123');
+      expect(mockUserRepository.createGoogleUser).not.toHaveBeenCalled();
+      expect(mockResponse.cookie).toHaveBeenCalledWith('sessionId', expect.any(String), expect.any(Object));
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        data: { userId: existingUser.id, username: existingUser.name }
+      });
+    });
+
+    it('should link and create session for existing user by email (non-guest)', async () => {
+      const existingUser: User = {
+        id: 'existing-id',
+        name: 'Existing User',
+        email: 'link@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { idToken: 'valid-token' };
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-new',
+            email: 'link@example.com',
+            name: 'Google Name'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(existingUser);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.getUserByEmail).toHaveBeenCalledWith('link@example.com');
+      expect(mockUserRepository.linkGoogleToUser).toHaveBeenCalledWith('existing-id', 'firebase-uid-new');
+      expect(mockUserRepository.createGoogleUser).not.toHaveBeenCalled();
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        data: { userId: existingUser.id, username: existingUser.name }
+      });
+    });
+
+    it('should not link when existing user is GUEST', async () => {
+      const guestUser: User = {
+        id: 'guest-id',
+        name: 'guest',
+        email: 'guest@example.com',
+        role: 'GUEST' as UserRole
+      };
+      mockRequest.body = { idToken: 'valid-token' };
+      (mockRequest as any).ip = '192.168.1.1';
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-new',
+            email: 'guest@example.com',
+            name: 'Guest'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(guestUser);
+      mockUserRepository.createGoogleUser.mockResolvedValue({
+        id: 'new-google-id',
+        name: 'Guest',
+        email: 'guest@example.com',
+        role: 'USER' as UserRole
+      });
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.linkGoogleToUser).not.toHaveBeenCalled();
+      expect(mockUserRepository.createGoogleUser).toHaveBeenCalledWith(
+        'guest@example.com',
+        'Guest',
+        'firebase-uid-new'
+      );
+    });
+
+    it('should create new Google user and session when no existing user', async () => {
+      const newUser: User = {
+        id: 'new-id',
+        name: 'New User',
+        email: 'new@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { idToken: 'valid-token' };
+      (mockRequest as any).ip = '192.168.1.1';
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-123',
+            email: 'new@example.com',
+            name: 'New User'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+      mockUserRepository.createGoogleUser.mockResolvedValue(newUser);
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.createGoogleUser).toHaveBeenCalledWith(
+        'new@example.com',
+        'New User',
+        'firebase-uid-123'
+      );
+      expect(recordCreation).toHaveBeenCalledWith('192.168.1.1');
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        data: { userId: newUser.id, username: newUser.name }
+      });
+    });
+
+    it('should use email prefix when name is missing from token', async () => {
+      mockRequest.body = { idToken: 'valid-token' };
+      (mockRequest as any).ip = '192.168.1.1';
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-456',
+            email: 'naming@example.com'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+      mockUserRepository.createGoogleUser.mockResolvedValue({
+        id: 'new-id',
+        name: 'naming',
+        email: 'naming@example.com',
+        role: 'USER' as UserRole
+      });
+
+      await authService.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.createGoogleUser).toHaveBeenCalledWith(
+        'naming@example.com',
+        'naming',
+        'firebase-uid-456'
+      );
     });
   });
 });

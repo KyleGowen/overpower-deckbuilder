@@ -23,6 +23,7 @@
 20. [Deck Editor List View Styling](#deck-editor-list-view-styling)
 21. [Export Modal Styling](#export-modal-styling)
 22. [Import Modal Styling](#import-modal-styling)
+23. [Google Sign-In Button Styling](#google-sign-in-button-styling)
 
 ## Overview
 
@@ -2096,3 +2097,31 @@ This shared structure ensures visual consistency between export and import workf
 - **Desktop**: Full-size modal (90% width, 80% height, max 1200px × 900px)
 - **Tablet**: Maintains same proportions, adjusts to viewport
 - **Mobile**: Modal fills most of screen (90% width), content scrolls internally
+
+## Google Sign-In Button Styling
+
+### Overview
+The "Sign in with Google" button appears in the login modal between the Log In button and "Continue as Guest." It uses Google's standard blue branding for instant recognition.
+
+### CSS Class
+- **Element**: Button with class `.google-btn`
+- **Location**: [public/components/login/login.css](public/components/login/login.css)
+
+### Base Styling
+- **Background**: `#4285f4` (Google blue)
+- **Color**: `white`
+- **Border**: `none`
+- **Padding**: `12px 24px`
+- **Border Radius**: `8px`
+- **Font Size**: `1.1rem`
+- **Font Weight**: `500`
+- **Cursor**: `pointer`
+- **Transition**: `background 0.2s ease`
+- **Margin Top**: `15px`
+- **Width**: `100%`
+
+### Hover State
+- **Background**: `#357ae8` (darker Google blue)
+
+### Position
+Positioned between the Log In button and Continue as Guest button in the login form for consistent visual hierarchy.

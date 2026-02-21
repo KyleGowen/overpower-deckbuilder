@@ -1,0 +1,16 @@
+# Terraform variables example
+# Copy this file to terraform.tfvars and fill in your values.
+# NEVER commit terraform.tfvars with real secrets.
+
+# Firebase (for Google Sign-In)
+# Copy these values from Firebase Console -> Project settings -> Your apps -> Config (SDK snippet)
+firebase_api_key     = "YOUR_FIREBASE_API_KEY"
+firebase_auth_domain = "YOUR_PROJECT_ID.firebaseapp.com"
+firebase_project_id  = "YOUR_PROJECT_ID"
+firebase_app_id      = "YOUR_FIREBASE_APP_ID"
+
+# Service account: Place the JSON file at infra/firebase-service-account.json (gitignored).
+# Pass it when running terraform apply:
+#   terraform apply -var "firebase_service_account_json=$(cat infra/firebase-service-account.json)"
+# Leave empty below; do NOT paste raw JSON in tfvars.
+firebase_service_account_json = ""

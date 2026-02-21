@@ -75,6 +75,22 @@ FLYWAY_USER=postgres
 FLYWAY_PASSWORD=TempPassword123!
 ```
 
+### Firebase Configuration (Google Sign-In)
+
+The deploy script and EC2 user_data automatically fetch Firebase config from SSM when building the environment file. To enable Google Sign-In:
+
+1. **Terraform variables**: Set `firebase_api_key`, `firebase_auth_domain`, `firebase_project_id`, and `firebase_app_id` in `terraform.tfvars` (copy from `infra/terraform.tfvars.example`). Get values from Firebase Console → Project settings → Your apps → Config.
+
+2. **Service account**: Place the Firebase Admin SDK service account JSON at `infra/firebase-service-account.json` (gitignored). Run `terraform apply` with: `-var "firebase_service_account_json=$(cat infra/firebase-service-account.json)"`
+
+3. **SSM parameters**: After `terraform apply`, Firebase params are stored at `/op-deckbuilder/dev/firebase/*`. The deploy script fetches them when building `/opt/app/.env`. If params are missing, deploy still succeeds (Google Sign-In is simply disabled).
+
+4. **Firebase Console**: Add `excelsior.cards` to Authorized domains (Authentication → Settings → Authorized domains).
+
+**Firebase environment variables** (appended by deploy script when SSM params exist):
+- `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_APP_ID` — client config for the frontend
+- `FIREBASE_SERVICE_ACCOUNT_JSON` — server-only, full JSON string for token verification
+
 ## Deployment Process
 
 ### 1. Build Phase

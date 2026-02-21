@@ -98,6 +98,24 @@
     transform: translateY(0);
 }
 
+.google-btn {
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.google-btn:hover {
+    background: #357ae8;
+}
+
 .guest-btn {
     background: rgba(78, 205, 196, 0.2);
     color: #4ecdc4;

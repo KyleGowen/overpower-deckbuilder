@@ -152,3 +152,10 @@ src/resources/cards/images/characters/thumb/
 # Backup files
 *_backup_*/
 BACKUP_*/
+
+# Firebase service account (sensitive - used for Terraform)
+infra/firebase-service-account.json
+
+# Firebase service account (sensitive - used for Terraform)
+infra/firebase-service-account.json
+

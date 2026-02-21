@@ -191,6 +191,35 @@ class FrontendAuthService {
     return this.login({ username: 'guest', password: 'guest' });
   }
 
+  async loginWithGoogle(idToken) {
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ idToken })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        this.currentUser = {
+          id: data.data.userId,
+          name: data.data.username,
+          email: '',
+          role: 'USER'
+        };
+        this.storeUser(this.currentUser);
+        this.hideLoginModal();
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Google login error:', error);
+      return { success: false, error: 'Google sign-in failed' };
+    }
+  }
+
   getStoredUser() {
     try {
       const userData = localStorage.getItem('currentUser');

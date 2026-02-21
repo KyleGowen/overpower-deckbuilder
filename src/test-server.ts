@@ -317,8 +317,18 @@ app.get('/api/basic-universe', async (req, res) => {
 
 // Authentication routes
 app.post('/api/auth/login', authService.handleLogin.bind(authService));
+app.post('/api/auth/google', authService.handleGoogleLogin.bind(authService));
 app.post('/api/auth/logout', authService.handleLogout.bind(authService));
 app.get('/api/auth/me', authService.handleSessionValidation.bind(authService));
+
+// Firebase config (public, for frontend SDK init)
+app.get('/api/config/firebase', (req, res) => {
+  const apiKey = process.env.FIREBASE_API_KEY || '';
+  const authDomain = process.env.FIREBASE_AUTH_DOMAIN || '';
+  const projectId = process.env.FIREBASE_PROJECT_ID || '';
+  const appId = process.env.FIREBASE_APP_ID || '';
+  res.json({ apiKey, authDomain, projectId, appId });
+});
 
 // User management routes
 app.get('/api/users', authenticateUser, async (req: any, res) => {
