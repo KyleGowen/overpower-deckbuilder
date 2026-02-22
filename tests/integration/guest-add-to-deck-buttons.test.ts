@@ -657,7 +657,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
 
     describe('Guest Role Add to Deck Functionality Verification', () => {
         let testDeckId: string;
-        let createdDeckIds: string[] = [];
+        const createdDeckIds: string[] = [];
 
         beforeAll(async () => {
             // Create a test deck for the guest user

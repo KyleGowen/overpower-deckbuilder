@@ -556,7 +556,7 @@ describe('DeckBackgroundManager', () => {
       ];
       
       // Mock document.createElement to return proper elements
-      let elementId = 0;
+      const elementId = 0;
       mockDocument.createElement = jest.fn((tag: string) => {
         const element: any = {
           id: '',

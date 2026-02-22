@@ -237,7 +237,7 @@ describe('Auto Guest Login Integration Tests', () => {
         testUserId = generateUUID();
       }
       // Ensure the referenced user actually exists
-      let userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
+      const userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
       if (userExists.rows.length === 0) {
         await pool.query(
           'INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
@@ -253,7 +253,7 @@ describe('Auto Guest Login Integration Tests', () => {
       if (!testDeckId) {
         testDeckId = generateUUID();
       }
-      let existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
+      const existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
       if (existing.rows.length === 0) {
         const deckCards = JSON.stringify([
           { cardType: 'character', cardId: 'leonidas', quantity: 1 },
@@ -291,7 +291,7 @@ describe('Auto Guest Login Integration Tests', () => {
         testUserId = generateUUID();
       }
       // Ensure the referenced user actually exists
-      let userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
+      const userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
       if (userExists.rows.length === 0) {
         await pool.query(
           'INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
@@ -307,7 +307,7 @@ describe('Auto Guest Login Integration Tests', () => {
       if (!testDeckId) {
         testDeckId = generateUUID();
       }
-      let existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
+      const existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
       if (existing.rows.length === 0) {
         const deckCards = JSON.stringify([
           { cardType: 'character', cardId: 'leonidas', quantity: 1 },

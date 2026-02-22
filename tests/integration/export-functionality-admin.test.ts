@@ -13,8 +13,8 @@ function generateUUID(): string {
 describe('Export Functionality - Admin Integration Test', () => {
     let pool: Pool;
     let testUserId: string | null = null;
-    let testUserPassword: string = 'test_password_123';
-    let createdDeckIds: string[] = [];
+    const testUserPassword: string = 'test_password_123';
+    const createdDeckIds: string[] = [];
 
     beforeAll(async () => {
         // Set up database connection - use shared connection

@@ -168,10 +168,10 @@ describe('Read-Only Mode Integration Tests', () => {
       }
       
       // Check if deck exists, create if not
-      let existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
+      const existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
       if (existing.rows.length === 0) {
         // Ensure user exists before creating deck
-        let userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
+        const userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
         if (userExists.rows.length === 0) {
           await pool.query(
             'INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
@@ -218,10 +218,10 @@ describe('Read-Only Mode Integration Tests', () => {
       }
       
       // Check if deck exists, create if not
-      let existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
+      const existing = await pool.query('SELECT id FROM decks WHERE id = $1', [testDeckId]);
       if (existing.rows.length === 0) {
         // Ensure user exists before creating deck
-        let userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
+        const userExists = await pool.query('SELECT 1 FROM users WHERE id = $1', [testUserId]);
         if (userExists.rows.length === 0) {
           await pool.query(
             'INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',

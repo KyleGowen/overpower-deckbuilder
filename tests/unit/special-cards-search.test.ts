@@ -75,7 +75,7 @@ global.document = dom.window.document;
 global.fetch = jest.fn();
 
 // Mock the functions we're testing
-let mockSpecialCardsData = [
+const mockSpecialCardsData = [
     {
         id: 1,
         name: 'Mob Mentality',

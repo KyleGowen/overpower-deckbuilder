@@ -236,7 +236,7 @@ describe('Limited Deck Functionality', () => {
 
   describe('Limited State Priority', () => {
     test('should prioritize limited state over validation state', async () => {
-      let isDeckLimited = true;
+      const isDeckLimited = true;
       const deckCards = [
         { id: '1', type: 'character', cardId: 'char1', quantity: 1 },
         { id: '2', type: 'character', cardId: 'char2', quantity: 1 },
@@ -305,7 +305,7 @@ describe('Limited Deck Functionality', () => {
 
   describe('Integration with Deck Validation', () => {
     test('should work with valid deck when not limited', async () => {
-      let isDeckLimited = false;
+      const isDeckLimited = false;
       const validDeckCards = [
         { id: '1', type: 'character', cardId: 'char1', quantity: 1 },
         { id: '2', type: 'character', cardId: 'char2', quantity: 1 },
@@ -344,7 +344,7 @@ describe('Limited Deck Functionality', () => {
     });
 
     test('should work with invalid deck when not limited', async () => {
-      let isDeckLimited = false;
+      const isDeckLimited = false;
       const invalidDeckCards = [
         { id: '1', type: 'character', cardId: 'char1', quantity: 1 },
         { id: '2', type: 'character', cardId: 'char2', quantity: 1 },

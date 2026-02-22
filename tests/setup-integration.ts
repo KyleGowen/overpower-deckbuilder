@@ -171,7 +171,7 @@ export const integrationTestUtils = {
       console.log('🧹 Starting comprehensive test data cleanup...');
       
       // Get tracked test deck IDs
-      let trackedDeckIds = Array.from(testCreatedDeckIds);
+      const trackedDeckIds = Array.from(testCreatedDeckIds);
       
       // Only delete tracked test decks - no complex protection needed
       

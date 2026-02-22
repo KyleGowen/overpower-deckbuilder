@@ -98,7 +98,7 @@ function formatSpecialCardEffect(effectText: string, cardData: any = null): stri
   if (!effectText) return '';
   
   // Decode HTML entities in the text
-  let decodedText = effectText
+  const decodedText = effectText
     .replace(/\'93/g, "'")  // Left single quotation mark
     .replace(/\'94/g, "'")  // Right single quotation mark
     .replace(/&quot;/g, '"') // Double quotes

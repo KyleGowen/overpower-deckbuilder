@@ -32,14 +32,8 @@ jobs:
     - name: Build project
       run: npm run build
       
-    - name: Run linting (if available)
-      run: |
-        if [ -f "package.json" ] && npm run lint --dry-run 2>/dev/null; then
-          npm run lint
-        else
-          echo "No linting script found, skipping..."
-        fi
-      continue-on-error: true
+    - name: Run linting
+      run: npm run lint
 
   knip:
     name: Knip (unused code scan)

@@ -150,7 +150,7 @@ describe('Deck Location Import - Unit Tests', () => {
             }
 
             // Direct name lookup
-            let foundCard = mockAvailableCardsMap.get(cardName);
+            const foundCard = mockAvailableCardsMap.get(cardName);
             if (foundCard && foundCard.id) {
                 const foundName = foundCard.name || foundCard.card_name;
                 const foundType = foundCard.type || foundCard.card_type;
