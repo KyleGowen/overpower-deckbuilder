@@ -66,7 +66,7 @@ function editDeck(deckId) {
     // Show main container if it's hidden
     const mainContainer = document.getElementById('mainContainer');
     if (mainContainer) {
-        mainContainer.style.display = 'block';
+        mainContainer.style.display = 'grid';
     }
     
     // Update URL to include the deck ID for sharing

@@ -194,7 +194,7 @@ async function handleGoogleLogin() {
             if (typeof window !== 'undefined') window.currentUser = user;
             if (typeof updateUserWelcome === 'function') updateUserWelcome();
             const mainContainer = document.getElementById('mainContainer');
-            if (mainContainer) mainContainer.style.display = 'block';
+            if (mainContainer) mainContainer.style.display = 'grid';
             if (typeof showMainApp === 'function') showMainApp();
         } else {
             if (typeof window.showLoginError === 'function') {
