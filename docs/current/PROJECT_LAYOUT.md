@@ -11,7 +11,6 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/API_DOCUMENTATION.md  # API endpoints and usage documentation
 ├── 📄 docs/current/DEPLOYMENT.md   # Deployment instructions and strategies
 ├── 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy
-├── 📄 docs/history/REFACTORING_SUMMARY.md  # Database refactoring summary
 ├── 📄 docs/current/SERVER_STARTUP.md       # Server startup and configuration guide
 ├── 📄 docs/current/STYLE_GUIDE.md          # Code style and formatting guidelines
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
@@ -353,7 +352,6 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 📄 docs/current/API_DOCUMENTATION.md  # API endpoints and usage
 📄 docs/current/DEPLOYMENT.md       # Deployment instructions
 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy
-📄 docs/history/REFACTORING_SUMMARY.md  # Database refactoring summary
 📄 docs/current/SERVER_STARTUP.md       # Server startup guide
 📄 docs/current/STYLE_GUIDE.md          # Code style guidelines
 ```
