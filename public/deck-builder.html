@@ -11251,8 +11251,18 @@
             const grid = document.createElement('div');
             grid.className = 'alternate-art-options';
             
+            // Deduplicate by image path - only show unique images
+            const uniqueCards = [];
+            const seenImagePaths = new Set();
+            for (const card of allCards) {
+                if (!seenImagePaths.has(card.imagePath)) {
+                    seenImagePaths.add(card.imagePath);
+                    uniqueCards.push(card);
+                }
+            }
+            
             // Add each card as an option
-            allCards.forEach((card, index) => {
+            uniqueCards.forEach((card, index) => {
                 const cardOption = document.createElement('div');
                 cardOption.className = 'art-option';
                 
@@ -11821,8 +11831,18 @@
             const grid = document.createElement('div');
             grid.className = 'alternate-art-options';
             
+            // Deduplicate by image path - only show unique images
+            const uniqueCards = [];
+            const seenImagePaths = new Set();
+            for (const card of allCards) {
+                if (!seenImagePaths.has(card.imagePath)) {
+                    seenImagePaths.add(card.imagePath);
+                    uniqueCards.push(card);
+                }
+            }
+            
             // Add each card as an option
-            allCards.forEach((card, index) => {
+            uniqueCards.forEach((card, index) => {
                 const cardOption = document.createElement('div');
                 cardOption.className = 'art-option';
                 
@@ -12391,8 +12411,18 @@
             const grid = document.createElement('div');
             grid.className = 'alternate-art-options';
             
+            // Deduplicate by image path - only show unique images
+            const uniqueCards = [];
+            const seenImagePaths = new Set();
+            for (const card of allCards) {
+                if (!seenImagePaths.has(card.imagePath)) {
+                    seenImagePaths.add(card.imagePath);
+                    uniqueCards.push(card);
+                }
+            }
+            
             // Add each card as an option
-            allCards.forEach((card, index) => {
+            uniqueCards.forEach((card, index) => {
                 const cardOption = document.createElement('div');
                 cardOption.className = 'art-option';
                 
@@ -12961,8 +12991,18 @@
             const grid = document.createElement('div');
             grid.className = 'alternate-art-options';
             
+            // Deduplicate by image path - only show unique images
+            const uniqueCards = [];
+            const seenImagePaths = new Set();
+            for (const card of allCards) {
+                if (!seenImagePaths.has(card.imagePath)) {
+                    seenImagePaths.add(card.imagePath);
+                    uniqueCards.push(card);
+                }
+            }
+            
             // Add each card as an option
-            allCards.forEach((card, index) => {
+            uniqueCards.forEach((card, index) => {
                 const cardOption = document.createElement('div');
                 cardOption.className = 'art-option';
                 

@@ -78,9 +78,19 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
     const grid = document.createElement('div');
     grid.className = 'alternate-art-options';
     
+    // Deduplicate by image path - only show unique images
+    const uniqueCards = [];
+    const seenImagePaths = new Set();
+    for (const card of allCards) {
+        if (!seenImagePaths.has(card.imagePath)) {
+            seenImagePaths.add(card.imagePath);
+            uniqueCards.push(card);
+        }
+    }
+    
     // Sort options deterministically:
     // original art first, then alternates by image path (so numbering is stable).
-    const sortedCards = [...allCards].sort((a, b) => {
+    const sortedCards = [...uniqueCards].sort((a, b) => {
         const aIsAlternate = (a.imagePath || '').includes('/alternate/');
         const bIsAlternate = (b.imagePath || '').includes('/alternate/');
         if (aIsAlternate && !bIsAlternate) return 1;
