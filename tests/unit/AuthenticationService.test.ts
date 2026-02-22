@@ -1,6 +1,7 @@
 import { AuthenticationService } from '../../src/services/AuthenticationService';
 import { UserRepository } from '../../src/repository/UserRepository';
 import { UserPersistenceService } from '../../src/persistence/userPersistence';
+import { NewUserSampleDeckService } from '../../src/services/newUserSampleDeckService';
 import { User, UserRole } from '../../src/types';
 import { Request, Response, NextFunction } from 'express';
 import { getFirebaseAdmin } from '../../src/config/firebaseAdmin';
@@ -677,6 +678,39 @@ describe('AuthenticationService', () => {
         'naming',
         'firebase-uid-456'
       );
+    });
+
+    it('should copy sample deck for new Google user when newUserSampleDeckService is provided', async () => {
+      const mockSampleDeckService = {
+        copyRandomGuestDeckForUser: jest.fn().mockResolvedValue('deck-id')
+      } as unknown as NewUserSampleDeckService;
+      const authWithSampleDeck = new AuthenticationService(mockUserRepository, mockSampleDeckService);
+
+      const newUser: User = {
+        id: 'new-google-id',
+        name: 'Google New',
+        email: 'google-new@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { idToken: 'valid-token' };
+      (mockRequest as any).ip = '192.168.1.1';
+      const mockAuth = {
+        auth: jest.fn().mockReturnValue({
+          verifyIdToken: jest.fn().mockResolvedValue({
+            uid: 'firebase-uid-new-google',
+            email: 'google-new@example.com',
+            name: 'Google New'
+          })
+        })
+      };
+      jest.mocked(getFirebaseAdmin).mockReturnValue(mockAuth as any);
+      mockUserRepository.getUserByFirebaseUid.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+      mockUserRepository.createGoogleUser.mockResolvedValue(newUser);
+
+      await authWithSampleDeck.handleGoogleLogin(mockRequest as Request, mockResponse as Response);
+
+      expect(mockSampleDeckService.copyRandomGuestDeckForUser).toHaveBeenCalledWith('new-google-id');
     });
   });
 

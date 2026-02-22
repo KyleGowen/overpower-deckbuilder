@@ -313,7 +313,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
       - Zero decks at all (original behavior)
       - Only sample decks (decks whose names start with `"Sample: "`)
     - **When it is hidden**: Once the user saves their own first deck (any deck whose name does NOT start with `"Sample: "`), the tile no longer appears.
-    - **Sample decks**: New users receive a copy of a random GUEST account deck on signup. The copy is prefixed with `"Sample: "` (e.g. `"Sample: Time Detectives"`). Sample decks are exact copies including all cards and metadata.
+    - **Sample decks**: New users receive a copy of a random GUEST account deck on signup or Google Sign-In. The copy is prefixed with `"Sample: "` (e.g. `"Sample: Time Detectives"`). Sample decks are exact copies including all cards and metadata.
     - **Layout**: When visible with sample decks, the sample deck(s) appear first in the deck list, followed by the "Create your first deck" tile below. The tile matches the height of normal deck tiles (`min-height: 200px`, `height: 200px` via `.deck-tile--create-first`). Styling: centered text "Create your first deck.", color `#34495e`, `onclick="createNewDeck()"`.
 
   - **Mission tile preview selection (“Display” button)**:

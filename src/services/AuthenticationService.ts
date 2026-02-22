@@ -226,6 +226,13 @@ export class AuthenticationService {
         }
         recordCreation(ip);
         user = await this.userRepository.createGoogleUser(email, name, firebaseUid);
+        if (this.newUserSampleDeckService) {
+          try {
+            await this.newUserSampleDeckService.copyRandomGuestDeckForUser(user.id);
+          } catch (e) {
+            console.error('Warning: failed to copy sample deck for new Google user:', e);
+          }
+        }
       }
 
       const sessionId = this.createSession(user);
