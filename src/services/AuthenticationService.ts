@@ -4,6 +4,7 @@ import { User, UserRole } from '../types';
 import crypto from 'crypto';
 import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdmin';
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
+import { NewUserSampleDeckService } from './newUserSampleDeckService';
 
 export interface LoginCredentials {
   username: string;
@@ -27,9 +28,14 @@ export interface SessionData {
 export class AuthenticationService {
   private userRepository: UserRepository;
   private sessions: Map<string, SessionData> = new Map();
+  private newUserSampleDeckService: NewUserSampleDeckService | null;
 
-  constructor(userRepository: UserRepository) {
+  constructor(
+    userRepository: UserRepository,
+    newUserSampleDeckService?: NewUserSampleDeckService
+  ) {
     this.userRepository = userRepository;
+    this.newUserSampleDeckService = newUserSampleDeckService ?? null;
     initializeFirebaseAdmin();
   }
 
@@ -298,6 +304,14 @@ export class AuthenticationService {
 
       recordCreation(ip);
       const user = await this.userRepository.createUser(trimmedUsername, trimmedEmail, password, 'USER');
+
+      if (this.newUserSampleDeckService) {
+        try {
+          await this.newUserSampleDeckService.copyRandomGuestDeckForUser(user.id);
+        } catch (e) {
+          console.error('Warning: failed to copy sample deck for new user:', e);
+        }
+      }
 
       const sessionId = this.createSession(user);
       res.cookie('sessionId', sessionId, {

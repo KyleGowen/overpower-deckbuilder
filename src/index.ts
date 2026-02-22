@@ -5,6 +5,7 @@ import { DeckPersistenceService } from './services/deckPersistence';
 import { DatabaseInitializationService } from './services/databaseInitialization';
 import { DeckService } from './services/deckService';
 import { AuthenticationService } from './services/AuthenticationService';
+import { NewUserSampleDeckService } from './services/newUserSampleDeckService';
 import { DeckValidationService } from './services/deckValidationService';
 import { CollectionsRepository } from './database/collectionsRepository';
 import { CollectionService } from './services/collectionService';
@@ -375,7 +376,8 @@ const deckValidationService = new DeckValidationService(cardRepository);
 const deckBusinessService = new DeckService(deckRepository);
 
 // Initialize authentication service
-const authService = new AuthenticationService(userRepository);
+const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository);
+const authService = new AuthenticationService(userRepository, newUserSampleDeckService);
 
 // Initialize collection repository and service
 const collectionsRepository = new CollectionsRepository((dataSource as any).pool);

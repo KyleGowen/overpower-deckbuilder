@@ -26,6 +26,7 @@
 23. [Import Modal Styling](#import-modal-styling)
 24. [Google Sign-In Button Styling](#google-sign-in-button-styling)
 25. [Sign Up and Account Creation Styling](#sign-up-and-account-creation-styling)
+26. [Create Your First Deck Tile and Sample Decks](#create-your-first-deck-tile-and-sample-decks)
 
 ## Overview
 
@@ -305,6 +306,15 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
         - Characters: teal glow (character stack hover)
         - Location: yellow glow (`.deck-tile-location-preview:hover`)
         - Mission: green glow (`.deck-tile-mission-preview:hover`)
+
+#### Create Your First Deck Tile and Sample Decks
+  - **"Create your first deck" tile (empty state)**:
+    - **When it appears**: The tile is shown when the user has no user-created decks. This includes:
+      - Zero decks at all (original behavior)
+      - Only sample decks (decks whose names start with `"Sample: "`)
+    - **When it is hidden**: Once the user saves their own first deck (any deck whose name does NOT start with `"Sample: "`), the tile no longer appears.
+    - **Sample decks**: New users receive a copy of a random GUEST account deck on signup. The copy is prefixed with `"Sample: "` (e.g. `"Sample: Time Detectives"`). Sample decks are exact copies including all cards and metadata.
+    - **Layout**: When visible with sample decks, the sample deck(s) appear first in the deck list, followed by the "Create your first deck" tile below. The tile matches the height of normal deck tiles (`min-height: 200px`, `height: 200px` via `.deck-tile--create-first`). Styling: centered text "Create your first deck.", color `#34495e`, `onclick="createNewDeck()"`.
 
   - **Mission tile preview selection (“Display” button)**:
     - **Goal**: choose **one** mission in the deck to be used for the deck selection tile’s mission preview.

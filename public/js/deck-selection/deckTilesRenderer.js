@@ -7,12 +7,22 @@
     window.DeckSelection.displayDecks = async function displayDecks(decks) {
         const deckList = document.getElementById('deck-list');
 
-        if (decks.length === 0) {
-            deckList.innerHTML = `
-                    <div class="deck-card" style="display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;" onclick="createNewDeck()">
+        // Show "Create your first deck" tile when user has no user-created decks.
+        // A deck is user-created if its name does NOT start with "Sample: ".
+        const hasUserCreatedDeck = decks.some(function (d) {
+            const name = (d.metadata && d.metadata.name) || d.name || '';
+            return !String(name).startsWith('Sample: ');
+        });
+        const showFirstDeckTile = decks.length === 0 || !hasUserCreatedDeck;
+
+        const firstDeckTileHTML = `
+                    <div class="deck-card deck-tile deck-tile--compact deck-tile--create-first" style="display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer;" onclick="createNewDeck()">
                         <h4 style="color: #34495e; font-weight: bold; margin: 0; font-size: 18px;">Create your first deck.</h4>
                     </div>
                 `;
+
+        if (decks.length === 0) {
+            deckList.innerHTML = firstDeckTileHTML;
             return;
         }
 
@@ -183,8 +193,8 @@
                 `;
         }).join('');
 
-        // Set the deck list HTML
-        deckList.innerHTML = deckCardsHTML;
+        // Set the deck list HTML: show sample deck(s) first, then "Create your first deck" tile when user has only sample decks
+        deckList.innerHTML = showFirstDeckTile ? deckCardsHTML + firstDeckTileHTML : deckCardsHTML;
 
         // Lazy-load background images when tiles enter viewport
         if (typeof window.DeckSelection.observeDeckTileImages === 'function') {

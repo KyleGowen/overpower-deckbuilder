@@ -1,5 +1,17 @@
 /* Deck selection tile styles (extracted from public/css/index.css) */
 
+/* "Create your first deck" tile - same height as normal deck tiles, single-column centered */
+.deck-card.deck-tile.deck-tile--compact.deck-tile--create-first {
+    grid-template-columns: 1fr;
+    min-height: 200px;
+    height: 200px;
+}
+
+.deck-card.deck-tile.deck-tile--compact.deck-tile--create-first::before,
+.deck-card.deck-tile.deck-tile--compact.deck-tile--create-first::after {
+    display: none;
+}
+
 /* Deck selection tile layout (compact modern) */
 .deck-card.deck-tile.deck-tile--compact {
     display: grid;

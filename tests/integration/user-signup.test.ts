@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../setup-integration';
 
-// Helper function to cleanup test users created by signup
+// Helper function to cleanup test users created by signup (decks cascade delete)
 const cleanupTestUser = async (userId: string) => {
     const { Pool } = require('pg');
     const pool = new Pool({
@@ -121,6 +121,49 @@ describe('User Signup Integration Tests', () => {
             expect(secondResponse.status).toBe(409);
             expect(secondResponse.body.success).toBe(false);
             expect(secondResponse.body.error).toBe('Email already exists');
+        } finally {
+            if (userId) await cleanupTestUser(userId);
+        }
+    });
+
+    it('should create a sample deck for new user (copy of random guest deck)', async () => {
+        let userId: string | null = null;
+        try {
+            const suffix = uniqueSuffix();
+            const username = `signupdeck${suffix}`;
+            const email = `signupdeck${suffix}@example.com`;
+            const password = 'SecurePassword123';
+
+            const response = await request(app)
+                .post('/api/auth/signup')
+                .send({ username, email, password });
+
+            expect(response.status).toBe(201);
+            userId = response.body.data.userId;
+            expect(userId).toBeTruthy();
+
+            const setCookie = response.headers['set-cookie'];
+            const cookieHeaders = Array.isArray(setCookie) ? setCookie : (setCookie ? [setCookie] : []);
+            const sessionCookie = cookieHeaders.find((c: string) => c.startsWith('sessionId='));
+            expect(sessionCookie).toBeTruthy();
+
+            const cookieValue = typeof sessionCookie === 'string' ? sessionCookie.split(';')[0] : '';
+
+            const decksResponse = await request(app)
+                .get('/api/decks')
+                .set('Cookie', cookieValue);
+
+            expect(decksResponse.status).toBe(200);
+            expect(decksResponse.body.success).toBe(true);
+            expect(Array.isArray(decksResponse.body.data)).toBe(true);
+            expect(decksResponse.body.data.length).toBeGreaterThanOrEqual(1);
+
+            const sampleDeck = decksResponse.body.data.find((d: any) => {
+                const name = (d.metadata && d.metadata.name) || d.name || '';
+                return String(name).startsWith('Sample: ');
+            });
+            expect(sampleDeck).toBeTruthy();
+            expect(sampleDeck.metadata.name).toMatch(/^Sample: /);
         } finally {
             if (userId) await cleanupTestUser(userId);
         }
