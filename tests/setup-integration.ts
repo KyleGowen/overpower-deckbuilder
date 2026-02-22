@@ -199,11 +199,44 @@ export const integrationTestUtils = {
       // Clear the deck tracking set
       testCreatedDeckIds.clear();
       
-      // Delete tracked test users
+      // Delete tracked test users (disable collection_cards triggers first to avoid
+      // FK violation when cascade delete fires trigger that inserts into collection_history)
       if (testCreatedUserIds.size > 0) {
         const userIds = Array.from(testCreatedUserIds);
-        await pool.query('DELETE FROM users WHERE id = ANY($1)', [userIds]);
-        console.log(`✅ Deleted ${userIds.length} test-created users`);
+        const client = await pool.connect();
+        try {
+          await client.query('BEGIN');
+          await client.query(
+            'ALTER TABLE collection_cards DISABLE TRIGGER trigger_log_collection_history_delete'
+          );
+          await client.query(
+            'ALTER TABLE collection_cards DISABLE TRIGGER trigger_log_collection_history_update'
+          );
+          await client.query(
+            'ALTER TABLE collection_cards DISABLE TRIGGER trigger_log_collection_history_insert'
+          );
+          await client.query('DELETE FROM users WHERE id = ANY($1)', [userIds]);
+          await client.query('COMMIT');
+          console.log(`✅ Deleted ${userIds.length} test-created users`);
+        } catch (e) {
+          await client.query('ROLLBACK').catch(() => {});
+          throw e;
+        } finally {
+          try {
+            await client.query(
+              'ALTER TABLE collection_cards ENABLE TRIGGER trigger_log_collection_history_delete'
+            );
+            await client.query(
+              'ALTER TABLE collection_cards ENABLE TRIGGER trigger_log_collection_history_update'
+            );
+            await client.query(
+              'ALTER TABLE collection_cards ENABLE TRIGGER trigger_log_collection_history_insert'
+            );
+          } catch {
+            /* best-effort re-enable */
+          }
+          client.release();
+        }
       } else {
         console.log('ℹ️ No tracked test users to delete');
       }
@@ -230,6 +263,7 @@ export const integrationTestUtils = {
     try {
       // Check if test guest user exists
       const result = await pool.query('SELECT * FROM users WHERE username = $1', ['Test-Guest']);
+      const TEST_GUEST_ID = '00000000-0000-0000-0000-000000000002';
       
       if (result.rows.length === 0) {
         // Hash the test guest password
@@ -239,15 +273,17 @@ export const integrationTestUtils = {
         await pool.query(
           'INSERT INTO users (id, username, email, password_hash, role) VALUES ($1, $2, $3, $4, $5)',
           [
-            '00000000-0000-0000-0000-000000000002', // Different ID from production guest
+            TEST_GUEST_ID, // Different ID from production guest
             'Test-Guest',
             'test-guest@example.com',
             hashedPassword,
             'GUEST'
           ]
         );
+        testCreatedUserIds.add(TEST_GUEST_ID);
         console.log('✅ Test-Guest user created for integration tests');
       } else {
+        testCreatedUserIds.add(TEST_GUEST_ID);
         console.log('✅ Test-Guest user already exists');
       }
     } catch (err: any) {
