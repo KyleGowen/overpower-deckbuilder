@@ -62,36 +62,38 @@ describe('Create User Integration Tests', () => {
     });
 
     afterAll(async () => {
-        // Clean up test users
-        await cleanupTestUser(adminUser.id);
-        await cleanupTestUser(regularUser.id);
+        if (adminUser?.id) await cleanupTestUser(adminUser.id);
+        if (regularUser?.id) await cleanupTestUser(regularUser.id);
     });
 
     describe('POST /api/users', () => {
         describe('Authorization', () => {
             it('should allow ADMIN users to create new users', async () => {
-                const newUserData = {
-                    username: 'new-test-user',
-                    password: 'new-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'new-test-user',
+                        password: 'new-password'
+                    };
 
-                const response = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    const response = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(response.status).toBe(201);
-                expect(response.body.success).toBe(true);
-                expect(response.body.data).toMatchObject({
-                    name: 'new-test-user',
-                    email: 'new-test-user@example.com',
-                    role: 'USER'
-                });
-                expect(response.body.data).not.toHaveProperty('password_hash');
-                expect(response.body.message).toBe('User "new-test-user" created successfully');
-
-                // Clean up the created user
-                await cleanupTestUser(response.body.data.id);
+                    expect(response.status).toBe(201);
+                    createdUserId = response.body.data.id;
+                    expect(response.body.success).toBe(true);
+                    expect(response.body.data).toMatchObject({
+                        name: 'new-test-user',
+                        email: 'new-test-user@example.com',
+                        role: 'USER'
+                    });
+                    expect(response.body.data).not.toHaveProperty('password_hash');
+                    expect(response.body.message).toBe('User "new-test-user" created successfully');
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
 
             it('should reject regular USER role from creating users', async () => {
@@ -165,188 +167,209 @@ describe('Create User Integration Tests', () => {
 
         describe('User Creation', () => {
             it('should create user with USER role by default', async () => {
-                const newUserData = {
-                    username: 'default-role-user',
-                    password: 'default-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'default-role-user',
+                        password: 'default-password'
+                    };
 
-                const response = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    const response = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(response.status).toBe(201);
-                expect(response.body.data.role).toBe('USER');
-                expect(response.body.data.email).toBe('default-role-user@example.com');
-
-                // Clean up
-                await cleanupTestUser(response.body.data.id);
+                    expect(response.status).toBe(201);
+                    createdUserId = response.body.data.id;
+                    expect(response.body.data.role).toBe('USER');
+                    expect(response.body.data.email).toBe('default-role-user@example.com');
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
 
             it('should generate email from username', async () => {
-                const newUserData = {
-                    username: 'email-test-user',
-                    password: 'email-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'email-test-user',
+                        password: 'email-password'
+                    };
 
-                const response = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    const response = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(response.status).toBe(201);
-                expect(response.body.data.email).toBe('email-test-user@example.com');
-
-                // Clean up
-                await cleanupTestUser(response.body.data.id);
+                    expect(response.status).toBe(201);
+                    createdUserId = response.body.data.id;
+                    expect(response.body.data.email).toBe('email-test-user@example.com');
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
 
             it('should not return password hash in response', async () => {
-                const newUserData = {
-                    username: 'no-password-hash-user',
-                    password: 'no-hash-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'no-password-hash-user',
+                        password: 'no-hash-password'
+                    };
 
-                const response = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    const response = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(response.status).toBe(201);
-                expect(response.body.data).not.toHaveProperty('password_hash');
-                expect(response.body.data).toHaveProperty('id');
-                expect(response.body.data).toHaveProperty('name');
-                expect(response.body.data).toHaveProperty('email');
-                expect(response.body.data).toHaveProperty('role');
-
-                // Clean up
-                await cleanupTestUser(response.body.data.id);
+                    expect(response.status).toBe(201);
+                    createdUserId = response.body.data.id;
+                    expect(response.body.data).not.toHaveProperty('password_hash');
+                    expect(response.body.data).toHaveProperty('id');
+                    expect(response.body.data).toHaveProperty('name');
+                    expect(response.body.data).toHaveProperty('email');
+                    expect(response.body.data).toHaveProperty('role');
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
         });
 
         describe('Duplicate Username Handling', () => {
             it('should reject duplicate usernames', async () => {
-                const newUserData = {
-                    username: 'duplicate-test-user',
-                    password: 'duplicate-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'duplicate-test-user',
+                        password: 'duplicate-password'
+                    };
 
-                // Create first user
-                const firstResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    // Create first user
+                    const firstResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(firstResponse.status).toBe(201);
+                    expect(firstResponse.status).toBe(201);
+                    createdUserId = firstResponse.body.data.id;
 
-                // Try to create second user with same username
-                const secondResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    // Try to create second user with same username
+                    const secondResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(secondResponse.status).toBe(409);
-                expect(secondResponse.body.success).toBe(false);
-                expect(secondResponse.body.error).toBe('Username already exists');
-
-                // Clean up
-                await cleanupTestUser(firstResponse.body.data.id);
+                    expect(secondResponse.status).toBe(409);
+                    expect(secondResponse.body.success).toBe(false);
+                    expect(secondResponse.body.error).toBe('Username already exists');
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
 
             it('should allow different usernames', async () => {
-                const firstUserData = {
-                    username: 'unique-user-1',
-                    password: 'unique-password-1'
-                };
+                let firstUserId: string | null = null;
+                let secondUserId: string | null = null;
+                try {
+                    const firstUserData = {
+                        username: 'unique-user-1',
+                        password: 'unique-password-1'
+                    };
 
-                const secondUserData = {
-                    username: 'unique-user-2',
-                    password: 'unique-password-2'
-                };
+                    const secondUserData = {
+                        username: 'unique-user-2',
+                        password: 'unique-password-2'
+                    };
 
-                // Create first user
-                const firstResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(firstUserData);
+                    // Create first user
+                    const firstResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(firstUserData);
 
-                expect(firstResponse.status).toBe(201);
+                    expect(firstResponse.status).toBe(201);
+                    firstUserId = firstResponse.body.data.id;
 
-                // Create second user with different username
-                const secondResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(secondUserData);
+                    // Create second user with different username
+                    const secondResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(secondUserData);
 
-                expect(secondResponse.status).toBe(201);
-                expect(secondResponse.body.data.name).toBe('unique-user-2');
-
-                // Clean up
-                await cleanupTestUser(firstResponse.body.data.id);
-                await cleanupTestUser(secondResponse.body.data.id);
+                    expect(secondResponse.status).toBe(201);
+                    secondUserId = secondResponse.body.data.id;
+                    expect(secondResponse.body.data.name).toBe('unique-user-2');
+                } finally {
+                    if (firstUserId) await cleanupTestUser(firstUserId);
+                    if (secondUserId) await cleanupTestUser(secondUserId);
+                }
             });
         });
 
         describe('Created User Functionality', () => {
             it('should allow created user to log in', async () => {
-                const newUserData = {
-                    username: 'login-test-user',
-                    password: 'login-test-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'login-test-user',
+                        password: 'login-test-password'
+                    };
 
-                // Create user
-                const createResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    // Create user
+                    const createResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(createResponse.status).toBe(201);
-                const createdUserId = createResponse.body.data.id;
+                    expect(createResponse.status).toBe(201);
+                    createdUserId = createResponse.body.data.id;
 
-                // Try to log in with created user
-                const loginResponse = await request(app)
-                    .post('/api/auth/login')
-                    .send({
-                        username: newUserData.username,
-                        password: newUserData.password
-                    });
+                    // Try to log in with created user
+                    const loginResponse = await request(app)
+                        .post('/api/auth/login')
+                        .send({
+                            username: newUserData.username,
+                            password: newUserData.password
+                        });
 
-                expect(loginResponse.status).toBe(200);
-                expect(loginResponse.body.success).toBe(true);
-                expect(loginResponse.body.data.userId).toBe(createdUserId);
-
-                // Clean up
-                await cleanupTestUser(createdUserId);
+                    expect(loginResponse.status).toBe(200);
+                    expect(loginResponse.body.success).toBe(true);
+                    expect(loginResponse.body.data.userId).toBe(createdUserId);
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
 
             it('should reject login with wrong password', async () => {
-                const newUserData = {
-                    username: 'wrong-password-user',
-                    password: 'correct-password'
-                };
+                let createdUserId: string | null = null;
+                try {
+                    const newUserData = {
+                        username: 'wrong-password-user',
+                        password: 'correct-password'
+                    };
 
-                // Create user
-                const createResponse = await request(app)
-                    .post('/api/users')
-                    .set('Cookie', adminAuthToken)
-                    .send(newUserData);
+                    // Create user
+                    const createResponse = await request(app)
+                        .post('/api/users')
+                        .set('Cookie', adminAuthToken)
+                        .send(newUserData);
 
-                expect(createResponse.status).toBe(201);
-                const createdUserId = createResponse.body.data.id;
+                    expect(createResponse.status).toBe(201);
+                    createdUserId = createResponse.body.data.id;
 
-                // Try to log in with wrong password
-                const loginResponse = await request(app)
-                    .post('/api/auth/login')
-                    .send({
-                        username: newUserData.username,
-                        password: 'wrong-password'
-                    });
+                    // Try to log in with wrong password
+                    const loginResponse = await request(app)
+                        .post('/api/auth/login')
+                        .send({
+                            username: newUserData.username,
+                            password: 'wrong-password'
+                        });
 
-                expect(loginResponse.status).toBe(401);
-                expect(loginResponse.body.success).toBe(false);
-
-                // Clean up
-                await cleanupTestUser(createdUserId);
+                    expect(loginResponse.status).toBe(401);
+                    expect(loginResponse.body.success).toBe(false);
+                } finally {
+                    if (createdUserId) await cleanupTestUser(createdUserId);
+                }
             });
         });
 
@@ -389,36 +412,38 @@ describe('Create User Integration Tests', () => {
         });
 
         it('should include created users in the list', async () => {
-            const uniqueSuffix = `_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-            const newUserData = {
-                username: `list-test-user${uniqueSuffix}`,
-                password: 'list-test-password'
-            };
+            let createdUserId: string | null = null;
+            try {
+                const uniqueSuffix = `_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                const newUserData = {
+                    username: `list-test-user${uniqueSuffix}`,
+                    password: 'list-test-password'
+                };
 
-            // Create user
-            const createResponse = await request(app)
-                .post('/api/users')
-                .set('Cookie', adminAuthToken)
-                .send(newUserData);
+                // Create user
+                const createResponse = await request(app)
+                    .post('/api/users')
+                    .set('Cookie', adminAuthToken)
+                    .send(newUserData);
 
-            expect(createResponse.status).toBe(201);
-            const createdUserId = createResponse.body.data.id;
+                expect(createResponse.status).toBe(201);
+                createdUserId = createResponse.body.data.id;
 
-            // Get users list
-            const listResponse = await request(app)
-                .get('/api/users')
-                .set('Cookie', adminAuthToken);
+                // Get users list
+                const listResponse = await request(app)
+                    .get('/api/users')
+                    .set('Cookie', adminAuthToken);
 
-            expect(listResponse.status).toBe(200);
-            expect(listResponse.body.success).toBe(true);
-            
-            // Check if created user is in the list
-            const userInList = listResponse.body.data.find((user: any) => user.id === createdUserId);
-            expect(userInList).toBeDefined();
-            expect(userInList.name).toBe(`list-test-user${uniqueSuffix}`);
+                expect(listResponse.status).toBe(200);
+                expect(listResponse.body.success).toBe(true);
 
-            // Clean up
-            await cleanupTestUser(createdUserId);
+                // Check if created user is in the list
+                const userInList = listResponse.body.data.find((user: any) => user.id === createdUserId);
+                expect(userInList).toBeDefined();
+                expect(userInList.name).toBe(`list-test-user${uniqueSuffix}`);
+            } finally {
+                if (createdUserId) await cleanupTestUser(createdUserId);
+            }
         });
     });
 });

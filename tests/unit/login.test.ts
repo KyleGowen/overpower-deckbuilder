@@ -9,6 +9,9 @@ describe('Login Component', () => {
     let mockLogin: jest.Mock;
     let mockShowLoginError: jest.Mock;
     let mockHideLoginError: jest.Mock;
+    let mockShowSignupError: jest.Mock;
+    let mockHideSignupError: jest.Mock;
+    let mockSignup: jest.Mock;
     let LoginComponent: any;
 
     beforeAll(() => {
@@ -36,6 +39,9 @@ describe('Login Component', () => {
             if (typeof setupLoginEventListeners !== 'undefined') funcContainer.setupLoginEventListeners = setupLoginEventListeners;
             if (typeof handleLoginSubmit !== 'undefined') funcContainer.handleLoginSubmit = handleLoginSubmit;
             if (typeof handleGuestLogin !== 'undefined') funcContainer.handleGuestLogin = handleGuestLogin;
+            if (typeof handleSignUpClick !== 'undefined') funcContainer.handleSignUpClick = handleSignUpClick;
+            if (typeof handleSignupBackClick !== 'undefined') funcContainer.handleSignupBackClick = handleSignupBackClick;
+            if (typeof handleSignupSubmit !== 'undefined') funcContainer.handleSignupSubmit = handleSignupSubmit;
         `;
         
         // Execute the wrapped code
@@ -63,10 +69,16 @@ describe('Login Component', () => {
         mockLogin = jest.fn().mockResolvedValue(undefined);
         mockShowLoginError = jest.fn();
         mockHideLoginError = jest.fn();
+        mockShowSignupError = jest.fn();
+        mockHideSignupError = jest.fn();
+        mockSignup = jest.fn().mockResolvedValue(undefined);
         
         (window as any).login = mockLogin;
         (window as any).showLoginError = mockShowLoginError;
         (window as any).hideLoginError = mockHideLoginError;
+        (window as any).showSignupError = mockShowSignupError;
+        (window as any).hideSignupError = mockHideSignupError;
+        (window as any).signup = mockSignup;
         
         // Mock console.error to avoid noise in tests
         jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -426,6 +438,149 @@ describe('Login Component', () => {
             await LoginComponent.handleGuestLogin();
 
             expect(mockLogin).toHaveBeenCalledWith('guest', 'guest');
+        });
+    });
+
+    describe('handleSignUpClick', () => {
+        beforeEach(() => {
+            document.body.innerHTML = `
+                <div id="loginView" style="display: block;"></div>
+                <div id="signupView" style="display: none;"></div>
+            `;
+        });
+
+        it('should hide login view and show signup view', () => {
+            LoginComponent.handleSignUpClick();
+
+            const loginView = document.getElementById('loginView');
+            const signupView = document.getElementById('signupView');
+            expect(loginView?.style.display).toBe('none');
+            expect(signupView?.style.display).toBe('block');
+        });
+
+        it('should call hideLoginError and hideSignupError when switching', () => {
+            LoginComponent.handleSignUpClick();
+
+            expect(mockHideLoginError).toHaveBeenCalled();
+            expect(mockHideSignupError).toHaveBeenCalled();
+        });
+    });
+
+    describe('handleSignupBackClick', () => {
+        beforeEach(() => {
+            document.body.innerHTML = `
+                <div id="loginView" style="display: none;"></div>
+                <div id="signupView" style="display: block;"></div>
+            `;
+        });
+
+        it('should show login view and hide signup view', () => {
+            LoginComponent.handleSignupBackClick();
+
+            const loginView = document.getElementById('loginView');
+            const signupView = document.getElementById('signupView');
+            expect(loginView?.style.display).toBe('block');
+            expect(signupView?.style.display).toBe('none');
+        });
+
+        it('should call hideSignupError when switching back', () => {
+            LoginComponent.handleSignupBackClick();
+
+            expect(mockHideSignupError).toHaveBeenCalled();
+        });
+    });
+
+    describe('handleSignupSubmit', () => {
+        beforeEach(() => {
+            document.body.innerHTML = `
+                <form id="signupForm">
+                    <input id="signupUsername" type="text" />
+                    <input id="signupEmail" type="email" />
+                    <input id="signupPassword" type="password" />
+                    <input id="signupPasswordConfirm" type="password" />
+                    <div id="signupError" style="display: none;"></div>
+                </form>
+            `;
+        });
+
+        it('should prevent default form submission', async () => {
+            const form = document.getElementById('signupForm') as HTMLFormElement;
+            const event = new Event('submit', { cancelable: true });
+            const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+
+            const usernameInput = document.getElementById('signupUsername') as HTMLInputElement;
+            const emailInput = document.getElementById('signupEmail') as HTMLInputElement;
+            const passwordInput = document.getElementById('signupPassword') as HTMLInputElement;
+            const passwordConfirmInput = document.getElementById('signupPasswordConfirm') as HTMLInputElement;
+            usernameInput.value = 'testuser';
+            emailInput.value = 'test@example.com';
+            passwordInput.value = 'password123';
+            passwordConfirmInput.value = 'password123';
+
+            await LoginComponent.handleSignupSubmit(event);
+
+            expect(preventDefaultSpy).toHaveBeenCalled();
+        });
+
+        it('should call hideSignupError on submit', async () => {
+            const usernameInput = document.getElementById('signupUsername') as HTMLInputElement;
+            const emailInput = document.getElementById('signupEmail') as HTMLInputElement;
+            const passwordInput = document.getElementById('signupPassword') as HTMLInputElement;
+            const passwordConfirmInput = document.getElementById('signupPasswordConfirm') as HTMLInputElement;
+            usernameInput.value = 'testuser';
+            emailInput.value = 'test@example.com';
+            passwordInput.value = 'password123';
+            passwordConfirmInput.value = 'password123';
+
+            const event = new Event('submit', { cancelable: true });
+            await LoginComponent.handleSignupSubmit(event);
+
+            expect(mockHideSignupError).toHaveBeenCalled();
+        });
+
+        it('should show error when passwords do not match', async () => {
+            const usernameInput = document.getElementById('signupUsername') as HTMLInputElement;
+            const emailInput = document.getElementById('signupEmail') as HTMLInputElement;
+            const passwordInput = document.getElementById('signupPassword') as HTMLInputElement;
+            const passwordConfirmInput = document.getElementById('signupPasswordConfirm') as HTMLInputElement;
+            usernameInput.value = 'testuser';
+            emailInput.value = 'test@example.com';
+            passwordInput.value = 'password123';
+            passwordConfirmInput.value = 'different';
+
+            const event = new Event('submit', { cancelable: true });
+            await LoginComponent.handleSignupSubmit(event);
+
+            expect(mockShowSignupError).toHaveBeenCalledWith('Passwords do not match');
+            expect(mockSignup).not.toHaveBeenCalled();
+        });
+
+        it('should show error when required fields are empty', async () => {
+            const event = new Event('submit', { cancelable: true });
+            await LoginComponent.handleSignupSubmit(event);
+
+            expect(mockShowSignupError).toHaveBeenCalledWith('Please fill in all fields');
+            expect(mockSignup).not.toHaveBeenCalled();
+        });
+
+        it('should call signup with credentials when form is valid', async () => {
+            const usernameInput = document.getElementById('signupUsername') as HTMLInputElement;
+            const emailInput = document.getElementById('signupEmail') as HTMLInputElement;
+            const passwordInput = document.getElementById('signupPassword') as HTMLInputElement;
+            const passwordConfirmInput = document.getElementById('signupPasswordConfirm') as HTMLInputElement;
+            usernameInput.value = 'testuser';
+            emailInput.value = 'test@example.com';
+            passwordInput.value = 'password123';
+            passwordConfirmInput.value = 'password123';
+
+            const event = new Event('submit', { cancelable: true });
+            await LoginComponent.handleSignupSubmit(event);
+
+            expect(mockSignup).toHaveBeenCalledWith({
+                username: 'testuser',
+                email: 'test@example.com',
+                password: 'password123'
+            });
         });
     });
 

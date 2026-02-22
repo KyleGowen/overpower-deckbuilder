@@ -317,6 +317,7 @@ app.get('/api/basic-universe', async (req, res) => {
 
 // Authentication routes
 app.post('/api/auth/login', authService.handleLogin.bind(authService));
+app.post('/api/auth/signup', authService.handleSignup.bind(authService));
 app.post('/api/auth/google', authService.handleGoogleLogin.bind(authService));
 app.post('/api/auth/logout', authService.handleLogout.bind(authService));
 app.get('/api/auth/me', authService.handleSessionValidation.bind(authService));

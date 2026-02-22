@@ -509,6 +509,7 @@ const authenticateUser = authService.createAuthMiddleware();
 
 // User authentication endpoints
 app.post('/api/auth/login', (req, res) => authService.handleLogin(req, res));
+app.post('/api/auth/signup', (req, res) => authService.handleSignup(req, res));
 app.post('/api/auth/google', (req, res) => authService.handleGoogleLogin(req, res));
 app.post('/api/auth/logout', (req, res) => authService.handleLogout(req, res));
 app.get('/api/auth/me', (req, res) => authService.handleSessionValidation(req, res));

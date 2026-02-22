@@ -679,4 +679,155 @@ describe('AuthenticationService', () => {
       );
     });
   });
+
+  describe('handleSignup', () => {
+    beforeEach(() => {
+      jest.mocked(checkLimit).mockReturnValue(true);
+      jest.mocked(recordCreation).mockImplementation(() => {});
+      (mockRequest as any).ip = '192.168.1.1';
+    });
+
+    it('should return 400 when username is missing', async () => {
+      mockRequest.body = { email: 'test@example.com', password: 'password123' };
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Username is required' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when email is missing', async () => {
+      mockRequest.body = { username: 'testuser', password: 'password123' };
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Email is required' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when password is missing', async () => {
+      mockRequest.body = { username: 'testuser', email: 'test@example.com' };
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Password is required' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 when username is whitespace only', async () => {
+      mockRequest.body = { username: '   ', email: 'test@example.com', password: 'password123' };
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Username is required' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 for invalid email format', async () => {
+      mockRequest.body = { username: 'testuser', email: 'notanemail', password: 'password123' };
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Invalid email format' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 429 when rate limit exceeded', async () => {
+      mockRequest.body = { username: 'newuser', email: 'new@example.com', password: 'password123' };
+      jest.mocked(checkLimit).mockReturnValue(false);
+      mockUserRepository.getUserByUsername.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(429);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Too many new accounts. Please try again later.'
+      });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+      expect(recordCreation).not.toHaveBeenCalled();
+    });
+
+    it('should return 409 when username already exists', async () => {
+      mockRequest.body = { username: 'existing', email: 'new@example.com', password: 'password123' };
+      mockUserRepository.getUserByUsername.mockResolvedValue({
+        id: 'existing-id',
+        name: 'existing',
+        email: 'existing@other.com',
+        role: 'USER' as UserRole
+      });
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(409);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Username already exists' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should return 409 when email already exists', async () => {
+      mockRequest.body = { username: 'newuser', email: 'existing@example.com', password: 'password123' };
+      mockUserRepository.getUserByUsername.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue({
+        id: 'existing-id',
+        name: 'existing',
+        email: 'existing@example.com',
+        role: 'USER' as UserRole
+      });
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(409);
+      expect(mockResponse.json).toHaveBeenCalledWith({ success: false, error: 'Email already exists' });
+      expect(mockUserRepository.createUser).not.toHaveBeenCalled();
+    });
+
+    it('should create user, set session cookie, and return user on success', async () => {
+      const newUser: User = {
+        id: 'new-id',
+        name: 'newuser',
+        email: 'new@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { username: 'newuser', email: 'new@example.com', password: 'password123' };
+      mockUserRepository.getUserByUsername.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+      mockUserRepository.createUser.mockResolvedValue(newUser);
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.createUser).toHaveBeenCalledWith('newuser', 'new@example.com', 'password123', 'USER');
+      expect(recordCreation).toHaveBeenCalledWith('192.168.1.1');
+      expect(mockResponse.cookie).toHaveBeenCalledWith('sessionId', expect.any(String), expect.any(Object));
+      expect(mockUserRepository.updateLastLoginAt).toHaveBeenCalledWith('new-id');
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        data: { userId: newUser.id, username: newUser.name }
+      });
+    });
+
+    it('should trim username and email before validation', async () => {
+      const newUser: User = {
+        id: 'new-id',
+        name: 'trimmed',
+        email: 'trimmed@example.com',
+        role: 'USER' as UserRole
+      };
+      mockRequest.body = { username: '  trimmed  ', email: '  trimmed@example.com  ', password: 'password123' };
+      mockUserRepository.getUserByUsername.mockResolvedValue(undefined);
+      mockUserRepository.getUserByEmail.mockResolvedValue(undefined);
+      mockUserRepository.createUser.mockResolvedValue(newUser);
+
+      await authService.handleSignup(mockRequest as Request, mockResponse as Response);
+
+      expect(mockUserRepository.createUser).toHaveBeenCalledWith('trimmed', 'trimmed@example.com', 'password123', 'USER');
+    });
+  });
 });

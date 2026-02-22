@@ -26,28 +26,61 @@ async function showLoginModal() {
                 const fallbackHTML = `
                     <div id="loginModal" class="login-modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
                         <div class="login-modal-content" style="background: #2c3e50; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
-                            <div class="login-header" style="text-align: center; margin-bottom: 20px;">
-                                <h2 style="color: #ecf0f1; margin: 0;">Please Log In</h2>
+                            <div id="loginView">
+                                <div class="login-header" style="text-align: center; margin-bottom: 20px;">
+                                    <h2 style="color: #ecf0f1; margin: 0;">Please Log In</h2>
+                                </div>
+                                <form id="loginForm" class="login-form">
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="username" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Username</label>
+                                        <input type="text" id="username" name="username" autocomplete="username" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="password" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Password</label>
+                                        <input type="password" id="password" name="password" autocomplete="current-password" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div id="loginError" class="error-message" style="display: none; color: #e74c3c; margin-bottom: 10px;"></div>
+                                </form>
+                                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                                    <button type="submit" form="loginForm" class="login-btn" style="width: 100%; padding: 8px 14px; background: #4ecdc4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Log In</button>
+                                    <button type="button" id="googleLoginBtn" class="google-btn" style="width: 100%; padding: 8px 14px; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Sign in with Google</button>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px;">
+                                        <button type="button" id="guestLoginBtn" class="guest-btn" style="width: 100%; padding: 8px 14px; background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Continue as Guest</button>
+                                        <button type="button" id="signUpBtn" class="signup-btn" style="width: 100%; padding: 8px 14px; background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Sign Up</button>
+                                    </div>
+                                </div>
                             </div>
-                            <form id="loginForm" class="login-form">
-                                <div class="form-group" style="margin-bottom: 15px;">
-                                    <label for="username" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Username</label>
-                                    <input type="text" id="username" name="username" autocomplete="username" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                            <div id="signupView" style="display: none;">
+                                <div class="login-header" style="text-align: center; margin-bottom: 20px;">
+                                    <h2 style="color: #4ecdc4; margin: 0;">Create Account</h2>
                                 </div>
-                                <div class="form-group" style="margin-bottom: 15px;">
-                                    <label for="password" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Password</label>
-                                    <input type="password" id="password" name="password" autocomplete="current-password" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
-                                </div>
-                                <div id="loginError" class="error-message" style="display: none; color: #e74c3c; margin-bottom: 10px;"></div>
-                                <button type="submit" class="login-btn" style="width: 100%; padding: 12px; background: #4ecdc4; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 10px;">Log In</button>
-                            </form>
-                            <button type="button" id="googleLoginBtn" class="google-btn" style="width: 100%; padding: 10px; background: #4285f4; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">Sign in with Google</button>
-                            <button type="button" id="guestLoginBtn" class="guest-btn" style="width: 100%; padding: 10px; background: transparent; color: #4ecdc4; border: 1px solid #4ecdc4; border-radius: 5px; cursor: pointer;">Continue as Guest</button>
+                                <form id="signupForm" class="login-form">
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="signupUsername" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Username</label>
+                                        <input type="text" id="signupUsername" name="username" autocomplete="username" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="signupEmail" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Email</label>
+                                        <input type="email" id="signupEmail" name="email" autocomplete="email" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="signupPassword" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Password</label>
+                                        <input type="password" id="signupPassword" name="password" autocomplete="new-password" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 15px;">
+                                        <label for="signupPasswordConfirm" style="display: block; color: #ecf0f1; margin-bottom: 5px;">Repeat Password</label>
+                                        <input type="password" id="signupPasswordConfirm" name="passwordConfirm" autocomplete="new-password" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #34495e; background: #34495e; color: #ecf0f1;">
+                                    </div>
+                                    <div id="signupError" class="error-message" style="display: none; color: #e74c3c; margin-bottom: 10px;"></div>
+                                    <button type="submit" class="login-btn" style="width: 100%; padding: 12px; background: #4ecdc4; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 10px;">Create Account</button>
+                                </form>
+                                <a href="#" id="signupBackLink" style="display: block; margin-top: 10px; color: #4ecdc4; font-size: 14px;">Already have an account? Log in</a>
+                            </div>
                         </div>
                     </div>
                 `;
                 document.body.insertAdjacentHTML('afterbegin', fallbackHTML);
-                
+
                 // Setup event listeners for the fallback modal
                 const loginForm = document.getElementById('loginForm');
                 const guestLoginBtn = document.getElementById('guestLoginBtn');
@@ -82,6 +115,64 @@ async function showLoginModal() {
                         }
                     });
                 }
+                const signUpBtn = document.getElementById('signUpBtn');
+                if (signUpBtn) {
+                    signUpBtn.addEventListener('click', () => {
+                        if (typeof handleSignUpClick === 'function') {
+                            handleSignUpClick();
+                        } else if (typeof window.handleSignUpClick === 'function') {
+                            window.handleSignUpClick();
+                        } else {
+                            document.getElementById('loginView').style.display = 'none';
+                            document.getElementById('signupView').style.display = 'block';
+                        }
+                    });
+                }
+                const signupForm = document.getElementById('signupForm');
+                if (signupForm) {
+                    signupForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        if (typeof handleSignupSubmit === 'function') {
+                            await handleSignupSubmit(e);
+                        } else if (typeof window.handleSignupSubmit === 'function') {
+                            await window.handleSignupSubmit(e);
+                        } else {
+                            const username = document.getElementById('signupUsername')?.value?.trim();
+                            const email = document.getElementById('signupEmail')?.value?.trim();
+                            const password = document.getElementById('signupPassword')?.value;
+                            const passwordConfirm = document.getElementById('signupPasswordConfirm')?.value;
+                            if (!username || !email || !password || !passwordConfirm) {
+                                const err = document.getElementById('signupError');
+                                if (err) { err.textContent = 'Please fill in all fields'; err.style.display = 'block'; }
+                                return;
+                            }
+                            if (password !== passwordConfirm) {
+                                const err = document.getElementById('signupError');
+                                if (err) { err.textContent = 'Passwords do not match'; err.style.display = 'block'; }
+                                return;
+                            }
+                            if (typeof signup === 'function') {
+                                await signup({ username, email, password });
+                            } else if (typeof window.signup === 'function') {
+                                await window.signup({ username, email, password });
+                            }
+                        }
+                    });
+                }
+                const signupBackLink = document.getElementById('signupBackLink');
+                if (signupBackLink) {
+                    signupBackLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (typeof handleSignupBackClick === 'function') {
+                            handleSignupBackClick();
+                        } else if (typeof window.handleSignupBackClick === 'function') {
+                            window.handleSignupBackClick();
+                        } else {
+                            document.getElementById('loginView').style.display = 'block';
+                            document.getElementById('signupView').style.display = 'none';
+                        }
+                    });
+                }
             }
         }
         
@@ -89,9 +180,13 @@ async function showLoginModal() {
         loginModal = document.getElementById('loginModal');
     }
     
-    // Show the login modal if it exists
+    // Show the login modal if it exists, and ensure login view is visible (not signup view)
     if (loginModal) {
         loginModal.style.display = 'flex';
+        const loginView = document.getElementById('loginView');
+        const signupView = document.getElementById('signupView');
+        if (loginView) loginView.style.display = 'block';
+        if (signupView) signupView.style.display = 'none';
     }
     
     // Hide main application views
@@ -118,7 +213,28 @@ function showLoginError(message) {
  * Hide login error message
  */
 function hideLoginError() {
-    document.getElementById('loginError').style.display = 'none';
+    const el = document.getElementById('loginError');
+    if (el) el.style.display = 'none';
+}
+
+/**
+ * Display signup error message to user
+ * @param {string} message - Error message to display
+ */
+function showSignupError(message) {
+    const errorDiv = document.getElementById('signupError');
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+/**
+ * Hide signup error message
+ */
+function hideSignupError() {
+    const el = document.getElementById('signupError');
+    if (el) el.style.display = 'none';
 }
 
 /**
@@ -155,6 +271,30 @@ async function login(username, password) {
         }
     } else {
         showLoginError(result.error || 'Login failed');
+    }
+}
+
+/**
+ * Sign up user with username, email, and password
+ * @param {Object} credentials - { username, email, password }
+ */
+async function signup(credentials) {
+    const result = await window.authService.signup(credentials);
+    if (result.success) {
+        currentUser = result.data;
+        if (typeof window !== 'undefined') window.currentUser = currentUser;
+
+        if (typeof updateUserWelcome === 'function') {
+            updateUserWelcome();
+        }
+
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) mainContainer.style.display = 'block';
+        if (typeof showMainApp === 'function') {
+            showMainApp();
+        }
+    } else {
+        showSignupError(result.error || 'Failed to create account');
     }
 }
 

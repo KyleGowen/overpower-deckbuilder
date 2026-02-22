@@ -246,6 +246,83 @@ export class AuthenticationService {
     }
   }
 
+  /** Simple email format validation - requires local@domain.tld pattern */
+  private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  /**
+   * Handle signup request (public, unauthenticated).
+   * Creates user, applies rate limit (5/IP/min, 10 global/min), establishes session.
+   */
+  public async handleSignup(req: Request, res: Response): Promise<void> {
+    try {
+      const { username, email, password } = req.body;
+
+      if (!username || typeof username !== 'string' || !username.trim()) {
+        res.status(400).json({ success: false, error: 'Username is required' });
+        return;
+      }
+      if (!email || typeof email !== 'string' || !email.trim()) {
+        res.status(400).json({ success: false, error: 'Email is required' });
+        return;
+      }
+      if (!password || typeof password !== 'string') {
+        res.status(400).json({ success: false, error: 'Password is required' });
+        return;
+      }
+
+      const trimmedUsername = username.trim();
+      const trimmedEmail = email.trim();
+
+      if (!AuthenticationService.EMAIL_REGEX.test(trimmedEmail)) {
+        res.status(400).json({ success: false, error: 'Invalid email format' });
+        return;
+      }
+
+      const ip = (req as any).ip || (req as any).connection?.remoteAddress || 'unknown';
+      if (!checkLimit(ip)) {
+        res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
+        return;
+      }
+
+      const existingByUsername = await this.userRepository.getUserByUsername(trimmedUsername);
+      if (existingByUsername) {
+        res.status(409).json({ success: false, error: 'Username already exists' });
+        return;
+      }
+
+      const existingByEmail = await this.userRepository.getUserByEmail(trimmedEmail);
+      if (existingByEmail) {
+        res.status(409).json({ success: false, error: 'Email already exists' });
+        return;
+      }
+
+      recordCreation(ip);
+      const user = await this.userRepository.createUser(trimmedUsername, trimmedEmail, password, 'USER');
+
+      const sessionId = this.createSession(user);
+      res.cookie('sessionId', sessionId, {
+        httpOnly: true,
+        secure: process.env.COOKIE_SECURE === 'true',
+        maxAge: 2 * 60 * 60 * 1000,
+        sameSite: 'lax'
+      });
+
+      try {
+        await this.userRepository.updateLastLoginAt(user.id);
+      } catch (e) {
+        console.error('Warning: failed to update last_login_at:', e);
+      }
+
+      res.status(201).json({
+        success: true,
+        data: { userId: user.id, username: user.name }
+      });
+    } catch (error) {
+      console.error('Signup error:', error);
+      res.status(500).json({ success: false, error: 'Failed to create account' });
+    }
+  }
+
   /**
    * Handle session validation request
    */

@@ -25,6 +25,7 @@
 22. [Export Modal Styling](#export-modal-styling)
 23. [Import Modal Styling](#import-modal-styling)
 24. [Google Sign-In Button Styling](#google-sign-in-button-styling)
+25. [Sign Up and Account Creation Styling](#sign-up-and-account-creation-styling)
 
 ## Overview
 
@@ -2156,4 +2157,46 @@ The "Sign in with Google" button appears in the login modal between the Log In b
 - **Background**: `#357ae8` (darker Google blue)
 
 ### Position
-Positioned between the Log In button and Continue as Guest button in the login form for consistent visual hierarchy.
+Part of the login buttons 2x2 grid (see Login Buttons Grid below).
+
+### Login Buttons Layout
+- **Container**: `.login-buttons-grid`
+- **Layout**: CSS Grid with three rows
+  - **Row 1**: Log In (full width, `grid-column: 1 / -1`)
+  - **Row 2**: Sign in with Google (full width, `grid-column: 1 / -1`)
+  - **Row 3**: Continue as Guest | Sign Up (two columns, `1fr 1fr`)
+- **Gap**: `8px` row, `10px` column
+- **Margin Top**: `12px`
+- **Button sizing**: `padding: 8px 14px`, `font-size: 0.9rem`, `border-radius: 6px`, `white-space: nowrap`
+
+## Sign Up and Account Creation Styling
+
+### Overview
+The login modal supports two views: Login and Sign Up. The Sign Up button toggles to the account creation form. Sign Up uses the same outline/teal secondary style as "Continue as Guest" for visual consistency.
+
+### Sign Up Button
+- **Element**: Button with class `.signup-btn`
+- **Location**: [public/components/login/login.css](public/components/login/login.css)
+- **Styling**: Reuses `.guest-btn` pattern — outline teal, secondary action
+- **Background**: `rgba(78, 205, 196, 0.2)`
+- **Color**: `#4ecdc4`
+- **Border**: `1px solid rgba(78, 205, 196, 0.3)`
+- **Padding**: `12px 24px`
+- **Border Radius**: `8px`
+- **Font Size**: `1.1rem`
+- **Hover**: `background: rgba(78, 205, 196, 0.3)`; `border-color: rgba(78, 205, 196, 0.4)`
+- **Position**: Bottom-right cell of the login buttons 2x2 grid (Log In top-left, Google top-right, Guest bottom-left, Sign Up bottom-right)
+
+### Signup Form
+- **Container**: `#signupView` with class `.signup-view`
+- **Form**: `#signupForm` with classes `.signup-form` and `.login-form`
+- **Heading**: `.signup-heading` — "Create Account" — color `#4ecdc4`, font-size `1.5rem`, font-weight `600`
+- **Input Fields**: Uses same `.form-group` and `.form-group input` styling as login form (teal labels, dark inputs with `rgba(255,255,255,0.1)` background)
+- **Create Account Button**: Uses `.login-btn` (primary teal gradient)
+
+### Back to Log In Link
+- **Element**: Anchor with id `signupBackLink` and class `.signup-back-link`
+- **Color**: `#4ecdc4`
+- **Text**: "Already have an account? Log in"
+- **Hover**: underline
+- **Display**: `block`, margin-top `15px`

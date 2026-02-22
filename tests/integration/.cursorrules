@@ -1,0 +1,12 @@
+# Integration Test Data Cleanup
+
+## Mandatory Cleanup Rules
+
+- **ALL integration tests that create users or decks MUST clean up what they create**
+- **Cleanup MUST run whether the test succeeds or fails**
+- Use try/finally blocks when cleanup is at the end of a test; if any expect() fails first, cleanup would otherwise be skipped
+- For users created via API (POST /api/auth/signup, POST /api/users): capture the userId as soon as the response returns, then call cleanup in a finally block
+- Use integrationTestUtils.createTestUser() for user creation (auto-cleanup via global afterAll)
+- Use integrationTestUtils.trackTestUser(userId) when using userRepository.createUser directly
+- Use integrationTestUtils.trackTestDeck(deckId) for decks created via API
+- **NEVER leave orphaned test data in the database**

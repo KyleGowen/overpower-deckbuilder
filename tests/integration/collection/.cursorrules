@@ -66,6 +66,13 @@ describe('Feature Name Integration Tests', () => {
    - Verify error messages are user-friendly
    - Test edge cases and boundary conditions
 
+## Data Cleanup (Success or Failure)
+
+- **Cleanup must happen regardless of test success or failure**
+- Use integrationTestUtils.trackTestUser() for all users created in beforeAll
+- Suite-level cleanup in afterAll runs even when tests fail; ensure tracked users are cleaned
+- For any per-test user creation outside createTestUser, use try/finally with cleanup in finally
+
 ## Test File Naming
 
 - Use kebab-case: `collection-feature-name.test.ts`
