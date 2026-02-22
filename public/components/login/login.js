@@ -191,8 +191,11 @@ async function handleGoogleLogin() {
         if (result2.success) {
             const user = result2.data;
             if (typeof currentUser !== 'undefined') currentUser = user;
+            if (typeof window !== 'undefined') window.currentUser = user;
             if (typeof updateUserWelcome === 'function') updateUserWelcome();
-            window.location.href = `/users/${(user && user.userId) || (user && user.id) || ''}/decks`;
+            const mainContainer = document.getElementById('mainContainer');
+            if (mainContainer) mainContainer.style.display = 'block';
+            if (typeof showMainApp === 'function') showMainApp();
         } else {
             if (typeof window.showLoginError === 'function') {
                 window.showLoginError(result2.error || 'Google sign-in failed');

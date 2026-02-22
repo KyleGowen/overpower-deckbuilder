@@ -49,11 +49,10 @@ function showMainApp() {
 }
 
 // Load main app data in background without showing the UI
+// loadDecks (called by switchToDeckBuilder) fetches decks and populates userDecks via setUserDecks
+// loadDatabaseViewData() deferred - called by switchToDatabaseView() on first tab switch
 function loadMainAppDataInBackground() {
-    // Load user decks
-    loadUserDecks();
-    // Load database view data (this will populate the global variables)
-    loadDatabaseViewData();
+    // No loadUserDecks - loadDecks handles decks and populates userDecks
 }
 
 // Load user-specific data

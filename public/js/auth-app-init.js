@@ -141,14 +141,18 @@ async function login(username, password) {
     const result = await window.authService.login({ username, password });
     if (result.success) {
         currentUser = result.data;
-        
-        // Update user welcome message and show/hide Create User button based on role
+        if (typeof window !== 'undefined') window.currentUser = currentUser;
+
         if (typeof updateUserWelcome === 'function') {
             updateUserWelcome();
         }
-        
-        // Redirect to user's deck page
-        window.location.href = `/users/${currentUser.userId}/decks`;
+
+        // Client-side navigation: show deck builder without full page reload (switchToDeckBuilder updates URL)
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) mainContainer.style.display = 'block';
+        if (typeof showMainApp === 'function') {
+            showMainApp();
+        }
     } else {
         showLoginError(result.error || 'Login failed');
     }

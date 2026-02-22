@@ -6,14 +6,20 @@
 
     window.DeckSelection.loadDecks = async function loadDecks() {
         try {
-            // Ensure available cards data is loaded first for threat calculation
-            await loadAvailableCardsData();
+            // Fetch decks immediately - deck tiles use metadata/cards from API, not availableCardsMap.
+            // Load availableCardsMap in background for deck editor/import/alternate-art when needed.
+            if (typeof loadAvailableCardsData === 'function') {
+                loadAvailableCardsData().catch(() => {}); // Fire-and-forget, no await
+            }
 
             const response = await fetch('/api/decks', {
                 credentials: 'include'
             });
             const data = await response.json();
             if (data.success) {
+                if (typeof setUserDecks === 'function') {
+                    setUserDecks(data.data);
+                }
                 await window.DeckSelection.displayDecks(data.data);
                 updateDeckStats();
             }

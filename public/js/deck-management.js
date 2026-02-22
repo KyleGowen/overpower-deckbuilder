@@ -21,7 +21,14 @@
 let userDecks = [];
 
 /**
- * Load user decks from the API
+ * Set user decks (used by loadDecks to avoid duplicate fetches)
+ */
+function setUserDecks(decks) {
+    userDecks = Array.isArray(decks) ? decks : [];
+}
+
+/**
+ * Load user decks from the API (use when loadDecks has not run, e.g. Database View Add-to-Deck)
  */
 async function loadUserDecks() {
     try {

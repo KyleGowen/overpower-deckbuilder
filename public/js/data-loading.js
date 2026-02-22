@@ -64,12 +64,14 @@ async function loadDatabaseViewData(forceCharactersTab = false) {
             switchTab('characters');
         }
         
-        // Lock all row heights after all data is loaded
-        setTimeout(() => {
-            if (typeof lockAllSpecialCardRowHeights === 'function') {
-                lockAllSpecialCardRowHeights();
-            }
-        }, 1000);
+        // Lock row heights after layout settles (requestAnimationFrame avoids long arbitrary delay)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (typeof lockAllSpecialCardRowHeights === 'function') {
+                    lockAllSpecialCardRowHeights();
+                }
+            });
+        });
         
     // Disable "Add to Deck" buttons for guest users immediately
     disableAddToDeckButtonsImmediate();
@@ -86,10 +88,6 @@ async function loadCharacters() {
         const data = await response.json();
         
         if (data.success) {
-            
-            // Small delay to ensure DOM is ready
-            await new Promise(resolve => setTimeout(resolve, 10));
-            
             displayCharacters(data.data);
         } else {
             throw new Error('Failed to load characters');
@@ -109,13 +107,13 @@ async function loadSpecialCards() {
         
         if (data.success) {
             displaySpecialCards(data.data);
-            
-            // Lock all row heights after a delay to ensure images are loaded
-            setTimeout(() => {
-                if (typeof lockAllSpecialCardRowHeights === 'function') {
-                    lockAllSpecialCardRowHeights();
-                }
-            }, 500);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (typeof lockAllSpecialCardRowHeights === 'function') {
+                        lockAllSpecialCardRowHeights();
+                    }
+                });
+            });
         } else {
             throw new Error('Failed to load special cards');
         }

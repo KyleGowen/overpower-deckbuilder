@@ -41,17 +41,14 @@ function switchToDatabaseView() {
         }
     }
     
-    // Switch to All tab by default (it's the first tab and should be active)
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         if (typeof switchTab === 'function') {
-            // Check if All tab button exists and is active
             const allTabButton = document.querySelector('[data-tab="all-cards"]');
             if (allTabButton && allTabButton.classList.contains('active')) {
                 switchTab('all-cards');
             }
         }
-    }, 100);
+    });
 }
 
 function switchToDeckBuilder() {
@@ -115,12 +112,13 @@ function switchToDeckBuilder() {
         }
     }
     
-    // Load deck data if not already loaded, but not if we're creating a new deck
+    // Load deck data when switching to deck builder (unless creating new deck)
     const historyState = window.history.state;
     const isCreatingNewDeckCheck = isCreatingNewDeck || currentUrl.includes('/decks/new') || (historyState && historyState.newDeck);
-    
-    
-    if (!isCreatingNewDeckCheck && document.getElementById('total-decks') && document.getElementById('total-decks').textContent === '-') {
+    const totalDecksEl = document.getElementById('total-decks') || document.getElementById('db-total-decks');
+    const needsDeckLoad = !totalDecksEl || totalDecksEl.textContent === '-';
+
+    if (!isCreatingNewDeckCheck && needsDeckLoad) {
         if (typeof loadDeckBuilderData === 'function') {
             loadDeckBuilderData();
         } else if (typeof loadDecks === 'function') {
