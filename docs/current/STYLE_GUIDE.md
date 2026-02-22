@@ -12,18 +12,19 @@
 9. [Interactive States](#interactive-states)
 10. [Responsive Design](#responsive-design)
 11. [Global Navigation](#global-navigation)
-12. [Import/Export Button Styling](#importexport-button-styling)
-13. [One Per Deck Card Dimming](#one-per-deck-card-dimming)
-14. [Cataclysm Card Dimming](#cataclysm-card-dimming)
-15. [Assist Card Dimming](#assist-card-dimming)
-16. [Ambush Card Dimming](#ambush-card-dimming)
-17. [Fortification Card Dimming](#fortification-card-dimming)
-18. [Pre-Placed Button Styling (Spartan Training Ground)](#pre-placed-button-styling-spartan-training-ground)
-19. [Deck Editor Card View Styling](#deck-editor-card-view-styling)
-20. [Deck Editor List View Styling](#deck-editor-list-view-styling)
-21. [Export Modal Styling](#export-modal-styling)
-22. [Import Modal Styling](#import-modal-styling)
-23. [Google Sign-In Button Styling](#google-sign-in-button-styling)
+12. [View Transitions and Modal Fade](#view-transitions-and-modal-fade)
+13. [Import/Export Button Styling](#importexport-button-styling)
+14. [One Per Deck Card Dimming](#one-per-deck-card-dimming)
+15. [Cataclysm Card Dimming](#cataclysm-card-dimming)
+16. [Assist Card Dimming](#assist-card-dimming)
+17. [Ambush Card Dimming](#ambush-card-dimming)
+18. [Fortification Card Dimming](#fortification-card-dimming)
+19. [Pre-Placed Button Styling (Spartan Training Ground)](#pre-placed-button-styling-spartan-training-ground)
+20. [Deck Editor Card View Styling](#deck-editor-card-view-styling)
+21. [Deck Editor List View Styling](#deck-editor-list-view-styling)
+22. [Export Modal Styling](#export-modal-styling)
+23. [Import Modal Styling](#import-modal-styling)
+24. [Google Sign-In Button Styling](#google-sign-in-button-styling)
 
 ## Overview
 
@@ -681,6 +682,37 @@ Consider implementing CSS custom properties for easier theme management:
 - **Contrast**: All nav text must meet WCAG AA on dark gradient
 - **Focus**: Visible teal focus ring `0 0 0 2px rgba(78, 205, 196, 0.5)`
 - **Hit Area**: Minimum 44px height for interactive items
+
+## View Transitions and Modal Fade
+
+### Overview
+View switches and modal open/close use smooth opacity transitions to eliminate visible flash when moving between deck selection, deck editor, and database views.
+
+### Deck Editor Modal Fade
+- **Location**: `#deckEditorModal` in [public/css/deck-background.css](public/css/deck-background.css)
+- **Transition**: `opacity 150ms ease-out`, `visibility 150ms`
+- **Classes**: `.modal-visible` (opacity 1), `.modal-opening` (visibility visible, opacity 0 during fade-in setup)
+- **JS**: Add `modal-visible` after setting `display: flex`; remove `modal-visible` to fade out; on `transitionend` set `display: none`
+
+### View Switch Crossfade (Database / Deck Builder)
+- **Location**: [public/css/index.css](public/css/index.css), [public/components/globalNav.js](public/components/globalNav.js)
+- **Layout**: `#mainContainer` uses CSS Grid (`grid-template-rows: auto 1fr`) so `#database-view`, `#collection-view`, and `#deck-builder` overlap in row 2
+- **Transition**: `opacity 100ms ease-out` on `#database-view` and `#deck-builder`
+- **Classes**:
+  - `.view-hidden`: opacity 0, pointer-events none (fading or hidden)
+  - `.view-removed`: display none (fully removed from layout after transition)
+- **Crossfade flow**: Both views kept in DOM during transition; outgoing gets `.view-hidden`, incoming gets `.view-hidden` removed via `requestAnimationFrame`; on `transitionend`, outgoing gets `.view-removed`
+
+### CSS Selectors
+```css
+#database-view.view-hidden, #deck-builder.view-hidden, #collection-view.view-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+#database-view.view-removed, #deck-builder.view-removed, #collection-view.view-removed {
+    display: none !important;
+}
+```
 
 ## Import/Export Button Styling
 

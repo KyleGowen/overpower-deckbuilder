@@ -2185,239 +2185,52 @@ async function displayDeckCardsForEditing() {
     });
 }
 // Apply background images to character, power, location, special, mission, and aspect cards in deck editor
+// Uses IntersectionObserver to lazy-load images when tiles enter viewport (matching Card View / deck selection efficiency)
 
 // ===== Background rendering, expansion state, deck type/list sections =====
 
+const CARD_PLACEHOLDER = '/src/resources/cards/images/placeholder.webp';
+let deckEditorTileObserver = null;
+
+function loadBackgroundImageForTile(el) {
+    const bgImage = el.getAttribute('data-bg-image');
+    if (!bgImage || el.dataset.bgImageLoaded === '1') return;
+    const usePlaceholderOnError = el.classList.contains('mission-card') || el.classList.contains('event-card');
+    const img = new Image();
+    img.onload = function() {
+        const encodedPath = encodeURI(bgImage);
+        el.style.setProperty('--bg-image', `url(${encodedPath})`);
+        el.dataset.bgImageLoaded = '1';
+    };
+    img.onerror = function() {
+        el.style.setProperty('--bg-image', usePlaceholderOnError ? `url(${CARD_PLACEHOLDER})` : 'none');
+        el.dataset.bgImageLoaded = '1';
+    };
+    img.src = bgImage;
+}
+
 function applyCharacterBackgroundsToEditor() {
-    const characterCards = document.querySelectorAll('.deck-card-editor-item.character-card');
-    const powerCards = document.querySelectorAll('.deck-card-editor-item.power-card');
-    const locationCards = document.querySelectorAll('.deck-card-editor-item.location-card');
-    const specialCards = document.querySelectorAll('.deck-card-editor-item.special-card');
-    const missionCards = document.querySelectorAll('.deck-card-editor-item.mission-card');
-    const eventCards = document.querySelectorAll('.deck-card-editor-item.event-card');
-    const aspectCards = document.querySelectorAll('.deck-card-editor-item.aspect-card');
-    const teamworkCards = document.querySelectorAll('.deck-card-editor-item.teamwork-card');
-    const allyUniverseCards = document.querySelectorAll('.deck-card-editor-item.ally-universe-card');
-    const basicUniverseCards = document.querySelectorAll('.deck-card-editor-item.basic-universe-card');
-    const advancedUniverseCards = document.querySelectorAll('.deck-card-editor-item.advanced-universe-card');
-    const trainingCards = document.querySelectorAll('.deck-card-editor-item.training-card');
-    
-    // Apply to character cards
-    characterCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to power cards
-    powerCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to location cards
-    locationCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to special cards
-    specialCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-
-    // Placeholder for cards when image fails - avoids jarring empty grey slots (e.g. missions 5-7)
-    const CARD_PLACEHOLDER = '/src/resources/cards/images/placeholder.webp';
-    function applyWithPlaceholderFallback(cards, placeholder) {
-        cards.forEach(card => {
-            const bgImage = card.getAttribute('data-bg-image');
-            if (bgImage) {
-                const img = new Image();
-                img.onload = function() { card.style.setProperty('--bg-image', `url(${bgImage})`); };
-                img.onerror = function() { card.style.setProperty('--bg-image', `url(${placeholder})`); };
-                img.src = bgImage;
-            }
-        });
+    const container = document.getElementById('deckCardsEditor');
+    if (!container) return;
+    const lazyEls = container.querySelectorAll('.deck-card-editor-item[data-bg-image]');
+    if (typeof IntersectionObserver === 'undefined') {
+        lazyEls.forEach((el) => loadBackgroundImageForTile(el));
+        return;
     }
-    applyWithPlaceholderFallback(missionCards, CARD_PLACEHOLDER);
-    applyWithPlaceholderFallback(eventCards, CARD_PLACEHOLDER);
-
-    // Apply to teamwork cards
-    teamworkCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to basic-universe cards
-    basicUniverseCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to advanced-universe cards
-    advancedUniverseCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-    
-    // Apply to training cards
-    trainingCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-
-    // Apply to ally-universe cards
-    allyUniverseCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-
-    // Apply to basic-universe cards
-    basicUniverseCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                // URL encode the path for CSS
-                const encodedPath = encodeURI(bgImage);
-                card.style.setProperty('--bg-image', `url(${encodedPath})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-
-    // Apply to aspect cards
-    aspectCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
+    if (!deckEditorTileObserver) {
+        deckEditorTileObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        loadBackgroundImageForTile(entry.target);
+                        deckEditorTileObserver.unobserve(entry.target);
+                    }
+                });
+            },
+            { rootMargin: '200px', threshold: 0.01 }
+        );
+    }
+    lazyEls.forEach((el) => deckEditorTileObserver.observe(el));
 }
 
 // Apply expansion state to deck editor sections

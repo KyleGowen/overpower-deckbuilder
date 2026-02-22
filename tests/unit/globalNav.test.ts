@@ -19,11 +19,11 @@ describe('Global Navigation Component', () => {
     let mockToggleChangePasswordDropdown: jest.Mock;
 
     beforeEach(() => {
-        // Set up DOM
+        // Set up DOM (use view-removed class for view visibility)
         document.body.innerHTML = `
-            <div id="database-view" style="display: none;"></div>
-            <div id="deck-builder" style="display: none;"></div>
-            <div id="collection-view" style="display: none;"></div>
+            <div id="database-view" class="view-removed"></div>
+            <div id="deck-builder" class="view-active"></div>
+            <div id="collection-view" class="view-removed"></div>
             <button id="databaseViewBtn"></button>
             <button id="deckBuilderBtn"></button>
             <button id="collectionViewBtn"></button>
@@ -149,8 +149,9 @@ describe('Global Navigation Component', () => {
     });
 
     describe('switchToDatabaseView()', () => {
-        it('should update URL and show database view', () => {
+        it('should update URL and show database view', async () => {
             (window as any).switchToDatabaseView();
+            await new Promise(r => requestAnimationFrame(r));
 
             expect(window.history.pushState).toHaveBeenCalledWith(
                 { view: 'database' },
@@ -162,9 +163,9 @@ describe('Global Navigation Component', () => {
             const deckBuilder = document.getElementById('deck-builder');
             const collectionView = document.getElementById('collection-view');
 
-            expect(databaseView!.style.display).toBe('block');
-            expect(deckBuilder!.style.display).toBe('none');
-            expect(collectionView!.style.display).toBe('none');
+            expect(databaseView!.classList.contains('view-removed')).toBe(false);
+            expect(deckBuilder!.classList.contains('view-removed')).toBe(true);
+            expect(collectionView!.classList.contains('view-removed')).toBe(true);
         });
 
         it('should update button states', () => {
@@ -239,8 +240,9 @@ describe('Global Navigation Component', () => {
             (window as any).location = { pathname: '/users/test-user-1/decks' };
         });
 
-        it('should update URL and show deck builder', () => {
+        it('should update URL and show deck builder', async () => {
             (window as any).switchToDeckBuilder();
+            await new Promise(r => requestAnimationFrame(r));
 
             expect(window.history.pushState).toHaveBeenCalledWith(
                 { view: 'deckbuilder' },
@@ -252,9 +254,10 @@ describe('Global Navigation Component', () => {
             const databaseView = document.getElementById('database-view');
             const collectionView = document.getElementById('collection-view');
 
-            expect(deckBuilder!.style.display).toBe('block');
-            expect(databaseView!.style.display).toBe('none');
-            expect(collectionView!.style.display).toBe('none');
+            expect(deckBuilder!.classList.contains('view-removed')).toBe(false);
+            expect(deckBuilder!.classList.contains('view-removed')).toBe(false);
+            expect(databaseView!.classList.contains('view-removed')).toBe(true);
+            expect(collectionView!.classList.contains('view-removed')).toBe(true);
         });
 
         it('should preserve /new URL when creating new deck', () => {
@@ -394,9 +397,9 @@ describe('Global Navigation Component', () => {
             const databaseView = document.getElementById('database-view');
             const deckBuilder = document.getElementById('deck-builder');
 
-            expect(collectionView!.style.display).toBe('block');
-            expect(databaseView!.style.display).toBe('none');
-            expect(deckBuilder!.style.display).toBe('none');
+            expect(collectionView!.classList.contains('view-removed')).toBe(false);
+            expect(databaseView!.classList.contains('view-removed')).toBe(true);
+            expect(deckBuilder!.classList.contains('view-removed')).toBe(true);
         });
 
         it('should update button states', () => {

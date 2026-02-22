@@ -89,12 +89,12 @@
 <body>
     <!-- Login Modal will be loaded by login.js component -->
     
-    <div class="container" id="mainContainer" style="display: block; opacity: 1;">
+    <div class="container" id="mainContainer">
         <!-- Global Navigation Component -->
         <div id="globalNav"></div>
 
 
-        <div id="database-view" class="database-section" style="display: none;">
+        <div id="database-view" class="database-section view-removed">
             <!-- Hidden stats elements for functionality (not displayed) -->
             <div class="stats" style="display: none;">
                 <div class="stat-card">
@@ -692,7 +692,7 @@
         </div>
 
         <!-- Collection View -->
-        <div id="collection-view" class="collection-section" style="display: none;">
+        <div id="collection-view" class="collection-section view-removed">
             <!-- Search Bar -->
             <div class="collection-search-container">
                 <input type="text" 
@@ -711,7 +711,7 @@
         </div>
 
         <!-- Deck Builder Section -->
-        <div id="deck-builder" class="deck-builder-section" style="display: none; opacity: 0; transition: opacity 120ms ease-in-out;">
+        <div id="deck-builder" class="deck-builder-section">
             <!-- Deck List -->
             <div class="deck-list-container">
                 <div class="deck-list" id="deck-list">
@@ -1435,6 +1435,13 @@
             
             // Check for 401 Unauthorized responses
             if (response.status === 401) {
+                // Skip for /api/auth/me when user is guest - guest sessions may 401 but user is valid
+                const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+                const isGuest = (typeof getCurrentUser === 'function' && getCurrentUser()?.role === 'GUEST') ||
+                    (window.authService?.getCurrentUser?.()?.role === 'GUEST');
+                if (url.includes('/api/auth/me') && isGuest) {
+                    return response;
+                }
                 // Session expired - clear user and show login modal
                 if (window.authService) {
                     window.authService.currentUser = null;
@@ -1513,7 +1520,7 @@
                         // Ensure database view is hidden to prevent flash
                         const databaseView = document.getElementById('database-view');
                         if (databaseView) {
-                            databaseView.style.display = 'none';
+                            databaseView.classList.add('view-removed');
                         }
                         
                         // Read-only mode removed - now handled by backend flag
@@ -1559,9 +1566,12 @@
                 
                 if (isCollectionRoute && currentUser.role === 'ADMIN') {
                     // Start in collection view
-                    document.getElementById('database-view').style.display = 'none';
-                    document.getElementById('deck-builder').style.display = 'none';
-                    document.getElementById('collection-view').style.display = 'block';
+                    const dbView = document.getElementById('database-view');
+                    const dbBuilder = document.getElementById('deck-builder');
+                    const collView = document.getElementById('collection-view');
+                    if (dbView) dbView.classList.add('view-removed');
+                    if (dbBuilder) dbBuilder.classList.add('view-removed');
+                    if (collView) collView.classList.remove('view-removed');
                     document.getElementById('databaseViewBtn').classList.remove('active');
                     document.getElementById('deckBuilderBtn').classList.remove('active');
                     const collectionBtn = document.getElementById('collectionViewBtn');
@@ -1572,9 +1582,12 @@
                     }
                 } else if (isDeckBuilderRoute) {
                     // Start in deck builder view
-                    document.getElementById('database-view').style.display = 'none';
-                    document.getElementById('deck-builder').style.display = 'block';
-                    document.getElementById('collection-view').style.display = 'none';
+                    const dbView = document.getElementById('database-view');
+                    const dbBuilder = document.getElementById('deck-builder');
+                    const collView = document.getElementById('collection-view');
+                    if (dbView) dbView.classList.add('view-removed');
+                    if (dbBuilder) dbBuilder.classList.remove('view-removed');
+                    if (collView) collView.classList.add('view-removed');
                     document.getElementById('databaseViewBtn').classList.remove('active');
                     document.getElementById('deckBuilderBtn').classList.add('active');
                     const collectionBtn = document.getElementById('collectionViewBtn');
@@ -1582,9 +1595,12 @@
                     
                 } else {
                     // Start in database view
-                    document.getElementById('database-view').style.display = 'block';
-                    document.getElementById('deck-builder').style.display = 'none';
-                    document.getElementById('collection-view').style.display = 'none';
+                    const dbView = document.getElementById('database-view');
+                    const dbBuilder = document.getElementById('deck-builder');
+                    const collView = document.getElementById('collection-view');
+                    if (dbView) dbView.classList.remove('view-removed');
+                    if (dbBuilder) dbBuilder.classList.add('view-removed');
+                    if (collView) collView.classList.add('view-removed');
                     document.getElementById('databaseViewBtn').classList.add('active');
                     document.getElementById('deckBuilderBtn').classList.remove('active');
                     const collectionBtn = document.getElementById('collectionViewBtn');

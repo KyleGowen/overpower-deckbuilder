@@ -10,6 +10,11 @@ function showDeckEditor() {
             return;
         }
         modal.style.display = 'flex';
+        modal.classList.add('modal-opening');
+        requestAnimationFrame(() => {
+            modal.classList.remove('modal-opening');
+            modal.classList.add('modal-visible');
+        });
         
         // Add body class for deck editor specific styling
         document.body.classList.add('deck-editor-active');
@@ -152,8 +157,14 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
         window.deckEditorCards = [];
         // Read-only mode removed - now handled by backend flag
         
-        // Show the deck editor modal
-        document.getElementById('deckEditorModal').style.display = 'block';
+        // Show the deck editor modal (use same fade-in as showDeckEditor)
+        const newDeckModal = document.getElementById('deckEditorModal');
+        newDeckModal.style.display = 'flex';
+        newDeckModal.classList.add('modal-opening');
+        requestAnimationFrame(() => {
+            newDeckModal.classList.remove('modal-opening');
+            newDeckModal.classList.add('modal-visible');
+        });
             
             // Ensure search component is initialized for new deck flow as well
             if (typeof initializeDeckEditorSearch === 'function') {
@@ -1024,7 +1035,16 @@ async function closeDeckEditor() {
         await saveUIPreferences(currentDeckId, preferences);
     }
     
-    document.getElementById('deckEditorModal').style.display = 'none';
+    const modal = document.getElementById('deckEditorModal');
+    const deckBuilderBtn = document.getElementById('deckBuilderBtn');
+    const isAlreadyInDeckBuilder = deckBuilderBtn && deckBuilderBtn.classList.contains('active');
+    
+    // Fade out, then hide
+    modal.classList.remove('modal-visible');
+    modal.addEventListener('transitionend', function onTransitionEnd() {
+        modal.removeEventListener('transitionend', onTransitionEnd);
+        modal.style.display = 'none';
+    }, { once: true });
     
     // Remove body class for deck editor specific styling
     document.body.classList.remove('deck-editor-active');
@@ -1033,8 +1053,10 @@ async function closeDeckEditor() {
     currentDeckData = null;
     window.deckEditorCards = [];
     
-    // Return to deck builder selection screen
-    switchToDeckBuilder();
+    // Return to deck builder selection screen only if not already there (avoids redundant DOM updates and flash)
+    if (!isAlreadyInDeckBuilder && typeof switchToDeckBuilder === 'function') {
+        switchToDeckBuilder();
+    }
 }
 
 // Export Overlay Functions

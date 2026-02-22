@@ -43,7 +43,7 @@ function importDeckFromJson() {
     // 1. Deck editor modal is open (visible), OR
     // 2. There's a currentDeckId (including "new"), OR  
     // 3. There are cards already in the deck
-    const isDeckEditorOpen = deckEditorModal && deckEditorModal.style.display !== 'none';
+    const isDeckEditorOpen = deckEditorModal && (deckEditorModal.classList.contains('modal-visible') || deckEditorModal.style.display !== 'none');
     const hasDeckId = currentDeckId !== null; // This includes "new" for new decks
     const hasCards = window.deckEditorCards && window.deckEditorCards.length > 0;
     

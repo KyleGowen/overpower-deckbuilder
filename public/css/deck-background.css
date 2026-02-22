@@ -124,6 +124,24 @@
     margin-top: 1rem;
 }
 
+/* Deck editor modal fade transition */
+#deckEditorModal {
+    transition: opacity 150ms ease-out, visibility 150ms;
+}
+#deckEditorModal.modal-visible {
+    opacity: 1;
+    visibility: visible;
+}
+#deckEditorModal.modal-opening {
+    visibility: visible;
+    opacity: 0;
+}
+#deckEditorModal:not(.modal-visible):not(.modal-opening) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 /* Ensure deck editor modal can display full-width background */
 .deck-editor-modal {
     position: relative;

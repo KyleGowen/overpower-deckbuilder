@@ -31,7 +31,7 @@ function showMainApp() {
     
     // Hide database view by default to avoid flash and switch directly to deck builder
     const databaseView = document.getElementById('database-view');
-    if (databaseView) databaseView.style.display = 'none';
+    if (databaseView) databaseView.classList.add('view-removed');
 
     // Load core data in background to keep transition smooth
     loadMainAppDataInBackground();
@@ -41,7 +41,7 @@ function showMainApp() {
         switchToDeckBuilder();
     } else {
         const deckBuilder = document.getElementById('deck-builder');
-        if (deckBuilder) deckBuilder.style.display = 'block';
+        if (deckBuilder) deckBuilder.classList.remove('view-removed');
     }
 
     // Disable "Add to Deck" buttons for guest users immediately

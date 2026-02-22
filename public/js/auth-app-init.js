@@ -100,8 +100,8 @@ async function showLoginModal() {
     
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
-    if (databaseView) databaseView.style.display = 'none';
-    if (deckBuilder) deckBuilder.style.display = 'none';
+    if (databaseView) databaseView.classList.add('view-removed');
+    if (deckBuilder) deckBuilder.classList.add('view-removed');
 }
 
 /**
@@ -169,8 +169,8 @@ async function logout() {
     if (mainContainer) mainContainer.style.display = 'none';
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
-    if (databaseView) databaseView.style.display = 'none';
-    if (deckBuilder) deckBuilder.style.display = 'none';
+    if (databaseView) databaseView.classList.add('view-removed');
+    if (deckBuilder) deckBuilder.classList.add('view-removed');
     // Redirect to root page
     window.location.href = '/';
 }

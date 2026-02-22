@@ -26,6 +26,13 @@
             margin: 0 auto;
         }
 
+        /* View visibility: one view visible at a time, no overlap (avoids grid/stacking bugs) */
+        #database-view.view-removed,
+        #deck-builder.view-removed,
+        #collection-view.view-removed {
+            display: none !important;
+        }
+
 
         .header h1 {
             margin: 0;

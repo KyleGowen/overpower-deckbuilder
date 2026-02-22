@@ -16,13 +16,13 @@ function switchToDatabaseView() {
     const collectionBtn = document.getElementById('collectionViewBtn');
     if (collectionBtn) collectionBtn.classList.remove('active');
     
-    // Show database view, hide deck builder and collection view
-    document.getElementById('database-view').style.display = 'block';
-    document.getElementById('deck-builder').style.display = 'none';
+    // Show database, hide deck builder and collection
+    const databaseViewEl = document.getElementById('database-view');
+    const deckBuilderEl = document.getElementById('deck-builder');
     const collectionViewEl = document.getElementById('collection-view');
-    if (collectionViewEl) {
-        collectionViewEl.style.display = 'none';
-    }
+    if (deckBuilderEl) deckBuilderEl.classList.add('view-removed');
+    if (collectionViewEl) collectionViewEl.classList.add('view-removed');
+    if (databaseViewEl) databaseViewEl.classList.remove('view-removed');
     
     // Show database statistics and hide deck statistics
     const databaseStats = document.getElementById('database-stats');
@@ -68,23 +68,13 @@ function switchToDeckBuilder() {
     const collectionBtn = document.getElementById('collectionViewBtn');
     if (collectionBtn) collectionBtn.classList.remove('active');
     
-    // Show deck builder, hide database view and collection view
+    // Show deck builder, hide database and collection
     const deckBuilderEl = document.getElementById('deck-builder');
-    if (deckBuilderEl) {
-        deckBuilderEl.style.display = 'block';
-        // Fade in smoothly to avoid flash
-        requestAnimationFrame(() => {
-            deckBuilderEl.style.opacity = '1';
-        });
-    }
     const databaseViewEl = document.getElementById('database-view');
-    if (databaseViewEl) {
-        databaseViewEl.style.display = 'none';
-    }
     const collectionViewEl = document.getElementById('collection-view');
-    if (collectionViewEl) {
-        collectionViewEl.style.display = 'none';
-    }
+    if (databaseViewEl) databaseViewEl.classList.add('view-removed');
+    if (collectionViewEl) collectionViewEl.classList.add('view-removed');
+    if (deckBuilderEl) deckBuilderEl.classList.remove('view-removed');
     
     // Show deck statistics and hide database statistics
     const databaseStats = document.getElementById('database-stats');
@@ -241,9 +231,9 @@ function switchToCollectionView() {
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
     
-    if (collectionView) collectionView.style.display = 'block';
-    if (databaseView) databaseView.style.display = 'none';
-    if (deckBuilder) deckBuilder.style.display = 'none';
+    if (databaseView) databaseView.classList.add('view-removed');
+    if (deckBuilder) deckBuilder.classList.add('view-removed');
+    if (collectionView) collectionView.classList.remove('view-removed');
     
     // Hide stats sections
     const databaseStats = document.getElementById('database-stats');
