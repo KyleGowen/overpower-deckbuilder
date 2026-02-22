@@ -144,7 +144,6 @@ class FrontendAuthService {
 
   async login(credentials) {
     try {
-      
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -152,7 +151,19 @@ class FrontendAuthService {
         body: JSON.stringify(credentials)
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Login response parse error:', parseError);
+        return {
+          success: false,
+          error: response.status >= 500
+            ? 'Server is temporarily unavailable. Please try again in a few moments.'
+            : 'Login failed'
+        };
+      }
 
       if (data.success && data.data) {
         this.currentUser = {
@@ -200,7 +211,20 @@ class FrontendAuthService {
         body: JSON.stringify(credentials)
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        // Server returned HTML (e.g. 502 Bad Gateway) or other non-JSON
+        console.error('Signup response parse error:', parseError);
+        return {
+          success: false,
+          error: response.status >= 500
+            ? 'Server is temporarily unavailable. Please try again in a few moments.'
+            : 'Failed to create account'
+        };
+      }
 
       if (data.success && data.data) {
         this.currentUser = {
@@ -229,7 +253,19 @@ class FrontendAuthService {
         body: JSON.stringify({ idToken })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Google login response parse error:', parseError);
+        return {
+          success: false,
+          error: response.status >= 500
+            ? 'Server is temporarily unavailable. Please try again in a few moments.'
+            : 'Google sign-in failed'
+        };
+      }
 
       if (data.success && data.data) {
         this.currentUser = {

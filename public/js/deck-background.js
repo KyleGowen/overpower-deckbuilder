@@ -33,14 +33,10 @@ class DeckBackgroundManager {
     // Show button and load backgrounds list for all users in edit mode
     if (!readOnly) {
       const currentUser = this.getCurrentUser();
-      console.log('Background manager: Current user:', currentUser);
       
       if (!currentUser) {
-        console.log('Background manager: No current user found, skipping button creation');
         return;
       }
-      
-      console.log('Background manager: Initializing for user');
 
       // Show the button immediately (prevents header reflow); keep disabled until backgrounds load
       this.createBackgroundButton();
@@ -88,7 +84,6 @@ class DeckBackgroundManager {
       
       if (!response.ok) {
         if (response.status === 403) {
-          console.log('Background feature not available: Access denied');
           return;
         }
         throw new Error('Failed to load backgrounds');
@@ -119,7 +114,6 @@ class DeckBackgroundManager {
         if (data.success && data.data.metadata) {
           const backgroundPath = data.data.metadata.background_image_path || null;
           this.selectedBackground = backgroundPath;
-          console.log('Background manager: Loaded background from deck:', backgroundPath);
           // Apply immediately after loading
           this.applyBackground();
         }
@@ -135,7 +129,6 @@ class DeckBackgroundManager {
   setBackgroundFromDeckData(deckMetadata) {
     if (deckMetadata && deckMetadata.background_image_path !== undefined) {
       this.selectedBackground = deckMetadata.background_image_path || null;
-      console.log('Background manager: Set background from deck metadata:', this.selectedBackground);
       this.applyBackground();
     }
   }
@@ -147,7 +140,6 @@ class DeckBackgroundManager {
     // Check if user exists before showing button
     const currentUser = this.getCurrentUser();
     if (!currentUser) {
-      console.log('Background manager: Not creating button - no current user');
       return; // Don't create button if we can't identify a user session
     }
 
@@ -162,19 +154,14 @@ class DeckBackgroundManager {
         if (retryCount < maxRetries) {
           // Retry after a short delay if button doesn't exist yet
           setTimeout(tryCreateButton, 100);
-        } else {
-          console.warn('Background manager: List View button not found after', maxRetries, 'retries');
         }
         return;
       }
 
       const backgroundBtn = document.getElementById('backgroundBtn');
       if (!backgroundBtn) {
-        console.warn('Background manager: backgroundBtn not found');
         return;
       }
-
-      console.log('Background manager: Enabling Background button');
       backgroundBtn.style.visibility = 'visible';
       backgroundBtn.style.pointerEvents = 'auto';
       backgroundBtn.removeAttribute('aria-hidden');
@@ -193,8 +180,6 @@ class DeckBackgroundManager {
         backgroundBtn.disabled = false;
         backgroundBtn.title = '';
       }
-
-      console.log('Background manager: Button ready');
 
       // Ensure correct disabled state if entering/leaving read-only mode
       if (typeof window.updateBackgroundButtonState === 'function') {
@@ -336,9 +321,7 @@ class DeckBackgroundManager {
    * Select a background
    */
   selectBackground(imagePath) {
-    console.log('Background manager: Selecting background:', imagePath);
     this.selectedBackground = imagePath;
-    console.log('Background manager: Selected background set to:', this.selectedBackground);
     
     // Update selected state in modal
     const options = this.modal.querySelectorAll('.background-option');
@@ -375,10 +358,6 @@ class DeckBackgroundManager {
     const modalContent = deckEditorModal ? deckEditorModal.querySelector('.modal-content') : null;
     const modalBody = deckEditorModal ? deckEditorModal.querySelector('.modal-body') : null;
     
-    console.log('Background manager: Applying background:', this.selectedBackground);
-    console.log('Background manager: Found modal-content:', modalContent);
-    console.log('Background manager: Found modal-body:', modalBody);
-    
     // Remove existing background from both modal-content and modal-body
     if (modalContent) {
       modalContent.style.backgroundImage = '';
@@ -394,15 +373,12 @@ class DeckBackgroundManager {
       // Header and stats bar have solid backgrounds so they won't show the image
       if (modalContent) {
         const imageUrl = `/${this.selectedBackground}`;
-        console.log('Background manager: Setting background image on modal-content:', imageUrl);
         modalContent.style.backgroundImage = `url(${imageUrl})`;
         modalContent.style.backgroundSize = 'cover';
         modalContent.style.backgroundPosition = 'center';
         modalContent.style.backgroundRepeat = 'no-repeat';
         modalContent.style.backgroundAttachment = 'scroll'; // Changed from 'fixed' to 'scroll' for proper positioning
         modalContent.style.backgroundColor = 'transparent'; // Ensure no background color conflicts
-      } else {
-        console.warn('Background manager: modal-content not found, cannot apply background');
       }
     } else {
       // Default black background
@@ -417,7 +393,6 @@ class DeckBackgroundManager {
    * Get selected background for saving
    */
   getSelectedBackground() {
-    console.log('Background manager: getSelectedBackground() called, returning:', this.selectedBackground);
     return this.selectedBackground;
   }
 

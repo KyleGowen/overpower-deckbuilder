@@ -62,10 +62,13 @@ locals {
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_cache_bypass $http_upgrade;
             
-            # Increase timeout for long-running requests
-            proxy_connect_timeout 60s;
-            proxy_send_timeout 60s;
-            proxy_read_timeout 60s;
+            # Timeouts and buffering for stability under concurrent static file loads
+            proxy_connect_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_read_timeout 120s;
+            proxy_buffering on;
+            proxy_buffer_size 8k;
+            proxy_buffers 8 16k;
         }
 
         # Health check endpoint - proxy to application for full JSON response

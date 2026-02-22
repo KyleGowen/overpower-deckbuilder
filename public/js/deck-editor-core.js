@@ -354,14 +354,6 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     const imagePath = cardData.image_path || cardData.image || '';
                     const isAlternateArt = imagePath && imagePath.includes('/alternate/');
                     
-                    console.log('[DeckEditor] Processing card for alternate art detection:', {
-                        cardId: card.cardId,
-                        cardType: card.type,
-                        imagePath: imagePath,
-                        isAlternateArt: isAlternateArt,
-                        hasSelectedAlternateCardId: !!card.selectedAlternateCardId
-                    });
-                    
                     if (isAlternateArt) {
                         // This cardId is an alternate art, find the base card
                         let baseCardId = null;
@@ -422,13 +414,6 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                         
                         if (baseCardId && baseCard) {
                             // Found base card, set selectedAlternateCardId to the alternate card ID
-                            console.log('[DeckEditor] Detected alternate art card, setting selectedAlternateCardId:', {
-                                originalCardId: card.cardId,
-                                baseCardId: baseCardId,
-                                alternateCardId: card.cardId,
-                                cardType: card.type
-                            });
-                            
                             return {
                                 ...card,
                                 cardId: baseCardId, // Use base card ID for grouping
@@ -441,12 +426,6 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                             // or it's an alternate art but we can't find the base
                             // In this case, keep the cardId as-is but still set selectedAlternateCardId
                             // This handles edge cases where alternate arts might not have a clear base
-                            console.warn('[DeckEditor] Could not find base card for alternate art, keeping cardId as-is:', {
-                                cardId: card.cardId,
-                                cardType: card.type,
-                                imagePath: imagePath
-                            });
-                            
                             // Still set selectedAlternateCardId to indicate this is the selected art
                             // The cardId might already be correct (alternate art card ID)
                             return {
@@ -525,20 +504,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                         }
                     });
                     
-                    const beforeConsolidation = window.deckEditorCards.length;
                     window.deckEditorCards = Array.from(consolidatedCards.values());
-                    
-                    console.log('[DeckEditor] Consolidated deck cards after alternate art detection:', {
-                        beforeConsolidation,
-                        afterConsolidation: window.deckEditorCards.length,
-                        cards: window.deckEditorCards.map(c => ({
-                            type: c.type,
-                            cardId: c.cardId,
-                            quantity: c.quantity,
-                            selectedAlternateCardId: c.selectedAlternateCardId,
-                            selectedAlternateCardIds: c.selectedAlternateCardIds
-                        }))
-                    });
                 } else {
                     // No consolidation needed, but ensure selectedAlternateCardId is set correctly
                     window.deckEditorCards = window.deckEditorCards.map(card => {

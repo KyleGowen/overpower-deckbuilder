@@ -352,7 +352,7 @@ function renderCardCell(card) {
     return `
         <div class="all-cards-cell">
             <div class="card-image-wrapper">
-                <img src="${imagePath}"
+                <img data-src="${imagePath}"
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
                      loading="lazy"
@@ -409,6 +409,16 @@ function displayAllCards(cards = null) {
     
     // Render all cards
     container.innerHTML = sortedCards.map(card => renderCardCell(card)).join('');
+    
+    // Queue image loads to throttle concurrent requests (prevents 502)
+    if (typeof window.ImageLoadQueue !== 'undefined') {
+        window.ImageLoadQueue.processContainer(container);
+    } else {
+        container.querySelectorAll('img[data-src]').forEach(img => {
+            const src = img.dataset.src || img.getAttribute('data-src');
+            if (src) img.src = src;
+        });
+    }
     
     console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }
