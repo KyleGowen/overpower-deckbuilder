@@ -7,6 +7,56 @@
             this.maxResults = options.maxResults || 20;
         }
 
+        _getImagePath(card, cardType) {
+            const img = card.image || card.image_path || '';
+            return cardType === 'location'
+                ? `/src/resources/cards/images/locations/${img}`
+                : `/src/resources/cards/images/${img}`;
+        }
+
+        _searchInMap(searchTerm) {
+            const map = typeof window !== 'undefined' ? window.availableCardsMap : null;
+            if (!map || map.size === 0) return null;
+            const byId = new Map();
+            for (const c of map.values()) {
+                if (c && c.id) byId.set(c.id, c);
+            }
+            const results = [];
+            const term = searchTerm.toLowerCase();
+            for (const card of byId.values()) {
+                const type = card.cardType || card.type;
+                const name = (card.name || card.card_name || card.power_type || card.to_use || '').toLowerCase();
+                const charName = (card.character || '').toLowerCase();
+                let match = false;
+                if (type === 'character' && name && name.includes(term)) match = true;
+                else if (type === 'special' && (name.includes(term) || charName.includes(term) || charName === term || term === 'special')) match = true;
+                else if (type === 'mission' && ((card.card_name || '').toLowerCase().includes(term) || (card.mission_set || '').toLowerCase().includes(term) || term === 'mission' || term === 'missions')) match = true;
+                else if (type === 'event' && (name.includes(term) || (card.mission_set || '').toLowerCase().includes(term) || term === 'event' || term === 'events')) match = true;
+                else if (type === 'aspect' && (card.card_name || '').toLowerCase().includes(term)) match = true;
+                else if (type === 'advanced-universe' && (name.includes(term) || charName.includes(term) || charName === term || term === 'advanced')) match = true;
+                else if (type === 'teamwork' && ((card.to_use || card.name || '').toLowerCase().includes(term) || charName.includes(term) || charName === term || term === 'teamwork')) match = true;
+                else if (type === 'ally-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'ally')) match = true;
+                else if (type === 'training' && ((card.card_name || '').toLowerCase().includes(term) || term === 'training')) match = true;
+                else if (type === 'basic-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'basic')) match = true;
+                else if (type === 'power' && ((card.power_type || '').toLowerCase().includes(term) || term === 'power card')) match = true;
+                else if (type === 'location' && (name.includes(term) || term === 'location')) match = true;
+                if (match) {
+                    const displayName = type === 'teamwork' ? (card.to_use || card.name) : (type === 'power' ? card.power_type : (card.card_name || card.name || card.power_type));
+                    if (displayName) {
+                        results.push({
+                            id: card.id,
+                            name: displayName,
+                            type: type === 'advanced-universe' ? type : (type === 'ally-universe' ? type : (type === 'basic-universe' ? type : type)),
+                            image: this._getImagePath(card, type),
+                            character: card.character || null,
+                            imagePath: card.image
+                        });
+                    }
+                }
+            }
+            return results;
+        }
+
         async search(term) {
             const searchTerm = (term || '').trim().toLowerCase();
             if (searchTerm.length < 2) return [];
@@ -14,7 +64,16 @@
             const results = [];
 
             try {
-                // Fetch all endpoints in parallel for responsiveness
+                // Prefer in-memory search when availableCardsMap is populated (avoids 12 API calls per search)
+                const mapResults = this._searchInMap(searchTerm);
+                if (mapResults !== null) {
+                    return mapResults
+                        .filter(r => r.name && r.name.trim())
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .slice(0, this.maxResults);
+                }
+
+                // Fallback: fetch all endpoints in parallel when map is empty
                 const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
                     fetch('/api/characters').then(r => r.json()).catch(() => ({ success: false, data: [] })),
                     fetch('/api/special-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),

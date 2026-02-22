@@ -56,271 +56,54 @@ async function handleDeckEditorSearch(e) {
     }, 300);
 }
 
-// Search all card types
+// Search all card types - uses availableCardsMap when populated (via CardSearchService), otherwise fetches
 async function searchAllCards(searchTerm) {
-    const results = [];
-    
-    try {
-        // Search characters
-        const charactersResponse = await fetch('/api/characters');
-        const characters = await charactersResponse.json();
-        if (characters.success) {
-            characters.data.forEach(char => {
-                if (char.name && char.name.toLowerCase().includes(searchTerm)) {
-                    results.push({
-                        id: char.id,
-                        name: char.name,
-                        type: 'character',
-                        image: `/src/resources/cards/images/${char.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
+    const term = (searchTerm || '').trim();
+    if (term.length < 2) return [];
 
-        // Search special cards
-        const specialResponse = await fetch('/api/special-cards');
-        const specialCards = await specialResponse.json();
-        if (specialCards.success) {
-            specialCards.data.forEach(card => {
-                
-                // Check if card name contains search term
-                const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                
-                // Check if character field contains search term
-                const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                
-                // Check if character field exactly matches search term (for character-specific searches)
-                const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm.toLowerCase();
-                
-                const typeMatch = searchTerm === 'special';
-                if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.name,
-                        type: 'special',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: card.character
-                    });
-                }
-            });
-        }
-
-
-        // Search missions
-        const missionsResponse = await fetch('/api/missions');
-        const missions = await missionsResponse.json();
-        if (missions.success) {
-            missions.data.forEach(mission => {
-                // Check if card name contains search term
-                const nameMatch = mission.card_name && mission.card_name.toLowerCase().includes(searchTerm);
-                
-                // Check if mission set contains search term
-                const setMatch = mission.mission_set && mission.mission_set.toLowerCase().includes(searchTerm);
-                
-                // Check for exact type match
-                const typeMatch = searchTerm === 'mission' || searchTerm === 'missions';
-                
-                if (nameMatch || setMatch || typeMatch) {
-                    results.push({
-                        id: mission.id,
-                        name: mission.card_name,
-                        type: 'mission',
-                        image: `/src/resources/cards/images/${mission.image}`,
-                        character: mission.mission_set
-                    });
-                }
-            });
-        }
-
-        // Search events
-        const eventsResponse = await fetch('/api/events');
-        const events = await eventsResponse.json();
-        if (events.success) {
-            events.data.forEach(event => {
-                // Check if event name contains search term
-                const nameMatch = event.name && event.name.toLowerCase().includes(searchTerm);
-                
-                // Check if mission set contains search term
-                const setMatch = event.mission_set && event.mission_set.toLowerCase().includes(searchTerm);
-                
-                // Check for exact type match
-                const typeMatch = searchTerm === 'event' || searchTerm === 'events';
-                
-                if (nameMatch || setMatch || typeMatch) {
-                    results.push({
-                        id: event.id,
-                        name: event.name,
-                        type: 'event',
-                        image: `/src/resources/cards/images/${event.image}`,
-                        character: event.mission_set
-                    });
-                }
-            });
-        }
-
-        // Search aspects
-        const aspectsResponse = await fetch('/api/aspects');
-        const aspects = await aspectsResponse.json();
-        if (aspects.success) {
-            aspects.data.forEach(aspect => {
-                if (aspect.card_name && aspect.card_name.toLowerCase().includes(searchTerm)) {
-                    results.push({
-                        id: aspect.id,
-                        name: aspect.card_name,
-                        type: 'aspect',
-                        image: `/src/resources/cards/images/${aspect.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-
-        // Search advanced universe
-        const advancedResponse = await fetch('/api/advanced-universe');
-        const advancedCards = await advancedResponse.json();
-        if (advancedCards.success) {
-            advancedCards.data.forEach(card => {
-                const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm.toLowerCase();
-                
-                const typeMatch = searchTerm === 'advanced';
-                if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.name,
-                        type: 'advanced-universe',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: card.character
-                    });
-                }
-            });
-        }
-
-        // Search teamwork
-        const teamworkResponse = await fetch('/api/teamwork');
-        const teamworkCards = await teamworkResponse.json();
-        if (teamworkCards.success) {
-            teamworkCards.data.forEach(card => {
-                const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm.toLowerCase();
-                const typeMatch = searchTerm === 'teamwork';                        
-                if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.to_use,
-                        type: 'teamwork',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: card.character
-                    });
-                }
-            });
-        }
-
-        // Search ally universe
-        const allyResponse = await fetch('/api/ally-universe');
-        const allyCards = await allyResponse.json();
-        if (allyCards.success) {
-            allyCards.data.forEach(card => {
-                const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
-                
-                const typeMatch = searchTerm === 'ally';
-                if (nameMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.card_name,
-                        type: 'ally-universe',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-
-        // Search training
-        const trainingResponse = await fetch('/api/training');
-        const trainingCards = await trainingResponse.json();
-        if (trainingCards.success) {
-            trainingCards.data.forEach(card => {
-                const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
-                
-                const typeMatch = searchTerm === 'training';
-                if (nameMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.card_name,
-                        type: 'training',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-
-        // Search basic universe
-        const basicResponse = await fetch('/api/basic-universe');
-        const basicCards = await basicResponse.json();
-        if (basicCards.success) {
-            basicCards.data.forEach(card => {
-                const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
-                
-                const typeMatch = searchTerm === 'basic';
-                if (nameMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.card_name,
-                        type: 'basic-universe',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-
-        // Search power cards
-        const powerResponse = await fetch('/api/power-cards');
-        const powerCards = await powerResponse.json();
-        if (powerCards.success) {
-            powerCards.data.forEach(card => {
-                if (card.power_type && card.power_type.toLowerCase().includes(searchTerm) || searchTerm === 'power card') {
-                    results.push({
-                        id: card.id,
-                        name: card.power_type,
-                        type: 'power',
-                        image: `/src/resources/cards/images/${card.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-
-        // Search locations
-        const locationResponse = await fetch('/api/locations');
-        const locationCards = await locationResponse.json();
-        if (locationCards.success) {
-            locationCards.data.forEach(card => {
-                const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                const typeMatch = searchTerm === 'location';
-                
-                if (nameMatch || typeMatch) {
-                    results.push({
-                        id: card.id,
-                        name: card.name,
-                        type: 'location',
-                        image: `/src/resources/cards/images/locations/${card.image}`,
-                        character: null
-                    });
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error searching cards:', error);
+    if (window.CardSearchService) {
+        const svc = new window.CardSearchService({ maxResults: 20 });
+        return svc.search(term);
     }
 
-    
-    // Sort results by name and limit to 20
+    // Legacy fallback when CardSearchService not loaded
+    const results = [];
+    try {
+        const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
+            fetch('/api/characters').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/special-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/missions').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/events').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/aspects').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/advanced-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/teamwork').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/ally-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/training').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/basic-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/power-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch('/api/locations').then(r => r.json()).catch(() => ({ success: false, data: [] }))
+        ]);
+        const st = term.toLowerCase();
+        const add = (card, type, name, char) => {
+            if (!name) return;
+            const img = type === 'location' ? `/src/resources/cards/images/locations/${card.image}` : `/src/resources/cards/images/${card.image}`;
+            results.push({ id: card.id, name, type, image: img, character: char ?? null });
+        };
+        if (characters.success) characters.data.forEach(c => c.name?.toLowerCase().includes(st) && add(c, 'character', c.name, null));
+        if (specials.success) specials.data.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'special') add(c, 'special', c.name, c.character); });
+        if (missions.success) missions.data.forEach(m => { const cn = m.card_name?.toLowerCase(); const ms = m.mission_set?.toLowerCase(); if (cn?.includes(st) || ms?.includes(st) || st === 'mission' || st === 'missions') add(m, 'mission', m.card_name, m.mission_set); });
+        if (events.success) events.data.forEach(e => { const nm = e.name?.toLowerCase(); const ms = e.mission_set?.toLowerCase(); if (nm?.includes(st) || ms?.includes(st) || st === 'event' || st === 'events') add(e, 'event', e.name, e.mission_set); });
+        if (aspects.success) aspects.data.forEach(a => a.card_name?.toLowerCase().includes(st) && add(a, 'aspect', a.card_name, null));
+        if (advanced.success) advanced.data.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'advanced') add(c, 'advanced-universe', c.name, c.character); });
+        if (teamwork.success) teamwork.data.forEach(c => { const n = (c.to_use || c.name)?.toLowerCase(); const ch = c.character?.toLowerCase(); if (n?.includes(st) || ch?.includes(st) || ch === st || st === 'teamwork') add(c, 'teamwork', c.to_use || c.name, c.character); });
+        if (ally.success) ally.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
+        if (training.success) training.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
+        if (basic.success) basic.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));
+        if (power.success) power.data.forEach(c => ((c.power_type?.toLowerCase().includes(st)) || st === 'power card') && add(c, 'power', c.power_type, null));
+        if (locations.success) locations.data.forEach(c => (c.name?.toLowerCase().includes(st) || st === 'location') && add(c, 'location', c.name, null));
+    } catch (err) {
+        console.error('Error searching cards:', err);
+    }
     const filteredResults = results
         .filter(result => result.name && result.name.trim()) // Filter out results with empty names
         .sort((a, b) => a.name.localeCompare(b.name))

@@ -15,12 +15,17 @@ class DeckBackgroundManager {
    * Initialize the background manager
    * @param {string} deckId - The deck ID
    * @param {boolean} readOnly - Whether this is read-only/view mode (button won't be shown)
+   * @param {object} [deckMetadata] - Optional deck metadata (e.g. from loadDeckForEditing). When provided, skips redundant deck fetch.
    */
-  async initialize(deckId, readOnly = false) {
+  async initialize(deckId, readOnly = false, deckMetadata = null) {
     this.currentDeckId = deckId;
     
-    // Load current deck background (works for all users in view mode)
-    await this.loadDeckBackground();
+    // Load current deck background - skip fetch when metadata already provided (e.g. from loadDeckForEditing)
+    if (deckMetadata) {
+      this.selectedBackground = deckMetadata.background_image_path ?? null;
+    } else {
+      await this.loadDeckBackground();
+    }
     
     // Apply background to editor (works for all users)
     this.applyBackground();

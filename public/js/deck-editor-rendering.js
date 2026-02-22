@@ -2272,39 +2272,21 @@ function applyCharacterBackgroundsToEditor() {
         }
     });
 
-    // Apply to mission cards
-    missionCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
-
-    // Apply to event cards
-    eventCards.forEach(card => {
-        const bgImage = card.getAttribute('data-bg-image');
-        if (bgImage) {
-            // Test if image loads successfully
-            const img = new Image();
-            img.onload = function() {
-                card.style.setProperty('--bg-image', `url(${bgImage})`);
-            };
-            img.onerror = function() {
-                // Fallback: use default gradient without background image
-                card.style.setProperty('--bg-image', 'none');
-            };
-            img.src = bgImage;
-        }
-    });
+    // Placeholder for cards when image fails - avoids jarring empty grey slots (e.g. missions 5-7)
+    const CARD_PLACEHOLDER = '/src/resources/cards/images/placeholder.webp';
+    function applyWithPlaceholderFallback(cards, placeholder) {
+        cards.forEach(card => {
+            const bgImage = card.getAttribute('data-bg-image');
+            if (bgImage) {
+                const img = new Image();
+                img.onload = function() { card.style.setProperty('--bg-image', `url(${bgImage})`); };
+                img.onerror = function() { card.style.setProperty('--bg-image', `url(${placeholder})`); };
+                img.src = bgImage;
+            }
+        });
+    }
+    applyWithPlaceholderFallback(missionCards, CARD_PLACEHOLDER);
+    applyWithPlaceholderFallback(eventCards, CARD_PLACEHOLDER);
 
     // Apply to teamwork cards
     teamworkCards.forEach(card => {

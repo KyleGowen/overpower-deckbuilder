@@ -25,33 +25,31 @@ function showDeckEditor() {
             importBtn.style.display = 'inline-block';
         }
         
-        // Apply layout immediately to prevent flash
-        setTimeout(() => {
-            const layout = document.querySelector('.deck-editor-layout');
-            const deckPane = document.querySelector('.deck-pane');
-            if (layout && deckPane) {
-                const layoutWidth = layout.offsetWidth;
-                const deckWidth = deckPane.offsetWidth;
-                const deckPercentage = (deckWidth / layoutWidth) * 100;
-                
-                // Apply two-column layout immediately if deck is wide enough
-                if (deckPercentage >= 33) {
-                    const deckCardsEditor = document.querySelector('.deck-cards-editor');
-                    if (deckCardsEditor && !manageDeckLayout('hasClass', { className: 'list-view' })) {
-                        manageDeckLayout('addClass', { className: 'two-column' });
-                        createTwoColumnLayout();
+        // Apply layout after paint (requestAnimationFrame avoids fixed delays)
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const layout = document.querySelector('.deck-editor-layout');
+                const deckPane = document.querySelector('.deck-pane');
+                if (layout && deckPane) {
+                    const layoutWidth = layout.offsetWidth;
+                    const deckWidth = deckPane.offsetWidth;
+                    const deckPercentage = (deckWidth / layoutWidth) * 100;
+                    if (deckPercentage >= 33) {
+                        const deckCardsEditor = document.querySelector('.deck-cards-editor');
+                        if (deckCardsEditor && !manageDeckLayout('hasClass', { className: 'list-view' })) {
+                            manageDeckLayout('addClass', { className: 'two-column' });
+                            createTwoColumnLayout();
+                        }
                     }
                 }
-            }
-        }, 10); // Very short delay to ensure elements are rendered
+            });
+        });
         
         // Ensure the deck editor starts scrolled to the top
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             const deckCardsEditor = document.querySelector('.deck-cards-editor');
-            if (deckCardsEditor) {
-                deckCardsEditor.scrollTop = 0;
-            }
-        }, 50);
+            if (deckCardsEditor) deckCardsEditor.scrollTop = 0;
+        });
         
         // Set initial divider position immediately to prevent 50% flash
         const uiPrefs = currentDeckData
@@ -62,15 +60,15 @@ function showDeckEditor() {
         const defaultPercentage = 71;
         const percentage = uiPrefs && uiPrefs.dividerPosition ? uiPrefs.dividerPosition : defaultPercentage;
         
-        // Use a small delay to ensure the modal is rendered
-        setTimeout(() => {
+        // Defer to after paint so layout is measurable
+        requestAnimationFrame(() => {
             const layout = document.querySelector('.deck-editor-layout');
             const deckPane = document.querySelector('.deck-pane');
             if (layout && deckPane) {
                 const newWidth = (percentage / 100) * layout.offsetWidth;
                 deckPane.style.flex = `0 0 ${newWidth}px`;
             }
-        }, 10);
+        });
         
         // Read-only mode removed - now handled by backend flag
         
@@ -110,24 +108,23 @@ function showDeckEditor() {
         // Initialize deck editor search
         initializeDeckEditorSearch();
         
-        // Initialize the resizable divider after the modal is shown
-        setTimeout(() => {
-            initializeResizableDivider();
-            // Restore slider position after a short delay to ensure layout is ready
-            setTimeout(() => {
-                restoreSliderPosition();
-                // Also check initial layout
-                const layout = document.querySelector('.deck-editor-layout');
-                const deckPane = document.querySelector('.deck-pane');
-                if (layout && deckPane) {
-                    updateDeckLayout(deckPane.offsetWidth, layout.offsetWidth);
-                }
-                // Only ensure layout if it appears broken
-                if (layout && window.getComputedStyle(layout).flexDirection !== 'row') {
-                    ensureTwoPaneLayout();
-                }
-            }, 200);
-        }, 100);
+        // Initialize the resizable divider after modal paint
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                initializeResizableDivider();
+                requestAnimationFrame(() => {
+                    restoreSliderPosition();
+                    const layout = document.querySelector('.deck-editor-layout');
+                    const deckPane = document.querySelector('.deck-pane');
+                    if (layout && deckPane) {
+                        updateDeckLayout(deckPane.offsetWidth, layout.offsetWidth);
+                    }
+                    if (layout && window.getComputedStyle(layout).flexDirection !== 'row') {
+                        ensureTwoPaneLayout();
+                    }
+                });
+            });
+        });
     } catch (error) {
         console.error('Error in showDeckEditor:', error);
     }
@@ -167,13 +164,11 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 }
             }
         
-        // Load available cards
+        // Load available cards in background - show editor immediately, panel populates when ready
         if (typeof loadAvailableCards === 'function') {
-            try {
-                await loadAvailableCards();
-            } catch (error) {
+            loadAvailableCards().catch(error => {
                 console.error('[DeckEditor] Error calling loadAvailableCards:', error);
-            }
+            });
         } else {
             console.error('[DeckEditor] ❌ loadAvailableCards function not found!');
             console.error('[DeckEditor] Available functions:', Object.keys(window).filter(k => k.includes('load') || k.includes('card')));
@@ -193,20 +188,21 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
         await viewManager.applyInitialView();
         
         // Initialize background manager for new decks (all users)
-        // Use setTimeout to ensure DOM is fully ready
-        setTimeout(async () => {
-            if (window.deckBackgroundManager) {
-                try {
-                    const currentUser = getCurrentUser();
-                    if (currentUser) {
-                        await window.deckBackgroundManager.loadBackgrounds();
-                        window.deckBackgroundManager.createBackgroundButton();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(async () => {
+                if (window.deckBackgroundManager) {
+                    try {
+                        const currentUser = getCurrentUser();
+                        if (currentUser) {
+                            await window.deckBackgroundManager.loadBackgrounds();
+                            window.deckBackgroundManager.createBackgroundButton();
+                        }
+                    } catch (error) {
+                        console.error('Error initializing background manager for new deck:', error);
                     }
-                } catch (error) {
-                    console.error('Error initializing background manager for new deck:', error);
                 }
-            }
-        }, 500); // Small delay to ensure DOM is ready
+            });
+        });
         
         return;
     }
@@ -552,24 +548,27 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             await viewManager.applyInitialView();
             
             // Ensure scroll container can show all content after deck is displayed
-            setTimeout(() => {
-                ensureScrollContainerCanShowAllContent();
-                
-                // Also check if any collapsed headers are cut off and fix them
-                const collapsedHeaders = document.querySelectorAll('.deck-type-header.collapsed');
-                collapsedHeaders.forEach(header => {
-                    ensureCollapsedHeaderIsVisible(header);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    ensureScrollContainerCanShowAllContent();
+                    const collapsedHeaders = document.querySelectorAll('.deck-type-header.collapsed');
+                    collapsedHeaders.forEach(header => {
+                        ensureCollapsedHeaderIsVisible(header);
+                    });
                 });
-            }, 100);
+            });
             
-            // Load UI preferences from database AFTER deck cards are displayed
-            const uiPreferences = await loadUIPreferences(deckId);
-            applyUIPreferences(uiPreferences);
+            // Use UI preferences from deck metadata when present (avoids redundant fetch)
+            const existingPrefs = currentDeckData?.metadata?.uiPreferences;
+            const uiPreferences = existingPrefs !== undefined ? (existingPrefs ?? {}) : await loadUIPreferences(deckId);
+            applyUIPreferences(uiPreferences ?? {});
             
-            // Force character cards to single column layout
-            setTimeout(() => {
-                forceCharacterSingleColumnLayout();
-            }, 200);
+            // Force character cards to single column layout after paint
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    forceCharacterSingleColumnLayout();
+                });
+            });
             
             // Also run it immediately as a backup
             forceCharacterSingleColumnLayout();
@@ -583,8 +582,8 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             // Initialize background manager without delay to avoid header control flicker
             if (window.deckBackgroundManager && currentDeckId) {
                 try {
-                    // Background is already set from deck data above, just initialize UI
-                    await window.deckBackgroundManager.initialize(currentDeckId, isReadOnlyMode);
+                    // Pass metadata to skip redundant deck fetch (already loaded above)
+                    await window.deckBackgroundManager.initialize(currentDeckId, isReadOnlyMode, currentDeckData?.metadata);
                 } catch (error) {
                     console.error('Error initializing background manager:', error);
                 }
@@ -596,13 +595,15 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             // Auto-activate special cards character filter if deck has characters
             const hasCharacters = window.deckEditorCards.some(card => card.type === 'character');
             if (hasCharacters) {
-                setTimeout(async () => {
-                    const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
-                    if (filterCheckbox && !filterCheckbox.checked) {
-                        filterCheckbox.checked = true;
-                        await toggleSpecialCardsCharacterFilter();
-                    }
-                }, 100); // Small delay to ensure DOM is updated
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(async () => {
+                        const filterCheckbox = document.getElementById('specialCardsCharacterFilter');
+                        if (filterCheckbox && !filterCheckbox.checked) {
+                            filterCheckbox.checked = true;
+                            await toggleSpecialCardsCharacterFilter();
+                        }
+                    });
+                });
             }
         } else {
             console.error('Failed to load deck for editing:', data.error);

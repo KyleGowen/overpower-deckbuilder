@@ -2618,11 +2618,47 @@
                     { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
                 ];
                 
-                let categoriesHtml = '';
+                let results;
+                const mapHasData = window.availableCardsMap && window.availableCardsMap.size > 0;
+                if (mapHasData) {
+                    results = categories.map(cat => {
+                        const cards = Array.from(window.availableCardsMap.values()).filter(c =>
+                            (c.cardType || c.type) === cat.type
+                        );
+                        return { category: cat, data: { success: cards.length > 0, data: cards } };
+                    });
+                } else {
+                    const fetched = await Promise.all(categories.map(cat =>
+                        fetch(cat.api).then(r => r.json()).then(data => ({ category: cat, data }))
+                    ));
+                    for (const { category, data } of fetched) {
+                        if (data.success && data.data && data.data.length > 0) {
+                            data.data.forEach(card => {
+                                card.cardType = category.type;
+                                window.availableCardsMap.set(card.id, card);
+                                window.availableCardsMap.set(`${category.type}_${card.id}`, card);
+                                if (category.type === 'teamwork') {
+                                    const cardName = card.to_use || card.name;
+                                    if (cardName) window.availableCardsMap.set(cardName, card);
+                                } else if (['training', 'ally-universe', 'basic-universe', 'aspect'].includes(category.type)) {
+                                    const cardName = card.card_name || card.name;
+                                    if (cardName) window.availableCardsMap.set(cardName, card);
+                                } else if (card.name) {
+                                    window.availableCardsMap.set(card.name, card);
+                                }
+                                if (category.type === 'character') {
+                                    const charMappings = { 'Zeus': 'char_42', 'Leonidas': 'char_22', 'Dr. Watson': 'char_11', 'Sherlock Holmes': 'char_8', 'Dracula': 'char_12', 'Victory Harben': 'char_15' };
+                                    const deckCardId = charMappings[card.name];
+                                    if (deckCardId) window.availableCardsMap.set(deckCardId, card);
+                                }
+                            });
+                        }
+                    }
+                    results = fetched;
+                }
                 
-                for (const category of categories) {
-                        const response = await fetch(category.api);
-                        const data = await response.json();
+                let categoriesHtml = '';
+                for (const { category, data } of results) {
                         
                         // Variables to store tile counts for header rendering
                         let characterTileCount = null;
@@ -2631,55 +2667,7 @@
                         let locationTileCount = null;
                         
                         if (data.success && data.data.length > 0) {
-                            // Populate the global map for deck editor use
-                            data.data.forEach(card => {
-                                // Add the category type to the card data for easy lookup
-                                card.cardType = category.type;
-                                
-                                // Store with database UUID format (primary key)
-                                window.availableCardsMap.set(card.id, card);
-                                
-                                // Store with category prefix for compatibility
-                                window.availableCardsMap.set(`${category.type}_${card.id}`, card);
-                                
-                                // Store by name for easy lookup
-                                // For teamwork cards, use 'to_use' field instead of 'name'
-                                if (category.type === 'teamwork') {
-                                    const cardName = card.to_use || card.name;
-                                    if (cardName) {
-                                        window.availableCardsMap.set(cardName, card);
-                                    }
-                                } else {
-                                    // For training, ally-universe, basic-universe, and aspects, use card_name if available
-                                    if (category.type === 'training' || category.type === 'ally-universe' || category.type === 'basic-universe' || category.type === 'aspect') {
-                                        const cardName = card.card_name || card.name;
-                                        if (cardName) {
-                                            window.availableCardsMap.set(cardName, card);
-                                        }
-                                    } else {
-                                        if (card.name) {
-                                window.availableCardsMap.set(card.name, card);
-                                        }
-                                    }
-                                }
-                                
-                                // For characters, create a mapping from deck card IDs to database UUIDs
-                                if (category.type === 'character') {
-                                    const charMappings = {
-                                        'Zeus': 'char_42',
-                                        'Leonidas': 'char_22', 
-                                        'Dr. Watson': 'char_11',
-                                        'Sherlock Holmes': 'char_8',
-                                        'Dracula': 'char_12',
-                                        'Victory Harben': 'char_15'
-                                    };
-                                    const deckCardId = charMappings[card.name];
-                                    if (deckCardId) {
-                                        window.availableCardsMap.set(deckCardId, card);
-                                    }
-                                }
-                            });
-                            
+                            // Map already populated by fetch-path or reused from loadAvailableCardsData
                             let cardsHtml = '';
                             
                             if (category.type === 'character') {
