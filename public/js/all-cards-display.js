@@ -11,16 +11,76 @@
 let allCardsData = [];
 let allCardsFiltered = [];
 
+/** Sort allCardsData by character/group name, display name, set, set_number */
+function sortAllCardsData(cards) {
+    const compareText =
+        (typeof window !== 'undefined' &&
+            window.Alphabetization &&
+            typeof window.Alphabetization.compare === 'function')
+            ? window.Alphabetization.compare
+            : (a, b) => String(a ?? '').localeCompare(String(b ?? ''));
+    function isAnyCharacterName(value) {
+        return String(value ?? '').trim().toLowerCase() === 'any character';
+    }
+    function compareCharacterNames(a, b) {
+        const aIsAny = isAnyCharacterName(a);
+        const bIsAny = isAnyCharacterName(b);
+        if (aIsAny !== bIsAny) return aIsAny ? 1 : -1;
+        return compareText(a, b);
+    }
+    function getGroupNameForSorting(card) {
+        if (!card) return '';
+        if (card.character) return String(card.character).trim();
+        if (card.character_name) return String(card.character_name).trim();
+        if (card.cardType === 'character' && card.name) return String(card.name).trim();
+        return String(getCardName(card)).trim();
+    }
+    return [...cards].sort((a, b) => {
+        const groupCmp = compareCharacterNames(getGroupNameForSorting(a), getGroupNameForSorting(b));
+        if (groupCmp !== 0) return groupCmp;
+        const nameCmp = compareText(getCardName(a), getCardName(b));
+        if (nameCmp !== 0) return nameCmp;
+        const setA = String(a?.set || a?.universe || 'ERB').trim();
+        const setB = String(b?.set || b?.universe || 'ERB').trim();
+        const setCmp = compareText(setA, setB);
+        if (setCmp !== 0) return setCmp;
+        const numAStr = String(a?.set_number || '').trim();
+        const numBStr = String(b?.set_number || '').trim();
+        const aHasNum = !!numAStr;
+        const bHasNum = !!numBStr;
+        if (aHasNum !== bHasNum) return aHasNum ? -1 : 1;
+        if (aHasNum && bHasNum) {
+            const numA = parseInt(numAStr, 10);
+            const numB = parseInt(numBStr, 10);
+            if (Number.isFinite(numA) && Number.isFinite(numB) && numA !== numB) return numA - numB;
+        }
+        return 0;
+    });
+}
+
+/** Map all-cards type names to database view cache keys */
+const CACHE_KEY_MAP = {
+    'character': 'characters',
+    'special': 'special-cards',
+    'advanced-universe': 'advanced-universe',
+    'location': 'locations',
+    'aspect': 'aspects',
+    'mission': 'missions',
+    'event': 'events',
+    'teamwork': 'teamwork',
+    'ally-universe': 'ally-universe',
+    'training': 'training',
+    'basic-universe': 'basic-universe',
+    'power': 'power-cards'
+};
+
 /**
  * Load all cards from all card types with performance logging
+ * Phase 3: Uses databaseViewCardCache when all data is present to avoid redundant API calls
  */
 async function loadAllCards() {
     const startTime = performance.now();
     const startTimestamp = new Date().toISOString();
-    
-    console.log('=== All Cards Load Performance ===');
-    console.log('Start time:', startTimestamp);
-    console.log('Loading card types...');
     
     const cardTypes = [
         { type: 'character', api: '/api/characters', nameField: 'name' },
@@ -36,11 +96,47 @@ async function loadAllCards() {
         { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
         { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
     ];
+
+    // Phase 3: Try cache first when database view has already loaded data
+    if (typeof getCachedCardData === 'function') {
+        const cachedCards = [];
+        let allFromCache = true;
+        const cardCounts = {};
+        for (const ct of cardTypes) {
+            const cacheKey = CACHE_KEY_MAP[ct.type] || ct.type;
+            const cached = getCachedCardData(cacheKey);
+            if (cached && Array.isArray(cached)) {
+                const mapped = cached.map(card => ({
+                    ...card,
+                    cardType: ct.type,
+                    nameField: ct.nameField
+                }));
+                cachedCards.push(...mapped);
+                cardCounts[ct.type] = cached.length;
+            } else {
+                allFromCache = false;
+                break;
+            }
+        }
+        if (allFromCache && cachedCards.length > 0) {
+            console.log('=== All Cards: using cached data (no API calls) ===');
+            allCardsData = cachedCards;
+            const endTime = performance.now();
+            const totalDuration = endTime - startTime;
+            console.log('Total load time (from cache):', totalDuration.toFixed(2), 'ms');
+            console.log('Total cards:', allCardsData.length);
+            allCardsData = sortAllCardsData(allCardsData);
+            return allCardsData;
+        }
+    }
     
-    const loadResults = [];
+    console.log('=== All Cards Load Performance ===');
+    console.log('Start time:', startTimestamp);
+    console.log('Loading card types...');
+    
     const cardCounts = {};
     
-    // Load all card types in parallel
+    // Load all card types in parallel (cache miss)
     const loadPromises = cardTypes.map(async (cardType) => {
         const typeStartTime = performance.now();
         try {
@@ -97,68 +193,8 @@ async function loadAllCards() {
             allCardsData.push(...result.cards);
         }
     });
-    
-    // Sort all cards primarily by "character / group name" (ignoring leading "The"),
-    // then by card display name, then by database set + set_number for stable ordering.
-    //
-    // This matches the rest of the UI's alphabetization expectations (e.g. "The Mummy" under M).
-    const compareText =
-        (typeof window !== 'undefined' &&
-            window.Alphabetization &&
-            typeof window.Alphabetization.compare === 'function')
-            ? window.Alphabetization.compare
-            : (a, b) => String(a ?? '').localeCompare(String(b ?? ''));
 
-    function isAnyCharacterName(value) {
-        return String(value ?? '').trim().toLowerCase() === 'any character';
-    }
-
-    // Sorting rule: when sorting by character/group name, "Any Character" always comes last.
-    function compareCharacterNames(a, b) {
-        const aIsAny = isAnyCharacterName(a);
-        const bIsAny = isAnyCharacterName(b);
-        if (aIsAny !== bIsAny) return aIsAny ? 1 : -1;
-        return compareText(a, b);
-    }
-
-    function getGroupNameForSorting(card) {
-        if (!card) return '';
-        // Many card types (special cards in particular) expose their owning character as `character`.
-        // Prefer that when available so specials sort/group under the character name.
-        if (card.character) return String(card.character).trim();
-        if (card.character_name) return String(card.character_name).trim();
-        // Character cards: name is the character name.
-        if (card.cardType === 'character' && card.name) return String(card.name).trim();
-        // Fallback: whatever we display as the card name.
-        return String(getCardName(card)).trim();
-    }
-
-    allCardsData.sort((a, b) => {
-        const groupCmp = compareCharacterNames(getGroupNameForSorting(a), getGroupNameForSorting(b));
-        if (groupCmp !== 0) return groupCmp;
-
-        const nameCmp = compareText(getCardName(a), getCardName(b));
-        if (nameCmp !== 0) return nameCmp;
-
-        // Stable tie-breakers: set + set_number (so order doesn't "jump" between reloads)
-        const setA = String(a?.set || a?.universe || 'ERB').trim();
-        const setB = String(b?.set || b?.universe || 'ERB').trim();
-        const setCmp = compareText(setA, setB);
-        if (setCmp !== 0) return setCmp;
-
-        const numAStr = String(a?.set_number || '').trim();
-        const numBStr = String(b?.set_number || '').trim();
-        const aHasNum = !!numAStr;
-        const bHasNum = !!numBStr;
-        if (aHasNum !== bHasNum) return aHasNum ? -1 : 1;
-        if (aHasNum && bHasNum) {
-            const numA = parseInt(numAStr, 10);
-            const numB = parseInt(numBStr, 10);
-            if (Number.isFinite(numA) && Number.isFinite(numB) && numA !== numB) return numA - numB;
-        }
-
-        return 0;
-    });
+    allCardsData = sortAllCardsData(allCardsData);
     
     const endTime = performance.now();
     const totalDuration = endTime - startTime;

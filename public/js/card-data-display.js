@@ -2,12 +2,18 @@
 // Extracted from public/index.html
 
 async function loadMissions() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('missions');
+    if (cached) {
+        window.missionsData = cached;
+        displayMissions(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/missions');
         const data = await response.json();
         
         if (data.success) {
-            // Store missions data globally for filtering
+            if (typeof setCachedCardData === 'function') setCachedCardData('missions', data.data);
             window.missionsData = data.data;
             displayMissions(data.data);
         }
@@ -22,12 +28,18 @@ async function loadMissions() {
 
 // Event functions
 async function loadEvents() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('events');
+    if (cached) {
+        window.eventsData = cached;
+        displayEvents(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/events');
         const data = await response.json();
         
         if (data.success) {
-            // Store events data globally for filtering
+            if (typeof setCachedCardData === 'function') setCachedCardData('events', data.data);
             window.eventsData = data.data;
             displayEvents(data.data);
         }
@@ -42,11 +54,17 @@ async function loadEvents() {
 
 // Aspect functions
 async function loadAspects() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('aspects');
+    if (cached) {
+        displayAspects(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/aspects');
         const data = await response.json();
         
         if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('aspects', data.data);
             displayAspects(data.data);
         }
     } catch (error) {
@@ -61,11 +79,17 @@ async function loadAspects() {
 
 // Advanced Universe functions
 async function loadAdvancedUniverse() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('advanced-universe');
+    if (cached) {
+        displayAdvancedUniverse(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/advanced-universe');
         const data = await response.json();
         
         if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('advanced-universe', data.data);
             displayAdvancedUniverse(data.data);
         }
     } catch (error) {
@@ -79,11 +103,17 @@ async function loadAdvancedUniverse() {
 
 // Teamwork functions
 async function loadTeamwork() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('teamwork');
+    if (cached) {
+        displayTeamwork(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/teamwork');
         const data = await response.json();
         
         if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('teamwork', data.data);
             displayTeamwork(data.data);
         }
     } catch (error) {
@@ -159,10 +189,16 @@ function displayTeamwork(teamwork) {
 
 // Ally Universe
 async function loadAllyUniverse() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('ally-universe');
+    if (cached) {
+        displayAllyUniverse(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/ally-universe');
         const data = await response.json();
         if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('ally-universe', data.data);
             displayAllyUniverse(data.data);
         }
     } catch (error) {
@@ -231,10 +267,18 @@ function displayAllyUniverse(allies) {
 
 // Training functions
 async function loadTraining() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('training');
+    if (cached) {
+        displayTraining(cached);
+        return;
+    }
     try {
         const response = await fetch('/api/training');
         const data = await response.json();
-        if (data.success) displayTraining(data.data);
+        if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('training', data.data);
+            displayTraining(data.data);
+        }
     } catch (e) { console.error('Error loading training:', e); }
 }
 
@@ -278,10 +322,18 @@ function displayTraining(cards) {
 
 // Basic Universe functions
 async function loadBasicUniverse() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('basic-universe');
+    if (cached) {
+        displayBasicUniverse(cached);
+        return;
+    }
     try {
         const resp = await fetch('/api/basic-universe');
         const data = await resp.json();
-        if (data.success) displayBasicUniverse(data.data);
+        if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('basic-universe', data.data);
+            displayBasicUniverse(data.data);
+        }
     } catch (e) { console.error('Error loading basic universe:', e); }
 }
 
@@ -411,10 +463,16 @@ function displayBasicUniverse(cards) {
 
 // Power Cards functions
 async function loadPowerCards() {
+    const cached = typeof getCachedCardData === 'function' && getCachedCardData('power-cards');
+    if (cached) {
+        displayPowerCards(cached);
+        return;
+    }
     try {
         const resp = await fetch('/api/power-cards');
         const data = await resp.json();
         if (data.success) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('power-cards', data.data);
             displayPowerCards(data.data);
         }
     } catch (e) { console.error('Error loading power cards:', e); }

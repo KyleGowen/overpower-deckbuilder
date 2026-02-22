@@ -28,6 +28,13 @@ function setUserDecks(decks) {
 }
 
 /**
+ * Check if user decks are already loaded (avoids redundant /api/decks fetch in database view)
+ */
+function hasUserDecksLoaded() {
+    return Array.isArray(userDecks) && userDecks.length > 0;
+}
+
+/**
  * Load user decks from the API (use when loadDecks has not run, e.g. Database View Add-to-Deck)
  */
 async function loadUserDecks() {

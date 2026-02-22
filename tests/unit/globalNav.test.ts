@@ -92,6 +92,9 @@ describe('Global Navigation Component', () => {
         mockToggleChangePasswordDropdown = jest.fn();
         (window as any).toggleChangePasswordDropdown = mockToggleChangePasswordDropdown;
 
+        // Reset database view loaded flag for tests that check load behavior
+        delete (window as any).databaseViewDataLoaded;
+
         // Mock history API
         Object.defineProperty(window, 'history', {
             value: {
@@ -189,8 +192,7 @@ describe('Global Navigation Component', () => {
         });
 
         it('should load database data if not already loaded', () => {
-            const totalCharacters = document.getElementById('total-characters');
-            totalCharacters!.textContent = '-';
+            (window as any).databaseViewDataLoaded = false;
 
             (window as any).switchToDatabaseView();
 
@@ -198,8 +200,7 @@ describe('Global Navigation Component', () => {
         });
 
         it('should not load database data if already loaded', () => {
-            const totalCharacters = document.getElementById('total-characters');
-            totalCharacters!.textContent = '100';
+            (window as any).databaseViewDataLoaded = true;
 
             (window as any).switchToDatabaseView();
 

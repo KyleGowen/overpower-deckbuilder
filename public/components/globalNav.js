@@ -32,13 +32,9 @@ function switchToDatabaseView() {
     if (deckStats) deckStats.style.display = 'none';
     if (createDeckSection) createDeckSection.style.display = 'none';
     
-    // Load database data if not already loaded
-    const totalCharacters = document.getElementById('total-characters');
-    
-    if (totalCharacters && totalCharacters.textContent === '-') {
-        if (typeof loadDatabaseViewData === 'function') {
-            loadDatabaseViewData(false); // Load data without forcing characters tab
-        }
+    // Load database data if not already loaded (Phase 5: use flag instead of DOM check)
+    if (!window.databaseViewDataLoaded && typeof loadDatabaseViewData === 'function') {
+        loadDatabaseViewData(false); // Load data without forcing characters tab
     }
     
     requestAnimationFrame(() => {
