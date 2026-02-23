@@ -84,6 +84,7 @@ function renderDeckCardsListView() {
             cards.forEach(card => {
                 let availableCard = window.availableCardsMap.get(card.cardId);
                 if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                 if (!availableCard) return;
                 
                 const characterName = availableCard.character || availableCard.character_name || 'Any Character';
@@ -116,6 +117,7 @@ function renderDeckCardsListView() {
                 characterCards.forEach((card, index) => {
                     let availableCard = window.availableCardsMap.get(card.cardId);
                     if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                     if (!availableCard) return;
                     
                     const cardName = availableCard.name || availableCard.card_name || 'Unknown Card';
@@ -187,6 +189,7 @@ function renderDeckCardsListView() {
             cards.forEach((card, index) => {
                 let availableCard = window.availableCardsMap.get(card.cardId);
                 if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                 
                 if (!availableCard) {
                     return;
@@ -992,6 +995,11 @@ function renderDeckCardsCardView() {
                 // Fallback: try type_cardId format (deck-builder uses this)
                 if (!availableCard && card.type) {
                     availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
+                    // DB uses underscore (ally_universe, basic_universe) but map uses hyphen (ally-universe, basic-universe)
+                    if (!availableCard && card.type.includes('_')) {
+                        const hyphenType = card.type.replace(/_/g, '-');
+                        availableCard = window.availableCardsMap.get(`${hyphenType}_${cardIdForImage}`);
+                    }
                 }
                 
                 // Try alternate key formats for basic-universe cards
@@ -1168,7 +1176,7 @@ function renderDeckCardsCardView() {
                              data-instance="${i + 1}"
                              onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}')"
                              onmouseleave="hideCardHoverModal()">
-                            <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="lazy" decoding="async">
+                            <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
                             <div class="card-view-actions">
                                 ${instanceChangeArtButton}
                                 ${quantityButtons}
@@ -1383,6 +1391,7 @@ async function displayDeckCardsForEditing() {
                     // Since deck_cards.card_id now contains UUIDs, we can look up directly
                     let availableCard = window.availableCardsMap.get(cardData.cardId);
                     if (!availableCard && cardData.type) availableCard = window.availableCardsMap.get(`${cardData.type}_${cardData.cardId}`);
+                    if (!availableCard && cardData.type && cardData.type.includes('_')) availableCard = window.availableCardsMap.get(`${cardData.type.replace(/_/g, '-')}_${cardData.cardId}`);
                     if (availableCard && availableCard.mission_set) {
                         missionSetCounts[availableCard.mission_set] = (missionSetCounts[availableCard.mission_set] || 0) + 1;
                     }
@@ -1462,6 +1471,7 @@ async function displayDeckCardsForEditing() {
                     let availableCard = window.availableCardsMap.get(card.cardId);
                     if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                     if (!availableCard) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                     
                     if (!availableCard) {
                         console.warn('Special card not found in availableCardsMap:', card);
@@ -1521,6 +1531,7 @@ async function displayDeckCardsForEditing() {
         let availableCard = window.availableCardsMap.get(cardIdForLookup);
         if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForLookup}`);
         if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${cardIdForLookup}`);
+        if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${cardIdForLookup}`);
                         
                         if (!availableCard && (card.type === 'basic-universe' || card.type === 'basic_universe')) {
                             // Try alternate key formats for basic-universe cards
@@ -1647,6 +1658,7 @@ async function displayDeckCardsForEditing() {
                         // Direct lookup using UUID
                         let availableCard = window.availableCardsMap.get(card.cardId);
                         if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                        if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                         
                         if (!availableCard) {
                             console.warn('Power card not found in availableCardsMap:', card);
@@ -1712,6 +1724,7 @@ async function displayDeckCardsForEditing() {
                             // Direct lookup using UUID
                             let availableCard = window.availableCardsMap.get(card.cardId);
                             if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                            if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                             
                             if (!availableCard) {
                                 console.warn('Card not found in availableCardsMap:', card);
@@ -1797,6 +1810,7 @@ async function displayDeckCardsForEditing() {
                         // Direct lookup using UUID
                         let availableCard = window.availableCardsMap.get(card.cardId);
                         if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                        if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                         
                         if (!availableCard) {
                             console.warn('Card not found in availableCardsMap:', card);
@@ -1869,6 +1883,7 @@ async function displayDeckCardsForEditing() {
                     let availableCard = window.availableCardsMap.get(card.cardId);
                     if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                     if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
+                    if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
                     
                     // Try alternate key formats for universe cards if direct lookup fails
                     if (!availableCard && (card.type === 'basic-universe' || card.type === 'basic_universe' || 

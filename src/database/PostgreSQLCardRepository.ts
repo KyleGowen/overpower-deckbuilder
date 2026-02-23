@@ -271,7 +271,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         name: loc.name,
         threat_level: loc.threat_level,
         special_ability: loc.special_ability,
-        image: loc.image_path
+        image: loc.image_path,
+        image_path: loc.image_path
       };
     } finally {
       client.release();
@@ -296,7 +297,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         set_number: loc.set_number || null,
         threat_level: loc.threat_level,
         special_ability: loc.special_ability,
-        image: loc.image_path
+        image: loc.image_path,
+        image_path: loc.image_path
       }));
       
       // Cache the result
@@ -482,6 +484,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         character: card.character,
         card_effect: card.card_effect,
         image: card.image_path,
+        image_path: card.image_path,
         is_one_per_deck: card.one_per_deck || false
       };
     } finally {
@@ -504,6 +507,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         image: card.image_path,
+        image_path: card.image_path,
         is_one_per_deck: card.one_per_deck || false
       }));
     } finally {
@@ -535,6 +539,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         first_attack_bonus: card.first_attack_bonus,
         second_attack_bonus: card.second_attack_bonus,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       };
     } finally {
@@ -559,6 +564,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       }));
     } finally {
@@ -587,6 +593,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         attack_type: card.attack_type,
         card_text: card.card_text,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       };
     } finally {
@@ -612,6 +619,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       }));
     } finally {
@@ -638,6 +646,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         value_to_use: card.value_to_use,
         bonus: card.bonus,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       };
     } finally {
@@ -661,6 +670,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       }));
     } finally {
@@ -686,6 +696,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         value_to_use: card.value_to_use,
         bonus: card.bonus,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       };
     } finally {
@@ -708,6 +719,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         image: card.image_path,
+        image_path: card.image_path,
         one_per_deck: card.one_per_deck || false
       }));
     } finally {

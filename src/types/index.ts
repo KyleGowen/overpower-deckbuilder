@@ -52,6 +52,7 @@ export interface Location {
   threat_level: number;
   special_ability: string;
   image: string;
+  image_path?: string;
 }
 
 // Card types for future expansion
@@ -122,6 +123,7 @@ export interface AdvancedUniverse {
   card_effect: string;
   card_description?: string;
   image: string;
+  image_path?: string;
   is_one_per_deck: boolean;
 }
 
@@ -135,6 +137,7 @@ export interface Teamwork {
   first_attack_bonus: string;
   second_attack_bonus: string;
   image: string;
+  image_path?: string;
   one_per_deck: boolean;
 }
 
@@ -148,6 +151,7 @@ export interface AllyUniverse {
   attack_type: string;          // Combat | Brute Force | Intelligence
   card_text: string;
   image: string;
+  image_path?: string;
   one_per_deck: boolean;
 }
 
@@ -159,6 +163,7 @@ export interface TrainingCard {
   value_to_use: string; // e.g., "5 or less"
   bonus: string;        // e.g., "+4"
   image: string;
+  image_path?: string;
   one_per_deck: boolean;
 }
 
@@ -169,6 +174,7 @@ export interface BasicUniverse {
   value_to_use: string; // e.g., "6 or greater", "7 or greater"
   bonus: string;        // e.g., "+2", "+3"
   image: string;
+  image_path?: string;
   one_per_deck: boolean;
 }
 
