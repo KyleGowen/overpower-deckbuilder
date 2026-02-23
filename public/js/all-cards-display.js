@@ -74,6 +74,9 @@ const CACHE_KEY_MAP = {
     'power': 'power-cards'
 };
 
+/** Number of cards to render per batch (progressive loading) */
+const BATCH_SIZE = 25;
+
 /**
  * Load all cards from all card types with performance logging
  * Phase 3: Uses databaseViewCardCache when all data is present to avoid redundant API calls
@@ -402,6 +405,39 @@ function renderCardCell(card) {
 }
 
 /**
+ * Render cards in batches of BATCH_SIZE; yields to main thread between batches
+ */
+function renderCardsInBatches(container, sortedCards) {
+    container.innerHTML = '';
+    let index = 0;
+
+    function renderNextBatch() {
+        const batch = sortedCards.slice(index, index + BATCH_SIZE);
+        if (batch.length === 0) return;
+
+        const html = batch.map(card => renderCardCell(card)).join('');
+        container.insertAdjacentHTML('beforeend', html);
+        index += batch.length;
+
+        if (typeof window.ImageLoadQueue !== 'undefined') {
+            window.ImageLoadQueue.observe(container);
+        } else {
+            const imgs = container.querySelectorAll('img[data-src]');
+            imgs.forEach(img => {
+                const src = img.dataset.src || img.getAttribute('data-src');
+                if (src) img.src = src;
+            });
+        }
+
+        if (index < sortedCards.length) {
+            requestAnimationFrame(renderNextBatch);
+        }
+    }
+
+    requestAnimationFrame(renderNextBatch);
+}
+
+/**
  * Display all cards in 5-column grid
  */
 function displayAllCards(cards = null) {
@@ -430,21 +466,9 @@ function displayAllCards(cards = null) {
         });
     }
     
-    // Render all cards
-    container.innerHTML = sortedCards.map(card => renderCardCell(card)).join('');
-    
-    // Lazy-load images via viewport observer; throttles to 24 concurrent
-    if (typeof window.ImageLoadQueue !== 'undefined') {
-        window.ImageLoadQueue.observe(container);
-    } else {
-        // Fallback: direct assign if queue not loaded
-        const imgs = container.querySelectorAll('img[data-src]');
-        imgs.forEach(img => {
-            const src = img.dataset.src || img.getAttribute('data-src');
-            if (src) img.src = src;
-        });
-    }
-    
+    // Render cards progressively in batches
+    renderCardsInBatches(container, sortedCards);
+
     console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }
 
