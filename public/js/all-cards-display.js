@@ -332,7 +332,7 @@ function renderCardCell(card) {
         cardName = getCardName(card);
     }
     const cardType = card.cardType || 'character';
-    const imagePath = getCardImagePathForAllCards(card, cardType, { useThumbnail: false });
+    const imagePath = getCardImagePathForAllCards(card, cardType, { useThumbnail: true });
     const fullResPath = getCardImagePathForAllCards(card, cardType);
     const escapedName = cardName.replace(/'/g, "\\'");
 
@@ -378,6 +378,7 @@ function renderCardCell(card) {
                 <img data-src="${imagePath}"
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
+                     loading="lazy"
                      decoding="async"
                      onload="${imageOnLoad}"
                      onerror="(function(img){var t=img.dataset.altTried;if(!t){img.dataset.altTried='1';var s=img.src||img.dataset.src;if(s&&s.endsWith('.webp')){img.src=s.replace(/\\.webp$/,'.png');return;}if(s&&s.endsWith('.png')){img.src=s.replace(/\\.png$/,'.webp');return;}}img.onerror=null;img.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';img.style.cursor='default';})(this)"
@@ -432,18 +433,17 @@ function displayAllCards(cards = null) {
     // Render all cards
     container.innerHTML = sortedCards.map(card => renderCardCell(card)).join('');
     
-    // Load images: set src directly for All tab (ImageLoadQueue can leave images on placeholder).
-    // Use batched direct assignment; avoid queue which may not reliably trigger loads in this layout.
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            if (!container) return;
-            const imgs = container.querySelectorAll('img[data-src]');
-            imgs.forEach(img => {
-                const src = img.dataset.src || img.getAttribute('data-src');
-                if (src) img.src = src;
-            });
+    // Lazy-load images via viewport observer; throttles to 24 concurrent
+    if (typeof window.ImageLoadQueue !== 'undefined') {
+        window.ImageLoadQueue.observe(container);
+    } else {
+        // Fallback: direct assign if queue not loaded
+        const imgs = container.querySelectorAll('img[data-src]');
+        imgs.forEach(img => {
+            const src = img.dataset.src || img.getAttribute('data-src');
+            if (src) img.src = src;
         });
-    });
+    }
     
     console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }
