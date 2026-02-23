@@ -198,16 +198,11 @@ jobs:
             script: test:integration
             args: "tests/integration/deck-ownership-security*.test.ts tests/integration/deck-save-security*.test.ts tests/integration/role-based-restrictions.test.ts"
             timeout: 15
-          - category: AuthZ Security - Session & Debug
-            slug: authz-session-debug
+          - category: AuthZ Security
+            slug: authz-security
             script: test:integration
-            args: "tests/integration/security/session-impersonation-security.test.ts tests/integration/security/debug-endpoints-access.test.ts"
-            timeout: 15
-          - category: AuthZ Security - Cross User
-            slug: authz-cross-user
-            script: test:integration
-            args: "tests/integration/security/cross-user-mutation-attempts.test.ts"
-            timeout: 15
+            args: "tests/integration/security/session-impersonation-security.test.ts tests/integration/security/debug-endpoints-access.test.ts tests/integration/security/cross-user-mutation-attempts.test.ts"
+            timeout: 20
           - category: Authentication
             slug: auth
             script: test:integration
@@ -268,16 +263,11 @@ jobs:
             script: test:integration:game-logic-character-threat
             args: ""
             timeout: 10
-          - category: Reserve Core
-            slug: reserve-core
-            script: test:integration:reserve-core
-            args: ""
-            timeout: 10
-          - category: Reserve Threat
-            slug: reserve-threat
-            script: test:integration:reserve-threat
-            args: ""
-            timeout: 10
+          - category: Reserve
+            slug: reserve
+            script: test:integration
+            args: "tests/integration/reserve-character-integration.test.ts tests/integration/reserve-character-loading-integration.test.ts tests/integration/reserve-character-simple.test.ts tests/integration/reserve-character-threat-integration.test.ts tests/integration/reserve-character-threat-persistence.test.ts tests/integration/guest-reserve-character-integration.test.ts"
+            timeout: 15
           - category: Game Logic Power & Teamwork
             slug: game-logic-power-teamwork
             script: test:integration:game-logic-power-teamwork
@@ -293,16 +283,11 @@ jobs:
             script: test:integration
             args: "tests/integration/create*.test.ts tests/integration/user*.test.ts tests/integration/cross*.test.ts tests/integration/change*.test.ts tests/integration/username*.test.ts"
             timeout: 15
-          - category: Collection Workflow
-            slug: collection-workflow
+          - category: Collection
+            slug: collection
             script: test:integration
-            args: "tests/integration/collection/collection-workflow.test.ts tests/integration/collection/collection-api-endpoints.test.ts tests/integration/collection/collection-database-persistence.test.ts"
-            timeout: 15
-          - category: Collection Security
-            slug: collection-security
-            script: test:integration
-            args: "tests/integration/collection/collection-cross-user-isolation.test.ts tests/integration/collection/collection-sql-injection-hardening.test.ts tests/integration/collection/collection-admin-access.test.ts tests/integration/collection/collection-error-handling.test.ts"
-            timeout: 15
+            args: "tests/integration/collection/collection-workflow.test.ts tests/integration/collection/collection-api-endpoints.test.ts tests/integration/collection/collection-database-persistence.test.ts tests/integration/collection/collection-cross-user-isolation.test.ts tests/integration/collection/collection-sql-injection-hardening.test.ts tests/integration/collection/collection-admin-access.test.ts tests/integration/collection/collection-error-handling.test.ts"
+            timeout: 20
           - category: Remaining
             slug: remaining
             script: test:integration
