@@ -86,6 +86,7 @@ export interface Mission {
   mission_set: string;
   card_name: string;
   image: string;
+  image_path?: string;
 }
 
 export interface Event {
@@ -95,6 +96,7 @@ export interface Event {
   game_effect: string;
   flavor_text: string;
   image: string;
+  image_path?: string;
   one_per_deck: boolean;
 }
 
