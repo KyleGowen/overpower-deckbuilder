@@ -34,15 +34,12 @@ function switchToDatabaseView() {
     
     // Load database data if not already loaded (Phase 5: use flag instead of DOM check)
     if (!window.databaseViewDataLoaded && typeof loadDatabaseViewData === 'function') {
-        loadDatabaseViewData(false); // Load data without forcing characters tab
+        loadDatabaseViewData(true); // Load data and show Characters tab (default)
     }
     
     requestAnimationFrame(() => {
         if (typeof switchTab === 'function') {
-            const allTabButton = document.querySelector('[data-tab="all-cards"]');
-            if (allTabButton && allTabButton.classList.contains('active')) {
-                switchTab('all-cards');
-            }
+            switchTab('characters'); // Default to Characters tab when landing on database view
         }
     });
 }

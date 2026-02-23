@@ -378,7 +378,8 @@ function renderCardCell(card) {
     return `
         <div class="all-cards-cell">
             <div class="card-image-wrapper">
-                <img data-src="${imagePath}"
+                <img src="${imagePath}"
+                     data-src="${imagePath}"
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
                      loading="lazy"
@@ -418,16 +419,6 @@ function renderCardsInBatches(container, sortedCards) {
         const html = batch.map(card => renderCardCell(card)).join('');
         container.insertAdjacentHTML('beforeend', html);
         index += batch.length;
-
-        if (typeof window.ImageLoadQueue !== 'undefined') {
-            window.ImageLoadQueue.observe(container);
-        } else {
-            const imgs = container.querySelectorAll('img[data-src]');
-            imgs.forEach(img => {
-                const src = img.dataset.src || img.getAttribute('data-src');
-                if (src) img.src = src;
-            });
-        }
 
         if (index < sortedCards.length) {
             requestAnimationFrame(renderNextBatch);

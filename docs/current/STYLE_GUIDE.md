@@ -332,6 +332,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
       - Persisted to the backend when the user clicks **Save**.
 
 ### Database View (database.html)
+- **Default Tab**: Characters tab is the default landing tab when opening the database view
 - **Character Cards**: Teal borders with gold text for character names
 - **Stat Cards**: `rgba(255, 255, 255, 0.1)` background with teal numbers
 - **Tab Navigation**: Teal active states with white inactive states

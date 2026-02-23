@@ -205,6 +205,7 @@ function displayCharacters(characters) {
                 <div class="card-image-container">
                     ${navArrows}
                     <img id="${groupId}-img"
+                         src="${currentImagePath}"
                          data-src="${currentImagePath}"
                          data-full-res="${currentFullResPath}"
                          alt="${currentImageName}"
@@ -242,13 +243,7 @@ function displayCharacters(characters) {
         
         tbody.appendChild(row);
         
-        // Queue image load to throttle concurrent requests (prevents 502)
         const img = row.querySelector('img');
-        if (img && typeof window.ImageLoadQueue !== 'undefined') {
-            window.ImageLoadQueue.queueImageLoad(img, currentImagePath);
-        } else if (img) {
-            img.src = currentImagePath;
-        }
         if (img) {
             const lockRowHeight = () => {
                 const imageCell = row.querySelector('td:nth-child(1)');
@@ -634,6 +629,7 @@ function displaySpecialCards(specialCards) {
                 <div class="card-image-container">
                     ${navArrows}
                     <img id="${groupId}-img"
+                         src="${currentImagePath}"
                          data-src="${currentImagePath}"
                          data-full-res="${currentImagePath}"
                          alt="${currentImageName}"
@@ -667,13 +663,7 @@ function displaySpecialCards(specialCards) {
         
         tbody.appendChild(row);
         
-        // Queue image load to throttle concurrent requests (prevents 502)
         const img = row.querySelector('img');
-        if (img && typeof window.ImageLoadQueue !== 'undefined') {
-            window.ImageLoadQueue.queueImageLoad(img, currentImagePath);
-        } else if (img) {
-            img.src = currentImagePath;
-        }
         if (img) {
             const lockRowHeight = () => {
                 const imageCell = row.querySelector('td:nth-child(1)');
@@ -782,6 +772,7 @@ function displayLocations(locations) {
                 <div class="card-image-container">
                     ${navArrows}
                     <img id="${groupId}-img"
+                         src="${currentImagePath}"
                          data-src="${currentImagePath}"
                          data-full-res="${currentFullResPath}"
                          alt="${currentImageName}"
@@ -816,11 +807,6 @@ function displayLocations(locations) {
 
         const img = row.querySelector('img');
         if (img) {
-            if (typeof window.ImageLoadQueue !== 'undefined') {
-                window.ImageLoadQueue.queueImageLoad(img, currentImagePath);
-            } else {
-                img.src = currentImagePath;
-            }
             const lockRowHeight = () => {
                 const imageCell = row.querySelector('td:nth-child(1)');
                 if (imageCell && !imageCell.dataset.heightLocked) {

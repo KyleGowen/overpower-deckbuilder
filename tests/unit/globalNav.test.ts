@@ -197,7 +197,7 @@ describe('Global Navigation Component', () => {
 
             (window as any).switchToDatabaseView();
 
-            expect(mockLoadDatabaseViewData).toHaveBeenCalledWith(false);
+            expect(mockLoadDatabaseViewData).toHaveBeenCalledWith(true); // true = show Characters tab (default)
         });
 
         it('should not load database data if already loaded', () => {

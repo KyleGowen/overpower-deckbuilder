@@ -132,8 +132,8 @@
             
             <div class="tab-container">
                 <div class="tab-row">
-                    <button class="tab-button active" data-click-handler="switchTab" data-tab="all-cards">All</button>
-                    <button class="tab-button" data-click-handler="switchTab" data-tab="characters">Characters</button>
+                    <button class="tab-button" data-click-handler="switchTab" data-tab="all-cards">All</button>
+                    <button class="tab-button active" data-click-handler="switchTab" data-tab="characters">Characters</button>
                     <button class="tab-button" data-click-handler="switchTab" data-tab="special-cards">Special Cards</button>
                     <button class="tab-button" data-click-handler="switchTab" data-tab="advanced-universe">Universe: Advanced</button>
                     <button class="tab-button" data-click-handler="switchTab" data-tab="locations">Locations</button>
@@ -155,13 +155,13 @@
             </div>
 
 
-            <div class="table-container" id="all-cards-tab" style="display: block;">
+            <div class="table-container" id="all-cards-tab" style="display: none;">
                 <div id="all-cards-grid-container" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 15px;">
                     <!-- Cards will be rendered here -->
                 </div>
             </div>
 
-            <div class="table-container" id="characters-tab" style="display: none;">
+            <div class="table-container" id="characters-tab" style="display: block;">
                 <table id="characters-table">
                     <thead>
                         <tr>
@@ -1591,13 +1591,10 @@
                     const collectionBtn = document.getElementById('collectionViewBtn');
                     if (collectionBtn) collectionBtn.classList.remove('active');
                     
-                    // Load All tab if it's the active tab
+                    // Load Characters tab (default) when starting in database view
                     setTimeout(() => {
-                        const allTabButton = document.querySelector('[data-tab="all-cards"]');
-                        if (allTabButton && allTabButton.classList.contains('active')) {
-                            if (typeof switchTab === 'function') {
-                                switchTab('all-cards');
-                            }
+                        if (typeof switchTab === 'function') {
+                            switchTab('characters');
                         }
                     }, 100);
                 }
