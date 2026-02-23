@@ -134,13 +134,20 @@ export class CollectionsRepository {
     if (cardImagePath && cardImagePath.trim() !== '') {
       const path = cardImagePath.trim();
       
-      // If already a full path, use it
+      // If already a full path, use it (fix location alternate paths missing locations/)
       if (path.startsWith('/src/resources/cards/images/')) {
+        if (cardType === 'location' && path.includes('/alternate/') && !path.includes('/locations/alternate/')) {
+          return path.replace('/images/alternate/', '/images/locations/alternate/');
+        }
         return path;
       }
       
-      // Otherwise, construct full path
-      return `/src/resources/cards/images/${path}`;
+      // Otherwise, construct full path (location alternates need locations/ prefix)
+      let fullPath = path;
+      if (cardType === 'location' && path.startsWith('alternate/') && !path.startsWith('locations/')) {
+        fullPath = 'locations/' + path;
+      }
+      return `/src/resources/cards/images/${fullPath}`;
     }
     
     // Fallback to placeholder

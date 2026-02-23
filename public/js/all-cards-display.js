@@ -290,12 +290,21 @@ function getCardImagePathForAllCards(card, cardType, options) {
     }
     const imagePath = (card.image_path || card.image || '').trim();
     if (!imagePath) return '/src/resources/cards/images/placeholder.webp';
-    if (imagePath.startsWith('/src/resources/cards/images/')) return imagePath;
+    if (imagePath.startsWith('/src/resources/cards/images/')) {
+        if (cardType === 'location' && imagePath.match(/\/images\/alternate\//) && !imagePath.includes('/locations/alternate/')) {
+            return imagePath.replace('/images/alternate/', '/images/locations/alternate/');
+        }
+        return imagePath;
+    }
     const typePrefixes = ['characters/', 'missions/', 'specials/', 'locations/', 'events/', 'aspects/', 'power-cards/', 'teamwork-universe/', 'ally-universe/', 'training-universe/', 'basic-universe/', 'advanced-universe/'];
     const hasTypePrefix = typePrefixes.some(p => imagePath.startsWith(p));
     const folder = CARD_TYPE_FOLDERS[cardType];
     const pathWithType = (!hasTypePrefix && folder) ? `${folder}/${imagePath}` : imagePath;
-    return `/src/resources/cards/images/${pathWithType}`;
+    let result = `/src/resources/cards/images/${pathWithType}`;
+    if (cardType === 'location' && result.includes('/alternate/') && !result.includes('/locations/alternate/')) {
+        result = result.replace('/images/alternate/', '/images/locations/alternate/');
+    }
+    return result;
 }
 
 /**

@@ -66,6 +66,16 @@ function toThumbnailPathForType(fullPath, type) {
     return base + 'thumb/' + dir + baseName + '.webp';
 }
 
+// Ensure location alternate paths include locations/ folder (fixes /images/alternate/ -> /images/locations/alternate/)
+function ensureLocationPathHasTypeFolder(path) {
+    if (!path || typeof path !== 'string') return path;
+    const badMatch = path.match(/^(\/src\/resources\/cards\/images\/)alternate\/(.+)$/);
+    if (badMatch) {
+        return badMatch[1] + 'locations/alternate/' + badMatch[2];
+    }
+    return path;
+}
+
 // Helper function to get card image path
 // options: { useThumbnail: boolean } - when true, return thumbnail path for character images
 function getCardImagePath(card, cardType, options) {
@@ -83,15 +93,24 @@ function getCardImagePath(card, cardType, options) {
         }
         return path;
     }
+    function finalPath(path) {
+        if (cardType === 'location') path = ensureLocationPathHasTypeFolder(path);
+        return maybeThumbnail(path);
+    }
     try {
         // After migration, alternate cards are separate cards, so we just use the card's image_path or image
         // Check for card.image_path first (for collection cards)
         if (card.image_path && typeof card.image_path === 'string' && card.image_path.trim() !== '') {
             const imagePath = card.image_path.trim();
             
-            // If it's already a full path, use it directly
+            // If it's already a full path, use it directly (fix malformed paths missing card-type folder)
             if (imagePath.startsWith('/src/resources/cards/images/')) {
-                return maybeThumbnail(imagePath);
+                // Fix: /images/alternate/xxx without locations/ causes 404 for location alternates
+                const badAlternateMatch = imagePath.match(/^\/src\/resources\/cards\/images\/alternate\/(.+)$/);
+                if (badAlternateMatch && cardType === 'location') {
+                    return finalPath(`/src/resources/cards/images/locations/alternate/${badAlternateMatch[1]}`);
+                }
+                return finalPath(imagePath);
             }
             
             // If it's just a filename, construct the full path based on card type
@@ -104,7 +123,7 @@ function getCardImagePath(card, cardType, options) {
                     case 'power':
                         return `/src/resources/cards/images/power-cards/${imagePath}`;
                     case 'location':
-                        return `/src/resources/cards/images/locations/${imagePath}`;
+                        return finalPath(`/src/resources/cards/images/locations/${imagePath}`);
                     case 'mission':
                         return `/src/resources/cards/images/missions/${imagePath}`;
                     case 'event':
@@ -142,10 +161,10 @@ function getCardImagePath(card, cardType, options) {
                 };
                 const folder = typeToFolder[cardType];
                 const pathWithType = (!hasTypePrefix && folder) ? `${folder}/${imagePath}` : imagePath;
-                return maybeThumbnail(`/src/resources/cards/images/${pathWithType}`);
+                return finalPath(`/src/resources/cards/images/${pathWithType}`);
             }
             
-            return maybeThumbnail(imagePath);
+            return finalPath(imagePath);
         }
         
         // Use card.image field (from database image_path column)
@@ -160,8 +179,8 @@ function getCardImagePath(card, cardType, options) {
                     return `/src/resources/cards/images/specials/${actualImagePath}`;
                 case 'power':
                     return `/src/resources/cards/images/power-cards/${actualImagePath}`;
-                case 'location':
-                    return `/src/resources/cards/images/locations/${actualImagePath}`;
+                    case 'location':
+                        return finalPath(`/src/resources/cards/images/locations/${actualImagePath}`);
                 case 'mission':
                     return `/src/resources/cards/images/missions/${actualImagePath}`;
                 case 'event':

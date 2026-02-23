@@ -85,9 +85,13 @@ function getCardImagePath(cardData, cardType, options) {
 
     const imagePath = cardData.image_path.trim();
 
-    // If it's already a full path, use it directly
+    // If it's already a full path, use it directly (fix location alternate paths missing locations/)
     if (imagePath.startsWith('/src/resources/cards/images/')) {
-        return maybeThumbnail(imagePath);
+        let path = imagePath;
+        if (cardType === 'location' && path.includes('/alternate/') && !path.includes('/locations/alternate/')) {
+            path = path.replace('/images/alternate/', '/images/locations/alternate/');
+        }
+        return maybeThumbnail(path);
     }
 
     // If it's just a filename (like "placeholder_aspect.webp" or "angry_mob__industrial_age_.webp")
@@ -138,9 +142,14 @@ function getCardImagePath(cardData, cardType, options) {
         return constructedPath;
     }
 
-    // If it has a partial path (like "characters/alternate/zorro.png"), construct full path
+    // If it has a partial path (like "characters/alternate/zorro.png" or "alternate/draculas_armory.png"), construct full path
     if (imagePath.includes('/') && !imagePath.startsWith('/')) {
-        return maybeThumbnail(`/src/resources/cards/images/${imagePath}`);
+        let fullPath = imagePath;
+        // Location alternates: alternate/xxx must become locations/alternate/xxx
+        if (cardType === 'location' && imagePath.startsWith('alternate/') && !imagePath.startsWith('locations/')) {
+            fullPath = 'locations/' + imagePath;
+        }
+        return maybeThumbnail(`/src/resources/cards/images/${fullPath}`);
     }
 
     // Fallback: ensure it starts with / to make it absolute

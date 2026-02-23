@@ -415,7 +415,7 @@ function navigateCardImage(groupId, direction) {
             cardType = 'special';
         } else if (groupId.startsWith('power-')) {
             cardType = 'power';
-        } else if (groupId.startsWith('location-')) {
+        } else if (groupId.startsWith('location-') || groupId.startsWith('loc-group-')) {
             cardType = 'location';
         } else if (groupId.startsWith('mission-')) {
             cardType = 'mission';
@@ -733,63 +733,123 @@ function displaySpecialCards(specialCards) {
 
 /**
  * Display location cards in the locations table
+ * Groups locations by name and set, showing a single row with navigation arrows for alternate arts
+ * (matches the character art switcher behavior)
  */
 function displayLocations(locations) {
     const tbody = document.getElementById('locations-tbody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
-    const compareText =
-        (typeof window !== 'undefined' &&
-            window.Alphabetization &&
-            typeof window.Alphabetization.compare === 'function')
-            ? window.Alphabetization.compare
-            : (a, b) => String(a ?? '').localeCompare(String(b ?? ''));
+    // Group locations by name and set (alternate arts are separate rows with same name)
+    const groupedLocations = groupCardsByVariant(locations, 'name', 'set');
 
-    const sortedLocations = Array.isArray(locations)
-        ? [...locations].sort((a, b) => compareText(a?.name, b?.name))
-        : [];
+    groupedLocations.forEach((group) => {
+        if (group.length === 0) return;
 
-    sortedLocations.forEach(location => {
-        const row = document.createElement('tr');
-        
-        // Set the data-id attribute for location identification
-        row.dataset.id = location.id;
-        
+        // Use the first location (original art) as the representative for stats
+        const representative = group[0];
+
         // Determine threat level class
         let threatClass = 'threat-low';
-        if (location.threat_level >= 3) threatClass = 'threat-high';
-        else if (location.threat_level >= 1) threatClass = 'threat-medium';
+        if (representative.threat_level >= 3) threatClass = 'threat-high';
+        else if (representative.threat_level >= 1) threatClass = 'threat-medium';
 
+        // Prepare image data for navigation
+        const imageData = group.map(loc => ({
+            id: loc.id,
+            imagePath: getCardImagePathForDisplay(loc, 'location'),
+            fullResPath: getCardImagePathForDisplay(loc, 'location'),
+            name: loc.name
+        }));
+
+        const groupId = `loc-group-${representative.id}`;
+        const hasMultipleImages = imageData.length > 1;
+        const navArrows = hasMultipleImages ? `
+            <button class="card-nav-arrow card-nav-prev" onclick="navigateCardImage('${groupId}', -1)" aria-label="Previous art" type="button">‹</button>
+            <button class="card-nav-arrow card-nav-next" onclick="navigateCardImage('${groupId}', 1)" aria-label="Next art" type="button">›</button>
+        ` : '';
+
+        const currentImage = imageData[0];
+        const currentImagePath = currentImage.imagePath;
+        const currentFullResPath = currentImage.fullResPath || currentImagePath;
+        const currentImageName = currentImage.name;
+
+        const row = document.createElement('tr');
+        row.dataset.id = representative.id;
         row.innerHTML = `
             <td>
-                <img src="/src/resources/cards/images/locations/${mapImagePathToActualFile(location.image)}" 
-                     alt="${location.name}" 
-                     loading="lazy"
-                     decoding="async"
-                     style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/locations/${mapImagePathToActualFile(location.image)}', '${location.name.replace(/'/g, "\\'")}')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+                <div class="card-image-container">
+                    ${navArrows}
+                    <img id="${groupId}-img"
+                         data-src="${currentImagePath}"
+                         data-full-res="${currentFullResPath}"
+                         alt="${currentImageName}"
+                         loading="lazy"
+                         decoding="async"
+                         style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('location', '${location.id}', '${location.name.replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('location', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${location.id}', 'location')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'location')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
                 ` : ''}
             </td>
-            <td><strong>${location.name}</strong></td>
-            <td class="${threatClass}">${location.threat_level}</td>
-            <td>${location.special_ability || ''}</td>
+            <td><strong>${representative.name}</strong></td>
+            <td class="${threatClass}">${representative.threat_level}</td>
+            <td>${representative.special_ability || ''}</td>
         `;
-        
+
+        row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
+        row.querySelector('.card-image-container').setAttribute('data-current-index', '0');
+
         tbody.appendChild(row);
-        
-        // Immediately disable Add to Deck button for guest users to prevent flash
+
+        const img = row.querySelector('img');
+        if (img) {
+            if (typeof window.ImageLoadQueue !== 'undefined') {
+                window.ImageLoadQueue.queueImageLoad(img, currentImagePath);
+            } else {
+                img.src = currentImagePath;
+            }
+            const lockRowHeight = () => {
+                const imageCell = row.querySelector('td:nth-child(1)');
+                if (imageCell && !imageCell.dataset.heightLocked) {
+                    const cellHeight = imageCell.offsetHeight;
+                    const rowHeight = row.offsetHeight;
+                    if (cellHeight > 0) {
+                        const cellHeightStr = cellHeight + 'px';
+                        imageCell.style.setProperty('height', cellHeightStr, 'important');
+                        imageCell.style.setProperty('min-height', cellHeightStr, 'important');
+                        imageCell.style.setProperty('max-height', cellHeightStr, 'important');
+                        imageCell.dataset.heightLocked = 'true';
+                    }
+                    if (rowHeight > 0) {
+                        const rowHeightStr = rowHeight + 'px';
+                        row.style.setProperty('height', rowHeightStr, 'important');
+                        row.style.setProperty('min-height', rowHeightStr, 'important');
+                        row.style.setProperty('max-height', rowHeightStr, 'important');
+                        row.dataset.heightLocked = 'true';
+                    }
+                }
+            };
+            if (img.complete) {
+                setTimeout(lockRowHeight, 100);
+            } else {
+                img.addEventListener('load', lockRowHeight, { once: true });
+                setTimeout(lockRowHeight, 1000);
+            }
+        }
+
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {
