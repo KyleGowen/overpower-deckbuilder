@@ -2623,9 +2623,13 @@
                 const mapHasData = window.availableCardsMap && window.availableCardsMap.size > 0;
                 if (mapHasData) {
                     results = categories.map(cat => {
-                        const cards = Array.from(window.availableCardsMap.values()).filter(c =>
+                        const allMatches = Array.from(window.availableCardsMap.values()).filter(c =>
                             (c.cardType || c.type) === cat.type
                         );
+                        // Deduplicate: same card is stored under multiple keys (id, type_id, name)
+                        const byId = new Map();
+                        allMatches.forEach(c => { if (c && c.id) byId.set(c.id, c); });
+                        const cards = Array.from(byId.values());
                         return { category: cat, data: { success: cards.length > 0, data: cards } };
                     });
                 } else {
