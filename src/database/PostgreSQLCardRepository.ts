@@ -327,7 +327,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         id: mission.id,
         mission_set: mission.mission_set,
         card_name: mission.name,
-        image: mission.image_path
+        image: mission.image_path,
+        image_path: mission.image_path
       };
     } finally {
       client.release();
@@ -346,7 +347,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         set_number: mission.set_number || null,
         card_name: mission.name,
         name: mission.name,
-        image: mission.image_path
+        image: mission.image_path,
+        image_path: mission.image_path
       }));
     } finally {
       client.release();
@@ -374,6 +376,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         game_effect: event.game_effect,
         flavor_text: event.flavor_text,
         image: event.image_path,
+        image_path: event.image_path,
         one_per_deck: event.one_per_deck || false
       };
     } finally {
@@ -395,6 +398,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         game_effect: event.game_effect,
         flavor_text: event.flavor_text,
         image: event.image_path,
+        image_path: event.image_path,
         one_per_deck: event.one_per_deck || false
       }));
     } finally {

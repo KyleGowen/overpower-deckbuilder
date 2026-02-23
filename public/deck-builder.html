@@ -9501,9 +9501,8 @@
                 }
             }
             
-            // Fallback: if no prefix matches, return the filename part (after the last slash)
-            const filename = imagePath.split('/').pop();
-            return filename;
+            // Fallback: preserve path as-is (don't strip subdirectories)
+            return imagePath;
         }
 
         // Helper function to get card image path
@@ -9517,31 +9516,31 @@
                     // Construct full path based on card type
                     switch (cardType) {
                         case 'character':
-                            return `src/resources/cards/images/characters/${actualImagePath}`;
+                            return `/src/resources/cards/images/characters/${actualImagePath}`;
                         case 'special':
-                            return `src/resources/cards/images/specials/${actualImagePath}`;
+                            return `/src/resources/cards/images/specials/${actualImagePath}`;
                         case 'power':
-                            return `src/resources/cards/images/power-cards/${actualImagePath}`;
+                            return `/src/resources/cards/images/power-cards/${actualImagePath}`;
                         case 'location':
-                            return `src/resources/cards/images/locations/${actualImagePath}`;
+                            return `/src/resources/cards/images/locations/${actualImagePath}`;
                         case 'mission':
-                            return `src/resources/cards/images/missions/${actualImagePath}`;
+                            return `/src/resources/cards/images/missions/${actualImagePath}`;
                         case 'event':
-                            return `src/resources/cards/images/events/${actualImagePath}`;
+                            return `/src/resources/cards/images/events/${actualImagePath}`;
                         case 'aspect':
-                            return `src/resources/cards/images/aspects/${actualImagePath}`;
+                            return `/src/resources/cards/images/aspects/${actualImagePath}`;
                         case 'advanced-universe':
-                            return `src/resources/cards/images/advanced-universe/${actualImagePath}`;
+                            return `/src/resources/cards/images/advanced-universe/${actualImagePath}`;
                         case 'teamwork':
-                            return `src/resources/cards/images/teamwork-universe/${actualImagePath}`;
+                            return `/src/resources/cards/images/teamwork-universe/${actualImagePath}`;
                         case 'ally-universe':
-                            return `src/resources/cards/images/ally-universe/${actualImagePath}`;
+                            return `/src/resources/cards/images/ally-universe/${actualImagePath}`;
                         case 'training':
-                            return `src/resources/cards/images/training-universe/${actualImagePath}`;
+                            return `/src/resources/cards/images/training-universe/${actualImagePath}`;
                         case 'basic-universe':
-                            return `src/resources/cards/images/basic-universe/${actualImagePath}`;
+                            return `/src/resources/cards/images/basic-universe/${actualImagePath}`;
                         default:
-                            return 'src/resources/cards/images/placeholder.webp';
+                            return '/src/resources/cards/images/placeholder.webp';
                     }
                 }
                 
@@ -9550,15 +9549,15 @@
                     const characterName = card.name || card.card_name || '';
                     if (characterName) {
                         const snakeCaseName = characterName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        return `src/resources/cards/images/characters/${snakeCaseName}.webp`;
+                        return `/src/resources/cards/images/characters/${snakeCaseName}.webp`;
                     }
                 }
                 
                 // If no image field found, return a placeholder
-                return `src/resources/cards/images/placeholder.webp`;
+                return '/src/resources/cards/images/placeholder.webp';
             } catch (error) {
                 console.error('Error getting card image path:', error);
-                return `src/resources/cards/images/placeholder.webp`;
+                return '/src/resources/cards/images/placeholder.webp';
             }
         }
         
@@ -9587,6 +9586,7 @@
                         
                         if (data.success && data.data.length > 0) {
                             data.data.forEach(card => {
+                                availableCardsMap.set(card.id, card);
                                 availableCardsMap.set(`${category.type}_${card.id}`, card);
                             });
                         }
@@ -10158,6 +10158,7 @@
                         if (data.success && data.data.length > 0) {
                             // Populate the global map for deck editor use
                             data.data.forEach(card => {
+                                availableCardsMap.set(card.id, card);
                                 availableCardsMap.set(`${category.type}_${card.id}`, card);
                             });
                             

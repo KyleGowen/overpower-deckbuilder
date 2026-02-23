@@ -1795,6 +1795,16 @@ app.get('/api/collections/me/history', authenticateUser, async (req: any, res) =
   }
 });
 
+// GET /logout - clears session and redirects to home (for testing/browser automation)
+app.get('/logout', (req, res) => {
+  const sessionId = req.cookies?.sessionId;
+  if (sessionId) {
+    authService.destroySession(sessionId);
+  }
+  res.clearCookie('sessionId');
+  res.redirect('/');
+});
+
 // Main page route - displays characters table
 // Main application route - serves the app with login modal
 app.get('/', (req, res) => {

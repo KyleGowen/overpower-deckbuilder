@@ -82,7 +82,8 @@ function renderDeckCardsListView() {
             const characterGroups = {};
             
             cards.forEach(card => {
-                const availableCard = window.availableCardsMap.get(card.cardId);
+                let availableCard = window.availableCardsMap.get(card.cardId);
+                if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                 if (!availableCard) return;
                 
                 const characterName = availableCard.character || availableCard.character_name || 'Any Character';
@@ -113,7 +114,8 @@ function renderDeckCardsListView() {
                 `;
                 
                 characterCards.forEach((card, index) => {
-                    const availableCard = window.availableCardsMap.get(card.cardId);
+                    let availableCard = window.availableCardsMap.get(card.cardId);
+                    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                     if (!availableCard) return;
                     
                     const cardName = availableCard.name || availableCard.card_name || 'Unknown Card';
@@ -173,15 +175,18 @@ function renderDeckCardsListView() {
             // Regular handling for other card types (including characters)
             // Sort cards by name for consistent display
             cards.sort((a, b) => {
-                const availableCardA = window.availableCardsMap.get(a.cardId);
-                const availableCardB = window.availableCardsMap.get(b.cardId);
+                let availableCardA = window.availableCardsMap.get(a.cardId);
+                if (!availableCardA && a.type) availableCardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
+                let availableCardB = window.availableCardsMap.get(b.cardId);
+                if (!availableCardB && b.type) availableCardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
                 const nameA = availableCardA?.name || availableCardA?.card_name || 'Unknown';
                 const nameB = availableCardB?.name || availableCardB?.card_name || 'Unknown';
                 return nameA.localeCompare(nameB);
             });
 
             cards.forEach((card, index) => {
-                const availableCard = window.availableCardsMap.get(card.cardId);
+                let availableCard = window.availableCardsMap.get(card.cardId);
+                if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                 
                 if (!availableCard) {
                     return;
@@ -847,7 +852,8 @@ function renderDeckCardsCardView() {
     const characterOrder = [];
     if (cardsByType['character'] && cardsByType['character'].length > 0) {
         cardsByType['character'].forEach(cardData => {
-            const characterCard = window.availableCardsMap.get(cardData.cardId);
+            let characterCard = window.availableCardsMap.get(cardData.cardId);
+            if (!characterCard && cardData.type) characterCard = window.availableCardsMap.get(`${cardData.type}_${cardData.cardId}`);
             if (characterCard && characterCard.name) {
                 const characterName = (characterCard.name || '').trim();
                 if (characterName && !characterOrder.includes(characterName)) {
@@ -906,8 +912,10 @@ function renderDeckCardsCardView() {
                 };
                 const copy = [...typeCards];
                 copy.sort((a, b) => {
-                    const cardA = window.availableCardsMap.get(a.cardId);
-                    const cardB = window.availableCardsMap.get(b.cardId);
+                    let cardA = window.availableCardsMap.get(a.cardId);
+                    if (!cardA && a.type) cardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
+                    let cardB = window.availableCardsMap.get(b.cardId);
+                    if (!cardB && b.type) cardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
                     if (!cardA || !cardB) return 0;
                     const valueA = parseInt(cardA.value) || 0;
                     const valueB = parseInt(cardB.value) || 0;
@@ -921,8 +929,10 @@ function renderDeckCardsCardView() {
                 // Sort special cards by character order, with "Any Character" specials last
                 const copy = [...typeCards];
                 copy.sort((a, b) => {
-                    const cardA = window.availableCardsMap.get(a.cardId);
-                    const cardB = window.availableCardsMap.get(b.cardId);
+                    let cardA = window.availableCardsMap.get(a.cardId);
+                    if (!cardA && a.type) cardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
+                    let cardB = window.availableCardsMap.get(b.cardId);
+                    if (!cardB && b.type) cardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
                     if (!cardA || !cardB) return 0;
                     
                     const charA = (cardA.character || '').trim();
@@ -979,6 +989,10 @@ function renderDeckCardsCardView() {
                 // If selectedAlternateCardId exists, use that for image lookup; otherwise use original cardId
                 const cardIdForImage = card.selectedAlternateCardId || card.cardId;
                 let availableCard = window.availableCardsMap.get(cardIdForImage);
+                // Fallback: try type_cardId format (deck-builder uses this)
+                if (!availableCard && card.type) {
+                    availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
+                }
                 
                 // Try alternate key formats for basic-universe cards
                 if ((card.type === 'basic-universe' || card.type === 'basic_universe') && !availableCard) {
@@ -1106,7 +1120,8 @@ function renderDeckCardsCardView() {
                     `;
                 } else if (card.type === 'special' && hasLancelot()) {
                     // Check if this is Sword and Shield special card
-                    const cardData = window.availableCardsMap.get(card.cardId);
+                    let cardData = window.availableCardsMap.get(card.cardId);
+                    if (!cardData && card.type) cardData = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                     const cardName = cardData ? (cardData.name || cardData.card_name || '') : '';
                     if (cardName === 'Sword and Shield' || card.cardId.includes('sword_and_shield') || card.cardId.includes('sword-and-shield')) {
                         const isExcluded = card.exclude_from_draw === true;
@@ -1130,6 +1145,7 @@ function renderDeckCardsCardView() {
                     
                     // Look up the card for this instance
                     let instanceAvailableCard = window.availableCardsMap.get(instanceCardId);
+                    if (!instanceAvailableCard && card.type) instanceAvailableCard = window.availableCardsMap.get(`${card.type}_${instanceCardId}`);
                     if (!instanceAvailableCard) {
                         instanceAvailableCard = availableCard; // Fallback to original
                     }
@@ -1365,7 +1381,8 @@ async function displayDeckCardsForEditing() {
                 const missionSetCounts = {};
                 typeCards.forEach(cardData => {
                     // Since deck_cards.card_id now contains UUIDs, we can look up directly
-                    const availableCard = window.availableCardsMap.get(cardData.cardId);
+                    let availableCard = window.availableCardsMap.get(cardData.cardId);
+                    if (!availableCard && cardData.type) availableCard = window.availableCardsMap.get(`${cardData.type}_${cardData.cardId}`);
                     if (availableCard && availableCard.mission_set) {
                         missionSetCounts[availableCard.mission_set] = (missionSetCounts[availableCard.mission_set] || 0) + 1;
                     }
@@ -1442,7 +1459,9 @@ async function displayDeckCardsForEditing() {
                         mapKeyType = 'advanced-universe';
                     }
                     // Direct lookup using UUID
-                    const availableCard = window.availableCardsMap.get(card.cardId);
+                    let availableCard = window.availableCardsMap.get(card.cardId);
+                    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
+                    if (!availableCard) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                     
                     if (!availableCard) {
                         console.warn('Special card not found in availableCardsMap:', card);
@@ -1500,6 +1519,8 @@ async function displayDeckCardsForEditing() {
             ? card.selectedAlternateCardIds[0] 
             : (card.selectedAlternateCardId || card.cardId);
         let availableCard = window.availableCardsMap.get(cardIdForLookup);
+        if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForLookup}`);
+        if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${cardIdForLookup}`);
                         
                         if (!availableCard && (card.type === 'basic-universe' || card.type === 'basic_universe')) {
                             // Try alternate key formats for basic-universe cards
@@ -1624,7 +1645,8 @@ async function displayDeckCardsForEditing() {
                             mapKeyType = 'advanced-universe';
                         }
                         // Direct lookup using UUID
-                    const availableCard = window.availableCardsMap.get(card.cardId);
+                        let availableCard = window.availableCardsMap.get(card.cardId);
+                        if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                         
                         if (!availableCard) {
                             console.warn('Power card not found in availableCardsMap:', card);
@@ -1688,7 +1710,8 @@ async function displayDeckCardsForEditing() {
                                 mapKeyType = 'advanced-universe';
                             }
                             // Direct lookup using UUID
-                    const availableCard = window.availableCardsMap.get(card.cardId);
+                            let availableCard = window.availableCardsMap.get(card.cardId);
+                            if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                             
                             if (!availableCard) {
                                 console.warn('Card not found in availableCardsMap:', card);
@@ -1752,8 +1775,10 @@ async function displayDeckCardsForEditing() {
                 // Value sorted view - sort all power cards by value, then Overpower type order
                 const sortedCards = [...typeCards].sort((a, b) => {
                         // Direct lookup using UUID
-                        const cardA = window.availableCardsMap.get(a.cardId);
-                        const cardB = window.availableCardsMap.get(b.cardId);
+                        let cardA = window.availableCardsMap.get(a.cardId);
+                        if (!cardA && a.type) cardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
+                        let cardB = window.availableCardsMap.get(b.cardId);
+                        if (!cardB && b.type) cardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
                         if (!cardA || !cardB) return 0;
                         const valueA = parseInt(cardA.value) || 0;
                         const valueB = parseInt(cardB.value) || 0;
@@ -1770,7 +1795,8 @@ async function displayDeckCardsForEditing() {
                         const card = cardData;
                         const index = cardData.originalIndex;
                         // Direct lookup using UUID
-                        const availableCard = window.availableCardsMap.get(card.cardId);
+                        let availableCard = window.availableCardsMap.get(card.cardId);
+                        if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                         
                         if (!availableCard) {
                             console.warn('Card not found in availableCardsMap:', card);
@@ -1841,6 +1867,8 @@ async function displayDeckCardsForEditing() {
                     }
                     // Direct lookup using UUID
                     let availableCard = window.availableCardsMap.get(card.cardId);
+                    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+                    if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
                     
                     // Try alternate key formats for universe cards if direct lookup fails
                     if (!availableCard && (card.type === 'basic-universe' || card.type === 'basic_universe' || 
@@ -2190,12 +2218,11 @@ async function displayDeckCardsForEditing() {
 // ===== Background rendering, expansion state, deck type/list sections =====
 
 const CARD_PLACEHOLDER = '/src/resources/cards/images/placeholder.webp';
-let deckEditorTileObserver = null;
 
 function loadBackgroundImageForTile(el) {
     const bgImage = el.getAttribute('data-bg-image');
     if (!bgImage || el.dataset.bgImageLoaded === '1') return;
-    const usePlaceholderOnError = el.classList.contains('mission-card') || el.classList.contains('event-card');
+    // Use placeholder for all card types on load failure (was only mission/event)
     const img = new Image();
     img.onload = function() {
         const encodedPath = encodeURI(bgImage);
@@ -2203,7 +2230,7 @@ function loadBackgroundImageForTile(el) {
         el.dataset.bgImageLoaded = '1';
     };
     img.onerror = function() {
-        el.style.setProperty('--bg-image', usePlaceholderOnError ? `url(${CARD_PLACEHOLDER})` : 'none');
+        el.style.setProperty('--bg-image', `url(${CARD_PLACEHOLDER})`);
         el.dataset.bgImageLoaded = '1';
     };
     img.src = bgImage;
@@ -2213,24 +2240,10 @@ function applyCharacterBackgroundsToEditor() {
     const container = document.getElementById('deckCardsEditor');
     if (!container) return;
     const lazyEls = container.querySelectorAll('.deck-card-editor-item[data-bg-image]');
-    if (typeof IntersectionObserver === 'undefined') {
-        lazyEls.forEach((el) => loadBackgroundImageForTile(el));
-        return;
-    }
-    if (!deckEditorTileObserver) {
-        deckEditorTileObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        loadBackgroundImageForTile(entry.target);
-                        deckEditorTileObserver.unobserve(entry.target);
-                    }
-                });
-            },
-            { rootMargin: '200px', threshold: 0.01 }
-        );
-    }
-    lazyEls.forEach((el) => deckEditorTileObserver.observe(el));
+    // Load all deck editor card images immediately (skip IntersectionObserver) - tiles are
+    // typically visible when the modal opens, and the observer was causing images to not load
+    // in some viewport/layout scenarios (e.g. two-column, scrollable panes).
+    lazyEls.forEach((el) => loadBackgroundImageForTile(el));
 }
 
 // Apply expansion state to deck editor sections
