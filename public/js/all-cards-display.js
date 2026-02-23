@@ -410,15 +410,25 @@ function displayAllCards(cards = null) {
     // Render all cards
     container.innerHTML = sortedCards.map(card => renderCardCell(card)).join('');
     
-    // Queue image loads to throttle concurrent requests (prevents 502)
-    if (typeof window.ImageLoadQueue !== 'undefined') {
-        window.ImageLoadQueue.processContainer(container);
-    } else {
-        container.querySelectorAll('img[data-src]').forEach(img => {
-            const src = img.dataset.src || img.getAttribute('data-src');
-            if (src) img.src = src;
-        });
-    }
+    // Eager-load first visible batch, lazy-load rest. Use requestAnimationFrame so container
+    // is painted and visible before assigning src (browsers skip loading images in display:none ancestors).
+    requestAnimationFrame(() => {
+        const imgs = container.querySelectorAll('img[data-src]');
+        const FIRST_BATCH_SIZE = 40;
+        if (typeof window.ImageLoadQueue !== 'undefined') {
+            const firstBatch = Array.from(imgs).slice(0, FIRST_BATCH_SIZE);
+            firstBatch.forEach(img => {
+                const url = img.dataset.src || img.getAttribute('data-src');
+                if (url) window.ImageLoadQueue.queueImageLoad(img, url);
+            });
+            window.ImageLoadQueue.observe(container);
+        } else {
+            imgs.forEach(img => {
+                const src = img.dataset.src || img.getAttribute('data-src');
+                if (src) img.src = src;
+            });
+        }
+    });
     
     console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }

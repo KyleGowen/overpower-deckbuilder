@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    const MAX_CONCURRENT = 6;
+    const MAX_CONCURRENT = 24;
     const RETRY_DELAY_MS = 2000;
     const MAX_RETRIES = 1;
 
@@ -113,7 +113,7 @@
                 }
             });
         }, {
-            rootMargin: '200px',
+            rootMargin: '600px',
             threshold: 0.01
         });
 
