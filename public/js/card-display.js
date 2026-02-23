@@ -37,11 +37,11 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
         groups.get(key).push(card);
     });
     
-    // Sort each group: original art first (image_path doesn't contain /alternate/), then alternates
+    // Sort each group: original art first (image_path doesn't contain alternate/), then alternates
     groups.forEach((group, key) => {
         group.sort((a, b) => {
-            const aIsAlternate = (a.image_path || a.image || '').includes('/alternate/');
-            const bIsAlternate = (b.image_path || b.image || '').includes('/alternate/');
+            const aIsAlternate = (a.image_path || a.image || '').includes('alternate/');
+            const bIsAlternate = (b.image_path || b.image || '').includes('alternate/');
             
             if (aIsAlternate && !bIsAlternate) return 1;  // b (original) comes first
             if (!aIsAlternate && bIsAlternate) return -1; // a (original) comes first
@@ -745,10 +745,10 @@ function displayLocations(locations) {
         if (representative.threat_level >= 3) threatClass = 'threat-high';
         else if (representative.threat_level >= 1) threatClass = 'threat-medium';
 
-        // Prepare image data for navigation
+        // Prepare image data for navigation (thumbnail for list display, full-res for modal/hover)
         const imageData = group.map(loc => ({
             id: loc.id,
-            imagePath: getCardImagePathForDisplay(loc, 'location'),
+            imagePath: getCardImagePathForDisplay(loc, 'location', { useThumbnail: true }),
             fullResPath: getCardImagePathForDisplay(loc, 'location'),
             name: loc.name
         }));

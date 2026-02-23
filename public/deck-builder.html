@@ -3358,6 +3358,7 @@
     <!-- Global Navigation Component -->
     <link rel="stylesheet" href="/components/globalNav.css">
     <link rel="stylesheet" href="/css/database-view.css">
+    <script src="/js/card-image-utils.js"></script>
     <script src="/components/globalNav.js"></script>
 </head>
 <body>
@@ -4579,9 +4580,13 @@
                 else if (representative.threat_level >= 1) threatClass = 'threat-medium';
 
                 const imageData = group.map(loc => {
-                    const p = loc.image_path || loc.image || '';
-                    const fullPath = '/src/resources/cards/images/locations/' + (p.startsWith('locations/') ? p.slice(10) : p);
-                    return { id: loc.id, imagePath: fullPath, fullResPath: fullPath, name: loc.name };
+                    const thumbPath = typeof window.getCardImagePath === 'function'
+                        ? window.getCardImagePath({ ...loc, image_path: loc.image_path || loc.image }, 'location', { useThumbnail: true })
+                        : null;
+                    const fullPath = typeof window.getCardImagePath === 'function'
+                        ? window.getCardImagePath({ ...loc, image_path: loc.image_path || loc.image }, 'location')
+                        : '/src/resources/cards/images/locations/' + ((loc.image_path || loc.image || '').startsWith('locations/') ? (loc.image_path || loc.image).slice(10) : (loc.image_path || loc.image || ''));
+                    return { id: loc.id, imagePath: thumbPath || fullPath, fullResPath: fullPath, name: loc.name };
                 });
 
                 const groupId = 'loc-group-' + representative.id;
@@ -4625,8 +4630,8 @@
             });
             groups.forEach((group) => {
                 group.sort((a, b) => {
-                    const aAlt = (a.image_path || a.image || '').includes('/alternate/');
-                    const bAlt = (b.image_path || b.image || '').includes('/alternate/');
+                    const aAlt = (a.image_path || a.image || '').includes('alternate/');
+                    const bAlt = (b.image_path || b.image || '').includes('alternate/');
                     if (aAlt && !bAlt) return 1;
                     if (!aAlt && bAlt) return -1;
                     return 0;
