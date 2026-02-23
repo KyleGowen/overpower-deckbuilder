@@ -109,6 +109,7 @@ export interface Aspect {
   card_effect: string;
   aspect_description?: string;
   image: string;
+  image_path?: string;
   icons?: string[]; // derived from aspect_description when it acts as an attack/defense
   value?: number | null; // level associated with icons, when applicable
   is_fortification: boolean;

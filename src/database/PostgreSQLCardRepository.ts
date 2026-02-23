@@ -429,6 +429,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         location: aspect.location,
         card_effect: aspect.card_effect,
         image: aspect.image_path,
+        image_path: aspect.image_path,
         is_fortification: aspect.fortifications || false,
         is_one_per_deck: aspect.one_per_deck || false
       };
@@ -453,6 +454,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: aspect.set || 'ERB',
         set_number: aspect.set_number || null,
         image: aspect.image_path,
+        image_path: aspect.image_path,
         icons: aspect.icons || undefined,
         value: aspect.value ?? null,
         is_fortification: aspect.fortifications || false,
