@@ -32,11 +32,11 @@
                 <form id="createUserForm" onsubmit="createUser(event)">
                     <div class="form-group">
                         <label for="newUsername">Username:</label>
-                        <input type="text" id="newUsername" name="username" required>
+                        <input type="text" id="newUsername" name="username" required autocomplete="username">
                     </div>
                     <div class="form-group">
                         <label for="newPassword">Password:</label>
-                        <input type="password" id="newPassword" name="password" required>
+                        <input type="password" id="newPassword" name="password" required autocomplete="new-password">
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="save-btn">Save</button>
@@ -49,6 +49,8 @@
         <div class="create-user-container" id="changePasswordContainer" style="display: none;">
             <div class="create-user-dropdown" id="changePasswordDropdown">
                 <form id="changePasswordForm" onsubmit="changePassword(event)">
+                    <!-- Hidden username field for accessibility (password managers, a11y) -->
+                    <input type="text" name="username" id="changePasswordUsername" autocomplete="username" style="position:absolute;left:-9999px;width:1px;height:1px" tabindex="-1" aria-hidden="true">
                     <div class="form-group">
                         <label for="newPasswordField">New Password:</label>
                         <input type="password" id="newPasswordField" name="newPassword" required autocomplete="new-password">

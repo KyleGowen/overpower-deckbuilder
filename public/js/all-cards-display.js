@@ -211,6 +211,7 @@ async function loadAllCards() {
 
 /**
  * Get card name based on card type and name field
+ * Uses nameField when present (from loadAllCards mapping) for API-specific structures
  */
 function getCardName(card) {
     if (!card) {
@@ -218,6 +219,13 @@ function getCardName(card) {
     }
     
     const cardType = card.cardType || '';
+    
+    // Use nameField from loadAllCards when available (handles API response structure)
+    const nameField = card.nameField;
+    if (nameField && card[nameField] !== undefined && card[nameField] !== null) {
+        const trimmed = String(card[nameField]).trim();
+        if (trimmed) return trimmed;
+    }
     
     // For power cards, format as "value - power_type"
     if (cardType === 'power') {
@@ -255,33 +263,39 @@ function getCardName(card) {
     }
     
     // For characters, special cards, events, locations - use name
-    // Default: try name first (most common), then card_name, then card_type
-    return card.name || card.card_name || card.card_type || 'Unknown Card';
+    // Fallbacks: card_name, card_type, character (specials), character_name
+    return card.name || card.card_name || card.card_type || card.character || card.character_name || 'Unknown Card';
 }
+
+/** Card type to folder mapping for image paths (alternate/ needs type prefix) */
+const CARD_TYPE_FOLDERS = {
+    'character': 'characters', 'special': 'specials', 'power': 'power-cards',
+    'location': 'locations', 'mission': 'missions', 'event': 'events', 'aspect': 'aspects',
+    'advanced-universe': 'advanced-universe', 'advanced_universe': 'advanced-universe',
+    'teamwork': 'teamwork-universe', 'ally-universe': 'ally-universe', 'ally_universe': 'ally-universe',
+    'training': 'training-universe', 'basic-universe': 'basic-universe', 'basic_universe': 'basic-universe'
+};
 
 /**
  * Get card image path based on card type
  * options: { useThumbnail: boolean } - when true, return thumbnail for character images
  */
 function getCardImagePathForAllCards(card, cardType, options) {
-    // Use existing function if available
+    // Prefer global getCardImagePath (card-image-utils) which has full path logic
+    if (typeof window.getCardImagePath === 'function') {
+        return window.getCardImagePath({ ...card, image_path: card.image_path || card.image }, cardType, options);
+    }
     if (typeof getCardImagePathForDisplay === 'function') {
         return getCardImagePathForDisplay(card, cardType, options);
     }
-    
-    // Fallback implementation
-    const imagePath = card.image_path || card.image || '';
-    if (!imagePath) {
-        return '/src/resources/cards/images/placeholder.webp';
-    }
-    
-    // If it's already a full path, return it
-    if (imagePath.startsWith('/src/resources/cards/images/')) {
-        return imagePath;
-    }
-    
-    // Construct full path
-    return `/src/resources/cards/images/${imagePath}`;
+    const imagePath = (card.image_path || card.image || '').trim();
+    if (!imagePath) return '/src/resources/cards/images/placeholder.webp';
+    if (imagePath.startsWith('/src/resources/cards/images/')) return imagePath;
+    const typePrefixes = ['characters/', 'missions/', 'specials/', 'locations/', 'events/', 'aspects/', 'power-cards/', 'teamwork-universe/', 'ally-universe/', 'training-universe/', 'basic-universe/', 'advanced-universe/'];
+    const hasTypePrefix = typePrefixes.some(p => imagePath.startsWith(p));
+    const folder = CARD_TYPE_FOLDERS[cardType];
+    const pathWithType = (!hasTypePrefix && folder) ? `${folder}/${imagePath}` : imagePath;
+    return `/src/resources/cards/images/${pathWithType}`;
 }
 
 /**
@@ -309,10 +323,10 @@ function renderCardCell(card) {
         cardName = getCardName(card);
     }
     const cardType = card.cardType || 'character';
-    const imagePath = getCardImagePathForAllCards(card, cardType, { useThumbnail: true });
+    const imagePath = getCardImagePathForAllCards(card, cardType, { useThumbnail: false });
     const fullResPath = getCardImagePathForAllCards(card, cardType);
     const escapedName = cardName.replace(/'/g, "\\'");
-    
+
     // Check if user is ADMIN
     const isAdmin = typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN';
     
@@ -355,10 +369,9 @@ function renderCardCell(card) {
                 <img data-src="${imagePath}"
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
-                     loading="lazy"
                      decoding="async"
                      onload="${imageOnLoad}"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='; this.style.cursor='default';"
+                     onerror="(function(img){var t=img.dataset.altTried;if(!t){img.dataset.altTried='1';var s=img.src||img.dataset.src;if(s&&s.endsWith('.webp')){img.src=s.replace(/\\.webp$/,'.png');return;}if(s&&s.endsWith('.png')){img.src=s.replace(/\\.png$/,'.webp');return;}}img.onerror=null;img.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';img.style.cursor='default';})(this)"
                      onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
@@ -369,7 +382,7 @@ function renderCardCell(card) {
                     +Deck
                 </button>
                 ${isAdmin ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', '${apiCardType}')" style="width: 100%;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', '${apiCardType}', '${fullResPath.replace(/'/g, "\\'")}')" style="width: 100%;">
                     +Collection
                 </button>
                 ` : ''}
@@ -410,24 +423,17 @@ function displayAllCards(cards = null) {
     // Render all cards
     container.innerHTML = sortedCards.map(card => renderCardCell(card)).join('');
     
-    // Eager-load first visible batch, lazy-load rest. Use requestAnimationFrame so container
-    // is painted and visible before assigning src (browsers skip loading images in display:none ancestors).
+    // Load images: set src directly for All tab (ImageLoadQueue can leave images on placeholder).
+    // Use batched direct assignment; avoid queue which may not reliably trigger loads in this layout.
     requestAnimationFrame(() => {
-        const imgs = container.querySelectorAll('img[data-src]');
-        const FIRST_BATCH_SIZE = 40;
-        if (typeof window.ImageLoadQueue !== 'undefined') {
-            const firstBatch = Array.from(imgs).slice(0, FIRST_BATCH_SIZE);
-            firstBatch.forEach(img => {
-                const url = img.dataset.src || img.getAttribute('data-src');
-                if (url) window.ImageLoadQueue.queueImageLoad(img, url);
-            });
-            window.ImageLoadQueue.observe(container);
-        } else {
+        requestAnimationFrame(() => {
+            if (!container) return;
+            const imgs = container.querySelectorAll('img[data-src]');
             imgs.forEach(img => {
                 const src = img.dataset.src || img.getAttribute('data-src');
                 if (src) img.src = src;
             });
-        }
+        });
     });
     
     console.log(`Displayed ${sortedCards.length} cards in All tab`);

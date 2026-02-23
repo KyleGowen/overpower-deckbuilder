@@ -1,5 +1,10 @@
 # Cursor AI Assistant Rules for Overpower Deckbuilder
 
+## Ship Command
+- **When the user says "ship", it means: commit and push everything to git**
+- Stage all changes, create a commit, and push to the remote
+- Follow all other rules (run tests first, no debug statements, etc.) before shipping
+
 ## Testing Requirements
 - **ALWAYS run all unit tests before committing to git**
 - **NEVER commit to git if any unit tests fail**

@@ -512,9 +512,12 @@ function handleCollectionSearchResultClick(element) {
 
 /**
  * Add card to collection from database view
+ * @param {string} cardId - Card UUID
+ * @param {string} cardType - Card type (character, special, advanced_universe, etc.)
+ * @param {string|null} [imagePath] - Optional image path (helps server avoid lookup)
  */
-async function addCardToCollectionFromDatabase(cardId, cardType) {
-    await addCardToCollection(cardId, cardType);
+async function addCardToCollectionFromDatabase(cardId, cardType, imagePath = null) {
+    await addCardToCollection(cardId, cardType, imagePath);
 }
 
 /**

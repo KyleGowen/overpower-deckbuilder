@@ -67,6 +67,7 @@
                     processQueue();
                 }, RETRY_DELAY_MS);
             } else {
+                console.warn('[ImageLoadQueue] Image failed to load:', src);
                 onComplete();
             }
         }, { once: true });
@@ -113,8 +114,8 @@
                 }
             });
         }, {
-            rootMargin: '600px',
-            threshold: 0.01
+            rootMargin: '800px',
+            threshold: 0
         });
 
         const imgs = container.querySelectorAll('img[data-src]');

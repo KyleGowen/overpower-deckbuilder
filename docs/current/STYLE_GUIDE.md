@@ -335,6 +335,14 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Character Cards**: Teal borders with gold text for character names
 - **Stat Cards**: `rgba(255, 255, 255, 0.1)` background with teal numbers
 - **Tab Navigation**: Teal active states with white inactive states
+- **+Deck and +Collection Buttons**: Styled to match unselected tab (all DB View tabs)
+  - **Background**: `rgba(255, 255, 255, 0.1)`
+  - **Border**: `1px solid rgba(255, 255, 255, 0.2)`
+  - **Text Color**: `#ffffff`
+  - **Border Radius**: `8px`
+  - **Hover**: `background: rgba(255, 255, 255, 0.2)`; `border-color: rgba(255, 255, 255, 0.3)`
+  - **Active**: `background: rgba(255, 255, 255, 0.15)`
+  - **CSS Classes**: `.add-to-deck-btn`, `.add-to-collection-btn` (in `database-view.css`)
 - **Search Results**: Gold highlights for matching text
 - **Search Bar Styling**: 
   - **Advanced Universe Card Effect Search**: 480px width with centered alignment

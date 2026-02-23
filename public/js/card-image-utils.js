@@ -111,14 +111,17 @@ function getCardImagePath(card, cardType, options) {
                         return `/src/resources/cards/images/events/${imagePath}`;
                     case 'aspect':
                         return `/src/resources/cards/images/aspects/${imagePath}`;
+                    case 'advanced-universe':
                     case 'advanced_universe':
                         return `/src/resources/cards/images/advanced-universe/${imagePath}`;
                     case 'teamwork':
                         return `/src/resources/cards/images/teamwork-universe/${imagePath}`;
+                    case 'ally-universe':
                     case 'ally_universe':
                         return `/src/resources/cards/images/ally-universe/${imagePath}`;
                     case 'training':
                         return `/src/resources/cards/images/training-universe/${imagePath}`;
+                    case 'basic-universe':
                     case 'basic_universe':
                         return `/src/resources/cards/images/basic-universe/${imagePath}`;
                     default:
@@ -126,9 +129,20 @@ function getCardImagePath(card, cardType, options) {
                 }
             }
             
-            // If it has a partial path, construct full path
+            // If it has a partial path (e.g. "alternate/draculas_armory.png"), prepend card-type folder when missing
             if (imagePath.includes('/') && !imagePath.startsWith('/')) {
-                return maybeThumbnail(`/src/resources/cards/images/${imagePath}`);
+                const typePrefixes = ['characters/', 'missions/', 'specials/', 'locations/', 'events/', 'aspects/', 'power-cards/', 'teamwork-universe/', 'ally-universe/', 'training-universe/', 'basic-universe/', 'advanced-universe/'];
+                const hasTypePrefix = typePrefixes.some(p => imagePath.startsWith(p));
+                const typeToFolder = {
+                    'character': 'characters', 'special': 'specials', 'power': 'power-cards',
+                    'location': 'locations', 'mission': 'missions', 'event': 'events', 'aspect': 'aspects',
+                    'advanced-universe': 'advanced-universe', 'advanced_universe': 'advanced-universe',
+                    'teamwork': 'teamwork-universe', 'ally-universe': 'ally-universe', 'ally_universe': 'ally-universe',
+                    'training': 'training-universe', 'basic-universe': 'basic-universe', 'basic_universe': 'basic-universe'
+                };
+                const folder = typeToFolder[cardType];
+                const pathWithType = (!hasTypePrefix && folder) ? `${folder}/${imagePath}` : imagePath;
+                return maybeThumbnail(`/src/resources/cards/images/${pathWithType}`);
             }
             
             return maybeThumbnail(imagePath);

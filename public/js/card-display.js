@@ -94,7 +94,7 @@ function getCardImagePathForDisplay(card, cardType = 'character', options) {
         return path;
     }
     const imagePath = card.image_path || card.image || '';
-    if (!imagePath) return '';
+    if (!imagePath) return '/src/resources/cards/images/placeholder.webp';
 
     // Use global getCardImagePath when available (handles all cases including thumbnail)
     if (typeof window.getCardImagePath === 'function') {
