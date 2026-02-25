@@ -158,3 +158,19 @@ resource "aws_ssm_parameter" "app_port" {
     Environment = var.environment
   }
 }
+
+# CloudFront CDN base URL for card image delivery
+# Set automatically from the CloudFront distribution output after terraform apply.
+# The application reads this at startup via /js/app-config.js to prefix card image paths.
+resource "aws_ssm_parameter" "cdn_base_url" {
+  name  = "/${var.project_name}/${var.environment}/app/cdn_base_url"
+  type  = "String"
+  value = "https://${aws_cloudfront_distribution.card_images.domain_name}"
+
+  description = "CloudFront CDN base URL for card images (excelsior.cards)"
+
+  tags = {
+    Name        = "${var.project_name}-cdn-base-url"
+    Environment = var.environment
+  }
+}

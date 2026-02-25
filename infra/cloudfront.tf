@@ -66,3 +66,46 @@ output "cloudfront_domain_name" {
   description = "CloudFront distribution domain name for card images — set this as CDN_BASE_URL in production"
   value       = "https://${aws_cloudfront_distribution.card_images.domain_name}"
 }
+
+# Restart the running Docker container on EC2 with CDN_BASE_URL injected.
+# Uses AWS SSM Run Command — no SSH required.
+# Triggers whenever the CloudFront domain name changes.
+resource "null_resource" "restart_app_with_cdn" {
+  triggers = {
+    cdn_domain = aws_cloudfront_distribution.card_images.domain_name
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      aws ssm send-command \
+        --region ${var.aws_region} \
+        --instance-ids ${aws_instance.app.id} \
+        --document-name "AWS-RunShellScript" \
+        --comment "Restart app container with CDN_BASE_URL" \
+        --parameters 'commands=[
+          "set -e",
+          "CDN_BASE_URL=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/app/cdn_base_url --region ${var.aws_region} --query Parameter.Value --output text)",
+          "DB_URL=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/database/url --with-decryption --region ${var.aws_region} --query Parameter.Value --output text)",
+          "APP_ENV=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/app/environment --region ${var.aws_region} --query Parameter.Value --output text)",
+          "FIREBASE_API_KEY=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/firebase/api_key --region ${var.aws_region} --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+          "FIREBASE_AUTH_DOMAIN=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/firebase/auth_domain --region ${var.aws_region} --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+          "FIREBASE_PROJECT_ID=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/firebase/project_id --region ${var.aws_region} --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+          "FIREBASE_APP_ID=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/firebase/app_id --region ${var.aws_region} --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+          "FIREBASE_SERVICE_ACCOUNT=$(aws ssm get-parameter --name /${var.project_name}/${var.environment}/firebase/service_account_json --with-decryption --region ${var.aws_region} --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+          "ECR_URL=$(aws ecr describe-repositories --repository-names op-deckbuilder-repo --region ${var.aws_region} --query repositories[0].repositoryUri --output text)",
+          "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin $ECR_URL",
+          "docker pull $ECR_URL:latest",
+          "docker stop overpower-app || true",
+          "docker rm overpower-app || true",
+          "docker run -d --name overpower-app --restart unless-stopped -p 3000:3000 -e NODE_ENV=$APP_ENV -e DATABASE_URL=$DB_URL -e NODE_TLS_REJECT_UNAUTHORIZED=0 -e PORT=3000 -e SKIP_MIGRATIONS=false -e FIREBASE_API_KEY=$FIREBASE_API_KEY -e FIREBASE_AUTH_DOMAIN=$FIREBASE_AUTH_DOMAIN -e FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID -e FIREBASE_APP_ID=$FIREBASE_APP_ID -e FIREBASE_SERVICE_ACCOUNT_JSON=$FIREBASE_SERVICE_ACCOUNT -e CDN_BASE_URL=$CDN_BASE_URL $ECR_URL:latest",
+          "sleep 10",
+          "docker ps | grep -q overpower-app && echo SUCCESS || echo FAILED"
+        ]'
+    EOT
+  }
+
+  depends_on = [
+    aws_cloudfront_distribution.card_images,
+    aws_ssm_parameter.cdn_base_url,
+  ]
+}
