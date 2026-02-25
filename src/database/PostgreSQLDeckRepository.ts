@@ -205,15 +205,15 @@ export class PostgreSQLDeckRepository implements DeckRepository {
             m.name as mission_name,
             m.image_path as mission_image_path
           FROM deck_cards dc
-          JOIN missions m ON m.id::text = dc.card_id
+          JOIN missions m ON m.id = dc.card_id::uuid
           WHERE dc.deck_id = d.id AND dc.card_type = 'mission'
           -- Prefer the user-selected mission when present; otherwise fall back to first by set_number/name/id.
           ORDER BY
             CASE
-              WHEN d.display_mission_card_id IS NOT NULL AND dc.card_id = d.display_mission_card_id::text THEN 0
+              WHEN d.display_mission_card_id IS NOT NULL AND dc.card_id::uuid = d.display_mission_card_id THEN 0
               ELSE 1
             END,
-            NULLIF(m.set_number, '')::int ASC NULLS LAST,
+            m.set_number_int ASC NULLS LAST,
             m.name ASC,
             dc.card_id ASC
           LIMIT 1

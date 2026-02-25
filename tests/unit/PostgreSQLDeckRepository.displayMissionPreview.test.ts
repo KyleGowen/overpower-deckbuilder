@@ -46,9 +46,13 @@ describe('PostgreSQLDeckRepository.getDecksByUserId mission preview selection', 
     const sql = String(mockClient.query.mock.calls[0][0]);
 
     expect(sql).toContain('display_mission_card_id');
-    expect(sql).toContain('dc.card_id = d.display_mission_card_id::text');
+    expect(sql).toContain('dc.card_id::uuid = d.display_mission_card_id');
     expect(sql).toContain('CASE');
     expect(sql).toContain('ORDER BY');
+    // Verify optimized join — no runtime cast on missions.id
+    expect(sql).toContain('m.id = dc.card_id::uuid');
+    // Verify precomputed column used instead of runtime NULLIF cast
+    expect(sql).toContain('m.set_number_int');
   });
 });
 
