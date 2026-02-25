@@ -613,6 +613,17 @@ jobs:
           --parameters file://.github/scripts/append-firebase-env.json \
           --output text --query 'Command.CommandId'
 
+    - name: Append CDN_BASE_URL to .env
+      run: |
+        aws ssm send-command \
+          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "CDN_BASE_URL=$(aws ssm get-parameter --name /op-deckbuilder/dev/app/cdn_base_url --region us-west-2 --query Parameter.Value --output text 2>/dev/null || echo \"\")",
+            "if [ -n \"$CDN_BASE_URL\" ]; then echo \"CDN_BASE_URL=$CDN_BASE_URL\" >> /opt/app/.env && echo \"CDN_BASE_URL appended to .env\"; else echo \"CDN_BASE_URL not set in SSM, skipping\"; fi"
+          ]' \
+          --output text --query 'Command.CommandId'
+
     - name: Copy Flyway configuration to EC2
       run: |
         echo "📋 Copying Flyway configuration to EC2..."
