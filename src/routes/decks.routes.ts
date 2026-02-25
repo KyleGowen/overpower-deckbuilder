@@ -28,6 +28,10 @@ export function createDeckRoutes(deps: DeckRoutesDeps) {
       const etag = `"${crypto.createHash('sha1').update(body).digest('hex')}"`;
 
       res.set('Cache-Control', 'private, max-age=30');
+      // Vary: Cookie ensures each unique session cookie gets its own browser cache entry.
+      // Without this, a guest session and a real user session share the same cached response
+      // for the URL GET /api/decks, causing the guest's deck list to appear after login.
+      res.set('Vary', 'Cookie');
       res.set('ETag', etag);
 
       if (req.headers['if-none-match'] === etag) {

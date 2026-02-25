@@ -10,6 +10,10 @@ The deck list API response (`GET /api/decks`) uses two complementary HTTP cachin
 
 ## Headers
 
+### `Vary: Cookie`
+
+Tells the browser to include the session cookie value in the cache key. Without this, a guest auto-login session and a real user session share the same cached response for `GET /api/decks` — causing the guest's deck list to appear immediately after a real user logs in (within the 30-second window). With `Vary: Cookie`, each distinct session cookie gets its own cache entry.
+
 ### `Cache-Control: private, max-age=30`
 
 Tells the browser it may store this response locally for up to **30 seconds**.
