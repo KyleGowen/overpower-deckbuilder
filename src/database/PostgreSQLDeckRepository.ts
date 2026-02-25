@@ -171,19 +171,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     const cached = this.deckCache.get(cacheKey);
     const now = Date.now();
     if (cached && (now - cached.timestamp) < this.DECK_CACHE_TTL) {
-      const cachedDecks = cached.deck as unknown as Deck[];
-      // If cached decks don't include mission preview cards, bypass cache.
-      // This prevents stale cache from hiding newly-added preview data fields.
-      const hasAnyMissionPreview = Array.isArray(cachedDecks) && cachedDecks.some((d: any) =>
-        Array.isArray(d?.cards) && d.cards.some((c: any) => c?.type === 'mission')
-      );
-      const hasBackgroundField = Array.isArray(cachedDecks) && cachedDecks.every((d: any) =>
-        d && Object.prototype.hasOwnProperty.call(d, 'background_image_path')
-      );
-      if (hasAnyMissionPreview && hasBackgroundField) {
-        return cachedDecks;
-      }
-      this.deckCache.delete(cacheKey);
+      return cached.deck as unknown as Deck[];
     }
 
     const client = await this.pool.connect();
