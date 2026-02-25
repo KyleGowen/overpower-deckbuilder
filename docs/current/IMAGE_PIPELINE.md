@@ -1,0 +1,126 @@
+# Image Pipeline — Card Thumbnails
+
+## Overview
+
+Card images on deck tiles are served as WebP thumbnails sized to exactly match the CSS display dimensions. Generating at display size reduces bytes transferred per tile by ~60% compared to serving full-resolution images.
+
+The pipeline is handled by `src/scripts/generateCardThumbnails.ts` and runs automatically during `npm run dev` and `npm run build`.
+
+---
+
+## Directory Structure
+
+```
+src/resources/cards/images/
+├── characters/
+│   ├── <character-name>.webp       ← source image (full resolution)
+│   ├── alternate/
+│   │   └── <character-name>-alt.webp
+│   └── thumb/                      ← generated thumbnails (do not edit)
+│       ├── <character-name>.webp
+│       └── alternate/
+│           └── <character-name>-alt.webp
+├── locations/
+│   ├── <location-name>.webp
+│   └── thumb/
+│       └── <location-name>.webp
+└── missions/
+    ├── <mission-name>.webp
+    └── thumb/
+        └── <mission-name>.webp
+```
+
+The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+
+---
+
+## Thumbnail Dimensions
+
+Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either requires updating both.
+
+| Card Type  | Width | Height | CSS Selector |
+|------------|-------|--------|--------------|
+| characters | 190px | 140px  | `.deck-character-card-display` |
+| locations  | 250px | 160px  | `.deck-tile-location-preview` |
+| missions   | 140px | 200px  | `.deck-tile-mission-preview` |
+
+To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` **and** the corresponding CSS in `public/css/deck-selection.css`.
+
+---
+
+## Adding New Card Images
+
+1. Drop the source image into the correct type directory:
+   - `src/resources/cards/images/characters/` for characters
+   - `src/resources/cards/images/locations/` for locations
+   - `src/resources/cards/images/missions/` for missions
+2. Run `npm run generate:thumbnails`
+3. Confirm the new thumbnail appears in the corresponding `thumb/` subdirectory
+4. Commit both the source image and the generated thumbnail
+
+**Never commit a source image without its corresponding thumbnail.**
+
+---
+
+## shouldSkip Logic
+
+The script uses file modification times to avoid regenerating up-to-date thumbnails:
+
+```typescript
+function shouldSkip(sourcePath: string, thumbPath: string): boolean {
+  if (!fs.existsSync(thumbPath)) return false;       // no thumb yet → generate
+  const sourceStat = fs.statSync(sourcePath);
+  const thumbStat  = fs.statSync(thumbPath);
+  return thumbStat.mtimeMs >= sourceStat.mtimeMs;    // thumb is newer → skip
+}
+```
+
+- If the thumbnail does not exist → generate it
+- If the source image is newer than the thumbnail → regenerate it
+- Otherwise → skip (already up to date)
+
+This makes the script fast on subsequent runs (all existing thumbnails are skipped in milliseconds).
+
+---
+
+## Build Pipeline Integration
+
+Thumbnail generation is wired into both the dev and build scripts in `package.json`:
+
+```json
+"dev":   "npm run generate:thumbnails && ts-node-dev ...",
+"build": "npm run generate:thumbnails && tsc"
+```
+
+This means thumbnails are always fresh when:
+- Starting the dev server (`npm run dev`)
+- Building locally (`npm run build`)
+- CI `build` job (calls `npm run build`)
+- CI `integration-tests` job (calls `npm run build`)
+- CI `build-docker` job (has an explicit `generate:thumbnails` step — redundant but harmless, `shouldSkip` makes it instant)
+
+---
+
+## Running Manually
+
+```bash
+npm run generate:thumbnails
+```
+
+Output example:
+```
+🖼️  Generating card thumbnails (characters, missions, locations)...
+   Dimensions: characters 190×140, locations 250×160, missions 140×200 | WebP quality: 80
+
+📁 characters/  (190×140)
+   ✓ spider-man.webp → thumb/spider-man.webp
+   5 generated, 105 skipped, 0 error(s)
+
+📁 missions/  (140×200)
+   0 generated, 28 skipped, 0 error(s)
+
+📁 locations/  (250×160)
+   0 generated, 12 skipped, 0 error(s)
+
+✅ Done: 5 generated, 145 skipped (up to date), 0 error(s)
+```

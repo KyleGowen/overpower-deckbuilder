@@ -154,7 +154,7 @@
                                 <div class="deck-tile-side-item">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
-                                            <img src="/public/resources/images/icons/threat.png" alt="" class="deck-tile-side-icon-img">
+                                            <img src="/public/resources/images/icons/threat.png" alt="" class="deck-tile-side-icon-img" width="16" height="16">
                                         </span>
                                         <span class="deck-tile-side-label">Threat</span>
                                     </span>
@@ -163,7 +163,7 @@
                                 <div class="deck-tile-side-item">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
-                                            <img src="/public/resources/images/icons/cards.svg" alt="" class="deck-tile-side-icon-img">
+                                            <img src="/public/resources/images/icons/cards.svg" alt="" class="deck-tile-side-icon-img" width="16" height="16">
                                         </span>
                                         <span class="deck-tile-side-label">Cards</span>
                                     </span>
@@ -172,7 +172,7 @@
                                 <div class="deck-tile-side-item">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
-                                            <img src="/public/resources/images/icons/updated.svg" alt="" class="deck-tile-side-icon-img">
+                                            <img src="/public/resources/images/icons/updated.svg" alt="" class="deck-tile-side-icon-img" width="16" height="16">
                                         </span>
                                         <span class="deck-tile-side-label">Updated</span>
                                     </span>
@@ -181,7 +181,7 @@
                                 <div class="deck-tile-side-item">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
-                                            <img src="/public/resources/images/icons/created.svg" alt="" class="deck-tile-side-icon-img">
+                                            <img src="/public/resources/images/icons/created.svg" alt="" class="deck-tile-side-icon-img" width="16" height="16">
                                         </span>
                                         <span class="deck-tile-side-label">Created</span>
                                     </span>

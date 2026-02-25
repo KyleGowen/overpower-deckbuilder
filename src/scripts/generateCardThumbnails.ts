@@ -9,8 +9,15 @@ import * as path from 'path';
 import sharp from 'sharp';
 
 const IMAGE_EXTENSIONS = ['.webp', '.png', '.jpg', '.jpeg', '.gif'];
-const MAX_WIDTH = 600;
 const WEBP_QUALITY = 80;
+
+// Dimensions match the exact CSS pixel sizes used on deck tiles.
+// Generating at display size avoids downloading 3x more pixels than needed.
+const THUMB_CONFIGS: Record<string, { width: number; height: number }> = {
+  characters: { width: 190, height: 140 },
+  locations:  { width: 250, height: 160 },
+  missions:   { width: 140, height: 200 },
+};
 
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
 const THUMBNAIL_DIRS = ['characters', 'missions', 'locations'] as const;
@@ -54,7 +61,8 @@ function shouldSkip(sourcePath: string, thumbPath: string): boolean {
 async function processDirectory(
   sourceDir: string,
   thumbDir: string,
-  label: string
+  label: string,
+  thumbConfig: { width: number; height: number }
 ): Promise<{ processed: number; skipped: number; errors: number }> {
   const imageFiles = getAllImageFiles(sourceDir);
   let processed = 0;
@@ -72,7 +80,7 @@ async function processDirectory(
     try {
       fs.mkdirSync(path.dirname(thumbPath), { recursive: true });
       await sharp(sourcePath)
-        .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+        .resize({ width: thumbConfig.width, height: thumbConfig.height, fit: 'cover' })
         .webp({ quality: WEBP_QUALITY })
         .toFile(thumbPath);
       processed++;
@@ -90,7 +98,7 @@ async function processDirectory(
 
 async function generateThumbnails(): Promise<void> {
   console.log('🖼️  Generating card thumbnails (characters, missions, locations)...');
-  console.log('   Max width:', MAX_WIDTH, 'px, WebP quality:', WEBP_QUALITY);
+  console.log('   Dimensions: characters 190×140, locations 250×160, missions 140×200 | WebP quality:', WEBP_QUALITY);
   console.log('');
 
   let totalProcessed = 0;
@@ -106,8 +114,9 @@ async function generateThumbnails(): Promise<void> {
       continue;
     }
 
-    console.log(`📁 ${dirName}/`);
-    const { processed, skipped, errors } = await processDirectory(sourceDir, thumbDir, dirName);
+    const config = THUMB_CONFIGS[dirName];
+    console.log(`📁 ${dirName}/  (${config.width}×${config.height})`);
+    const { processed, skipped, errors } = await processDirectory(sourceDir, thumbDir, dirName, config);
     totalProcessed += processed;
     totalSkipped += skipped;
     totalErrors += errors;

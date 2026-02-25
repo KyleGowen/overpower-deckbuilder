@@ -164,6 +164,15 @@
 - **Ally** = "Universe: Ally" - Ally Universe card category
 - **Training** = "Universe: Training" - Training Universe card category
 
+## Image Pipeline
+
+- **When adding new card images, ALWAYS run `npm run generate:thumbnails` before committing**
+- **NEVER commit a source image without its corresponding `/thumb/` thumbnail**
+- Thumbnails live in `src/resources/cards/images/<type>/thumb/` — never edit these files directly
+- To change thumbnail dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` AND the matching CSS in `public/css/deck-selection.css`
+- Thumbnail generation runs automatically via `npm run dev` and `npm run build` — no manual step needed in CI
+- Full workflow documented in [`docs/current/IMAGE_PIPELINE.md`](docs/current/IMAGE_PIPELINE.md)
+
 ## Remember
 - Quality over speed
 - Test-driven development approach

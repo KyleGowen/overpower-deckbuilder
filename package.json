@@ -4,7 +4,7 @@
   "description": "A deckbuilding application for the Overpower card game",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run generate:thumbnails && tsc",
     "start": "node dist/index.js",
     "dev": "npm run generate:thumbnails && ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "jest --config tests/config/jest.unit.config.js",
