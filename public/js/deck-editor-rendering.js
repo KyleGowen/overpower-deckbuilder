@@ -1158,8 +1158,8 @@ function renderDeckCardsCardView() {
                         instanceAvailableCard = availableCard; // Fallback to original
                     }
                     
-                    // Get instance-specific image path (thumbnail for character display, full-res for modal)
-                    const instanceImagePath = getCardImagePath(instanceAvailableCard, card.type, card.type === 'character' ? { useThumbnail: true } : {});
+                    // Get instance-specific image path (full-res — editor displays cards large, thumbnails look blurry)
+                    const instanceImagePath = getCardImagePath(instanceAvailableCard, card.type);
                     const instanceFullResPath = getCardImagePath(instanceAvailableCard, card.type);
 
                     // Create instance-specific Change Art button
@@ -2014,7 +2014,7 @@ async function displayDeckCardsForEditing() {
                     const advancedUniverseClass = isAdvancedUniverse ? 'advanced-universe-card' : '';
                     const trainingClass = isTraining ? 'training-card' : '';
                     
-                    const bgImagePath = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || isAllyUniverse || isBasicUniverse || isAdvancedUniverse || isTraining) ? getCardImagePath(availableCard, card.type, isCharacter ? { useThumbnail: true } : {}) : '';
+                    const bgImagePath = (isCharacter || isPower || isLocation || isMission || isEvent || isAspect || isTeamwork || isAllyUniverse || isBasicUniverse || isAdvancedUniverse || isTraining) ? getCardImagePath(availableCard, card.type) : '';
                     const bgImageData = bgImagePath ? `data-bg-image="${bgImagePath}"` : '';
                     
                 // Format card display name (handle both underscore and hyphen formats)

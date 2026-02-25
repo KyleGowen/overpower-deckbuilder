@@ -11,12 +11,12 @@ import sharp from 'sharp';
 const IMAGE_EXTENSIONS = ['.webp', '.png', '.jpg', '.jpeg', '.gif'];
 const WEBP_QUALITY = 80;
 
-// Dimensions match the exact CSS pixel sizes used on deck tiles.
-// Generating at display size avoids downloading 3x more pixels than needed.
+// Dimensions are 2× the CSS pixel display sizes for retina/HiDPI sharpness.
+// The browser requests a 190×140 image slot but on a 2× screen needs 380×280 source pixels to stay crisp.
 const THUMB_CONFIGS: Record<string, { width: number; height: number }> = {
-  characters: { width: 190, height: 140 },
-  locations:  { width: 250, height: 160 },
-  missions:   { width: 140, height: 200 },
+  characters: { width: 380, height: 280 },
+  locations:  { width: 500, height: 320 },
+  missions:   { width: 280, height: 400 },
 };
 
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
@@ -98,7 +98,7 @@ async function processDirectory(
 
 async function generateThumbnails(): Promise<void> {
   console.log('🖼️  Generating card thumbnails (characters, missions, locations)...');
-  console.log('   Dimensions: characters 190×140, locations 250×160, missions 140×200 | WebP quality:', WEBP_QUALITY);
+  console.log('   Dimensions: characters 380×280, locations 500×320, missions 280×400 (2× retina) | WebP quality:', WEBP_QUALITY);
   console.log('');
 
   let totalProcessed = 0;
