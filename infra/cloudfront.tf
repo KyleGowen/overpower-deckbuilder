@@ -15,7 +15,9 @@ resource "aws_cloudfront_distribution" "card_images" {
   price_class = "PriceClass_100" # US, Canada, Europe only — lowest cost tier
 
   origin {
-    domain_name = aws_eip.app_eip.public_ip
+    # CloudFront requires a DNS hostname — raw IP addresses are not accepted.
+    # excelsior.cards resolves to the EC2 EIP via Route53, so this is equivalent.
+    domain_name = var.domain_name
     origin_id   = "ec2-origin"
 
     custom_origin_config {
