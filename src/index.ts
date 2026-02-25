@@ -525,6 +525,16 @@ app.get('/api/config/firebase', (req, res) => {
   res.json({ apiKey, authDomain, projectId, appId });
 });
 
+// App config JS snippet — exposes server-side env vars to the frontend as window globals.
+// Loaded synchronously before other scripts so values are available immediately.
+// CDN_BASE_URL: CloudFront domain (e.g. https://xxxx.cloudfront.net) — empty in local dev.
+app.get('/js/app-config.js', (req, res) => {
+  const cdnBaseUrl = process.env.CDN_BASE_URL || '';
+  res.set('Content-Type', 'application/javascript');
+  res.set('Cache-Control', 'public, max-age=300'); // 5-minute cache; short enough to pick up env changes
+  res.send(`window.APP_CDN_BASE = ${JSON.stringify(cdnBaseUrl)};`);
+});
+
 // API Routes
 app.get('/api/characters', async (req, res) => {
   try {

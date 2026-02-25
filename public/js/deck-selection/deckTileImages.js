@@ -4,6 +4,11 @@
 (function initDeckTileImages() {
     window.DeckSelection = window.DeckSelection || {};
 
+    // CDN_BASE is set by /js/app-config.js (served dynamically from the server).
+    // In production it is the CloudFront domain (e.g. https://xxxx.cloudfront.net).
+    // In local dev it is an empty string, so all paths remain relative to the EC2 origin.
+    const CDN_BASE = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+
     // Convert full-res path to thumbnail path (characters, missions, locations).
     // e.g. .../characters/foo.webp → .../characters/thumb/foo.webp
     // e.g. .../missions/setname/card.webp → .../missions/thumb/setname/card.webp
@@ -17,7 +22,7 @@
         const dir = lastSlash >= 0 ? afterBase.slice(0, lastSlash + 1) : '';
         const filename = lastSlash >= 0 ? afterBase.slice(lastSlash + 1) : afterBase;
         const baseName = filename.replace(/\.[^.]+$/, '');
-        return base + 'thumb/' + dir + baseName + '.webp';
+        return CDN_BASE + base + 'thumb/' + dir + baseName + '.webp';
     }
 
     function maybeThumbnailForDeckTile(imagePath, card) {
