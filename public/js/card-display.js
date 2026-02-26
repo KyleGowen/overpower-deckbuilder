@@ -142,6 +142,20 @@ function getCardImagePathForDisplay(card, cardType = 'character', options) {
 }
 
 /**
+ * Preloads alternate art images (index 1+) from imageData into the browser cache so that
+ * the first arrow-click is instant rather than triggering a visible network fetch.
+ */
+function preloadAlternateImages(imageData) {
+    if (!imageData || imageData.length <= 1) return;
+    imageData.slice(1).forEach(function(item) {
+        if (item.imagePath) {
+            var img = new Image();
+            img.src = item.imagePath;
+        }
+    });
+}
+
+/**
  * Display character cards in the characters table
  * Groups cards by name and universe, showing a single row with navigation arrows for alternate arts
  */
@@ -240,6 +254,7 @@ function displayCharacters(characters) {
         // Store image data in data attribute for navigation
         row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
         row.querySelector('.card-image-container').setAttribute('data-current-index', '0');
+        preloadAlternateImages(imageData);
         
         tbody.appendChild(row);
         
@@ -660,6 +675,7 @@ function displaySpecialCards(specialCards) {
         // Store image data in data attribute for navigation
         row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
         row.querySelector('.card-image-container').setAttribute('data-current-index', '0');
+        preloadAlternateImages(imageData);
         
         tbody.appendChild(row);
         
@@ -802,6 +818,7 @@ function displayLocations(locations) {
 
         row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
         row.querySelector('.card-image-container').setAttribute('data-current-index', '0');
+        preloadAlternateImages(imageData);
 
         tbody.appendChild(row);
 
