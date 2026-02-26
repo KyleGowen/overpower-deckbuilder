@@ -3,30 +3,46 @@
  * Handles login modal display, form submission, and guest login functionality
  */
 
+// Singleton promise — prevents concurrent calls from fetching and injecting the template twice
+let _loginTemplateLoadPromise = null;
+
 /**
- * Load login HTML template and inject into body
+ * Load login HTML template and inject into body.
+ * Multiple concurrent callers share a single in-flight promise so the template
+ * is never fetched or injected more than once.
  */
 async function loadLoginTemplate() {
-    // Check if login modal already exists
+    // Already in the DOM — nothing to do
     if (document.getElementById('loginModal')) {
-        return; // Already loaded
+        return;
     }
-    
-    try {
-        const response = await fetch('/components/login/login.html');
-        const html = await response.text();
-        
-        // Inject HTML at the beginning of body
-        document.body.insertAdjacentHTML('afterbegin', html);
-        
-        // Setup event listeners after HTML is loaded
-        setupLoginEventListeners();
-    } catch (error) {
-        console.error('Error loading login template:', error);
-        // Fallback: create basic login modal structure
-        createFallbackLoginModal();
-        setupLoginEventListeners();
+    // A load is already in progress — wait for it instead of starting a second fetch
+    if (_loginTemplateLoadPromise) {
+        return _loginTemplateLoadPromise;
     }
+    _loginTemplateLoadPromise = (async () => {
+        try {
+            const response = await fetch('/components/login/login.html');
+            const html = await response.text();
+            // Re-check after the async fetch in case a concurrent caller already injected it
+            if (!document.getElementById('loginModal')) {
+                document.body.insertAdjacentHTML('afterbegin', html);
+                setupLoginEventListeners();
+            }
+        } catch (error) {
+            console.error('Error loading login template:', error);
+            if (!document.getElementById('loginModal')) {
+                createFallbackLoginModal();
+                setupLoginEventListeners();
+            }
+        } finally {
+            // Reset so future calls (after DOM is cleared, e.g. on page transition) start fresh.
+            // The getElementById guard at the top still prevents redundant re-fetches when the
+            // modal is already present.
+            _loginTemplateLoadPromise = null;
+        }
+    })();
+    return _loginTemplateLoadPromise;
 }
 
 /**

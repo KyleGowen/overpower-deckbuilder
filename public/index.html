@@ -1457,6 +1457,10 @@
                         loginModal.style.display = 'none';
                     }
                 });
+            } else {
+                // No stored user — hide mainContainer immediately to prevent flash before login modal appears
+                var mc = document.getElementById('mainContainer');
+                if (mc) mc.style.display = 'none';
             }
         })();
 

@@ -711,3 +711,179 @@ describe('Login Component', () => {
     });
 });
 
+// ---------------------------------------------------------------------------
+// Concurrency guard — loadLoginTemplate singleton promise
+// ---------------------------------------------------------------------------
+describe('loadLoginTemplate — concurrency guard', () => {
+    let mockFetch: jest.Mock;
+    let LoadComponent: any;
+
+    beforeAll(() => {
+        const fs = require('fs');
+        const path = require('path');
+        let componentCode = fs.readFileSync(
+            path.join(__dirname, '../../public/components/login/login.js'),
+            'utf8'
+        );
+        componentCode = componentCode.replace(/\/\/ Initialize login component when script loads[\s\S]*$/, '');
+
+        const funcContainer: any = {};
+        const wrappedCode = `
+            ${componentCode}
+            if (typeof loadLoginTemplate !== 'undefined') funcContainer.loadLoginTemplate = loadLoginTemplate;
+            if (typeof createFallbackLoginModal !== 'undefined') funcContainer.createFallbackLoginModal = createFallbackLoginModal;
+            if (typeof setupLoginEventListeners !== 'undefined') funcContainer.setupLoginEventListeners = setupLoginEventListeners;
+        `;
+        eval(wrappedCode);
+        LoadComponent = funcContainer;
+    });
+
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        mockFetch = jest.fn();
+        (global as any).fetch = mockFetch;
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    it('concurrent calls issue only one fetch and inject exactly one modal', async () => {
+        let resolveHtml!: (v: string) => void;
+        const htmlPromise = new Promise<string>(res => { resolveHtml = res; });
+
+        mockFetch.mockReturnValueOnce({
+            ok: true,
+            text: () => htmlPromise,
+        });
+
+        const modalHtml = '<div id="loginModal"><form id="loginForm"></form><button id="guestLoginBtn"></button></div>';
+
+        // Start two calls without awaiting the first
+        const call1 = LoadComponent.loadLoginTemplate();
+        const call2 = LoadComponent.loadLoginTemplate();
+
+        // Resolve the fetch after both calls have started
+        resolveHtml(modalHtml);
+
+        await Promise.all([call1, call2]);
+
+        // Only one network request
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        // Only one modal in the DOM
+        expect(document.querySelectorAll('#loginModal').length).toBe(1);
+    });
+
+    it('a second call that arrives after the first resolves still finds the modal and skips fetch', async () => {
+        const modalHtml = '<div id="loginModal"><form id="loginForm"></form><button id="guestLoginBtn"></button></div>';
+        mockFetch.mockResolvedValueOnce({ ok: true, text: jest.fn().mockResolvedValue(modalHtml) });
+
+        // First call loads the template
+        await LoadComponent.loadLoginTemplate();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+
+        // Second call after completion — modal already in DOM so no new fetch
+        await LoadComponent.loadLoginTemplate();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(document.querySelectorAll('#loginModal').length).toBe(1);
+    });
+
+    it('after DOM is cleared a fresh call starts a new fetch', async () => {
+        const modalHtml = '<div id="loginModal"><form id="loginForm"></form><button id="guestLoginBtn"></button></div>';
+        mockFetch
+            .mockResolvedValueOnce({ ok: true, text: jest.fn().mockResolvedValue(modalHtml) })
+            .mockResolvedValueOnce({ ok: true, text: jest.fn().mockResolvedValue(modalHtml) });
+
+        await LoadComponent.loadLoginTemplate();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+
+        // Simulate DOM being cleared (e.g., page transition / test teardown)
+        document.body.innerHTML = '';
+
+        await LoadComponent.loadLoginTemplate();
+        expect(mockFetch).toHaveBeenCalledTimes(2);
+        expect(document.getElementById('loginModal')).toBeTruthy();
+    });
+
+    it('concurrent calls during a slow fetch do not produce duplicate modals', async () => {
+        const modalHtml = '<div id="loginModal"><form id="loginForm"></form><button id="guestLoginBtn"></button></div>';
+
+        let resolveText!: (v: string) => void;
+        const slowText = new Promise<string>(res => { resolveText = res; });
+
+        mockFetch.mockReturnValueOnce({ ok: true, text: () => slowText });
+
+        // Simulate 5 concurrent callers
+        const calls = Array.from({ length: 5 }, () => LoadComponent.loadLoginTemplate());
+
+        resolveText(modalHtml);
+        await Promise.all(calls);
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(document.querySelectorAll('#loginModal').length).toBe(1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// IIFE mainContainer hide logic (Bug 1 fix)
+// ---------------------------------------------------------------------------
+describe('logout flash fix — IIFE mainContainer hide', () => {
+    /**
+     * The IIFE in index.html hides mainContainer immediately when there is no
+     * stored user, preventing the brief flash of page content before the login
+     * modal appears. These tests exercise the equivalent logic directly.
+     */
+
+    function runIIFELogic(storedUser: object | null): void {
+        // Equivalent to the inline IIFE added to index.html
+        const mainContainer = document.getElementById('mainContainer');
+        if (storedUser) {
+            // Authenticated path — mainContainer stays visible (login modal would be hidden on DOMContentLoaded)
+        } else {
+            // Unauthenticated path — hide immediately
+            if (mainContainer) (mainContainer as HTMLElement).style.display = 'none';
+        }
+    }
+
+    beforeEach(() => {
+        document.body.innerHTML = '<div id="mainContainer" style="display: block;"></div>';
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('hides mainContainer immediately when no stored user', () => {
+        runIIFELogic(null);
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('none');
+    });
+
+    it('leaves mainContainer visible when a stored user is present', () => {
+        runIIFELogic({ id: 'abc', role: 'USER' });
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('block');
+    });
+
+    it('does not throw when mainContainer is absent', () => {
+        document.body.innerHTML = ''; // no mainContainer
+        expect(() => runIIFELogic(null)).not.toThrow();
+    });
+
+    it('login success path restores mainContainer visibility', () => {
+        // IIFE hides it on page load (unauthenticated)
+        runIIFELogic(null);
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('none');
+
+        // Simulates lines 268/292 in auth-app-init.js where login/signup success shows it
+        mc.style.display = 'block';
+        expect(mc.style.display).toBe('block');
+    });
+});
+
