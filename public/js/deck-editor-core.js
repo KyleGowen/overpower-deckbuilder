@@ -1019,7 +1019,12 @@ async function closeDeckEditor() {
     currentDeckData = null;
     window.deckEditorCards = [];
     
-    // Return to deck builder selection screen only if not already there (avoids redundant DOM updates and flash)
+    // Always reset URL to remove the deck ID — prevents stale deck URLs on hard refresh
+    const closingUser = getCurrentUser();
+    const closingUserId = closingUser ? (closingUser.userId || closingUser.id) : 'guest';
+    history.replaceState({view: 'deckbuilder'}, '', `/users/${closingUserId}/decks`);
+
+    // Only do DOM work if not already in deck builder (avoids redundant DOM updates and flash)
     if (!isAlreadyInDeckBuilder && typeof switchToDeckBuilder === 'function') {
         switchToDeckBuilder();
     }

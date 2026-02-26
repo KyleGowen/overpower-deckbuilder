@@ -223,9 +223,6 @@ describe('FrontendAuthService', () => {
         location: mockLocation
       };
       
-      // Mock fetch to return a failed response so we don't hit the real API
-      mockFetch.mockResolvedValueOnce({ ok: false });
-      
       // Call with explicit pathname to bypass window.location
       const result = await authService.checkAuthentication('/users/testuser/decks/testdeck');
       
@@ -319,10 +316,47 @@ describe('FrontendAuthService', () => {
       expect(result.currentUser).toBeNull();
     });
 
-    it('should attempt auto guest login for deck URLs without authentication', async () => {
-      // This test is complex due to mocking issues, but the functionality is covered by other tests
-      // The guest login functionality is tested in the login tests
-      expect(true).toBe(true);
+    it('should NOT attempt auto guest login when not authenticated on a deck URL', async () => {
+      // No stored user — user is fully unauthenticated
+      mockLocalStorage.getItem.mockReturnValue(null);
+
+      const result = await authService.checkAuthentication('/users/someuser/decks/somedeck');
+
+      // Must remain unauthenticated — no guest login should have been attempted
+      expect(result.isAuthenticated).toBe(false);
+      expect(result.currentUser).toBeNull();
+
+      // fetch should NOT have been called with guest credentials
+      const fetchCallsWithGuestCreds = mockFetch.mock.calls.filter(
+        ([, options]: [string, RequestInit]) =>
+          options?.body === JSON.stringify({ username: 'guest', password: 'guest' })
+      );
+      expect(fetchCallsWithGuestCreds).toHaveLength(0);
+    });
+
+    it('should NOT attempt auto guest login when session expires on a deck URL', async () => {
+      const mockUser: User = {
+        id: 'test-id',
+        name: 'testuser',
+        email: 'test@example.com',
+        role: 'USER'
+      };
+
+      // Stored user exists but session has expired
+      mockLocalStorage.getItem.mockReturnValue(JSON.stringify(mockUser));
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 401 });
+
+      const result = await authService.checkAuthentication('/users/testuser/decks/somedeck');
+
+      // Should be unauthenticated — guest login must NOT have been attempted
+      expect(result.isAuthenticated).toBe(false);
+      expect(result.currentUser).toBeNull();
+
+      const fetchCallsWithGuestCreds = mockFetch.mock.calls.filter(
+        ([, options]: [string, RequestInit]) =>
+          options?.body === JSON.stringify({ username: 'guest', password: 'guest' })
+      );
+      expect(fetchCallsWithGuestCreds).toHaveLength(0);
     });
 
     it('should set read-only mode when viewing another user\'s deck', async () => {
@@ -349,8 +383,7 @@ describe('FrontendAuthService', () => {
     });
 
     it('should set read-only mode when not authenticated on deck URL', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false }); // No stored user
-
+      // No stored user, no fetch mock needed — unauthenticated path makes no fetch calls
       const result = await authService.checkAuthentication('/users/testuser/decks/testdeck');
 
       expect(result.isReadOnlyMode).toBe(true);

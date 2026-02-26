@@ -131,38 +131,6 @@ export class FrontendAuthService {
       }
     }
 
-    // If no user is authenticated and we are on a deck URL, attempt auto guest login
-    if (!authResult.isAuthenticated && authResult.deckId) {
-      console.log('✅ Detected deck URL - attempting auto guest login for deck:', authResult.deckId, 'user:', authResult.urlUserId);
-      try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'guest', password: 'guest' })
-        });
-
-        if (response.ok) {
-          const data = await response.json() as LoginResponse;
-          if (data.data) {
-            this.currentUser = {
-              id: data.data.userId,
-              name: data.data.username,
-              email: '',
-              role: 'GUEST' as UserRole
-            };
-            this.storeUser(this.currentUser);
-            authResult.isAuthenticated = true;
-            authResult.currentUser = this.currentUser;
-            console.log('Auto guest login successful');
-          }
-        } else {
-          console.error('Auto guest login failed:', await response.json());
-        }
-      } catch (error) {
-        console.error('Error during auto guest login:', error);
-      }
-    }
-
     // Determine read-only mode if a deck is being viewed
     if (authResult.deckId) {
       // If readonly query parameter is set, always use read-only mode

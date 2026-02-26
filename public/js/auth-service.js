@@ -105,38 +105,6 @@ class FrontendAuthService {
       }
     }
 
-    // If no user is authenticated and we are on a deck URL, attempt auto guest login
-    if (!authResult.isAuthenticated && authResult.deckId) {
-      try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ username: 'guest', password: 'guest' })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.data) {
-            this.currentUser = {
-              id: data.data.userId,
-              name: data.data.username,
-              email: '',
-              role: 'GUEST'
-            };
-            this.storeUser(this.currentUser);
-            authResult.isAuthenticated = true;
-            authResult.currentUser = this.currentUser;
-            console.log('Auto guest login successful');
-          }
-        } else {
-          console.error('Auto guest login failed:', await response.json());
-        }
-      } catch (error) {
-        console.error('Error during auto guest login:', error);
-      }
-    }
-
     // Read-only mode removed - now handled by backend flag
 
     return authResult;
