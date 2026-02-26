@@ -828,62 +828,242 @@ describe('loadLoginTemplate — concurrency guard', () => {
 });
 
 // ---------------------------------------------------------------------------
-// IIFE mainContainer hide logic (Bug 1 fix)
+// mainContainer default-hidden — IIFE flash prevention
 // ---------------------------------------------------------------------------
-describe('logout flash fix — IIFE mainContainer hide', () => {
+describe('mainContainer default-hidden — IIFE flash prevention', () => {
     /**
-     * The IIFE in index.html hides mainContainer immediately when there is no
-     * stored user, preventing the brief flash of page content before the login
-     * modal appears. These tests exercise the equivalent logic directly.
+     * The IIFE in index.html now works with mainContainer hidden by default
+     * (style="display:none" on the element). These tests exercise the updated
+     * logic: show mainContainer for authenticated users, leave it hidden for
+     * unauthenticated users.
      */
 
     function runIIFELogic(storedUser: object | null): void {
-        // Equivalent to the inline IIFE added to index.html
-        const mainContainer = document.getElementById('mainContainer');
+        // Mirrors the updated IIFE in public/index.html
         if (storedUser) {
-            // Authenticated path — mainContainer stays visible (login modal would be hidden on DOMContentLoaded)
-        } else {
-            // Unauthenticated path — hide immediately
-            if (mainContainer) (mainContainer as HTMLElement).style.display = 'none';
+            const mc = document.getElementById('mainContainer');
+            if (mc) (mc as HTMLElement).style.display = 'block';
         }
+        // No else branch — mainContainer is already hidden by default in HTML
     }
 
     beforeEach(() => {
-        document.body.innerHTML = '<div id="mainContainer" style="display: block;"></div>';
+        document.body.innerHTML = '<div id="mainContainer" style="display:none"></div>';
     });
 
     afterEach(() => {
         document.body.innerHTML = '';
     });
 
-    it('hides mainContainer immediately when no stored user', () => {
-        runIIFELogic(null);
-
-        const mc = document.getElementById('mainContainer') as HTMLElement;
-        expect(mc.style.display).toBe('none');
-    });
-
-    it('leaves mainContainer visible when a stored user is present', () => {
+    it('stored user → mainContainer is shown immediately', () => {
         runIIFELogic({ id: 'abc', role: 'USER' });
 
         const mc = document.getElementById('mainContainer') as HTMLElement;
         expect(mc.style.display).toBe('block');
     });
 
+    it('no stored user → mainContainer stays hidden', () => {
+        runIIFELogic(null);
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('none');
+    });
+
     it('does not throw when mainContainer is absent', () => {
-        document.body.innerHTML = ''; // no mainContainer
+        document.body.innerHTML = '';
+
+        expect(() => runIIFELogic({ id: 'abc', role: 'USER' })).not.toThrow();
         expect(() => runIIFELogic(null)).not.toThrow();
     });
 
-    it('login success path restores mainContainer visibility', () => {
-        // IIFE hides it on page load (unauthenticated)
+    it('login success after unauthenticated page load → mainContainer becomes visible', () => {
+        // Page loads with no stored user → mainContainer stays hidden
         runIIFELogic(null);
         const mc = document.getElementById('mainContainer') as HTMLElement;
         expect(mc.style.display).toBe('none');
 
-        // Simulates lines 268/292 in auth-app-init.js where login/signup success shows it
+        // Login succeeds → auth-app-init.js login handler sets display:block
         mc.style.display = 'block';
+        expect(mc.style.display).toBe('block');
+    });
+
+    it('guest stored user → mainContainer is shown', () => {
+        runIIFELogic({ id: 'guest-id', role: 'GUEST' });
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
         expect(mc.style.display).toBe('block');
     });
 });
 
+// ---------------------------------------------------------------------------
+// showMainApp() — mainContainer visibility
+// ---------------------------------------------------------------------------
+describe('showMainApp — shows mainContainer', () => {
+    let AppInit: any;
+
+    beforeAll(() => {
+        const fs = require('fs');
+        const path = require('path');
+        const code = fs.readFileSync(
+            path.join(__dirname, '../../public/js/app-initialization.js'),
+            'utf8'
+        );
+        const funcContainer: any = {};
+        const wrappedCode = `
+            ${code}
+            if (typeof showMainApp !== 'undefined') funcContainer.showMainApp = showMainApp;
+        `;
+        // Stub globals required by app-initialization.js
+        (global as any).currentUser = { role: 'USER', username: 'testuser' };
+        (global as any).disableAddToDeckButtonsImmediate = () => {};
+        (global as any).switchToDeckBuilder = () => {};
+        (global as any).updateUserWelcome = () => {};
+        (global as any).loadCharacters = () => {};
+        (global as any).loadSpecialCards = () => {};
+        (global as any).loadAdvancedUniverse = () => {};
+        (global as any).loadMissions = () => {};
+        (global as any).loadLocations = () => {};
+        (global as any).loadEvents = () => {};
+        (global as any).loadAspects = () => {};
+        (global as any).loadTeamwork = () => {};
+        (global as any).loadAllyUniverse = () => {};
+        (global as any).loadTraining = () => {};
+        (global as any).loadBasicUniverse = () => {};
+        (global as any).loadPowerCards = () => {};
+        (global as any).loadDecks = () => {};
+        eval(wrappedCode);
+        AppInit = funcContainer;
+    });
+
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <div id="mainContainer" style="display:none"></div>
+            <div id="loginModal" style="display:flex"></div>
+            <span id="currentUsername"></span>
+            <div id="database-view"></div>
+            <div id="deck-builder" class="view-removed"></div>
+        `;
+        (global as any).currentUser = { role: 'USER', username: 'testuser' };
+        (global as any).disableAddToDeckButtonsImmediate = jest.fn();
+        (global as any).switchToDeckBuilder = jest.fn();
+        (global as any).updateUserWelcome = jest.fn();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    it('sets mainContainer display to block', () => {
+        AppInit.showMainApp();
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('block');
+    });
+
+    it('hides the login modal', () => {
+        AppInit.showMainApp();
+
+        const loginModal = document.getElementById('loginModal') as HTMLElement;
+        expect(loginModal.style.display).toBe('none');
+    });
+
+    it('does not throw when mainContainer is absent', () => {
+        document.body.innerHTML = `
+            <div id="loginModal" style="display:flex"></div>
+            <span id="currentUsername"></span>
+            <div id="database-view"></div>
+            <div id="deck-builder" class="view-removed"></div>
+        `;
+
+        expect(() => AppInit.showMainApp()).not.toThrow();
+    });
+
+    it('shows mainContainer for guest users', () => {
+        (global as any).currentUser = { role: 'GUEST', username: 'guest' };
+
+        AppInit.showMainApp();
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('block');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// showDeckEditor() — mainContainer visibility
+// ---------------------------------------------------------------------------
+describe('showDeckEditor — shows mainContainer', () => {
+    let DeckEditorCore: any;
+
+    beforeAll(() => {
+        const fs = require('fs');
+        const path = require('path');
+        const code = fs.readFileSync(
+            path.join(__dirname, '../../public/js/deck-editor-core.js'),
+            'utf8'
+        );
+        const funcContainer: any = {};
+        // Stub all globals deck-editor-core.js depends on
+        (global as any).currentDeckData = null;
+        (global as any).manageDeckLayout = () => false;
+        (global as any).createTwoColumnLayout = () => {};
+        (global as any).getCurrentUser = () => null;
+        (global as any).loadDeckForEditing = async () => {};
+        (global as any).requestAnimationFrame = (cb: () => void) => { try { cb(); } catch (_) {} };
+        const wrappedCode = `
+            ${code}
+            if (typeof showDeckEditor !== 'undefined') funcContainer.showDeckEditor = showDeckEditor;
+        `;
+        eval(wrappedCode);
+        DeckEditorCore = funcContainer;
+    });
+
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <div id="mainContainer" style="display:none"></div>
+            <div id="deckEditorModal" style="display:none">
+                <div class="deck-editor-layout">
+                    <div class="deck-pane"></div>
+                </div>
+            </div>
+        `;
+        (global as any).currentDeckData = null;
+        (global as any).manageDeckLayout = () => false;
+        (global as any).createTwoColumnLayout = () => {};
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    it('sets mainContainer display to block', () => {
+        DeckEditorCore.showDeckEditor();
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('block');
+    });
+
+    it('sets mainContainer display to block even when deckEditorModal is absent', () => {
+        document.body.innerHTML = '<div id="mainContainer" style="display:none"></div>';
+
+        DeckEditorCore.showDeckEditor();
+
+        const mc = document.getElementById('mainContainer') as HTMLElement;
+        expect(mc.style.display).toBe('block');
+    });
+
+    it('does not throw when mainContainer is absent', () => {
+        document.body.innerHTML = `
+            <div id="deckEditorModal" style="display:none">
+                <div class="deck-editor-layout"></div>
+            </div>
+        `;
+
+        expect(() => DeckEditorCore.showDeckEditor()).not.toThrow();
+    });
+});

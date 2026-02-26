@@ -3,6 +3,8 @@
 
 // Show deck editor modal
 function showDeckEditor() {
+    const mc = document.getElementById('mainContainer');
+    if (mc) mc.style.display = 'block';
     try {
         const modal = document.getElementById('deckEditorModal');
         if (!modal) {

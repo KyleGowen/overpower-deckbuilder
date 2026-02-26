@@ -92,7 +92,7 @@
 <body>
     <!-- Login Modal will be loaded by login.js component -->
     
-    <div class="container" id="mainContainer">
+    <div class="container" id="mainContainer" style="display:none">
         <!-- Global Navigation Component -->
         <div id="globalNav"></div>
 
@@ -1450,6 +1450,9 @@
                 (window.authService && typeof window.authService.getCurrentUser === 'function' ? window.authService.getCurrentUser() : null);
             if (storedUser) {
                 currentUser = storedUser;
+                // mainContainer starts hidden by default; show it immediately for authenticated users
+                var mc = document.getElementById('mainContainer');
+                if (mc) mc.style.display = 'block';
                 // Hide login modal immediately if we have a stored user
                 document.addEventListener('DOMContentLoaded', function() {
                     const loginModal = document.getElementById('loginModal');
@@ -1457,10 +1460,6 @@
                         loginModal.style.display = 'none';
                     }
                 });
-            } else {
-                // No stored user — hide mainContainer immediately to prevent flash before login modal appears
-                var mc = document.getElementById('mainContainer');
-                if (mc) mc.style.display = 'none';
             }
         })();
 
