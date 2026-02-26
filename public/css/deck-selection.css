@@ -457,3 +457,46 @@
     text-align: center;
 }
 
+
+/* ── Skeleton loading tiles ──────────────────────────────────────────────── */
+/* Matches the .deck-tile--compact layout; shimmer replaces real content     */
+
+@keyframes deck-tile-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+}
+
+.deck-tile--skeleton {
+    pointer-events: none;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.deck-tile-skeleton-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.deck-tile-skeleton-title,
+.deck-tile-skeleton-chars,
+.deck-tile-skeleton-meta,
+.deck-tile-skeleton-side {
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.12) 40%,
+        rgba(255, 255, 255, 0.05) 80%
+    );
+    background-size: 600px 100%;
+    animation: deck-tile-shimmer 1.4s ease-in-out infinite;
+}
+
+.deck-tile-skeleton-title  { height: 22px; width: 55%; }
+.deck-tile-skeleton-chars  { height: 100px; width: 100%; }
+.deck-tile-skeleton-meta   { height: 14px; width: 40%; }
+.deck-tile-skeleton-side   { width: 220px; flex-shrink: 0; border-radius: 8px; }
