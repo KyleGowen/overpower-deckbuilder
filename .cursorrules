@@ -3,7 +3,12 @@
 ## Ship Command
 - **When the user says "ship", it means: commit and push everything to git**
 - Stage all changes, create a commit, and push to the remote
-- Follow all other rules (run tests first, no debug statements, etc.) before shipping
+- Follow all other rules before shipping, in this exact order:
+  1. Run `npx eslint src --ext .ts --max-warnings 0` — fix any warnings before proceeding
+  2. Run `npm run test:unit` — fix any failures before proceeding
+  3. Run `npm audit` (first push of the day only) — fix vulnerabilities before proceeding
+  4. Remove any debug statements (console.log, console.debug, etc.)
+  5. Commit and push
 
 ## Testing Requirements
 - **ALWAYS run all unit tests before committing to git**
@@ -59,13 +64,23 @@
 - **Only required once per calendar day** -- after the first push of the day passes the audit, subsequent pushes that day do not need to re-audit unless `package.json` or `package-lock.json` changed
 - **ALWAYS re-audit if `package.json` or `package-lock.json` was modified**, regardless of whether the daily audit already ran
 
+## Linting Requirements
+- **ALWAYS run the linter before committing to git**
+- **NEVER commit to git if linting produces any warnings or errors**
+- Use `npx eslint src --ext .ts --max-warnings 0` to lint all TypeScript source files
+- If warnings or errors are reported, fix them before committing
+- The CI pipeline enforces the same zero-warning policy — local lint must pass first
+- Common fixes: replace `any` types with specific types, prefix unused variables with `_`, wrap `case` blocks with braces, use optional catch binding (`catch {}`) for unused errors
+
 ## Git Workflow
 1. Make code changes
-2. Run `npm run test:unit` to verify all tests pass
-3. If tests fail, fix issues and re-run tests
-4. Only commit when all tests are passing
-5. Before pushing (first push of the day): run `npm audit` and fix any vulnerabilities
-6. Use descriptive commit messages
+2. Run `npx eslint src --ext .ts --max-warnings 0` to verify zero lint warnings
+3. If lint warnings exist, fix them and re-run lint
+4. Run `npm run test:unit` to verify all tests pass
+5. If tests fail, fix issues and re-run tests
+6. Only commit when lint is clean AND all tests are passing
+7. Before pushing (first push of the day): run `npm audit` and fix any vulnerabilities
+8. Use descriptive commit messages
 
 ## Project-Specific Guidelines
 - This is a TypeScript/Node.js project with Jest testing
