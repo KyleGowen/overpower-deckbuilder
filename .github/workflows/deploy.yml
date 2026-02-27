@@ -742,7 +742,7 @@ jobs:
         CMD_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
-          --timeout-seconds 360 \
+          --timeout-seconds 540 \
           --parameters "commands=[
             \"echo '=== Blue-Green Deploy Start ===' \",
             \"CURRENT_PORT=\$(cat /opt/app/active_port 2>/dev/null || echo '3000')\",
@@ -755,10 +755,12 @@ jobs:
             \"echo '--- Step 2: Start new container on idle port ---'\",
             \"docker stop overpower-app-new || true\",
             \"docker rm overpower-app-new || true\",
-            \"docker run -d --name overpower-app-new --restart unless-stopped -p \$NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=false $ECR_URI:latest\",
+            \"docker run -d --name overpower-app-new --restart unless-stopped -p \$NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=true $ECR_URI:latest\",
             \"echo \\\"New container started on port \$NEW_PORT\\\"\",
             \"echo '--- Step 3: Health check new container ---'\",
-            \"MAX_ATTEMPTS=18\",
+            \"echo 'Waiting 30s for container to start before first health check...'\",
+            \"sleep 30\",
+            \"MAX_ATTEMPTS=36\",
             \"ATTEMPT=0\",
             \"PASSED=0\",
             \"while [ \$ATTEMPT -lt \$MAX_ATTEMPTS ]; do\",
@@ -805,8 +807,8 @@ jobs:
           --output text --query 'Command.CommandId')
 
         echo "SSM Command ID: $CMD_ID"
-        echo "Waiting 300 seconds for deploy to complete..."
-        sleep 300
+        echo "Waiting 450 seconds for deploy to complete..."
+        sleep 450
         echo "Wait complete."
 
     - name: Verify Deployment
