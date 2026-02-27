@@ -799,6 +799,7 @@ jobs:
             \"docker rename overpower-app-new overpower-app\",
             \"echo \$NEW_PORT > /opt/app/active_port\",
             \"docker exec overpower-app flyway -url=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require -user=postgres -password=TempPassword123! -locations=filesystem:/app/migrations repair || true\",
+            \"docker exec overpower-app flyway -url=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require -user=postgres -password=TempPassword123! -locations=filesystem:/app/migrations migrate\",
             \"docker image prune -af || true\",
             \"echo \\\"Active port: \$(cat /opt/app/active_port)\\\"\",
             \"docker ps\",

@@ -263,7 +263,7 @@
 |-----------|-----------|-----------|--------------|-------------|------------|---------|----------|
 | Archimedes | Special Card | Merlin | Choose either Special, Universe, or Power cards. Opponent must reveal all cards of that type in hand.  | false | false | false | false |
 | Ascendant Mage | Special Card | Merlin | Negates the effect of any 1 Special card played by Opponent.  | false | false | false | false |
-| For Camelot! | Special Card | Merlin | For remainder of game, Merlin may defend King Arthur, Lancelot, and Morgana le Fay with Power cards and may defend them from Reserve.  | false | false | false | false |
+| For Camelot! | Special Card | Merlin | For remainder of game, Merlin may defend King Arthur, Lancelot, and Morgan le Fay with Power cards and may defend Merlin.  | false | false | false | false |
 | Foretell the Future | Special Card | Merlin | Remove any cards from Merlin's Draw Pile and discard them into Dead Pile. Reshuffle Draw Pile. **One Per Deck** | true | false | false | false |
 | Transmogrification | Special Card | Merlin | Choose one Front Line teammate. For remainder of game, Merlin may place and play any Special card playable by the chosen teammate. **One Per Deck** | true | false | false | false |
 | Summon the Elements | Special Card | Merlin | Acts as a level 4 Energy or Combat MultiPower attack. Merlin may make 1 additional attack.  | false | false | false | false |
