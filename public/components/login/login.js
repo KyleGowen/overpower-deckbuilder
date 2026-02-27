@@ -12,25 +12,35 @@ let _loginTemplateLoadPromise = null;
  * is never fetched or injected more than once.
  */
 async function loadLoginTemplate() {
+    window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: called', 'loginModal in DOM=' + !!document.getElementById('loginModal'));
     // Already in the DOM — nothing to do
     if (document.getElementById('loginModal')) {
+        window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: loginModal already in DOM, returning early');
         return;
     }
     // A load is already in progress — wait for it instead of starting a second fetch
     if (_loginTemplateLoadPromise) {
+        window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: reusing in-flight singleton promise');
         return _loginTemplateLoadPromise;
     }
+    window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: starting new fetch of login.html');
     _loginTemplateLoadPromise = (async () => {
         try {
             const response = await fetch('/components/login/login.html');
             const html = await response.text();
+            window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: fetch complete, loginModal in DOM before inject=' + !!document.getElementById('loginModal'));
             // Re-check after the async fetch in case a concurrent caller already injected it
             if (!document.getElementById('loginModal')) {
+                window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: injecting HTML into body (insertAdjacentHTML afterbegin)');
                 document.body.insertAdjacentHTML('afterbegin', html);
+                window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: HTML injected, calling setupLoginEventListeners');
                 setupLoginEventListeners();
+            } else {
+                window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: loginModal appeared while fetching (concurrent call), skipping inject');
             }
         } catch (error) {
             console.error('Error loading login template:', error);
+            window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: FETCH ERROR, using fallback', String(error));
             if (!document.getElementById('loginModal')) {
                 createFallbackLoginModal();
                 setupLoginEventListeners();
@@ -40,6 +50,7 @@ async function loadLoginTemplate() {
             // The getElementById guard at the top still prevents redundant re-fetches when the
             // modal is already present.
             _loginTemplateLoadPromise = null;
+            window.__flashDebug && window.__flashDebug('login.js loadLoginTemplate: done, singleton promise reset');
         }
     })();
     return _loginTemplateLoadPromise;
@@ -126,12 +137,16 @@ function createFallbackLoginModal() {
  * Sets up event listeners for login form and guest login button
  */
 function initializeLoginComponent() {
+    window.__flashDebug && window.__flashDebug('login.js initializeLoginComponent: called', 'readyState=' + document.readyState);
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
+        window.__flashDebug && window.__flashDebug('login.js initializeLoginComponent: DOM loading, attaching DOMContentLoaded listener');
         document.addEventListener('DOMContentLoaded', async () => {
+            window.__flashDebug && window.__flashDebug('login.js initializeLoginComponent: DOMContentLoaded fired, calling loadLoginTemplate');
             await loadLoginTemplate();
         });
     } else {
+        window.__flashDebug && window.__flashDebug('login.js initializeLoginComponent: DOM already ready, calling loadLoginTemplate immediately');
         loadLoginTemplate();
     }
 }
@@ -140,6 +155,7 @@ function initializeLoginComponent() {
  * Setup event listeners for login form, guest login, sign up, and signup form
  */
 function setupLoginEventListeners() {
+    window.__flashDebug && window.__flashDebug('login.js setupLoginEventListeners: called');
     const loginForm = document.getElementById('loginForm');
     const guestLoginBtn = document.getElementById('guestLoginBtn');
     const signUpBtn = document.getElementById('signUpBtn');

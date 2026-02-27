@@ -1444,18 +1444,60 @@
             return response;
         };
         
+        // ---- FLASH DEBUG: global helper + MutationObserver ----
+        window.__flashDebug = function(label, extra) {
+            const t = performance.now().toFixed(1);
+            const mc = document.getElementById('mainContainer');
+            const lm = document.getElementById('loginModal');
+            console.log(
+                '%c[FLASH ' + t + 'ms] ' + label,
+                'color:#f0a; font-weight:bold;',
+                extra || '',
+                '| mc=' + (mc ? (mc.style.display || '(css)') : 'absent'),
+                '| lm=' + (lm ? (lm.style.display || '(css)') : 'absent')
+            );
+            console.trace();
+        };
+        const __flashObserver = new MutationObserver(function(mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+                var m = mutations[i];
+                if (m.type === 'attributes' && m.attributeName === 'style') {
+                    var id = m.target.id;
+                    if (id === 'mainContainer' || id === 'loginModal') {
+                        window.__flashDebug('MutationObserver: style changed on #' + id, 'new="' + m.target.style.display + '"');
+                    }
+                }
+                if (m.type === 'childList') {
+                    m.addedNodes.forEach(function(n) {
+                        if (n.id === 'loginModal' || n.id === 'mainContainer') {
+                            window.__flashDebug('MutationObserver: #' + n.id + ' added to DOM', 'display="' + (n.style && n.style.display || '(css)') + '"');
+                        }
+                    });
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            __flashObserver.observe(document.body, { attributes: true, subtree: true, childList: true, attributeFilter: ['style'] });
+            window.__flashDebug('MutationObserver attached');
+        });
+        // ---- END FLASH DEBUG helper ----
+
         // Check for stored user immediately to prevent any flash (guard: getCurrentUser may not be loaded yet with defer)
         (function() {
+            window.__flashDebug && window.__flashDebug('IIFE start', 'localStorage.currentUser=' + !!localStorage.getItem('currentUser'));
             const storedUser = (typeof getCurrentUser === 'function' ? getCurrentUser() : null) ||
                 (window.authService && typeof window.authService.getCurrentUser === 'function' ? window.authService.getCurrentUser() : null);
+            window.__flashDebug && window.__flashDebug('IIFE storedUser result', 'storedUser=' + !!storedUser);
             if (storedUser) {
                 currentUser = storedUser;
                 // mainContainer starts hidden by default; show it immediately for authenticated users
                 var mc = document.getElementById('mainContainer');
+                window.__flashDebug && window.__flashDebug('IIFE: showing mainContainer for stored user');
                 if (mc) mc.style.display = 'block';
                 // Hide login modal immediately if we have a stored user
                 document.addEventListener('DOMContentLoaded', function() {
                     const loginModal = document.getElementById('loginModal');
+                    window.__flashDebug && window.__flashDebug('IIFE DOMContentLoaded: hiding loginModal for stored user', 'loginModal=' + !!loginModal);
                     if (loginModal) {
                         loginModal.style.display = 'none';
                     }
@@ -1483,11 +1525,16 @@
         // loadGlobalNav function moved to external file
 
         document.addEventListener('DOMContentLoaded', async () => {
+            window.__flashDebug && window.__flashDebug('DOMContentLoaded: handler start');
             try {
                 // Load global navigation first
+                window.__flashDebug && window.__flashDebug('DOMContentLoaded: before loadGlobalNav');
                 await loadGlobalNav();
+                window.__flashDebug && window.__flashDebug('DOMContentLoaded: after loadGlobalNav');
                 
+                window.__flashDebug && window.__flashDebug('DOMContentLoaded: before checkAuthentication');
                 const authResult = await checkAuthentication();
+                window.__flashDebug && window.__flashDebug('DOMContentLoaded: after checkAuthentication', 'isAuthenticated=' + authResult.isAuthenticated);
                 currentUser = authResult.currentUser; // Update global currentUser after checkAuthentication
                 window.currentUser = currentUser; // Also set on window for modules to access
 
@@ -1506,6 +1553,7 @@
                     }
                     if (authResult.deckId) {
                         // Going directly to deck editor - skip showing main app to avoid flash
+                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: authenticated, going to deck editor', 'deckId=' + authResult.deckId);
                         
                         // Ensure database view is hidden to prevent flash
                         const databaseView = document.getElementById('database-view');
@@ -1531,13 +1579,17 @@
                         showDeckEditor();
                     } else {
                         // No deck ID - show main app normally
+                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: authenticated, calling showMainApp');
                         showMainApp(); // This will load general app data (characters, etc.)
                     }
                 } else {
+                    window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, before showLoginModal');
                     await showLoginModal();
+                    window.__flashDebug && window.__flashDebug('DOMContentLoaded: after showLoginModal');
                 }
             } catch (error) {
                 console.error('❌ Error during page initialization:', error);
+                window.__flashDebug && window.__flashDebug('DOMContentLoaded: ERROR, calling showLoginModal fallback', String(error));
                 // Fallback: show login modal if initialization fails
                 await showLoginModal();
             }

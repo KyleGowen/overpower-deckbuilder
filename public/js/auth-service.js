@@ -19,21 +19,27 @@
 
 class FrontendAuthService {
   constructor() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService: constructor start');
     this.currentUser = null;
     this.isReadOnlyMode = false;
     this.initializeFromStorage();
+    window.__flashDebug && window.__flashDebug('FrontendAuthService: constructor done');
   }
 
   initializeFromStorage() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.initializeFromStorage: start');
     try {
       const storedUser = this.getStoredUser();
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.initializeFromStorage: storedUser=' + !!storedUser);
       if (storedUser) {
         this.currentUser = storedUser;
+        window.__flashDebug && window.__flashDebug('FrontendAuthService.initializeFromStorage: calling hideLoginModal');
         this.hideLoginModal();
       }
     } catch (error) {
       console.error('Error initializing from storage:', error);
     }
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.initializeFromStorage: done');
   }
 
   getCurrentUser() {
@@ -53,6 +59,7 @@ class FrontendAuthService {
   }
 
   async checkAuthentication() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: start');
     const authResult = {
       isAuthenticated: false,
       currentUser: null,
@@ -71,15 +78,18 @@ class FrontendAuthService {
 
     // Check if we have a user in localStorage
     const storedUser = this.getStoredUser();
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: storedUser=' + !!storedUser);
     if (storedUser) {
       this.currentUser = storedUser;
       authResult.currentUser = this.currentUser;
 
       // Verify the session is still valid
       try {
+        window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: fetching /api/auth/me');
         const response = await fetch('/api/auth/me', {
           credentials: 'include'
         });
+        window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: /api/auth/me response status=' + response.status);
         
         if (response.ok) {
           const data = await response.json();
@@ -87,8 +97,10 @@ class FrontendAuthService {
           this.storeUser(this.currentUser);
           authResult.isAuthenticated = true;
           authResult.currentUser = this.currentUser;
+          window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: session valid, isAuthenticated=true');
         } else {
           // Session expired, clear stored user
+          window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: session EXPIRED (non-ok response), calling showLoginModal');
           this.clearStoredUser();
           this.currentUser = null;
           authResult.currentUser = null;
@@ -97,6 +109,7 @@ class FrontendAuthService {
         }
       } catch (error) {
         console.error('Error verifying session:', error);
+        window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: /api/auth/me ERROR, calling showLoginModal', String(error));
         this.clearStoredUser();
         this.currentUser = null;
         authResult.currentUser = null;
@@ -107,6 +120,7 @@ class FrontendAuthService {
 
     // Read-only mode removed - now handled by backend flag
 
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.checkAuthentication: done, isAuthenticated=' + authResult.isAuthenticated);
     return authResult;
   }
 
@@ -152,17 +166,22 @@ class FrontendAuthService {
   }
 
   async logout() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: start, calling /api/auth/logout');
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include'
       });
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: fetch completed successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: fetch ERRORED', String(error));
     } finally {
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block - clearing user + calling showLoginModal (NOT awaited)');
       this.currentUser = null;
       this.clearStoredUser();
       this.showLoginModal();
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block done - showLoginModal() was called (unawaited async)');
     }
   }
 
@@ -282,18 +301,24 @@ class FrontendAuthService {
   }
 
   hideLoginModal() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.hideLoginModal: called');
+    console.trace('[FLASH] hideLoginModal stack');
     const loginModal = document.getElementById('loginModal');
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.hideLoginModal: loginModal=' + !!loginModal);
     if (loginModal) {
       loginModal.style.display = 'none';
     }
   }
 
   async showLoginModal() {
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: start');
     // Ensure login modal exists before showing it
     let loginModal = document.getElementById('loginModal');
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: loginModal in DOM=' + !!loginModal);
     
     if (!loginModal) {
       // Try to load login template if available
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: no loginModal, calling loadLoginTemplate');
       if (typeof loadLoginTemplate === 'function') {
         await loadLoginTemplate();
       } else if (typeof window.loadLoginTemplate === 'function') {
@@ -302,18 +327,22 @@ class FrontendAuthService {
       
       // Try again after loading
       loginModal = document.getElementById('loginModal');
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: after loadLoginTemplate, loginModal=' + !!loginModal);
     }
     
     if (loginModal) {
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: setting loginModal.style.display = flex');
       loginModal.style.display = 'flex';
     } else {
       // If still no modal, call the global showLoginModal function which has fallback
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: still no modal, delegating to global showLoginModal');
       if (typeof showLoginModal === 'function') {
         await showLoginModal();
       } else if (typeof window.showLoginModal === 'function') {
         await window.showLoginModal();
       }
     }
+    window.__flashDebug && window.__flashDebug('FrontendAuthService.showLoginModal: done');
   }
 
   getUserId() {
