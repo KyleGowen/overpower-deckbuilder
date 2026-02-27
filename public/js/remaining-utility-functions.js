@@ -8,7 +8,6 @@
  * Purpose: Remaining utility and helper functions
  * Created: Phase 10C of 12-phase refactoring project
  * Contains:
- *   - getCardName() - Card name extraction
  *   - formatCardType() - Card type formatting
  *   - displayCardSearchResults() - Search result display
  *   - getCardBounds() - Card boundary calculations
@@ -19,14 +18,8 @@
  * ======================================== */
 
 // Card management functions
-function getCardName(card) {
-    // TODO: This should fetch the actual card name from the database
-    // For now, return a placeholder
-    if (!card || !card.type || !card.cardId) {
-        return 'Unknown Card';
-    }
-    return `${formatCardType(card.type)} Card ${card.cardId}`;
-}
+// Note: getCardName is defined in all-cards-display.js (proper implementation).
+// This file intentionally does not redefine it to avoid overwriting the real version.
 
 function formatCardType(type) {
     if (!type) {

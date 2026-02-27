@@ -33,9 +33,8 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     delete (globalThis as any).mapImagePathToActualFile;
   });
 
-  it('All tab sorting: sorts by character/group name using Alphabetization ("The" ignored) and forces "Any Character" last', async () => {
-    const Alphabetization = loadAlphabetization();
-    expect(typeof Alphabetization?.compare).toBe('function');
+  it('All tab sorting: sorts by set then set_number (numerically); cards without a number sort last', async () => {
+    loadAlphabetization();
 
     // Silence the performance logs in tests.
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -45,9 +44,9 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     expect(typeof (window as any).loadAllCards).toBe('function');
 
     const characters = [
-      { id: 'c1', name: 'Tarzan', set: 'MA', set_number: '2', image: 'tarzan.webp' },
-      { id: 'c2', name: 'The Mummy', set: 'MA', set_number: '1', image: 'mummy.webp' },
-      { id: 'c3', name: 'Morgan le Fay', set: 'MA', set_number: '3', image: 'morgan.webp' }
+      { id: 'c1', name: 'Tarzan',       set: 'MA', set_number: '2', image: 'tarzan.webp' },
+      { id: 'c2', name: 'The Mummy',    set: 'MA', set_number: '1', image: 'mummy.webp' },
+      { id: 'c3', name: 'Morgan le Fay',set: 'MA', set_number: '3', image: 'morgan.webp' }
     ];
 
     const specials = [
@@ -68,6 +67,15 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
         set_number: '11',
         image: 'any.webp',
         card_effect: ''
+      },
+      {
+        id: 's3',
+        name: 'No Number Card',
+        character: 'Tarzan',
+        universe: 'MA',
+        set_number: null,
+        image: 'nonumber.webp',
+        card_effect: ''
       }
     ];
 
@@ -87,33 +95,32 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     const loaded = await (window as any).loadAllCards();
     expect(Array.isArray(loaded)).toBe(true);
 
-    // Derive group name the same way the All tab does.
-    const groupName = (card: any) => {
-      if (card?.character) return String(card.character).trim();
-      if (card?.character_name) return String(card.character_name).trim();
-      if (card?.cardType === 'character' && card?.name) return String(card.name).trim();
-      return String(card?.name || card?.card_name || card?.card_type || '').trim();
-    };
+    // Cards should be ordered by set_number numerically within the same set.
+    // MA/1 (The Mummy), MA/2 (Tarzan), MA/3 (Morgan le Fay), MA/10 (Ancient Wisdom), MA/11 (Wildcard Heal), then null (No Number Card)
+    const numbers = loaded.map((c: any) => c.set_number);
 
-    const groupsInOrder: string[] = [];
-    for (const c of loaded) {
-      const g = groupName(c);
-      if (g && groupsInOrder[groupsInOrder.length - 1] !== g) groupsInOrder.push(g);
+    const numberedCards = loaded.filter((c: any) => c.set_number != null);
+    const unnumberedCards = loaded.filter((c: any) => c.set_number == null);
+
+    // All numbered cards come before unnumbered ones
+    if (unnumberedCards.length > 0 && numberedCards.length > 0) {
+      const lastNumberedIdx = loaded.lastIndexOf(numberedCards[numberedCards.length - 1]);
+      const firstUnnumberedIdx = loaded.indexOf(unnumberedCards[0]);
+      expect(lastNumberedIdx).toBeLessThan(firstUnnumberedIdx);
     }
 
-    // Sanity: our test data is present
-    expect(groupsInOrder).toEqual(expect.arrayContaining(['Morgan le Fay', 'The Mummy', 'Tarzan', 'Any Character']));
+    // Numbered cards are in ascending numeric order
+    const numberedSetNumbers = numberedCards.map((c: any) => parseInt(c.set_number, 10));
+    for (let i = 1; i < numberedSetNumbers.length; i++) {
+      expect(numberedSetNumbers[i]).toBeGreaterThanOrEqual(numberedSetNumbers[i - 1]);
+    }
 
-    // "Any Character" forced last (for character/group sort)
-    expect(groupsInOrder[groupsInOrder.length - 1]).toBe('Any Character');
-
-    // "The Mummy" should be treated like "Mummy", so it should appear after Morgan and before Tarzan.
-    expect(groupsInOrder.indexOf('Morgan le Fay')).toBeLessThan(groupsInOrder.indexOf('The Mummy'));
-    expect(groupsInOrder.indexOf('The Mummy')).toBeLessThan(groupsInOrder.indexOf('Tarzan'));
-
-    // Within The Mummy group, "Ancient Wisdom" (A) should sort before "The Mummy" (T)
-    const mummyCards = loaded.filter((c: any) => groupName(c) === 'The Mummy');
-    expect(mummyCards.map((c: any) => c.name)).toEqual(['Ancient Wisdom', 'The Mummy']);
+    // Sanity: The Mummy (1) before Tarzan (2) before Morgan le Fay (3)
+    const mummyIdx    = loaded.findIndex((c: any) => c.name === 'The Mummy');
+    const tarzanIdx   = loaded.findIndex((c: any) => c.name === 'Tarzan');
+    const morganIdx   = loaded.findIndex((c: any) => c.name === 'Morgan le Fay');
+    expect(mummyIdx).toBeLessThan(tarzanIdx);
+    expect(tarzanIdx).toBeLessThan(morganIdx);
   });
 
   it('Special Cards tab: groups remain intact but are ordered by character name (Alphabetization, "The" ignored) and "Any Character" last', () => {

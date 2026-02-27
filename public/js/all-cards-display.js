@@ -11,7 +11,7 @@
 let allCardsData = [];
 let allCardsFiltered = [];
 
-/** Sort allCardsData by character/group name, display name, set, set_number */
+/** Sort allCardsData by set then set_number (numerically), cards without a number sort last */
 function sortAllCardsData(cards) {
     const compareText =
         (typeof window !== 'undefined' &&
@@ -19,27 +19,7 @@ function sortAllCardsData(cards) {
             typeof window.Alphabetization.compare === 'function')
             ? window.Alphabetization.compare
             : (a, b) => String(a ?? '').localeCompare(String(b ?? ''));
-    function isAnyCharacterName(value) {
-        return String(value ?? '').trim().toLowerCase() === 'any character';
-    }
-    function compareCharacterNames(a, b) {
-        const aIsAny = isAnyCharacterName(a);
-        const bIsAny = isAnyCharacterName(b);
-        if (aIsAny !== bIsAny) return aIsAny ? 1 : -1;
-        return compareText(a, b);
-    }
-    function getGroupNameForSorting(card) {
-        if (!card) return '';
-        if (card.character) return String(card.character).trim();
-        if (card.character_name) return String(card.character_name).trim();
-        if (card.cardType === 'character' && card.name) return String(card.name).trim();
-        return String(getCardName(card)).trim();
-    }
     return [...cards].sort((a, b) => {
-        const groupCmp = compareCharacterNames(getGroupNameForSorting(a), getGroupNameForSorting(b));
-        if (groupCmp !== 0) return groupCmp;
-        const nameCmp = compareText(getCardName(a), getCardName(b));
-        if (nameCmp !== 0) return nameCmp;
         const setA = String(a?.set || a?.universe || 'ERB').trim();
         const setB = String(b?.set || b?.universe || 'ERB').trim();
         const setCmp = compareText(setA, setB);
