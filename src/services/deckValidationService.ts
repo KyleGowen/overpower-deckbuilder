@@ -293,7 +293,7 @@ export class DeckValidationService {
         
         for (const [cardKey, count] of Object.entries(onePerDeckCards)) {
             if (count > 1) {
-                const [type, cardId] = cardKey.split('_', 2);
+                const [_type, cardId] = cardKey.split('_', 2);
                 const availableCard = availableCardsMap.get(cardKey);
                 const cardName = availableCard ? availableCard.name : cardId;
                 errors.push({

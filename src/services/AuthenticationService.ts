@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UserRepository } from '../repository/UserRepository';
-import { User, UserRole } from '../types';
+import { User } from '../types';
 import crypto from 'crypto';
 import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdmin';
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
@@ -219,7 +219,7 @@ export class AuthenticationService {
 
       // 3. If no user, create new Google user (with rate limit check)
       if (!user) {
-        const ip = (req as any).ip || (req as any).connection?.remoteAddress || 'unknown';
+        const ip = req.ip || req.socket?.remoteAddress || 'unknown';
         if (!checkLimit(ip)) {
           res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
           return;
@@ -291,7 +291,7 @@ export class AuthenticationService {
         return;
       }
 
-      const ip = (req as any).ip || (req as any).connection?.remoteAddress || 'unknown';
+      const ip = req.ip || req.socket?.remoteAddress || 'unknown';
       if (!checkLimit(ip)) {
         res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
         return;
@@ -385,7 +385,7 @@ export class AuthenticationService {
    * Authentication middleware
    */
   public createAuthMiddleware() {
-    return async (req: Request, res: Response, next: Function) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       const sessionId = req.cookies?.sessionId;
       const { userId } = req.params;
       
@@ -395,7 +395,7 @@ export class AuthenticationService {
         const allUsers = await this.userRepository.getAllUsers();
         const guestUser = allUsers.find(user => user.role === 'GUEST');
         if (guestUser) {
-          (req as any).user = guestUser;
+          (req as unknown as Record<string, unknown>).user = guestUser;
           return next();
         }
       }
@@ -427,7 +427,7 @@ export class AuthenticationService {
         return res.redirect('/');
       }
       
-      (req as any).user = user;
+      (req as unknown as Record<string, unknown>).user = user;
       next();
     };
   }

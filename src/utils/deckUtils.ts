@@ -106,17 +106,18 @@ export class DeckUtils {
    * @param card - Deck card to validate
    * @returns boolean - True if card is valid
    */
-  static isValidDeckCard(card: any): card is DeckCard {
+  static isValidDeckCard(card: unknown): card is DeckCard {
     if (!card || typeof card !== 'object') {
       return false;
     }
 
+    const c = card as Record<string, unknown>;
     return (
-      typeof card.id === 'string' &&
-      typeof card.type === 'string' &&
-      typeof card.cardId === 'string' &&
-      typeof card.quantity === 'number' &&
-      card.quantity > 0
+      typeof c.id === 'string' &&
+      typeof c.type === 'string' &&
+      typeof c.cardId === 'string' &&
+      typeof c.quantity === 'number' &&
+      (c.quantity as number) > 0
     );
   }
 
@@ -125,7 +126,7 @@ export class DeckUtils {
    * @param cards - Array of deck cards to validate
    * @returns boolean - True if all cards are valid
    */
-  static isValidDeckCardsArray(cards: any): cards is DeckCard[] {
+  static isValidDeckCardsArray(cards: unknown): cards is DeckCard[] {
     if (!Array.isArray(cards)) {
       return false;
     }

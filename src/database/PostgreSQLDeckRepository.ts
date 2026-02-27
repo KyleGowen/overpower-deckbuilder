@@ -986,19 +986,20 @@ export class PostgreSQLDeckRepository implements DeckRepository {
       }
       
       // Success - function now throws errors instead of returning false
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Rollback on error
       try {
         await client.query('ROLLBACK');
       } catch (rollbackError) {
         console.error('Error rolling back transaction:', rollbackError);
       }
+      const err = error as { message?: string; code?: string; detail?: string; constraint?: string; stack?: string };
       console.error('Error replacing all cards in deck:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error code:', error?.code);
-      console.error('Error detail:', error?.detail);
-      console.error('Error constraint:', error?.constraint);
-      console.error('Error stack:', error?.stack);
+      console.error('Error message:', err?.message);
+      console.error('Error code:', err?.code);
+      console.error('Error detail:', err?.detail);
+      console.error('Error constraint:', err?.constraint);
+      console.error('Error stack:', err?.stack);
       console.error('Deck ID:', deckId);
       console.error('Cards being inserted:', JSON.stringify(cards, null, 2));
       // Log first few cards that might be problematic

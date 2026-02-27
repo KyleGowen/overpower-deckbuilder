@@ -82,6 +82,13 @@ export class DataSourceConfig {
     return this.dataSourceType;
   }
 
+  public getPool(): Pool {
+    if (!this.pool) {
+      throw new Error('Pool not initialized');
+    }
+    return this.pool;
+  }
+
   public async close(): Promise<void> {
     if (this.pool) {
       await this.pool.end();

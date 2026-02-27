@@ -1,5 +1,6 @@
 import { DeckService } from '../../src/services/deckService';
 import { DeckRepository } from '../../src/repository/DeckRepository';
+import { UIPreferences } from '../../src/types';
 
 // Mock the DeckRepository
 const mockDeckRepository: jest.Mocked<DeckRepository> = {
@@ -666,7 +667,7 @@ describe('DeckService Character Limit Business Logic Tests', () => {
   describe('updateUIPreferences', () => {
     it('should update UI preferences for deck', async () => {
       const deckId = generateUUID();
-      const preferences = { theme: 'dark', layout: 'grid' };
+      const preferences = { theme: 'dark', layout: 'grid' } as unknown as UIPreferences;
       mockDeckRepository.updateUIPreferences.mockResolvedValue(true);
 
       const result = await deckService.updateUIPreferences(deckId, preferences);
@@ -677,7 +678,7 @@ describe('DeckService Character Limit Business Logic Tests', () => {
 
     it('should return false when update fails', async () => {
       const deckId = generateUUID();
-      const preferences = { theme: 'dark' };
+      const preferences = { theme: 'dark' } as unknown as UIPreferences;
       mockDeckRepository.updateUIPreferences.mockResolvedValue(false);
 
       const result = await deckService.updateUIPreferences(deckId, preferences);

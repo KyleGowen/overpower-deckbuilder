@@ -1,6 +1,5 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as path from 'path';
 
 const execAsync = promisify(exec);
 
@@ -140,7 +139,7 @@ export class DatabaseInitializationService {
   async validateDatabase(): Promise<boolean> {
     try {
       console.log('🔍 Validating database migrations...');
-      const { stdout, stderr } = await execAsync('npm run migrate:validate');
+      const { stdout: _stdout, stderr } = await execAsync('npm run migrate:validate');
       
       if (stderr && !stderr.includes('WARNING')) {
         console.error('❌ Database validation failed:', stderr);

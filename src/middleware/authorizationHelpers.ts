@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 /**
  * Centralized authorization helper functions.
@@ -11,7 +11,7 @@ import { Response } from 'express';
  * Ensures the request has an authenticated user attached.
  * Returns false (and sends 401) if no user is present.
  */
-export function requireAuth(req: any, res: Response): boolean {
+export function requireAuth(req: Request, res: Response): boolean {
   if (!req.user) {
     res.status(401).json({ success: false, error: 'Authentication required' });
     return false;
@@ -23,7 +23,7 @@ export function requireAuth(req: any, res: Response): boolean {
  * Ensures the authenticated user has the ADMIN role.
  * Returns false (and sends 403) if the user is not an admin.
  */
-export function requireAdmin(req: any, res: Response): boolean {
+export function requireAdmin(req: Request, res: Response): boolean {
   if (req.user?.role !== 'ADMIN') {
     res.status(403).json({ success: false, error: 'Only ADMIN users can access this endpoint' });
     return false;
@@ -36,7 +36,7 @@ export function requireAdmin(req: any, res: Response): boolean {
  * Returns true (and sends 403) if the user is a guest — caller should return early.
  * Returns false if the user is allowed to proceed.
  */
-export function blockGuestMutation(req: any, res: Response, operation: string): boolean {
+export function blockGuestMutation(req: Request, res: Response, operation: string): boolean {
   if (req.user?.role === 'GUEST') {
     res.status(403).json({ success: false, error: `Guests may not ${operation}` });
     return true; // blocked

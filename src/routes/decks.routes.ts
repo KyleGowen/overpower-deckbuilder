@@ -1,20 +1,21 @@
 import crypto from 'crypto';
-import express from 'express';
+import express, { Request, RequestHandler } from 'express';
 import { transformDeckList } from '../api/deckTransform';
+import { Deck } from '../types';
 
 type DeckRoutesDeps = {
   deckRepository: {
-    getDecksByUserId: (userId: string) => Promise<any[]>;
+    getDecksByUserId: (userId: string) => Promise<Deck[]>;
   };
-  authenticateUser: any;
+  authenticateUser: RequestHandler;
 };
 
 export function createDeckRoutes(deps: DeckRoutesDeps) {
   const router = express.Router();
 
-  router.get('/decks', deps.authenticateUser, async (req: any, res) => {
+  router.get('/decks', deps.authenticateUser, async (req: Request, res) => {
     try {
-      const decks = await deps.deckRepository.getDecksByUserId(req.user.id);
+      const decks = await deps.deckRepository.getDecksByUserId(req.user!.id);
 
       // Transform deck data to match frontend expectations
       // Note: getDecksByUserId now returns decks with metadata columns for performance

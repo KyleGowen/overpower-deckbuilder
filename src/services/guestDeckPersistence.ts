@@ -1,4 +1,4 @@
-import { DeckData, DeckCard } from '../types';
+import { DeckData } from '../types';
 
 interface GuestDeck {
   id: string;

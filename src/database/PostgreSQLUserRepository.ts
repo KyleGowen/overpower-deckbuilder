@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { User, UserRole } from '../types';
 import { UserRepository } from '../repository/UserRepository';
 import { PasswordUtils } from '../utils/passwordUtils';
@@ -128,7 +128,7 @@ export class PostgreSQLUserRepository implements UserRepository {
 
       let finalUsername = username;
       let suffix = 2;
-      while (true) {
+      for (;;) {
         const existing = await client.query(
           'SELECT id FROM users WHERE username = $1',
           [finalUsername]
@@ -163,13 +163,13 @@ export class PostgreSQLUserRepository implements UserRepository {
     }
   }
 
-  private mapRowToUser(user: any): User {
+  private mapRowToUser(user: Record<string, unknown>): User {
     return {
-      id: user.id,
-      name: user.username,
-      email: user.email,
-      role: user.role,
-      lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
+      id: user.id as string,
+      name: user.username as string,
+      email: user.email as string,
+      role: user.role as UserRole,
+      lastLoginAt: user.last_login_at ? new Date(user.last_login_at as string) : null
     };
   }
 

@@ -2,15 +2,6 @@ import { Request, Response } from 'express';
 import { PostgreSQLUserRepository } from '../../src/database/PostgreSQLUserRepository';
 import { User } from '../../src/types';
 
-// Extend Request interface to include user property
-interface AuthenticatedRequest extends Request {
-    user?: {
-        id: string;
-        role: string;
-        username: string;
-    };
-}
-
 // Database user interface (includes password_hash)
 interface DatabaseUser extends User {
     password_hash: string;
@@ -22,10 +13,10 @@ interface DatabaseUser extends User {
 jest.mock('../../src/database/PostgreSQLUserRepository');
 
 describe('Create User API Endpoint', () => {
-    let mockRequest: Partial<AuthenticatedRequest>;
+    let mockRequest: Partial<Request>;
     let mockResponse: Partial<Response>;
     let mockUserRepository: jest.Mocked<PostgreSQLUserRepository>;
-    let createUserHandler: (req: AuthenticatedRequest, res: Response) => Promise<Response | undefined>;
+    let createUserHandler: (req: Request, res: Response) => Promise<Response | undefined>;
 
     beforeEach(() => {
         // Reset mocks
@@ -37,7 +28,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            },
+            } as unknown as User,
             body: {}
         };
 
@@ -53,7 +44,7 @@ describe('Create User API Endpoint', () => {
         } as any;
 
         // Create the handler function (simulating the API endpoint logic)
-        createUserHandler = async (req: AuthenticatedRequest, res: Response) => {
+        createUserHandler = async (req: Request, res: Response) => {
             try {
                 // Check if the current user is an ADMIN
                 const currentUser = req.user;
@@ -150,7 +141,7 @@ describe('Create User API Endpoint', () => {
                 id: 'user-id',
                 role: 'USER',
                 username: 'user'
-            };
+            } as unknown as import("../../src/types").User;
 
             mockRequest.body = {
                 username: 'testuser',
@@ -171,7 +162,7 @@ describe('Create User API Endpoint', () => {
                 id: 'guest-id',
                 role: 'GUEST',
                 username: 'guest'
-            };
+            } as unknown as import("../../src/types").User;
 
             mockRequest.body = {
                 username: 'testuser',
@@ -194,7 +185,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            };
+            } as unknown as import("../../src/types").User;
         });
 
         it('should require username', async () => {
@@ -244,7 +235,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            };
+            } as unknown as import("../../src/types").User;
         });
 
         it('should create user with USER role by default', async () => {
@@ -351,7 +342,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            };
+            } as unknown as import("../../src/types").User;
         });
 
         it('should reject duplicate usernames', async () => {
@@ -391,7 +382,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            };
+            } as unknown as import("../../src/types").User;
         });
 
         it('should handle repository errors gracefully', async () => {
@@ -436,7 +427,7 @@ describe('Create User API Endpoint', () => {
                 id: 'admin-user-id',
                 role: 'ADMIN',
                 username: 'admin'
-            };
+            } as unknown as import("../../src/types").User;
         });
 
         it('should return proper success response format', async () => {

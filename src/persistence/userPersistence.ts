@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { User } from '../types';
+import { User, UserRole } from '../types';
 
 // Legacy User interface for backward compatibility
 export interface LegacyUser {
@@ -36,7 +36,7 @@ export class UserPersistenceService {
         const data = fs.readFileSync(this.usersFilePath, 'utf8');
         const usersArray = JSON.parse(data);
         this.users.clear();
-        usersArray.forEach((user: any) => {
+        usersArray.forEach((user: Record<string, unknown>) => {
           this.users.set(user.id, {
             ...user,
             createdAt: new Date(user.createdAt),
@@ -63,7 +63,7 @@ export class UserPersistenceService {
         const data = fs.readFileSync(this.sessionsFilePath, 'utf8');
         const sessionsArray = JSON.parse(data);
         this.sessions.clear();
-        sessionsArray.forEach((session: any) => {
+        sessionsArray.forEach((session: Record<string, unknown>) => {
           this.sessions.set(session.sessionId, {
             ...session,
             expiresAt: new Date(session.expiresAt)
@@ -190,7 +190,7 @@ export class UserPersistenceService {
           id: user.id,
           name: user.username,
           email: '', // Legacy users don't have email
-          role: user.username === 'guest' ? 'GUEST' as any : 'USER' as any // Guest role for guest user
+          role: user.username === 'guest' ? 'GUEST' as UserRole : 'USER' as UserRole
         };
       }
     }
@@ -238,7 +238,7 @@ export class UserPersistenceService {
       id: legacyUser.id,
       name: legacyUser.username,
       email: '', // Legacy users don't have email
-      role: legacyUser.username === 'guest' ? 'GUEST' as any : 'USER' as any // Guest role for guest user
+      role: legacyUser.username === 'guest' ? 'GUEST' as UserRole : 'USER' as UserRole
     };
   }
 
@@ -249,7 +249,7 @@ export class UserPersistenceService {
           id: user.id,
           name: user.username,
           email: '', // Legacy users don't have email
-          role: user.username === 'guest' ? 'GUEST' as any : 'USER' as any // Guest role for guest user
+          role: user.username === 'guest' ? 'GUEST' as UserRole : 'USER' as UserRole
         };
       }
     }
@@ -270,7 +270,7 @@ export class UserPersistenceService {
       id: legacyUser.id,
       name: legacyUser.username,
       email: '', // Legacy users don't have email
-      role: legacyUser.username === 'guest' ? 'GUEST' as any : 'USER' as any // Guest role for guest user
+      role: legacyUser.username === 'guest' ? 'GUEST' as UserRole : 'USER' as UserRole
     }));
   }
 

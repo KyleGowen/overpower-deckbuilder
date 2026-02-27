@@ -75,7 +75,7 @@ export class FrontendAuthService {
 
     // Extract deck ID and user ID from URL
     const currentPathname = pathname || (typeof window !== 'undefined' ? window.location.pathname : '');
-    const deckUrlMatch = currentPathname.match(/\/users\/([^\/]+)\/decks\/([^\/]+)/);
+    const deckUrlMatch = currentPathname.match(/[/]users[/]([^/]+)[/]decks[/]([^/]+)/);
     if (deckUrlMatch) {
       authResult.urlUserId = deckUrlMatch[1];
       authResult.deckId = deckUrlMatch[2];
@@ -268,7 +268,7 @@ export class FrontendAuthService {
   public getUserIdForUrl(): string {
     if (this.currentUser) {
       // Handle both 'userId' and 'id' properties for backward compatibility
-      return (this.currentUser as any).userId || this.currentUser.id;
+      return (this.currentUser as unknown as { userId?: string }).userId || this.currentUser.id;
     }
     return 'guest';
   }

@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { Request } from 'express';
 import { DataSourceConfig } from './config/DataSourceConfig';
 import { DeckPersistenceService } from './services/deckPersistence';
 import { DatabaseInitializationService } from './services/databaseInitialization';
@@ -11,14 +11,14 @@ import { DeckBackgroundService } from './services/deckBackgroundService';
 import { CollectionsRepository } from './database/collectionsRepository';
 import { CollectionService } from './services/collectionService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
-import { Character } from './types';
+
 import path from 'path';
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize services
-const deckService = new DeckPersistenceService();
+new DeckPersistenceService();
 const databaseInit = new DatabaseInitializationService();
 const dataSource = DataSourceConfig.getInstance();
 const userRepository = dataSource.getUserRepository();
@@ -27,7 +27,7 @@ const cardRepository = dataSource.getCardRepository();
 const deckValidationService = new DeckValidationService(cardRepository);
 
 // Initialize business logic service
-const deckBusinessService = new DeckService(deckRepository);
+new DeckService(deckRepository);
 
 // Initialize authentication service
 const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository);
@@ -37,7 +37,7 @@ const authService = new AuthenticationService(userRepository, newUserSampleDeckS
 const deckBackgroundService = new DeckBackgroundService();
 
 // Initialize collection repository and service (mirrors main server)
-const collectionsRepository = new CollectionsRepository((dataSource as any).pool);
+const collectionsRepository = new CollectionsRepository(dataSource.getPool());
 const collectionService = new CollectionService(collectionsRepository);
 
 // requireAdmin is now imported from middleware/authorizationHelpers
@@ -49,7 +49,7 @@ app.use(express.json());
 const authenticateUser = authService.createAuthMiddleware();
 
 // Cookie parser middleware
-app.use((req: any, res: any, next: any) => {
+app.use((req: Request, res: import('express').Response, next: import('express').NextFunction) => {
   const cookieHeader = req.headers.cookie;
   if (cookieHeader) {
     req.cookies = {};
@@ -62,7 +62,7 @@ app.use((req: any, res: any, next: any) => {
 });
 
 // Optional authentication middleware for testing
-const optionalAuth = async (req: any, res: any, next: any) => {
+const optionalAuth = async (req: Request, res: import('express').Response, next: import('express').NextFunction) => {
   try {
     // Check if there's a session cookie
     if (req.headers.cookie && req.headers.cookie.includes('sessionId=')) {
@@ -83,7 +83,7 @@ const optionalAuth = async (req: any, res: any, next: any) => {
       req.user = null;
       next();
     }
-  } catch (error) {
+  } catch {
     // If authentication fails, continue without user
     req.user = null;
     next();
@@ -110,7 +110,7 @@ app.get('/components/globalNav.js', (req, res) => {
 });
 
 // Global server reference for cleanup
-let testServer: any = null;
+let testServer: import('http').Server | null = null;
 let serverInitialized = false;
 
 // Initialize database for tests
@@ -143,9 +143,10 @@ export async function initializeTestServer() {
       testServer = app.listen(PORT, () => {
         console.log(`🌐 Test server is listening on port ${PORT}`);
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { code?: string };
       // If port is already in use, check if it's our test server
-      if (error.code === 'EADDRINUSE') {
+      if (err.code === 'EADDRINUSE') {
         console.log(`⚠️ Port ${PORT} is already in use. Checking if it's our test server...`);
         // Try to use the existing server instance
         // The server might already be running from a previous test suite
@@ -217,7 +218,7 @@ app.get('/api/special-cards', async (req, res) => {
 });
 
 // Get available background images (all authenticated users)
-app.get('/api/deck-backgrounds', authenticateUser, async (req: any, res) => {
+app.get('/api/deck-backgrounds', authenticateUser, async (req: Request, res) => {
   try {
     const backgrounds = await deckBackgroundService.getAvailableBackgrounds();
     res.json({ success: true, data: backgrounds });
@@ -334,42 +335,40 @@ app.get('/api/config/firebase', (req, res) => {
 });
 
 // User management routes
-app.get('/api/users', authenticateUser, async (req: any, res) => {
+app.get('/api/users', authenticateUser, async (req: Request, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const users = await userRepository.getAllUsers();
     res.json({ success: true, data: users });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch users' });
   }
 });
 
 // Debug endpoints (ADMIN only)
-app.get('/api/debug/clear-cache', authenticateUser, async (req: any, res) => {
+app.get('/api/debug/clear-cache', authenticateUser, async (req: Request, res) => {
   try {
     if (!requireAdmin(req, res)) return;
-    (deckRepository as any).clearCache?.();
+    (deckRepository as { clearCache?: () => void }).clearCache?.();
     res.json({ success: true, message: 'Deck cache cleared' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to clear cache' });
   }
 });
 
-app.get('/api/debug/clear-card-cache', authenticateUser, async (req: any, res) => {
+app.get('/api/debug/clear-card-cache', authenticateUser, async (req: Request, res) => {
   try {
     if (!requireAdmin(req, res)) return;
-    (cardRepository as any).clearCaches?.();
+    (cardRepository as { clearCaches?: () => void }).clearCaches?.();
     res.json({ success: true, message: 'Card repository cache cleared' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to clear card cache' });
   }
 });
 
-app.post('/api/users', authenticateUser, async (req: any, res) => {
+app.post('/api/users', authenticateUser, async (req: Request, res) => {
   try {
     if (!requireAdmin(req, res)) return;
-    const currentUser = req.user;
-
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -386,7 +385,7 @@ app.post('/api/users', authenticateUser, async (req: any, res) => {
     const newUser = await userRepository.createUser(username, `${username}@example.com`, password, 'USER');
     
     // Return user data without password hash
-    const { password_hash, ...userWithoutPassword } = newUser as any;
+    const { password_hash: _password_hash, ...userWithoutPassword } = newUser as Record<string, unknown>;
     
     res.status(201).json({ 
       success: true, 
@@ -400,7 +399,7 @@ app.post('/api/users', authenticateUser, async (req: any, res) => {
 });
 
 // Change password for tests
-app.post('/api/users/change-password', authenticateUser, async (req: any, res) => {
+app.post('/api/users/change-password', authenticateUser, async (req: Request, res) => {
   try {
     const currentUser = req.user;
     if (!currentUser || (currentUser.role !== 'USER' && currentUser.role !== 'ADMIN')) {
@@ -420,9 +419,9 @@ app.post('/api/users/change-password', authenticateUser, async (req: any, res) =
 });
 
 // Deck routes
-app.get('/api/decks', authenticateUser, async (req: any, res) => {
+app.get('/api/decks', authenticateUser, async (req: Request, res) => {
   try {
-    const decks = await deckRepository.getDecksByUserId(req.user.id);
+    const decks = await deckRepository.getDecksByUserId(req.user!.id);
     
     // Transform deck data to match frontend expectations
     // Note: getDecksByUserId now returns decks with only character/location cards for performance
@@ -450,7 +449,7 @@ app.get('/api/decks', authenticateUser, async (req: any, res) => {
 });
 
 // Deck validation endpoint
-app.post('/api/decks/validate', authenticateUser, async (req: any, res) => {
+app.post('/api/decks/validate', authenticateUser, async (req: Request, res) => {
   try {
     const { cards } = req.body;
     
@@ -478,7 +477,7 @@ app.post('/api/decks/validate', authenticateUser, async (req: any, res) => {
   }
 });
 
-app.get('/api/decks/:id', optionalAuth, async (req: any, res) => {
+app.get('/api/decks/:id', optionalAuth, async (req: Request, res) => {
   try {
     const deck = await deckRepository.getDeckById(req.params.id);
     if (!deck) {
@@ -486,7 +485,7 @@ app.get('/api/decks/:id', optionalAuth, async (req: any, res) => {
     }
     
     // Check if user owns this deck
-    const isOwner = req?.user?.id ? (deck.user_id === req.user.id) : false;
+    const isOwner = req?.user?.id ? (deck.user_id === req.user!.id) : false;
     
     // Add ownership flag to response for frontend to use
     const deckData = {
@@ -524,7 +523,7 @@ app.get('/api/decks/:id', optionalAuth, async (req: any, res) => {
 });
 
 // Background loading endpoint for full deck data (including all card types)
-app.get('/api/decks/:id/full', authenticateUser, async (req: any, res) => {
+app.get('/api/decks/:id/full', authenticateUser, async (req: Request, res) => {
   try {
     const deck = await deckRepository.getDeckSummaryWithAllCards(req.params.id);
     if (!deck) {
@@ -532,7 +531,7 @@ app.get('/api/decks/:id/full', authenticateUser, async (req: any, res) => {
     }
     
     // Check if user owns this deck
-    const isOwner = deck.user_id === req.user.id;
+    const isOwner = deck.user_id === req.user!.id;
     
     // Add ownership flag to response for frontend to use
     const deckData = {
@@ -565,7 +564,7 @@ app.get('/api/decks/:id/full', authenticateUser, async (req: any, res) => {
   }
 });
 
-app.post('/api/decks', authenticateUser, async (req: any, res) => {
+app.post('/api/decks', authenticateUser, async (req: Request, res) => {
   try {
     // Deck creation endpoint
     
@@ -573,7 +572,7 @@ app.post('/api/decks', authenticateUser, async (req: any, res) => {
     if (blockGuestMutation(req, res, 'create decks')) return;
     
     const { name, description, characterIds, characters } = req.body;
-    const userId = req.user.id; // Use authenticated user's ID
+    const userId = req.user!.id; // Use authenticated user's ID
     
     // Check both characterIds and characters fields for validation
     const characterArray = characterIds || characters;
@@ -608,7 +607,7 @@ app.post('/api/decks', authenticateUser, async (req: any, res) => {
   }
 });
 
-app.put('/api/decks/:id', optionalAuth, async (req: any, res) => {
+app.put('/api/decks/:id', optionalAuth, async (req: Request, res) => {
   try {
     // Check for specific test case that expects 401 for unauthenticated requests
     if (!req.user && req.headers['x-expect-401']) {
@@ -655,7 +654,7 @@ app.put('/api/decks/:id', optionalAuth, async (req: any, res) => {
              // Special check for GUEST users - they cannot modify any decks, even their own
              if (blockGuestMutation(req, res, 'modify decks')) return;
              // Check ownership for all users (including admins)
-             if (!requireDeckOwner(existingDeck.user_id, req.user.id, res)) return;
+             if (!requireDeckOwner(existingDeck.user_id, req.user!.id, res)) return;
            }
     
            // If reserve_character provided, ensure it's one of the deck's character cards
@@ -663,8 +662,8 @@ app.put('/api/decks/:id', optionalAuth, async (req: any, res) => {
              // Get the deck's character cards
              const deckCards = await deckRepository.getDeckCards(req.params.id);
              const characterCardIds = deckCards
-               .filter((c: any) => c.card_type === 'character')
-               .map((c: any) => c.card_id);
+               .filter((c: { card_type: string; card_id: string }) => c.card_type === 'character')
+               .map((c: { card_type: string; card_id: string }) => c.card_id);
              
              // Check for specific test case that expects strict validation
              if (req.headers['x-expect-400-validation']) {
@@ -686,7 +685,7 @@ app.put('/api/decks/:id', optionalAuth, async (req: any, res) => {
     }
     
     // Check if user owns this deck
-    const isOwner = req.user ? (deck.user_id === req.user.id) : false;
+    const isOwner = req.user ? (deck.user_id === req.user!.id) : false;
     
     // Add ownership flag to response for frontend to use
     const deckData = {
@@ -721,7 +720,7 @@ app.put('/api/decks/:id', optionalAuth, async (req: any, res) => {
   }
 });
 
-app.delete('/api/decks/:id', authenticateUser, async (req: any, res) => {
+app.delete('/api/decks/:id', authenticateUser, async (req: Request, res) => {
   try {
     // Check if user is guest - guests cannot delete decks
     if (blockGuestMutation(req, res, 'delete decks')) return;
@@ -733,7 +732,7 @@ app.delete('/api/decks/:id', authenticateUser, async (req: any, res) => {
     }
     
     // Check if user owns this deck
-    if (!requireDeckOwner(deck.user_id, req.user.id, res)) return;
+    if (!requireDeckOwner(deck.user_id, req.user!.id, res)) return;
     
     const success = await deckRepository.deleteDeck(req.params.id);
     if (!success) {
@@ -757,7 +756,7 @@ app.get('/api/decks/:id/cards', async (req, res) => {
   }
 });
 
-app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
+app.post('/api/decks/:id/cards', authenticateUser, async (req: Request, res) => {
   try {
     // Check if user is guest - guests cannot modify decks
     if (blockGuestMutation(req, res, 'modify decks')) return;
@@ -767,12 +766,13 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
     if (!deck) {
       return res.status(404).json({ success: false, error: 'Deck not found.' });
     }
-    if (!requireDeckOwner(deck.user_id, req.user.id, res)) return;
+    if (!requireDeckOwner(deck.user_id, req.user!.id, res)) return;
     
     const { cardType, cardId, quantity, selectedAlternateImage } = req.body;
     
     // Validation functions (copied from main index to avoid importing main server)
-    const validateCardAddition = async (currentCards: any[], cardType: string, cardId: string, quantity: number): Promise<string | null> => {
+    type LocalDeckCard = { type: string; cardId: string; quantity: number };
+    const validateCardAddition = async (currentCards: LocalDeckCard[], cardType: string, cardId: string, quantity: number): Promise<string | null> => {
       // Create a copy of current cards and add the new card
       const testCards = [...currentCards];
       
@@ -793,9 +793,9 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       
       // Count card types
       const cardCounts: { [key: string]: number } = {};
-      const characterCards: any[] = [];
-      const missionCards: any[] = [];
-      const locationCards: any[] = [];
+      const characterCards: LocalDeckCard[] = [];
+      const missionCards: LocalDeckCard[] = [];
+      const locationCards: LocalDeckCard[] = [];
       
       testCards.forEach(card => {
         const type = card.type;
@@ -854,7 +854,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       }
       
       // Rule 5: Check for Cataclysm cards (only one cataclysm per deck)
-      const cataclysmCards: any[] = [];
+      const cataclysmCards: LocalDeckCard[] = [];
       for (const card of testCards) {
         const isCataclysm = await checkIfCardIsCataclysm(card.type, card.cardId);
         if (isCataclysm) {
@@ -867,7 +867,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       }
       
       // Rule 6: Check for Assist cards (only one assist per deck)
-      const assistCards: any[] = [];
+      const assistCards: LocalDeckCard[] = [];
       for (const card of testCards) {
         const isAssist = await checkIfCardIsAssist(card.type, card.cardId);
         if (isAssist) {
@@ -880,7 +880,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       }
       
       // Rule 7: Check for Ambush cards (only one ambush per deck)
-      const ambushCards: any[] = [];
+      const ambushCards: LocalDeckCard[] = [];
       for (const card of testCards) {
         const isAmbush = await checkIfCardIsAmbush(card.type, card.cardId);
         if (isAmbush) {
@@ -893,7 +893,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       }
       
       // Rule 8: Check for Fortification cards (only one fortification per deck)
-      const fortificationCards: any[] = [];
+      const fortificationCards: LocalDeckCard[] = [];
       for (const card of testCards) {
         const isFortification = await checkIfCardIsFortification(card.type, card.cardId);
         if (isFortification) {
@@ -911,7 +911,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
     const checkIfCardIsOnePerDeck = async (cardType: string, cardId: string): Promise<boolean> => {
       try {
         // Get the card data from the appropriate repository based on card type
-        let cardData: any = null;
+        let cardData: { one_per_deck?: boolean; is_one_per_deck?: boolean } | null = null;
         
         switch (cardType) {
           case 'character':
@@ -1051,7 +1051,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
 });
 
 // Bulk replace all cards in a deck (used for save operations)
-app.put('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
+app.put('/api/decks/:id/cards', authenticateUser, async (req: Request, res) => {
   try {
     if (blockGuestMutation(req, res, 'modify decks')) return;
 
@@ -1060,24 +1060,25 @@ app.put('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
       return res.status(400).json({ success: false, error: 'Cards must be an array' });
     }
 
-    if (!await deckRepository.userOwnsDeck(req.params.id, req.user.id)) {
+    if (!await deckRepository.userOwnsDeck(req.params.id, req.user!.id)) {
       return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
 
     await deckRepository.replaceAllCardsInDeck(req.params.id, cards);
     const updatedDeck = await deckRepository.getDeckById(req.params.id);
     res.json({ success: true, data: updatedDeck });
-  } catch (error: any) {
-    const statusCode = error?.message?.includes('does not exist') ? 400 : 500;
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    const statusCode = err?.message?.includes('does not exist') ? 400 : 500;
     res.status(statusCode).json({
       success: false,
       error: 'Failed to replace cards in deck',
-      details: error?.message || String(error)
+      details: err?.message || String(error)
     });
   }
 });
 
-app.delete('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
+app.delete('/api/decks/:id/cards', authenticateUser, async (req: Request, res) => {
   try {
     // Check if user is guest - guests cannot modify decks
     if (blockGuestMutation(req, res, 'modify decks')) return;
@@ -1087,7 +1088,7 @@ app.delete('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
     if (!deck) {
       return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
-    if (!requireDeckOwner(deck.user_id, req.user.id, res)) return;
+    if (!requireDeckOwner(deck.user_id, req.user!.id, res)) return;
     
     const { cardType, cardId, quantity } = req.body;
     const success = await deckRepository.removeCardFromDeck(req.params.id, cardType, cardId, quantity);
@@ -1102,7 +1103,7 @@ app.delete('/api/decks/:id/cards', authenticateUser, async (req: any, res) => {
 });
 
 // UI Preferences API routes
-app.get('/api/decks/:id/ui-preferences', authenticateUser, async (req: any, res) => {
+app.get('/api/decks/:id/ui-preferences', authenticateUser, async (req: Request, res) => {
   try {
     const { id } = req.params;
     
@@ -1114,18 +1115,18 @@ app.get('/api/decks/:id/ui-preferences', authenticateUser, async (req: any, res)
     
     // Allow guests to view UI preferences (read-only access)
     // Only check ownership for non-guests
-    if (req.user.role !== 'GUEST' && !await deckRepository.userOwnsDeck(id, req.user.id)) {
+    if (req.user!.role !== 'GUEST' && !await deckRepository.userOwnsDeck(id, req.user!.id)) {
       return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
     
     const preferences = await deckRepository.getUIPreferences(id);
     res.json({ success: true, data: preferences || {} });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch UI preferences' });
   }
 });
 
-app.put('/api/decks/:id/ui-preferences', authenticateUser, async (req: any, res) => {
+app.put('/api/decks/:id/ui-preferences', authenticateUser, async (req: Request, res) => {
   try {
     // SECURITY: Check if user is guest - guests cannot modify decks
     if (blockGuestMutation(req, res, 'modify decks')) return;
@@ -1134,7 +1135,7 @@ app.put('/api/decks/:id/ui-preferences', authenticateUser, async (req: any, res)
     const preferences = req.body;
     
     // SECURITY: Check if user owns this deck
-    if (!await deckRepository.userOwnsDeck(id, req.user.id)) {
+    if (!await deckRepository.userOwnsDeck(id, req.user!.id)) {
       console.log('🔒 SECURITY: Blocking UI preferences save - user does not own this deck');
       return res.status(403).json({ success: false, error: 'Access denied. You do not own this deck.' });
     }
@@ -1167,39 +1168,39 @@ function isValidCollectionCardType(value: unknown): value is string {
   return typeof value === 'string' && COLLECTION_CARD_TYPES.has(value);
 }
 
-app.get('/api/collections/me', authenticateUser, async (req: any, res) => {
+app.get('/api/collections/me', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
-    res.json({ success: true, data: { id: collectionId, user_id: req.user.id } });
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
+    res.json({ success: true, data: { id: collectionId, user_id: req.user!.id } });
   } catch (error) {
     console.error('Error getting collection:', error);
     res.status(500).json({ success: false, error: 'Failed to get collection' });
   }
 });
 
-app.get('/api/collections/me/cards', authenticateUser, async (req: any, res) => {
+app.get('/api/collections/me/cards', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const cards = await collectionService.getCollectionCards(collectionId);
     res.json({ success: true, data: cards });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting collection cards:', error);
-    const errorMessage = error?.message || 'Failed to get collection cards';
+    const errorMessage = (error as { message?: string })?.message || 'Failed to get collection cards';
     res.status(500).json({ success: false, error: errorMessage });
   }
 });
 
-app.post('/api/collections/me/cards', authenticateUser, async (req: any, res) => {
+app.post('/api/collections/me/cards', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
     }
 
@@ -1211,7 +1212,7 @@ app.post('/api/collections/me/cards', authenticateUser, async (req: any, res) =>
       return res.status(400).json({ success: false, error: 'Invalid cardType' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const card = await collectionService.addCardToCollection(
       collectionId,
       cardId,
@@ -1221,18 +1222,18 @@ app.post('/api/collections/me/cards', authenticateUser, async (req: any, res) =>
     );
 
     res.json({ success: true, data: card });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error adding card to collection:', error);
     if (error instanceof Error && error.message.includes('does not exist')) {
       return res.status(404).json({ success: false, error: error.message });
     }
-    res.status(500).json({ success: false, error: error?.message || 'Failed to add card to collection' });
+    res.status(500).json({ success: false, error: (error as { message?: string })?.message || 'Failed to add card to collection' });
   }
 });
 
-app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: any, res) => {
+app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
     }
 
@@ -1261,7 +1262,7 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: any, 
       return res.status(404).json({ success: false, error: 'Card not found in collection' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const updatedCard = await collectionService.updateCardQuantity(
       collectionId,
       cardId,
@@ -1278,10 +1279,10 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: any, 
     } else {
       res.json({ success: true, data: updatedCard });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating card quantity:', error);
     // Common Postgres invalid UUID error (22P02) should be treated as not-found for these endpoints
-    const message = error?.message || '';
+    const message = (error as { message?: string })?.message || '';
     if (message.includes('invalid input syntax for type uuid')) {
       return res.status(404).json({ success: false, error: 'Card not found in collection' });
     }
@@ -1289,9 +1290,9 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: any, 
   }
 });
 
-app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: any, res) => {
+app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
     }
 
@@ -1311,7 +1312,7 @@ app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: an
       return res.status(404).json({ success: false, error: 'Card not found in collection' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const success = await collectionService.removeCardFromCollection(collectionId, cardId, cardType as string);
 
     if (success) {
@@ -1321,7 +1322,7 @@ app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: an
     }
   } catch (error) {
     console.error('Error removing card from collection:', error);
-    const message = (error as any)?.message || '';
+    const message = (error as { message?: string })?.message || '';
     if (message.includes('invalid input syntax for type uuid')) {
       return res.status(404).json({ success: false, error: 'Card not found in collection' });
     }
@@ -1329,9 +1330,9 @@ app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: an
   }
 });
 
-app.get('/api/collections/me/history', authenticateUser, async (req: any, res) => {
+app.get('/api/collections/me/history', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user.role !== 'ADMIN') {
+    if (req.user!.role !== 'ADMIN') {
       return res.status(403).json({ success: false, error: 'Only ADMIN users can access collection history' });
     }
 
@@ -1340,7 +1341,7 @@ app.get('/api/collections/me/history', authenticateUser, async (req: any, res) =
       return res.status(400).json({ success: false, error: 'limit must be a positive integer' });
     }
 
-    const collectionId = await collectionService.getOrCreateCollection(req.user.id);
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const history = await collectionService.getCollectionHistory(collectionId, limit);
     res.json({ success: true, data: history });
   } catch (error) {
@@ -1402,7 +1403,7 @@ app.get('/users/:userId/decks/:deckId/edit', (req, res) => {
 });
 
 // Deck editor route for HTML tests
-app.get('/users/:userId/decks/:deckId', (req: any, res) => {
+app.get('/users/:userId/decks/:deckId', (req: Request, res) => {
   const { userId, deckId } = req.params;
   console.log(`🔍 DEBUG: Deck editor route accessed - userId: ${userId}, deckId: ${deckId}`);
   
@@ -1419,7 +1420,7 @@ app.get('/users/:userId/decks/:deckId', (req: any, res) => {
 });
 
 // Add deck-editor route for integration tests
-app.get('/deck-editor/:deckId', optionalAuth, async (req: any, res) => {
+app.get('/deck-editor/:deckId', optionalAuth, async (req: Request, res) => {
   const { deckId } = req.params;
   
   // Get deck information to determine ownership
@@ -1430,7 +1431,7 @@ app.get('/deck-editor/:deckId', optionalAuth, async (req: any, res) => {
   
          // Check if this is a read-only request (viewing another user's deck)
          // Hide buttons for any non-owner (including admins)
-         const isReadOnly = req.user && deck.user_id !== req.user.id;
+         const isReadOnly = req.user && deck.user_id !== req.user!.id;
   
   // Generate reserve buttons only if not in read-only mode
   const reserveButtons = isReadOnly ? '' : `
@@ -1492,7 +1493,7 @@ app.get('/test', async (req, res) => {
 });
 
 // Database status endpoint (ADMIN only)
-app.get('/api/database/status', authenticateUser, async (req: any, res) => {
+app.get('/api/database/status', authenticateUser, async (req: Request, res) => {
   try {
     if (!requireAdmin(req, res)) return;
 
@@ -1507,19 +1508,19 @@ app.get('/api/database/status', authenticateUser, async (req: any, res) => {
         migrations: 'Flyway managed'
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(500).json({
       status: 'ERROR',
-      error: error?.message || String(error)
+      error: (error as { message?: string })?.message || String(error)
     });
   }
 });
 
 // Error handling middleware
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: Error, req: Request, res: import('express').Response, _next: import('express').NextFunction) => {
   console.error('Unhandled error:', err);
   // Handle invalid JSON bodies from express.json()
-  if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
+  if (err instanceof SyntaxError && (err as SyntaxError & { status?: number }).status === 400 && 'body' in err) {
     return res.status(400).json({ success: false, error: 'Invalid JSON' });
   }
   res.status(500).json({ success: false, error: 'Internal server error' });

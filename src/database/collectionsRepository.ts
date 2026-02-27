@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, QueryResult } from 'pg';
 
 export interface Collection {
   id: string;
@@ -20,7 +20,7 @@ export interface CollectionCard {
 
 export interface CollectionCardWithDetails extends CollectionCard {
   card_name?: string;
-  card_data?: any;
+  card_data?: Record<string, unknown>;
   set?: string; // Renamed from universe
 }
 
@@ -53,78 +53,90 @@ export class CollectionsRepository {
     
     try {
       switch (cardType) {
-        case 'character':
+        case 'character': {
           const charResult = await client.query('SELECT image_path FROM characters WHERE id = $1', [cardId]);
           if (charResult.rows.length > 0) {
             cardImagePath = charResult.rows[0].image_path;
           }
           break;
-        case 'special':
+        }
+        case 'special': {
           const specialResult = await client.query('SELECT image_path FROM special_cards WHERE id = $1', [cardId]);
           if (specialResult.rows.length > 0) {
             cardImagePath = specialResult.rows[0].image_path;
           }
           break;
-        case 'power':
+        }
+        case 'power': {
           const powerResult = await client.query('SELECT image_path FROM power_cards WHERE id = $1', [cardId]);
           if (powerResult.rows.length > 0) {
             cardImagePath = powerResult.rows[0].image_path;
           }
           break;
-        case 'location':
+        }
+        case 'location': {
           const locationResult = await client.query('SELECT image_path FROM locations WHERE id = $1', [cardId]);
           if (locationResult.rows.length > 0) {
             cardImagePath = locationResult.rows[0].image_path;
           }
           break;
-        case 'mission':
+        }
+        case 'mission': {
           const missionResult = await client.query('SELECT image_path FROM missions WHERE id = $1', [cardId]);
           if (missionResult.rows.length > 0) {
             cardImagePath = missionResult.rows[0].image_path;
           }
           break;
-        case 'event':
+        }
+        case 'event': {
           const eventResult = await client.query('SELECT image_path FROM events WHERE id = $1', [cardId]);
           if (eventResult.rows.length > 0) {
             cardImagePath = eventResult.rows[0].image_path;
           }
           break;
-        case 'aspect':
+        }
+        case 'aspect': {
           const aspectResult = await client.query('SELECT image_path FROM aspects WHERE id = $1', [cardId]);
           if (aspectResult.rows.length > 0) {
             cardImagePath = aspectResult.rows[0].image_path;
           }
           break;
-        case 'advanced_universe':
+        }
+        case 'advanced_universe': {
           const advUniResult = await client.query('SELECT image_path FROM advanced_universe_cards WHERE id = $1', [cardId]);
           if (advUniResult.rows.length > 0) {
             cardImagePath = advUniResult.rows[0].image_path;
           }
           break;
-        case 'teamwork':
+        }
+        case 'teamwork': {
           const teamworkResult = await client.query('SELECT image_path FROM teamwork_cards WHERE id = $1', [cardId]);
           if (teamworkResult.rows.length > 0) {
             cardImagePath = teamworkResult.rows[0].image_path;
           }
           break;
-        case 'ally_universe':
+        }
+        case 'ally_universe': {
           const allyResult = await client.query('SELECT image_path FROM ally_universe_cards WHERE id = $1', [cardId]);
           if (allyResult.rows.length > 0) {
             cardImagePath = allyResult.rows[0].image_path;
           }
           break;
-        case 'training':
+        }
+        case 'training': {
           const trainingResult = await client.query('SELECT image_path FROM training_cards WHERE id = $1', [cardId]);
           if (trainingResult.rows.length > 0) {
             cardImagePath = trainingResult.rows[0].image_path;
           }
           break;
-        case 'basic_universe':
+        }
+        case 'basic_universe': {
           const basicResult = await client.query('SELECT image_path FROM basic_universe_cards WHERE id = $1', [cardId]);
           if (basicResult.rows.length > 0) {
             cardImagePath = basicResult.rows[0].image_path;
           }
           break;
+        }
       }
     } catch (error) {
       console.error(`Error fetching card image_path for ${cardType} ${cardId}:`, error);
@@ -209,114 +221,126 @@ export class CollectionsRepository {
           image_path: cc.image_path
         });
         
-        let cardData: any = null;
+        let cardData: Record<string, unknown> | null = null;
         let cardName: string = '';
         let set: string = '';
 
         try {
           switch (cc.card_type) {
-            case 'character':
+            case 'character': {
               const charResult = await client.query('SELECT * FROM characters WHERE id = $1', [cc.card_id]);
               if (charResult.rows.length > 0) {
-                cardData = charResult.rows[0];
-                cardName = cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = charResult.rows[0] as Record<string, unknown>;
+                cardName = cardData.name as string;
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'special':
+            }
+            case 'special': {
               const specialResult = await client.query('SELECT * FROM special_cards WHERE id = $1', [cc.card_id]);
               if (specialResult.rows.length > 0) {
-                cardData = specialResult.rows[0];
-                cardName = cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = specialResult.rows[0] as Record<string, unknown>;
+                cardName = cardData.name as string;
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'power':
+            }
+            case 'power': {
               const powerResult = await client.query('SELECT * FROM power_cards WHERE id = $1', [cc.card_id]);
               if (powerResult.rows.length > 0) {
-                cardData = powerResult.rows[0];
+                cardData = powerResult.rows[0] as Record<string, unknown>;
                 cardName = `${cardData.value} - ${cardData.power_type}`;
-                set = cardData.set || 'ERB';
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'location':
+            }
+            case 'location': {
               const locationResult = await client.query('SELECT * FROM locations WHERE id = $1', [cc.card_id]);
               if (locationResult.rows.length > 0) {
-                cardData = locationResult.rows[0];
-                cardName = locationResult.rows[0].name;
-                set = cardData.set || 'ERB';
+                cardData = locationResult.rows[0] as Record<string, unknown>;
+                cardName = cardData.name as string;
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'mission':
+            }
+            case 'mission': {
               const missionResult = await client.query('SELECT * FROM missions WHERE id = $1', [cc.card_id]);
               if (missionResult.rows.length > 0) {
-                cardData = missionResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = missionResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'event':
+            }
+            case 'event': {
               const eventResult = await client.query('SELECT * FROM events WHERE id = $1', [cc.card_id]);
               if (eventResult.rows.length > 0) {
-                cardData = eventResult.rows[0];
-                cardName = cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = eventResult.rows[0] as Record<string, unknown>;
+                cardName = cardData.name as string;
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'aspect':
+            }
+            case 'aspect': {
               const aspectResult = await client.query('SELECT * FROM aspects WHERE id = $1', [cc.card_id]);
               if (aspectResult.rows.length > 0) {
-                cardData = aspectResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = aspectResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'advanced_universe':
+            }
+            case 'advanced_universe': {
               const advUniResult = await client.query('SELECT * FROM advanced_universe_cards WHERE id = $1', [cc.card_id]);
               if (advUniResult.rows.length > 0) {
-                cardData = advUniResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = advUniResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'teamwork':
+            }
+            case 'teamwork': {
               const teamworkResult = await client.query('SELECT * FROM teamwork_cards WHERE id = $1', [cc.card_id]);
               if (teamworkResult.rows.length > 0) {
-                cardData = teamworkResult.rows[0];
-                cardName = cardData.card_type || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = teamworkResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_type as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'ally_universe':
+            }
+            case 'ally_universe': {
               const allyResult = await client.query('SELECT * FROM ally_universe_cards WHERE id = $1', [cc.card_id]);
               if (allyResult.rows.length > 0) {
-                cardData = allyResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = allyResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'training':
+            }
+            case 'training': {
               const trainingResult = await client.query('SELECT * FROM training_cards WHERE id = $1', [cc.card_id]);
               if (trainingResult.rows.length > 0) {
-                cardData = trainingResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = trainingResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
-            case 'basic_universe':
+            }
+            case 'basic_universe': {
               const basicResult = await client.query('SELECT * FROM basic_universe_cards WHERE id = $1', [cc.card_id]);
               if (basicResult.rows.length > 0) {
-                cardData = basicResult.rows[0];
-                cardName = cardData.card_name || cardData.name;
-                set = cardData.set || 'ERB';
+                cardData = basicResult.rows[0] as Record<string, unknown>;
+                cardName = (cardData.card_name as string) || (cardData.name as string);
+                set = (cardData.set as string) || 'ERB';
               }
               break;
+            }
           }
         } catch (error) {
           console.error(`Error fetching card data for ${cc.card_type} ${cc.card_id}:`, error);
         }
         
-        cardsWithDetails.push({
+        const cardEntry: CollectionCardWithDetails = {
           id: cc.id,
           collection_id: cc.collection_id,
           card_id: cc.card_id,
@@ -326,9 +350,12 @@ export class CollectionsRepository {
           created_at: cc.created_at,
           updated_at: cc.updated_at,
           card_name: cardName,
-          card_data: cardData,
           set: set
-        });
+        };
+        if (cardData !== null) {
+          cardEntry.card_data = cardData;
+        }
+        cardsWithDetails.push(cardEntry);
         
         console.log('🟠 [Repo] Pushed card with details:', {
           card_id: cc.card_id,
@@ -437,7 +464,7 @@ export class CollectionsRepository {
     try {
       await client.query('BEGIN');
       
-      let result: any = null; // Initialize result variable
+      let result: QueryResult<CollectionCard> | null = null;
 
       if (quantity === 0) {
         // Remove card if quantity is 0 - try to find by image_path first, then by card_id/card_type
@@ -617,7 +644,7 @@ export class CollectionsRepository {
         ORDER BY created_at DESC
       `;
       
-      const params: any[] = [collectionId];
+      const params: (string | number)[] = [collectionId];
       
       if (limit && limit > 0) {
         query += ' LIMIT $2';

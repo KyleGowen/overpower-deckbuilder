@@ -1,5 +1,5 @@
 import { DeckRepository } from '../repository/DeckRepository';
-import { Deck } from '../types';
+import { Deck, DeckCard, UIPreferences } from '../types';
 
 export class DeckService {
   constructor(private deckRepository: DeckRepository) {}
@@ -83,7 +83,7 @@ export class DeckService {
   /**
    * Get deck cards
    */
-  async getDeckCards(deckId: string): Promise<any[]> {
+  async getDeckCards(deckId: string): Promise<DeckCard[]> {
     return await this.deckRepository.getDeckCards(deckId);
   }
 
@@ -97,14 +97,14 @@ export class DeckService {
   /**
    * Update UI preferences
    */
-  async updateUIPreferences(deckId: string, preferences: any): Promise<boolean> {
+  async updateUIPreferences(deckId: string, preferences: UIPreferences): Promise<boolean> {
     return await this.deckRepository.updateUIPreferences(deckId, preferences);
   }
 
   /**
    * Get UI preferences
    */
-  async getUIPreferences(deckId: string): Promise<any | undefined> {
+  async getUIPreferences(deckId: string): Promise<UIPreferences | undefined> {
     return await this.deckRepository.getUIPreferences(deckId);
   }
 
