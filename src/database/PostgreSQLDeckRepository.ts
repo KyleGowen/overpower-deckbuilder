@@ -6,7 +6,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
   private pool: Pool;
   
   // Caching for frequently accessed deck data
-  private deckCache: Map<string, { deck: Deck; timestamp: number }> = new Map();
+  private deckCache: Map<string, { deck: Deck | Deck[]; timestamp: number }> = new Map();
   private readonly DECK_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
   
   // Debug method to clear cache
@@ -108,7 +108,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     const cached = this.deckCache.get(id);
     const now = Date.now();
     if (cached && (now - cached.timestamp) < this.DECK_CACHE_TTL) {
-      return cached.deck;
+      return cached.deck as Deck;
     }
 
     const client = await this.pool.connect();
@@ -171,7 +171,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     const cached = this.deckCache.get(cacheKey);
     const now = Date.now();
     if (cached && (now - cached.timestamp) < this.DECK_CACHE_TTL) {
-      return cached.deck as unknown as Deck[];
+      return cached.deck as Deck[];
     }
 
     const client = await this.pool.connect();
@@ -228,7 +228,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
       
       // Build character and location cards from metadata
       const decks = deckResult.rows.map(deck => {
-        const cards: any[] = [];
+        const cards: DeckCard[] = [];
         
         // Add character cards from metadata
         if (deck.character_1_id) {
@@ -316,7 +316,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
       });
       
       // Cache the result
-      this.deckCache.set(cacheKey, { deck: decks as any, timestamp: now });
+      this.deckCache.set(cacheKey, { deck: decks, timestamp: now });
       
       return decks;
     } finally {
@@ -565,7 +565,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
   }
 
   // Deck card management methods
-  async addCardToDeck(deckId: string, cardType: string, cardId: string, quantity: number = 1, selectedAlternateImage?: string): Promise<boolean> {
+  async addCardToDeck(deckId: string, cardType: string, cardId: string, quantity: number = 1, _selectedAlternateImage?: string): Promise<boolean> {
     // Note: selectedAlternateImage parameter is accepted for API compatibility but ignored
     // since selected_alternate_image column was removed in migration V181
     const client = await this.pool.connect();
@@ -578,56 +578,67 @@ export class PostgreSQLDeckRepository implements DeckRepository {
           try {
             const characterResult = await client.query('SELECT id FROM characters WHERE id::text = $1 OR id = $1::uuid', [cardId]);
             cardExists = characterResult.rows.length > 0;
-          } catch (uuidError: any) {
+          } catch (_uuidError: unknown) {
             // If UUID cast fails, try string comparison
             const characterResult = await client.query('SELECT id FROM characters WHERE id::text = $1', [String(cardId)]);
             cardExists = characterResult.rows.length > 0;
           }
           break;
-        case 'special':
+        case 'special': {
           const specialResult = await client.query('SELECT id FROM special_cards WHERE id = $1', [cardId]);
           cardExists = specialResult.rows.length > 0;
           break;
-        case 'power':
+        }
+        case 'power': {
           const powerResult = await client.query('SELECT id FROM power_cards WHERE id = $1', [cardId]);
           cardExists = powerResult.rows.length > 0;
           break;
-        case 'mission':
+        }
+        case 'mission': {
           const missionResult = await client.query('SELECT id FROM missions WHERE id = $1', [cardId]);
           cardExists = missionResult.rows.length > 0;
           break;
-        case 'event':
+        }
+        case 'event': {
           const eventResult = await client.query('SELECT id FROM events WHERE id = $1', [cardId]);
           cardExists = eventResult.rows.length > 0;
           break;
-        case 'aspect':
+        }
+        case 'aspect': {
           const aspectResult = await client.query('SELECT id FROM aspects WHERE id = $1', [cardId]);
           cardExists = aspectResult.rows.length > 0;
           break;
-        case 'location':
+        }
+        case 'location': {
           const locationResult = await client.query('SELECT id FROM locations WHERE id = $1', [cardId]);
           cardExists = locationResult.rows.length > 0;
           break;
-        case 'teamwork':
+        }
+        case 'teamwork': {
           const teamworkResult = await client.query('SELECT id FROM teamwork_cards WHERE id = $1', [cardId]);
           cardExists = teamworkResult.rows.length > 0;
           break;
-        case 'ally-universe':
+        }
+        case 'ally-universe': {
           const allyResult = await client.query('SELECT id FROM ally_universe_cards WHERE id = $1', [cardId]);
           cardExists = allyResult.rows.length > 0;
           break;
-        case 'training':
+        }
+        case 'training': {
           const trainingResult = await client.query('SELECT id FROM training_cards WHERE id = $1', [cardId]);
           cardExists = trainingResult.rows.length > 0;
           break;
-        case 'basic-universe':
+        }
+        case 'basic-universe': {
           const basicResult = await client.query('SELECT id FROM basic_universe_cards WHERE id = $1', [cardId]);
           cardExists = basicResult.rows.length > 0;
           break;
-        case 'advanced-universe':
+        }
+        case 'advanced-universe': {
           const advancedResult = await client.query('SELECT id FROM advanced_universe_cards WHERE id = $1', [cardId]);
           cardExists = advancedResult.rows.length > 0;
           break;
+        }
         default:
           console.error(`Unknown card type: ${cardType}`);
           return false;
@@ -861,7 +872,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
               try {
                 const characterResult = await client.query('SELECT id FROM characters WHERE id::text = $1 OR id = $1::uuid', [card.cardId]);
                 cardExists = characterResult.rows.length > 0;
-              } catch (uuidError: any) {
+              } catch (_uuidError: unknown) {
                 // If UUID cast fails, try string comparison
                 const characterResult = await client.query('SELECT id FROM characters WHERE id::text = $1', [String(card.cardId)]);
                 cardExists = characterResult.rows.length > 0;
@@ -871,7 +882,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
               try {
                 const specialResult = await client.query('SELECT id FROM special_cards WHERE id::text = $1 OR id = $1::uuid', [card.cardId]);
                 cardExists = specialResult.rows.length > 0;
-              } catch (uuidError: any) {
+              } catch (_uuidError: unknown) {
                 // If UUID cast fails, try string comparison
                 const specialResult = await client.query('SELECT id FROM special_cards WHERE id::text = $1', [String(card.cardId)]);
                 cardExists = specialResult.rows.length > 0;
@@ -881,7 +892,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
               try {
                 const powerResult = await client.query('SELECT id FROM power_cards WHERE id::text = $1 OR id = $1::uuid', [card.cardId]);
                 cardExists = powerResult.rows.length > 0;
-              } catch (uuidError: any) {
+              } catch (_uuidError: unknown) {
                 // If UUID cast fails, try string comparison
                 const powerResult = await client.query('SELECT id FROM power_cards WHERE id::text = $1', [String(card.cardId)]);
                 cardExists = powerResult.rows.length > 0;

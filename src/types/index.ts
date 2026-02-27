@@ -197,6 +197,8 @@ export interface DeckCard {
   cardId: string; // The ID from the original card table (now includes alternate cards as separate rows)
   quantity: number; // How many copies of this card
   exclude_from_draw?: boolean; // Whether this card is excluded from Draw Hand (for Training cards with Spartan Training Ground)
+  defaultImage?: string; // Preview image path populated when building deck list metadata
+  name?: string; // Card name populated when building deck list metadata
 }
 
 // Extended type for API operations that includes special cases
