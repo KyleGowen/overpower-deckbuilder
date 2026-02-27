@@ -1445,19 +1445,52 @@
         };
         
         // ---- FLASH DEBUG: global helper + MutationObserver ----
+        // Buffer persists across redirects so we can see what happened on the PREVIOUS page
+        var __flashBuf = [];
         window.__flashDebug = function(label, extra) {
-            const t = performance.now().toFixed(1);
-            const mc = document.getElementById('mainContainer');
-            const lm = document.getElementById('loginModal');
+            var t = performance.now().toFixed(1);
+            var mc = document.getElementById('mainContainer');
+            var lm = document.getElementById('loginModal');
+            var mcVal = mc ? (mc.style.display || '(css)') : 'absent';
+            var lmVal = lm ? (lm.style.display || '(css)') : 'absent';
+            var msg = '[FLASH ' + t + 'ms] ' + label + (extra ? ' ' + extra : '') + ' | mc=' + mcVal + ' | lm=' + lmVal;
+            __flashBuf.push(msg);
+            // Keep last 80 entries in sessionStorage so they survive redirect
+            try {
+                var saved = JSON.parse(sessionStorage.getItem('__flashBuf') || '[]');
+                saved.push(msg);
+                if (saved.length > 80) saved = saved.slice(-80);
+                sessionStorage.setItem('__flashBuf', JSON.stringify(saved));
+            } catch(e) {}
             console.log(
-                '%c[FLASH ' + t + 'ms] ' + label,
-                'color:#f0a; font-weight:bold;',
-                extra || '',
-                '| mc=' + (mc ? (mc.style.display || '(css)') : 'absent'),
-                '| lm=' + (lm ? (lm.style.display || '(css)') : 'absent')
+                '%c' + msg,
+                'color:#f0a; font-weight:bold;'
             );
             console.trace();
         };
+        // On page load, dump any logs saved from the PREVIOUS page (before redirect)
+        (function() {
+            try {
+                var prev = JSON.parse(sessionStorage.getItem('__flashBufPrev') || '[]');
+                if (prev.length > 0) {
+                    console.log('%c[FLASH — PREVIOUS PAGE BEFORE REDIRECT (' + prev.length + ' entries)]', 'color:#0ff; font-weight:bold; font-size:13px;');
+                    prev.forEach(function(m) { console.log('%c' + m, 'color:#0ff;'); });
+                    console.log('%c[FLASH — END PREVIOUS PAGE LOGS]', 'color:#0ff; font-weight:bold;');
+                }
+                sessionStorage.removeItem('__flashBufPrev');
+            } catch(e) {}
+        })();
+        // On unload (redirect/close), move current buffer to "prev" slot for next page to read
+        window.addEventListener('beforeunload', function() {
+            try {
+                var mc = document.getElementById('mainContainer');
+                var lm = document.getElementById('loginModal');
+                var snap = '[FLASH UNLOAD] page navigating away | mc=' + (mc ? (mc.style.display || '(css)') : 'absent') + ' | lm=' + (lm ? (lm.style.display || '(css)') : 'absent') + ' | url=' + window.location.href;
+                __flashBuf.push(snap);
+                sessionStorage.setItem('__flashBufPrev', JSON.stringify(__flashBuf));
+                sessionStorage.removeItem('__flashBuf');
+            } catch(e) {}
+        });
         const __flashObserver = new MutationObserver(function(mutations) {
             for (var i = 0; i < mutations.length; i++) {
                 var m = mutations[i];
@@ -1597,7 +1630,10 @@
             // Login form and guest login button event listeners are now handled by login.js component
             
             // Logout button event listener
-            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                window.__flashDebug && window.__flashDebug('LOGOUT BUTTON CLICKED', 'url=' + window.location.href);
+                logout(e);
+            });
             
             // Load data only if authenticated
             if (currentUser) {

@@ -150,19 +150,25 @@ async function signup(credentials) {
  * Logout current user and redirect to home page
  */
 async function logout() {
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: start, calling window.authService.logout()');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: START');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: loginModal visible BEFORE authService.logout?',
+        (function() { var lm = document.getElementById('loginModal'); return lm ? 'display=' + (lm.style.display || '(css)') : 'absent'; })()
+    );
     await window.authService.logout();
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: authService.logout() returned, setting currentUser=null');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: authService.logout() RETURNED');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: loginModal state AFTER authService.logout',
+        (function() { var lm = document.getElementById('loginModal'); return lm ? 'display=' + (lm.style.display || '(css)') : 'absent'; })()
+    );
     currentUser = null;
     // Hide main UI immediately to prevent flash before redirect
     const mainContainer = document.getElementById('mainContainer');
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: hiding mainContainer before redirect (present=' + !!mainContainer + ')');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: hiding mainContainer (present=' + !!mainContainer + ', current=' + (mainContainer ? mainContainer.style.display || '(css)' : 'n/a') + ')');
     if (mainContainer) mainContainer.style.display = 'none';
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
     if (databaseView) databaseView.classList.add('view-removed');
     if (deckBuilder) deckBuilder.classList.add('view-removed');
     // Redirect to root page
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: redirecting to /');
+    window.__flashDebug && window.__flashDebug('auth-app-init.logout: ABOUT TO REDIRECT to / — this is the last log on this page');
     window.location.href = '/';
 }

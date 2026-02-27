@@ -177,13 +177,17 @@ class FrontendAuthService {
       console.error('Logout error:', error);
       window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: fetch ERRORED', String(error));
     } finally {
-      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block - clearing user (NOT calling showLoginModal; caller handles redirect)');
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block start');
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: loginModal state in finally',
+          (function() { var lm = document.getElementById('loginModal'); return lm ? 'display=' + (lm.style.display || '(css)') : 'absent'; })()
+      );
       this.currentUser = null;
       this.clearStoredUser();
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: after clearStoredUser, localStorage.currentUser=' + !!localStorage.getItem('currentUser'));
       // Do NOT call showLoginModal() here — the caller (auth-app-init.logout) always redirects
       // to '/', so the new page handles showing the login modal. Calling showLoginModal() here
       // causes the login modal to flash on top of the current app page before the redirect fires.
-      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block done');
+      window.__flashDebug && window.__flashDebug('FrontendAuthService.logout: finally block done (no showLoginModal called)');
     }
   }
 
