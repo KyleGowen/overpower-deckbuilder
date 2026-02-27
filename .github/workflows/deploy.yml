@@ -750,7 +750,7 @@ jobs:
             \"echo \\\"Switching: port \$CURRENT_PORT -> \$NEW_PORT\\\"\",
             \"echo '--- Step 1: Pull new image ---'\",
             \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_URI\",
-            \"docker pull --no-cache $ECR_URI:latest\",
+            \"docker pull $ECR_URI:latest\",
             \"echo 'Image pulled.'\",
             \"echo '--- Step 2: Start new container on idle port ---'\",
             \"docker stop overpower-app-new || true\",
