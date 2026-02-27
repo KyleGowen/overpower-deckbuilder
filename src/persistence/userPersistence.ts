@@ -37,11 +37,16 @@ export class UserPersistenceService {
         const usersArray = JSON.parse(data);
         this.users.clear();
         usersArray.forEach((user: Record<string, unknown>) => {
-          this.users.set(user.id, {
-            ...user,
-            createdAt: new Date(user.createdAt),
-            lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt) : undefined
-          });
+          const entry: LegacyUser = {
+            id: user.id as string,
+            username: user.username as string,
+            password: user.password as string,
+            createdAt: new Date(user.createdAt as string),
+          };
+          if (user.lastLoginAt) {
+            entry.lastLoginAt = new Date(user.lastLoginAt as string);
+          }
+          this.users.set(user.id as string, entry);
         });
         console.log(`✅ Loaded ${this.users.size} users`);
         
@@ -64,9 +69,10 @@ export class UserPersistenceService {
         const sessionsArray = JSON.parse(data);
         this.sessions.clear();
         sessionsArray.forEach((session: Record<string, unknown>) => {
-          this.sessions.set(session.sessionId, {
-            ...session,
-            expiresAt: new Date(session.expiresAt)
+          this.sessions.set(session.sessionId as string, {
+            userId: session.userId as string,
+            username: session.username as string,
+            expiresAt: new Date(session.expiresAt as string)
           });
         });
         console.log(`✅ Loaded ${this.sessions.size} active sessions`);

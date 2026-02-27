@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express, { Request } from 'express';
+import { DeckCard } from './types';
 import { DataSourceConfig } from './config/DataSourceConfig';
 import { DeckPersistenceService } from './services/deckPersistence';
 import { DatabaseInitializationService } from './services/databaseInitialization';
@@ -70,22 +71,20 @@ const optionalAuth = async (req: Request, res: import('express').Response, next:
       await authenticateUser(req, res, next);
     } else if (req.headers['x-test-user-id']) {
       // Handle x-test-user-id header for testing
-      const userId = req.headers['x-test-user-id'];
+      const userId = Array.isArray(req.headers['x-test-user-id'])
+        ? req.headers['x-test-user-id'][0]
+        : req.headers['x-test-user-id'] as string;
       const user = await userRepository.getUserById(userId);
       if (user) {
         req.user = user;
-      } else {
-        req.user = null;
       }
       next();
     } else {
       // No session, continue without user
-      req.user = null;
       next();
     }
   } catch {
     // If authentication fails, continue without user
-    req.user = null;
     next();
   }
 };
@@ -174,9 +173,10 @@ export async function initializeTestServer() {
 
 // Cleanup function to close the test server
 export async function closeTestServer() {
-  if (testServer) {
+  const server = testServer;
+  if (server) {
     return new Promise<void>((resolve) => {
-      testServer.close(() => {
+      server.close(() => {
         console.log('🔌 Test server closed');
         testServer = null;
         serverInitialized = false;
@@ -385,7 +385,7 @@ app.post('/api/users', authenticateUser, async (req: Request, res) => {
     const newUser = await userRepository.createUser(username, `${username}@example.com`, password, 'USER');
     
     // Return user data without password hash
-    const { password_hash: _password_hash, ...userWithoutPassword } = newUser as Record<string, unknown>;
+    const { password_hash: _password_hash, ...userWithoutPassword } = newUser as unknown as Record<string, unknown>;
     
     res.status(201).json({ 
       success: true, 
@@ -662,8 +662,8 @@ app.put('/api/decks/:id', optionalAuth, async (req: Request, res) => {
              // Get the deck's character cards
              const deckCards = await deckRepository.getDeckCards(req.params.id);
              const characterCardIds = deckCards
-               .filter((c: { card_type: string; card_id: string }) => c.card_type === 'character')
-               .map((c: { card_type: string; card_id: string }) => c.card_id);
+               .filter((c: DeckCard) => c.type === 'character')
+               .map((c: DeckCard) => c.cardId);
              
              // Check for specific test case that expects strict validation
              if (req.headers['x-expect-400-validation']) {
@@ -911,7 +911,7 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: Request, res) => 
     const checkIfCardIsOnePerDeck = async (cardType: string, cardId: string): Promise<boolean> => {
       try {
         // Get the card data from the appropriate repository based on card type
-        let cardData: { one_per_deck?: boolean; is_one_per_deck?: boolean } | null = null;
+        let cardData: unknown = null;
         
         switch (cardType) {
           case 'character':
@@ -954,7 +954,8 @@ app.post('/api/decks/:id/cards', authenticateUser, async (req: Request, res) => 
             return false; // Unknown card type, not one-per-deck
         }
         
-        return cardData && (cardData.one_per_deck === true || cardData.is_one_per_deck === true);
+        const d = cardData as { one_per_deck?: boolean; is_one_per_deck?: boolean } | null;
+        return !!(d && (d.one_per_deck === true || d.is_one_per_deck === true));
       } catch (error) {
         console.error('Error checking if card is one-per-deck:', error);
         return false; // Default to not one-per-deck if we can't determine
