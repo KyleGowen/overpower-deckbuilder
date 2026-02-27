@@ -730,334 +730,121 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
-      
-    - name: Pull New Image
+
+    - name: Blue-Green Deploy
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
         ECR_URI="$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}"
-        echo "Pulling new image while old container continues serving..."
+        echo "Sending blue-green deploy command (fire-and-forget)..."
+        echo "ECR URI: $ECR_URI"
 
         CMD_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
+          --timeout-seconds 360 \
           --parameters "commands=[
-            \"echo '=== Pull New Image ===' \",
+            \"echo '=== Blue-Green Deploy Start ===' \",
+            \"CURRENT_PORT=\$(cat /opt/app/active_port 2>/dev/null || echo '3000')\",
+            \"if [ \\\"\$CURRENT_PORT\\\" = \\\"3000\\\" ]; then NEW_PORT=3001; else NEW_PORT=3000; fi\",
+            \"echo \\\"Switching: port \$CURRENT_PORT -> \$NEW_PORT\\\"\",
+            \"echo '--- Step 1: Pull new image ---'\",
             \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_URI\",
             \"docker pull --no-cache $ECR_URI:latest\",
-            \"echo '$ECR_URI' > /tmp/deploy_ecr_uri\",
-            \"echo 'Image pulled. Current images:'\",
-            \"docker images | grep overpower-deckbuilder || true\",
-            \"echo 'Running containers (old still serving):'\",
-            \"docker ps\"
+            \"echo 'Image pulled.'\",
+            \"echo '--- Step 2: Start new container on idle port ---'\",
+            \"docker stop overpower-app-new || true\",
+            \"docker rm overpower-app-new || true\",
+            \"docker run -d --name overpower-app-new --restart unless-stopped -p \$NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=false $ECR_URI:latest\",
+            \"echo \\\"New container started on port \$NEW_PORT\\\"\",
+            \"echo '--- Step 3: Health check new container ---'\",
+            \"MAX_ATTEMPTS=18\",
+            \"ATTEMPT=0\",
+            \"PASSED=0\",
+            \"while [ \$ATTEMPT -lt \$MAX_ATTEMPTS ]; do\",
+            \"  ATTEMPT=\$((ATTEMPT + 1))\",
+            \"  HTTP_CODE=\$(curl -s -o /tmp/new_health.json -w '%{http_code}' http://localhost:\$NEW_PORT/health 2>/dev/null || echo '000')\",
+            \"  if [ \\\"\$HTTP_CODE\\\" = \\\"200\\\" ]; then\",
+            \"    APP_STATUS=\$(cat /tmp/new_health.json | jq -r '.status' 2>/dev/null || echo 'unknown')\",
+            \"    DB_STATUS=\$(cat /tmp/new_health.json | jq -r '.database.status' 2>/dev/null || echo 'unknown')\",
+            \"    echo \\\"Attempt \$ATTEMPT/\$MAX_ATTEMPTS: HTTP \$HTTP_CODE | app=\$APP_STATUS db=\$DB_STATUS\\\"\",
+            \"    if [ \\\"\$APP_STATUS\\\" = \\\"OK\\\" ] && [ \\\"\$DB_STATUS\\\" = \\\"OK\\\" ]; then\",
+            \"      PASSED=1\",
+            \"      break\",
+            \"    fi\",
+            \"  else\",
+            \"    echo \\\"Attempt \$ATTEMPT/\$MAX_ATTEMPTS: HTTP \$HTTP_CODE - waiting...\\\"\",
+            \"  fi\",
+            \"  sleep 5\",
+            \"done\",
+            \"if [ \$PASSED -ne 1 ]; then\",
+            \"  echo 'Health check timed out - rolling back'\",
+            \"  docker logs overpower-app-new --tail 30 || true\",
+            \"  docker stop overpower-app-new || true\",
+            \"  docker rm overpower-app-new || true\",
+            \"  echo \\\"Old container still serving on port \$CURRENT_PORT\\\"\",
+            \"  exit 1\",
+            \"fi\",
+            \"echo 'New container is healthy'\",
+            \"echo '--- Step 4: Switch nginx traffic ---'\",
+            \"sed -i \\\"s/localhost:\$CURRENT_PORT/localhost:\$NEW_PORT/g\\\" /etc/nginx/conf.d/excelsior.cards.conf\",
+            \"nginx -t\",
+            \"nginx -s reload\",
+            \"echo \\\"Traffic switched to port \$NEW_PORT\\\"\",
+            \"echo '--- Step 5: Finalize ---'\",
+            \"docker stop overpower-app || true\",
+            \"docker rm overpower-app || true\",
+            \"docker rename overpower-app-new overpower-app\",
+            \"echo \$NEW_PORT > /opt/app/active_port\",
+            \"docker exec overpower-app flyway -url=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require -user=postgres -password=TempPassword123! -locations=filesystem:/app/migrations repair || true\",
+            \"docker image prune -af || true\",
+            \"echo \\\"Active port: \$(cat /opt/app/active_port)\\\"\",
+            \"docker ps\",
+            \"echo '=== Blue-Green Deploy Complete ==='\"
           ]" \
           --output text --query 'Command.CommandId')
 
         echo "SSM Command ID: $CMD_ID"
-        for i in $(seq 1 24); do
-          STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }} --query 'Status' --output text 2>/dev/null || echo "Pending")
-          [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]] && break
-          echo "[$i/24] Status: $STATUS"; sleep 5
+        echo "Waiting 300 seconds for deploy to complete..."
+        sleep 300
+        echo "Wait complete."
+
+    - name: Verify Deployment
+      run: |
+        echo "Verifying deployment via production health endpoint..."
+        EXPECTED_COMMIT="${{ github.sha }}"
+        echo "Expected commit: $EXPECTED_COMMIT"
+
+        SUCCESS=0
+        for i in $(seq 1 12); do
+          HEALTH=$(curl -s --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "000")
+          DEPLOYED_COMMIT=$(echo "$HEALTH" | jq -r '.git.commit // ""' 2>/dev/null || echo "")
+
+          echo "[$i/12] HTTP: $HTTP_STATUS | deployed: ${DEPLOYED_COMMIT:-none} | expected: $EXPECTED_COMMIT"
+
+          if [ "$DEPLOYED_COMMIT" = "$EXPECTED_COMMIT" ]; then
+            echo "Deployment verified: commit $DEPLOYED_COMMIT is live on production"
+            SUCCESS=1
+            break
+          fi
+
+          sleep 10
         done
-        INVOCATION=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
-        echo "$INVOCATION" | jq -r '.StandardOutputContent // ""'
-        RESPONSE_CODE=$(echo "$INVOCATION" | jq -r '.ResponseCode')
-        [ "$RESPONSE_CODE" = "0" ] || { echo "Pull failed (code $RESPONSE_CODE)"; exit 1; }
 
-    - name: Start New Container
-      run: |
-        echo "Starting new container on idle port alongside old container..."
+        if [ $SUCCESS -ne 1 ]; then
+          echo "Deployment verification failed"
+          echo "Production is running: ${DEPLOYED_COMMIT:-unknown}"
+          echo "Expected: $EXPECTED_COMMIT"
+          echo "The SSM deploy command may have failed. Check CloudWatch or EC2 logs for details."
+          exit 1
+        fi
 
-        CMD_ID=$(aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== Start New Container ===\"",
-            "CURRENT_PORT=$(cat /opt/app/active_port 2>/dev/null || echo \"3000\")",
-            "echo \"Current active port: $CURRENT_PORT\"",
-            "if [ \"$CURRENT_PORT\" = \"3000\" ]; then NEW_PORT=\"3001\"; else NEW_PORT=\"3000\"; fi",
-            "echo \"New container will start on port: $NEW_PORT\"",
-            "echo $NEW_PORT > /tmp/deploy_new_port",
-            "ECR_URI=$(cat /tmp/deploy_ecr_uri)",
-            "echo \"ECR URI: $ECR_URI\"",
-            "echo \"Cleaning up any stale overpower-app-new container...\"",
-            "docker stop overpower-app-new || true",
-            "docker rm overpower-app-new || true",
-            "echo \"Starting new container on port $NEW_PORT...\"",
-            "docker run -d --name overpower-app-new --restart unless-stopped -p $NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=false $ECR_URI:latest",
-            "echo \"Both containers now running:\"",
-            "docker ps",
-            "echo \"=== New container started ===\""
-          ]' \
-          --output text --query 'Command.CommandId')
-
-        echo "SSM Command ID: $CMD_ID"
-        for i in $(seq 1 24); do
-          STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }} --query 'Status' --output text 2>/dev/null || echo "Pending")
-          [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]] && break
-          echo "[$i/24] Status: $STATUS"; sleep 5
-        done
-        INVOCATION=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
-        echo "$INVOCATION" | jq -r '.StandardOutputContent // ""'
-        RESPONSE_CODE=$(echo "$INVOCATION" | jq -r '.ResponseCode')
-        [ "$RESPONSE_CODE" = "0" ] || { echo "Start failed (code $RESPONSE_CODE)"; exit 1; }
-
-    - name: Health Check New Container
-      run: |
-        echo "Waiting for new container to pass health check before switching traffic..."
-
-        CMD_ID=$(aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== Health Check New Container ===\"",
-            "NEW_PORT=$(cat /tmp/deploy_new_port)",
-            "echo \"Health checking new container on port $NEW_PORT...\"",
-            "MAX_ATTEMPTS=18",
-            "ATTEMPT=0",
-            "PASSED=0",
-            "while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do",
-            "  ATTEMPT=$((ATTEMPT + 1))",
-            "  HTTP_CODE=$(curl -s -o /tmp/new_health.json -w \"%{http_code}\" http://localhost:$NEW_PORT/health 2>/dev/null || echo \"000\")",
-            "  if [ \"$HTTP_CODE\" = \"200\" ]; then",
-            "    STATUS=$(cat /tmp/new_health.json | jq -r \".status\" 2>/dev/null || echo \"unknown\")",
-            "    DB=$(cat /tmp/new_health.json | jq -r \".database.status\" 2>/dev/null || echo \"unknown\")",
-            "    echo \"Attempt $ATTEMPT/$MAX_ATTEMPTS: HTTP $HTTP_CODE | app=$STATUS db=$DB\"",
-            "    if [ \"$STATUS\" = \"OK\" ] && [ \"$DB\" = \"OK\" ]; then",
-            "      echo \"New container is healthy - ready to receive traffic\"",
-            "      PASSED=1",
-            "      break",
-            "    fi",
-            "  else",
-            "    echo \"Attempt $ATTEMPT/$MAX_ATTEMPTS: HTTP $HTTP_CODE - not ready yet, waiting 5s...\"",
-            "  fi",
-            "  sleep 5",
-            "done",
-            "if [ $PASSED -ne 1 ]; then",
-            "  echo \"Health check timed out after $MAX_ATTEMPTS attempts - cleaning up and aborting deploy\"",
-            "  docker logs overpower-app-new --tail 30 || true",
-            "  docker stop overpower-app-new || true",
-            "  docker rm overpower-app-new || true",
-            "  rm -f /tmp/deploy_new_port /tmp/deploy_ecr_uri",
-            "  echo \"Old container still serving on port $(cat /opt/app/active_port 2>/dev/null || echo 3000)\"",
-            "  exit 1",
-            "fi",
-            "echo \"=== Health check passed ===\""
-          ]' \
-          --output text --query 'Command.CommandId')
-
-        echo "SSM Command ID: $CMD_ID"
-        # Poll up to 3 minutes - health check itself loops up to 90s plus container boot overhead
-        for i in $(seq 1 36); do
-          STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }} --query 'Status' --output text 2>/dev/null || echo "Pending")
-          [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]] && break
-          echo "[$i/36] Status: $STATUS"; sleep 5
-        done
-        INVOCATION=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
-        echo "$INVOCATION" | jq -r '.StandardOutputContent // ""'
-        ERR=$(echo "$INVOCATION" | jq -r '.StandardErrorContent // ""')
-        [ -n "$ERR" ] && echo "--- Stderr ---" && echo "$ERR"
-        RESPONSE_CODE=$(echo "$INVOCATION" | jq -r '.ResponseCode')
-        [ "$RESPONSE_CODE" = "0" ] || { echo "Health check failed - pipeline aborted, old container still serving"; exit 1; }
-
-    - name: Switch Traffic
-      run: |
-        echo "Switching nginx traffic to new container (graceful reload)..."
-
-        CMD_ID=$(aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== Switch Traffic ===\"",
-            "NEW_PORT=$(cat /tmp/deploy_new_port)",
-            "CURRENT_PORT=$(cat /opt/app/active_port 2>/dev/null || echo \"3000\")",
-            "echo \"Updating nginx: $CURRENT_PORT -> $NEW_PORT\"",
-            "sed -i \"s/localhost:$CURRENT_PORT/localhost:$NEW_PORT/g\" /etc/nginx/conf.d/excelsior.cards.conf",
-            "echo \"Updated proxy_pass lines:\"",
-            "grep proxy_pass /etc/nginx/conf.d/excelsior.cards.conf",
-            "echo \"Testing nginx config...\"",
-            "nginx -t",
-            "echo \"Reloading nginx (graceful - in-flight requests complete normally)...\"",
-            "nginx -s reload",
-            "echo \"Traffic is now routing to port $NEW_PORT\"",
-            "echo \"=== Traffic switched ===\""
-          ]' \
-          --output text --query 'Command.CommandId')
-
-        echo "SSM Command ID: $CMD_ID"
-        for i in $(seq 1 24); do
-          STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }} --query 'Status' --output text 2>/dev/null || echo "Pending")
-          [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]] && break
-          echo "[$i/24] Status: $STATUS"; sleep 5
-        done
-        INVOCATION=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
-        echo "$INVOCATION" | jq -r '.StandardOutputContent // ""'
-        RESPONSE_CODE=$(echo "$INVOCATION" | jq -r '.ResponseCode')
-        [ "$RESPONSE_CODE" = "0" ] || { echo "Traffic switch failed (code $RESPONSE_CODE)"; exit 1; }
-
-    - name: Finalize Deployment
-      run: |
-        echo "Removing old container and finalizing deployment..."
-
-        CMD_ID=$(aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== Finalize Deployment ===\"",
-            "NEW_PORT=$(cat /tmp/deploy_new_port)",
-            "echo \"Stopping and removing old container...\"",
-            "docker stop overpower-app || true",
-            "docker rm overpower-app || true",
-            "echo \"Renaming new container to canonical name...\"",
-            "docker rename overpower-app-new overpower-app",
-            "echo \"Updating active port state file to $NEW_PORT...\"",
-            "echo $NEW_PORT > /opt/app/active_port",
-            "rm -f /tmp/deploy_new_port /tmp/deploy_ecr_uri",
-            "echo \"Running Flyway repair...\"",
-            "docker exec overpower-app flyway -url=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require -user=postgres -password=TempPassword123! -locations=filesystem:/app/migrations repair || true",
-            "echo \"Pruning old images to free disk space...\"",
-            "docker image prune -af || true",
-            "echo \"Final running containers:\"",
-            "docker ps",
-            "echo \"Active port: $(cat /opt/app/active_port)\"",
-            "echo \"=== Deployment complete ===\""
-          ]' \
-          --output text --query 'Command.CommandId')
-
-        echo "SSM Command ID: $CMD_ID"
-        for i in $(seq 1 24); do
-          STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }} --query 'Status' --output text 2>/dev/null || echo "Pending")
-          [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]] && break
-          echo "[$i/24] Status: $STATUS"; sleep 5
-        done
-        INVOCATION=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
-        echo "$INVOCATION" | jq -r '.StandardOutputContent // ""'
-        RESPONSE_CODE=$(echo "$INVOCATION" | jq -r '.ResponseCode')
-        [ "$RESPONSE_CODE" = "0" ] || { echo "Finalize failed (code $RESPONSE_CODE)"; exit 1; }
-      
-    - name: Get deployment logs
-      run: |
-        echo "🔍 Getting deployment logs..."
-        aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== DEPLOYMENT LOGS ===\"",
-            "docker logs overpower-app --tail 50",
-            "echo \"\"",
-            "echo \"=== CONTAINER INFO ===\"",
-            "docker inspect overpower-app --format=\"{{.Image}}\"",
-            "docker inspect overpower-app --format=\"{{.Created}}\"",
-            "echo \"\"",
-            "echo \"=== FILE VERIFICATION ===\"",
-            "ls -la /app/public/index.html",
-            "grep -c \"replaceAllCardsInDeck\" /app/src/database/PostgreSQLDeckRepository.ts || echo \"0\"",
-            "grep -c \"Victory Harben.*20\" /app/public/index.html || echo \"0\"",
-            "echo \"=== API ROUTE VERIFICATION ===\"",
-            "grep -c \"PUT.*decks.*cards\" /app/dist/index.js || echo \"0\"",
-            "grep -c \"replaceAllCardsInDeck\" /app/dist/index.js || echo \"0\"",
-            "echo \"=== GIT INFO VERIFICATION ===\"",
-            "echo \"GIT_COMMIT: $GIT_COMMIT\"",
-            "echo \"GIT_SHORT_COMMIT: $GIT_SHORT_COMMIT\"",
-            "echo \"BUILD_TIMESTAMP: $BUILD_TIMESTAMP\""
-          ]' \
-          --output text --query 'Command.CommandId'
-        echo "✅ Deployment logs command sent successfully"
-        
-    - name: Verify deployment
-      run: |
-        echo "🔍 Running production verification..."
-        aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== PRODUCTION VERIFICATION RESULTS ===\"",
-            "echo \"Container Status:\"",
-            "docker ps",
-            "echo \"\"",
-            "echo \"Application Logs (last 20 lines):\"",
-            "docker logs overpower-app --tail 20",
-            "echo \"\"",
-            "echo \"File Verification:\"",
-            "test -f /app/public/js/auth-service.js && echo \"✅ auth-service.js found\" || echo \"❌ auth-service.js missing\"",
-            "test -f /app/public/index.html && echo \"✅ index.html found\" || echo \"❌ index.html missing\"",
-            "echo \"\"",
-            "echo \"Code Verification:\"",
-            "grep -q \"replaceAllCardsInDeck\" /app/src/database/PostgreSQLDeckRepository.ts && echo \"✅ Card duplication bug fix found in production\" || echo \"❌ Card duplication bug fix NOT found in production\"",
-            "test -d /app/public/js && echo \"✅ Refactored JavaScript directory found in production\" || echo \"❌ Refactored JavaScript directory NOT found in production\"",
-            "echo \"\"",
-            "echo \"Git Information Verification:\"",
-            "echo \"GIT_COMMIT: $GIT_COMMIT\"",
-            "echo \"GIT_SHORT_COMMIT: $GIT_SHORT_COMMIT\"",
-            "echo \"GIT_BRANCH: $GIT_BRANCH\"",
-            "echo \"GIT_COMMIT_MESSAGE: $GIT_COMMIT_MESSAGE\"",
-            "if [ \"$GIT_COMMIT\" != \"unknown\" ]; then echo \"✅ Git information properly embedded in production container\"; else echo \"❌ Git information NOT properly embedded in production container\"; fi",
-            "echo \"\"",
-            "echo \"=== END VERIFICATION ===\""
-          ]' \
-          --output text --query 'Command.CommandId'
-        echo "✅ Verification command sent successfully"
-      
-    - name: Production Health Check
-      run: |
-        echo "🏥 Running production health check..."
-        aws ssm send-command \
-          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "echo \"=== PRODUCTION HEALTH CHECK ===\"",
-            "echo \"Testing health endpoint...\"",
-            "sleep 5",
-            "HEALTH_RESPONSE=$(curl -s -w \"%{http_code}\" http://localhost:3000/health -o /tmp/health_response.json)",
-            "echo \"Health check HTTP status: $HEALTH_RESPONSE\"",
-            "if [ \"$HEALTH_RESPONSE\" = \"200\" ]; then",
-            "  echo \"✅ Health check passed (HTTP 200)\"",
-            "  echo \"Health check response:\"",
-            "  cat /tmp/health_response.json | jq .",
-            "  echo \"\"",
-            "  echo \"🔍 Verifying key health metrics:\"",
-            "  STATUS=$(cat /tmp/health_response.json | jq -r \".status\")",
-            "  DB_STATUS=$(cat /tmp/health_response.json | jq -r \".database.status\")",
-            "  MIGRATION_VERSION=$(cat /tmp/health_response.json | jq -r \".database.latestMigration.version\")",
-            "  GIT_COMMIT=$(cat /tmp/health_response.json | jq -r \".git.commit\")",
-            "  echo \"Overall status: $STATUS\"",
-            "  echo \"Database status: $DB_STATUS\"",
-            "  echo \"Latest migration: $MIGRATION_VERSION\"",
-            "  echo \"Git commit: $GIT_COMMIT\"",
-            "  echo \"\"",
-            "  if [ \"$STATUS\" = \"OK\" ] && [ \"$DB_STATUS\" = \"OK\" ]; then",
-            "    echo \"✅ All health checks passed!\"",
-            "    echo \"✅ Database is healthy\"",
-            "    echo \"✅ Latest migration: $MIGRATION_VERSION\"",
-            "    echo \"✅ Deployed commit: $GIT_COMMIT\"",
-            "  else",
-            "    echo \"❌ Health check failed - status: $STATUS, database: $DB_STATUS\"",
-            "    exit 1",
-            "  fi",
-            "else",
-            "  echo \"❌ Health check failed with HTTP status: $HEALTH_RESPONSE\"",
-            "  echo \"Response body:\"",
-            "  cat /tmp/health_response.json",
-            "  echo \"\"",
-            "  echo \"Container logs (last 20 lines):\"",
-            "  docker logs overpower-app --tail 20",
-            "  exit 1",
-            "fi",
-            "echo \"\"",
-            "echo \"=== HEALTH CHECK COMPLETE ===\""
-          ]' \
-          --output text --query 'Command.CommandId'
-        echo "✅ Health check command sent successfully"
-        
-    - name: Wait for health check
-      run: sleep 10
-      
     - name: Deployment success notification
       run: |
-        echo "✅ Deployment completed successfully!"
-        echo "🌐 Application URL: http://excelsior.cards"
-        echo "🔍 Image deployed: ${{ steps.build-image.outputs.image }}"
-        echo "🏥 Health check: PASSED"
+        echo "Deployment completed and verified!"
+        echo "Application URL: http://excelsior.cards"
+        echo "Deployed commit: ${{ github.sha }}"
 
   post-production:
     name: Post Production
