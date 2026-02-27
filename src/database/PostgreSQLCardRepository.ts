@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { 
   Character, 
   SpecialCard, 
@@ -14,6 +14,21 @@ import {
   BasicUniverse 
 } from '../types';
 import { CardRepository } from '../repository/CardRepository';
+
+type CardStats = {
+  characters: number;
+  locations: number;
+  specialCards: number;
+  missions: number;
+  events: number;
+  aspects: number;
+  advancedUniverse: number;
+  teamwork: number;
+  allyUniverse: number;
+  training: number;
+  basicUniverse: number;
+  powerCards: number;
+};
 
 export class PostgreSQLCardRepository implements CardRepository {
   private pool: Pool;
@@ -110,7 +125,7 @@ export class PostgreSQLCardRepository implements CardRepository {
     }
   }
 
-  async getCharacterEffectiveImage(characterId: string, selectedAlternateImage?: string): Promise<string> {
+  async getCharacterEffectiveImage(characterId: string, _selectedAlternateImage?: string): Promise<string> {
     const character = await this.getCharacterById(characterId);
     if (!character) return '';
 
@@ -180,7 +195,7 @@ export class PostgreSQLCardRepository implements CardRepository {
     }
   }
 
-  async getSpecialCardEffectiveImage(specialCardId: string, selectedAlternateImage?: string): Promise<string> {
+  async getSpecialCardEffectiveImage(specialCardId: string, _selectedAlternateImage?: string): Promise<string> {
     const card = await this.getSpecialCardById(specialCardId);
     if (!card) return '';
 
@@ -244,7 +259,7 @@ export class PostgreSQLCardRepository implements CardRepository {
     }
   }
 
-  async getPowerCardEffectiveImage(powerCardId: string, selectedAlternateImage?: string): Promise<string> {
+  async getPowerCardEffectiveImage(powerCardId: string, _selectedAlternateImage?: string): Promise<string> {
     const card = await this.getPowerCardById(powerCardId);
     if (!card) return '';
 
@@ -730,7 +745,7 @@ export class PostgreSQLCardRepository implements CardRepository {
   }
 
   // Card stats method - optimized with caching
-  private cardStatsCache: any = null;
+  private cardStatsCache: CardStats | null = null;
   private cardStatsCacheTime: number = 0;
   private readonly CARD_STATS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -785,7 +800,7 @@ export class PostgreSQLCardRepository implements CardRepository {
       `);
       
       // Convert array result to object
-      const stats: any = {};
+      const stats = {} as CardStats;
       result.rows.forEach(row => {
         const key = row.table_name.replace(/_/g, '').replace('cards', 'Cards');
         if (key === 'characters') stats.characters = parseInt(row.count);

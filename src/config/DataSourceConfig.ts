@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolConfig } from 'pg';
 import { UserRepository } from '../repository/UserRepository';
 import { DeckRepository } from '../repository/DeckRepository';
 import { CardRepository } from '../repository/CardRepository';
@@ -25,7 +25,7 @@ export class DataSourceConfig {
   private initializePostgreSQL(): void {
     console.log('🐘 Initializing PostgreSQL repositories...');
     
-    let poolConfig: any;
+    let poolConfig: PoolConfig;
     
     if (process.env.DATABASE_URL) {
       // Use DATABASE_URL if provided

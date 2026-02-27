@@ -1,7 +1,9 @@
 // Deck API response mappers
 // Extracted from src/index.ts to reduce file size while preserving behavior.
 
-export function transformDeckListItem(deck: any) {
+import { Deck } from '../types';
+
+export function transformDeckListItem(deck: Deck) {
   return {
     metadata: {
       id: deck.id,
@@ -21,7 +23,7 @@ export function transformDeckListItem(deck: any) {
   };
 }
 
-export function transformDeckList(decks: any[]) {
+export function transformDeckList(decks: Deck[]) {
   return decks.map(transformDeckListItem);
 }
 

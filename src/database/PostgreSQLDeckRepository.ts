@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { Deck, UIPreferences, DeckCard } from '../types';
 import { DeckRepository } from '../repository/DeckRepository';
 
