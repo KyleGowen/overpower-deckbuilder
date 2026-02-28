@@ -263,13 +263,24 @@
     border-radius: 3.3px;
     font-size: 11px;
     cursor: pointer;
-    transition: box-shadow 0.1s ease, filter 0.1s ease;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Pressed / active state — shown when this card instance is foil */
+.foil-btn:hover {
+    background: rgba(78, 205, 196, 0.3);
+    border-color: rgba(78, 205, 196, 0.4);
+}
+
+/* Pressed / active state — solid filled, matches KO button active pattern */
 .foil-btn--active {
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
-    filter: brightness(1.5);
+    background: #4ecdc4;
+    color: rgba(26, 26, 46, 0.9);
+    border-color: #4ecdc4;
+}
+
+.foil-btn--active:hover {
+    background: #3bbdb4;
+    border-color: #3bbdb4;
 }
 
 /* Card-view variant (matches .card-view-btn sizing) */
@@ -278,6 +289,17 @@
     padding: 2px 4px;
     min-width: 28px;
     height: 18px;
+}
+
+.card-view-btn.foil-btn--active {
+    background: #4ecdc4 !important;
+    color: rgba(26, 26, 46, 0.9) !important;
+    border-color: #4ecdc4 !important;
+}
+
+.card-view-btn.foil-btn--active:hover {
+    background: #3bbdb4 !important;
+    border-color: #3bbdb4 !important;
 }
 
 /* ─── Foil badge (Database view type tabs) ─────────────────────────────────── */
