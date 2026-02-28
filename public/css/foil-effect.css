@@ -1,0 +1,191 @@
+/*
+ * foil-effect.css
+ *
+ * Single source of truth for all foil card visuals in the app.
+ * This file owns two things:
+ *   1. .foil-shimmer  — the one-shot metallic sheen applied to card images
+ *   2. .foil-btn / .foil-btn--active  — the Foil toggle button states in the deck editor
+ *
+ * HOW TO APPLY THE SHIMMER
+ * -------------------------
+ * Add .foil-shimmer to the immediate *wrapper* element of a card image, NOT to
+ * the <img> itself. The effect uses a ::after pseudo-element, which requires a
+ * positioned parent:
+ *
+ *   Good:  <div class="card-image-wrap foil-shimmer"><img ...></div>
+ *   Bad:   <img class="foil-shimmer" ...>          (::after won't render)
+ *
+ * At runtime the wrapper gets .foil-shimmer when card.is_foil === true.
+ * No other code needs to change — just add or remove the class.
+ *
+ * HOW THE ANIMATION WORKS
+ * -------------------------
+ * Uses a CSS class toggle driven by foil-animation.js:
+ *   • .foil-shimmer::after          — shimmer translated off-screen right, transition:none
+ *   • .foil-shimmer.foil-active::after — shimmer at translateX(0), transition ease-out
+ *
+ * foil-animation.js adds .foil-active on mouseenter and removes it on mouseleave.
+ * The remove is instant (transition:none on the base rule), so every enter
+ * always starts from a clean off-screen position — including moves directly
+ * from one foil card to another.
+ *
+ * overflow:hidden on .foil-shimmer clips the off-screen ::after completely.
+ *
+ * Timing is randomised per card by foil-animation.js, which sets:
+ *   --foil-duration   controls how long the sweep takes (default 0.9 s)
+ *
+ * HOW TO CHANGE THE EFFECT
+ * -------------------------
+ * Edit only this file. The relevant knobs:
+ *   - gradient angle        → the first argument to linear-gradient()
+ *   - colour stops          → the rgba() values and their % positions
+ *   - starting position     → the 0% keyframe background-position
+ *   - settled position      → the 100% keyframe background-position
+ *                             (50% 50% = shimmer band centred on card)
+ *   - shimmer band width    → background-size (larger = wider band)
+ *
+ * WHERE IT IS USED
+ * ----------------
+ *   • Deck editor  — card view and tile view card images
+ *   • Deck editor  — hover/preview card display
+ *   • Deck selection tiles — character thumbnail images
+ *   • Database view ALL tab — card images
+ *   • Database view type tabs — foil option in the art cycle
+ *   • Collection view — card images
+ *
+ * WHAT DRIVES IT AT RUNTIME
+ * -------------------------
+ * The is_foil boolean on card data returned by the API.
+ * If card.is_foil === true, the wrapper element gets .foil-shimmer added.
+ * foil-animation.js then sets --foil-duration with slight random variance.
+ *
+ * FOIL BUTTON STATES
+ * ------------------
+ * The deck editor Foil button always reads "Foil". Its pressed/unpressed
+ * appearance is communicated by adding .foil-btn--active when foil is selected.
+ * Both states are defined here so all foil visuals live in one place.
+ */
+
+/* ─── Shimmer overlay ──────────────────────────────────────────────────────── */
+
+.foil-shimmer {
+    position: relative;
+    overflow: hidden;
+    /* Per-element sweep duration, randomised by foil-animation.js.
+     * Used by the :hover transition on ::after. */
+    --foil-duration: 0.9s;
+}
+
+.foil-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.30) 38%,
+        rgba(200, 160, 255, 0.45) 50%,
+        rgba(255, 210, 100, 0.30) 62%,
+        transparent 80%
+    );
+    /*
+     * Resting state: translated entirely off-screen to the right.
+     * overflow:hidden on .foil-shimmer clips it invisibly.
+     * transition:none means snap-back is instant when foil-active is
+     * removed, so each new sweep always starts from a clean off-screen state.
+     */
+    transform: translateX(110%);
+    transition: none;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 1;
+}
+
+/*
+ * Active state — added by foil-animation.js on mouseenter, removed on mouseleave.
+ * The transition is declared here (not on the base rule) so the sweep plays
+ * on enter but the snap-back is instant on leave.
+ */
+.foil-shimmer.foil-active::after {
+    transform: translateX(0);
+    transition: transform var(--foil-duration) ease-out;
+}
+
+/* Ensure action buttons render above the shimmer overlay */
+.foil-shimmer .card-view-actions,
+.foil-shimmer .deck-card-editor-actions {
+    position: relative;
+    z-index: 2;
+}
+
+/* ─── Foil toggle button ───────────────────────────────────────────────────── */
+
+/* Base state — inherits sizing/colour from .alternate-art-btn in index.css */
+.foil-btn {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ecdc4;
+    border: 1px solid rgba(78, 205, 196, 0.3);
+    padding: 3.3px 6.6px;
+    border-radius: 3.3px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+/* Pressed / active state — shown when this card instance is foil */
+.foil-btn--active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+    filter: brightness(1.5);
+}
+
+/* Card-view variant (matches .card-view-btn sizing) */
+.card-view-btn.foil-btn {
+    font-size: 9px;
+    padding: 2px 4px;
+    min-width: 28px;
+    height: 18px;
+}
+
+/* ─── Foil badge (Database view type tabs) ─────────────────────────────────── */
+
+/* ─── Collection view foil row & inline badge ──────────────────────────────── */
+
+/* Inline badge used inside the card-name cell in collection view */
+.collection-foil-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #b8860b, #ffd700, #b8860b);
+    color: #1a1a1a;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* Subtle gold left-border accent on foil rows */
+.collection-card-foil {
+    border-left: 2px solid rgba(212, 175, 55, 0.5);
+}
+
+/* ─── Database view type-tab foil badge ─────────────────────────────────────── */
+
+/* Badge shown above a card image when the cycled art is the foil version */
+.foil-card-badge {
+    display: block;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: linear-gradient(90deg, #b8860b, #ffd700, #b8860b);
+    color: #1a1a1a;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    pointer-events: none;
+    white-space: nowrap;
+}

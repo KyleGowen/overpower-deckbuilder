@@ -37,11 +37,17 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
         groups.get(key).push(card);
     });
     
-    // Sort each group: original art first (image_path doesn't contain alternate/), then alternates
-    groups.forEach((group, key) => {
+    // Sort each group: original art first, then alternates, foil versions last
+    groups.forEach((group, _key) => {
         group.sort((a, b) => {
             const aIsAlternate = (a.image_path || a.image || '').includes('alternate/');
             const bIsAlternate = (b.image_path || b.image || '').includes('alternate/');
+            const aIsFoil = !!(a.is_foil);
+            const bIsFoil = !!(b.is_foil);
+
+            // Foil cards always sort last
+            if (aIsFoil && !bIsFoil) return 1;
+            if (!aIsFoil && bIsFoil) return -1;
             
             if (aIsAlternate && !bIsAlternate) return 1;  // b (original) comes first
             if (!aIsAlternate && bIsAlternate) return -1; // a (original) comes first
@@ -194,7 +200,8 @@ function displayCharacters(characters) {
             id: card.id,
             imagePath: getCardImagePathForDisplay(card, 'character', { useThumbnail: true }),
             fullResPath: getCardImagePathForDisplay(card, 'character'),
-            name: card.name
+            name: card.name,
+            isFoil: !!(card.is_foil)
         }));
         
         // Create unique identifier for this card group
@@ -218,6 +225,7 @@ function displayCharacters(characters) {
             <td>
                 <div class="card-image-container">
                     ${navArrows}
+                    <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:none;">✦ FOIL</span>
                     <img id="${groupId}-img"
                          src="${currentImagePath}"
                          data-src="${currentImagePath}"
@@ -411,8 +419,21 @@ function navigateCardImage(groupId, direction) {
     const fullResPath = newImage.fullResPath || newImagePath;
     img.setAttribute('data-full-res', fullResPath);
 
-    // Update hover modal (pass full-res for progressive loading)
-    img.setAttribute('onmouseenter', `showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${newImage.name.replace(/'/g, "\\'")}')`);
+    // Apply or remove foil shimmer effect on the container
+    if (newImage.isFoil) {
+        container.classList.add('foil-shimmer');
+    } else {
+        container.classList.remove('foil-shimmer');
+    }
+
+    // Show or hide foil badge (badge has id `${groupId}-foil-badge`)
+    const foilBadge = document.getElementById(`${groupId}-foil-badge`);
+    if (foilBadge) {
+        foilBadge.style.display = newImage.isFoil ? 'block' : 'none';
+    }
+
+    // Update hover modal (pass full-res and foil state for shimmer in modal)
+    img.setAttribute('onmouseenter', `showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${newImage.name.replace(/'/g, "\\'")}', null, null, ${!!newImage.isFoil})`);
     
     // Update current index
     container.setAttribute('data-current-index', currentIndex.toString());
@@ -620,7 +641,8 @@ function displaySpecialCards(specialCards) {
             id: card.id,
             imagePath: getCardImagePathForDisplay(card, 'special'),
             fullResPath: getCardImagePathForDisplay(card, 'special'),
-            name: card.name
+            name: card.name,
+            isFoil: !!(card.is_foil)
         }));
         
         // Create unique identifier for this card group
@@ -643,6 +665,7 @@ function displaySpecialCards(specialCards) {
             <td>
                 <div class="card-image-container">
                     ${navArrows}
+                    <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:none;">✦ FOIL</span>
                     <img id="${groupId}-img"
                          src="${currentImagePath}"
                          data-src="${currentImagePath}"

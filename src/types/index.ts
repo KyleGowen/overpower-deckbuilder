@@ -44,6 +44,8 @@ export interface Character {
   special_abilities: string; // Can be empty string for no special ability
   image: string;
   image_path?: string; // Optional for backward compatibility, same as image
+  set_number?: string; // e.g. "035" or "035F" for foil rows
+  is_foil?: boolean;   // TRUE for foil card rows; foil effect applied via CSS only
 }
 
 export interface Location {
@@ -80,6 +82,8 @@ export interface SpecialCard {
   is_ambush: boolean;
   one_per_deck: boolean;
   banned?: boolean;     // Indicates if the card is banned from legal deck construction
+  set_number?: string;  // e.g. "036F" for foil rows
+  is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
 }
 
 export interface Mission {
@@ -188,6 +192,24 @@ export interface PowerCard {
   set?: string;         // Set code (renamed from universe)
   set_name?: string;    // Set display name from sets table
   one_per_deck: boolean; // Whether this card can only be included once per deck
+  set_number?: string;  // e.g. "473F" for foil rows
+  is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
+}
+
+/**
+ * One entry from the foil_card_map table.
+ * The table is bidirectional — both foil→base and base→foil lookups are
+ * available by querying the same table in both directions.
+ *
+ * On the frontend this is flattened into window.foilCardMap: a plain object
+ * keyed in both directions for O(1) lookups:
+ *   window.foilCardMap[foilCardId]  → baseCardId
+ *   window.foilCardMap[baseCardId]  → foilCardId
+ */
+export interface FoilCardMapEntry {
+  foilCardId: string;
+  baseCardId: string;
+  cardType: string; // 'character' | 'special' | 'power'
 }
 
 // Deck management interfaces

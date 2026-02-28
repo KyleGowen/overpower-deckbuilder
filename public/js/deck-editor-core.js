@@ -1134,3 +1134,74 @@ async function togglePreviewMode() {
 window.togglePreviewMode = togglePreviewMode;
 window.updatePreviewButtonState = updatePreviewButtonState;
 window.updateBackgroundButtonState = updateBackgroundButtonState;
+
+/**
+ * toggleFoilForCard
+ *
+ * Toggles the foil state of a specific card instance in the deck editor.
+ * Uses window.foilCardMap for O(1) bidirectional lookup — the same map key
+ * works regardless of whether the current instance is foil or non-foil:
+ *
+ *   window.foilCardMap[foilCardId]  → baseCardId  (deselect foil)
+ *   window.foilCardMap[baseCardId]  → foilCardId  (select foil)
+ *
+ * Foil state is persisted by storing the foil/base card UUID in
+ * selectedAlternateCardIds[instanceIndex], identical to how alternate art
+ * is saved. Deck persistence requires no schema changes.
+ *
+ * @param {string} cardId - The original (base) card ID for this deck slot
+ * @param {number} index - Index of the card in window.deckEditorCards
+ * @param {number} instanceIndex - Which instance to toggle (0-based, default 0)
+ */
+window.toggleFoilForCard = function toggleFoilForCard(cardId, index, instanceIndex = 0) {
+    if (!window.deckEditorCards || !window.deckEditorCards[index]) {
+        console.error('[toggleFoilForCard] Invalid card index:', index);
+        return;
+    }
+    if (!window.foilCardMap) {
+        console.warn('[toggleFoilForCard] foilCardMap not loaded yet');
+        return;
+    }
+
+    const deckCard = window.deckEditorCards[index];
+
+    // Resolve current instance card ID
+    let currentInstanceId;
+    if (deckCard.selectedAlternateCardIds && deckCard.selectedAlternateCardIds[instanceIndex]) {
+        currentInstanceId = deckCard.selectedAlternateCardIds[instanceIndex];
+    } else if (deckCard.selectedAlternateCardId) {
+        currentInstanceId = deckCard.selectedAlternateCardId;
+    } else {
+        currentInstanceId = deckCard.cardId;
+    }
+
+    // O(1) lookup for the counterpart ID (works in both directions)
+    const counterpartId = window.foilCardMap[currentInstanceId];
+    if (!counterpartId) {
+        console.warn('[toggleFoilForCard] No foil counterpart found for:', currentInstanceId);
+        return;
+    }
+
+    // Apply the swap using the same selectedAlternateCardIds mechanism as alternate art
+    if (!deckCard.selectedAlternateCardIds) {
+        deckCard.selectedAlternateCardIds = Array(deckCard.quantity || 1).fill(deckCard.cardId);
+    }
+    deckCard.selectedAlternateCardIds[instanceIndex] = counterpartId;
+
+    // Keep backward-compat single field in sync for quantity === 1
+    if (deckCard.quantity === 1) {
+        deckCard.selectedAlternateCardId = counterpartId;
+    }
+
+    // Re-render the current view
+    const deckCardsEditor = document.getElementById('deckCardsEditor');
+    if (!deckCardsEditor) return;
+
+    if (deckCardsEditor.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
+        renderDeckCardsCardView();
+    } else if (deckCardsEditor.classList.contains('list-view') && typeof renderDeckCardsListView === 'function') {
+        renderDeckCardsListView();
+    } else if (typeof displayDeckCardsForEditing === 'function') {
+        displayDeckCardsForEditing();
+    }
+};

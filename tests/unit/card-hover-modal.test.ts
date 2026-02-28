@@ -139,7 +139,7 @@ describe('Card Hover Modal Module - Comprehensive Tests', () => {
         });
 
         it('should have correct function signatures', () => {
-            expect(window.showCardHoverModal?.length).toBe(4); // imagePath, cardName, cardId (optional), cardType (optional)
+            expect(window.showCardHoverModal?.length).toBe(5); // imagePath, cardName, cardId (optional), cardType (optional), isFoil (optional)
             expect(window.hideCardHoverModal?.length).toBe(0); // no parameters
         });
     });

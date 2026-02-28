@@ -75,6 +75,7 @@ export class PostgreSQLCardRepository implements CardRepository {
         id: char.id,
         name: char.name,
         set: char.set || 'ERB',
+        set_number: char.set_number || null,
         energy: char.energy,
         combat: char.combat,
         brute_force: char.brute_force,
@@ -82,7 +83,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         threat_level: char.threat_level,
         special_abilities: char.special_abilities,
         image: char.image_path,
-        image_path: char.image_path
+        image_path: char.image_path,
+        is_foil: char.is_foil || false
       };
     } finally {
       client.release();
@@ -112,7 +114,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         threat_level: char.threat_level,
         special_abilities: char.special_abilities,
         image: char.image_path,
-        image_path: char.image_path
+        image_path: char.image_path,
+        is_foil: char.is_foil || false
       }));
       
       // Cache the result
@@ -154,13 +157,17 @@ export class PostgreSQLCardRepository implements CardRepository {
               character: card.character_name,
               card_effect: card.card_effect,
               image: card.image_path,
+              image_path: card.image_path,
+              set: card.set || 'ERB',
+              set_number: card.set_number || null,
               icons: card.icons || undefined,
               value: card.value ?? null,
               is_cataclysm: card.cataclysm || false,
               is_assist: card.assist || false,
               is_ambush: card.ambush || false,
               one_per_deck: card.one_per_deck || false,
-              banned: card.banned || false
+              banned: card.banned || false,
+              is_foil: card.is_foil || false
             };
     } finally {
       client.release();
@@ -188,7 +195,8 @@ export class PostgreSQLCardRepository implements CardRepository {
               is_assist: card.assist || false,
               is_ambush: card.ambush || false,
               one_per_deck: card.one_per_deck || false,
-              banned: card.banned || false
+              banned: card.banned || false,
+              is_foil: card.is_foil || false
             }));
     } finally {
       client.release();
@@ -219,11 +227,15 @@ export class PostgreSQLCardRepository implements CardRepository {
       const card = result.rows[0];
       return {
         id: card.id,
-        name: card.name, // Added name field
+        name: card.name,
         power_type: card.power_type,
         value: card.value,
         image: card.image_path,
-        one_per_deck: card.one_per_deck || false
+        image_path: card.image_path,
+        set: card.set || 'ERB',
+        set_number: card.set_number || null,
+        one_per_deck: card.one_per_deck || false,
+        is_foil: card.is_foil || false
       };
     } finally {
       client.release();
@@ -252,7 +264,8 @@ export class PostgreSQLCardRepository implements CardRepository {
         set: card.set || 'ERB',
         set_number: card.set_number || null,
         set_name: card.set_name || 'Edgar Rice Burroughs and the World Legends',
-        one_per_deck: card.one_per_deck || false
+        one_per_deck: card.one_per_deck || false,
+        is_foil: card.is_foil || false
       }));
     } finally {
       client.release();

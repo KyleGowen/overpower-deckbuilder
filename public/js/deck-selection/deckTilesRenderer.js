@@ -61,8 +61,9 @@
                     }
                     const imagePath = window.DeckSelection.getDeckCardImagePath(card);
                     const title = card.name || 'Unknown Character';
+                    const foilClass = card.is_foil ? ' foil-shimmer' : '';
                     if (imagePath) {
-                        html += `<div class="deck-character-card-display deck-tile-lazy-bg" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
+                        html += `<div class="deck-character-card-display deck-tile-lazy-bg${foilClass}" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
                     } else {
                         html += `<div class="deck-character-card-display empty">?</div>`;
                     }

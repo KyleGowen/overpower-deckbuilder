@@ -187,6 +187,45 @@ async function loadLocations() {
     }
 }
 
+/**
+ * loadFoilCardMap
+ *
+ * Fetches /api/foil-card-map once at app startup and builds window.foilCardMap —
+ * a bidirectional plain object for O(1) foil ↔ base card ID lookup:
+ *
+ *   window.foilCardMap[foilCardId]  → baseCardId
+ *   window.foilCardMap[baseCardId]  → foilCardId
+ *
+ * Both directions are stored so a single lookup works regardless of whether
+ * the caller has a foil ID or a base ID.
+ *
+ * To check whether a card has a foil version (or is itself foil):
+ *   const counterpartId = window.foilCardMap[card.id];  // undefined if no foil
+ *
+ * Source of truth: foil_card_map table (populated by V231 migration).
+ * To add new foils in the future, add a row to foil_card_map in a new migration —
+ * no application code changes are required.
+ */
+async function loadFoilCardMap() {
+    try {
+        const response = await fetch('/api/foil-card-map');
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Failed to load foil card map');
+        }
+        // Build bidirectional lookup: foilId → baseId AND baseId → foilId
+        const map = {};
+        for (const entry of data.data) {
+            map[entry.foilCardId] = entry.baseCardId;
+            map[entry.baseCardId] = entry.foilCardId;
+        }
+        window.foilCardMap = map;
+    } catch (error) {
+        console.error('❌ Error loading foil card map:', error);
+        window.foilCardMap = {};
+    }
+}
+
 // Expose cache helpers for card-data-display.js and all-cards-display.js
 window.getCachedCardData = getCachedCardData;
 window.setCachedCardData = setCachedCardData;

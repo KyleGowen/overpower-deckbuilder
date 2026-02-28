@@ -10,6 +10,7 @@ import { DeckValidationService } from './services/deckValidationService';
 import { CollectionsRepository } from './database/collectionsRepository';
 import { CollectionService } from './services/collectionService';
 import { DeckBackgroundService } from './services/deckBackgroundService';
+import { FoilCardMapRepository } from './database/foilCardMapRepository';
 import { createDeckRoutes } from './routes/decks.routes';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import path from 'path';
@@ -388,6 +389,9 @@ const collectionService = new CollectionService(collectionsRepository);
 // Initialize deck background service
 const deckBackgroundService = new DeckBackgroundService();
 
+// Initialize foil card map repository
+const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
+
 // Function to get git information
 function getGitInfo() {
   // In production (Docker), use environment variables set during build
@@ -645,6 +649,26 @@ app.get('/api/power-cards', async (req, res) => {
     res.json({ success: true, data: powerCards });
   } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch power cards' });
+  }
+});
+
+/**
+ * GET /api/foil-card-map
+ *
+ * Returns all rows from the foil_card_map table as a flat array.
+ * The frontend (data-loading.js) converts this into window.foilCardMap — a
+ * bidirectional plain object so both directions are O(1):
+ *   window.foilCardMap[foilCardId]  → baseCardId
+ *   window.foilCardMap[baseCardId]  → foilCardId
+ *
+ * No authentication required — foil card structure is public data.
+ */
+app.get('/api/foil-card-map', async (_req, res) => {
+  try {
+    const entries = await foilCardMapRepository.getFoilCardMap();
+    res.json({ success: true, data: entries });
+  } catch {
+    res.status(500).json({ success: false, error: 'Failed to fetch foil card map' });
   }
 });
 

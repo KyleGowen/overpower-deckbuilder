@@ -25,7 +25,8 @@ function mergeCollectionWithAllCards(owned, allCards) {
         const key = `${card.id}|${card.cardType}`;
         if (ownedLookup.has(key)) {
             // Already in collection — use the collection record, mark it owned
-            merged.push(Object.assign({}, ownedLookup.get(key), { inCollection: true }));
+            // Carry is_foil from allCardsData so foil UI can be applied
+            merged.push(Object.assign({}, ownedLookup.get(key), { inCollection: true, is_foil: !!(card.is_foil) }));
             ownedLookup.delete(key); // Remove so we don't double-add
         } else {
             // Not in collection — synthesise an entry from allCardsData
@@ -36,6 +37,7 @@ function mergeCollectionWithAllCards(owned, allCards) {
                 image_path: card.image_path || card.image || null,
                 quantity: null,
                 set: card.set || card.universe || null,
+                is_foil: !!(card.is_foil),
                 card_data: card
             });
         }
@@ -375,14 +377,19 @@ function displayCollectionCards(cards) {
         // Use high number for null values so they sort last
         const setNumberValue = setNumber ? parseInt(setNumber) : 999999;
 
-        // Check if this is an alternate art
+        // Check if this is an alternate art or foil
         const isAlternateArt = card.image_path && card.image_path.includes('/alternate/');
-        const displayName = isAlternateArt ? `${cardName} (Alternate Art)` : cardName;
+        const isFoil = !!(card.is_foil);
+        let displayName = isAlternateArt ? `${cardName} (Alternate Art)` : cardName;
+        if (isFoil) {
+            displayName = `${cardName} <span class="collection-foil-badge">✦ FOIL</span>`;
+        }
 
         const escapedImagePath = cardImage.replace(/'/g, "\\'");
         const escapedImagePathAttr = cardImage.replace(/"/g, '&quot;');
-        const escapedDisplayName = displayName.replace(/"/g, '&quot;');
-        const escapedDisplayNameSingle = displayName.replace(/'/g, "\\'");
+        const escapedDisplayName = (isFoil ? `${cardName} ✦ FOIL` : displayName).replace(/"/g, '&quot;');
+        const escapedDisplayNameSingle = (isFoil ? `${cardName} ✦ FOIL` : cardName).replace(/'/g, "\\'");
+        const foilRowClass = isFoil ? ' collection-card-foil' : '';
 
         if (card.inCollection === false) {
             // Unowned card: dimmed row, blank Qty, single + button
@@ -391,15 +398,16 @@ function displayCollectionCards(cards) {
             const escapedImageForAdd = cardImage.replace(/'/g, "\\'");
 
             html += `
-                <tr class="collection-card-item collection-card-unowned"
+                <tr class="collection-card-item collection-card-unowned${foilRowClass}"
                     data-card-id="${escapedCardId}"
                     data-card-type="${escapedCardType}"
                     data-image-path="${escapedImagePathAttr}"
                     data-quantity="-1"
                     data-set-number="${setNumberValue}"
+                    data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
-                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}')"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', null, null, ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity"></td>
                     <td class="collection-card-set-number">${setNumber || ''}</td>
@@ -417,15 +425,16 @@ function displayCollectionCards(cards) {
         } else {
             // Owned card: full row with - and + quantity controls
             html += `
-                <tr class="collection-card-item"
+                <tr class="collection-card-item${foilRowClass}"
                     data-card-id="${card.card_id}"
                     data-card-type="${card.card_type}"
                     data-image-path="${escapedImagePathAttr}"
                     data-quantity="${card.quantity}"
                     data-set-number="${setNumberValue}"
+                    data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
-                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}')"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', null, null, ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity">${card.quantity}</td>
                     <td class="collection-card-set-number">${setNumber || ''}</td>
@@ -891,7 +900,11 @@ function sortCollectionTable(table, sortField, direction) {
                         ? aSet < bSet ? -1 : 1
                         : aSet < bSet ? 1 : -1;
                 }
-                // Secondary: set_number numerically
+                // Secondary: foil cards always sort after non-foil (regardless of sort direction)
+                const aFoil = a.getAttribute('data-is-foil') === 'true';
+                const bFoil = b.getAttribute('data-is-foil') === 'true';
+                if (aFoil !== bFoil) return aFoil ? 1 : -1;
+                // Tertiary: set_number numerically
                 const av = parseInt(a.getAttribute('data-set-number') || '999999');
                 const bv = parseInt(b.getAttribute('data-set-number') || '999999');
                 return direction === 'asc' ? av - bv : bv - av;

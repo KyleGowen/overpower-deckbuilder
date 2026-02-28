@@ -11,7 +11,10 @@
 let allCardsData = [];
 let allCardsFiltered = [];
 
-/** Sort allCardsData by set then set_number (numerically), cards without a number sort last */
+/**
+ * Sort allCardsData by set then set_number (numerically), foil cards last within
+ * each number group, cards without a number sort last.
+ */
 function sortAllCardsData(cards) {
     const compareText =
         (typeof window !== 'undefined' &&
@@ -24,6 +27,12 @@ function sortAllCardsData(cards) {
         const setB = String(b?.set || b?.universe || 'ERB').trim();
         const setCmp = compareText(setA, setB);
         if (setCmp !== 0) return setCmp;
+
+        // Foil cards always sort after non-foil cards within the same set
+        const aFoil = !!(a?.is_foil);
+        const bFoil = !!(b?.is_foil);
+        if (aFoil !== bFoil) return aFoil ? 1 : -1;
+
         const numAStr = String(a?.set_number || '').trim();
         const numBStr = String(b?.set_number || '').trim();
         const aHasNum = !!numAStr;
@@ -355,9 +364,11 @@ function renderCardCell(card) {
         })(this);
     `;
     
+    const foilShimmerClass = card.is_foil ? ' foil-shimmer' : '';
+    const foilBadge = card.is_foil ? ' <span style="color:#d4af37;font-size:10px;font-weight:bold;">✦ FOIL</span>' : '';
     return `
         <div class="all-cards-cell">
-            <div class="card-image-wrapper">
+            <div class="card-image-wrapper${foilShimmerClass}">
                 <img src="${imagePath}"
                      data-src="${imagePath}"
                      data-full-res="${fullResPath}"
@@ -366,12 +377,12 @@ function renderCardCell(card) {
                      decoding="async"
                      onload="${imageOnLoad}"
                      onerror="(function(img){var t=img.dataset.altTried;if(!t){img.dataset.altTried='1';var s=img.src||img.dataset.src;if(s&&s.endsWith('.webp')){img.src=s.replace(/\\.webp$/,'.png');return;}if(s&&s.endsWith('.png')){img.src=s.replace(/\\.png$/,'.webp');return;}}img.onerror=null;img.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';img.style.cursor='default';})(this)"
-                     onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}')"
+                     onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}', null, null, ${!!card.is_foil})"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </div>
             <div class="card-content-bottom">
-                <div style="font-size: 12px; color: #fff; text-align: center; margin-bottom: 8px; word-wrap: break-word; max-width: 100%;">${cardName}</div>
+                <div style="font-size: 12px; color: #fff; text-align: center; margin-bottom: 8px; word-wrap: break-word; max-width: 100%;">${cardName}${foilBadge}</div>
                 <button class="add-to-deck-btn" ${deckButtonOnClick} ${deckButtonDisabled} style="margin-bottom: 4px; width: 100%;">
                     +Deck
                 </button>

@@ -1167,18 +1167,31 @@ function renderDeckCardsCardView() {
                         `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})`,
                         `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index}, ${i})`
                     );
+
+                    /**
+                     * Foil toggle button for this card instance.
+                     * Uses window.foilCardMap for O(1) lookup — if instanceCardId is in the map,
+                     * a foil counterpart exists. See .cursor/rules for the foil map system.
+                     */
+                    const instanceIsFoil = !!(instanceAvailableCard && instanceAvailableCard.is_foil);
+                    const instanceHasFoilVersion = !!(window.foilCardMap && window.foilCardMap[instanceCardId] !== undefined);
+                    const instanceFoilButton = instanceHasFoilVersion
+                        ? `<button class="foil-btn card-view-btn${instanceIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index}, ${i})">Foil</button>`
+                        : '';
+                    const instanceFoilShimmerClass = instanceIsFoil ? ' foil-shimmer' : '';
                     
                     cardsHtml += `
-                        <div class="deck-card-card-view-item ${koDimmedClassCardView}" 
+                        <div class="deck-card-card-view-item ${koDimmedClassCardView}${instanceFoilShimmerClass}" 
                              data-index="${index}" 
                              data-card-id="${card.cardId}"
                              data-type="${card.type}"
                              data-instance="${i + 1}"
-                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}')"
+                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', null, null, ${instanceIsFoil})"
                              onmouseleave="hideCardHoverModal()">
                             <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
                             <div class="card-view-actions">
                                 ${instanceChangeArtButton}
+                                ${instanceFoilButton}
                                 ${quantityButtons}
                                 ${prePlacedButton}
                                 ${card.type === 'mission' ? getDisplayMissionButton(card.cardId, index) : ''}
@@ -1611,6 +1624,11 @@ async function displayDeckCardsForEditing() {
                         }
                         const changeArtButtonSpecial = hasAlternateArtsSpecial ? 
                             `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>` : '';
+                        const specialIsFoil = !!(availableCard && availableCard.is_foil);
+                        const specialHasFoilVersion = !!(window.foilCardMap && window.foilCardMap[card.cardId] !== undefined);
+                        const specialFoilButton = specialHasFoilVersion
+                            ? `<button class="foil-btn${specialIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index})">Foil</button>`
+                            : '';
                         
                         cardsHtml += `
                             <div class="deck-card-editor-item preview-view ${cardClass}" draggable="true" data-index="${index}" data-type="${card.type}"
@@ -1627,6 +1645,7 @@ async function displayDeckCardsForEditing() {
                                 </div>
                                 <div class="deck-card-editor-actions">
                                     ${changeArtButtonSpecial}
+                                    ${specialFoilButton}
                                     <button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>
                                     <button class="add-one-btn" onclick="addOneCardToEditor(${index})">+1</button>
                                 </div>
@@ -1755,6 +1774,11 @@ async function displayDeckCardsForEditing() {
                             }
                             const changeArtButtonPower1 = hasAlternateArtsPower1 ? 
                                 `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>` : '';
+                            const power1IsFoil = !!(availableCard && availableCard.is_foil);
+                            const power1HasFoilVersion = !!(window.foilCardMap && window.foilCardMap[card.cardId] !== undefined);
+                            const power1FoilButton = power1HasFoilVersion
+                                ? `<button class="foil-btn${power1IsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index})">Foil</button>`
+                                : '';
                             
                             cardsHtml += `
                                 <div class="deck-card-editor-item preview-view power-card" draggable="true" data-index="${index}" data-type="${card.type}"
@@ -1771,6 +1795,7 @@ async function displayDeckCardsForEditing() {
                                     </div>
                                     <div class="deck-card-editor-actions">
                                         ${changeArtButtonPower1}
+                                        ${power1FoilButton}
                                         ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
                                         ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="add-one-btn" onclick="addOneCardToEditor(${index})">+1</button>` : ''}
                                         ${card.type === 'character' || card.type === 'location' || card.type === 'mission' ? `<button class="quantity-btn" onclick="removeCardFromEditor(${index})">-</button>` : ''}
@@ -1841,6 +1866,11 @@ async function displayDeckCardsForEditing() {
                         }
                         const changeArtButtonPower2 = hasAlternateArtsPower2 ? 
                             `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>` : '';
+                        const power2IsFoil = !!(availableCard && availableCard.is_foil);
+                        const power2HasFoilVersion = !!(window.foilCardMap && window.foilCardMap[card.cardId] !== undefined);
+                        const power2FoilButton = power2HasFoilVersion
+                            ? `<button class="foil-btn${power2IsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index})">Foil</button>`
+                            : '';
                         
                         cardsHtml += `
                             <div class="deck-card-editor-item preview-view power-card" draggable="true" data-index="${index}" data-type="${card.type}"
@@ -1857,6 +1887,7 @@ async function displayDeckCardsForEditing() {
                                 </div>
                                 <div class="deck-card-editor-actions">
                                     ${changeArtButtonPower2}
+                                    ${power2FoilButton}
                                     ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
                                     ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="add-one-btn" onclick="addOneCardToEditor(${index})">+1</button>` : ''}
                                     ${card.type === 'character' || card.type === 'location' || card.type === 'mission' ? `<button class="quantity-btn" onclick="removeCardFromEditor(${index})">-</button>` : ''}
@@ -2105,6 +2136,17 @@ async function displayDeckCardsForEditing() {
                 
                 const changeArtButton = hasAlternateArts ? 
                     `<button class="alternate-art-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>` : '';
+
+                /**
+                 * Foil toggle button for tile view.
+                 * Uses window.foilCardMap[card.cardId] for O(1) lookup.
+                 * See .cursor/rules for the foil map system.
+                 */
+                const tileIsFoil = !!(availableCard && availableCard.is_foil);
+                const tileHasFoilVersion = !!(window.foilCardMap && window.foilCardMap[card.cardId] !== undefined);
+                const tileFoilButton = tileHasFoilVersion
+                    ? `<button class="foil-btn${tileIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index})">Foil</button>`
+                    : '';
                 
                 cardsHtml += `
                         <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass} ${advancedUniverseClass} ${trainingClass} ${koDimmedClass}" draggable="true" data-index="${index}" data-type="${card.type}" data-card-id="${card.cardId}"
@@ -2121,6 +2163,7 @@ async function displayDeckCardsForEditing() {
                         </div>
                         <div class="deck-card-editor-actions">
                             ${changeArtButton}
+                            ${tileFoilButton}
                             ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="remove-one-btn" onclick="removeOneCardFromEditor(${index})">-1</button>` : ''}
                             ${card.type !== 'character' && card.type !== 'location' && card.type !== 'mission' ? `<button class="add-one-btn" onclick="addOneCardToEditor(${index})">+1</button>` : ''}
                             ${card.type === 'character' || card.type === 'location' || card.type === 'mission' ? `<button class="quantity-btn" onclick="removeCardFromEditor(${index})">-</button>` : ''}
