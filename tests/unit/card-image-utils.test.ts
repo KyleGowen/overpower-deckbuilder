@@ -71,6 +71,18 @@ describe('Card Image Utilities', () => {
             expect(result).toBe('/src/resources/cards/images/characters/thumb/alternate/bar.webp');
         });
 
+        it('should convert CamelCase alternate art filename to thumbnail path', () => {
+            const fullPath = '/src/resources/cards/images/characters/alternate/Anubis-Alt.png';
+            const result = window.toThumbnailPath!(fullPath);
+            expect(result).toBe('/src/resources/cards/images/characters/thumb/alternate/Anubis-Alt.webp');
+        });
+
+        it('should not double-convert a path already containing /thumb/', () => {
+            const alreadyThumb = '/src/resources/cards/images/characters/thumb/alternate/Anubis-Alt.webp';
+            const result = window.toThumbnailPath!(alreadyThumb);
+            expect(result).toBe(alreadyThumb);
+        });
+
         it('should return path unchanged for non-character paths', () => {
             const fullPath = '/src/resources/cards/images/specials/foo.webp';
             const result = window.toThumbnailPath!(fullPath);

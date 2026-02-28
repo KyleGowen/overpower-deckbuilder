@@ -9585,8 +9585,10 @@
                     
                     // Construct full path based on card type
                     switch (cardType) {
-                        case 'character':
-                            return `/src/resources/cards/images/characters/${actualImagePath}`;
+                        case 'character': {
+                            const fullPath = `/src/resources/cards/images/characters/${actualImagePath}`;
+                            return (typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(fullPath) : fullPath;
+                        }
                         case 'special':
                             return `/src/resources/cards/images/specials/${actualImagePath}`;
                         case 'power':
@@ -9619,7 +9621,8 @@
                     const characterName = card.name || card.card_name || '';
                     if (characterName) {
                         const snakeCaseName = characterName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                        return `/src/resources/cards/images/characters/${snakeCaseName}.webp`;
+                        const fallbackPath = `/src/resources/cards/images/characters/${snakeCaseName}.webp`;
+                        return (typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(fallbackPath) : fallbackPath;
                     }
                 }
                 

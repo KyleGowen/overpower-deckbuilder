@@ -51,7 +51,8 @@ function loadModule() {
             removeCardFromCollection,
             formatCardType,
             translateSet,
-            getCardDisplayName
+            getCardDisplayName,
+            sortCollectionTable
         })
     `);
 }
@@ -432,6 +433,14 @@ describe('translateSet()', () => {
         expect(fns.translateSet('')).toBe('Edgar Rice Burroughs and the World Legends');
     });
 
+    it('maps SKY to Skybound', () => {
+        expect(fns.translateSet('SKY')).toBe('Skybound');
+    });
+
+    it('is case-insensitive for SKY', () => {
+        expect(fns.translateSet('sky')).toBe('Skybound');
+    });
+
     it('returns unknown codes unchanged', () => {
         expect(fns.translateSet('XYZ')).toBe('XYZ');
     });
@@ -538,6 +547,98 @@ describe('loadCollection()', () => {
 
         const container = document.getElementById('collectionCardsList')!;
         expect(container.innerHTML).toContain('Error loading');
+    });
+});
+
+// ─── sortCollectionTable() compound set→set_number sort ──────────────────────
+
+describe('sortCollectionTable() set_number compound sort', () => {
+    beforeEach(() => {
+        loadModule();
+        localStorageMock.getItem.mockReturnValue(null);
+    });
+
+    /**
+     * Build a minimal table with rows carrying the data attributes that the
+     * sort function reads.  Returns the tbody element.
+     */
+    function buildTable(rows: Array<{ setName: string; setNumber: number; name: string }>) {
+        document.body.innerHTML = `
+            <table id="collection-table" data-sort="set_number" data-sort-dir="asc">
+                <tbody>
+                    ${rows.map(r => `
+                        <tr class="collection-card-item"
+                            data-card-set="${r.setName}"
+                            data-set-number="${r.setNumber}"
+                            data-card-name="${r.name}"
+                            data-quantity="1">
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        return document.getElementById('collection-table') as HTMLTableElement;
+    }
+
+    it('groups ERB cards before Skybound cards', () => {
+        const table = buildTable([
+            { setName: 'Skybound',                                  setNumber: 1,   name: 'Sky A' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 1,   name: 'ERB A' },
+            { setName: 'Skybound',                                  setNumber: 2,   name: 'Sky B' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 2,   name: 'ERB B' },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'asc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        expect(names).toEqual(['ERB A', 'ERB B', 'Sky A', 'Sky B']);
+    });
+
+    it('sorts by set_number numerically within each set', () => {
+        const table = buildTable([
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 10,  name: 'ERB 10' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 2,   name: 'ERB 2' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 100, name: 'ERB 100' },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'asc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        expect(names).toEqual(['ERB 2', 'ERB 10', 'ERB 100']);
+    });
+
+    it('desc direction reverses both set and number order', () => {
+        const table = buildTable([
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 1, name: 'ERB 1' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 2, name: 'ERB 2' },
+            { setName: 'Skybound',                                  setNumber: 1, name: 'Sky 1' },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'desc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        // Desc: Skybound first, then ERB in reverse number order
+        expect(names).toEqual(['Sky 1', 'ERB 2', 'ERB 1']);
+    });
+
+    it('cards with no set_number sort last within their set', () => {
+        const table = buildTable([
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 999999, name: 'ERB no-num' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 1,      name: 'ERB 1' },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'asc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        expect(names).toEqual(['ERB 1', 'ERB no-num']);
     });
 });
 

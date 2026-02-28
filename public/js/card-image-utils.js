@@ -45,7 +45,7 @@ function mapImagePathToActualFile(imagePath) {
 function toThumbnailPath(fullPath) {
     if (!fullPath || typeof fullPath !== 'string') return fullPath;
     const base = '/src/resources/cards/images/characters/';
-    if (!fullPath.startsWith(base)) return fullPath;
+    if (!fullPath.startsWith(base) || fullPath.includes('/thumb/')) return fullPath;
     const afterChars = fullPath.slice(base.length);
     const lastSlash = afterChars.lastIndexOf('/');
     const dir = lastSlash >= 0 ? afterChars.slice(0, lastSlash + 1) : '';

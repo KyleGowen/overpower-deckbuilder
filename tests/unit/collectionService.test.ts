@@ -182,6 +182,16 @@ describe('CollectionService', () => {
       expect(result).toBe('Edgar Rice Burroughs and the World Legends');
     });
 
+    it('should translate SKY to Skybound', () => {
+      const result = collectionService.translateSet('SKY');
+      expect(result).toBe('Skybound');
+    });
+
+    it('should translate sky (lowercase) to Skybound', () => {
+      const result = collectionService.translateSet('sky');
+      expect(result).toBe('Skybound');
+    });
+
     it('should return original code for unknown set codes', () => {
       const result = collectionService.translateSet('UNKNOWN');
       expect(result).toBe('UNKNOWN');

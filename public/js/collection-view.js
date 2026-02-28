@@ -60,6 +60,8 @@ function translateSet(setCode) {
     switch (setCode.toUpperCase()) {
         case 'ERB':
             return 'Edgar Rice Burroughs and the World Legends';
+        case 'SKY':
+            return 'Skybound';
         default:
             return setCode;
     }
@@ -863,7 +865,9 @@ function initializeCollectionSorting() {
 }
 
 /**
- * Sort collection table rows
+ * Sort collection table rows.
+ * The set_number column uses a compound sort: set name first (ERB < SKY alphabetically),
+ * then set_number numerically within each set.
  */
 function sortCollectionTable(table, sortField, direction) {
     const tbody = table.querySelector('tbody');
@@ -872,39 +876,49 @@ function sortCollectionTable(table, sortField, direction) {
     const rows = Array.from(tbody.querySelectorAll('tr.collection-card-item'));
     
     rows.sort((a, b) => {
-        let aValue, bValue;
-        
         switch (sortField) {
-            case 'quantity':
-                aValue = parseInt(a.getAttribute('data-quantity') || '0');
-                bValue = parseInt(b.getAttribute('data-quantity') || '0');
-                break;
-            case 'set_number':
-                aValue = parseInt(a.getAttribute('data-set-number') || '999999');
-                bValue = parseInt(b.getAttribute('data-set-number') || '999999');
-                break;
-            case 'name':
-                aValue = (a.getAttribute('data-card-name') || '').toLowerCase();
-                bValue = (b.getAttribute('data-card-name') || '').toLowerCase();
-                break;
-            case 'set':
-                aValue = (a.getAttribute('data-card-set') || '').toLowerCase();
-                bValue = (b.getAttribute('data-card-set') || '').toLowerCase();
-                break;
-            case 'type':
-                aValue = (a.querySelector('.collection-card-type')?.textContent || '').toLowerCase();
-                bValue = (b.querySelector('.collection-card-type')?.textContent || '').toLowerCase();
-                break;
+            case 'quantity': {
+                const av = parseInt(a.getAttribute('data-quantity') || '0');
+                const bv = parseInt(b.getAttribute('data-quantity') || '0');
+                return direction === 'asc' ? av - bv : bv - av;
+            }
+            case 'set_number': {
+                // Primary: set name alphabetically (Edgar… < Skybound, so ERB always first)
+                const aSet = (a.getAttribute('data-card-set') || '').toLowerCase();
+                const bSet = (b.getAttribute('data-card-set') || '').toLowerCase();
+                if (aSet !== bSet) {
+                    return direction === 'asc'
+                        ? aSet < bSet ? -1 : 1
+                        : aSet < bSet ? 1 : -1;
+                }
+                // Secondary: set_number numerically
+                const av = parseInt(a.getAttribute('data-set-number') || '999999');
+                const bv = parseInt(b.getAttribute('data-set-number') || '999999');
+                return direction === 'asc' ? av - bv : bv - av;
+            }
+            case 'name': {
+                const av = (a.getAttribute('data-card-name') || '').toLowerCase();
+                const bv = (b.getAttribute('data-card-name') || '').toLowerCase();
+                if (av < bv) return direction === 'asc' ? -1 : 1;
+                if (av > bv) return direction === 'asc' ? 1 : -1;
+                return 0;
+            }
+            case 'set': {
+                const av = (a.getAttribute('data-card-set') || '').toLowerCase();
+                const bv = (b.getAttribute('data-card-set') || '').toLowerCase();
+                if (av < bv) return direction === 'asc' ? -1 : 1;
+                if (av > bv) return direction === 'asc' ? 1 : -1;
+                return 0;
+            }
+            case 'type': {
+                const av = (a.querySelector('.collection-card-type')?.textContent || '').toLowerCase();
+                const bv = (b.querySelector('.collection-card-type')?.textContent || '').toLowerCase();
+                if (av < bv) return direction === 'asc' ? -1 : 1;
+                if (av > bv) return direction === 'asc' ? 1 : -1;
+                return 0;
+            }
             default:
                 return 0;
-        }
-        
-        if (typeof aValue === 'number' && typeof bValue === 'number') {
-            return direction === 'asc' ? aValue - bValue : bValue - aValue;
-        } else {
-            if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-            if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-            return 0;
         }
     });
     
