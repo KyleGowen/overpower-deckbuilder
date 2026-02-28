@@ -35,10 +35,16 @@ jobs:
     - name: Run linting
       run: npx eslint src --ext .ts --max-warnings 0
 
+    - name: Upload dist artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+        retention-days: 1
+
   knip:
     name: Knip (unused code scan)
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -91,7 +97,6 @@ jobs:
   semgrep:
     name: Semgrep (SQL injection patterns)
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -121,7 +126,6 @@ jobs:
   soc2-compliance:
     name: SOC 2 Compliance Checks
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -140,7 +144,6 @@ jobs:
   trivy:
     name: Trivy (dependency vulnerabilities)
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -322,8 +325,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build project
-      run: npm run build
+    - name: Download dist artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
 
     - name: Wait for PostgreSQL
       run: |
@@ -331,16 +337,27 @@ jobs:
         timeout 60s bash -c 'until pg_isready -h localhost -p 1337 -U postgres; do sleep 1; done'
         echo "PostgreSQL is ready!"
 
+    - name: Cache Flyway
+      id: flyway-cache
+      uses: actions/cache@v4
+      with:
+        path: /opt/flyway
+        key: flyway-9.22.3-linux-x64
+
     - name: Install Flyway
+      if: steps.flyway-cache.outputs.cache-hit != 'true'
       run: |
         echo "Installing Flyway..."
         curl -L https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/9.22.3/flyway-commandline-9.22.3-linux-x64.tar.gz -o flyway.tar.gz
         tar -xzf flyway.tar.gz
         sudo mv flyway-9.22.3 /opt/flyway
         sudo chmod +x /opt/flyway/flyway
+        echo "✅ Flyway installed successfully!"
+
+    - name: Add Flyway to PATH
+      run: |
         echo "/opt/flyway" >> $GITHUB_PATH
         /opt/flyway/flyway --version
-        echo "✅ Flyway installed successfully!"
 
     - name: Run database migrations
       run: |
@@ -390,10 +407,17 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Download dist artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
     - name: Generate card image thumbnails
-      run: |
-        npm ci
-        npm run generate:thumbnails
+      run: npm run generate:thumbnails
 
     - name: Verify Git Information
       run: |
@@ -435,8 +459,9 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
+        DOCKER_BUILDKIT: 1
       run: |
-        echo "🚀 Starting FORCE Docker build with NO CACHE..."
+        echo "🚀 Starting Docker build with layer caching..."
         echo "🔍 PRE-BUILD VERIFICATION:"
         echo "Building from commit: $(git rev-parse HEAD)"
         echo "Building from branch: $(git branch --show-current)"
@@ -456,26 +481,11 @@ jobs:
           echo "❌ Main index.html file NOT found in source files"
           exit 1
         fi
-        echo "🧹 FORCE CLEANING Docker environment..."
-        # Remove all containers, networks, images, and build cache
-        docker system prune -a -f --volumes || true
-        docker builder prune -a -f || true
-        docker image prune -a -f || true
-        docker container prune -f || true
-        docker volume prune -f || true
-        docker network prune -f || true
         
-        # Remove any existing images for this repository
-        docker images | grep $ECR_REPOSITORY | awk '{print $3}' | xargs -r docker rmi -f || true
-        
-        echo "🔨 FORCE BUILDING with maximum cache busting..."
-        # Add timestamp to bust any remaining caches
         BUILD_TIMESTAMP=$(date +%s)
         docker build --platform linux/amd64 \
-          --no-cache \
-          --pull \
-          --force-rm \
-          --build-arg BUILDKIT_INLINE_CACHE=0 \
+          --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
           --build-arg GIT_COMMIT="${{ github.sha }}" \
           --build-arg GIT_SHORT_COMMIT="$(git rev-parse --short HEAD)" \
           --build-arg GIT_BRANCH="$(git branch --show-current)" \
@@ -808,9 +818,25 @@ jobs:
           --output text --query 'Command.CommandId')
 
         echo "SSM Command ID: $CMD_ID"
-        echo "Waiting 450 seconds for deploy to complete..."
-        sleep 450
-        echo "Wait complete."
+        echo "Polling SSM command status (max 450s)..."
+        for i in $(seq 1 90); do
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id "$CMD_ID" \
+            --instance-id ${{ env.EC2_INSTANCE_ID }} \
+            --query 'Status' --output text 2>/dev/null || echo "Pending")
+          echo "[$i/90] Deploy status: $STATUS"
+          [ "$STATUS" = "Success" ] && break
+          if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+            echo "SSM command ended with status: $STATUS"
+            aws ssm get-command-invocation \
+              --command-id "$CMD_ID" \
+              --instance-id ${{ env.EC2_INSTANCE_ID }} \
+              --query 'StandardErrorContent' --output text || true
+            exit 1
+          fi
+          sleep 5
+        done
+        echo "Deploy polling complete."
 
     - name: Verify Deployment
       run: |
