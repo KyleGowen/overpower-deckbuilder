@@ -27,6 +27,7 @@
 24. [Google Sign-In Button Styling](#google-sign-in-button-styling)
 25. [Sign Up and Account Creation Styling](#sign-up-and-account-creation-styling)
 26. [Create Your First Deck Tile and Sample Decks](#create-your-first-deck-tile-and-sample-decks)
+27. [Foil Card Shimmer Effect](#foil-card-shimmer-effect)
 
 ## Overview
 
@@ -2219,3 +2220,261 @@ The login modal supports two views: Login and Sign Up. The Sign Up button toggle
 - **Text**: "Already have an account? Log in"
 - **Hover**: underline
 - **Display**: `block`, margin-top `15px`
+
+---
+
+## Foil Card Shimmer Effect
+
+### Overview
+
+FOIL cards are special versions of existing cards with a metallic sheen overlaid on the original card image. The effect is **CSS-only and fully encapsulated** in [`public/css/foil-effect.css`](../../public/css/foil-effect.css) — no separate image files are needed. The JavaScript driver lives in [`public/js/foil-animation.js`](../../public/js/foil-animation.js).
+
+The shimmer is a diagonal light band that sweeps across the card image once, then settles in a randomised resting position. The animation is intentionally brief (~0.3–0.9 s) so it feels like a physical card catch of the light rather than a looping cartoon effect.
+
+---
+
+### Source Files
+
+| File | Responsibility |
+|------|---------------|
+| `public/css/foil-effect.css` | **Single source of truth** for all foil visuals: shimmer gradient, animation keyframes, CSS custom properties, Foil button states |
+| `public/js/foil-animation.js` | Randomises CSS custom properties per hover; adds/removes `.foil-active` on mouse events; skips hover listeners for deck-editor static elements |
+| `public/js/deck-editor-rendering.js` | Calls `initDeckEditorFoilElements()` after each deck re-render to handle the one-shot animation for card-view and tile-view foil elements |
+| `public/js/card-hover-modal.js` | Explicitly triggers `.foil-active` on the hover modal's image wrapper via `requestAnimationFrame` so the shimmer plays when the modal appears |
+
+---
+
+### CSS Custom Properties
+
+All visual knobs are controlled by CSS custom properties set on the `.foil-shimmer` wrapper element. JavaScript sets these before each animation trigger so every instance looks distinct.
+
+| Property | Default | Range | Description |
+|----------|---------|-------|-------------|
+| `--foil-duration` | `0.9s` | `0.25 – 1.15s` | How long the sweep takes to cross the card |
+| `--foil-translate-end` | `0%` | `-5% – +5%` | Where the shimmer band rests after the sweep (horizontal offset as % of element width) |
+| `--foil-opacity` | `1` | `0.55 – 1.0` | Overall brightness of the shimmer band |
+| `--foil-angle` | `115deg` | `90 – 150deg` | Diagonal angle of the gradient sweep |
+| `--foil-anim-delay` | `0s` | `0s` or `-100s` | Internal deck-editor flag: `-100s` snaps the one-shot animation to its end state (used by `initDeckEditorFoilElements` for cards that were already foil before a re-render) |
+
+> **Custom properties cascade into `::after` pseudo-elements**, which is the mechanism that lets JS changes on the wrapper element control the animation on its pseudo-element child.
+
+---
+
+### Shimmer Gradient
+
+```css
+background: linear-gradient(
+    var(--foil-angle),       /* randomised diagonal, default 115deg */
+    transparent 20%,
+    rgba(255, 255, 255, 0.30) 38%,
+    rgba(200, 160, 255, 0.45) 50%,   /* soft purple highlight */
+    rgba(255, 210, 100, 0.30) 62%,   /* warm gold highlight  */
+    transparent 80%
+);
+```
+
+- The band occupies **~60% of the element width** (20%–80%), with fully transparent zones on both edges — this prevents any hard clipping edge at the card border.
+- `--foil-opacity` is applied as `opacity` on the `::after` element, letting the brightness vary independently of the gradient stops.
+
+---
+
+### Oversized Pseudo-Element (`inset: -50% -20%`)
+
+The `::after` element that carries the gradient is intentionally larger than the card:
+
+- **Horizontal**: extends 20% beyond each side (element = 140% of card width)
+- **Vertical**: extends 50% beyond each side (element = 200% of card height)
+
+**Why**: The gradient runs diagonally (`--foil-angle` ≈ 90–150°). If the `::after` were card-sized, the diagonal band would intersect the element's own corners, producing a hard visible line where the shimmer gets clipped by `overflow: hidden`. By extending the element well beyond the card and clamping `--foil-translate-end` to ±5%, the card edges always land in the gradient's fully-transparent zones (0–20% and 80–100%), guaranteeing soft fade-outs on all sides.
+
+`overflow: hidden` on the `.foil-shimmer` wrapper clips the excess invisibly.
+
+---
+
+### Animation Modes
+
+There are two distinct animation modes depending on context.
+
+#### 1. Interactive (Hover-Triggered) — Collection View, Database View, Hover Modal
+
+Used for foil cards viewed in read-only contexts. The shimmer triggers on each hover and re-triggers every time the user moves off the card and back.
+
+**Mechanism**: JavaScript class toggle driven by `mouseenter` / `mouseleave` in `foil-animation.js`.
+
+```css
+/* Resting state — shimmer parked off-screen right, snap-back is instant */
+.foil-shimmer::after {
+    transform: translateX(110%);
+    transition: none;
+}
+
+/* Active state — shimmer sweeps to resting position */
+.foil-shimmer.foil-active::after {
+    transform: translateX(var(--foil-translate-end));
+    transition: transform var(--foil-duration) ease-out;
+}
+```
+
+- `transition: none` on the base rule means removing `.foil-active` snaps the element back to off-screen **instantly**, so the next hover always starts from a clean state.
+- `foil-animation.js` calls `randomiseFoilVars(el)` on every `mouseenter`, giving each hover a fresh randomised look.
+- Elements with `.foil-once` class are **skipped** by `foil-animation.js` (deck-editor cards should not respond to hover).
+
+#### 2. One-Shot Static (Deck Editor) — Card View and Tile View
+
+Used in the deck editor when a card is selected as foil. The shimmer plays once on render and then **remains frozen** in place; it does not reset on hover.
+
+**Card-view** (`.foil-shimmer.foil-once`):
+
+```css
+@keyframes foil-once-sweep {
+    from { transform: translateX(110%); }
+    to   { transform: translateX(0%); }
+}
+
+.foil-shimmer.foil-once::after {
+    animation: foil-once-sweep var(--foil-duration) ease-out
+               var(--foil-anim-delay, 0s) forwards;
+    opacity: 0.85;
+}
+```
+
+**Tile-view** (`.tile-foil-shimmer`):
+
+The character tile already uses `::before` (card image) and `::after` (dark overlay), so the shimmer cannot use a pseudo-element. Instead it is a standalone `<div class="tile-foil-shimmer">` that animates its own `background-position`:
+
+```css
+@keyframes tile-foil-sweep {
+    from { background-position: 250% center; }
+    to   { background-position: 0% center; }
+}
+
+.tile-foil-shimmer {
+    position: absolute !important;  /* overrides .character-card > * rule */
+    inset: 0 !important;
+    animation: tile-foil-sweep var(--foil-duration, 0.7s) ease-out
+               var(--foil-anim-delay, 0s) forwards;
+}
+```
+
+> `!important` is required because `.character-card > *` sets `position: relative; z-index: 1` on all children, which would override `position: absolute` and cause the shimmer to bleed outside the tile.
+
+---
+
+### Applying the Effect
+
+Add `.foil-shimmer` to the **immediate wrapper element** of a card image — never to the `<img>` itself, since `::after` requires a positioned parent.
+
+```html
+<!-- Correct -->
+<div class="card-foil-img-wrap foil-shimmer">
+  <img src="..." class="card-view-image">
+</div>
+
+<!-- Wrong — ::after will not render on replaced elements -->
+<img class="foil-shimmer" src="...">
+```
+
+At runtime, `card.is_foil === true` on the API response is what triggers the class. No other logic is needed.
+
+For the deck-editor card view, also add `.foil-once` to enable the one-shot static mode:
+
+```html
+<div class="card-foil-img-wrap foil-shimmer foil-once">
+  <img src="..." class="card-view-image">
+</div>
+```
+
+For the deck-editor tile view, inject the standalone shimmer div as the **first child** of the tile (before info/action divs so text renders on top at the same z-index):
+
+```html
+<div class="deck-card-editor-item ...">
+  <div class="tile-foil-shimmer" aria-hidden="true"></div>
+  <div class="deck-card-editor-info">...</div>
+  <div class="deck-card-editor-actions">...</div>
+</div>
+```
+
+---
+
+### Wrapper Containment (`overflow: hidden`)
+
+The shimmer effect's oversized `::after` must be clipped to the card image. Every element that carries `.foil-shimmer` must have `overflow: hidden`. This is guaranteed by:
+
+- `.foil-shimmer` base rule: `overflow: hidden`
+- `.card-foil-img-wrap` in both `foil-effect.css` and `card-tables.css`: `overflow: hidden`
+- `.tile-foil-shimmer` uses `background-image` directly (no pseudo-element), so no overflow clipping is needed
+
+If you ever see shimmer bleeding outside a card boundary, check that `overflow: hidden` has not been overridden by a more-specific rule on the wrapper.
+
+---
+
+### Randomisation Logic (`foil-animation.js`)
+
+```js
+const FOIL_STOP_SECONDS  = 0.7;   // target sweep duration
+const FOIL_VARIANCE_SEC  = 0.2;   // ± variance
+const FOIL_MIN_SEC       = 0.25;  // floor
+
+const FOIL_END_MIN       = -5;    // min translateX stop (%)
+const FOIL_END_MAX       =  5;    // max translateX stop (%)
+const FOIL_OPACITY_MIN   = 0.55;
+const FOIL_OPACITY_MAX   = 1.0;
+const FOIL_ANGLE_MIN     = 90;    // deg
+const FOIL_ANGLE_MAX     = 150;   // deg
+```
+
+`randomiseFoilVars(el)` is called:
+- On every `mouseenter` for interactive elements
+- On every deck re-render for newly-foiled deck-editor elements (via `initDeckEditorFoilElements`)
+- In `showCardHoverModal` (via `window.randomiseFoilVars`) before the modal is shown
+
+`--foil-translate-end` is clamped to ±5% so the opaque gradient band never reaches the card's left or right edge (which would create a hard clip line against `overflow: hidden`).
+
+---
+
+### Deck Editor Re-Render Stability (`initDeckEditorFoilElements`)
+
+Every foil toggle re-renders the entire deck editor via `innerHTML` replacement, creating brand-new DOM elements for all cards. Without special handling, every foil card — not just the newly-toggled one — would replay its sweep animation.
+
+**Solution**: `_foilAnimatedInstances` (a module-level `Set` in `deck-editor-rendering.js`) tracks which card instances have already played their animation, keyed by `"shimmer::<cardId>::<instanceIndex>"` or `"tile::<cardId>::<instanceIndex>"`.
+
+On each re-render:
+- **Key already in set** (card was foil before the re-render): CSS vars are left unchanged and `--foil-anim-delay: -100s` snaps the animation to its end state immediately. No visual change occurs.
+- **Key not in set** (newly-foiled card): CSS vars are randomised, `--foil-anim-delay: 0s`, animation plays normally. Key is added to the set.
+- **Stale keys** (card was de-foiled): pruned at the end of each render cycle, so if the user re-selects foil later, the animation plays fresh again.
+
+---
+
+### Foil Toggle Button
+
+The Foil button in the deck editor always reads **"Foil"**. Its pressed/unpressed state communicates whether foil is currently active — consistent with the KO button pattern.
+
+| State | Class | Background | Text Color | Border |
+|-------|-------|-----------|------------|--------|
+| Unpressed | `.foil-btn` | `rgba(78, 205, 196, 0.2)` | `#4ecdc4` | `rgba(78, 205, 196, 0.3)` |
+| Pressed | `.foil-btn.foil-btn--active` | `#4ecdc4` (solid) | `rgba(26, 26, 46, 0.9)` (dark) | `#4ecdc4` |
+| Hover (unpressed) | `.foil-btn:hover` | `rgba(78, 205, 196, 0.3)` | — | `rgba(78, 205, 196, 0.4)` |
+| Hover (pressed) | `.foil-btn--active:hover` | `#3bbdb4` | — | `#3bbdb4` |
+
+Card-view variant adds `!important` overrides via `.card-view-btn.foil-btn--active` to beat the card-view button base specificity.
+
+All button states are defined in `foil-effect.css` alongside the shimmer, so all foil visuals stay in one place.
+
+---
+
+### Editing the Effect
+
+**To change the shimmer look** — edit only `public/css/foil-effect.css`:
+- Gradient colours / stop positions: modify the `linear-gradient()` inside `.foil-shimmer::after`
+- Band width: adjust the stop percentages (currently 20%–80%)
+- Animation feel: adjust `ease-out` on the `foil-once-sweep` / `foil-active` transition
+- Extend/contract the oversized area: change `inset: -50% -20%` (keep negative values)
+
+**To change timing/randomisation** — edit constants at the top of `public/js/foil-animation.js`:
+- `FOIL_STOP_SECONDS` — target duration
+- `FOIL_VARIANCE_SEC` — how much the duration can vary
+- `FOIL_END_MIN/MAX` — how far left/right the shimmer can stop (keep within ±20% to avoid hard edges)
+- `FOIL_OPACITY_MIN/MAX` — brightness range
+- `FOIL_ANGLE_MIN/MAX` — sweep angle range
+
+**No other files need to change** to modify the visual effect.
