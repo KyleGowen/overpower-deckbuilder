@@ -143,7 +143,8 @@ export class AuthenticationService {
           success: true, 
           data: { 
             userId: user.id, 
-            username: user.name 
+            username: user.name,
+            role: user.role
           } 
         });
       } else {
@@ -251,7 +252,7 @@ export class AuthenticationService {
 
       res.json({
         success: true,
-        data: { userId: user.id, username: user.name }
+        data: { userId: user.id, username: user.name, role: user.role }
       });
     } catch (error) {
       console.error('Google login error:', error);
@@ -336,7 +337,7 @@ export class AuthenticationService {
 
       res.status(201).json({
         success: true,
-        data: { userId: user.id, username: user.name }
+        data: { userId: user.id, username: user.name, role: user.role }
       });
     } catch (error) {
       console.error('Signup error:', error);

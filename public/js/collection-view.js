@@ -3,6 +3,51 @@
 // Collection view state
 let collectionCards = [];
 let collectionSearchTimeout = null;
+let mergedCollectionData = [];
+let showUnownedCards = true;
+
+/**
+ * Merge owned collection cards with all cards from the game database.
+ * Returns a unified array where each entry has inCollection: true/false.
+ * Owned entries preserve the full collection record; unowned entries are
+ * synthesised from allCardsData so they can be rendered in the same table.
+ */
+function mergeCollectionWithAllCards(owned, allCards) {
+    // Build a lookup of owned cards: "card_id|card_type" -> collection record
+    const ownedLookup = new Map();
+    owned.forEach(c => {
+        ownedLookup.set(`${c.card_id}|${c.card_type}`, c);
+    });
+
+    const merged = [];
+
+    allCards.forEach(card => {
+        const key = `${card.id}|${card.cardType}`;
+        if (ownedLookup.has(key)) {
+            // Already in collection — use the collection record, mark it owned
+            merged.push(Object.assign({}, ownedLookup.get(key), { inCollection: true }));
+            ownedLookup.delete(key); // Remove so we don't double-add
+        } else {
+            // Not in collection — synthesise an entry from allCardsData
+            merged.push({
+                inCollection: false,
+                card_id: card.id,
+                card_type: card.cardType,
+                image_path: card.image_path || card.image || null,
+                quantity: null,
+                set: card.set || card.universe || null,
+                card_data: card
+            });
+        }
+    });
+
+    // Any remaining owned cards not found in allCardsData (edge case)
+    ownedLookup.forEach(c => {
+        merged.push(Object.assign({}, c, { inCollection: true }));
+    });
+
+    return merged;
+}
 
 /**
  * Translate set code to display name
@@ -201,7 +246,7 @@ function getCardDisplayName(cardData, cardType) {
 }
 
 /**
- * Load collection cards from API
+ * Load collection cards from API, merge with full card database, and display.
  */
 async function loadCollection() {
     try {
@@ -220,7 +265,24 @@ async function loadCollection() {
         const data = await response.json();
         if (data.success) {
             collectionCards = data.data;
-            displayCollectionCards(collectionCards);
+
+            // Reuse already-loaded allCardsData if available; otherwise load on-demand
+            let allCards = (window.allCardsData && window.allCardsData.length > 0)
+                ? window.allCardsData
+                : null;
+
+            if (!allCards && typeof loadAllCards === 'function') {
+                allCards = await loadAllCards();
+            }
+
+            if (allCards && allCards.length > 0) {
+                mergedCollectionData = mergeCollectionWithAllCards(collectionCards, allCards);
+            } else {
+                // Fallback: no allCardsData available — show only owned cards
+                mergedCollectionData = collectionCards.map(c => Object.assign({}, c, { inCollection: true }));
+            }
+
+            displayCollectionCards(mergedCollectionData);
         } else {
             console.error('Failed to load collection:', data.error);
         }
@@ -234,17 +296,34 @@ async function loadCollection() {
 }
 
 /**
- * Display collection cards in a single table
+ * Display collection cards in a single table.
+ * Accepts merged array (from mergeCollectionWithAllCards) or plain collection array.
  */
 function displayCollectionCards(cards) {
     const listContainer = document.getElementById('collectionCardsList');
     if (!listContainer) return;
 
-    if (cards.length === 0) {
+    // Apply unowned filter
+    const visibleCards = showUnownedCards
+        ? cards
+        : cards.filter(c => c.inCollection !== false);
+
+    const ownedCount = cards.filter(c => c.inCollection !== false).length;
+
+    if (ownedCount === 0 && !showUnownedCards) {
         listContainer.innerHTML = `
             <div class="collection-empty">
                 <div class="collection-empty-message">Your collection is empty</div>
                 <div class="collection-empty-hint">Use the search bar above to add cards to your collection</div>
+            </div>
+        `;
+        return;
+    }
+
+    if (visibleCards.length === 0) {
+        listContainer.innerHTML = `
+            <div class="collection-empty">
+                <div class="collection-empty-message">No cards to display</div>
             </div>
         `;
         return;
@@ -283,75 +362,86 @@ function displayCollectionCards(cards) {
             <tbody class="collection-category-tbody">
     `;
 
-    cards.forEach(card => {
+    visibleCards.forEach(card => {
         const cardType = card.card_type;
         const cardName = getCardDisplayName(card, cardType);
-        
-        console.log('🟣 [Collection] Processing card for display:', {
-            card_id: card.card_id,
-            card_type: cardType,
-            card_name: cardName,
-            image_path_from_db: card.image_path,
-            image_path_type: typeof card.image_path,
-            image_path_length: card.image_path ? card.image_path.length : 0,
-            has_card_data: !!card.card_data
-        });
-        
         const cardImage = getCardImagePath(card, cardType);
-        console.log('🟣 [Collection] getCardImagePath returned:', {
-            input_image_path: card.image_path,
-            output_cardImage: cardImage,
-            cardType
-        });
-        
         const cardSet = translateSet(card.set);
-        
+
         // Get set_number from card_data
         const setNumber = card.card_data?.set_number || '';
-        const setNumberValue = setNumber ? parseInt(setNumber) : 999999; // Use high number for null values to sort them last
-        
-        // Check if this is an alternate art by checking if image_path contains '/alternate/'
+        // Use high number for null values so they sort last
+        const setNumberValue = setNumber ? parseInt(setNumber) : 999999;
+
+        // Check if this is an alternate art
         const isAlternateArt = card.image_path && card.image_path.includes('/alternate/');
         const displayName = isAlternateArt ? `${cardName} (Alternate Art)` : cardName;
-        
-        // Escape single quotes in image path for use in HTML attribute
+
         const escapedImagePath = cardImage.replace(/'/g, "\\'");
         const escapedImagePathAttr = cardImage.replace(/"/g, '&quot;');
-        
-        console.log('🟣 [Collection] Final paths for HTML:', {
-            original_cardImage: cardImage,
-            escapedImagePath: escapedImagePath,
-            escapedImagePathAttr: escapedImagePathAttr,
-            will_be_used_in_onmouseenter: escapedImagePath
-        });
+        const escapedDisplayName = displayName.replace(/"/g, '&quot;');
+        const escapedDisplayNameSingle = displayName.replace(/'/g, "\\'");
 
-        html += `
-            <tr class="collection-card-item"
-                data-card-id="${card.card_id}"
-                data-card-type="${card.card_type}"
-                data-image-path="${escapedImagePathAttr}"
-                data-quantity="${card.quantity}"
-                data-set-number="${setNumberValue}"
-                data-card-name="${displayName.replace(/"/g, '&quot;')}"
-                data-card-set="${cardSet.replace(/"/g, '&quot;')}"
-                onmouseenter="showCardHoverModal('${escapedImagePath}', '${displayName.replace(/'/g, "\\'")}')"
-                onmouseleave="hideCardHoverModal()">
-                <td class="collection-card-quantity">${card.quantity}</td>
-                <td class="collection-card-set-number">${setNumber || ''}</td>
-                <td class="collection-card-name">${displayName}</td>
-                <td class="collection-card-type">${formatCardType(cardType)}</td>
-                <td class="collection-card-set">${cardSet}</td>
-                <td class="collection-card-actions">
-                    <div class="collection-quantity-control">
-                        <button class="collection-quantity-btn" 
-                            onclick="handleCollectionQuantityClick(this, ${card.quantity - 1})"
-                                ${card.quantity <= 0 ? 'disabled' : ''}>-</button>
-                        <button class="collection-quantity-btn" 
-                            onclick="handleCollectionQuantityClick(this, ${card.quantity + 1})">+</button>
-                    </div>
-                </td>
-            </tr>
-        `;
+        if (card.inCollection === false) {
+            // Unowned card: dimmed row, blank Qty, single + button
+            const escapedCardId = String(card.card_id).replace(/"/g, '&quot;');
+            const escapedCardType = String(card.card_type).replace(/"/g, '&quot;');
+            const escapedImageForAdd = cardImage.replace(/'/g, "\\'");
+
+            html += `
+                <tr class="collection-card-item collection-card-unowned"
+                    data-card-id="${escapedCardId}"
+                    data-card-type="${escapedCardType}"
+                    data-image-path="${escapedImagePathAttr}"
+                    data-quantity="-1"
+                    data-set-number="${setNumberValue}"
+                    data-card-name="${escapedDisplayName}"
+                    data-card-set="${cardSet.replace(/"/g, '&quot;')}"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}')"
+                    onmouseleave="hideCardHoverModal()">
+                    <td class="collection-card-quantity"></td>
+                    <td class="collection-card-set-number">${setNumber || ''}</td>
+                    <td class="collection-card-name">${displayName}</td>
+                    <td class="collection-card-type">${formatCardType(cardType)}</td>
+                    <td class="collection-card-set">${cardSet}</td>
+                    <td class="collection-card-actions">
+                        <div class="collection-quantity-control">
+                            <button class="collection-quantity-btn collection-add-btn"
+                                onclick="addCardToCollection('${escapedCardId}', '${escapedCardType}', '${escapedImageForAdd}')">+</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        } else {
+            // Owned card: full row with - and + quantity controls
+            html += `
+                <tr class="collection-card-item"
+                    data-card-id="${card.card_id}"
+                    data-card-type="${card.card_type}"
+                    data-image-path="${escapedImagePathAttr}"
+                    data-quantity="${card.quantity}"
+                    data-set-number="${setNumberValue}"
+                    data-card-name="${escapedDisplayName}"
+                    data-card-set="${cardSet.replace(/"/g, '&quot;')}"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}')"
+                    onmouseleave="hideCardHoverModal()">
+                    <td class="collection-card-quantity">${card.quantity}</td>
+                    <td class="collection-card-set-number">${setNumber || ''}</td>
+                    <td class="collection-card-name">${displayName}</td>
+                    <td class="collection-card-type">${formatCardType(cardType)}</td>
+                    <td class="collection-card-set">${cardSet}</td>
+                    <td class="collection-card-actions">
+                        <div class="collection-quantity-control">
+                            <button class="collection-quantity-btn"
+                                onclick="handleCollectionQuantityClick(this, ${card.quantity - 1})"
+                                    ${card.quantity <= 0 ? 'disabled' : ''}>-</button>
+                            <button class="collection-quantity-btn"
+                                onclick="handleCollectionQuantityClick(this, ${card.quantity + 1})">+</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
     });
 
     html += `
@@ -360,19 +450,18 @@ function displayCollectionCards(cards) {
     `;
 
     listContainer.innerHTML = html;
-    
+
     // Load saved column widths
     const table = listContainer.querySelector('#collection-table');
     if (table) {
         loadColumnWidths(table);
     }
-    
+
     // Add event listeners for sortable column headers
     initializeCollectionSorting();
-    
+
     // Apply default sort by set_number ascending
     if (table) {
-        // Update sort indicator for set_number column
         const setNumberHeader = table.querySelector('[data-sort="set_number"]');
         if (setNumberHeader) {
             const indicator = setNumberHeader.querySelector('.sort-indicator');
@@ -382,7 +471,7 @@ function displayCollectionCards(cards) {
         }
         sortCollectionTable(table, 'set_number', 'asc');
     }
-    
+
     // Add event listeners for resizable columns
     initializeCollectionResizing();
 }
@@ -515,7 +604,6 @@ function handleCollectionSearchResultClick(element) {
     const cardId = element.getAttribute('data-card-id');
     const cardType = element.getAttribute('data-card-type');
     const imagePath = element.getAttribute('data-image-path') || null;
-    console.log('🟦 [Collection] Search result selected:', { cardId, cardType, imagePath });
     addCardToCollection(cardId, cardType, imagePath);
 }
 
@@ -546,15 +634,6 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
         }
         
         const url = '/api/collections/me/cards';
-        console.log('🔵 [Collection] Adding card to collection:', {
-            url,
-            cardId,
-            cardType,
-            imagePath,
-            requestBody,
-            method: 'POST'
-        });
-        
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -562,13 +641,6 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
             },
             credentials: 'include',
             body: JSON.stringify(requestBody)
-        });
-        
-        console.log('🔵 [Collection] Response received:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok,
-            url: response.url
         });
 
         if (!response.ok) {
@@ -578,12 +650,9 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
             } catch (e) {
                 errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
             }
-            console.error('🔴 [Collection] Failed to add card to collection:', {
+            console.error('Failed to add card to collection:', {
                 status: response.status,
-                statusText: response.statusText,
-                errorData,
-                requestBody,
-                responseUrl: response.url
+                errorData
             });
             if (typeof showNotification === 'function') {
                 showNotification(`Failed to add card: ${errorData.error || 'Unknown error'}`, 'error');
@@ -595,7 +664,6 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
 
         const data = await response.json();
         if (data.success) {
-            console.log('🟢 [Collection] Card added successfully:', data);
             // Clear search
             const searchInput = document.getElementById('collectionSearchInput');
             if (searchInput) {
@@ -643,15 +711,6 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
         cardType: cardType,
         imagePath: imagePath
     };
-    
-    console.log('🟦 [Collection] Updating collection quantity:', {
-        url,
-        cardId,
-        cardType,
-        newQuantity,
-        imagePath,
-        requestBody
-    });
 
     try {
         const response = await fetch(url, {
@@ -663,12 +722,6 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
             body: JSON.stringify(requestBody)
         });
 
-        console.log('🟦 [Collection] Update quantity response:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok
-        });
-
         if (!response.ok) {
             let errorData;
             try {
@@ -676,7 +729,7 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
             } catch (e) {
                 errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
             }
-            console.error('🔴 [Collection] Failed to update quantity:', {
+            console.error('Failed to update quantity:', {
                 status: response.status,
                 statusText: response.statusText,
                 errorData,
@@ -712,10 +765,9 @@ function handleCollectionQuantityClick(buttonElement, newQuantity) {
     const cardId = row.getAttribute('data-card-id');
     const cardType = row.getAttribute('data-card-type');
     const imagePath = row.getAttribute('data-image-path');
-    console.log('🟦 [Collection] Quantity button clicked:', { cardId, cardType, imagePath, newQuantity });
 
     if (!imagePath) {
-        console.error('🟦 [Collection] Missing image_path attribute on collection card row');
+        console.error('Missing image_path attribute on collection card row');
         return;
     }
 
@@ -1033,6 +1085,16 @@ function loadColumnWidths(table) {
 }
 
 /**
+ * Toggle visibility of unowned (not-in-collection) cards.
+ * Re-renders from the cached merged data so no API call is needed.
+ */
+function toggleUnownedCards() {
+    const checkbox = document.getElementById('showUnownedToggle');
+    showUnownedCards = checkbox ? checkbox.checked : !showUnownedCards;
+    displayCollectionCards(mergedCollectionData);
+}
+
+/**
  * Initialize collection view
  */
 function initializeCollectionView() {
@@ -1054,4 +1116,5 @@ window.removeCardFromCollection = removeCardFromCollection;
 window.initializeCollectionView = initializeCollectionView;
 window.addCardToCollectionFromDatabase = addCardToCollectionFromDatabase;
 window.handleCollectionSearchResultClick = handleCollectionSearchResultClick;
+window.toggleUnownedCards = toggleUnownedCards;
 

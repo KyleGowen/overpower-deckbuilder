@@ -152,7 +152,7 @@ class FrontendAuthService {
           id: data.data.userId,
           name: data.data.username,
           email: '',
-          role: 'USER'
+          role: data.data.role || 'USER'
         };
         this.storeUser(this.currentUser);
         this.hideLoginModal();
@@ -224,7 +224,7 @@ class FrontendAuthService {
           id: data.data.userId,
           name: data.data.username,
           email: '',
-          role: 'USER'
+          role: data.data.role || 'USER'
         };
         this.storeUser(this.currentUser);
         this.hideLoginModal();
@@ -265,7 +265,7 @@ class FrontendAuthService {
           id: data.data.userId,
           name: data.data.username,
           email: '',
-          role: 'USER'
+          role: data.data.role || 'USER'
         };
         this.storeUser(this.currentUser);
         this.hideLoginModal();

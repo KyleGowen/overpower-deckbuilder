@@ -295,7 +295,8 @@ describe('AuthenticationService', () => {
         success: true,
         data: {
           userId: user.id,
-          username: user.name
+          username: user.name,
+          role: user.role
         }
       });
       expect((mockUserRepository as any).updateLastLoginAt).toHaveBeenCalledWith(user.id);
@@ -539,7 +540,7 @@ describe('AuthenticationService', () => {
       expect(mockResponse.cookie).toHaveBeenCalledWith('sessionId', expect.any(String), expect.any(Object));
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: existingUser.id, username: existingUser.name }
+        data: { userId: existingUser.id, username: existingUser.name, role: existingUser.role }
       });
     });
 
@@ -571,7 +572,7 @@ describe('AuthenticationService', () => {
       expect(mockUserRepository.createGoogleUser).not.toHaveBeenCalled();
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: existingUser.id, username: existingUser.name }
+        data: { userId: existingUser.id, username: existingUser.name, role: existingUser.role }
       });
     });
 
@@ -646,7 +647,7 @@ describe('AuthenticationService', () => {
       expect(recordCreation).toHaveBeenCalledWith('192.168.1.1');
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: newUser.id, username: newUser.name }
+        data: { userId: newUser.id, username: newUser.name, role: newUser.role }
       });
     });
 
@@ -843,7 +844,7 @@ describe('AuthenticationService', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: newUser.id, username: newUser.name }
+        data: { userId: newUser.id, username: newUser.name, role: newUser.role }
       });
     });
 
