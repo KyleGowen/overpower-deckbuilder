@@ -611,26 +611,32 @@
         const image = document.getElementById('cardHoverImage');
         const caption = document.getElementById('cardHoverCaption');
 
-        // Apply foil shimmer to the image wrapper when hovering a foil card.
-        // The hover modal element can't receive a natural mouseenter (it appears
-        // under the cursor, not entered by it), so we directly control foil-active
-        // here rather than waiting for foil-animation.js's mouseenter listener.
-        const hoverContent = modal ? modal.querySelector('.card-hover-content') : null;
-        if (hoverContent) {
+        // Apply foil shimmer to the image wrapper only — not the full content div
+        // which also contains the caption. This keeps the shimmer clipped to the
+        // card image so it doesn't bleed into the title below.
+        //
+        // The wrapper can't receive a natural mouseenter (it appears under the
+        // cursor, not entered by it), so we directly control foil-active here
+        // rather than waiting for foil-animation.js's mouseenter listener.
+        const imageWrap = modal ? modal.querySelector('.card-hover-image-wrap') : null;
+        if (imageWrap) {
             if (isFoil) {
                 // 1. Reset: remove foil-active so the ::after snaps back instantly
                 //    (transition:none on the base rule makes this immediate).
-                hoverContent.classList.remove('foil-active');
-                hoverContent.classList.add('foil-shimmer');
-                // 2. In the next frame, add foil-active to start a fresh sweep.
-                //    rAF ensures the browser processes the remove before the add,
-                //    so every showCardHoverModal call re-triggers the animation.
+                imageWrap.classList.remove('foil-active');
+                imageWrap.classList.add('foil-shimmer');
+                // 2. In the next frame, re-roll the random vars then add foil-active
+                //    to start a fresh, varied sweep. rAF ensures the browser
+                //    processes the remove before the add so the snap-back is clean.
                 requestAnimationFrame(() => {
-                    hoverContent.classList.add('foil-active');
+                    if (typeof window.randomiseFoilVars === 'function') {
+                        window.randomiseFoilVars(imageWrap);
+                    }
+                    imageWrap.classList.add('foil-active');
                 });
             } else {
-                hoverContent.classList.remove('foil-active');
-                hoverContent.classList.remove('foil-shimmer');
+                imageWrap.classList.remove('foil-active');
+                imageWrap.classList.remove('foil-shimmer');
             }
         }
         const stats = document.getElementById('cardHoverStats');
@@ -922,9 +928,9 @@
                 }
                 modal.style.display = 'none';
                 // Reset foil animation state so the next hover always starts fresh
-                const hoverContent = modal.querySelector('.card-hover-content');
-                if (hoverContent) {
-                    hoverContent.classList.remove('foil-active');
+                const imageWrap = modal.querySelector('.card-hover-image-wrap');
+                if (imageWrap) {
+                    imageWrap.classList.remove('foil-active');
                 }
             }
         }, 100);

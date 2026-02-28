@@ -697,14 +697,23 @@
             gap: 8px;
         }
 
+        /* Tight wrapper around the image only — foil-shimmer is applied here
+           so the shimmer is clipped to the image and never bleeds into the caption. */
+        .card-hover-image-wrap {
+            display: inline-block;
+            line-height: 0;
+            border-radius: 6px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+        }
+
         .card-hover-image {
             max-width: 345px;
             max-height: 483px;
             width: auto;
             height: auto;
             object-fit: contain;
-            border-radius: 6px;
-            border: 2px solid rgba(78, 205, 196, 0.3);
+            border-radius: 4px;
+            display: block;
         }
 
         .card-hover-caption {

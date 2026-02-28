@@ -71,23 +71,60 @@
 .foil-shimmer {
     position: relative;
     overflow: hidden;
-    /* Per-element sweep duration, randomised by foil-animation.js.
-     * Used by the :hover transition on ::after. */
-    --foil-duration: 0.9s;
+    /*
+     * All four vars are re-randomised on every hover by foil-animation.js,
+     * so each shimmer instance looks distinct:
+     *
+     *   --foil-duration      how long the sweep takes          (0.3 – 1.15 s)
+     *   --foil-translate-end where the band stops on the card  (-5% – +5% of element)
+     *   --foil-opacity       overall shimmer brightness        (0.55 – 1.0)
+     *   --foil-angle         gradient sweep direction          (90 – 150 deg)
+     *
+     * Defaults below are only a fallback; foil-animation.js overwrites them.
+     */
+    --foil-duration:      0.9s;
+    --foil-translate-end: 0%;
+    --foil-opacity:       1;
+    --foil-angle:         115deg;
 }
 
 .foil-shimmer::after {
     content: '';
     position: absolute;
-    inset: 0;
+    /*
+     * Gradient restored to the look from the last commit.
+     * Angle driven by CSS var so foil-animation.js can randomise the sweep
+     * direction; all other colour stops are unchanged from the original.
+     */
     background: linear-gradient(
-        115deg,
+        var(--foil-angle),
         transparent 20%,
         rgba(255, 255, 255, 0.30) 38%,
         rgba(200, 160, 255, 0.45) 50%,
         rgba(255, 210, 100, 0.30) 62%,
         transparent 80%
     );
+    opacity: var(--foil-opacity);
+    /*
+     * The element is intentionally LARGER than the card on all sides:
+     *   horizontal: ±20% of card width on each side  (element = 140% card width)
+     *   vertical:   ±50% of card height on each side (element = 200% card height)
+     *
+     * Why: the gradient runs diagonally (var(--foil-angle) ≈ 100–135°). Without
+     * extra room the diagonal band would intersect the element's own edges at
+     * the card corners, producing a visible hard line where the shimmer stops.
+     * overflow:hidden on .foil-shimmer clips all the excess invisibly.
+     *
+     * The ±20% horizontal padding, combined with clamping translateX to ±5%
+     * of element width in foil-animation.js, guarantees that the card edges
+     * always land in the gradient's fully-transparent zone (0–20% or 80–100%).
+     * This prevents the opaque band from being clipped by overflow:hidden at
+     * the card boundary, which would produce a visible hard edge.
+     *
+     * At translateX(0) the gradient centre (50% of element) sits exactly at
+     * 50% of the card: −20% + 50% × 140% = 50%.  Centering is preserved.
+     */
+    inset: -50% -20%;
     /*
      * Resting state: translated entirely off-screen to the right.
      * overflow:hidden on .foil-shimmer clips it invisibly.
@@ -102,12 +139,16 @@
 }
 
 /*
- * Active state — added by foil-animation.js on mouseenter, removed on mouseleave.
- * The transition is declared here (not on the base rule) so the sweep plays
- * on enter but the snap-back is instant on leave.
+ * Active state — added by foil-animation.js on mouseenter (and by
+ * showCardHoverModal for the hover modal), removed on mouseleave/hide.
+ * The transition is declared here so the sweep plays on enter but the
+ * snap-back is instant on leave.
+ *
+ * translateX(var(--foil-translate-end)) lets the band land at a different
+ * horizontal position on the card each time instead of always centring.
  */
 .foil-shimmer.foil-active::after {
-    transform: translateX(0);
+    transform: translateX(var(--foil-translate-end));
     transition: transform var(--foil-duration) ease-out;
 }
 
