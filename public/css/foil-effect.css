@@ -152,6 +152,99 @@
     transition: transform var(--foil-duration) ease-out;
 }
 
+/*
+ * One-shot deck-editor shimmer — used when a card is selected as foil in the
+ * deck editor. The sweep plays once on render and stops at the resting position
+ * (animation-fill-mode: forwards keeps the final frame visible indefinitely).
+ *
+ * Applied via .foil-shimmer.foil-once (added by the renderer when
+ * card.is_foil === true in card-view and tile-view).
+ *
+ * On hover, foil-animation.js still adds .foil-active which overrides this
+ * animation with the interactive transition, giving the usual per-hover sweep.
+ * On mouseleave, .foil-active is removed and the one-shot animation re-runs
+ * from the start — so you always see the sweep when you come back to the card.
+ */
+@keyframes foil-once-sweep {
+    from { transform: translateX(110%); }
+    to   { transform: translateX(0%); }
+}
+
+.foil-shimmer.foil-once::after {
+    /*
+     * --foil-anim-delay defaults to 0s (normal play).
+     * initDeckEditorFoilElements sets it to -100s on already-animated instances
+     * so the animation jumps to its end state immediately, keeping the shimmer
+     * static on cards that were foil before the re-render.
+     * Custom properties cascade into ::after, so this works without touching
+     * the pseudo-element directly.
+     */
+    animation: foil-once-sweep var(--foil-duration) ease-out var(--foil-anim-delay, 0s) forwards;
+    /* Override the static off-screen resting state from the base rule */
+    transform: none;
+    transition: none;
+    opacity: 0.85;
+}
+
+/* foil-active (hover) takes priority — plays the interactive sweep instead */
+.foil-shimmer.foil-once.foil-active::after {
+    animation: none;
+    transform: translateX(var(--foil-translate-end));
+    transition: transform var(--foil-duration) ease-out;
+}
+
+/*
+ * Wrapper for the card image in card-view; keeps foil-shimmer scoped to the
+ * image so overflow:hidden never clips the action buttons below it.
+ */
+.card-foil-img-wrap {
+    width: 100%;
+    flex-grow: 1;
+    display: block;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/*
+ * Standalone shimmer overlay for deck-editor tile view character cards.
+ *
+ * The character tile already uses ::before (card image) and ::after (dark
+ * overlay), so we cannot use pseudo-elements here. This div animates its
+ * own background-position instead — no ::after, no overflow tricks.
+ *
+ * The gradient is applied as a background-image directly on the div; it
+ * stays naturally within the div's bounds (background never bleeds out).
+ *
+ * !important on position/inset overrides the .character-card > * rule in
+ * index.css which sets position: relative; z-index: 1 on all children.
+ * pointer-events: none ensures the overlay never blocks button clicks.
+ * Document order (injected before info/action divs) means text renders
+ * on top at the same z-index without needing explicit z-index bumping.
+ */
+@keyframes tile-foil-sweep {
+    from { background-position: 250% center; }
+    to   { background-position: 0% center; }
+}
+
+.tile-foil-shimmer {
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: 6px;
+    pointer-events: none;
+    background-image: linear-gradient(
+        var(--foil-angle, 115deg),
+        transparent 20%,
+        rgba(255, 255, 255, 0.30) 38%,
+        rgba(200, 160, 255, 0.45) 50%,
+        rgba(255, 210, 100, 0.30) 62%,
+        transparent 80%
+    );
+    background-size: 250% 100%;
+    background-position: 250% center;
+    /* --foil-anim-delay: -100s snaps to end state for already-animated instances */
+    animation: tile-foil-sweep var(--foil-duration, 0.7s) ease-out var(--foil-anim-delay, 0s) forwards;
+}
+
 /* Ensure action buttons render above the shimmer overlay */
 .foil-shimmer .card-view-actions,
 .foil-shimmer .deck-card-editor-actions {

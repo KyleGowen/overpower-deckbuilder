@@ -96,6 +96,14 @@
 
         randomiseVars(el);
 
+        /*
+         * Deck-editor card-view thumbnails carry .foil-once: their shimmer is
+         * a one-shot CSS animation that plays on render and then stays static.
+         * They must not respond to hover — the shimmer should remain frozen
+         * until the user deselects Foil (which removes the class on re-render).
+         */
+        if (el.classList.contains('foil-once')) return;
+
         el.addEventListener('mouseenter', function () {
             randomiseVars(el);
             el.classList.add('foil-active');

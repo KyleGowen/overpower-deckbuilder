@@ -1178,17 +1178,18 @@ function renderDeckCardsCardView() {
                     const instanceFoilButton = instanceHasFoilVersion
                         ? `<button class="foil-btn card-view-btn${instanceIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index}, ${i})">Foil</button>`
                         : '';
-                    const instanceFoilShimmerClass = instanceIsFoil ? ' foil-shimmer' : '';
                     
                     cardsHtml += `
-                        <div class="deck-card-card-view-item ${koDimmedClassCardView}${instanceFoilShimmerClass}" 
+                        <div class="deck-card-card-view-item ${koDimmedClassCardView}" 
                              data-index="${index}" 
                              data-card-id="${card.cardId}"
                              data-type="${card.type}"
                              data-instance="${i + 1}"
                              onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', null, null, ${instanceIsFoil})"
                              onmouseleave="hideCardHoverModal()">
-                            <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
+                            <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
+                                <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
+                            </div>
                             <div class="card-view-actions">
                                 ${instanceChangeArtButton}
                                 ${instanceFoilButton}
@@ -1215,6 +1216,9 @@ function renderDeckCardsCardView() {
         applyKODimming();
     }
     
+    // Randomise foil vars for one-shot deck-editor shimmer elements
+    initDeckEditorFoilElements(deckCardsEditor);
+    
     // Update deck summary and card count to ensure Draw Hand button state is correct
     updateDeckEditorCardCount();
     if (typeof updateDeckSummary === 'function') {
@@ -1222,6 +1226,110 @@ function renderDeckCardsCardView() {
     }
 }
 
+
+/**
+ * Tracks which foil card instances have already played their one-shot animation
+ * so that re-renders (triggered by toggling foil on a different card) do not
+ * restart the shimmer on cards that are already statically shimmering.
+ *
+ * Keys are "<cardId>::<instanceIndex>" prefixed with "shimmer::" or "tile::"
+ * depending on element type.  The set is pruned each render cycle so keys for
+ * cards that are no longer foil are automatically removed, allowing the
+ * animation to replay if the user re-selects foil for the same card.
+ */
+const _foilAnimatedInstances = new Set();
+
+/**
+ * Returns a stable string key for a foil element based on its parent card's
+ * data-card-id and data-instance attributes.  Returns null if the parent
+ * cannot be found (element cannot be tracked).
+ */
+function _getFoilAnimationKey(el) {
+    const cardItem = el.closest('[data-card-id]');
+    if (!cardItem) return null;
+    const cardId = cardItem.dataset.cardId || '';
+    const instance = cardItem.dataset.instance || '0';
+    return `${cardId}::${instance}`;
+}
+
+/**
+ * After re-rendering the deck editor, randomise CSS custom properties on every
+ * foil element so each one-shot sweep animation looks distinct.
+ *
+ * Handles two element types:
+ *   .foil-shimmer.foil-once  — card-view image wrappers (::after-based shimmer)
+ *   .tile-foil-shimmer       — tile-view overlays (background-position animation)
+ *
+ * Cards that were already foil before this render (tracked in _foilAnimatedInstances)
+ * snap immediately to their end state so their shimmer stays static.
+ * Only newly-foiled cards play the full sweep animation.
+ */
+function initDeckEditorFoilElements(container) {
+    if (typeof window.randomiseFoilVars !== 'function') return;
+
+    const currentKeys = new Set();
+
+    // Card-view image wrappers (foil-shimmer + foil-once)
+    container.querySelectorAll('.foil-shimmer.foil-once').forEach(el => {
+        const key = _getFoilAnimationKey(el);
+        const trackKey = key ? `shimmer::${key}` : null;
+        if (trackKey) currentKeys.add(trackKey);
+
+        const alreadyAnimated = !!(trackKey && _foilAnimatedInstances.has(trackKey));
+
+        if (alreadyAnimated) {
+            /*
+             * Card was already foil before this re-render — keep all CSS vars
+             * exactly as they were (no re-randomise) and snap the animation to
+             * its end state.  Skipping randomiseFoilVars prevents the visible
+             * colour/opacity flicker that would otherwise occur when a different
+             * card is foil-toggled and triggers a full re-render.
+             */
+            el.style.setProperty('--foil-anim-delay', '-100s');
+            el.classList.remove('foil-once');
+            void el.offsetWidth;
+            el.classList.add('foil-once');
+        } else {
+            // Newly-foiled card — randomise vars then play the sweep animation.
+            window.randomiseFoilVars(el);
+            el.style.setProperty('--foil-anim-delay', '0s');
+            el.classList.remove('foil-once');
+            void el.offsetWidth;
+            el.classList.add('foil-once');
+            if (trackKey) _foilAnimatedInstances.add(trackKey);
+        }
+    });
+
+    // Tile-view shimmer overlays — set vars then restart background-position animation
+    container.querySelectorAll('.tile-foil-shimmer').forEach(el => {
+        const key = _getFoilAnimationKey(el);
+        const trackKey = key ? `tile::${key}` : null;
+        if (trackKey) currentKeys.add(trackKey);
+
+        const alreadyAnimated = !!(trackKey && _foilAnimatedInstances.has(trackKey));
+
+        if (alreadyAnimated) {
+            // Snap to end state without re-randomising so appearance is unchanged.
+            el.style.setProperty('--foil-anim-delay', '-100s');
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = '';
+        } else {
+            window.randomiseFoilVars(el);
+            el.style.setProperty('--foil-anim-delay', '0s');
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = '';
+            if (trackKey) _foilAnimatedInstances.add(trackKey);
+        }
+    });
+
+    // Prune keys for cards that are no longer foil so the animation replays
+    // if the user re-selects foil for the same card later.
+    for (const k of _foilAnimatedInstances) {
+        if (!currentKeys.has(k)) _foilAnimatedInstances.delete(k);
+    }
+}
 
 // ===== Category toggle, power sort, character/mission group toggles =====
 
@@ -1910,11 +2018,16 @@ async function displayDeckCardsForEditing() {
                     } else if (card.type === 'advanced_universe' || card.type === 'advanced-universe') {
                         mapKeyType = 'advanced-universe';
                     }
-                    // Direct lookup using UUID
-                    let availableCard = window.availableCardsMap.get(card.cardId);
-                    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
-                    if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${card.cardId}`);
-                    if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
+                    // Direct lookup using UUID — use selected alternate (foil or alt art) if set
+                    const tileCardIdForLookup = (card.selectedAlternateCardIds && card.selectedAlternateCardIds[0])
+                        ? card.selectedAlternateCardIds[0]
+                        : (card.selectedAlternateCardId || card.cardId);
+                    let availableCard = window.availableCardsMap.get(tileCardIdForLookup);
+                    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${tileCardIdForLookup}`);
+                    if (!availableCard && mapKeyType) availableCard = window.availableCardsMap.get(`${mapKeyType}_${tileCardIdForLookup}`);
+                    if (!availableCard && card.type && card.type.includes('_')) availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${tileCardIdForLookup}`);
+                    // Fall back to base card if alternate not found
+                    if (!availableCard) availableCard = window.availableCardsMap.get(card.cardId) || window.availableCardsMap.get(`${card.type}_${card.cardId}`);
                     
                     // Try alternate key formats for universe cards if direct lookup fails
                     if (!availableCard && (card.type === 'basic-universe' || card.type === 'basic_universe' || 
@@ -2147,16 +2260,18 @@ async function displayDeckCardsForEditing() {
                 const tileFoilButton = tileHasFoilVersion
                     ? `<button class="foil-btn${tileIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index})">Foil</button>`
                     : '';
+                const tileHoverIsFoil = tileIsFoil;
                 
                 cardsHtml += `
                         <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass} ${advancedUniverseClass} ${trainingClass} ${koDimmedClass}" draggable="true" data-index="${index}" data-type="${card.type}" data-card-id="${card.cardId}"
                              ${bgImageData}
-                             onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${cardDisplayNameForPreview.replace(/'/g, "\\'")}')"
+                             onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${cardDisplayNameForPreview.replace(/'/g, "\\'")}', null, null, ${tileHoverIsFoil})"
                          onmouseleave="hideCardHoverModal()"
                          ondragstart="handleDeckCardDragStart(event)"
                          ondragend="handleDeckCardDragEnd(event)"
                          ondragover="handleDeckCardDragOver(event)"
                          ondrop="handleDeckCardDrop(event)">
+                        ${tileIsFoil ? '<div class="tile-foil-shimmer" aria-hidden="true"></div>' : ''}
                         <div class="deck-card-editor-info">
                                 <div class="deck-card-editor-name">${cardDisplayNameForPreview}${card.quantity > 1 ? ` (${card.quantity})` : ''}</div>
                             ${cardDetails ? `<div class="deck-card-editor-stats">${cardDetails}</div>` : ''}
@@ -2189,6 +2304,9 @@ async function displayDeckCardsForEditing() {
     if (currentUser) {
         applyKODimming();
     }
+
+    // Randomise foil vars for one-shot deck-editor shimmer elements
+    initDeckEditorFoilElements(deckCardsEditor);
     
     // Debug: Check character section layout and body classes
     setTimeout(() => {

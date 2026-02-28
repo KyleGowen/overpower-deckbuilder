@@ -275,35 +275,64 @@
         /* Card View Image */
         .card-view-image {
             width: 100%;
-            flex-grow: 1; /* Fill available space above buttons */
+            height: 100%;
             object-fit: cover;
             object-position: center top; /* Move image up to reduce empty head space */
             border-radius: 6px;
-            margin-bottom: 8px; /* Space between image and buttons - same as landscape */
+            display: block;
         }
         
-        /* Portrait image - increase size by 15% and fill frame */
+        /*
+         * Wrapper that receives .foil-shimmer so that overflow:hidden from the
+         * shimmer class never clips the action buttons beneath the card.
+         * It takes the same flex role the <img> used to have.
+         * overflow:hidden is required to clip the oversized ::after pseudo-element
+         * (inset: -50% -20%) that creates the shimmer effect.
+         */
+        .card-foil-img-wrap {
+            flex-grow: 1;
+            width: 100%;
+            min-height: 0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        /* Portrait wrapper — fill frame, no margin below */
+        .deck-card-card-view-item:not([data-type="character"]):not([data-type="location"]):not([data-type="event"]) .card-foil-img-wrap {
+            flex-grow: 0;
+            width: 115%;
+            height: 100%;
+            margin-left: -7.5%;
+            margin-right: -7.5%;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+        
+        /* Portrait image inside wrapper */
         .deck-card-card-view-item:not([data-type="character"]):not([data-type="location"]):not([data-type="event"]) .card-view-image {
-            width: 115%; /* Increase width by 15% */
-            height: 100%; /* Fill the entire frame height */
-            margin-left: -7.5%; /* Center the larger image */
-            margin-right: -7.5%; /* Center the larger image */
-            margin-bottom: 0; /* Remove space below image for portrait cards */
-            flex-grow: 0; /* Don't use flex-grow, use fixed height */
-            object-fit: cover; /* Ensure image covers the frame */
-            object-position: center top; /* Position image at top of frame */
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
         }
         
-        /* Landscape image for character, location, and event cards */
+        /* Landscape wrapper and image for character, location, and event cards */
+        .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap,
+        .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap,
+        .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+            flex-grow: 1;
+            flex-shrink: 0;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
         .deck-card-card-view-item[data-type="character"] .card-view-image,
         .deck-card-card-view-item[data-type="location"] .card-view-image,
         .deck-card-card-view-item[data-type="event"] .card-view-image {
-            width: 100%; /* Full width of container */
-            /* Removed fixed height - uses flex-grow from base class */
-            object-position: center top; /* Move image up to reduce empty head space */
-            margin-bottom: 8px; /* Space between image and buttons */
+            width: 100%;
+            object-position: center top;
             margin-right: 0;
-            flex-shrink: 0;
         }
         
         /* Card View Actions Container */
