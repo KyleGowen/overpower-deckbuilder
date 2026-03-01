@@ -309,7 +309,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
             expect(globalNavResponse.text).toContain('function createNewDeck()');
             
             // Verify the main page contains the external script references
-            expect(response.text).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(response.text).toContain('src="/js/deck-editor-core.js"');
         });
     });
 

@@ -61,7 +61,7 @@
                     }
                     const imagePath = window.DeckSelection.getDeckCardImagePath(card);
                     const title = card.name || 'Unknown Character';
-                    const foilClass = card.is_foil ? ' foil-shimmer' : '';
+                    const foilClass = card.is_foil ? ' foil-shimmer foil-once' : '';
                     if (imagePath) {
                         html += `<div class="deck-character-card-display deck-tile-lazy-bg${foilClass}" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
                     } else {

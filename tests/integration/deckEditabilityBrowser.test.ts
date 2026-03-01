@@ -141,7 +141,7 @@ describe('Deck Editability Browser Tests', () => {
       const html = response.text;
 
       // Check for external script references that contain the functions
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       console.log('✅ JavaScript functions are properly referenced and defined');
     });
@@ -214,7 +214,7 @@ describe('Deck Editability Browser Tests', () => {
       const scripts = scriptMatch!.join('\n');
       
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ JavaScript contains proper editability control logic');
     });
@@ -230,7 +230,7 @@ describe('Deck Editability Browser Tests', () => {
       expect(html).toContain('<link rel="stylesheet" href="/css/index.css">');
 
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ Cursor styles are properly defined and controlled');
     });
@@ -258,7 +258,7 @@ describe('Deck Editability Browser Tests', () => {
       // Verify the logic exists for other scenarios
       const scripts = html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '';
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ All editability scenarios are covered in the code');
     });
@@ -274,7 +274,7 @@ describe('Deck Editability Browser Tests', () => {
       const scripts = html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '';
       
       // Should have external script references that contain the error handling logic
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       console.log('✅ Error handling for read-only mode edit attempts is present');
     });

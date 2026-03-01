@@ -44,7 +44,7 @@ describe('Deck Editability HTML Tests', () => {
       const html = response.text;
 
       // Check for external script references that contain the functions
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       console.log('✅ JavaScript functions are properly defined and referenced');
     });
@@ -57,7 +57,7 @@ describe('Deck Editability HTML Tests', () => {
       const html = response.text;
 
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ Read-only mode logic is present in JavaScript');
     });
@@ -70,7 +70,7 @@ describe('Deck Editability HTML Tests', () => {
       const html = response.text;
 
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ Cursor style management is implemented');
     });
@@ -83,7 +83,7 @@ describe('Deck Editability HTML Tests', () => {
       const html = response.text;
 
       // Check for external script references that contain the error handling logic
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       console.log('✅ Error handling for read-only mode is implemented');
     });
@@ -182,7 +182,7 @@ describe('Deck Editability HTML Tests', () => {
       // 5. ADMIN viewing other's deck -> Read-only (would need auth)
 
       // Check for external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ All editability scenarios are covered in the code');
     });
@@ -252,7 +252,7 @@ describe('Deck Editability HTML Tests', () => {
       const html = response.text;
 
       // Check for external script references that contain the error messages
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       console.log('✅ Error messages are user-friendly');
     });

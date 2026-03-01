@@ -419,7 +419,7 @@ describe('Deck Clickability Tests', () => {
       expect(html).toContain('id="deckEditorDescription"');
 
       // Check for external script references that contain the functions
-      expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
+      expect(html).toContain('src="/js/ui-utility-functions.js"');
 
       // Check that CSS link is present (CSS is now external)
       expect(html).toContain('<link rel="stylesheet" href="/css/index.css">');
@@ -436,7 +436,7 @@ describe('Deck Clickability Tests', () => {
       const scripts = html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '';
 
       // Check for the external script reference
-      expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(html).toContain('src="/js/deck-editor-core.js"');
 
       console.log('✅ JavaScript logic matches test expectations');
     });

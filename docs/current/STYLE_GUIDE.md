@@ -2501,14 +2501,14 @@ These properties are defined in `public/css/index.css` alongside `.ko-btn` and `
 
 ### Button States
 
-When selected, the Reserve button uses the same visual pattern as Foil and KO: solid filled background with dark text.
+When selected, the Reserve button darkens (grey tone) with a pressed-in inset shadow so it is clearly distinct from the unselected state.
 
 | State | Class | Appearance |
 |------|-------|------------|
 | Unselected | `.reserve-btn` | `rgba(255, 255, 255, 0.1)` background, white text |
-| Selected | `.reserve-btn.active` | `#ffd700` (gold) background, dark text `rgba(26, 26, 46, 0.9)` |
-| Selected hover | `.reserve-btn.active:hover` | `#ffed4e` (lighter gold) |
-| Read-only (selected) | `.reserve-btn.active:disabled` | Same gold as selected but non-interactive |
+| Selected | `.reserve-btn.active` | `rgba(100, 100, 100, 0.6)` background, white text, `box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6)` |
+| Selected hover | `.reserve-btn.active:hover` | Slightly brighter grey (`rgba(120, 120, 120, 0.65)`), same inset shadow |
+| Read-only (selected) | `.reserve-btn.active:disabled` | Same darkened pressed-in look but non-interactive |
 
 ### Location
 

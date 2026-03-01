@@ -328,18 +328,18 @@ function displayPowerCards(cards) {
     
     tbody.innerHTML = '';
     
-    // Group power cards by power_type, value, and set
-    // Cards with the same power_type, value, and set are alternate arts of the same card
+    // Group power cards by power_type and value only (not set) — includes alternates across sets
+    // e.g. 5 Multi Power: Tarzan (ERB) and Cthulhu (ERBP) are alternate arts of the same card
+    // Exclude foil cards — they only appear on ALL tab; foil+base of same art should not show arrows
     const groups = new Map();
     
     cards.forEach(card => {
+        if (card.is_foil) return; // foils only on ALL tab, not in type-tab art cycling
         // Normalize values to ensure consistent grouping
         const powerType = (card.power_type || card.type || '').trim();
         const value = String(card.value || '').trim(); // Convert to string for consistent comparison
-        const set = (card.set || 'ERB').trim();
-        
-        // Create a normalized key for grouping
-        const key = `${powerType}|${value}|${set}`;
+        // Key omits set so Tarzan (ERB) and Cthulhu (ERBP) group together
+        const key = `${powerType}|${value}`;
         
         if (!groups.has(key)) {
             groups.set(key, []);

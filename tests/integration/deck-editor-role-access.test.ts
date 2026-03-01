@@ -431,7 +431,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .expect(200);
 
       // Verify external script references are present
-      expect(response.text).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(response.text).toContain('src="/js/deck-editor-core.js"');
     });
 
     it('should have proper error handling for guest user restrictions', async () => {
@@ -442,7 +442,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
       // Verify guest user restriction checks are present
       expect(response.text).toContain('isGuestUser');
-      expect(response.text).toContain('<script src="/js/deck-editor-core.js"></script>');
+      expect(response.text).toContain('src="/js/deck-editor-core.js"');
     });
   });
 

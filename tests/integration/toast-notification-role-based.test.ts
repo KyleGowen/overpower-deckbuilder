@@ -80,8 +80,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             // Check that the HTML contains the isGuestUser function
             const html = response.text;
             // Verify the external script files are loaded
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
 
         it('should show toast notification for ADMIN role when editing title', async () => {
@@ -106,8 +106,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Check that the HTML contains the external script files
             const html = response.text;
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
             
             // Clean up admin user
             await pool.query('DELETE FROM users WHERE id = $1', [adminUserId]);
@@ -120,8 +120,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Check that the HTML contains the external script files
             const html = response.text;
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
     });
 
@@ -133,8 +133,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Check that the HTML contains the external script files
             const html = response.text;
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
 
         it('should show toast notification for ADMIN role when editing description', async () => {
@@ -159,8 +159,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Check that the HTML contains the external script files
             const html = response.text;
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
             
             // Clean up admin user
             await pool.query('DELETE FROM users WHERE id = $1', [adminUserId]);
@@ -173,8 +173,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Check that the HTML contains the external script files
             const html = response.text;
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
     });
 
@@ -188,8 +188,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Verify the isGuestUser function exists and has the correct logic
             // Verify the external script files are loaded
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
 
         it('should correctly identify non-GUEST role users', async () => {
@@ -201,8 +201,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             // Verify the isGuestUser function exists
             // Verify the external script files are loaded
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
     });
 
@@ -215,8 +215,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             const html = response.text;
             
             // Verify the external script files are loaded
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
 
         it('should use the correct notification message and type', async () => {
@@ -227,8 +227,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             const html = response.text;
             
             // Verify the external script files are loaded
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
     });
 
@@ -258,8 +258,8 @@ describe('Toast Notification Role-Based Behavior', () => {
             expect(html).toContain('startEditingTitle');
             expect(html).toContain('startEditingDescription');
             expect(html).toContain('saveTitleEdit');
-            expect(html).toContain('<script src="/js/ui-utility-functions.js"></script>');
-            expect(html).toContain('<script src="/js/deck-editor-core.js"></script>');
+            expect(html).toContain('src="/js/ui-utility-functions.js"');
+            expect(html).toContain('src="/js/deck-editor-core.js"');
         });
     });
 });
