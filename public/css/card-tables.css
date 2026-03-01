@@ -301,10 +301,10 @@
         /* Portrait wrapper — fill frame, no margin below */
         .deck-card-card-view-item:not([data-type="character"]):not([data-type="location"]):not([data-type="event"]) .card-foil-img-wrap {
             flex-grow: 0;
-            width: 115%;
+            width: 100%;
             height: 100%;
-            margin-left: -7.5%;
-            margin-right: -7.5%;
+            margin-left: 0;
+            margin-right: 0;
             margin-bottom: 0;
             overflow: hidden;
         }
