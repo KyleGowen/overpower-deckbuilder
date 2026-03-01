@@ -1,0 +1,107 @@
+/**
+ * Integration tests for foil handling in Deck Selection.
+ *
+ * Verifies:
+ * - Create deck with foil character
+ * - Deck list API returns deck with foil card (is_foil on character card)
+ * - Deck selection page loads foil-related scripts (foil-shimmer, deckTilesRenderer.js)
+ */
+
+import request from 'supertest';
+import { Pool } from 'pg';
+import { app, initializeTestServer } from '../../src/test-server';
+import { DataSourceConfig } from '../../src/config/DataSourceConfig';
+import { integrationTestUtils } from '../setup-integration';
+
+describe('Foil Deck Selection Integration Tests', () => {
+  let pool: Pool;
+  let testUser: any;
+  let testDeckId: string;
+  let authCookie: string;
+  let foilCharacterId: string;
+
+  beforeAll(async () => {
+    await initializeTestServer();
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower',
+    });
+
+    await integrationTestUtils.ensureGuestUser();
+
+    const timestamp = Date.now();
+    const userRepository = DataSourceConfig.getInstance().getUserRepository();
+    testUser = await userRepository.createUser(
+      `foil-deck-sel-${timestamp}`,
+      `foil-deck-sel-${timestamp}@example.com`,
+      'password123',
+      'USER'
+    );
+    integrationTestUtils.trackTestUser(testUser.id);
+
+    const foilMapResult = await pool.query(
+      'SELECT foil_card_id FROM foil_card_map WHERE card_type = $1 LIMIT 1',
+      ['character']
+    );
+    if (foilMapResult.rows.length === 0) {
+      throw new Error('No foil characters in foil_card_map - run migrations');
+    }
+    foilCharacterId = foilMapResult.rows[0].foil_card_id;
+
+    const deckRepository = DataSourceConfig.getInstance().getDeckRepository();
+    const deck = await deckRepository.createDeck(
+      testUser.id,
+      'Foil Deck Selection Test',
+      'Deck for foil deck selection tests'
+    );
+    testDeckId = deck.id;
+    integrationTestUtils.trackTestDeck(testDeckId);
+
+    const loginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({
+        username: `foil-deck-sel-${timestamp}`,
+        password: 'password123',
+      });
+    expect(loginResponse.status).toBe(200);
+    authCookie = loginResponse.headers['set-cookie']![0].split(';')[0];
+
+    await request(app)
+      .post(`/api/decks/${testDeckId}/cards`)
+      .set('Cookie', authCookie)
+      .send({ cardId: foilCharacterId, cardType: 'character', quantity: 1 })
+      .expect(200);
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  it('should return deck list with foil character card having is_foil', async () => {
+    const response = await request(app)
+      .get('/api/decks')
+      .set('Cookie', authCookie)
+      .expect(200);
+
+    expect(response.body.success).toBe(true);
+    const deck = response.body.data?.find(
+      (d: { metadata: { id: string } }) => d.metadata?.id === testDeckId
+    );
+    expect(deck).toBeTruthy();
+    const foilCharCard = deck.cards?.find(
+      (c: { type: string; cardId: string }) =>
+        c.type === 'character' && c.cardId === foilCharacterId
+    );
+    expect(foilCharCard).toBeTruthy();
+    expect(foilCharCard.is_foil).toBe(true);
+  });
+
+  it('should load deck selection page with foil-related scripts', async () => {
+    const htmlResponse = await request(app)
+      .get('/')
+      .expect(200);
+
+    const html = htmlResponse.text;
+    expect(html).toContain('deckTilesRenderer.js');
+    expect(html).toContain('foil-effect.css');
+  });
+});

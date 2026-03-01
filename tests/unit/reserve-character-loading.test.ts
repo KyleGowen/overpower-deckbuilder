@@ -52,9 +52,9 @@ describe('Reserve Character Loading Functionality', () => {
             else if (hasReserveCharacter) {
                 return ''; 
             }
-            // If no reserve character is selected, show "Select Reserve" button
+            // If no reserve character is selected, show "Reserve" button
             else {
-                const buttonText = 'Select Reserve';
+                const buttonText = 'Reserve';
                 const buttonClass = 'reserve-btn';
                 const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
                 return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
@@ -83,13 +83,13 @@ describe('Reserve Character Loading Functionality', () => {
             expect(result).toBe('');
         });
 
-        it('should return "Select Reserve" button when no reserve character is selected', () => {
+        it('should return "Reserve" button when no reserve character is selected', () => {
             // No reserve character selected
             mockCurrentDeckData.metadata.reserve_character = null;
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
             expect(result).toContain('selectReserveCharacter(\'billy-the-kid-id\', 0)');
         });
@@ -100,7 +100,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
 
@@ -110,7 +110,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
 
@@ -120,7 +120,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
     });
@@ -133,8 +133,8 @@ describe('Reserve Character Loading Functionality', () => {
             let result1 = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             let result2 = (global as any).getReserveCharacterButton('sheriff-id', 1);
             
-            expect(result1).toContain('Select Reserve');
-            expect(result2).toContain('Select Reserve');
+            expect(result1).toContain('Reserve');
+            expect(result2).toContain('Reserve');
             
             // Select Billy the Kid as reserve
             mockCurrentDeckData.metadata.reserve_character = 'billy-the-kid-id';
@@ -157,7 +157,7 @@ describe('Reserve Character Loading Functionality', () => {
             expect(result2).toContain('reserve-btn active');
         });
 
-        it('should show all "Select Reserve" buttons when reserve is deselected', () => {
+        it('should show all "Reserve" buttons when reserve is deselected', () => {
             // Initially have Billy as reserve
             mockCurrentDeckData.metadata.reserve_character = 'billy-the-kid-id';
             
@@ -173,8 +173,8 @@ describe('Reserve Character Loading Functionality', () => {
             result1 = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             result2 = (global as any).getReserveCharacterButton('sheriff-id', 1);
             
-            expect(result1).toContain('Select Reserve');
-            expect(result2).toContain('Select Reserve');
+            expect(result1).toContain('Reserve');
+            expect(result2).toContain('Reserve');
         });
     });
 
@@ -223,7 +223,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
 
@@ -247,7 +247,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
     });
@@ -258,7 +258,7 @@ describe('Reserve Character Loading Functionality', () => {
             
             const result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
         });
 
@@ -297,7 +297,7 @@ describe('Reserve Character Loading Functionality', () => {
             mockCurrentDeckData.metadata.reserve_character = null;
             
             let result = (global as any).getReserveCharacterButton('billy-the-kid-id', 0);
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             
             // Simulate deck reload with reserve character
             mockCurrentDeckData.metadata.reserve_character = 'billy-the-kid-id';

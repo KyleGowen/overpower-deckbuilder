@@ -11,6 +11,7 @@ import { DeckValidationService } from './services/deckValidationService';
 import { DeckBackgroundService } from './services/deckBackgroundService';
 import { CollectionsRepository } from './database/collectionsRepository';
 import { CollectionService } from './services/collectionService';
+import { FoilCardMapRepository } from './database/foilCardMapRepository';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 
 import path from 'path';
@@ -315,6 +316,16 @@ app.get('/api/basic-universe', async (req, res) => {
   } catch (error) {
     console.error('Error fetching basic universe cards:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch basic universe cards' });
+  }
+});
+
+const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
+app.get('/api/foil-card-map', async (_req, res) => {
+  try {
+    const entries = await foilCardMapRepository.getFoilCardMap();
+    res.json({ success: true, data: entries });
+  } catch {
+    res.status(500).json({ success: false, error: 'Failed to fetch foil card map' });
   }
 });
 
@@ -1438,22 +1449,22 @@ app.get('/deck-editor/:deckId', optionalAuth, async (req: Request, res) => {
   const reserveButtons = isReadOnly ? '' : `
                     <div class="deck-card-editor" data-card-id="char-1">
                         <div class="deck-card-editor-reserve">
-                            <button class="reserve-btn" data-character-id="char-1">Select Reserve</button>
+                            <button class="reserve-btn" data-character-id="char-1">Reserve</button>
                         </div>
                     </div>
                     <div class="deck-card-editor" data-card-id="char-2">
                         <div class="deck-card-editor-reserve">
-                            <button class="reserve-btn" data-character-id="char-2">Select Reserve</button>
+                            <button class="reserve-btn" data-character-id="char-2">Reserve</button>
                         </div>
                     </div>
                     <div class="deck-card-editor" data-card-id="char-3">
                         <div class="deck-card-editor-reserve">
-                            <button class="reserve-btn" data-character-id="char-3">Select Reserve</button>
+                            <button class="reserve-btn" data-character-id="char-3">Reserve</button>
                         </div>
                     </div>
                     <div class="deck-card-editor" data-card-id="char-4">
                         <div class="deck-card-editor-reserve">
-                            <button class="reserve-btn" data-character-id="char-4">Select Reserve</button>
+                            <button class="reserve-btn" data-character-id="char-4">Reserve</button>
                         </div>
                     </div>`;
   

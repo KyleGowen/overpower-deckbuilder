@@ -82,9 +82,9 @@ function getReserveCharacterButton(cardId: string, index: number): string {
     else if (hasReserveCharacter) {
         return ''; 
     }
-    // If no reserve character is selected, show "Select Reserve" button
+    // If no reserve character is selected, show "Reserve" button
     else {
-        const buttonText = 'Select Reserve';
+        const buttonText = 'Reserve';
         const buttonClass = 'reserve-btn';
         const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
         return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
@@ -125,9 +125,9 @@ describe('Read-Only Reserve Indicator Functionality', () => {
     });
 
     describe('Edit Mode (isReadOnlyMode = false)', () => {
-        it('should show "Select Reserve" buttons when no reserve character is selected', () => {
+        it('should show "Reserve" buttons when no reserve character is selected', () => {
             const result = getReserveCharacterButton('card-1', 0);
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
             expect(result).toContain('button');
             expect(result).toContain('selectReserveCharacter');

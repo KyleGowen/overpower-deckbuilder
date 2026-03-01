@@ -74,6 +74,7 @@ export interface SpecialCard {
   character: string;
   card_effect: string;
   image: string;
+  image_path?: string;  // Database path; image is derived from this
   set?: string;         // Set code (renamed from universe)
   icons?: string[]; // e.g., ["Energy"], ["Combat","Brute Force"], ["Any-Power"]
   value?: number | null; // level associated with icons
@@ -189,6 +190,7 @@ export interface PowerCard {
   power_type: string;   // Energy | Combat | Brute Force | Intelligence | Any-Power | Multi-Power
   value: number;        // 1..8, or 3..5 for Multi-Power
   image: string;
+  image_path?: string; // Database path; image is derived from this
   set?: string;         // Set code (renamed from universe)
   set_name?: string;    // Set display name from sets table
   one_per_deck: boolean; // Whether this card can only be included once per deck
@@ -221,6 +223,7 @@ export interface DeckCard {
   exclude_from_draw?: boolean; // Whether this card is excluded from Draw Hand (for Training cards with Spartan Training Ground)
   defaultImage?: string; // Preview image path populated when building deck list metadata
   name?: string; // Card name populated when building deck list metadata
+  is_foil?: boolean; // TRUE for foil card rows; used by deck tile preview for foil-shimmer
 }
 
 // Extended type for API operations that includes special cases

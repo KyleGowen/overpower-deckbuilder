@@ -2755,20 +2755,25 @@
             cursor: pointer;
             font-size: 11px;
             transition: all 0.3s ease;
+            flex-shrink: 0;
+            min-width: 52px;
+            white-space: nowrap;
         }
 
         .reserve-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* Inverted color scheme when selected — matches Foil/KO active pattern */
         .reserve-btn.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            color: #ffffff;
+            background: #ffd700;
+            color: rgba(26, 26, 46, 0.9);
+            border-color: #ffd700;
         }
 
         .reserve-btn.active:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: #ffed4e;
+            border-color: #ffed4e;
         }
 
         /* Reserve button in read-only mode (disabled but should still look selected) */
@@ -2783,17 +2788,17 @@
 
         .reserve-btn.active:disabled,
         .reserve-btn.active:disabled:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            color: #ffffff;
+            background: #ffd700;
+            border-color: #ffd700;
+            color: rgba(26, 26, 46, 0.9);
             opacity: 0.95;
         }
 
         /* Read-only reserve indicator styling - matches reserve-btn.active */
         .reserve-indicator {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #ffd700;
+            color: rgba(26, 26, 46, 0.9);
+            border: 1px solid #ffd700;
             padding: 3.3px 6.6px;
             border-radius: 3.3px;
             font-size: 10px;
@@ -4790,6 +4795,14 @@
         .deck-cards-editor:not(.list-view):not(.card-view) .deck-card-editor-item.preview-view .deck-card-editor-actions .reserve-btn:hover {
             background: rgba(255, 255, 255, 0.33) !important; /* was 0.25 */
             border-color: rgba(255, 255, 255, 0.47) !important; /* was 0.35 */
+        }
+
+        /* Tile View: Reserve button active state — solid gold when selected (matches Foil/KO pattern) */
+        .deck-cards-editor:not(.list-view):not(.card-view) .deck-card-editor-item.preview-view .deck-card-editor-actions .reserve-btn.active,
+        .deck-cards-editor:not(.list-view):not(.card-view) .deck-card-editor-item.preview-view .deck-card-editor-actions .reserve-btn.active:hover {
+            background: #ffd700 !important;
+            border-color: #ffd700 !important;
+            color: rgba(26, 26, 46, 0.9) !important;
         }
 
         .deck-cards-editor:not(.list-view):not(.card-view) .deck-card-editor-item.preview-view .deck-card-editor-actions .alternate-art-btn {

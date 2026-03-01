@@ -18,7 +18,7 @@ describe('Reserve Button Rendering - Regression', () => {
     } else if (hasReserveCharacter) {
       return '';
     } else {
-      const buttonText = 'Select Reserve';
+      const buttonText = 'Reserve';
       const buttonClass = 'reserve-btn';
       const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
       return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
@@ -40,10 +40,10 @@ describe('Reserve Button Rendering - Regression', () => {
     expect(html).toBe('');
   });
 
-  it('shows Select Reserve button when no reserve is selected', () => {
+  it('shows Reserve button when no reserve is selected', () => {
     const currentDeckData = { metadata: { reserve_character: null } };
     const html = getReserveCharacterButton(currentDeckData, 'victory-harben', 0);
-    expect(html).toContain('Select Reserve');
+    expect(html).toContain('Reserve');
     expect(html).toContain("selectReserveCharacter('victory-harben', 0)");
   });
 });

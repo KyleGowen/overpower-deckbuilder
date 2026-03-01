@@ -28,6 +28,7 @@
 25. [Sign Up and Account Creation Styling](#sign-up-and-account-creation-styling)
 26. [Create Your First Deck Tile and Sample Decks](#create-your-first-deck-tile-and-sample-decks)
 27. [Foil Card Shimmer Effect](#foil-card-shimmer-effect)
+28. [Reserve Button Styling](#reserve-button-styling)
 
 ## Overview
 
@@ -2478,3 +2479,39 @@ All button states are defined in `foil-effect.css` alongside the shimmer, so all
 - `FOIL_ANGLE_MIN/MAX` — sweep angle range
 
 **No other files need to change** to modify the visual effect.
+
+---
+
+## Reserve Button Styling
+
+### Overview
+
+The **Reserve** button appears on character cards in the deck editor. It allows the user to select which character serves as the reserve. The button label is **"Reserve"** (not "Select Reserve") to keep it compact and aligned with other action buttons (Change Art, Foil, KO).
+
+### Sizing and Layout
+
+When the Foil button is present on character cards with foil variants, the action row can become crowded. To prevent the Reserve button from being mis-sized (vertically elongated or horizontally compressed):
+
+- **Class**: `.reserve-btn`
+- **min-width**: `52px` — ensures consistent width regardless of button count
+- **flex-shrink**: `0` — prevents the button from shrinking in a flex row
+- **white-space**: `nowrap` — prevents text wrapping
+
+These properties are defined in `public/css/index.css` alongside `.ko-btn` and `.alternate-art-btn`. The `.foil-btn` in `foil-effect.css` also uses `flex-shrink: 0` so all action buttons maintain consistent sizing.
+
+### Button States
+
+When selected, the Reserve button uses the same visual pattern as Foil and KO: solid filled background with dark text.
+
+| State | Class | Appearance |
+|------|-------|------------|
+| Unselected | `.reserve-btn` | `rgba(255, 255, 255, 0.1)` background, white text |
+| Selected | `.reserve-btn.active` | `#ffd700` (gold) background, dark text `rgba(26, 26, 46, 0.9)` |
+| Selected hover | `.reserve-btn.active:hover` | `#ffed4e` (lighter gold) |
+| Read-only (selected) | `.reserve-btn.active:disabled` | Same gold as selected but non-interactive |
+
+### Location
+
+- **Tile View**: Bottom-right of character card, in `.deck-card-editor-actions`
+- **Card View**: In the card action row
+- **List View**: `.deck-list-item .reserve-btn` with reduced font-size (10px) and padding

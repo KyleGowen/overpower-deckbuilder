@@ -59,9 +59,9 @@ describe('Reserve Character Functionality', () => {
                 else if (hasReserveCharacter) {
                     return ''; 
                 }
-                // If no reserve character is selected, show "Select Reserve" button
+                // If no reserve character is selected, show "Reserve" button
                 else {
-                    const buttonText = 'Select Reserve';
+                    const buttonText = 'Reserve';
                     const buttonClass = 'reserve-btn';
                     const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
                     return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
@@ -69,10 +69,10 @@ describe('Reserve Character Functionality', () => {
             };
         });
 
-        it('should return "Select Reserve" button when no reserve character is set', () => {
+        it('should return "Reserve" button when no reserve character is set', () => {
             const result = (global as any).getReserveCharacterButton('char-123', 0);
             
-            expect(result).toContain('Select Reserve');
+            expect(result).toContain('Reserve');
             expect(result).toContain('reserve-btn');
             expect(result).not.toContain('active');
             expect(result).toContain('selectReserveCharacter(\'char-123\', 0)');

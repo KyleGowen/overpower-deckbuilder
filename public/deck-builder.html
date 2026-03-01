@@ -10860,10 +10860,12 @@
                                 `;
                             }).join('');
                         } else if (category.type === 'power') {
-                            // Special handling for power cards - group by power type, then by value and universe
+                            // Special handling for power cards - group by power type, then by value only (not set)
+                            // Exclude foil cards so we group alternate arts (Tarzan vs Cthulhu) and default to base
                             const typeGroups = {};
+                            const baseCardsOnly = data.data.filter(card => !card.is_foil);
                             
-                            data.data.forEach(card => {
+                            baseCardsOnly.forEach(card => {
                                 const powerType = card.power_type;
                                 if (!typeGroups[powerType]) {
                                     typeGroups[powerType] = [];
@@ -10894,13 +10896,11 @@
                             typeNames.forEach(typeName => {
                                 const cards = typeGroups[typeName];
                                 
-                                // Group power cards by value and universe (power_type is already grouped)
-                                // For power cards, we group by power_type, value, and universe
+                                // Group power cards by value only (not set) so alternate arts across sets are together
                                 const groupedCards = new Map();
                                 cards.forEach(card => {
                                     const value = String(card.value || '').trim();
-                                    const universe = (card.universe || 'ERB').trim();
-                                    const key = `${value}|${universe}`;
+                                    const key = value;
                                     
                                     if (!groupedCards.has(key)) {
                                         groupedCards.set(key, []);
@@ -10908,8 +10908,8 @@
                                     groupedCards.get(key).push(card);
                                 });
                                 
-                                // Sort each group: original art first
-                                groupedCards.forEach((group, key) => {
+                                // Sort each group: original art first, then ERB before other sets
+                                groupedCards.forEach((group) => {
                                     group.sort((a, b) => {
                                         const aImage = a.image_path || a.image || '';
                                         const bImage = b.image_path || b.image || '';
@@ -10918,6 +10918,11 @@
                                         
                                         if (aIsAlternate && !bIsAlternate) return 1;
                                         if (!aIsAlternate && bIsAlternate) return -1;
+                                        // Same art type: ERB set first
+                                        const aSet = (a.set || a.universe || 'ERB').trim();
+                                        const bSet = (b.set || b.universe || 'ERB').trim();
+                                        if (aSet === 'ERB' && bSet !== 'ERB') return -1;
+                                        if (aSet !== 'ERB' && bSet === 'ERB') return 1;
                                         return 0;
                                     });
                                 });
@@ -10966,9 +10971,10 @@
                                 const typeUniqueCount = sortedGroups.length;
                                 totalUniquePowers += typeUniqueCount;
                                 
-                                // Add "Add All" button for Multi-Power and Any-Power subsections
+                                // Add "Add All" button - pass one base card per value (first/representative)
+                                const cardsForAddAll = sortedGroups.map(([, group]) => group[0]);
                                 const addAllButton = (typeName === 'Multi-Power' || typeName === 'Any-Power') ? 
-                                    `<button class="add-all-btn" onclick="event.stopPropagation(); addAllPowerCards('${typeName}', ${JSON.stringify(cards).replace(/"/g, '&quot;')})">Add All</button>` : '';
+                                    `<button class="add-all-btn" onclick="event.stopPropagation(); addAllPowerCards('${typeName}', ${JSON.stringify(cardsForAddAll).replace(/"/g, '&quot;')})">Add All</button>` : '';
                                 
                                 cardsHtml += `
                                     <div class="character-group">

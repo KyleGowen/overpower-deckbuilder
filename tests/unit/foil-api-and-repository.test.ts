@@ -1,0 +1,82 @@
+/**
+ * Unit tests for foil API and FoilCardMapRepository.
+ *
+ * - GET /api/foil-card-map returns { success: true, data: array } with expected shape
+ * - FoilCardMapRepository returns entries with foilCardId, baseCardId, cardType
+ */
+
+const mockGetFoilCardMap = jest.fn().mockResolvedValue([
+  { foilCardId: 'foil-power-1', baseCardId: 'base-power-1', cardType: 'power' },
+  { foilCardId: 'foil-char-1', baseCardId: 'base-char-1', cardType: 'character' },
+]);
+
+jest.mock('../../src/database/foilCardMapRepository', () => ({
+  FoilCardMapRepository: jest.fn().mockImplementation(() => ({
+    getFoilCardMap: mockGetFoilCardMap,
+  })),
+}));
+
+import request from 'supertest';
+import { app } from '../../src/test-server';
+
+describe('Foil API and Repository', () => {
+  beforeEach(() => {
+    mockGetFoilCardMap.mockClear();
+    mockGetFoilCardMap.mockResolvedValue([
+      { foilCardId: 'foil-power-1', baseCardId: 'base-power-1', cardType: 'power' },
+      { foilCardId: 'foil-char-1', baseCardId: 'base-char-1', cardType: 'character' },
+    ]);
+  });
+
+  describe('GET /api/foil-card-map', () => {
+    it('should return success: true and data array with foil_card_id, base_card_id, card_type', async () => {
+      const response = await request(app)
+        .get('/api/foil-card-map')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+
+      const entry = response.body.data[0];
+      expect(entry).toHaveProperty('foilCardId');
+      expect(entry).toHaveProperty('baseCardId');
+      expect(entry).toHaveProperty('cardType');
+    });
+
+    it('should return entries with correct structure', async () => {
+      const response = await request(app)
+        .get('/api/foil-card-map')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      for (const entry of response.body.data) {
+        expect(typeof entry.foilCardId).toBe('string');
+        expect(typeof entry.baseCardId).toBe('string');
+        expect(typeof entry.cardType).toBe('string');
+        expect(['character', 'special', 'power']).toContain(entry.cardType);
+      }
+    });
+  });
+
+  describe('FoilCardMapRepository', () => {
+    it('should return entries with expected shape when given mock pool', async () => {
+      const mockPool = {
+        query: jest.fn().mockResolvedValue({
+          rows: [
+            { foil_card_id: 'f1', base_card_id: 'b1', card_type: 'power' },
+            { foil_card_id: 'f2', base_card_id: 'b2', card_type: 'character' },
+          ],
+        }),
+      };
+
+      const { FoilCardMapRepository: RealRepo } = jest.requireActual<typeof import('../../src/database/foilCardMapRepository')>('../../src/database/foilCardMapRepository');
+      const repo = new RealRepo(mockPool as any);
+      const entries = await repo.getFoilCardMap();
+
+      expect(entries).toHaveLength(2);
+      expect(entries[0]).toEqual({ foilCardId: 'f1', baseCardId: 'b1', cardType: 'power' });
+      expect(entries[1]).toEqual({ foilCardId: 'f2', baseCardId: 'b2', cardType: 'character' });
+    });
+  });
+});

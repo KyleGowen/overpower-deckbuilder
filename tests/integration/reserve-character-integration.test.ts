@@ -102,7 +102,7 @@ describe('Reserve Character Integration Tests', () => {
     });
 
     describe('Guest User Reserve Character Functionality', () => {
-        it('should show "Select Reserve" buttons on all characters when no reserve is selected', async () => {
+        it('should show "Reserve" buttons on all characters when no reserve is selected', async () => {
             const response = await request(app)
                 .get(`/api/decks/${testDeck.id}`)
                 .expect(200);
@@ -110,15 +110,15 @@ describe('Reserve Character Integration Tests', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.metadata.reserve_character).toBeNull();
 
-            // Verify deck editor HTML contains "Select Reserve" buttons
+            // Verify deck editor HTML contains "Reserve" buttons
             const deckEditorResponse = await request(app)
                 .get(`/deck-editor/${testDeck.id}`)
                 .expect(200);
 
             const html = deckEditorResponse.text;
             
-            // Should have 4 "Select Reserve" buttons (one for each character)
-            const selectReserveMatches = html.match(/Select Reserve/g);
+            // Should have 4 "Reserve" buttons (one for each character)
+            const selectReserveMatches = html.match(/Reserve/g);
             expect(selectReserveMatches).toHaveLength(4);
             
             // Should not have any "Reserve" buttons
@@ -208,7 +208,7 @@ describe('Reserve Character Integration Tests', () => {
     });
 
     describe('Regular User Reserve Character Functionality', () => {
-        it('should show "Select Reserve" buttons on all characters when no reserve is selected', async () => {
+        it('should show "Reserve" buttons on all characters when no reserve is selected', async () => {
             const response = await request(app)
                 .get(`/api/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
@@ -217,7 +217,7 @@ describe('Reserve Character Integration Tests', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.metadata.reserve_character).toBeNull();
 
-            // Verify deck editor HTML contains "Select Reserve" buttons
+            // Verify deck editor HTML contains "Reserve" buttons
             const deckEditorResponse = await request(app)
                 .get(`/deck-editor/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
@@ -225,8 +225,8 @@ describe('Reserve Character Integration Tests', () => {
 
             const html = deckEditorResponse.text;
             
-            // Should have 4 "Select Reserve" buttons (one for each character)
-            const selectReserveMatches = html.match(/Select Reserve/g);
+            // Should have 4 "Reserve" buttons (one for each character)
+            const selectReserveMatches = html.match(/Reserve/g);
             expect(selectReserveMatches).toHaveLength(4);
             
             // Should not have any "Reserve" buttons
@@ -365,7 +365,7 @@ describe('Reserve Character Integration Tests', () => {
     });
 
     describe('Admin User Reserve Character Functionality', () => {
-        it('should show "Select Reserve" buttons on all characters when no reserve is selected', async () => {
+        it('should show "Reserve" buttons on all characters when no reserve is selected', async () => {
             // Create a deck as admin user
             const adminDeckData = {
                 name: 'Admin Reserve Test Deck',
@@ -396,7 +396,7 @@ describe('Reserve Character Integration Tests', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.metadata.reserve_character).toBeNull();
 
-            // Verify deck editor HTML contains "Select Reserve" buttons
+            // Verify deck editor HTML contains "Reserve" buttons
             const deckEditorResponse = await request(app)
                 .get(`/deck-editor/${adminDeck.id}`)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
@@ -404,8 +404,8 @@ describe('Reserve Character Integration Tests', () => {
 
             const html = deckEditorResponse.text;
             
-            // Should have 4 "Select Reserve" buttons (one for each character)
-            const selectReserveMatches = html.match(/Select Reserve/g);
+            // Should have 4 "Reserve" buttons (one for each character)
+            const selectReserveMatches = html.match(/Reserve/g);
             expect(selectReserveMatches).toHaveLength(4);
             
             // Should not have any "Reserve" buttons
@@ -686,8 +686,8 @@ describe('Reserve Character Integration Tests', () => {
 
             const html = deckEditorResponse.text;
             
-            // Should not have any "Select Reserve" buttons in read-only mode
-            const selectReserveMatches = html.match(/Select Reserve/g);
+            // Should not have any "Reserve" buttons in read-only mode
+            const selectReserveMatches = html.match(/Reserve/g);
             expect(selectReserveMatches).toBeNull();
             
             // Should not have any "Reserve" buttons in read-only mode

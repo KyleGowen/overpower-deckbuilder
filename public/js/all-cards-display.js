@@ -565,6 +565,7 @@ window.filterAllCardsByType = filterAllCardsByType;
 window.initializeAllCardsFilters = initializeAllCardsFilters;
 window.loadAndDisplayAllCards = loadAndDisplayAllCards;
 window.getCardName = getCardName;
+window.sortAllCardsData = sortAllCardsData;
 // Expose allCardsData for debugging
 Object.defineProperty(window, 'allCardsData', {
     get: function() { return allCardsData; },

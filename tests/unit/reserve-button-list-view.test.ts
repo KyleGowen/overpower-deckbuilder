@@ -119,7 +119,7 @@ describe('Reserve Button List View Functionality', () => {
             } else if (hasReserveCharacter) {
                 return '';
             } else {
-                return `<button class="reserve-btn" onclick="selectReserveCharacter('${cardId}', ${index})">Select Reserve</button>`;
+                return `<button class="reserve-btn" onclick="selectReserveCharacter('${cardId}', ${index})">Reserve</button>`;
             }
         });
 
@@ -172,13 +172,13 @@ describe('Reserve Button List View Functionality', () => {
             const firstCharacterActions = characterItems[0].querySelector('.deck-list-item-actions');
             const firstReserveBtn = firstCharacterActions?.querySelector('.reserve-btn');
             expect(firstReserveBtn).toBeTruthy();
-            expect(firstReserveBtn?.textContent).toBe('Select Reserve');
+            expect(firstReserveBtn?.textContent).toBe('Reserve');
 
             // Check second character item
             const secondCharacterActions = characterItems[1].querySelector('.deck-list-item-actions');
             const secondReserveBtn = secondCharacterActions?.querySelector('.reserve-btn');
             expect(secondReserveBtn).toBeTruthy();
-            expect(secondReserveBtn?.textContent).toBe('Select Reserve');
+            expect(secondReserveBtn?.textContent).toBe('Reserve');
 
             // Verify that mission items were NOT affected
             const missionItems = document.querySelectorAll('#deck-list-items-mission .deck-list-item');
@@ -460,13 +460,13 @@ describe('Reserve Button List View Functionality', () => {
             const characterCards = mockDeckEditorCards.filter(card => card.type === 'character');
             const characterHTML = generateListHTML('character', characterCards);
             expect(characterHTML).toContain('reserve-btn');
-            expect(characterHTML).toContain('Select Reserve');
+            expect(characterHTML).toContain('Reserve');
 
             // Test mission section
             const missionCards = mockDeckEditorCards.filter(card => card.type === 'mission');
             const missionHTML = generateListHTML('mission', missionCards);
             expect(missionHTML).not.toContain('reserve-btn');
-            expect(missionHTML).not.toContain('Select Reserve');
+            expect(missionHTML).not.toContain('Reserve');
 
             // Test power section
             const powerCards = mockDeckEditorCards.filter(card => card.type === 'power');

@@ -182,12 +182,16 @@ export class PostgreSQLDeckRepository implements DeckRepository {
           d.*,
           c1.name as character_1_name,
           c1.image_path as character_1_default_image,
+          c1.is_foil as character_1_is_foil,
           c2.name as character_2_name,
           c2.image_path as character_2_default_image,
+          c2.is_foil as character_2_is_foil,
           c3.name as character_3_name,
           c3.image_path as character_3_default_image,
+          c3.is_foil as character_3_is_foil,
           c4.name as character_4_name,
           c4.image_path as character_4_default_image,
+          c4.is_foil as character_4_is_foil,
           l.name as location_name,
           l.image_path as location_default_image,
           dm1.mission_id as mission_1_id,
@@ -238,7 +242,8 @@ export class PostgreSQLDeckRepository implements DeckRepository {
             cardId: deck.character_1_id,
             quantity: 1,
             defaultImage: deck.character_1_default_image,
-            name: deck.character_1_name
+            name: deck.character_1_name,
+            is_foil: deck.character_1_is_foil || false
           });
         }
         if (deck.character_2_id) {
@@ -248,7 +253,8 @@ export class PostgreSQLDeckRepository implements DeckRepository {
             cardId: deck.character_2_id,
             quantity: 1,
             defaultImage: deck.character_2_default_image,
-            name: deck.character_2_name
+            name: deck.character_2_name,
+            is_foil: deck.character_2_is_foil || false
           });
         }
         if (deck.character_3_id) {
@@ -258,7 +264,8 @@ export class PostgreSQLDeckRepository implements DeckRepository {
             cardId: deck.character_3_id,
             quantity: 1,
             defaultImage: deck.character_3_default_image,
-            name: deck.character_3_name
+            name: deck.character_3_name,
+            is_foil: deck.character_3_is_foil || false
           });
         }
         if (deck.character_4_id) {
@@ -268,7 +275,8 @@ export class PostgreSQLDeckRepository implements DeckRepository {
             cardId: deck.character_4_id,
             quantity: 1,
             defaultImage: deck.character_4_default_image,
-            name: deck.character_4_name
+            name: deck.character_4_name,
+            is_foil: deck.character_4_is_foil || false
           });
         }
         

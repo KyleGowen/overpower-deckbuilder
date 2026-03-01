@@ -3390,12 +3390,12 @@
                                 `;
                             }).join('');
                         } else if (category.type === 'power') {
-                            // Special handling for power cards - group by power type, then by value and universe to consolidate alternate arts
-                            
-                            // First, group by power type
+                            // Special handling for power cards - group by power type, then by value
+                            // Exclude foil cards so we default to base and show all alternate arts
                             const typeGroups = {};
+                            const baseCardsOnly = data.data.filter(card => !card.is_foil);
                             
-                            data.data.forEach(card => {
+                            baseCardsOnly.forEach(card => {
                                 const powerType = card.power_type;
                                 if (!typeGroups[powerType]) {
                                     typeGroups[powerType] = [];
@@ -3539,10 +3539,11 @@
                                     `);
                                 });
                                 
-                                // Add "Add All" button for Multi-Power and Any-Power subsections
+                                // Add "Add All" button - pass one base card per value (first/representative)
+                                const cardsForAddAll = sortedCardGroups.map(([, group]) => group[0]);
                                 const normalizedTypeName = typeName.replace(/\s+/g, '-');
                                 const addAllButton = (normalizedTypeName === 'Multi-Power' || normalizedTypeName === 'Any-Power') ? 
-                                    `<button class="add-all-btn" onclick="event.stopPropagation(); addAllPowerCards('${typeName}', ${JSON.stringify(cardsInTypeGroup).replace(/"/g, '&quot;')})">Add All</button>` : '';
+                                    `<button class="add-all-btn" onclick="event.stopPropagation(); addAllPowerCards('${typeName}', ${JSON.stringify(cardsForAddAll).replace(/"/g, '&quot;')})">Add All</button>` : '';
                                 
                                 cardsHtml += `
                                     <div class="character-group">
@@ -4107,18 +4108,18 @@
                     }
                 }
                 
-                // If reserve doesn't match any card, show "Select Reserve" button (allows fixing invalid reference)
+                // If reserve doesn't match any card, show "Reserve" button (allows fixing invalid reference)
                 // If reserve matches another card, hide the button
                 if (hasReserveCharacter && !reserveMatchesAnyCard) {
-                    const buttonText = 'Select Reserve';
+                    const buttonText = 'Reserve';
                     const buttonClass = 'reserve-btn';
                     const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
                     return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
                 } else if (hasReserveCharacter && reserveMatchesAnyCard) {
                     return ''; // Reserve matches another card, hide button
                 } else {
-                    // No reserve character selected, show "Select Reserve" button
-                    const buttonText = 'Select Reserve';
+                    // No reserve character selected, show "Reserve" button
+                    const buttonText = 'Reserve';
                     const buttonClass = 'reserve-btn';
                     const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
                     return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;

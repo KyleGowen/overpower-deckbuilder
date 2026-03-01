@@ -272,15 +272,16 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
         });
     } else if (cardType === 'power') {
         // For power cards, group by value and power_type (not by set) to include all alternate arts across sets
+        // Exclude foil cards - we only show base art options; foil is a separate toggle
         const value = String(availableCard.value || '').trim();
         const powerType = (availableCard.power_type || '').trim();
         
-        // Use same logic as Card View detection: cardType || type
         window.availableCardsMap.forEach((card, id) => {
             const iterCardType = card.cardType || card.type || '';
             if ((iterCardType === 'power' || id.startsWith('power_')) && 
                 String(card.value || '').trim() === value && 
-                (card.power_type || '').trim() === powerType) {
+                (card.power_type || '').trim() === powerType &&
+                !card.is_foil) {
                 allAlternateArts.push({
                     id: card.id || id,
                     imagePath: getCardImagePath(card, 'power'),

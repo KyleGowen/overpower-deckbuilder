@@ -67,7 +67,7 @@ function getReserveCharacterButton(cardId: string, index: number): string {
     } else if (hasReserveCharacter) {
         return '';
     } else {
-        return `<button class="reserve-btn" onclick="selectReserveCharacter('${cardId}', ${index})">Select Reserve</button>`;
+        return `<button class="reserve-btn" onclick="selectReserveCharacter('${cardId}', ${index})">Reserve</button>`;
     }
 }
 
@@ -183,15 +183,15 @@ describe('Reserve Character Threat Calculation Fix', () => {
         it('should correctly match card IDs by name when no reserve character is selected', () => {
             updateReserveButtons();
 
-            // Check that all character cards have "Select Reserve" buttons
+            // Check that all character cards have "Reserve" buttons
             const reserveContainers = document.querySelectorAll('.deck-card-editor-reserve');
-            expect(reserveContainers[0].innerHTML).toContain('Select Reserve');
+            expect(reserveContainers[0].innerHTML).toContain('Reserve');
             expect(reserveContainers[0].innerHTML).toContain("selectReserveCharacter('card-1', 0)");
             
-            expect(reserveContainers[1].innerHTML).toContain('Select Reserve');
+            expect(reserveContainers[1].innerHTML).toContain('Reserve');
             expect(reserveContainers[1].innerHTML).toContain("selectReserveCharacter('card-2', 1)");
             
-            expect(reserveContainers[2].innerHTML).toContain('Select Reserve');
+            expect(reserveContainers[2].innerHTML).toContain('Reserve');
             expect(reserveContainers[2].innerHTML).toContain("selectReserveCharacter('card-3', 2)");
         });
 
@@ -259,8 +259,8 @@ describe('Reserve Character Threat Calculation Fix', () => {
             expect(reserveContainers[1].innerHTML).toBe('');
             
             // Other characters should still work
-            expect(reserveContainers[0].innerHTML).toContain('Select Reserve');
-            expect(reserveContainers[2].innerHTML).toContain('Select Reserve');
+            expect(reserveContainers[0].innerHTML).toContain('Reserve');
+            expect(reserveContainers[2].innerHTML).toContain('Reserve');
         });
     });
 
@@ -270,18 +270,18 @@ describe('Reserve Character Threat Calculation Fix', () => {
 
             const listItems = document.querySelectorAll('#deck-list-items-character .deck-list-item');
             
-            // Check that all list items have "Select Reserve" buttons
+            // Check that all list items have "Reserve" buttons
             const actions1 = listItems[0].querySelector('.deck-list-item-actions');
             const actions2 = listItems[1].querySelector('.deck-list-item-actions');
             const actions3 = listItems[2].querySelector('.deck-list-item-actions');
             
-            expect(actions1?.innerHTML).toContain('Select Reserve');
+            expect(actions1?.innerHTML).toContain('Reserve');
             expect(actions1?.innerHTML).toContain("selectReserveCharacter('card-1', 0)");
             
-            expect(actions2?.innerHTML).toContain('Select Reserve');
+            expect(actions2?.innerHTML).toContain('Reserve');
             expect(actions2?.innerHTML).toContain("selectReserveCharacter('card-2', 1)");
             
-            expect(actions3?.innerHTML).toContain('Select Reserve');
+            expect(actions3?.innerHTML).toContain('Reserve');
             expect(actions3?.innerHTML).toContain("selectReserveCharacter('card-3', 2)");
         });
 
@@ -339,7 +339,7 @@ describe('Reserve Character Threat Calculation Fix', () => {
 
             // Should have removed the old button and added the new one
             const actions = listItem?.querySelector('.deck-list-item-actions');
-            expect(actions?.innerHTML).toContain('Select Reserve');
+            expect(actions?.innerHTML).toContain('Reserve');
             expect(actions?.innerHTML).not.toContain('Old Button');
             expect(actions?.innerHTML).toContain('deck-list-item-remove');
         });

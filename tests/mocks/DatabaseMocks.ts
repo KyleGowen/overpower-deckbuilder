@@ -67,6 +67,18 @@ const mockCharacters: Character[] = [
     brute_force: 4,
     intelligence: 2,
     special_abilities: 'Spartan shield defense'
+  },
+  {
+    id: 'char-foil-1',
+    name: 'Zeus (Foil)',
+    image: '/images/zeus_foil.jpg',
+    threat_level: 5,
+    energy: 4,
+    combat: 3,
+    brute_force: 2,
+    intelligence: 4,
+    special_abilities: 'Lightning bolt attack',
+    is_foil: true
   }
 ];
 
@@ -113,6 +125,15 @@ const mockPowerCards: PowerCard[] = [
     power_type: 'Combat',
     image: '/images/combat_7.jpg',
     one_per_deck: true
+  },
+  {
+    id: 'power-foil-1',
+    name: '6 - Energy (Foil)',
+    value: 6,
+    power_type: 'Energy',
+    image: '/images/energy_6_foil.jpg',
+    one_per_deck: false,
+    is_foil: true
   }
 ];
 
