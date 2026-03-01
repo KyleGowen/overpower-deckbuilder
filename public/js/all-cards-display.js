@@ -364,12 +364,13 @@ function renderCardCell(card) {
         })(this);
     `;
     
-    const foilShimmerClass = card.is_foil ? ' foil-shimmer foil-once' : '';
-    const foilBadge = card.is_foil ? ' <span style="color:#d4af37;font-size:10px;font-weight:bold;">✦ FOIL</span>' : '';
+    const foilBadge = card.is_foil ? ' <span class="collection-foil-badge">✦ FOIL</span>' : '';
+    const foilWrapOpen = card.is_foil ? '<div class="all-cards-img-wrap foil-shimmer foil-once">' : '';
+    const foilWrapClose = card.is_foil ? '</div>' : '';
     return `
         <div class="all-cards-cell">
-            <div class="card-image-wrapper${foilShimmerClass}">
-                <img src="${imagePath}"
+            <div class="card-image-wrapper">
+                ${foilWrapOpen}<img src="${imagePath}"
                      data-src="${imagePath}"
                      data-full-res="${fullResPath}"
                      alt="${escapedName}"
@@ -379,7 +380,7 @@ function renderCardCell(card) {
                      onerror="(function(img){var t=img.dataset.altTried;if(!t){img.dataset.altTried='1';var s=img.src||img.dataset.src;if(s&&s.endsWith('.webp')){img.src=s.replace(/\\.webp$/,'.png');return;}if(s&&s.endsWith('.png')){img.src=s.replace(/\\.png$/,'.webp');return;}}img.onerror=null;img.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';img.style.cursor='default';})(this)"
                      onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}', null, null, ${!!card.is_foil})"
                      onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+                     onclick="openModal(this)">${foilWrapClose}
             </div>
             <div class="card-content-bottom">
                 <div style="font-size: 12px; color: #fff; text-align: center; margin-bottom: 8px; word-wrap: break-word; max-width: 100%;">${cardName}${foilBadge}</div>

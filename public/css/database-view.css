@@ -1557,6 +1557,15 @@ table {
     min-height: 0;
 }
 
+/* Inner wrapper for foil cards — sized to the image so overflow:hidden clips correctly */
+.all-cards-img-wrap {
+    display: block;
+    max-width: 200px;
+    width: 100%;
+    border-radius: 5px;
+    line-height: 0;
+}
+
 .all-cards-cell img {
     width: 100%;
     max-width: 200px;
