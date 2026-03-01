@@ -364,7 +364,7 @@ function renderCardCell(card) {
         })(this);
     `;
     
-    const foilShimmerClass = card.is_foil ? ' foil-shimmer' : '';
+    const foilShimmerClass = card.is_foil ? ' foil-shimmer foil-once' : '';
     const foilBadge = card.is_foil ? ' <span style="color:#d4af37;font-size:10px;font-weight:bold;">✦ FOIL</span>' : '';
     return `
         <div class="all-cards-cell">
