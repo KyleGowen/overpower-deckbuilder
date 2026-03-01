@@ -25,6 +25,7 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
     const groups = new Map();
     
     cards.forEach(card => {
+        if (card.is_foil) return; // foils only appear on the ALL tab, not in art cycling
         const name = card[nameField] || card.name || '';
         const set = card[universeField] || card.set || 'ERB';
         const cardType = card.card_type || 'character';
@@ -37,18 +38,12 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
         groups.get(key).push(card);
     });
     
-    // Sort each group: original art first, then alternates, foil versions last
+    // Sort each group: original art first, then alternates
     groups.forEach((group, _key) => {
         group.sort((a, b) => {
             const aIsAlternate = (a.image_path || a.image || '').includes('alternate/');
             const bIsAlternate = (b.image_path || b.image || '').includes('alternate/');
-            const aIsFoil = !!(a.is_foil);
-            const bIsFoil = !!(b.is_foil);
 
-            // Foil cards always sort last
-            if (aIsFoil && !bIsFoil) return 1;
-            if (!aIsFoil && bIsFoil) return -1;
-            
             if (aIsAlternate && !bIsAlternate) return 1;  // b (original) comes first
             if (!aIsAlternate && bIsAlternate) return -1; // a (original) comes first
             return 0; // Keep original order for same type
