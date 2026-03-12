@@ -56,13 +56,12 @@ build
 
 ### CI Job Configuration
 
-The Trivy job is defined in `.github/workflows/deploy.yml`:
+The Trivy job is defined in `.github/workflows/deploy.yml`. We use the Trivy CLI directly instead of the `aquasecurity/trivy-action` GitHub Action because the action has [known bugs](https://github.com/aquasecurity/trivy-action/issues/436) where `.trivyignore` files are not reliably passed to the underlying Trivy command.
 
 ```yaml
 trivy:
   name: Trivy (dependency vulnerabilities)
   runs-on: ubuntu-latest
-  needs: [build]
   steps:
   - name: Checkout code
     uses: actions/checkout@v4
@@ -76,27 +75,36 @@ trivy:
   - name: Install dependencies
     run: npm ci
 
+  - name: Install Trivy
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+      wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+      echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+      sudo apt-get update
+      sudo apt-get install -y trivy
+
   - name: Run Trivy vulnerability scanner
-    uses: aquasecurity/trivy-action@0.28.0
-    with:
-      scan-type: 'fs'
-      scan-ref: '.'
-      severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-      exit-code: '1'
-      ignore-unfixed: true
-      scanners: 'vuln'
+    run: |
+      trivy fs \
+        --ignorefile .trivyignore \
+        --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+        --exit-code 1 \
+        --ignore-unfixed \
+        --scanners vuln \
+        .
 
   - name: Run Trivy (JSON artifact)
     if: always()
-    uses: aquasecurity/trivy-action@0.28.0
-    with:
-      scan-type: 'fs'
-      scan-ref: '.'
-      severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-      format: 'json'
-      output: 'trivy-report.json'
-      ignore-unfixed: true
-      scanners: 'vuln'
+    run: |
+      trivy fs \
+        --ignorefile .trivyignore \
+        --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+        --ignore-unfixed \
+        --scanners vuln \
+        --format json \
+        --output trivy-report.json \
+        . || true
 
   - name: Upload Trivy report
     if: always()
@@ -108,14 +116,14 @@ trivy:
 
 ### Configuration Options Explained
 
-| Option | Value | What It Does |
-|--------|-------|--------------|
-| `scan-type: 'fs'` | Filesystem scan | Scans the checked-out repo directory rather than a container image. Trivy reads `package-lock.json` to resolve the full dependency tree. |
-| `scan-ref: '.'` | Current directory | Tells Trivy to scan from the repository root. |
-| `severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'` | Filter threshold | Report vulnerabilities of **all** severity levels. We enforce a zero-tolerance policy -- any known vulnerability with an available fix blocks deployment. |
-| `exit-code: '1'` | Fail on findings | Exit with code 1 (failing the CI job) if any matching vulnerabilities are found. Set to `'0'` to make the scan informational only. |
-| `ignore-unfixed: true` | Skip unfixed CVEs | Do not report vulnerabilities that have no patched version available yet. Only flag issues that can actually be resolved by upgrading. |
-| `scanners: 'vuln'` | Vulnerability scanner only | Trivy can also scan for misconfigurations and secrets. We limit it to dependency vulnerabilities since Semgrep and gitleaks handle the other categories. |
+| CLI Flag | Value | What It Does |
+|----------|-------|--------------|
+| `fs .` | Filesystem scan | Scans the checked-out repo directory rather than a container image. Trivy reads `package-lock.json` to resolve the full dependency tree. |
+| `--ignorefile .trivyignore` | Ignore file | Specifies the file containing CVE IDs to suppress. Each CVE ID should be on its own line. |
+| `--severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Filter threshold | Report vulnerabilities of **all** severity levels. We enforce a zero-tolerance policy -- any known vulnerability with an available fix blocks deployment. |
+| `--exit-code 1` | Fail on findings | Exit with code 1 (failing the CI job) if any matching vulnerabilities are found. Set to `0` to make the scan informational only. |
+| `--ignore-unfixed` | Skip unfixed CVEs | Do not report vulnerabilities that have no patched version available yet. Only flag issues that can actually be resolved by upgrading. |
+| `--scanners vuln` | Vulnerability scanner only | Trivy can also scan for misconfigurations and secrets. We limit it to dependency vulnerabilities since Semgrep and gitleaks handle the other categories. |
 
 ### The Two-Step Pattern
 

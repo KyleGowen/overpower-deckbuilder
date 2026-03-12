@@ -157,31 +157,41 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
+
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-        exit-code: '1'
-        ignore-unfixed: true
-        scanners: 'vuln'
-      env:
-        TRIVY_IGNOREFILE: .trivyignore
+      run: |
+        echo "🔍 Running Trivy with ignorefile: .trivyignore"
+        echo "📋 Contents of .trivyignore:"
+        cat .trivyignore
+        echo ""
+        echo "🚀 Starting scan..."
+        trivy fs \
+          --ignorefile .trivyignore \
+          --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+          --exit-code 1 \
+          --ignore-unfixed \
+          --scanners vuln \
+          .
 
     - name: Run Trivy (JSON artifact)
       if: always()
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-        format: 'json'
-        output: 'trivy-report.json'
-        ignore-unfixed: true
-        scanners: 'vuln'
-      env:
-        TRIVY_IGNOREFILE: .trivyignore
+      run: |
+        trivy fs \
+          --ignorefile .trivyignore \
+          --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+          --ignore-unfixed \
+          --scanners vuln \
+          --format json \
+          --output trivy-report.json \
+          . || true
 
     - name: Upload Trivy report
       if: always()
