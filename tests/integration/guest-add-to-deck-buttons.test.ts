@@ -629,7 +629,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
                 .expect(200);
 
             // Check that the isGuestUser function is available via external script
-            expect(response.text).toContain('<script src="/js/filter-functions.js"></script>');
+            expect(response.text).toContain('<script src="/js/filter-functions.js" defer></script>');
         });
 
         it('should have disableAddToDeckButtons function defined', async () => {
@@ -639,7 +639,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
                 .expect(200);
 
             // Check that the disableAddToDeckButtons function is loaded from external file
-            expect(response.text).toContain('<script src="/js/deck-editor-simple.js"></script>');
+            expect(response.text).toContain('<script src="/js/deck-editor-simple.js" defer></script>');
             expect(response.text).toContain('disableAddToDeckButtons function moved to external file');
         });
 
@@ -651,7 +651,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
 
             // Check that the function is called after data loads
             expect(response.text).toContain('disableAddToDeckButtonsImmediate()');
-            expect(response.text).toContain('<script src="/js/app-initialization.js"></script>');
+            expect(response.text).toContain('<script src="/js/app-initialization.js" defer></script>');
         });
     });
 

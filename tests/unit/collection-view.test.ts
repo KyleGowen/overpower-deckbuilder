@@ -828,9 +828,9 @@ describe('showGuestSandboxBanner()', () => {
         expect(link!.getAttribute('href')).toBe('#');
     });
 
-    it('signup link calls showSignupModal on click', () => {
-        const mockShowSignupModal = jest.fn();
-        (window as any).showSignupModal = mockShowSignupModal;
+    it('signup link calls showLoginModal on click', () => {
+        const mockShowLoginModal = jest.fn();
+        (window as any).showLoginModal = mockShowLoginModal;
         
         fns.showGuestSandboxBanner();
 
@@ -840,7 +840,7 @@ describe('showGuestSandboxBanner()', () => {
         const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
         link.dispatchEvent(clickEvent);
         
-        expect(mockShowSignupModal).toHaveBeenCalled();
+        expect(mockShowLoginModal).toHaveBeenCalled();
     });
 
     it('does nothing if container not found', () => {

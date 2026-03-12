@@ -59,15 +59,15 @@ function showGuestSandboxBanner() {
         <a href="#" class="guest-signup-link">Create an account</a> to save your collection permanently.</span>
     `;
     
-    // Attach click handler to open signup modal
+    // Attach click handler to open login modal (where user can sign up)
     const signupLink = banner.querySelector('.guest-signup-link');
     if (signupLink) {
         signupLink.addEventListener('click', (e) => {
             e.preventDefault();
-            if (typeof showSignupModal === 'function') {
-                showSignupModal();
-            } else if (typeof window.showSignupModal === 'function') {
-                window.showSignupModal();
+            if (typeof showLoginModal === 'function') {
+                showLoginModal();
+            } else if (typeof window.showLoginModal === 'function') {
+                window.showLoginModal();
             }
         });
     }
@@ -359,6 +359,12 @@ async function loadCollection() {
         }
 
         // For authenticated users (USER/ADMIN), use API
+        // Remove any GUEST sandbox banner if present (e.g., from a previous session)
+        const existingBanner = document.getElementById('guestSandboxBanner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+
         const response = await fetch('/api/collections/me/cards', {
             credentials: 'include'
         });

@@ -27,12 +27,12 @@ describe('Collection GUEST Sandbox UI Integration Tests', () => {
       expect(response.text).not.toContain('href="/signup"');
     });
 
-    it('should call showSignupModal on signup link click', async () => {
+    it('should call showLoginModal on signup link click', async () => {
       const response = await request(app)
         .get('/js/collection-view.js');
       
       expect(response.status).toBe(200);
-      expect(response.text).toContain('showSignupModal');
+      expect(response.text).toContain('showLoginModal');
     });
   });
 

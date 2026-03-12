@@ -306,7 +306,8 @@ describe('All Tab Integration Tests', () => {
       }
     });
 
-    it('should prevent non-ADMIN users from accessing collection endpoints', async () => {
+    it('should allow all authenticated users to access collection endpoints', async () => {
+      // Collection feature is now available to all authenticated users (USER, ADMIN, GUEST)
       const charactersRes = await request(app)
         .get('/api/characters')
         .expect(200);
@@ -322,10 +323,9 @@ describe('All Tab Integration Tests', () => {
             cardType: 'character',
             quantity: 1
           })
-          .expect(403); // Forbidden
+          .expect(200); // Now allowed for all authenticated users
 
-        expect(response.body.success).toBe(false);
-        expect(response.body.error).toContain('ADMIN');
+        expect(response.body.success).toBe(true);
       }
     });
   });
@@ -383,18 +383,19 @@ describe('All Tab Integration Tests', () => {
   describe('Card Sorting Verification', () => {
     it('should verify cards are sorted by set then set_number in database', async () => {
       // Verify sorting within each table (avoids invalid ORDER BY + UNION syntax)
+      // Filter to numeric set_numbers only (some cards have non-numeric values like "035F")
       const [characters, specials] = await Promise.all([
         pool.query(`
           SELECT set, set_number
           FROM characters
-          WHERE set IS NOT NULL AND set_number IS NOT NULL
+          WHERE set IS NOT NULL AND set_number IS NOT NULL AND set_number ~ '^[0-9]+$'
           ORDER BY set, CAST(set_number AS INTEGER)
           LIMIT 50
         `),
         pool.query(`
           SELECT set, set_number
           FROM special_cards
-          WHERE set IS NOT NULL AND set_number IS NOT NULL
+          WHERE set IS NOT NULL AND set_number IS NOT NULL AND set_number ~ '^[0-9]+$'
           ORDER BY set, CAST(set_number AS INTEGER)
           LIMIT 50
         `)

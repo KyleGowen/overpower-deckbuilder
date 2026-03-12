@@ -124,7 +124,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
       expect(openResponse.text).toContain('modal-content');
       
       // Test that the deck editor has the correct layout functions available
-      expect(openResponse.text).toContain('<script src="/js/filter-functions.js"></script>');
+      expect(openResponse.text).toContain('<script src="/js/filter-functions.js" defer></script>');
     });
 
     it('should load available cards for deck editor', async () => {

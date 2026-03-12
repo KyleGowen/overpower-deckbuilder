@@ -213,7 +213,8 @@ describe('Bcrypt Authentication Integration Tests', () => {
 
   describe('Password Security Verification', () => {
     it('should verify all existing passwords are hashed', async () => {
-      const result = await pool.query('SELECT username, password_hash FROM users LIMIT 10');
+      // Exclude users without passwords (e.g., GUEST account, Google Sign-In users)
+      const result = await pool.query('SELECT username, password_hash FROM users WHERE password_hash IS NOT NULL LIMIT 10');
       
       result.rows.forEach(user => {
         expect(user.password_hash).toMatch(/^\$2[ab]\$\d+\$/);

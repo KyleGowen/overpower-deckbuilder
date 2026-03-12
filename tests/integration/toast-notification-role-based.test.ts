@@ -241,7 +241,7 @@ describe('Toast Notification Role-Based Behavior', () => {
             const html = response.text;
             
             // The isGuestUser function should be available via external script
-            expect(html).toContain('<script src="/js/filter-functions.js"></script>');
+            expect(html).toContain('<script src="/js/filter-functions.js" defer></script>');
             
             // This should return false for missing currentUser, allowing notifications
             // But in practice, guests won't have currentUser set, so they won't see notifications

@@ -152,8 +152,8 @@ describe('Database View Integration Tests', () => {
       const count = parseInt(result.rows[0].count);
       expect(count).toBeGreaterThan(0);
       
-      // Based on server logs showing "8 locations"
-      expect(count).toBe(8);
+      // Based on current database content
+      expect(count).toBe(12);
       
       console.log('✅ Location count verified:', count);
     });

@@ -70,7 +70,7 @@ describe('Global Nav Integration Tests', () => {
 
       // Check that the page contains the global nav container and loading mechanism
       expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('<script src="/js/app-initialization.js"></script>');
+      expect(response.text).toContain('<script src="/js/app-initialization.js" defer></script>');
     });
 
     test('should include global nav JavaScript and CSS files', async () => {
