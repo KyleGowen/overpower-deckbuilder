@@ -691,7 +691,7 @@ describe('Global Navigation Component', () => {
             expect(collectionBtn!.style.display).toBe('');
         });
 
-        it('should hide Collection button for non-ADMIN users', () => {
+        it('should show Collection button for USER users', () => {
             mockGetCurrentUser.mockReturnValue({
                 role: 'USER'
             });
@@ -700,7 +700,19 @@ describe('Global Navigation Component', () => {
 
             (window as any).updateUserWelcome();
 
-            expect(collectionBtn!.style.display).toBe('none');
+            expect(collectionBtn!.style.display).toBe('');
+        });
+
+        it('should show Collection button for GUEST users', () => {
+            mockGetCurrentUser.mockReturnValue({
+                role: 'GUEST'
+            });
+
+            const collectionBtn = document.getElementById('collectionViewBtn');
+
+            (window as any).updateUserWelcome();
+
+            expect(collectionBtn!.style.display).toBe('');
         });
     });
 

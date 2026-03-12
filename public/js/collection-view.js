@@ -6,6 +6,75 @@ let collectionSearchTimeout = null;
 let mergedCollectionData = [];
 let showUnownedCards = true;
 
+// GUEST sandbox localStorage key
+const GUEST_COLLECTION_KEY = 'guestCollection';
+
+/**
+ * Check if the current user is a GUEST
+ */
+function isGuestUser() {
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    return currentUser && currentUser.role === 'GUEST';
+}
+
+/**
+ * Load GUEST collection from localStorage
+ */
+function loadGuestCollectionFromStorage() {
+    try {
+        const stored = localStorage.getItem(GUEST_COLLECTION_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * Save GUEST collection to localStorage
+ */
+function saveGuestCollectionToStorage(cards) {
+    try {
+        localStorage.setItem(GUEST_COLLECTION_KEY, JSON.stringify(cards));
+    } catch (e) {
+        console.error('Failed to save guest collection:', e);
+    }
+}
+
+/**
+ * Show sandbox banner for GUEST users
+ */
+function showGuestSandboxBanner() {
+    const container = document.getElementById('collectionCardsList');
+    if (!container || !container.parentNode) return;
+    
+    const existingBanner = document.getElementById('guestSandboxBanner');
+    if (existingBanner) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'guestSandboxBanner';
+    banner.className = 'guest-sandbox-banner';
+    banner.innerHTML = `
+        <span class="sandbox-icon">&#x1F9EA;</span>
+        <span class="sandbox-text">Sandbox Mode: Your collection is stored locally in this browser and will not be saved to your account.
+        <a href="#" class="guest-signup-link">Create an account</a> to save your collection permanently.</span>
+    `;
+    
+    // Attach click handler to open signup modal
+    const signupLink = banner.querySelector('.guest-signup-link');
+    if (signupLink) {
+        signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof showSignupModal === 'function') {
+                showSignupModal();
+            } else if (typeof window.showSignupModal === 'function') {
+                window.showSignupModal();
+            }
+        });
+    }
+    
+    container.parentNode.insertBefore(banner, container);
+}
+
 /**
  * Merge owned collection cards with all cards from the game database.
  * Returns a unified array where each entry has inCollection: true/false.
@@ -25,8 +94,18 @@ function mergeCollectionWithAllCards(owned, allCards) {
         const key = `${card.id}|${card.cardType}`;
         if (ownedLookup.has(key)) {
             // Already in collection — use the collection record, mark it owned
+            // Include card_data from allCardsData for display name and other info
             // Carry is_foil from allCardsData so foil UI can be applied
-            merged.push(Object.assign({}, ownedLookup.get(key), { inCollection: true, is_foil: !!(card.is_foil) }));
+            merged.push(Object.assign(
+                {}, 
+                ownedLookup.get(key), 
+                { 
+                    inCollection: true, 
+                    is_foil: !!(card.is_foil),
+                    card_data: card,
+                    set: card.set || card.universe || null
+                }
+            ));
             ownedLookup.delete(key); // Remove so we don't double-add
         } else {
             // Not in collection — synthesise an entry from allCardsData
@@ -250,19 +329,41 @@ function getCardDisplayName(cardData, cardType) {
 }
 
 /**
- * Load collection cards from API, merge with full card database, and display.
+ * Load collection cards from API (or localStorage for GUEST), merge with full card database, and display.
  */
 async function loadCollection() {
     try {
+        // For GUEST users, load from localStorage instead of API
+        if (isGuestUser()) {
+            collectionCards = loadGuestCollectionFromStorage();
+            
+            // Load allCardsData for merging
+            let allCards = (window.allCardsData && window.allCardsData.length > 0)
+                ? window.allCardsData
+                : null;
+
+            if (!allCards && typeof loadAllCards === 'function') {
+                allCards = await loadAllCards();
+            }
+
+            if (allCards && allCards.length > 0) {
+                mergedCollectionData = mergeCollectionWithAllCards(collectionCards, allCards);
+            } else {
+                mergedCollectionData = collectionCards.map(c => Object.assign({}, c, { inCollection: true }));
+            }
+
+            // Show sandbox banner for GUEST users
+            showGuestSandboxBanner();
+            displayCollectionCards(mergedCollectionData);
+            return;
+        }
+
+        // For authenticated users (USER/ADMIN), use API
         const response = await fetch('/api/collections/me/cards', {
             credentials: 'include'
         });
 
         if (!response.ok) {
-            if (response.status === 403) {
-                console.error('Access denied: Only ADMIN users can access collections');
-                return;
-            }
             throw new Error(`Failed to load collection: ${response.status}`);
         }
 
@@ -633,6 +734,39 @@ async function addCardToCollectionFromDatabase(cardId, cardType, imagePath = nul
  */
 async function addCardToCollection(cardId, cardType, imagePath = null) {
     try {
+        // For GUEST users, store in localStorage
+        if (isGuestUser()) {
+            const guestCards = loadGuestCollectionFromStorage();
+            const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
+            
+            if (existingIndex >= 0) {
+                guestCards[existingIndex].quantity = (guestCards[existingIndex].quantity || 1) + 1;
+            } else {
+                guestCards.push({
+                    card_id: cardId,
+                    card_type: cardType,
+                    image_path: imagePath,
+                    quantity: 1
+                });
+            }
+            
+            saveGuestCollectionToStorage(guestCards);
+            
+            // Clear search
+            const searchInput = document.getElementById('collectionSearchInput');
+            if (searchInput) searchInput.value = '';
+            const searchResults = document.getElementById('collectionSearchResults');
+            if (searchResults) searchResults.style.display = 'none';
+            
+            await loadCollection();
+            
+            if (typeof showNotification === 'function') {
+                showNotification('Card added to collection', 'success');
+            }
+            return;
+        }
+
+        // For authenticated users (USER/ADMIN), use API
         const requestBody = {
             cardId: cardId,
             cardType: cardType,
@@ -716,6 +850,32 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
         return;
     }
 
+    // For GUEST users, update localStorage
+    if (isGuestUser()) {
+        const guestCards = loadGuestCollectionFromStorage();
+        const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
+        
+        if (newQuantity === 0) {
+            if (existingIndex >= 0) {
+                guestCards.splice(existingIndex, 1);
+            }
+        } else if (existingIndex >= 0) {
+            guestCards[existingIndex].quantity = newQuantity;
+        } else {
+            guestCards.push({
+                card_id: cardId,
+                card_type: cardType,
+                image_path: imagePath,
+                quantity: newQuantity
+            });
+        }
+        
+        saveGuestCollectionToStorage(guestCards);
+        await loadCollection();
+        return;
+    }
+
+    // For authenticated users (USER/ADMIN), use API
     const url = `/api/collections/me/cards/${cardId}`;
     const requestBody = {
         quantity: newQuantity,
@@ -793,6 +953,25 @@ async function removeCardFromCollection(cardId, cardType) {
         return;
     }
 
+    // For GUEST users, remove from localStorage
+    if (isGuestUser()) {
+        const guestCards = loadGuestCollectionFromStorage();
+        const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
+        
+        if (existingIndex >= 0) {
+            guestCards.splice(existingIndex, 1);
+            saveGuestCollectionToStorage(guestCards);
+        }
+        
+        await loadCollection();
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Card removed from collection', 'success');
+        }
+        return;
+    }
+
+    // For authenticated users (USER/ADMIN), use API
     try {
         const response = await fetch(`/api/collections/me/cards/${cardId}?cardType=${encodeURIComponent(cardType)}`, {
             method: 'DELETE',

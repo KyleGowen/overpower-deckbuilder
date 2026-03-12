@@ -436,3 +436,35 @@
     }
 }
 
+/* Guest Sandbox Banner */
+.guest-sandbox-banner {
+    background: linear-gradient(135deg, #2d1f3d 0%, #1a1a2e 100%);
+    border: 1px solid #6c5ce7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guest-sandbox-banner .sandbox-icon {
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.guest-sandbox-banner .sandbox-text {
+    color: #b8b8d1;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.guest-sandbox-banner a {
+    color: #a29bfe;
+    text-decoration: underline;
+}
+
+.guest-sandbox-banner a:hover {
+    color: #6c5ce7;
+}
+

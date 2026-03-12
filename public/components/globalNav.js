@@ -249,12 +249,12 @@ function switchToCollectionView() {
 // Initialize global navigation
 function initializeGlobalNav() {
     
-    // Show Collection button only for ADMIN users
+    // Show Collection button for all authenticated users
     // Note: This will be updated again in updateUserWelcome() after authentication
     const currentUser = getCurrentUser();
     const collectionBtn = document.getElementById('collectionViewBtn');
     if (collectionBtn) {
-        if (currentUser && currentUser.role === 'ADMIN') {
+        if (currentUser) {
             collectionBtn.removeAttribute('style'); // Remove inline style to use default
         } else {
             collectionBtn.style.display = 'none';
@@ -310,15 +310,11 @@ function updateUserWelcome() {
         if (usernameElement) usernameElement.textContent = displayName;
         buildUserMenuOptions(currentUser);
         
-        // Update Collection button visibility based on user role
+        // Show Collection button for all authenticated users
         const collectionBtn = document.getElementById('collectionViewBtn');
         if (collectionBtn) {
-            if (currentUser.role === 'ADMIN') {
-                collectionBtn.style.display = ''; // Remove inline style to use default
-                collectionBtn.removeAttribute('style'); // Remove the style attribute entirely
-            } else {
-                collectionBtn.style.display = 'none';
-            }
+            collectionBtn.style.display = ''; // Remove inline style to use default
+            collectionBtn.removeAttribute('style'); // Remove the style attribute entirely
         }
     } else {
         // Hide Collection button if no user

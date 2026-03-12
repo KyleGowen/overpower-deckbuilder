@@ -1182,10 +1182,6 @@ function isValidCollectionCardType(value: unknown): value is string {
 
 app.get('/api/collections/me', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
-    }
-
     const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     res.json({ success: true, data: { id: collectionId, user_id: req.user!.id } });
   } catch (error) {
@@ -1196,10 +1192,6 @@ app.get('/api/collections/me', authenticateUser, async (req: Request, res) => {
 
 app.get('/api/collections/me/cards', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
-    }
-
     const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const cards = await collectionService.getCollectionCards(collectionId);
     res.json({ success: true, data: cards });
@@ -1212,10 +1204,6 @@ app.get('/api/collections/me/cards', authenticateUser, async (req: Request, res)
 
 app.post('/api/collections/me/cards', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
-
     const { cardId, cardType, quantity, imagePath } = req.body;
     if (!cardId || !cardType) {
       return res.status(400).json({ success: false, error: 'cardId and cardType are required' });
@@ -1245,10 +1233,6 @@ app.post('/api/collections/me/cards', authenticateUser, async (req: Request, res
 
 app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
-
     const { cardId } = req.params;
     const { quantity, cardType, imagePath, oldImagePath } = req.body;
 
@@ -1304,10 +1288,6 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Reque
 
 app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
-
     const { cardId } = req.params;
     const { cardType } = req.query;
 

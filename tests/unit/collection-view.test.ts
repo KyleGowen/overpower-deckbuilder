@@ -38,6 +38,10 @@ const collectionViewCode = fs.readFileSync(
 // Extract functions from the eval scope
 let fns: Record<string, (...args: any[]) => any>;
 
+// Mock getCurrentUser for GUEST detection tests
+let mockCurrentUser: any = null;
+(window as any).getCurrentUser = jest.fn(() => mockCurrentUser);
+
 function loadModule() {
     fns = eval(`
         ${collectionViewCode}
@@ -52,7 +56,12 @@ function loadModule() {
             formatCardType,
             translateSet,
             getCardDisplayName,
-            sortCollectionTable
+            sortCollectionTable,
+            isGuestUser,
+            loadGuestCollectionFromStorage,
+            saveGuestCollectionToStorage,
+            showGuestSandboxBanner,
+            addCardToCollection
         })
     `);
 }
@@ -485,19 +494,18 @@ describe('loadCollection()', () => {
         expect(container.innerHTML).toContain('Error loading');
     });
 
-    it('does not render anything on 403 (access denied)', async () => {
+    it('shows error message on 403 (unexpected error since all authenticated users can access)', async () => {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 403
         });
 
         const container = document.getElementById('collectionCardsList')!;
-        const originalHTML = container.innerHTML;
 
         await fns.loadCollection();
 
-        // Should not have added error html (just logs and returns)
-        expect(container.innerHTML).toBe(originalHTML);
+        // Should show error message since 403 is now treated as a server error
+        expect(container.innerHTML).toContain('Error loading');
     });
 
     it('falls back to owned-only display when allCardsData is unavailable', async () => {
@@ -698,5 +706,299 @@ describe('handleCollectionQuantityClick()', () => {
 
     it('does nothing when buttonElement is null', () => {
         expect(() => fns.handleCollectionQuantityClick(null, 1)).not.toThrow();
+    });
+});
+
+// ─── GUEST Sandbox Functions ──────────────────────────────────────────────────
+
+describe('isGuestUser()', () => {
+    beforeEach(() => {
+        loadModule();
+        mockCurrentUser = null;
+    });
+
+    it('returns true when user role is GUEST', () => {
+        mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
+        expect(fns.isGuestUser()).toBe(true);
+    });
+
+    it('returns false when user role is USER', () => {
+        mockCurrentUser = { role: 'USER', id: 'user-123' };
+        expect(fns.isGuestUser()).toBe(false);
+    });
+
+    it('returns false when user role is ADMIN', () => {
+        mockCurrentUser = { role: 'ADMIN', id: 'admin-123' };
+        expect(fns.isGuestUser()).toBe(false);
+    });
+
+    it('returns falsy when no user is logged in', () => {
+        mockCurrentUser = null;
+        expect(fns.isGuestUser()).toBeFalsy();
+    });
+});
+
+describe('loadGuestCollectionFromStorage()', () => {
+    beforeEach(() => {
+        loadModule();
+        localStorageMock.clear();
+        localStorageMock.getItem.mockClear();
+    });
+
+    it('returns empty array when no collection stored', () => {
+        localStorageMock.getItem.mockReturnValue(null);
+        const result = fns.loadGuestCollectionFromStorage();
+        expect(result).toEqual([]);
+    });
+
+    it('returns parsed collection from localStorage', () => {
+        const storedCards = [
+            { card_id: 'card-1', card_type: 'character', quantity: 2 },
+            { card_id: 'card-2', card_type: 'special', quantity: 1 }
+        ];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(storedCards));
+        
+        const result = fns.loadGuestCollectionFromStorage();
+        expect(result).toEqual(storedCards);
+    });
+
+    it('returns empty array on JSON parse error', () => {
+        localStorageMock.getItem.mockReturnValue('invalid-json{');
+        const result = fns.loadGuestCollectionFromStorage();
+        expect(result).toEqual([]);
+    });
+});
+
+describe('saveGuestCollectionToStorage()', () => {
+    beforeEach(() => {
+        loadModule();
+        localStorageMock.clear();
+        localStorageMock.setItem.mockClear();
+    });
+
+    it('saves collection to localStorage as JSON', () => {
+        const cards = [
+            { card_id: 'card-1', card_type: 'character', quantity: 2 }
+        ];
+        fns.saveGuestCollectionToStorage(cards);
+        
+        expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'guestCollection',
+            JSON.stringify(cards)
+        );
+    });
+
+    it('handles empty array', () => {
+        fns.saveGuestCollectionToStorage([]);
+        expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'guestCollection',
+            '[]'
+        );
+    });
+});
+
+describe('showGuestSandboxBanner()', () => {
+    beforeEach(() => {
+        loadModule();
+        setupDOM();
+    });
+
+    it('inserts banner before collectionCardsList', () => {
+        fns.showGuestSandboxBanner();
+        
+        const banner = document.getElementById('guestSandboxBanner');
+        expect(banner).not.toBeNull();
+        expect(banner!.className).toBe('guest-sandbox-banner');
+    });
+
+    it('does not duplicate banner if already exists', () => {
+        fns.showGuestSandboxBanner();
+        fns.showGuestSandboxBanner();
+        
+        const banners = document.querySelectorAll('#guestSandboxBanner');
+        expect(banners.length).toBe(1);
+    });
+
+    it('banner contains signup link with click handler', () => {
+        fns.showGuestSandboxBanner();
+
+        const banner = document.getElementById('guestSandboxBanner');
+        const link = banner!.querySelector('a.guest-signup-link');
+        expect(link).not.toBeNull();
+        expect(link!.getAttribute('href')).toBe('#');
+    });
+
+    it('signup link calls showSignupModal on click', () => {
+        const mockShowSignupModal = jest.fn();
+        (window as any).showSignupModal = mockShowSignupModal;
+        
+        fns.showGuestSandboxBanner();
+
+        const banner = document.getElementById('guestSandboxBanner');
+        const link = banner!.querySelector('a.guest-signup-link') as HTMLAnchorElement;
+        
+        const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+        link.dispatchEvent(clickEvent);
+        
+        expect(mockShowSignupModal).toHaveBeenCalled();
+    });
+
+    it('does nothing if container not found', () => {
+        document.body.innerHTML = '';
+        expect(() => fns.showGuestSandboxBanner()).not.toThrow();
+    });
+});
+
+const GUEST_COLLECTION_KEY = 'guestCollection';
+
+describe('GUEST sandbox in addCardToCollection()', () => {
+    beforeEach(() => {
+        loadModule();
+        setupDOM();
+        localStorageMock.clear();
+        localStorageMock.getItem.mockClear();
+        localStorageMock.setItem.mockClear();
+        (global.fetch as jest.Mock).mockReset();
+        mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
+        (window as any).allCardsData = [makeAllCard('card-1', 'character')];
+    });
+
+    it('saves to localStorage instead of calling API for GUEST', async () => {
+        localStorageMock.getItem.mockReturnValue('[]');
+        
+        await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
+        
+        expect(global.fetch).not.toHaveBeenCalled();
+        expect(localStorageMock.setItem).toHaveBeenCalled();
+    });
+
+    it('increments quantity if card already in GUEST collection', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/img.webp' }];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+        
+        await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
+        
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards[0].quantity).toBe(2);
+    });
+
+    it('adds new card to GUEST collection if not present', async () => {
+        localStorageMock.getItem.mockReturnValue('[]');
+        
+        await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
+        
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(1);
+        expect(savedCards[0].card_id).toBe('card-1');
+        expect(savedCards[0].quantity).toBe(1);
+    });
+});
+
+describe('GUEST sandbox in updateCollectionQuantity()', () => {
+    beforeEach(() => {
+        loadModule();
+        setupDOM();
+        localStorageMock.clear();
+        localStorageMock.getItem.mockClear();
+        localStorageMock.setItem.mockClear();
+        (global.fetch as jest.Mock).mockReset();
+        mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
+        (window as any).allCardsData = [makeAllCard('card-1', 'character')];
+    });
+
+    it('updates localStorage instead of calling API for GUEST', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/img.webp' }];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+        
+        await fns.updateCollectionQuantity('card-1', 'character', 5, '/img.webp');
+        
+        expect(global.fetch).not.toHaveBeenCalled();
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards[0].quantity).toBe(5);
+    });
+
+    it('removes card from GUEST collection when quantity is 0', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 3, image_path: '/img.webp' }];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+        
+        await fns.updateCollectionQuantity('card-1', 'character', 0, '/img.webp');
+        
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(0);
+    });
+});
+
+describe('GUEST sandbox in removeCardFromCollection()', () => {
+    beforeEach(() => {
+        loadModule();
+        setupDOM();
+        localStorageMock.clear();
+        localStorageMock.getItem.mockClear();
+        localStorageMock.setItem.mockClear();
+        (global.fetch as jest.Mock).mockReset();
+        mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
+        (window as any).allCardsData = [makeAllCard('card-1', 'character')];
+        // Mock confirm to return true
+        global.confirm = jest.fn(() => true);
+    });
+
+    it('removes from localStorage instead of calling API for GUEST', async () => {
+        const existing = [
+            { card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/img.webp' },
+            { card_id: 'card-2', card_type: 'special', quantity: 2, image_path: '/img2.webp' }
+        ];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+        
+        await fns.removeCardFromCollection('card-1', 'character');
+        
+        expect(global.fetch).not.toHaveBeenCalled();
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(1);
+        expect(savedCards[0].card_id).toBe('card-2');
+    });
+});
+
+describe('mergeCollectionWithAllCards() includes card_data for owned cards', () => {
+    beforeAll(() => loadModule());
+
+    it('includes card_data from allCardsData for owned cards', () => {
+        const owned = [{ card_id: 'c1', card_type: 'character', quantity: 2, image_path: '/img.webp' }];
+        const allCards = [makeAllCard('c1', 'character')];
+        
+        const merged = fns.mergeCollectionWithAllCards(owned, allCards);
+        
+        const ownedCard = merged.find((c: any) => c.card_id === 'c1');
+        expect(ownedCard.card_data).toBeDefined();
+        expect(ownedCard.card_data.name).toBe('Card c1');
+    });
+
+    it('owned cards without card_data get it from allCardsData', () => {
+        const owned = [{ card_id: 'c1', card_type: 'character', quantity: 1 }];
+        const allCards = [makeAllCard('c1', 'character')];
+        
+        const merged = fns.mergeCollectionWithAllCards(owned, allCards);
+        
+        const ownedCard = merged.find((c: any) => c.inCollection === true);
+        expect(ownedCard.card_data).toBeDefined();
     });
 });

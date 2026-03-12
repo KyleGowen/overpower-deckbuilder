@@ -1,11 +1,11 @@
 /**
- * Integration tests for Collection Admin Access Control
+ * Integration tests for Collection Access Control
  * 
- * Tests that all collection endpoints properly enforce ADMIN-only access:
- * - Non-admin users receive 403 Forbidden
- * - Unauthenticated users receive 401 Unauthorized
+ * Tests that all collection endpoints allow access for all authenticated users:
  * - ADMIN users can access all endpoints
- * - Role-based restrictions are properly enforced
+ * - USER users can access all endpoints
+ * - GUEST users can access all endpoints (frontend handles localStorage sandbox)
+ * - Unauthenticated users receive 401 Unauthorized
  */
 
 import request from 'supertest';
@@ -14,7 +14,7 @@ import { app } from '../../../src/test-server';
 import { DataSourceConfig } from '../../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../../setup-integration';
 
-describe('Collection Admin Access Control Integration Tests', () => {
+describe('Collection Access Control Integration Tests', () => {
   let pool: Pool;
   let adminUser: any;
   let regularUser: any;
@@ -119,24 +119,24 @@ describe('Collection Admin Access Control Integration Tests', () => {
       expect(response.body.data).toBeDefined();
     });
 
-    it('should block regular USER from accessing', async () => {
+    it('should allow USER to access', async () => {
       const response = await request(app)
         .get('/api/collections/me')
         .set('Cookie', regularAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can access collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
     });
 
-    it('should block GUEST users from accessing', async () => {
+    it('should allow GUEST users to access', async () => {
       const response = await request(app)
         .get('/api/collections/me')
         .set('Cookie', guestAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can access collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
     });
 
     it('should require authentication', async () => {
@@ -160,24 +160,24 @@ describe('Collection Admin Access Control Integration Tests', () => {
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
-    it('should block regular USER from accessing', async () => {
+    it('should allow USER to access', async () => {
       const response = await request(app)
         .get('/api/collections/me/cards')
         .set('Cookie', regularAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can access collections');
+      expect(response.body.success).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
-    it('should block GUEST users from accessing', async () => {
+    it('should allow GUEST users to access', async () => {
       const response = await request(app)
         .get('/api/collections/me/cards')
         .set('Cookie', guestAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can access collections');
+      expect(response.body.success).toBe(true);
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should require authentication', async () => {
@@ -191,14 +191,16 @@ describe('Collection Admin Access Control Integration Tests', () => {
 
   describe('POST /api/collections/me/cards', () => {
     beforeEach(async () => {
-      // Clear admin's collection before each test
-      const collectionResult = await pool.query(
-        'SELECT id FROM collections WHERE user_id = $1',
-        [adminUser.id]
-      );
-      if (collectionResult.rows.length > 0) {
-        const collectionId = collectionResult.rows[0].id;
-        await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
+      // Clear all test users' collections before each test
+      for (const user of [adminUser, regularUser, guestUser]) {
+        const collectionResult = await pool.query(
+          'SELECT id FROM collections WHERE user_id = $1',
+          [user.id]
+        );
+        if (collectionResult.rows.length > 0) {
+          const collectionId = collectionResult.rows[0].id;
+          await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
+        }
       }
     });
 
@@ -218,7 +220,7 @@ describe('Collection Admin Access Control Integration Tests', () => {
       expect(response.body.data).toBeDefined();
     });
 
-    it('should block regular USER from adding cards', async () => {
+    it('should allow USER to add cards', async () => {
       const response = await request(app)
         .post('/api/collections/me/cards')
         .set('Cookie', regularAuthCookie)
@@ -228,13 +230,13 @@ describe('Collection Admin Access Control Integration Tests', () => {
           quantity: 1,
           imagePath: '/images/test-character.webp'
         })
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
     });
 
-    it('should block GUEST users from adding cards', async () => {
+    it('should allow GUEST users to add cards', async () => {
       const response = await request(app)
         .post('/api/collections/me/cards')
         .set('Cookie', guestAuthCookie)
@@ -244,10 +246,10 @@ describe('Collection Admin Access Control Integration Tests', () => {
           quantity: 1,
           imagePath: '/images/test-character.webp'
         })
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
     });
 
     it('should require authentication', async () => {
@@ -267,27 +269,29 @@ describe('Collection Admin Access Control Integration Tests', () => {
 
   describe('PUT /api/collections/me/cards/:cardId', () => {
     beforeEach(async () => {
-      // Add a card to admin's collection for testing updates
-      const collectionResult = await pool.query(
-        'SELECT id FROM collections WHERE user_id = $1',
-        [adminUser.id]
-      );
-      let collectionId: string;
-      if (collectionResult.rows.length === 0) {
-        const insertResult = await pool.query(
-          'INSERT INTO collections (user_id) VALUES ($1) RETURNING id',
-          [adminUser.id]
+      // Add a card to all test users' collections for testing updates
+      for (const user of [adminUser, regularUser, guestUser]) {
+        const collectionResult = await pool.query(
+          'SELECT id FROM collections WHERE user_id = $1',
+          [user.id]
         );
-        collectionId = insertResult.rows[0].id;
-      } else {
-        collectionId = collectionResult.rows[0].id;
-        await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
-      }
+        let collectionId: string;
+        if (collectionResult.rows.length === 0) {
+          const insertResult = await pool.query(
+            'INSERT INTO collections (user_id) VALUES ($1) RETURNING id',
+            [user.id]
+          );
+          collectionId = insertResult.rows[0].id;
+        } else {
+          collectionId = collectionResult.rows[0].id;
+          await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
+        }
 
-      await pool.query(
-        'INSERT INTO collection_cards (collection_id, card_id, card_type, quantity, image_path) VALUES ($1, $2, $3, $4, $5)',
-        [collectionId, testCharacterId, 'character', 1, '/images/test-character.webp']
-      );
+        await pool.query(
+          'INSERT INTO collection_cards (collection_id, card_id, card_type, quantity, image_path) VALUES ($1, $2, $3, $4, $5)',
+          [collectionId, testCharacterId, 'character', 1, '/images/test-character.webp']
+        );
+      }
     });
 
     it('should allow ADMIN users to update cards', async () => {
@@ -305,7 +309,7 @@ describe('Collection Admin Access Control Integration Tests', () => {
       expect(response.body.data.quantity).toBe(5);
     });
 
-    it('should block regular USER from updating cards', async () => {
+    it('should allow USER to update cards', async () => {
       const response = await request(app)
         .put(`/api/collections/me/cards/${testCharacterId}`)
         .set('Cookie', regularAuthCookie)
@@ -314,13 +318,13 @@ describe('Collection Admin Access Control Integration Tests', () => {
           cardType: 'character',
           imagePath: '/images/test-character.webp'
         })
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.quantity).toBe(5);
     });
 
-    it('should block GUEST users from updating cards', async () => {
+    it('should allow GUEST users to update cards', async () => {
       const response = await request(app)
         .put(`/api/collections/me/cards/${testCharacterId}`)
         .set('Cookie', guestAuthCookie)
@@ -329,10 +333,10 @@ describe('Collection Admin Access Control Integration Tests', () => {
           cardType: 'character',
           imagePath: '/images/test-character.webp'
         })
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.quantity).toBe(5);
     });
 
     it('should require authentication', async () => {
@@ -351,27 +355,29 @@ describe('Collection Admin Access Control Integration Tests', () => {
 
   describe('DELETE /api/collections/me/cards/:cardId', () => {
     beforeEach(async () => {
-      // Add a card to admin's collection for testing deletion
-      const collectionResult = await pool.query(
-        'SELECT id FROM collections WHERE user_id = $1',
-        [adminUser.id]
-      );
-      let collectionId: string;
-      if (collectionResult.rows.length === 0) {
-        const insertResult = await pool.query(
-          'INSERT INTO collections (user_id) VALUES ($1) RETURNING id',
-          [adminUser.id]
+      // Add a card to all test users' collections for testing deletion
+      for (const user of [adminUser, regularUser, guestUser]) {
+        const collectionResult = await pool.query(
+          'SELECT id FROM collections WHERE user_id = $1',
+          [user.id]
         );
-        collectionId = insertResult.rows[0].id;
-      } else {
-        collectionId = collectionResult.rows[0].id;
-        await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
-      }
+        let collectionId: string;
+        if (collectionResult.rows.length === 0) {
+          const insertResult = await pool.query(
+            'INSERT INTO collections (user_id) VALUES ($1) RETURNING id',
+            [user.id]
+          );
+          collectionId = insertResult.rows[0].id;
+        } else {
+          collectionId = collectionResult.rows[0].id;
+          await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
+        }
 
-      await pool.query(
-        'INSERT INTO collection_cards (collection_id, card_id, card_type, quantity, image_path) VALUES ($1, $2, $3, $4, $5)',
-        [collectionId, testCharacterId, 'character', 1, '/images/test-character.webp']
-      );
+        await pool.query(
+          'INSERT INTO collection_cards (collection_id, card_id, card_type, quantity, image_path) VALUES ($1, $2, $3, $4, $5)',
+          [collectionId, testCharacterId, 'character', 1, '/images/test-character.webp']
+        );
+      }
     });
 
     it('should allow ADMIN users to delete cards', async () => {
@@ -384,24 +390,24 @@ describe('Collection Admin Access Control Integration Tests', () => {
       expect(response.body.message).toContain('removed');
     });
 
-    it('should block regular USER from deleting cards', async () => {
+    it('should allow USER to delete cards', async () => {
       const response = await request(app)
         .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', regularAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('removed');
     });
 
-    it('should block GUEST users from deleting cards', async () => {
+    it('should allow GUEST users to delete cards', async () => {
       const response = await request(app)
         .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', guestAuthCookie)
-        .expect(403);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Only ADMIN users can modify collections');
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('removed');
     });
 
     it('should require authentication', async () => {
@@ -413,8 +419,8 @@ describe('Collection Admin Access Control Integration Tests', () => {
     });
   });
 
-  describe('Role consistency across all endpoints', () => {
-    it('should consistently enforce ADMIN-only access', async () => {
+  describe('Authentication requirement across all endpoints', () => {
+    it('should require authentication for all collection endpoints', async () => {
       const endpoints = [
         { method: 'get', path: '/api/collections/me' },
         { method: 'get', path: '/api/collections/me/cards' },
@@ -424,17 +430,33 @@ describe('Collection Admin Access Control Integration Tests', () => {
       ];
 
       for (const endpoint of endpoints) {
-        // supertest's request agent isn't indexable in TS; cast to any for dynamic method selection
         const agent = request(app) as any;
         const response = await agent[endpoint.method](endpoint.path)
-          .set('Cookie', regularAuthCookie)
           .send(endpoint.body || {})
-          .expect(403);
+          .expect(401);
 
         expect(response.body.success).toBe(false);
-        expect(response.body.error).toMatch(/Only ADMIN users can/i);
+      }
+    });
+  });
+
+  describe('All authenticated users can access collection endpoints', () => {
+    it('should allow all authenticated users to access GET endpoints', async () => {
+      const cookies = [adminAuthCookie, regularAuthCookie, guestAuthCookie];
+      
+      for (const cookie of cookies) {
+        const meResponse = await request(app)
+          .get('/api/collections/me')
+          .set('Cookie', cookie)
+          .expect(200);
+        expect(meResponse.body.success).toBe(true);
+
+        const cardsResponse = await request(app)
+          .get('/api/collections/me/cards')
+          .set('Cookie', cookie)
+          .expect(200);
+        expect(cardsResponse.body.success).toBe(true);
       }
     });
   });
 });
-

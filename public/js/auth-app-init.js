@@ -48,6 +48,29 @@ async function showLoginModal() {
 }
 
 /**
+ * Show the signup modal (login modal with signup view active)
+ * Used when directing users to create an account (e.g., from GUEST sandbox banner)
+ */
+async function showSignupModal() {
+    window.__flashDebug && window.__flashDebug('auth-app-init.showSignupModal: start');
+    
+    // First ensure the login modal exists and is visible
+    await showLoginModal();
+    
+    // Switch to signup view
+    const loginView = document.getElementById('loginView');
+    const signupView = document.getElementById('signupView');
+    if (loginView) loginView.style.display = 'none';
+    if (signupView) signupView.style.display = 'block';
+    
+    // Clear any previous errors
+    if (typeof hideLoginError === 'function') hideLoginError();
+    if (typeof hideSignupError === 'function') hideSignupError();
+    
+    window.__flashDebug && window.__flashDebug('auth-app-init.showSignupModal: done');
+}
+
+/**
  * Display login error message to user
  * @param {string} message - Error message to display
  */

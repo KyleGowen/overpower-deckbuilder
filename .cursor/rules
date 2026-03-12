@@ -613,3 +613,173 @@ Edit only `public/css/foil-effect.css`. Key knobs:
 The deck editor Foil button always reads "Foil". State is visual only:
 - `.foil-btn` — base (unpressed) appearance
 - `.foil-btn--active` — pressed appearance when foil is selected for that card instance
+
+---
+
+## Collection Feature
+
+The collection feature allows all authenticated users to manage their card collection.
+
+### Access Control
+
+All authenticated users (ADMIN, USER, GUEST) can access the collection interface.
+The Collection button in the global navigation appears for all logged-in users.
+
+### Data Persistence by Role
+
+| Role | Storage | Persistence |
+|------|---------|-------------|
+| ADMIN, USER | PostgreSQL via API | Permanent, server-synced |
+| GUEST | localStorage | Session-only sandbox |
+
+### GUEST Sandbox Mode
+
+GUEST users operate in a **sandbox mode** where:
+- Collection data is stored in `localStorage` under key `guestCollection`
+- No API calls are made for GUEST collection operations
+- A sandbox banner is displayed explaining the non-persistent nature
+- Users are prompted to sign up for permanent storage
+
+### Key Functions in `public/js/collection-view.js`
+
+| Function | Purpose |
+|----------|---------|
+| `isGuestUser()` | Returns truthy if current user has GUEST role |
+| `loadGuestCollectionFromStorage()` | Retrieves GUEST collection from localStorage |
+| `saveGuestCollectionToStorage(cards)` | Persists GUEST collection to localStorage |
+| `showGuestSandboxBanner()` | Displays the sandbox notification banner |
+
+### localStorage Schema
+
+```js
+// Key: 'guestCollection'
+// Value: JSON array of collection cards
+[
+  {
+    card_id: string,
+    card_type: string,      // 'character', 'special', etc.
+    quantity: number,
+    image_path: string,
+    card_data: {            // Required for display
+      name: string,
+      set_number: string
+    }
+  }
+]
+```
+
+### API Endpoints (ADMIN/USER only)
+
+All endpoints require authentication. GUEST users bypass these via localStorage.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/collections/me` | Fetch user's collection |
+| GET | `/api/collections/me/cards` | Fetch collection cards |
+| POST | `/api/collections/me/cards` | Add card to collection |
+| PUT | `/api/collections/me/cards/:cardId` | Update card quantity |
+| DELETE | `/api/collections/me/cards/:cardId` | Remove card from collection |
+| GET | `/api/collections/me/history` | Fetch collection change history |
+
+### Frontend Flow
+
+```
+loadCollection()
+    │
+    ├─ isGuestUser()? ──yes──► loadGuestCollectionFromStorage()
+    │                         showGuestSandboxBanner()
+    │
+    └─ no ──► fetch('/api/collections/me/cards')
+```
+
+### Files
+
+| Layer | File |
+|-------|------|
+| Frontend JS | `public/js/collection-view.js` |
+| Frontend CSS | `public/css/collection-view.css` |
+| HTML Template | (rendered via EJS in `src/index.ts`) |
+| Backend API | Collection endpoints in `src/index.ts` |
+| Repository | `src/database/collectionRepository.ts` |
+| Service | `src/services/collectionService.ts` |
+
+### Testing
+
+| Test Type | Location |
+|-----------|----------|
+| Unit tests | `tests/unit/collection-view.test.ts`, `tests/unit/collectionService.test.ts` |
+| Integration tests | `tests/integration/collection/*.test.ts` |
+
+Key test suites:
+- **collection-admin-access.test.ts** — verifies all roles can access collection APIs
+- **collection-workflow.test.ts** — end-to-end collection operations
+- **collection-view.test.ts** — unit tests for GUEST sandbox functions
+- **collection-guest-sandbox-ui.test.ts** — verifies signup link behavior
+
+### Adding Features
+
+When modifying the collection feature:
+1. Update both API and localStorage paths if applicable
+2. Ensure GUEST users receive appropriate feedback (no server errors)
+3. Update both unit and integration tests
+4. Test with all three roles: ADMIN, USER, GUEST
+
+---
+
+## Login/Signup Modal Pattern
+
+The application uses a **modal-based** login/signup flow, NOT separate page routes.
+
+### Key Points
+
+- **No `/signup` route exists** — signup is part of the login modal
+- **No `/login` route exists** — login is displayed via a modal overlay
+- Use `showLoginModal()` to display the login view
+- Use `showSignupModal()` to display the signup view
+
+### Available Functions (in `public/js/auth-app-init.js`)
+
+| Function | Purpose |
+|----------|---------|
+| `showLoginModal()` | Opens modal with login view visible |
+| `showSignupModal()` | Opens modal with signup view visible |
+| `showLoginError(msg)` | Displays error in login form |
+| `hideLoginError()` | Hides login error message |
+| `showSignupError(msg)` | Displays error in signup form |
+| `hideSignupError()` | Hides signup error message |
+
+### Linking to Signup
+
+**DO NOT** use `href="/signup"` — it will 404.
+
+Instead, use a click handler:
+
+```javascript
+// ✅ Correct approach
+link.addEventListener('click', (e) => {
+    e.preventDefault();
+    showSignupModal();
+});
+
+// ❌ Wrong - /signup does not exist
+<a href="/signup">Sign up</a>
+```
+
+### Modal HTML Structure
+
+The login modal lives in `public/components/login/login.html` and contains:
+- `#loginModal` — outer container
+- `#loginView` — login form (username/password)
+- `#signupView` — signup form (username/email/password/confirm)
+
+Only one view is visible at a time, controlled by `style.display`.
+
+### Related Files
+
+| Purpose | File |
+|---------|------|
+| Modal HTML template | `public/components/login/login.html` |
+| Modal JS (event handlers) | `public/components/login/login.js` |
+| Global auth functions | `public/js/auth-app-init.js` |
+| Auth service | `public/js/auth-service.js` |
+| Unit tests | `tests/unit/auth-app-init.test.ts` |

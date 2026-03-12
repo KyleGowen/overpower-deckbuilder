@@ -1586,11 +1586,6 @@ function isValidCollectionCardType(value: unknown): value is string {
 // Get current user's collection
 app.get('/api/collections/me', authenticateUser, async (req: Request, res) => {
   try {
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
-    }
-
     const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     res.json({ success: true, data: { id: collectionId, user_id: req.user!.id } });
   } catch (error) {
@@ -1602,11 +1597,6 @@ app.get('/api/collections/me', authenticateUser, async (req: Request, res) => {
 // Get all cards in user's collection
 app.get('/api/collections/me/cards', authenticateUser, async (req: Request, res) => {
   try {
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can access collections' });
-    }
-
     const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
     const cards = await collectionService.getCollectionCards(collectionId);
     res.json({ success: true, data: cards });
@@ -1625,11 +1615,6 @@ app.post('/api/collections/me/cards', authenticateUser, async (req: Request, res
       role: req.user!.role,
       body: req.body
     });
-    
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
 
     const { cardId, cardType, quantity, imagePath } = req.body;
 
@@ -1694,11 +1679,6 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Reque
       cardId: req.params.cardId,
       body: req.body
     });
-    
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
 
     const { cardId } = req.params;
     const { quantity, cardType, imagePath, oldImagePath } = req.body;
@@ -1776,11 +1756,6 @@ app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Reque
 // Remove card from collection
 app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can modify collections' });
-    }
-
     const { cardId } = req.params;
     const { cardType } = req.query;
 
@@ -1812,11 +1787,6 @@ app.delete('/api/collections/me/cards/:cardId', authenticateUser, async (req: Re
 // Get collection history
 app.get('/api/collections/me/history', authenticateUser, async (req: Request, res) => {
   try {
-    // Check if user is ADMIN
-    if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Only ADMIN users can access collection history' });
-    }
-
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
     
     if (limit !== undefined && (isNaN(limit) || limit < 1)) {
@@ -1896,12 +1866,6 @@ app.get('/users/:userId/decks/:deckId', (req: Request, res) => {
 
 // Collection View route - serve collection view for specific user
 app.get('/users/:userId/collection', authenticateUser, (req: Request, res) => {
-  // Check if user is ADMIN
-  if (req.user!.role !== 'ADMIN') {
-    // Redirect to deck builder if not ADMIN
-    return res.redirect(`/users/${req.user!.id}/decks`);
-  }
-  
   // Add cache-busting headers to prevent HTML caching during development
   res.set({
     'Cache-Control': 'no-cache, no-store, must-revalidate',
