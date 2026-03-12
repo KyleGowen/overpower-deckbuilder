@@ -237,45 +237,8 @@ class FrontendAuthService {
     }
   }
 
-  async loginWithGoogle(idToken) {
-    try {
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ idToken })
-      });
-
-      let data;
-      try {
-        const text = await response.text();
-        data = text ? JSON.parse(text) : {};
-      } catch (parseError) {
-        console.error('Google login response parse error:', parseError);
-        return {
-          success: false,
-          error: response.status >= 500
-            ? 'Server is temporarily unavailable. Please try again in a few moments.'
-            : 'Google sign-in failed'
-        };
-      }
-
-      if (data.success && data.data) {
-        this.currentUser = {
-          id: data.data.userId,
-          name: data.data.username,
-          email: '',
-          role: data.data.role || 'USER'
-        };
-        this.storeUser(this.currentUser);
-        this.hideLoginModal();
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Google login error:', error);
-      return { success: false, error: 'Google sign-in failed' };
-    }
+  async loginWithGoogle() {
+    return { success: false, error: 'Google sign-in is not available' };
   }
 
   getStoredUser() {

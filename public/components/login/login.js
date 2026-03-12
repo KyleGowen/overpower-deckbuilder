@@ -80,44 +80,8 @@ function createFallbackLoginModal() {
                     </form>
                     <div class="login-buttons-grid">
                         <button type="submit" form="loginForm" class="login-btn">Log In</button>
-                        <button type="button" id="googleLoginBtn" class="google-btn">Sign in with Google</button>
                         <button type="button" id="guestLoginBtn" class="guest-btn">Continue as Guest</button>
-                        <button type="button" id="signUpBtn" class="signup-btn">Sign Up</button>
                     </div>
-                    <div class="login-contact" aria-label="Contact">
-                        For questions or comments, email
-                        <a class="login-contact-link" href="mailto:kyle@excelsior.cards">kyle@excelsior.cards</a>.
-                        <br>
-                        Or message me at the
-                        <a class="login-contact-link" href="https://discord.com/invite/overpowerlives" target="_blank" rel="noopener noreferrer">OverPower Discord</a>: <a class="login-contact-link" href="https://discord.com/users/414971289267339274" target="_blank" rel="noopener noreferrer">@GirlsGoneKyle</a>.
-                    </div>
-                </div>
-                <div id="signupView" class="signup-view" style="display: none;">
-                    <div class="login-header">
-                        <img src="/src/resources/images/logo/logo5.png" alt="Excelsior Deckbuilder" style="max-width: 300px; height: auto; display: block; margin: 0 auto;" data-click-handler="handleLoginLogoClick">
-                    </div>
-                    <h2 class="signup-heading">Create Account</h2>
-                    <form id="signupForm" class="signup-form login-form">
-                        <div class="form-group">
-                            <label for="signupUsername">Username</label>
-                            <input type="text" id="signupUsername" name="username" autocomplete="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="signupEmail">Email</label>
-                            <input type="email" id="signupEmail" name="email" autocomplete="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="signupPassword">Password</label>
-                            <input type="password" id="signupPassword" name="password" autocomplete="new-password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="signupPasswordConfirm">Repeat Password</label>
-                            <input type="password" id="signupPasswordConfirm" name="passwordConfirm" autocomplete="new-password" required>
-                        </div>
-                        <div id="signupError" class="error-message" style="display: none;"></div>
-                        <button type="submit" class="login-btn">Create Account</button>
-                    </form>
-                    <a href="#" id="signupBackLink" class="signup-back-link">Already have an account? Log in</a>
                     <div class="login-contact" aria-label="Contact">
                         For questions or comments, email
                         <a class="login-contact-link" href="mailto:kyle@excelsior.cards">kyle@excelsior.cards</a>.
@@ -152,108 +116,18 @@ function initializeLoginComponent() {
 }
 
 /**
- * Setup event listeners for login form, guest login, sign up, and signup form
+ * Setup event listeners for login form and guest login
  */
 function setupLoginEventListeners() {
     window.__flashDebug && window.__flashDebug('login.js setupLoginEventListeners: called');
     const loginForm = document.getElementById('loginForm');
     const guestLoginBtn = document.getElementById('guestLoginBtn');
-    const signUpBtn = document.getElementById('signUpBtn');
-    const signupForm = document.getElementById('signupForm');
-    const signupBackLink = document.getElementById('signupBackLink');
     
     if (loginForm) {
         loginForm.addEventListener('submit', handleLoginSubmit);
     }
-    
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    if (googleLoginBtn) {
-        googleLoginBtn.addEventListener('click', handleGoogleLogin);
-    }
     if (guestLoginBtn) {
         guestLoginBtn.addEventListener('click', handleGuestLogin);
-    }
-    if (signUpBtn) {
-        signUpBtn.addEventListener('click', handleSignUpClick);
-    }
-    if (signupForm) {
-        signupForm.addEventListener('submit', handleSignupSubmit);
-    }
-    if (signupBackLink) {
-        signupBackLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleSignupBackClick();
-        });
-    }
-}
-
-/**
- * Switch from login view to signup view
- */
-function handleSignUpClick() {
-    if (typeof window.hideLoginError === 'function') {
-        window.hideLoginError();
-    }
-    if (typeof window.hideSignupError === 'function') {
-        window.hideSignupError();
-    }
-    const loginView = document.getElementById('loginView');
-    const signupView = document.getElementById('signupView');
-    if (loginView) loginView.style.display = 'none';
-    if (signupView) signupView.style.display = 'block';
-}
-
-/**
- * Switch from signup view back to login view
- */
-function handleSignupBackClick() {
-    if (typeof window.hideSignupError === 'function') {
-        window.hideSignupError();
-    }
-    const loginView = document.getElementById('loginView');
-    const signupView = document.getElementById('signupView');
-    if (loginView) loginView.style.display = 'block';
-    if (signupView) signupView.style.display = 'none';
-}
-
-/**
- * Handle signup form submission
- * @param {Event} e - Form submit event
- */
-async function handleSignupSubmit(e) {
-    e.preventDefault();
-    
-    if (typeof window.hideSignupError === 'function') {
-        window.hideSignupError();
-    }
-    
-    const username = document.getElementById('signupUsername')?.value?.trim();
-    const email = document.getElementById('signupEmail')?.value?.trim();
-    const password = document.getElementById('signupPassword')?.value;
-    const passwordConfirm = document.getElementById('signupPasswordConfirm')?.value;
-    
-    if (!username || !email || !password || !passwordConfirm) {
-        if (typeof window.showSignupError === 'function') {
-            window.showSignupError('Please fill in all fields');
-        }
-        return;
-    }
-    
-    if (password !== passwordConfirm) {
-        if (typeof window.showSignupError === 'function') {
-            window.showSignupError('Passwords do not match');
-        }
-        return;
-    }
-    
-    const signupFn = typeof signup === 'function' ? signup : (typeof window.signup === 'function' ? window.signup : null);
-    if (signupFn) {
-        await signupFn({ username, email, password });
-    } else {
-        console.error('Signup function not available');
-        if (typeof window.showSignupError === 'function') {
-            window.showSignupError('Signup functionality not available');
-        }
     }
 }
 
@@ -318,53 +192,6 @@ async function handleGuestLogin() {
         }
     }
 }
-
-/**
- * Handle Google login button click
- */
-async function handleGoogleLogin() {
-    if (typeof window.hideLoginError === 'function') {
-        window.hideLoginError();
-    }
-    try {
-        const auth = await (typeof initializeFirebase === 'function' ? initializeFirebase() : null);
-        if (!auth) {
-            if (typeof window.showLoginError === 'function') {
-                window.showLoginError('Google sign-in is not available');
-            }
-            return;
-        }
-        const provider = new firebase.auth.GoogleAuthProvider();
-        const result = await auth.signInWithPopup(provider);
-        const idToken = result.user ? await result.user.getIdToken() : null;
-        if (!idToken) {
-            if (typeof window.showLoginError === 'function') {
-                window.showLoginError('Could not get Google credentials');
-            }
-            return;
-        }
-        const result2 = await window.authService.loginWithGoogle(idToken);
-        if (result2.success) {
-            const user = result2.data;
-            if (typeof currentUser !== 'undefined') currentUser = user;
-            if (typeof window !== 'undefined') window.currentUser = user;
-            if (typeof updateUserWelcome === 'function') updateUserWelcome();
-            const mainContainer = document.getElementById('mainContainer');
-            if (mainContainer) mainContainer.style.display = 'grid';
-            if (typeof showMainApp === 'function') showMainApp();
-        } else {
-            if (typeof window.showLoginError === 'function') {
-                window.showLoginError(result2.error || 'Google sign-in failed');
-            }
-        }
-    } catch (err) {
-        console.error('Google login error:', err);
-        if (typeof window.showLoginError === 'function') {
-            window.showLoginError(err.message || 'Google sign-in failed');
-        }
-    }
-}
-
 
 // Note: showLoginError and hideLoginError are defined in auth-app-init.js
 // We don't redefine them here to avoid recursion issues
