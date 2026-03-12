@@ -783,3 +783,116 @@ Only one view is visible at a time, controlled by `style.display`.
 | Global auth functions | `public/js/auth-app-init.js` |
 | Auth service | `public/js/auth-service.js` |
 | Unit tests | `tests/unit/auth-app-init.test.ts` |
+
+---
+
+## Google Sign-In / Firebase Admin Setup
+
+The application supports Google Sign-In using Firebase Admin SDK for server-side ID token verification.
+
+### Architecture
+
+- **Frontend**: Uses Firebase Client SDK to trigger Google Sign-In popup and obtain ID token
+- **Backend**: Uses `firebase-admin` to verify the ID token via `verifyIdToken()`
+- **No Cloud Storage**: We only use Firebase for authentication, NOT for `@google-cloud/storage` or any other Google Cloud services
+
+### Key Files
+
+| Layer | File |
+|-------|------|
+| Firebase config | `src/config/firebaseAdmin.ts` |
+| Auth service | `src/services/AuthenticationService.ts` |
+| Frontend auth | `public/js/auth-service.js` |
+| Integration tests | `tests/integration/google-auth-firebase.test.ts` |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | JSON string of Firebase service account credentials |
+
+For local dev, can also use file: `infra/firebase-service-account.json`
+
+### Dependency Chain Issue
+
+The `firebase-admin` package pulls in `@google-cloud/storage` which has a deep dependency chain:
+
+```
+firebase-admin
+  → @google-cloud/storage
+    → teeny-request
+      → http-proxy-agent@5.x
+        → @tootallnate/once@2.x (VULNERABLE)
+```
+
+**Important**: We do NOT use `@google-cloud/storage` functionality. Firebase Admin is used solely for `verifyIdToken()` in Google Sign-In. The vulnerable code path (`@tootallnate/once`) is never executed in our usage.
+
+---
+
+## Trivy CI Configuration
+
+### Known Issue: trivy-action Ignores .trivyignore
+
+The `aquasecurity/trivy-action` GitHub Action has [documented bugs](https://github.com/aquasecurity/trivy-action/issues/436) where:
+- The `TRIVY_IGNOREFILE` environment variable doesn't work
+- The `trivyignores` input parameter doesn't reliably pass the ignore file to Trivy
+
+**Solution**: Use Trivy CLI directly instead of the GitHub Action.
+
+### Current Configuration (deploy.yml)
+
+```yaml
+- name: Install Trivy
+  run: |
+    sudo apt-get update
+    sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+    sudo apt-get update
+    sudo apt-get install -y trivy
+
+- name: Run Trivy vulnerability scanner
+  run: |
+    trivy fs \
+      --ignorefile .trivyignore \
+      --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+      --exit-code 1 \
+      --ignore-unfixed \
+      --scanners vuln \
+      .
+```
+
+### .trivyignore File
+
+Located at project root. Format: one CVE ID per line with comments explaining the suppression reason.
+
+```
+# CVE-XXXX-YYYY: Package Name - Brief description
+# Suppressed because: [reason]
+# Review periodically: [what to check]
+CVE-XXXX-YYYY
+```
+
+### Currently Suppressed CVEs
+
+| CVE | Package | Reason |
+|-----|---------|--------|
+| CVE-2026-3449 | @tootallnate/once | Vulnerable code path never executed - we only use firebase-admin for `verifyIdToken()`, not `@google-cloud/storage` or proxy functionality |
+
+### Adding New Suppressions
+
+1. Add the CVE ID to `.trivyignore` with full documentation:
+   - CVE ID and package name
+   - CVSS score and severity
+   - Why it's safe to suppress (what code path is/isn't executed)
+   - What blocks the fix (upstream dependency issues)
+   - When to review (what upstream change would allow removal)
+2. The CI will automatically pick it up via `--ignorefile .trivyignore`
+
+### Key Files
+
+| Purpose | File |
+|---------|------|
+| Ignore file | `.trivyignore` |
+| CI workflow | `.github/workflows/deploy.yml` (trivy job) |
+| Documentation | `docs/trivy-dependency-scanning.md` |
