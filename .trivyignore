@@ -1,0 +1,14 @@
+# CVE-2026-3449: @tootallnate/once Incorrect Control Flow Scoping
+# CVSS 3.3 (Low) | EPSS 0.01%
+#
+# Suppressed because:
+# - Vulnerability only triggers when AbortSignal is passed to once() and aborted
+# - This app uses firebase-admin solely for verifyIdToken() in Google Sign-In
+# - We don't use @google-cloud/storage or proxy functionality
+# - The vulnerable code path is never executed
+#
+# Fix blocked by: teeny-request pins http-proxy-agent@^5.0.0 which requires @tootallnate/once@2
+# Upstream issue: Google's teeny-request hasn't updated to http-proxy-agent v7+
+#
+# Review periodically: Check if teeny-request updates http-proxy-agent dependency
+CVE-2026-3449
