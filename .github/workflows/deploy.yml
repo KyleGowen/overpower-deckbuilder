@@ -166,6 +166,7 @@ jobs:
         exit-code: '1'
         ignore-unfixed: true
         scanners: 'vuln'
+        trivyignores: '.trivyignore'
 
     - name: Run Trivy (JSON artifact)
       if: always()
@@ -178,6 +179,7 @@ jobs:
         output: 'trivy-report.json'
         ignore-unfixed: true
         scanners: 'vuln'
+        trivyignores: '.trivyignore'
 
     - name: Upload Trivy report
       if: always()
