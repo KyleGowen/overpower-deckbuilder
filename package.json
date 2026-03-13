@@ -32,6 +32,7 @@
     "test:integration:game-logic-reserve:coverage": "jest --config tests/config/jest.integration.game-logic-reserve.config.js --coverage",
     "test:integration:game-logic-power-teamwork:coverage": "jest --config tests/config/jest.integration.game-logic-power-teamwork.config.js --coverage",
     "test:integration:game-logic:parallel": "npm run test:integration:game-logic-character-validation & npm run test:integration:game-logic-character-layout & npm run test:integration:game-logic-character-threat & npm run test:integration:game-logic-reserve & npm run test:integration:game-logic-power-teamwork & wait",
+    "test:integration:security": "jest --config tests/config/jest.integration.security.config.js",
     "test:integration:deck-security-ownership": "jest --config tests/config/jest.integration.deck-security-ownership.config.js",
     "test:integration:deck-security-save": "jest --config tests/config/jest.integration.deck-security-save.config.js",
     "test:integration:deck-security-frontend": "jest --config tests/config/jest.integration.deck-security-frontend.config.js",

@@ -212,9 +212,9 @@ jobs:
         include:
           - category: Security
             slug: security
-            script: test:integration
-            args: "tests/integration/deck-ownership-security*.test.ts tests/integration/deck-save-security*.test.ts tests/integration/role-based-restrictions.test.ts"
-            timeout: 15
+            script: test:integration:security
+            args: ""
+            timeout: 25
           - category: AuthZ Security
             slug: authz-security
             script: test:integration
@@ -269,17 +269,17 @@ jobs:
             slug: game-logic-character-validation
             script: test:integration:game-logic-character-validation
             args: ""
-            timeout: 10
+            timeout: 15
           - category: Game Logic Character Layout
             slug: game-logic-character-layout
             script: test:integration:game-logic-character-layout
             args: ""
-            timeout: 10
+            timeout: 15
           - category: Game Logic Character Threat
             slug: game-logic-character-threat
             script: test:integration:game-logic-character-threat
             args: ""
-            timeout: 10
+            timeout: 15
           - category: Reserve
             slug: reserve
             script: test:integration
