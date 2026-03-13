@@ -141,7 +141,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
       deckId,
       cardType,
       cardId,
-      { quantity: updates.quantity }
+      updates.quantity !== undefined ? { quantity: updates.quantity } : {}
     );
   }
 
@@ -166,7 +166,9 @@ export class PostgreSQLDeckRepository implements DeckRepository {
         cardType: c.cardType,
         cardId: c.cardId,
         quantity: c.quantity,
-        exclude_from_draw: c.exclude_from_draw,
+        ...(c.exclude_from_draw !== undefined && {
+          exclude_from_draw: c.exclude_from_draw,
+        }),
       }))
     );
   }

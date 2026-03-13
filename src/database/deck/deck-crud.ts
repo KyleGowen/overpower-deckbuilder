@@ -38,23 +38,29 @@ interface DeckCardRow {
   exclude_from_draw?: boolean;
 }
 
-export function mapDeckRowWithCards(
-  deckRow: DeckRow,
-  cards: Array<{ id: string; type: string; cardId: string; quantity: number; exclude_from_draw?: boolean }>
-): Deck {
+export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
+  const desc = deckRow.description as string | undefined;
+  const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
+  const isLimited = deckRow.is_limited as boolean | undefined;
+  const reserveChar = deckRow.reserve_character as string | undefined;
+  const displayMission = (deckRow.display_mission_card_id as string | null) ?? null;
+  const bgPath = deckRow.background_image_path as string | undefined;
+  const threatVal = deckRow.threat as number | undefined;
+  const createdAt = deckRow.created_at as string | undefined;
+  const updatedAt = deckRow.updated_at as string | undefined;
   return {
     id: deckRow.id as string,
     user_id: deckRow.user_id as string,
     name: deckRow.name as string,
-    description: deckRow.description as string | undefined,
-    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
-    is_limited: deckRow.is_limited as boolean | undefined,
-    reserve_character: deckRow.reserve_character as string | undefined,
-    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
-    background_image_path: deckRow.background_image_path as string | undefined,
-    threat: deckRow.threat as number | undefined,
-    created_at: deckRow.created_at as string | undefined,
-    updated_at: deckRow.updated_at as string | undefined,
+    ...(desc !== undefined && { description: desc }),
+    ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
+    ...(isLimited !== undefined && { is_limited: isLimited }),
+    ...(reserveChar !== undefined && { reserve_character: reserveChar }),
+    ...(displayMission !== null && { display_mission_card_id: displayMission }),
+    ...(bgPath !== undefined && { background_image_path: bgPath }),
+    ...(threatVal !== undefined && { threat: threatVal }),
+    ...(createdAt !== undefined && { created_at: createdAt }),
+    ...(updatedAt !== undefined && { updated_at: updatedAt }),
     cards,
   };
 }
@@ -68,8 +74,10 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'character',
       cardId: deckRow.character_1_id,
       quantity: 1,
-      defaultImage: deckRow.character_1_default_image,
-      name: deckRow.character_1_name,
+      ...(deckRow.character_1_default_image !== undefined && {
+        defaultImage: deckRow.character_1_default_image,
+      }),
+      ...(deckRow.character_1_name !== undefined && { name: deckRow.character_1_name }),
       is_foil: deckRow.character_1_is_foil ?? false,
     });
   }
@@ -79,8 +87,10 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'character',
       cardId: deckRow.character_2_id,
       quantity: 1,
-      defaultImage: deckRow.character_2_default_image,
-      name: deckRow.character_2_name,
+      ...(deckRow.character_2_default_image !== undefined && {
+        defaultImage: deckRow.character_2_default_image,
+      }),
+      ...(deckRow.character_2_name !== undefined && { name: deckRow.character_2_name }),
       is_foil: deckRow.character_2_is_foil ?? false,
     });
   }
@@ -90,8 +100,10 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'character',
       cardId: deckRow.character_3_id,
       quantity: 1,
-      defaultImage: deckRow.character_3_default_image,
-      name: deckRow.character_3_name,
+      ...(deckRow.character_3_default_image !== undefined && {
+        defaultImage: deckRow.character_3_default_image,
+      }),
+      ...(deckRow.character_3_name !== undefined && { name: deckRow.character_3_name }),
       is_foil: deckRow.character_3_is_foil ?? false,
     });
   }
@@ -101,8 +113,10 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'character',
       cardId: deckRow.character_4_id,
       quantity: 1,
-      defaultImage: deckRow.character_4_default_image,
-      name: deckRow.character_4_name,
+      ...(deckRow.character_4_default_image !== undefined && {
+        defaultImage: deckRow.character_4_default_image,
+      }),
+      ...(deckRow.character_4_name !== undefined && { name: deckRow.character_4_name }),
       is_foil: deckRow.character_4_is_foil ?? false,
     });
   }
@@ -112,8 +126,10 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'location',
       cardId: deckRow.location_id,
       quantity: 1,
-      defaultImage: deckRow.location_default_image,
-      name: deckRow.location_name,
+      ...(deckRow.location_default_image !== undefined && {
+        defaultImage: deckRow.location_default_image,
+      }),
+      ...(deckRow.location_name !== undefined && { name: deckRow.location_name }),
     });
   }
   if (deckRow.mission_1_id) {
@@ -122,46 +138,70 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       type: 'mission',
       cardId: deckRow.mission_1_id,
       quantity: 1,
-      defaultImage: deckRow.mission_1_default_image,
-      name: deckRow.mission_1_name,
+      ...(deckRow.mission_1_default_image !== undefined && {
+        defaultImage: deckRow.mission_1_default_image,
+      }),
+      ...(deckRow.mission_1_name !== undefined && { name: deckRow.mission_1_name }),
     });
   }
 
+  const desc = deckRow.description as string | undefined;
+  const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
+  const isLimited = deckRow.is_limited as boolean | undefined;
+  const isValid = deckRow.is_valid as boolean | undefined;
+  const cardCount = deckRow.card_count as number | undefined;
+  const threatVal = deckRow.threat as number | undefined;
+  const reserveChar = deckRow.reserve_character as string | undefined;
+  const displayMission = (deckRow.display_mission_card_id as string | null) ?? null;
+  const bgPath = deckRow.background_image_path as string | undefined;
+  const createdAt = deckRow.created_at as string | undefined;
+  const updatedAt = deckRow.updated_at as string | undefined;
   return {
     id: deckRow.id as string,
     user_id: deckRow.user_id as string,
     name: deckRow.name as string,
-    description: deckRow.description as string | undefined,
-    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
-    is_limited: deckRow.is_limited as boolean | undefined,
-    is_valid: deckRow.is_valid as boolean | undefined,
-    card_count: deckRow.card_count as number | undefined,
-    threat: deckRow.threat as number | undefined,
-    reserve_character: deckRow.reserve_character as string | undefined,
-    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
-    background_image_path: deckRow.background_image_path as string | undefined,
-    created_at: deckRow.created_at as string | undefined,
-    updated_at: deckRow.updated_at as string | undefined,
+    ...(desc !== undefined && { description: desc }),
+    ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
+    ...(isLimited !== undefined && { is_limited: isLimited }),
+    ...(isValid !== undefined && { is_valid: isValid }),
+    ...(cardCount !== undefined && { card_count: cardCount }),
+    ...(threatVal !== undefined && { threat: threatVal }),
+    ...(reserveChar !== undefined && { reserve_character: reserveChar }),
+    ...(displayMission !== null && { display_mission_card_id: displayMission }),
+    ...(bgPath !== undefined && { background_image_path: bgPath }),
+    ...(createdAt !== undefined && { created_at: createdAt }),
+    ...(updatedAt !== undefined && { updated_at: updatedAt }),
     cards,
   };
 }
 
 export function mapDeckRowBasic(deckRow: DeckRow): Deck {
+  const desc = deckRow.description as string | undefined;
+  const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
+  const isLimited = deckRow.is_limited as boolean | undefined;
+  const isValid = deckRow.is_valid as boolean | undefined;
+  const cardCount = deckRow.card_count as number | undefined;
+  const threatVal = deckRow.threat as number | undefined;
+  const reserveChar = deckRow.reserve_character as string | undefined;
+  const displayMission = (deckRow.display_mission_card_id as string | null) ?? null;
+  const bgPath = deckRow.background_image_path as string | undefined;
+  const createdAt = deckRow.created_at as string | undefined;
+  const updatedAt = deckRow.updated_at as string | undefined;
   return {
     id: deckRow.id as string,
     user_id: deckRow.user_id as string,
     name: deckRow.name as string,
-    description: deckRow.description as string | undefined,
-    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
-    is_limited: deckRow.is_limited as boolean | undefined,
-    is_valid: deckRow.is_valid as boolean | undefined,
-    card_count: deckRow.card_count as number | undefined,
-    threat: deckRow.threat as number | undefined,
-    reserve_character: deckRow.reserve_character as string | undefined,
-    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
-    background_image_path: deckRow.background_image_path as string | undefined,
-    created_at: deckRow.created_at as string | undefined,
-    updated_at: deckRow.updated_at as string | undefined,
+    ...(desc !== undefined && { description: desc }),
+    ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
+    ...(isLimited !== undefined && { is_limited: isLimited }),
+    ...(isValid !== undefined && { is_valid: isValid }),
+    ...(cardCount !== undefined && { card_count: cardCount }),
+    ...(threatVal !== undefined && { threat: threatVal }),
+    ...(reserveChar !== undefined && { reserve_character: reserveChar }),
+    ...(displayMission !== null && { display_mission_card_id: displayMission }),
+    ...(bgPath !== undefined && { background_image_path: bgPath }),
+    ...(createdAt !== undefined && { created_at: createdAt }),
+    ...(updatedAt !== undefined && { updated_at: updatedAt }),
   };
 }
 
@@ -255,9 +295,9 @@ export async function getDeckById(
       'SELECT * FROM deck_cards WHERE deck_id = $1',
       [id]
     );
-    const cards = (cardsResult.rows as DeckCardRow[]).map((card) => ({
+    const cards: DeckCard[] = (cardsResult.rows as DeckCardRow[]).map((card) => ({
       id: card.id,
-      type: card.card_type,
+      type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
       exclude_from_draw: card.exclude_from_draw ?? false,
@@ -366,9 +406,9 @@ export async function getDeckSummaryWithAllCards(
       'SELECT * FROM deck_cards WHERE deck_id = $1',
       [deckId]
     );
-    const cards = (cardsResult.rows as DeckCardRow[]).map((card) => ({
+    const cards: DeckCard[] = (cardsResult.rows as DeckCardRow[]).map((card) => ({
       id: card.id,
-      type: card.card_type,
+      type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
     }));
@@ -444,8 +484,8 @@ export async function updateDeck(
     setClause.push('updated_at = NOW()');
     values.push(id);
 
-    const result = await client.query(
-      // nosemgrep: pg-sql-template-interpolation
+    // setClause is from a fixed whitelist of column assignments; values are parameterized.
+    const result = await client.query( // nosemgrep: pg-sql-template-interpolation
       `UPDATE decks SET ${setClause.join(', ')} WHERE id = $${paramCount} RETURNING *`,
       values
     );

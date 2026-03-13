@@ -34,6 +34,7 @@ export function mapCharacterRow(row: DbRow): Character {
 }
 
 export function mapSpecialCardRow(row: DbRow): SpecialCard {
+  const icons = row.icons as string[] | undefined;
   return {
     id: row.id as string,
     name: row.name as string,
@@ -44,7 +45,7 @@ export function mapSpecialCardRow(row: DbRow): SpecialCard {
     image_path: row.image_path as string,
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
-    icons: row.icons as string[] | undefined,
+    ...(icons !== undefined && { icons }),
     value: (row.value as number) ?? null,
     is_cataclysm: (row.cataclysm as boolean) || false,
     is_assist: (row.assist as boolean) || false,
@@ -147,16 +148,16 @@ export function mapAspectRow(row: DbRow): Aspect {
   };
 }
 
-/** Aspect from getAll (includes name, aspect_description, set, set_number, icons, value). */
+/** Aspect from getAll (includes aspect_description, icons, value). */
 export function mapAspectRowWithSet(row: DbRow): Aspect {
+  const aspectDesc = row.aspect_description as string | undefined;
+  const icons = row.icons as string[] | undefined;
+  const value = (row.value as number | null) ?? null;
   return {
     ...mapAspectRow(row),
-    name: row.name as string,
-    aspect_description: row.aspect_description as string | undefined,
-    set: (row.set as string) || 'ERB',
-    set_number: (row.set_number as string) ?? null,
-    icons: row.icons as string[] | undefined,
-    value: (row.value as number) ?? null,
+    ...(aspectDesc !== undefined && { aspect_description: aspectDesc }),
+    ...(icons !== undefined && { icons }),
+    ...(value !== undefined && { value }),
   };
 }
 
@@ -173,13 +174,12 @@ export function mapAdvancedUniverseRow(row: DbRow): AdvancedUniverse {
   };
 }
 
-/** AdvancedUniverse from getAll (includes card_description, set, set_number). */
+/** AdvancedUniverse from getAll (includes card_description). */
 export function mapAdvancedUniverseRowWithSet(row: DbRow): AdvancedUniverse {
+  const cardDesc = row.card_description as string | undefined;
   return {
     ...mapAdvancedUniverseRow(row),
-    card_description: row.card_description as string | undefined,
-    set: (row.set as string) || 'ERB',
-    set_number: (row.set_number as string) ?? null,
+    ...(cardDesc !== undefined && { card_description: cardDesc }),
   };
 }
 
@@ -224,14 +224,9 @@ export function mapAllyUniverseRow(row: DbRow): AllyUniverse {
   };
 }
 
-/** AllyUniverse from getAll (includes name, set, set_number). */
+/** AllyUniverse from getAll (same shape as getById). */
 export function mapAllyUniverseRowWithSet(row: DbRow): AllyUniverse {
-  return {
-    ...mapAllyUniverseRow(row),
-    name: row.name as string,
-    set: (row.set as string) || 'ERB',
-    set_number: (row.set_number as string) ?? null,
-  };
+  return mapAllyUniverseRow(row);
 }
 
 export function mapTrainingRow(row: DbRow): TrainingCard {
@@ -248,14 +243,9 @@ export function mapTrainingRow(row: DbRow): TrainingCard {
   };
 }
 
-/** TrainingCard from getAll (includes name, set, set_number). */
+/** TrainingCard from getAll (same shape as getById). */
 export function mapTrainingRowWithSet(row: DbRow): TrainingCard {
-  return {
-    ...mapTrainingRow(row),
-    name: row.name as string,
-    set: (row.set as string) || 'ERB',
-    set_number: (row.set_number as string) ?? null,
-  };
+  return mapTrainingRow(row);
 }
 
 export function mapBasicUniverseRow(row: DbRow): BasicUniverse {
@@ -271,12 +261,7 @@ export function mapBasicUniverseRow(row: DbRow): BasicUniverse {
   };
 }
 
-/** BasicUniverse from getAll (includes name, set, set_number). */
+/** BasicUniverse from getAll (same shape as getById). */
 export function mapBasicUniverseRowWithSet(row: DbRow): BasicUniverse {
-  return {
-    ...mapBasicUniverseRow(row),
-    name: row.name as string,
-    set: (row.set as string) || 'ERB',
-    set_number: (row.set_number as string) ?? null,
-  };
+  return mapBasicUniverseRow(row);
 }

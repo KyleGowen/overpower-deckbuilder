@@ -260,8 +260,8 @@ export async function updateCardInDeck(
     setClause.push('updated_at = NOW()');
     values.push(deckId, cardType, cardId);
 
-    const result = await client.query(
-      // nosemgrep: pg-sql-template-interpolation
+    // setClause is from a fixed whitelist; values are parameterized.
+    const result = await client.query( // nosemgrep: pg-sql-template-interpolation
       `UPDATE deck_cards SET ${setClause.join(', ')} WHERE deck_id = $${paramCount} AND card_type = $${paramCount + 1} AND card_id = $${paramCount + 2}`,
       values
     );
@@ -412,9 +412,16 @@ export async function getDeckCards(
       'SELECT * FROM deck_cards WHERE deck_id = $1 ORDER BY card_type, card_id',
       [deckId]
     );
-    return result.rows.map((card: { id: string; card_type: string; card_id: string; quantity: number; exclude_from_draw?: boolean }) => ({
+    const rows = result.rows as {
+      id: string;
+      card_type: string;
+      card_id: string;
+      quantity: number;
+      exclude_from_draw?: boolean;
+    }[];
+    return rows.map((card) => ({
       id: card.id,
-      type: card.card_type,
+      type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
       exclude_from_draw: card.exclude_from_draw ?? false,
