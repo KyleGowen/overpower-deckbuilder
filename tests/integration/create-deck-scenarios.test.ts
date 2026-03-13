@@ -138,9 +138,9 @@ describe('Create Deck Scenarios Integration Tests', () => {
             const globalNavResponse = await request(app)
                 .get('/components/globalNav.js')
                 .expect(200);
-            expect(globalNavResponse.text).toContain('viewMode": "tile"');
-            expect(globalNavResponse.text).toContain('dividerPosition": 65');
-            expect(globalNavResponse.text).toContain('powerCardsSortMode": "type"');
+            expect(globalNavResponse.text).toContain("viewMode: 'tile'");
+            expect(globalNavResponse.text).toContain('dividerPosition: 65');
+            expect(globalNavResponse.text).toContain("powerCardsSortMode: 'type'");
             expect(globalNavResponse.text).toContain('expansionState');
         });
     });

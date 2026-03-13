@@ -1,0 +1,5 @@
+# Database layer
+
+- PostgreSQL repositories; use **migrations** (Flyway, under `migrations/`) for schema changes.
+- Do not add raw SQL in route handlers; keep queries in this directory (repositories).
+- See `src/repository/` for interfaces; `src/database/` for implementations.

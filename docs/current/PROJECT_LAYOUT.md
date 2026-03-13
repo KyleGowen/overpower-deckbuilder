@@ -358,6 +358,19 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck / session deck attempts and why we disabled +Deck for GUEST
 ```
 
+### Documentation map and context files
+
+**Existing context files** (`.context.md` — feature overview and code locations for AI/contributors):
+
+- `public/css/foil-effect.context.md` — foil card styling and CSS
+- `src/services/deck-background.context.md` — deck editor backgrounds; see also `src/resources/cards/images/backgrounds/.cursorrules`
+
+**Areas that would benefit from a future `.context.md`** (high complexity or many touchpoints):
+
+- Deck editor flow: `public/js/deck-editor-*.js`, `deck-card-operations.js`, `deck-validation.js`, and related components
+- Collection service and UI: `src/services/collectionService.ts`, `src/database/collectionsRepository.ts`, `public/js/collection-view.js`
+- Auth flow: `src/services/AuthenticationService.ts`, `src/middleware/authorizationHelpers.ts`, `public/js/auth-service.js`, Firebase config
+
 ## 🔄 **12-Phase Refactoring History**
 
 This project underwent a comprehensive 12-phase refactoring to transform a monolithic `index.html` file into a well-organized, modular codebase:

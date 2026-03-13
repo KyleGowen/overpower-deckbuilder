@@ -13,8 +13,7 @@ tests/
 ├── unit/                 # Unit tests for individual functions/classes
 ├── helpers/              # Test utilities and helpers
 │   └── apiClient.ts
-├── config/               # Test configuration
-│   └── testConfig.ts
+├── config/               # Test configuration (Jest configs)
 ├── fixtures/             # Test data and fixtures
 └── setup.ts             # Global test setup and teardown
 ```
@@ -109,23 +108,6 @@ await apiClient.addCardToDeck(deckId, cardData);
 await apiClient.removeCardFromDeck(deckId, cardData);
 ```
 
-### Test Configuration
-
-Use `testConfig` for consistent test data:
-
-```typescript
-import { testConfig } from '../config/testConfig';
-
-// Use predefined test users
-await apiClient.login(testConfig.testUsers.regular.name, 'password');
-
-// Use predefined test decks
-const deck = await apiClient.createDeck(testConfig.testDecks.valid);
-
-// Use predefined test cards
-await apiClient.addCardToDeck(deckId, testConfig.testCards.character);
-```
-
 ## Describing Test Scenarios
 
 When you want me to write tests for specific scenarios, describe them like this:
@@ -142,7 +124,7 @@ I'll then write comprehensive tests covering all these scenarios!
 - Tests automatically create and clean up test data
 - Each test runs in isolation
 - The test database is reset between test runs
-- Use the `testConfig` for consistent test data across tests
+- Use consistent test data and helpers (e.g. integrationTestUtils) where available
 
 ## Debugging Tests
 

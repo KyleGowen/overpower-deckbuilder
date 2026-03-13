@@ -1,4 +1,4 @@
-# Overpower Deckbuilder Testing Guide
+# Excelsior Deckbuilder Testing Guide
 
 ## 🚀 Jest Integration Test Framework Setup Complete!
 
@@ -92,6 +92,60 @@ When you want me to write tests for specific scenarios, just describe them like 
 
 **Example 3:**
 > "Test the save functionality. When a user makes changes to their deck and clicks save, it should persist the changes. Test that validation errors are shown for invalid decks. Test that the save button is disabled in read-only mode."
+
+### Test configuration and categories
+
+Unit and integration tests use separate Jest configs in `tests/config/`. Integration tests are split into categories so CI can run them in parallel.
+
+**Unit tests**
+
+- Config: `tests/config/jest.unit.config.js`
+- Match: `**/tests/unit/**/*.test.ts` (and `*.spec.ts`)
+- Run: `npm run test:unit`
+
+**Integration tests (all)**
+
+- Config: `tests/config/jest.integration.config.js`
+- Match: `**/tests/integration/**/*.test.ts` (with some files excluded and run by category configs)
+- Run: `npm run test:integration`
+
+**Integration test categories** (each has its own config in `tests/config/`)
+
+| Config | Pattern / files |
+|--------|------------------|
+| `jest.integration.security.config.js` | `role-based-restrictions.test.ts` |
+| `jest.integration.deck-security-save.config.js` | `deck-save-security*.test.ts` |
+| `jest.integration.deck-security-ownership.config.js` | `deck-ownership-security*.test.ts` |
+| `jest.integration.deck-security-frontend.config.js` | `deck-save-frontend-validation.test.ts` |
+| `jest.integration.game-logic-reserve.config.js` | `reserve-character*.test.ts`, `guest-reserve-character-integration.test.ts` |
+| `jest.integration.reserve-core.config.js` | `reserve-character-integration.test.ts`, `reserve-character-loading-integration.test.ts`, `reserve-character-simple.test.ts` |
+| `jest.integration.reserve-threat.config.js` | `reserve-character-threat-integration.test.ts`, `reserve-character-threat-persistence.test.ts`, `guest-reserve-character-integration.test.ts` |
+| `jest.integration.game-logic-characters.config.js` | `character*.test.ts`, `special-character-threat-display.test.ts` |
+| `jest.integration.game-logic-character-validation.config.js` | `characterLimitValidation.test.ts` |
+| `jest.integration.game-logic-character-layout.config.js` | `character-column-layout.test.ts` |
+| `jest.integration.game-logic-character-threat.config.js` | `special-character-threat-display.test.ts` |
+| `jest.integration.game-logic-power-teamwork.config.js` | `power*.test.ts`, `teamwork*.test.ts`, `event-mission-filtering-integration.test.ts` |
+| `jest.deckbuilding.config.js` | `deckBuilding.test.ts` |
+
+**Run a single category**
+
+```bash
+npx jest -c tests/config/jest.integration.security.config.js
+npx jest -c tests/config/jest.integration.deck-security-save.config.js
+# etc.
+```
+
+**Frontend tests**
+
+- Config: `tests/config/jest.frontend.config.js`
+- Match: `**/tests/frontend/**/*.test.ts`
+- Run: `npm run test:unit` (frontend tests are included in unit run) or run with the frontend config explicitly.
+
+### Where to add new tests
+
+- **Unit tests**: Add `*.test.ts` under `tests/unit/`. Use `tests/helpers/` for shared utilities (e.g. `apiClient.ts`, `deckImportTestHelpers.ts`).
+- **Integration tests**: Add `*.test.ts` under `tests/integration/`. Match one of the category patterns above (e.g. `deck-save-security-*.test.ts` for deck save security) so the test runs in the right CI job. See `tests/integration/.cursorrules` for mandatory cleanup rules (track test users/decks, clean up in `finally`).
+- **Frontend tests**: Add `*.test.ts` under `tests/frontend/`.
 
 ### 🔧 Test Configuration
 

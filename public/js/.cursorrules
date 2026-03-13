@@ -1,0 +1,4 @@
+# Frontend JavaScript
+
+- **Vanilla JS only** — no frameworks. Entry points and load order are documented in [docs/FRONTEND_SCRIPT_MANIFEST.md](../../docs/FRONTEND_SCRIPT_MANIFEST.md).
+- Scripts are loaded via `<script src="">` in HTML; do not remove or rename files that are listed in the manifest without updating the manifest and HTML.

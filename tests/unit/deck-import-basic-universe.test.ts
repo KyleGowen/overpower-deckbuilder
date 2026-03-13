@@ -1,28 +1,15 @@
 /** @jest-environment jsdom */
 
+import {
+  DECK_IMPORT_MINIMAL_HTML,
+  applyDeckImportMocks,
+  teardownDeckImportMocks
+} from '../helpers/deckImportTestHelpers';
+
 describe('Deck Import - Basic Universe - Unit Tests', () => {
   beforeEach(() => {
-    document.body.innerHTML = `
-      <textarea id="importJsonContent"></textarea>
-      <div id="importErrorMessages" style="display: none;"></div>
-      <button id="importJsonButton"></button>
-      <select id="viewMode">
-        <option value="card" selected>Card</option>
-        <option value="list">List</option>
-      </select>
-    `;
-
-    (window as any).availableCardsMap = new Map();
-    (window as any).deckEditorCards = [];
-    (window as any).addCardToEditor = jest.fn(async (type: string, cardId: string, cardName: string) => {
-      (window as any).deckEditorCards.push({ type, cardId, cardName, quantity: 1 });
-    });
-    (window as any).showNotification = jest.fn();
-    (window as any).closeImportOverlay = jest.fn();
-    (window as any).validateDeck = jest.fn().mockReturnValue({ errors: [], warnings: [] });
-    (window as any).loadAvailableCards = jest.fn().mockResolvedValue(undefined);
-    (window as any).renderDeckCardsCardView = jest.fn();
-    (window as any).renderDeckCardsListView = jest.fn();
+    document.body.innerHTML = DECK_IMPORT_MINIMAL_HTML;
+    applyDeckImportMocks(global.window);
 
     // Load real implementation to attach functions to window
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -35,15 +22,7 @@ describe('Deck Import - Basic Universe - Unit Tests', () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
-    delete (window as any).availableCardsMap;
-    delete (window as any).deckEditorCards;
-    delete (window as any).addCardToEditor;
-    delete (window as any).showNotification;
-    delete (window as any).closeImportOverlay;
-    delete (window as any).validateDeck;
-    delete (window as any).loadAvailableCards;
-    delete (window as any).renderDeckCardsCardView;
-    delete (window as any).renderDeckCardsListView;
+    teardownDeckImportMocks(global.window);
   });
 
   describe('extractCardsFromImportData - basic_universe', () => {
