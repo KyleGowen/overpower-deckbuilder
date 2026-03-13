@@ -82,6 +82,11 @@
 7. Before pushing (first push of the day): run `npm audit` and fix any vulnerabilities
 8. Use descriptive commit messages
 
+## Cursor context files (.cursorrules)
+- **When creating a new directory, ALWAYS add a `.cursorrules` file in that directory** to give Cursor context for that area of the codebase.
+- The file should briefly describe the directory’s purpose, main entry points, and any conventions or patterns used there (see existing `src/.cursorrules`, `src/middleware/.cursorrules`, `src/routes/.cursorrules` for examples).
+- **Keep each directory’s `.cursorrules` up to date** when you add, remove, or refactor files in that directory—update the description so it stays accurate.
+
 ## Project-Specific Guidelines
 - This is a TypeScript/Node.js project with Jest testing
 - Frontend uses vanilla JavaScript (no frameworks)
