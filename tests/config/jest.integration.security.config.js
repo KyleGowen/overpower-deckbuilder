@@ -21,6 +21,7 @@ module.exports = {
   globalTeardown: '<rootDir>/tests/teardown-integration.ts',
   testTimeout: 60000,
   verbose: true,
+  forceExit: true, // Security job only: ensure Jest exits after tests (supertest/pool may leave handles)
   testEnvironmentOptions: {
     NODE_ENV: 'test',
     PORT: '3005'
