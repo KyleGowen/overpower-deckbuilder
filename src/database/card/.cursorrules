@@ -1,0 +1,15 @@
+# Card repository (domain split)
+
+Card persistence is split by domain. The public entry point is `PostgreSQLCardRepository` in `src/database/PostgreSQLCardRepository.ts`, which delegates to modules in this directory.
+
+- **context.ts** — Shared context: pool, cache (characters, locations, cardStats with TTLs), and `createCardRepositoryContext`. Used by all card modules.
+- **mappers.ts** — Pure row-to-type mappers for each card type (Character, SpecialCard, PowerCard, Location, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse). No pool or queries.
+- **character.ts** — Character: getCharacterById, getAllCharacters, getCharacterEffectiveImage (cached getAll).
+- **location.ts** — Location: getLocationById, getAllLocations (cached getAll).
+- **special-power.ts** — SpecialCard and PowerCard: getById, getAll, get*EffectiveImage.
+- **mission-event.ts** — Mission and Event: getById, getAll.
+- **aspect.ts** — Aspect: getAspectById, getAllAspects.
+- **universe.ts** — AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse: getById, getAll for each.
+- **stats.ts** — getCardStats (UNION ALL over all card tables, cached).
+
+Do not add raw SQL in route handlers; keep queries here or in other `src/database/` modules.
