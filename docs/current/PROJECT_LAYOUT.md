@@ -14,6 +14,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/SERVER_STARTUP.md       # Server startup and configuration guide
 ├── 📄 docs/current/STYLE_GUIDE.md          # Code style and formatting guidelines
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
+├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
 ├── 📄 package.json                 # Node.js dependencies and scripts
 ├── 📄 tsconfig.json                # TypeScript configuration
 ├── 📄 jest.config.js               # Jest testing configuration
@@ -354,6 +355,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy
 📄 docs/current/SERVER_STARTUP.md       # Server startup guide
 📄 docs/current/STYLE_GUIDE.md          # Code style guidelines
+📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck / session deck attempts and why we disabled +Deck for GUEST
 ```
 
 ## 🔄 **12-Phase Refactoring History**

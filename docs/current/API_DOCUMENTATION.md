@@ -475,6 +475,8 @@ Change the current user's password.
 
 Guest deck endpoints allow users with the **GUEST** role to create, list, get, update, and delete decks that are **session-scoped only**. Data is stored in memory keyed by the session cookie and **is not persisted to the database**. Decks expire after a period of inactivity (e.g. 24 hours). Non-GUEST users receive `403 Forbidden` on these endpoints. A valid session cookie is required (`401` if missing).
 
+**Note:** The "+Deck" button on the Card Database view is **disabled for GUEST**. For the history of what we tried (add-to-DB-deck, session-copy-from-dropdown, etc.) and why we keep it disabled, see [Guest Deck Lessons Learned](GUEST_DECK_LESSONS_LEARNED.md).
+
 **Base path:** `/api/guest/decks`
 
 ### POST /api/guest/decks

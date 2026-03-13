@@ -89,6 +89,7 @@
 - All changes should maintain backward compatibility
 - Follow the existing component structure (globalNav, etc.)
 - **GUEST users** can create and edit decks via session-scoped guest deck APIs (`/api/guest/decks`); these decks are stored in memory keyed by session cookie and are **not persisted to the database**. Main deck APIs (POST/PUT/DELETE `/api/decks`) remain forbidden for GUEST.
+- **GUEST and the +Deck button:** The "+Deck" button on the Card Database view is **disabled for GUEST** (greyed out, "Log in to add to decks..."). Do **not** re-enable it without a clear product decision; past attempts (allowing add-to-DB-deck, session-copy-from-dropdown, etc.) caused DB persistence bugs or brittle UX. See [`docs/current/GUEST_DECK_LESSONS_LEARNED.md`](docs/current/GUEST_DECK_LESSONS_LEARNED.md) for what we tried and why we disabled it.
 
 ## UI/UX Guidelines
 - **All global navigation popups and tooltips must appear above main page content**
