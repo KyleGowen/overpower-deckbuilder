@@ -16,7 +16,7 @@ Track progress by checking off items. Tackle in milestone order or by priority.
 | **M2** | ☑ | Extract test server and helpers into smaller modules | [src/test-server.ts](../../src/test-server.ts) (~1,746 lines) | Done: test server reuses `registerRoutes`; bootstrap and lifecycle in `src/test-server/`. |
 | **M3** | ☑ | Split deck repository by domain | [src/database/PostgreSQLDeckRepository.ts](../../src/database/PostgreSQLDeckRepository.ts) (~1,061 lines) | Done: split by domain — deck CRUD → `src/database/deck/deck-crud.ts`, deck cards → `deck-cards.ts`, metadata/auth → `deck-metadata.ts`; shared context and card validation in `deck/`. |
 | **M4** | ☑ | Refactor card repository | [src/database/PostgreSQLCardRepository.ts](../../src/database/PostgreSQLCardRepository.ts) (~842 lines) | Done: split by domain — context + mappers in `src/database/card/`; character, location, special-power, mission-event, aspect, universe, stats; facade delegates. |
-| **M5** | ☐ | Split collections repository | [src/database/collectionsRepository.ts](../../src/database/collectionsRepository.ts) (~738 lines) | Split read vs write paths or by feature. |
+| **M5** | ☑ | Split collections repository | [src/database/collectionsRepository.ts](../../src/database/collectionsRepository.ts) (~738 lines) | Done: split by feature — context + types in `src/database/collection/`; collection-crud, collection-cards, collection-history, card-lookup; facade delegates and re-exports types. |
 
 ### Tests (high line count)
 

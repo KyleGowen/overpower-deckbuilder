@@ -1,0 +1,12 @@
+# Collection repository (domain split)
+
+Collection persistence is split by domain. The public entry point is `CollectionsRepository` in `src/database/collectionsRepository.ts`, which delegates to modules in this directory.
+
+- **context.ts** — Shared context: pool and `createCollectionRepositoryContext(pool)`. Used by all collection modules.
+- **types.ts** — Collection, CollectionCard, CollectionCardWithDetails, CollectionHistory.
+- **collection-crud.ts** — getOrCreateCollection (collections table).
+- **collection-cards.ts** — getCollectionCards, addCardToCollection, updateCardQuantity, getQuantity, removeCardFromCollection (collection_cards table).
+- **collection-history.ts** — getCollectionHistory (collection_history table).
+- **card-lookup.ts** — getCardImagePath, verifyCardExists, fetchCardDataForCollectionCard (card-type → table lookups; used by collection-cards).
+
+Do not add raw SQL in route handlers; keep queries here or in other `src/database/` modules.

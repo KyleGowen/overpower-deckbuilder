@@ -4,3 +4,4 @@
 - Do not add raw SQL in route handlers; keep queries in this directory (repositories).
 - See `src/repository/` for interfaces; `src/database/` for implementations.
 - Deck logic is split by domain under `src/database/deck/` (crud, cards, metadata); the single implementation is `PostgreSQLDeckRepository.ts`, which delegates to those modules.
+- Collection logic is split under `src/database/collection/` (context, types, collection-crud, collection-cards, collection-history, card-lookup); the single implementation is `collectionsRepository.ts`, which delegates to those modules.

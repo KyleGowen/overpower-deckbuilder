@@ -1,37 +1,15 @@
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool } from 'pg';
+import {
+  createCollectionRepositoryContext,
+  type CollectionRepositoryContext,
+} from './collection/context';
+import type { Collection, CollectionCard, CollectionCardWithDetails, CollectionHistory } from './collection/types';
+import * as collectionCrud from './collection/collection-crud';
+import * as collectionCards from './collection/collection-cards';
+import * as collectionHistory from './collection/collection-history';
+import * as cardLookup from './collection/card-lookup';
 
-export interface Collection {
-  id: string;
-  user_id: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface CollectionCard {
-  id: string;
-  collection_id: string;
-  card_id: string;
-  card_type: string;
-  quantity: number;
-  image_path: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface CollectionCardWithDetails extends CollectionCard {
-  card_name?: string;
-  card_data?: Record<string, unknown>;
-  set?: string; // Renamed from universe
-}
-
-export interface CollectionHistory {
-  id: string;
-  collection_id: string;
-  card_id: string;
-  action: 'ADD' | 'REMOVE';
-  new_quantity: number;
-  created_at: Date;
-}
+export type { Collection, CollectionCard, CollectionCardWithDetails, CollectionHistory };
 
 export class CollectionsRepository {
   private pool: Pool;
@@ -40,345 +18,18 @@ export class CollectionsRepository {
     this.pool = pool;
   }
 
-  /**
-   * Get image path from card data
-   * After migration, alternate cards are separate cards, so we just get the card's image_path
-   */
-  private async getCardImagePath(
-    client: PoolClient,
-    cardId: string,
-    cardType: string
-  ): Promise<string> {
-    let cardImagePath: string | null = null;
-    
-    try {
-      switch (cardType) {
-        case 'character': {
-          const charResult = await client.query('SELECT image_path FROM characters WHERE id = $1', [cardId]);
-          if (charResult.rows.length > 0) {
-            cardImagePath = charResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'special': {
-          const specialResult = await client.query('SELECT image_path FROM special_cards WHERE id = $1', [cardId]);
-          if (specialResult.rows.length > 0) {
-            cardImagePath = specialResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'power': {
-          const powerResult = await client.query('SELECT image_path FROM power_cards WHERE id = $1', [cardId]);
-          if (powerResult.rows.length > 0) {
-            cardImagePath = powerResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'location': {
-          const locationResult = await client.query('SELECT image_path FROM locations WHERE id = $1', [cardId]);
-          if (locationResult.rows.length > 0) {
-            cardImagePath = locationResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'mission': {
-          const missionResult = await client.query('SELECT image_path FROM missions WHERE id = $1', [cardId]);
-          if (missionResult.rows.length > 0) {
-            cardImagePath = missionResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'event': {
-          const eventResult = await client.query('SELECT image_path FROM events WHERE id = $1', [cardId]);
-          if (eventResult.rows.length > 0) {
-            cardImagePath = eventResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'aspect': {
-          const aspectResult = await client.query('SELECT image_path FROM aspects WHERE id = $1', [cardId]);
-          if (aspectResult.rows.length > 0) {
-            cardImagePath = aspectResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'advanced_universe': {
-          const advUniResult = await client.query('SELECT image_path FROM advanced_universe_cards WHERE id = $1', [cardId]);
-          if (advUniResult.rows.length > 0) {
-            cardImagePath = advUniResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'teamwork': {
-          const teamworkResult = await client.query('SELECT image_path FROM teamwork_cards WHERE id = $1', [cardId]);
-          if (teamworkResult.rows.length > 0) {
-            cardImagePath = teamworkResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'ally_universe': {
-          const allyResult = await client.query('SELECT image_path FROM ally_universe_cards WHERE id = $1', [cardId]);
-          if (allyResult.rows.length > 0) {
-            cardImagePath = allyResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'training': {
-          const trainingResult = await client.query('SELECT image_path FROM training_cards WHERE id = $1', [cardId]);
-          if (trainingResult.rows.length > 0) {
-            cardImagePath = trainingResult.rows[0].image_path;
-          }
-          break;
-        }
-        case 'basic_universe': {
-          const basicResult = await client.query('SELECT image_path FROM basic_universe_cards WHERE id = $1', [cardId]);
-          if (basicResult.rows.length > 0) {
-            cardImagePath = basicResult.rows[0].image_path;
-          }
-          break;
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching card image_path for ${cardType} ${cardId}:`, error);
-    }
-    
-    // Construct full path from image_path
-    if (cardImagePath && cardImagePath.trim() !== '') {
-      const path = cardImagePath.trim();
-      
-      // If already a full path, use it (fix location alternate paths missing locations/)
-      if (path.startsWith('/src/resources/cards/images/')) {
-        if (cardType === 'location' && path.includes('/alternate/') && !path.includes('/locations/alternate/')) {
-          return path.replace('/images/alternate/', '/images/locations/alternate/');
-        }
-        return path;
-      }
-      
-      // Otherwise, construct full path (location alternates need locations/ prefix)
-      let fullPath = path;
-      if (cardType === 'location' && path.startsWith('alternate/') && !path.startsWith('locations/')) {
-        fullPath = 'locations/' + path;
-      }
-      return `/src/resources/cards/images/${fullPath}`;
-    }
-    
-    // Fallback to placeholder
-    return '/src/resources/cards/images/placeholder.webp';
+  private getContext(): CollectionRepositoryContext {
+    return createCollectionRepositoryContext(this.pool);
   }
 
-  /**
-   * Get or create a collection for a user
-   * Returns the collection ID
-   */
   async getOrCreateCollection(userId: string): Promise<string> {
-    const client = await this.pool.connect();
-    try {
-      // Try to get existing collection
-      const existingResult = await client.query(
-        'SELECT id FROM collections WHERE user_id = $1',
-        [userId]
-      );
-
-      if (existingResult.rows.length > 0) {
-        return existingResult.rows[0].id;
-      }
-
-      // Create new collection
-      const createResult = await client.query(
-        'INSERT INTO collections (user_id) VALUES ($1) RETURNING id',
-        [userId]
-      );
-
-      return createResult.rows[0].id;
-    } finally {
-      client.release();
-    }
+    return collectionCrud.getOrCreateCollection(this.getContext(), userId);
   }
 
-  /**
-   * Get all cards in a collection with full card data
-   */
   async getCollectionCards(collectionId: string): Promise<CollectionCardWithDetails[]> {
-    console.log('🟠 [Repo] getCollectionCards called:', { collectionId });
-    const client = await this.pool.connect();
-    try {
-      // Get all collection cards
-      const collectionCardsResult = await client.query(
-        'SELECT * FROM collection_cards WHERE collection_id = $1 ORDER BY card_type, created_at',
-        [collectionId]
-      );
-      console.log('🟠 [Repo] collection_cards rows fetched:', collectionCardsResult.rows.length);
-
-      const collectionCards = collectionCardsResult.rows;
-      const cardsWithDetails: CollectionCardWithDetails[] = [];
-
-      // Fetch full card data for each collection card
-      for (const cc of collectionCards) {
-        console.log('🟠 [Repo] Processing collection card:', {
-          id: cc.id,
-          card_id: cc.card_id,
-          card_type: cc.card_type,
-          image_path: cc.image_path
-        });
-        
-        let cardData: Record<string, unknown> | null = null;
-        let cardName: string = '';
-        let set: string = '';
-
-        try {
-          switch (cc.card_type) {
-            case 'character': {
-              const charResult = await client.query('SELECT * FROM characters WHERE id = $1', [cc.card_id]);
-              if (charResult.rows.length > 0) {
-                cardData = charResult.rows[0] as Record<string, unknown>;
-                cardName = cardData.name as string;
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'special': {
-              const specialResult = await client.query('SELECT * FROM special_cards WHERE id = $1', [cc.card_id]);
-              if (specialResult.rows.length > 0) {
-                cardData = specialResult.rows[0] as Record<string, unknown>;
-                cardName = cardData.name as string;
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'power': {
-              const powerResult = await client.query('SELECT * FROM power_cards WHERE id = $1', [cc.card_id]);
-              if (powerResult.rows.length > 0) {
-                cardData = powerResult.rows[0] as Record<string, unknown>;
-                cardName = `${cardData.value} - ${cardData.power_type}`;
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'location': {
-              const locationResult = await client.query('SELECT * FROM locations WHERE id = $1', [cc.card_id]);
-              if (locationResult.rows.length > 0) {
-                cardData = locationResult.rows[0] as Record<string, unknown>;
-                cardName = cardData.name as string;
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'mission': {
-              const missionResult = await client.query('SELECT * FROM missions WHERE id = $1', [cc.card_id]);
-              if (missionResult.rows.length > 0) {
-                cardData = missionResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'event': {
-              const eventResult = await client.query('SELECT * FROM events WHERE id = $1', [cc.card_id]);
-              if (eventResult.rows.length > 0) {
-                cardData = eventResult.rows[0] as Record<string, unknown>;
-                cardName = cardData.name as string;
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'aspect': {
-              const aspectResult = await client.query('SELECT * FROM aspects WHERE id = $1', [cc.card_id]);
-              if (aspectResult.rows.length > 0) {
-                cardData = aspectResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'advanced_universe': {
-              const advUniResult = await client.query('SELECT * FROM advanced_universe_cards WHERE id = $1', [cc.card_id]);
-              if (advUniResult.rows.length > 0) {
-                cardData = advUniResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'teamwork': {
-              const teamworkResult = await client.query('SELECT * FROM teamwork_cards WHERE id = $1', [cc.card_id]);
-              if (teamworkResult.rows.length > 0) {
-                cardData = teamworkResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_type as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'ally_universe': {
-              const allyResult = await client.query('SELECT * FROM ally_universe_cards WHERE id = $1', [cc.card_id]);
-              if (allyResult.rows.length > 0) {
-                cardData = allyResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'training': {
-              const trainingResult = await client.query('SELECT * FROM training_cards WHERE id = $1', [cc.card_id]);
-              if (trainingResult.rows.length > 0) {
-                cardData = trainingResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-            case 'basic_universe': {
-              const basicResult = await client.query('SELECT * FROM basic_universe_cards WHERE id = $1', [cc.card_id]);
-              if (basicResult.rows.length > 0) {
-                cardData = basicResult.rows[0] as Record<string, unknown>;
-                cardName = (cardData.card_name as string) || (cardData.name as string);
-                set = (cardData.set as string) || 'ERB';
-              }
-              break;
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching card data for ${cc.card_type} ${cc.card_id}:`, error);
-        }
-        
-        const cardEntry: CollectionCardWithDetails = {
-          id: cc.id,
-          collection_id: cc.collection_id,
-          card_id: cc.card_id,
-          card_type: cc.card_type,
-          quantity: cc.quantity,
-          image_path: cc.image_path,
-          created_at: cc.created_at,
-          updated_at: cc.updated_at,
-          card_name: cardName,
-          set: set
-        };
-        if (cardData !== null) {
-          cardEntry.card_data = cardData;
-        }
-        cardsWithDetails.push(cardEntry);
-        
-        console.log('🟠 [Repo] Pushed card with details:', {
-          card_id: cc.card_id,
-          card_type: cc.card_type,
-          card_name: cardName,
-          image_path_from_db: cc.image_path,
-          image_path_type: typeof cc.image_path,
-          image_path_length: cc.image_path ? cc.image_path.length : 0,
-          image_path_starts_with_slash: cc.image_path ? cc.image_path.startsWith('/') : false,
-          has_card_data: !!cardData,
-          card_data_image_path: cardData ? (cardData.image_path || cardData.image || 'N/A') : 'N/A'
-        });
-      }
-
-      return cardsWithDetails;
-    } finally {
-      client.release();
-    }
+    return collectionCards.getCollectionCards(this.getContext(), collectionId);
   }
 
-  /**
-   * Add a card to collection or increment quantity if it already exists
-   */
   async addCardToCollection(
     collectionId: string,
     cardId: string,
@@ -386,60 +37,16 @@ export class CollectionsRepository {
     quantity: number = 1,
     imagePath?: string
   ): Promise<CollectionCard> {
-    console.log('🟠 [Repo] addCardToCollection called:', {
+    return collectionCards.addCardToCollection(
+      this.getContext(),
       collectionId,
       cardId,
       cardType,
       quantity,
       imagePath
-    });
-
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      // Get the image path from the card if not provided
-      let finalImagePath = imagePath;
-      if (!finalImagePath) {
-        finalImagePath = await this.getCardImagePath(client, cardId, cardType);
-      }
-      console.log('🟠 [Repo] Using image_path:', finalImagePath);
-
-      // Use ON CONFLICT with the unique constraint
-      const insertResult = await client.query<CollectionCard>(
-        `INSERT INTO collection_cards (
-            collection_id,
-            card_id,
-            card_type,
-            quantity,
-            image_path
-          )
-          VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT ON CONSTRAINT collection_cards_unique
-          DO UPDATE SET
-            quantity = collection_cards.quantity + EXCLUDED.quantity,
-            updated_at = NOW()
-          RETURNING *`,
-        [collectionId, cardId, cardType, quantity, finalImagePath]
-      );
-
-      await client.query('COMMIT');
-      console.log('🟠 [Repo] Final inserted/updated row:', insertResult.rows[0]);
-      return insertResult.rows[0];
-    } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('🟠 [Repo] Error in addCardToCollection, rolling back:', error);
-      throw error;
-    } finally {
-      client.release();
-    }
+    );
   }
 
-  /**
-   * Update card quantity in collection
-   * If imagePath doesn't match an existing row, finds the existing row and updates its image_path
-   * If oldImagePath is provided, uses it to find the exact row to update
-   */
   async updateCardQuantity(
     collectionId: string,
     cardId: string,
@@ -448,289 +55,53 @@ export class CollectionsRepository {
     imagePath: string,
     oldImagePath?: string
   ): Promise<CollectionCard | null> {
-    if (quantity < 0) {
-      throw new Error('Quantity cannot be negative');
-    }
-
-    console.log('🟠 [Repo] updateCardQuantity called:', {
+    return collectionCards.updateCardQuantity(
+      this.getContext(),
       collectionId,
       cardId,
       cardType,
       quantity,
-      imagePath
-    });
-
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-      
-      let result: QueryResult<CollectionCard> | null = null;
-
-      if (quantity === 0) {
-        // Remove card if quantity is 0 - try to find by image_path first, then by card_id/card_type
-        let deleteResult = await client.query(
-          'DELETE FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 AND image_path = $4',
-          [collectionId, cardId, cardType, imagePath]
-        );
-        
-        // If no row found with the new image_path, try to find any row for this card
-        if (deleteResult.rowCount === 0) {
-          const existingRows = await client.query(
-            'SELECT id, image_path FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3',
-            [collectionId, cardId, cardType]
-          );
-          
-          if (existingRows.rows.length > 0) {
-            // Delete the first matching row (or all if user wants to remove all variants)
-            deleteResult = await client.query(
-              'DELETE FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 LIMIT 1',
-              [collectionId, cardId, cardType]
-            );
-          }
-        }
-        
-        await client.query('COMMIT');
-        console.log('🟠 [Repo] Removed card because quantity set to 0, rows deleted:', deleteResult.rowCount);
-        return null;
-      }
-
-      // If oldImagePath is provided, use it to find the exact row to update
-      if (oldImagePath && oldImagePath !== imagePath) {
-        console.log('🟠 [Repo] Updating with oldImagePath to find exact row:', {
-          oldImagePath,
-          newImagePath: imagePath
-        });
-        
-        // Try to find row with old image path first
-        const oldPathResult = await client.query(
-          'SELECT id FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 AND image_path = $4',
-          [collectionId, cardId, cardType, oldImagePath]
-        );
-        
-        if (oldPathResult.rows.length > 0) {
-          // Found the row with old path, update it with new path and quantity
-          result = await client.query(
-            'UPDATE collection_cards SET image_path = $1, quantity = $2, updated_at = NOW() WHERE collection_id = $3 AND card_id = $4 AND card_type = $5 AND image_path = $6 RETURNING *',
-            [imagePath, quantity, collectionId, cardId, cardType, oldImagePath]
-          );
-        } else {
-          // Old path not found, fall through to normal logic
-          console.log('🟠 [Repo] Row with oldImagePath not found, using normal update logic');
-        }
-      }
-
-      // Try to update with the new image_path first (exact match)
-      if (!result || result.rows.length === 0) {
-        result = await client.query(
-          'UPDATE collection_cards SET quantity = $1, updated_at = NOW() WHERE collection_id = $2 AND card_id = $3 AND card_type = $4 AND image_path = $5 RETURNING *',
-          [quantity, collectionId, cardId, cardType, imagePath]
-        );
-      }
-
-      // If no row found with the new image_path, find existing row and update its image_path
-      if (result.rows.length === 0) {
-        console.log('🟠 [Repo] No row found with new image_path, searching for existing rows...');
-        
-        // Get all existing rows for this card to see what we're working with
-        const allExistingRows = await client.query(
-          'SELECT id, image_path, quantity, created_at FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 ORDER BY created_at ASC',
-          [collectionId, cardId, cardType]
-        );
-
-        console.log('🟠 [Repo] Found existing rows:', allExistingRows.rows.map(r => ({
-          id: r.id,
-          image_path: r.image_path,
-          quantity: r.quantity
-        })));
-
-        if (allExistingRows.rows.length > 0) {
-          // Check if a row with the new image_path already exists (maybe with different case or whitespace)
-          const normalizedNewPath = imagePath.trim();
-          const checkResult = await client.query(
-            'SELECT id, image_path FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 AND TRIM(image_path) = $4',
-            [collectionId, cardId, cardType, normalizedNewPath]
-          );
-
-          if (checkResult.rows.length > 0) {
-            // Row with new image_path already exists (maybe with different whitespace), update its quantity
-            console.log('🟠 [Repo] Found row with normalized image_path match, updating quantity');
-            result = await client.query(
-              'UPDATE collection_cards SET quantity = $1, updated_at = NOW() WHERE collection_id = $2 AND card_id = $3 AND card_type = $4 AND TRIM(image_path) = $5 RETURNING *',
-              [quantity, collectionId, cardId, cardType, normalizedNewPath]
-            );
-          } else {
-            // No row with new image_path exists, update the first existing row's image_path and quantity
-            const existingRow = allExistingRows.rows[0];
-            const oldImagePath = existingRow.image_path;
-            
-            console.log('🟠 [Repo] Updating existing row with new image_path:', {
-              rowId: existingRow.id,
-              oldImagePath,
-              newImagePath: imagePath,
-              oldQuantity: existingRow.quantity,
-              newQuantity: quantity
-            });
-
-            // Update the existing row's image_path and quantity
-            // Use the row ID to ensure we update the correct row
-            result = await client.query(
-              'UPDATE collection_cards SET image_path = $1, quantity = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
-              [imagePath, quantity, existingRow.id]
-            );
-          }
-        }
-      }
-
-      await client.query('COMMIT');
-
-      if (result.rows.length === 0) {
-        console.warn('🟠 [Repo] updateCardQuantity found no rows to update. Query params:', {
-          collectionId,
-          cardId,
-          cardType,
-          imagePath
-        });
-        return null;
-      }
-
-      console.log('🟠 [Repo] updateCardQuantity result:', result.rows[0]);
-      return result.rows[0];
-    } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('🟠 [Repo] Error in updateCardQuantity:', error);
-      throw error;
-    } finally {
-      client.release();
-    }
+      imagePath,
+      oldImagePath
+    );
   }
 
-  /**
-   * Get quantity for a specific card variant (card_id, card_type, image_path) in a collection.
-   * Returns 0 if not found.
-   */
   async getQuantity(
     collectionId: string,
     cardId: string,
     cardType: string,
     imagePath: string
   ): Promise<number> {
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query<{ quantity: number }>(
-        'SELECT quantity FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 AND image_path = $4',
-        [collectionId, cardId, cardType, imagePath]
-      );
-      if (result.rows.length === 0) return 0;
-      return result.rows[0].quantity;
-    } finally {
-      client.release();
-    }
+    return collectionCards.getQuantity(
+      this.getContext(),
+      collectionId,
+      cardId,
+      cardType,
+      imagePath
+    );
   }
 
-  /**
-   * Remove card from collection
-   */
   async removeCardFromCollection(
     collectionId: string,
     cardId: string,
     cardType: string
   ): Promise<boolean> {
-    console.log('🟠 [Repo] removeCardFromCollection called:', {
+    return collectionCards.removeCardFromCollection(
+      this.getContext(),
       collectionId,
       cardId,
       cardType
-    });
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query(
-        'DELETE FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3',
-        [collectionId, cardId, cardType]
-      );
-      console.log('🟠 [Repo] removeCardFromCollection deleted rows:', result.rowCount);
-      return result.rowCount !== null && result.rowCount > 0;
-    } finally {
-      client.release();
-    }
+    );
   }
 
-  /**
-   * Get collection history for a collection
-   * Returns history entries ordered by created_at DESC (most recent first)
-   */
   async getCollectionHistory(collectionId: string, limit?: number): Promise<CollectionHistory[]> {
-    const client = await this.pool.connect();
-    try {
-      let query = `
-        SELECT id, collection_id, card_id, action, new_quantity, created_at
-        FROM collection_history
-        WHERE collection_id = $1
-        ORDER BY created_at DESC
-      `;
-      
-      const params: (string | number)[] = [collectionId];
-      
-      if (limit && limit > 0) {
-        query += ' LIMIT $2';
-        params.push(limit);
-      }
-      
-      const result = await client.query<CollectionHistory>(query, params);
-      return result.rows;
-    } finally {
-      client.release();
-    }
+    return collectionHistory.getCollectionHistory(this.getContext(), collectionId, limit);
   }
 
-  /**
-   * Verify that a card exists in the specified table
-   */
   async verifyCardExists(cardId: string, cardType: string): Promise<boolean> {
     const client = await this.pool.connect();
     try {
-      let query: string;
-      switch (cardType) {
-        case 'character':
-          query = 'SELECT 1 FROM characters WHERE id = $1';
-          break;
-        case 'special':
-          query = 'SELECT 1 FROM special_cards WHERE id = $1';
-          break;
-        case 'power':
-          query = 'SELECT 1 FROM power_cards WHERE id = $1';
-          break;
-        case 'location':
-          query = 'SELECT 1 FROM locations WHERE id = $1';
-          break;
-        case 'mission':
-          query = 'SELECT 1 FROM missions WHERE id = $1';
-          break;
-        case 'event':
-          query = 'SELECT 1 FROM events WHERE id = $1';
-          break;
-        case 'aspect':
-          query = 'SELECT 1 FROM aspects WHERE id = $1';
-          break;
-        case 'advanced_universe':
-          query = 'SELECT 1 FROM advanced_universe_cards WHERE id = $1';
-          break;
-        case 'teamwork':
-          query = 'SELECT 1 FROM teamwork_cards WHERE id = $1';
-          break;
-        case 'ally_universe':
-          query = 'SELECT 1 FROM ally_universe_cards WHERE id = $1';
-          break;
-        case 'training':
-          query = 'SELECT 1 FROM training_cards WHERE id = $1';
-          break;
-        case 'basic_universe':
-          query = 'SELECT 1 FROM basic_universe_cards WHERE id = $1';
-          break;
-        default:
-          return false;
-      }
-
-      const result = await client.query(query, [cardId]);
-      return result.rows.length > 0;
+      return await cardLookup.verifyCardExists(client, cardId, cardType);
     } finally {
       client.release();
     }
