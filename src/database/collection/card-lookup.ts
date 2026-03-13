@@ -15,6 +15,16 @@ const CARD_TABLE_BY_TYPE: Record<string, string> = {
   basic_universe: 'basic_universe_cards',
 };
 
+// Pre-built query strings (table names from allowlist only; no interpolation at query call site).
+const QUERY_IMAGE_PATH: Record<string, string> = {};
+const QUERY_EXISTS: Record<string, string> = {};
+const QUERY_FETCH_CARD: Record<string, string> = {};
+for (const [type, table] of Object.entries(CARD_TABLE_BY_TYPE)) {
+  QUERY_IMAGE_PATH[type] = `SELECT image_path FROM ${table} WHERE id = $1`;
+  QUERY_EXISTS[type] = `SELECT 1 FROM ${table} WHERE id = $1`;
+  QUERY_FETCH_CARD[type] = `SELECT * FROM ${table} WHERE id = $1`;
+}
+
 /**
  * Get image path from card data.
  * After migration, alternate cards are separate cards, so we just get the card's image_path.
@@ -24,15 +34,12 @@ export async function getCardImagePath(
   cardId: string,
   cardType: string
 ): Promise<string> {
-  const table = CARD_TABLE_BY_TYPE[cardType];
+  const query = QUERY_IMAGE_PATH[cardType];
   let cardImagePath: string | null = null;
 
-  if (table) {
+  if (query) {
     try {
-      const result = await client.query(
-        `SELECT image_path FROM ${table} WHERE id = $1`,
-        [cardId]
-      );
+      const result = await client.query(query, [cardId]);
       if (result.rows.length > 0) {
         cardImagePath = result.rows[0].image_path;
       }
@@ -69,11 +76,11 @@ export async function verifyCardExists(
   cardId: string,
   cardType: string
 ): Promise<boolean> {
-  const table = CARD_TABLE_BY_TYPE[cardType];
-  if (!table) {
+  const query = QUERY_EXISTS[cardType];
+  if (!query) {
     return false;
   }
-  const result = await client.query(`SELECT 1 FROM ${table} WHERE id = $1`, [cardId]);
+  const result = await client.query(query, [cardId]);
   return result.rows.length > 0;
 }
 
@@ -91,15 +98,15 @@ export async function fetchCardDataForCollectionCard(
   cardId: string,
   cardType: string
 ): Promise<FetchCardDataResult> {
-  const table = CARD_TABLE_BY_TYPE[cardType];
+  const query = QUERY_FETCH_CARD[cardType];
   const out: FetchCardDataResult = { cardData: null, cardName: '', set: 'ERB' };
 
-  if (!table) {
+  if (!query) {
     return out;
   }
 
   try {
-    const result = await client.query(`SELECT * FROM ${table} WHERE id = $1`, [cardId]);
+    const result = await client.query(query, [cardId]);
     if (result.rows.length === 0) {
       return out;
     }
