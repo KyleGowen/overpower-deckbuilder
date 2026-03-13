@@ -111,41 +111,118 @@ function switchToDeckBuilder() {
 }
 
 function createNewDeck() {
+    const currentUser = getCurrentUser();
+    if (currentUser && currentUser.role === 'GUEST') {
+        createNewDeckForGuest();
+        return;
+    }
+    createNewDeckForUser();
+}
+
+async function createNewDeckForGuest() {
     isCreatingNewDeck = true;
-    
-    // Ensure we're in edit mode for new decks
+    try {
+        const res = await fetch('/api/guest/decks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name: 'New Deck', description: '' })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            if (typeof showNotification === 'function') {
+                showNotification(data.error || 'Failed to create guest deck', 'error');
+            } else {
+                alert(data.error || 'Failed to create guest deck');
+            }
+            return;
+        }
+        const deckId = data.data.id;
+        const created = data.data.created_at;
+        const updated = data.data.updated_at;
+
+        if (typeof isReadOnlyMode !== 'undefined') {
+            isReadOnlyMode = false;
+            document.body.classList.remove('read-only-mode');
+        }
+        const defaultUIPreferences = {
+            viewMode: 'tile',
+            expansionState: {
+                event: true, power: true, aspect: true, mission: true, special: true,
+                location: true, teamwork: true, training: true, character: true,
+                ally_universe: true, basic_universe: true, advanced_universe: true
+            },
+            dividerPosition: 65,
+            powerCardsSortMode: 'type',
+            characterGroupExpansionState: {}
+        };
+        if (typeof currentDeckId !== 'undefined') currentDeckId = deckId;
+        if (typeof currentDeckData !== 'undefined') {
+            currentDeckData = {
+                metadata: {
+                    id: deckId,
+                    name: 'New Deck',
+                    description: '',
+                    created: created || new Date().toISOString(),
+                    lastModified: updated || new Date().toISOString(),
+                    cardCount: 0,
+                    userId: getCurrentUser() ? (getCurrentUser().userId || getCurrentUser().id) : 'guest',
+                    ui_preferences: defaultUIPreferences
+                },
+                cards: []
+            };
+        }
+        if (typeof window.deckEditorCards !== 'undefined') window.deckEditorCards = [];
+
+        const userId = getCurrentUser() ? (getCurrentUser().userId || getCurrentUser().id) : 'guest';
+        window.history.pushState({ deckId, userId, view: 'deckbuilder' }, '', `/users/${userId}/decks/${deckId}`);
+
+        if (typeof showDeckEditor === 'function') {
+            const deckCardsContainer = document.getElementById('deckCardsContainer');
+            if (deckCardsContainer) deckCardsContainer.innerHTML = '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>';
+            const deckCardsEditor = document.getElementById('deckCardsEditor');
+            if (deckCardsEditor) deckCardsEditor.innerHTML = '<div class="empty-deck-message"><p>No cards in this deck yet.</p><p>Drag cards from the right panel to add them!</p></div>';
+            showDeckEditor();
+            const titleElement = document.getElementById('deckEditorTitle');
+            if (titleElement) titleElement.textContent = currentDeckData.metadata.name;
+            if (typeof loadAvailableCards === 'function') loadAvailableCards();
+            if (typeof updateDeckCardCount === 'function') updateDeckCardCount();
+            if (typeof updateDeckSummary === 'function') updateDeckSummary(window.deckEditorCards);
+        }
+    } finally {
+        setTimeout(() => { isCreatingNewDeck = false; }, 1000);
+    }
+}
+
+function createNewDeckForUser() {
+    isCreatingNewDeck = true;
+
     if (typeof isReadOnlyMode !== 'undefined') {
         isReadOnlyMode = false;
-        // Update the body class to reflect edit mode
         document.body.classList.remove('read-only-mode');
     }
-    
-    // Define default UI preferences
     const defaultUIPreferences = {
-        "viewMode": "tile",
-        "expansionState": {
-            "event": true, "power": true, "aspect": true, "mission": true, "special": true,
-            "location": true, "teamwork": true, "training": true, "character": true,
-            "ally_universe": true, "basic_universe": true, "advanced_universe": true
+        viewMode: 'tile',
+        expansionState: {
+            event: true, power: true, aspect: true, mission: true, special: true,
+            location: true, teamwork: true, training: true, character: true,
+            ally_universe: true, basic_universe: true, advanced_universe: true
         },
-        "dividerPosition": 65,
-        "powerCardsSortMode": "type",
-        "characterGroupExpansionState": {}
+        dividerPosition: 65,
+        powerCardsSortMode: 'type',
+        characterGroupExpansionState: {}
     };
 
-    // Clear any existing deck data and set up a new blank deck client-side
-    if (typeof currentDeckId !== 'undefined') {
-        currentDeckId = null; // No ID until saved
-    }
+    if (typeof currentDeckId !== 'undefined') currentDeckId = null;
     if (typeof currentDeckData !== 'undefined') {
         const currentUser = getCurrentUser();
         currentDeckData = {
             metadata: {
-                id: null, // No ID until saved
+                id: null,
                 name: 'New Deck',
                 description: '',
-                created: new Date().toISOString(), // Client-side timestamp
-                lastModified: new Date().toISOString(), // Client-side timestamp
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
                 cardCount: 0,
                 userId: currentUser ? (currentUser.userId || currentUser.id) : 'guest',
                 ui_preferences: defaultUIPreferences
@@ -153,60 +230,26 @@ function createNewDeck() {
             cards: []
         };
     }
-    if (typeof window.deckEditorCards !== 'undefined') {
-        window.deckEditorCards = [];
-    }
+    if (typeof window.deckEditorCards !== 'undefined') window.deckEditorCards = [];
 
-    // Update URL to indicate we're creating a new deck
     const currentUser = getCurrentUser();
     const userId = currentUser ? (currentUser.userId || currentUser.id) : 'guest';
-    const newUrl = `/users/${userId}/decks/new`;
-    window.history.pushState({ newDeck: true, userId, view: 'deckbuilder' }, '', newUrl);
+    window.history.pushState({ newDeck: true, userId, view: 'deckbuilder' }, '', `/users/${userId}/decks/new`);
 
-    // Show the deck editor with the blank deck
     if (typeof showDeckEditor === 'function') {
-        
-        // Clear any existing cards BEFORE showing the editor
         const deckCardsContainer = document.getElementById('deckCardsContainer');
-        if (deckCardsContainer) {
-            deckCardsContainer.innerHTML = '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>';
-        }
-        
-        // Also clear the deckCardsEditor element if it exists
+        if (deckCardsContainer) deckCardsContainer.innerHTML = '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>';
         const deckCardsEditor = document.getElementById('deckCardsEditor');
-        if (deckCardsEditor) {
-            deckCardsEditor.innerHTML = '<div class="empty-deck-message"><p>No cards in this deck yet.</p><p>Drag cards from the right panel to add them!</p></div>';
-        }
-        
+        if (deckCardsEditor) deckCardsEditor.innerHTML = '<div class="empty-deck-message"><p>No cards in this deck yet.</p><p>Drag cards from the right panel to add them!</p></div>';
         showDeckEditor();
-        
-        // Set up the deck editor with the new blank deck data
         const titleElement = document.getElementById('deckEditorTitle');
-        
-        if (titleElement) {
-            titleElement.textContent = currentDeckData.metadata.name;
-        }
-        
-        // Load available cards if function exists
-        if (typeof loadAvailableCards === 'function') {
-            loadAvailableCards();
-        }
-        
-        // Update card count
-        if (typeof updateDeckCardCount === 'function') {
-            updateDeckCardCount();
-        }
-        
-        // Update deck summary to set proper button states
-        if (typeof updateDeckSummary === 'function') {
-            updateDeckSummary(window.deckEditorCards);
-        }
-        
-        // Reset the flag after a short delay to allow the deck editor to fully initialize
-        setTimeout(() => {
-            isCreatingNewDeck = false;
-        }, 1000);
+        if (titleElement) titleElement.textContent = currentDeckData.metadata.name;
+        if (typeof loadAvailableCards === 'function') loadAvailableCards();
+        if (typeof updateDeckCardCount === 'function') updateDeckCardCount();
+        if (typeof updateDeckSummary === 'function') updateDeckSummary(window.deckEditorCards);
+        setTimeout(() => { isCreatingNewDeck = false; }, 1000);
     } else {
+        isCreatingNewDeck = false;
         console.error('showDeckEditor function not found');
     }
 }
@@ -365,10 +408,8 @@ function buildUserMenuOptions(user) {
     if (!dropdown) return;
     dropdown.innerHTML = '';
 
-    // + Create Deck - available to USER and ADMIN
-    if (user.role !== 'GUEST') {
-        dropdown.appendChild(createUserMenuItem('+ Create Deck', () => { closeUserMenu(); createNewDeck(); }, 'user-menu-item--primary'));
-    }
+    // + Create Deck - available to all roles (GUEST uses session-scoped guest decks)
+    dropdown.appendChild(createUserMenuItem('+ Create Deck', () => { closeUserMenu(); createNewDeck(); }, 'user-menu-item--primary'));
     // + Create User - ADMIN only
     if (user.role === 'ADMIN') {
         dropdown.appendChild(createUserMenuItem('+ Create User', () => {

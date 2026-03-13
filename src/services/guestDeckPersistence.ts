@@ -60,7 +60,8 @@ export class GuestDeckPersistenceService {
   createDeck(sessionId: string, deckData: DeckData): string {
     const deckId = `guest_${sessionId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
+    const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours - session-scoped
+    const expiresAt = new Date(now.getTime() + GUEST_DECK_TTL_MS);
 
     const guestDeck: GuestDeck = {
       id: deckId,
@@ -108,7 +109,8 @@ export class GuestDeckPersistenceService {
       }
     };
     deck.lastAccessedAt = now;
-    deck.expiresAt = new Date(now.getTime() + 2 * 60 * 1000); // Extend by 2 minutes
+    const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+    deck.expiresAt = new Date(now.getTime() + GUEST_DECK_TTL_MS);
 
     this.guestDecks.set(deckId, deck);
     return true;
@@ -124,7 +126,8 @@ export class GuestDeckPersistenceService {
     // Update last accessed time and extend expiration
     const now = new Date();
     deck.lastAccessedAt = now;
-    deck.expiresAt = new Date(now.getTime() + 2 * 60 * 1000); // Extend by 2 minutes
+    const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+    deck.expiresAt = new Date(now.getTime() + GUEST_DECK_TTL_MS);
 
     this.guestDecks.set(deckId, deck);
     return deck.deckData;
@@ -143,9 +146,10 @@ export class GuestDeckPersistenceService {
         // Update last accessed time and extend expiration
         const now = new Date();
         deck.lastAccessedAt = now;
-        deck.expiresAt = new Date(now.getTime() + 2 * 60 * 1000); // Extend by 2 minutes
+        const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        deck.expiresAt = new Date(now.getTime() + GUEST_DECK_TTL_MS);
         this.guestDecks.set(deckId, deck);
-        
+
         decks.push(deck.deckData);
       }
     }

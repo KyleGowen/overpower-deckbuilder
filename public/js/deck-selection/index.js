@@ -45,17 +45,16 @@
 
     window.DeckSelection.loadDecks = async function loadDecks() {
         try {
-            // Fetch decks immediately - deck tiles use metadata/cards from API, not availableCardsMap.
-            // Load availableCardsMap in background for deck editor/import/alternate-art when needed.
             if (typeof loadAvailableCardsData === 'function') {
-                loadAvailableCardsData().catch(() => {}); // Fire-and-forget, no await
+                loadAvailableCardsData().catch(() => {});
             }
 
             showSkeletonTiles(getSkeletonCount());
 
-            const response = await fetch('/api/decks', {
-                credentials: 'include'
-            });
+            const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+            const isGuest = currentUser && currentUser.role === 'GUEST';
+            const url = isGuest ? '/api/guest/decks' : '/api/decks';
+            const response = await fetch(url, { credentials: 'include' });
             const data = await response.json();
             if (data.success) {
                 saveSkeletonCount(data.data);

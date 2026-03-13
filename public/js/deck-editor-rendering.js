@@ -24,21 +24,24 @@ function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
 
 /**
  * After card-view HTML is in the DOM, progressively load full-res for tiles that show a thumbnail.
- * For each .card-view-image with data-full-res different from current src, preload full-res and swap on load.
+ * Targets only .card-view-image-full (two-layer markup). Preloads full-res, then sets the full-res
+ * layer's src and adds card-view-image-full--loaded so it fades in over the thumb (no flash).
  */
 function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
     if (!deckCardsEditor) return;
-    const images = deckCardsEditor.querySelectorAll('.deck-card-card-view-item .card-view-image[data-full-res]');
-    images.forEach(function (img) {
+    const fullResLayers = deckCardsEditor.querySelectorAll('.deck-card-card-view-item .card-view-image-full[data-full-res]');
+    fullResLayers.forEach(function (img) {
         const fullRes = img.getAttribute('data-full-res');
         if (!fullRes) return;
-        // Skip if already showing full-res (e.g. non-thumb types); img.src is absolute URL, fullRes is path
-        if (img.src.indexOf(fullRes) !== -1) return;
         const fullResImg = new Image();
         fullResImg.onload = function () {
             if (img.getAttribute('data-full-res') === fullRes) {
                 img.src = fullRes;
+                img.classList.add('card-view-image-full--loaded');
             }
+        };
+        fullResImg.onerror = function () {
+            // Leave full-res layer hidden; thumbnail remains visible
         };
         fullResImg.src = fullRes;
     });
@@ -1201,9 +1204,10 @@ function renderDeckCardsCardView() {
                         instanceAvailableCard = availableCard; // Fallback to original
                     }
                     
-                    // Instance image: thumbnail-first for character/location/mission, then progressive swap to full-res (see initDeckEditorCardViewProgressiveLoad)
+                    // Instance image: two-layer when thumb !== full-res (thumb + full-res layer that fades in; see initDeckEditorCardViewProgressiveLoad)
                     const instanceFullResPath = getCardImagePath(instanceAvailableCard, card.type);
                     const instanceImagePath = getDeckEditorCardViewInitialImagePath(instanceFullResPath, card.type);
+                    const useTwoLayer = instanceImagePath !== instanceFullResPath;
 
                     // Create instance-specific Change Art button
                     const instanceChangeArtButton = changeArtButton.replace(
@@ -1231,7 +1235,11 @@ function renderDeckCardsCardView() {
                              onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', null, null, ${instanceIsFoil})"
                              onmouseleave="hideCardHoverModal()">
                             <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
-                                <img src="${instanceImagePath}" data-full-res="${instanceFullResPath}" alt="${instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card'}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
+                                ${useTwoLayer
+                                    ? `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-thumb" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
+                                <img data-full-res="${instanceFullResPath.replace(/"/g, '&quot;')}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-full" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">`
+                                    : `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">`
+                                }
                             </div>
                             <div class="card-view-actions">
                                 ${instanceChangeArtButton}

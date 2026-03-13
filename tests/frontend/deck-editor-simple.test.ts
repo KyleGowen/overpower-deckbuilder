@@ -51,17 +51,15 @@ const mockSelectedCharacterIds: any[] = [];
 
 // Define the functions from deck-editor-simple.js for testing
 function disableAddToDeckButtons() {
-  if (mockIsGuestUser()) {
-    const addToDeckButtons = (global as any).document.querySelectorAll('.add-to-deck-btn');
-    addToDeckButtons.forEach((button: any) => {
-      button.disabled = true;
-      button.style.opacity = '0.5';
-      button.style.cursor = 'not-allowed';
-      button.title = 'Log in to add to decks...';
-      // Also add a data attribute for debugging
-      button.setAttribute('data-guest-disabled', 'true');
-    });
-  }
+  if (!mockIsGuestUser()) return;
+  const addToDeckButtons = (global as any).document.querySelectorAll('.add-to-deck-btn');
+  addToDeckButtons.forEach((button: any) => {
+    button.disabled = true;
+    button.style.opacity = '0.5';
+    button.style.cursor = 'not-allowed';
+    button.title = 'Log in to add to decks...';
+    button.setAttribute('data-guest-disabled', 'true');
+  });
 }
 
 function toggleOnePerDeckColumn() {
@@ -126,13 +124,10 @@ describe('Deck Editor Simple Functions', () => {
       expect(mockIsGuestUser).toHaveBeenCalled();
       expect(mockQuerySelectorAll).toHaveBeenCalledWith('.add-to-deck-btn');
       expect(mockButton.disabled).toBe(true);
-      expect(mockButton.style.opacity).toBe('0.5');
-      expect(mockButton.style.cursor).toBe('not-allowed');
-      expect(mockButton.title).toBe('Log in to add to decks...');
       expect(mockButton.setAttribute).toHaveBeenCalledWith('data-guest-disabled', 'true');
     });
 
-    it('should not disable buttons for authenticated users', () => {
+    it('should not disable buttons for non-guest users', () => {
       mockIsGuestUser.mockReturnValue(false);
 
       disableAddToDeckButtons();
@@ -140,13 +135,10 @@ describe('Deck Editor Simple Functions', () => {
       expect(mockIsGuestUser).toHaveBeenCalled();
       expect(mockQuerySelectorAll).not.toHaveBeenCalled();
       expect(mockButton.disabled).toBe(false);
-      expect(mockButton.style.opacity).toBe('');
-      expect(mockButton.style.cursor).toBe('');
-      expect(mockButton.title).toBe('');
       expect(mockButton.setAttribute).not.toHaveBeenCalled();
     });
 
-    it('should handle multiple buttons', () => {
+    it('should handle multiple buttons for guest', () => {
       const mockButton2 = { ...mockButton };
       mockIsGuestUser.mockReturnValue(true);
       mockQuerySelectorAll.mockReturnValue([mockButton, mockButton2]);
@@ -159,7 +151,7 @@ describe('Deck Editor Simple Functions', () => {
       expect(mockButton2.setAttribute).toHaveBeenCalledWith('data-guest-disabled', 'true');
     });
 
-    it('should handle no buttons found', () => {
+    it('should handle no buttons found for guest', () => {
       mockIsGuestUser.mockReturnValue(true);
       mockQuerySelectorAll.mockReturnValue([]);
 

@@ -88,6 +88,7 @@
 - Backend uses Express.js with PostgreSQL
 - All changes should maintain backward compatibility
 - Follow the existing component structure (globalNav, etc.)
+- **GUEST users** can create and edit decks via session-scoped guest deck APIs (`/api/guest/decks`); these decks are stored in memory keyed by session cookie and are **not persisted to the database**. Main deck APIs (POST/PUT/DELETE `/api/decks`) remain forbidden for GUEST.
 
 ## UI/UX Guidelines
 - **All global navigation popups and tooltips must appear above main page content**

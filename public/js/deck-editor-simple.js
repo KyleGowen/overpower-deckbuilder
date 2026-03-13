@@ -15,20 +15,18 @@
  * ======================================== */
 
 /**
- * Disable add to deck buttons for guest users
+ * Disable add to deck buttons for guest users.
  */
 function disableAddToDeckButtons() {
-    if (isGuestUser()) {
-        const addToDeckButtons = document.querySelectorAll('.add-to-deck-btn');
-        addToDeckButtons.forEach(button => {
-            button.disabled = true;
-            button.style.opacity = '0.5';
-            button.style.cursor = 'not-allowed';
-            button.title = 'Log in to add to decks...';
-            // Also add a data attribute for debugging
-            button.setAttribute('data-guest-disabled', 'true');
-        });
-    }
+    if (typeof isGuestUser !== 'function' || !isGuestUser()) return;
+    const addToDeckButtons = document.querySelectorAll('.add-to-deck-btn');
+    addToDeckButtons.forEach(button => {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+        button.style.cursor = 'not-allowed';
+        button.title = 'Log in to add to decks...';
+        button.setAttribute('data-guest-disabled', 'true');
+    });
 }
 
 

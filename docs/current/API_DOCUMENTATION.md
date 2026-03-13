@@ -8,7 +8,7 @@
 Most endpoints require authentication via session cookies. The API supports three login methods: **username/password**, **Google Sign-In**, and **Guest**. The API uses cookie-based authentication with the following roles:
 - **ADMIN**: Full access to all features
 - **USER**: Standard user access
-- **GUEST**: Read-only access to decks
+- **GUEST**: Can create and edit session-scoped decks via `/api/guest/decks` (not persisted to database); read-only for main deck APIs
 
 ---
 
@@ -468,6 +468,85 @@ Change the current user's password.
   "message": "Password updated"
 }
 ```
+
+---
+
+## Guest Deck Endpoints (GUEST role only)
+
+Guest deck endpoints allow users with the **GUEST** role to create, list, get, update, and delete decks that are **session-scoped only**. Data is stored in memory keyed by the session cookie and **is not persisted to the database**. Decks expire after a period of inactivity (e.g. 24 hours). Non-GUEST users receive `403 Forbidden` on these endpoints. A valid session cookie is required (`401` if missing).
+
+**Base path:** `/api/guest/decks`
+
+### POST /api/guest/decks
+Create a new guest deck for the current session.
+
+**Authentication:** Required (GUEST role; session cookie required)
+
+**Request Body:**
+```json
+{
+  "name": "string (optional, default: New Deck)",
+  "description": "string (optional)"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string (guest_...)",
+    "name": "string",
+    "description": "string",
+    "created_at": "string (ISO)",
+    "updated_at": "string (ISO)"
+  }
+}
+```
+
+### GET /api/guest/decks
+List all guest decks for the current session.
+
+**Authentication:** Required (GUEST role)
+
+**Response:** `200 OK` — same array shape as `GET /api/decks` (metadata + cards per deck).
+
+### GET /api/guest/decks/:id
+Get a single guest deck by ID. The deck must belong to the current session.
+
+**Authentication:** Required (GUEST role)
+
+**Response:** `200 OK` — same shape as `GET /api/decks/:id` (metadata with `isOwner: true`, cards array). `404` if not found or wrong session.
+
+### PUT /api/guest/decks/:id
+Update guest deck metadata (name, description).
+
+**Authentication:** Required (GUEST role)
+
+**Request Body:** `{ "name": "string (optional)", "description": "string (optional)" }`
+
+**Response:** `200 OK` with full deck data, or `404` if not found.
+
+### PUT /api/guest/decks/:id/cards
+Replace all cards in a guest deck. Same request/response semantics as `PUT /api/decks/:id/cards` (body: `{ "cards": [ { "cardType", "cardId", "quantity", "exclude_from_draw" (optional) } ] }`).
+
+**Authentication:** Required (GUEST role)
+
+**Response:** `200 OK` with updated deck data, or `404` if not found.
+
+### POST /api/guest/decks/:id/cards
+Add a single card to a guest deck. Same request body as `POST /api/decks/:id/cards`: `{ "cardType", "cardId", "quantity" (optional, default 1) }`. Deck-building rules (one-per-deck, cataclysm limit, etc.) apply.
+
+**Authentication:** Required (GUEST role)
+
+**Response:** `200 OK` with updated deck data, or `400` for validation errors, or `404` if deck not found.
+
+### DELETE /api/guest/decks/:id
+Delete a guest deck for the current session.
+
+**Authentication:** Required (GUEST role)
+
+**Response:** `200 OK` with `{ "success": true }`, or `404` if not found.
 
 ---
 

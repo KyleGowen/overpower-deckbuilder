@@ -700,6 +700,7 @@
         /* Tight wrapper around the image only — foil-shimmer is applied here
            so the shimmer is clipped to the image and never bleeds into the caption. */
         .card-hover-image-wrap {
+            position: relative;
             display: inline-block;
             line-height: 0;
             border-radius: 6px;
@@ -714,6 +715,21 @@
             object-fit: contain;
             border-radius: 4px;
             display: block;
+        }
+
+        /* Two-layer progressive load: full-res fades in over thumb (no flash) */
+        .card-hover-image-wrap .card-hover-image-full {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        .card-hover-image-wrap .card-hover-image-full.card-hover-image-full--loaded {
+            opacity: 1;
         }
 
         .card-hover-caption {

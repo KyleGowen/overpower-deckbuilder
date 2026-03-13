@@ -519,12 +519,28 @@ describe('Global Navigation Component', () => {
             expect(titleElement!.textContent).toBe('New Deck');
         });
 
-        it('should handle guest user', () => {
-            mockGetCurrentUser.mockReturnValue({ role: 'GUEST', id: 'guest' });
+        it('should handle guest user', async () => {
+            mockGetCurrentUser.mockReturnValue({ role: 'GUEST', id: 'guest', userId: 'guest' });
+            const mockFetch = jest.fn().mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve({
+                    success: true,
+                    data: {
+                        id: 'guest_session_123',
+                        name: 'New Deck',
+                        description: '',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }
+                })
+            });
+            (global as any).fetch = mockFetch;
 
             (window as any).createNewDeck();
+            await new Promise((r) => setTimeout(r, 0));
 
             expect((window as any).currentDeckData.metadata.userId).toBe('guest');
+            expect((window as any).currentDeckId).toBe('guest_session_123');
         });
 
         it('should handle missing showDeckEditor gracefully', () => {
@@ -614,14 +630,14 @@ describe('Global Navigation Component', () => {
                 expect(Array.from(items).some((item: any) => item.textContent.includes('Create User'))).toBe(true);
             });
 
-            it('should not show Create Deck for GUEST role', () => {
+            it('should show Create Deck for GUEST role (session-scoped guest decks)', () => {
                 const dropdown = document.getElementById('userMenuDropdown');
                 const user = { role: 'GUEST' };
 
                 (window as any).buildUserMenuOptions(user);
 
                 const items = dropdown!.querySelectorAll('.user-menu-item');
-                expect(Array.from(items).some((item: any) => item.textContent.includes('Create Deck'))).toBe(false);
+                expect(Array.from(items).some((item: any) => item.textContent.includes('Create Deck'))).toBe(true);
             });
         });
     });

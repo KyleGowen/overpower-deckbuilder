@@ -651,20 +651,43 @@
                 thumbnailPath = window.toThumbnailPathForType(fullResPath, cardType === 'location' ? 'locations' : 'missions');
             }
 
-            // Progressive hover: show thumbnail first for instant display, then swap to full-res when loaded
+            // Two-layer when thumb !== full-res: thumb stays visible, full-res fades in on top (no flash)
             window._hoverModalRequestId = (window._hoverModalRequestId || 0) + 1;
             const thisRequestId = window._hoverModalRequestId;
-            image.src = thumbnailPath;
             caption.textContent = cardName || '';
 
             if (thumbnailPath !== fullResPath) {
-                const fullResImg = new Image();
-                fullResImg.onload = function() {
-                    if (window._hoverModalRequestId === thisRequestId) {
-                        image.src = fullResPath;
-                    }
-                };
-                fullResImg.src = fullResPath;
+                // Get or create the full-res layer
+                let fullResLayer = imageWrap ? imageWrap.querySelector('.card-hover-image-full') : null;
+                if (imageWrap && !fullResLayer) {
+                    fullResLayer = document.createElement('img');
+                    fullResLayer.alt = cardName || 'Card';
+                    fullResLayer.className = 'card-hover-image card-hover-image-full';
+                    imageWrap.appendChild(fullResLayer);
+                }
+                image.src = thumbnailPath;
+                if (fullResLayer) {
+                    fullResLayer.src = '';
+                    fullResLayer.classList.remove('card-hover-image-full--loaded');
+                    const fullResImg = new Image();
+                    fullResImg.onload = function() {
+                        if (window._hoverModalRequestId === thisRequestId && fullResLayer) {
+                            fullResLayer.src = fullResPath;
+                            fullResLayer.classList.add('card-hover-image-full--loaded');
+                        }
+                    };
+                    fullResImg.onerror = function() {
+                        // Leave full-res layer hidden; thumb remains visible
+                    };
+                    fullResImg.src = fullResPath;
+                }
+            } else {
+                image.src = fullResPath;
+                const fullResLayer = imageWrap ? imageWrap.querySelector('.card-hover-image-full') : null;
+                if (fullResLayer) {
+                    fullResLayer.src = '';
+                    fullResLayer.classList.remove('card-hover-image-full--loaded');
+                }
             }
 
             // Set card type data attribute for CSS styling

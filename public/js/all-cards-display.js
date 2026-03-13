@@ -331,10 +331,7 @@ function renderCardCell(card) {
     // Show collection buttons for any logged-in user (GUEST = sandbox, USER/ADMIN = persisted)
     const hasUser = typeof getCurrentUser === 'function' && getCurrentUser();
     
-    // Check if user is guest
     const isGuest = typeof isGuestUser === 'function' && isGuestUser();
-    
-    // Determine card type for API calls (some types need mapping)
     let apiCardType = cardType;
     if (cardType === 'advanced-universe') {
         apiCardType = 'advanced_universe';
@@ -343,7 +340,6 @@ function renderCardCell(card) {
     } else if (cardType === 'basic-universe') {
         apiCardType = 'basic_universe';
     }
-    
     const deckButtonDisabled = isGuest ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="Log in to add to decks..."' : '';
     const deckButtonOnClick = isGuest ? '' : `onclick="showDeckSelection('${apiCardType}', '${card.id}', '${escapedName}', this)"`;
     

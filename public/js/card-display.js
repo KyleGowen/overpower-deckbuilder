@@ -300,8 +300,6 @@ function displayCharacters(characters) {
                 setTimeout(lockRowHeight, 1000);
             }
         }
-        
-        // Immediately disable Add to Deck button for guest users to prevent flash
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {
@@ -763,8 +761,6 @@ function displaySpecialCards(specialCards) {
                 }, 1000);
             }
         }
-        
-        // Immediately disable Add to Deck button for guest users to prevent flash
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {
@@ -899,7 +895,6 @@ function displayLocations(locations) {
                 setTimeout(lockRowHeight, 1000);
             }
         }
-
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {

@@ -288,14 +288,36 @@
          * It takes the same flex role the <img> used to have.
          * overflow:hidden is required to clip the oversized ::after pseudo-element
          * (inset: -50% -20%) that creates the shimmer effect.
+         * position: relative so stacked .card-view-image-thumb / .card-view-image-full overlay correctly.
          */
         .card-foil-img-wrap {
+            position: relative;
             flex-grow: 1;
             width: 100%;
             min-height: 0;
             border-radius: 6px;
             margin-bottom: 8px;
             overflow: hidden;
+        }
+        
+        /* Two-layer progressive load: thumb stays visible, full-res fades in on top (no flash) */
+        .card-view-image-thumb,
+        .card-view-image-full {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            border-radius: 6px;
+            display: block;
+        }
+        .card-view-image-full {
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        .card-view-image-full.card-view-image-full--loaded {
+            opacity: 1;
         }
         
         /* Portrait wrapper — fill frame, no margin below */

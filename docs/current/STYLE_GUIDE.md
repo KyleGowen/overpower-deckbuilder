@@ -1590,6 +1590,9 @@ The Card View is a deck visualization mode available to all users that displays 
 - **Box Shadow**: `0 4px 12px rgba(0, 0, 0, 0.3)` (depth shadow)
 
 ### Card Images
+#### Progressive image load (two-layer, no flash)
+For character, location, and mission we show a thumbnail first, then fade in full-res over it so there is no visible flash. Two layers: `.card-view-image-thumb` (thumbnail, `src` never changed) and `.card-view-image-full` (opacity 0 → 1 via `.card-view-image-full--loaded` when full-res loads). Implemented in `deck-editor-rendering.js` and `card-tables.css`; see [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md).
+
 #### Portrait Image Styling
 - **Class**: `.card-view-image` (portrait cards)
 - **Width**: `115%` (15% larger than container)

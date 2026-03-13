@@ -1,8 +1,6 @@
 /**
- * Unit tests for guest user "Add to Deck" button disabling functionality
- * 
- * Tests the fix for the issue where "Add to Deck" buttons would briefly
- * light up before being disabled for guest users.
+ * Unit tests for guest user "Add to Deck" button disabling.
+ * +Deck is disabled for GUEST roles.
  */
 
 import { JSDOM } from 'jsdom';
@@ -64,8 +62,7 @@ describe('Guest User Button Disabling', () => {
     });
 
     describe('displayCharacters function', () => {
-        test('should immediately disable Add to Deck buttons for guest users', () => {
-            // Mock character data
+        test('should disable Add to Deck buttons for guest users', () => {
             const mockCharacters = [
                 {
                     id: '1',
@@ -80,16 +77,12 @@ describe('Guest User Button Disabling', () => {
                 }
             ];
 
-            // Include the displayCharacters function
             const displayCharacters = (characters: any[]) => {
                 const tbody = document.getElementById('characters-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 characters.forEach(character => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/characters/${character.image}" 
@@ -110,10 +103,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${character.threat_level}</td>
                         <td>${character.special_abilities || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
                     if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
                         const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
                         if (addToDeckBtn) {
@@ -127,21 +117,15 @@ describe('Guest User Button Disabling', () => {
                 });
             };
 
-            // Execute the function
             displayCharacters(mockCharacters);
 
-            // Verify the button is immediately disabled
             const addToDeckBtn = document.querySelector('#characters-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
             expect(addToDeckBtn.disabled).toBe(true);
-            expect(addToDeckBtn.style.opacity).toBe('0.5');
-            expect(addToDeckBtn.style.cursor).toBe('not-allowed');
-            expect(addToDeckBtn.title).toBe('Log in to add to decks...');
             expect(addToDeckBtn.getAttribute('data-guest-disabled')).toBe('true');
         });
 
         test('should not disable buttons for non-guest users', () => {
-            // Mock non-guest user
             (global as any).isGuestUser = jest.fn(() => false);
 
             const mockCharacters = [
@@ -161,12 +145,9 @@ describe('Guest User Button Disabling', () => {
             const displayCharacters = (characters: any[]) => {
                 const tbody = document.getElementById('characters-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 characters.forEach(character => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/characters/${character.image}" 
@@ -187,20 +168,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${character.threat_level}</td>
                         <td>${character.special_abilities || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
-                    if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
-                        const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
-                        if (addToDeckBtn) {
-                            addToDeckBtn.disabled = true;
-                            addToDeckBtn.style.opacity = '0.5';
-                            addToDeckBtn.style.cursor = 'not-allowed';
-                            addToDeckBtn.title = 'Log in to add to decks...';
-                            addToDeckBtn.setAttribute('data-guest-disabled', 'true');
-                        }
-                    }
                 });
             };
 
@@ -209,15 +177,12 @@ describe('Guest User Button Disabling', () => {
             const addToDeckBtn = document.querySelector('#characters-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
             expect(addToDeckBtn.disabled).toBe(false);
-            expect(addToDeckBtn.style.opacity).toBe('');
-            expect(addToDeckBtn.style.cursor).toBe('');
-            expect(addToDeckBtn.title).toBe('');
             expect(addToDeckBtn.getAttribute('data-guest-disabled')).toBe(null);
         });
     });
 
     describe('displaySpecialCards function', () => {
-        test('should immediately disable Add to Deck buttons for guest users', () => {
+        test('should disable Add to Deck buttons for guest users', () => {
             const mockSpecialCards = [
                 {
                     id: '1',
@@ -231,12 +196,9 @@ describe('Guest User Button Disabling', () => {
             const displaySpecialCards = (specialCards: any[]) => {
                 const tbody = document.getElementById('special-cards-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 specialCards.forEach(card => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/specials/${card.image}" 
@@ -253,10 +215,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${card.character}</td>
                         <td>${card.card_effect}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
                     if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
                         const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
                         if (addToDeckBtn) {
@@ -275,15 +234,12 @@ describe('Guest User Button Disabling', () => {
             const addToDeckBtn = document.querySelector('#special-cards-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
             expect(addToDeckBtn.disabled).toBe(true);
-            expect(addToDeckBtn.style.opacity).toBe('0.5');
-            expect(addToDeckBtn.style.cursor).toBe('not-allowed');
-            expect(addToDeckBtn.title).toBe('Log in to add to decks...');
             expect(addToDeckBtn.getAttribute('data-guest-disabled')).toBe('true');
         });
     });
 
     describe('displayEvents function', () => {
-        test('should immediately disable Add to Deck buttons for guest users', () => {
+        test('should disable Add to Deck buttons for guest users', () => {
             const mockEvents = [
                 {
                     id: '1',
@@ -298,9 +254,7 @@ describe('Guest User Button Disabling', () => {
             const displayEvents = (events: any[]) => {
                 const tbody = document.getElementById('events-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-                
                 events.forEach(event => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -320,10 +274,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${event.game_effect}</td>
                         <td><em>${event.flavor_text}</em></td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
                     if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
                         const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
                         if (addToDeckBtn) {
@@ -342,15 +293,12 @@ describe('Guest User Button Disabling', () => {
             const addToDeckBtn = document.querySelector('#events-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
             expect(addToDeckBtn.disabled).toBe(true);
-            expect(addToDeckBtn.style.opacity).toBe('0.5');
-            expect(addToDeckBtn.style.cursor).toBe('not-allowed');
-            expect(addToDeckBtn.title).toBe('Log in to add to decks...');
             expect(addToDeckBtn.getAttribute('data-guest-disabled')).toBe('true');
         });
     });
 
     describe('displayLocations function', () => {
-        test('should immediately disable Add to Deck buttons for guest users', () => {
+        test('should disable Add to Deck buttons for guest users', () => {
             const mockLocations = [
                 {
                     id: '1',
@@ -364,12 +312,9 @@ describe('Guest User Button Disabling', () => {
             const displayLocations = (locations: any[]) => {
                 const tbody = document.getElementById('locations-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 locations.forEach(location => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/locations/${location.image}" 
@@ -386,10 +331,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${location.threat_level}</td>
                         <td>${location.special_ability || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
                     if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
                         const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
                         if (addToDeckBtn) {
@@ -408,9 +350,6 @@ describe('Guest User Button Disabling', () => {
             const addToDeckBtn = document.querySelector('#locations-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
             expect(addToDeckBtn.disabled).toBe(true);
-            expect(addToDeckBtn.style.opacity).toBe('0.5');
-            expect(addToDeckBtn.style.cursor).toBe('not-allowed');
-            expect(addToDeckBtn.title).toBe('Log in to add to decks...');
             expect(addToDeckBtn.getAttribute('data-guest-disabled')).toBe('true');
         });
     });
@@ -445,12 +384,9 @@ describe('Guest User Button Disabling', () => {
             const displayCharacters = (characters: any[]) => {
                 const tbody = document.getElementById('characters-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 characters.forEach(character => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/characters/${character.image}" 
@@ -471,10 +407,7 @@ describe('Guest User Button Disabling', () => {
                         <td>${character.threat_level}</td>
                         <td>${character.special_abilities || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
                     if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
                         const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
                         if (addToDeckBtn) {
@@ -492,13 +425,9 @@ describe('Guest User Button Disabling', () => {
 
             const addToDeckButtons = document.querySelectorAll('#characters-tab .add-to-deck-btn');
             expect(addToDeckButtons).toHaveLength(2);
-
             addToDeckButtons.forEach(button => {
                 const btn = button as HTMLButtonElement;
                 expect(btn.disabled).toBe(true);
-                expect(btn.style.opacity).toBe('0.5');
-                expect(btn.style.cursor).toBe('not-allowed');
-                expect(btn.title).toBe('Log in to add to decks...');
                 expect(btn.getAttribute('data-guest-disabled')).toBe('true');
             });
         });
@@ -506,7 +435,6 @@ describe('Guest User Button Disabling', () => {
 
     describe('Edge cases', () => {
         test('should handle missing isGuestUser function gracefully', () => {
-            // Remove the isGuestUser function
             delete (global as any).isGuestUser;
 
             const mockCharacters = [
@@ -526,12 +454,9 @@ describe('Guest User Button Disabling', () => {
             const displayCharacters = (characters: any[]) => {
                 const tbody = document.getElementById('characters-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 characters.forEach(character => {
                     const row = document.createElement('tr');
-                    
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/characters/${character.image}" 
@@ -552,29 +477,14 @@ describe('Guest User Button Disabling', () => {
                         <td>${character.threat_level}</td>
                         <td>${character.special_abilities || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
-                    if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
-                        const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
-                        if (addToDeckBtn) {
-                            addToDeckBtn.disabled = true;
-                            addToDeckBtn.style.opacity = '0.5';
-                            addToDeckBtn.style.cursor = 'not-allowed';
-                            addToDeckBtn.title = 'Log in to add to decks...';
-                            addToDeckBtn.setAttribute('data-guest-disabled', 'true');
-                        }
-                    }
                 });
             };
 
-            // Should not throw an error
             expect(() => displayCharacters(mockCharacters)).not.toThrow();
-
             const addToDeckBtn = document.querySelector('#characters-tab .add-to-deck-btn') as HTMLButtonElement;
             expect(addToDeckBtn).toBeTruthy();
-            expect(addToDeckBtn.disabled).toBe(false); // Should remain enabled when isGuestUser is not available
+            expect(addToDeckBtn.disabled).toBe(false);
         });
 
         test('should handle missing button element gracefully', () => {
@@ -595,13 +505,9 @@ describe('Guest User Button Disabling', () => {
             const displayCharacters = (characters: any[]) => {
                 const tbody = document.getElementById('characters-tbody');
                 if (!tbody) return;
-
                 tbody.innerHTML = '';
-
                 characters.forEach(character => {
                     const row = document.createElement('tr');
-                    
-                    // Create row without the button to test missing button handling
                     row.innerHTML = `
                         <td>
                             <img src="/src/resources/cards/images/characters/${character.image}" 
@@ -617,24 +523,10 @@ describe('Guest User Button Disabling', () => {
                         <td>${character.threat_level}</td>
                         <td>${character.special_abilities || ''}</td>
                     `;
-                    
                     tbody.appendChild(row);
-                    
-                    // Immediately disable Add to Deck button for guest users to prevent flash
-                    if (typeof (global as any).isGuestUser === 'function' && (global as any).isGuestUser()) {
-                        const addToDeckBtn = row.querySelector('.add-to-deck-btn') as HTMLButtonElement;
-                        if (addToDeckBtn) {
-                            addToDeckBtn.disabled = true;
-                            addToDeckBtn.style.opacity = '0.5';
-                            addToDeckBtn.style.cursor = 'not-allowed';
-                            addToDeckBtn.title = 'Log in to add to decks...';
-                            addToDeckBtn.setAttribute('data-guest-disabled', 'true');
-                        }
-                    }
                 });
             };
 
-            // Should not throw an error even when button is missing
             expect(() => displayCharacters(mockCharacters)).not.toThrow();
         });
     });

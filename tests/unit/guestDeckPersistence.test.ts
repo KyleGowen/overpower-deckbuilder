@@ -66,12 +66,13 @@ describe('GuestDeckPersistenceService', () => {
       expect(guestDeck.sessionId).toBe(mockSessionId);
     });
 
-    it('should set expiration time to 2 minutes from now', () => {
+    it('should set expiration time to 24 hours from now', () => {
       const now = new Date();
       const deckId = service.createDeck(mockSessionId, mockDeckData);
       const guestDeck = (service as any).guestDecks.get(deckId);
 
-      const expectedExpiration = new Date(now.getTime() + 2 * 60 * 1000);
+      const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours (matches service)
+      const expectedExpiration = new Date(now.getTime() + GUEST_DECK_TTL_MS);
       expect(guestDeck.expiresAt.getTime()).toBeCloseTo(expectedExpiration.getTime(), -2);
     });
 
@@ -312,53 +313,35 @@ describe('GuestDeckPersistenceService', () => {
   });
 
   describe('cleanupExpiredDecks', () => {
+    const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours (matches service)
+
     it('should clean up expired decks', () => {
       const deckId = service.createDeck(mockSessionId, mockDeckData);
-      
-      // Fast forward time by 3 minutes (past 2-minute expiration)
-      jest.advanceTimersByTime(3 * 60 * 1000);
-
-      // Trigger cleanup
+      jest.advanceTimersByTime(GUEST_DECK_TTL_MS + 60 * 1000); // past 24h expiration
       (service as any).cleanupExpiredDecks();
-
       expect((service as any).guestDecks.has(deckId)).toBe(false);
       expect((service as any).sessionToDecks.has(mockSessionId)).toBe(false);
     });
 
     it('should not clean up non-expired decks', () => {
       const deckId = service.createDeck(mockSessionId, mockDeckData);
-      
-      // Fast forward time by 1 minute (before 2-minute expiration)
-      jest.advanceTimersByTime(60 * 1000);
-
-      // Trigger cleanup
+      jest.advanceTimersByTime(60 * 60 * 1000); // 1 hour, before 24h expiration
       (service as any).cleanupExpiredDecks();
-
       expect((service as any).guestDecks.has(deckId)).toBe(true);
       expect((service as any).sessionToDecks.has(mockSessionId)).toBe(true);
     });
 
     it('should log cleanup count', () => {
       service.createDeck(mockSessionId, mockDeckData);
-      
-      // Fast forward time by 3 minutes
-      jest.advanceTimersByTime(3 * 60 * 1000);
-
-      // Trigger cleanup
+      jest.advanceTimersByTime(GUEST_DECK_TTL_MS + 60 * 1000);
       (service as any).cleanupExpiredDecks();
-
       expect(mockConsoleLog).toHaveBeenCalledWith('🧹 Cleaned up 1 expired guest decks');
     });
 
     it('should not log when no decks are cleaned up', () => {
       service.createDeck(mockSessionId, mockDeckData);
-      
-      // Fast forward time by 1 minute
-      jest.advanceTimersByTime(60 * 1000);
-
-      // Trigger cleanup
+      jest.advanceTimersByTime(60 * 60 * 1000); // 1 hour
       (service as any).cleanupExpiredDecks();
-
       expect(mockConsoleLog).not.toHaveBeenCalledWith(expect.stringContaining('🧹 Cleaned up'));
     });
   });
@@ -424,13 +407,9 @@ describe('GuestDeckPersistenceService', () => {
   describe('edge cases', () => {
     it('should handle deck access after expiration', () => {
       const deckId = service.createDeck(mockSessionId, mockDeckData);
-      
-      // Fast forward time by 3 minutes
-      jest.advanceTimersByTime(3 * 60 * 1000);
-
-      // Trigger cleanup
+      const GUEST_DECK_TTL_MS = 24 * 60 * 60 * 1000;
+      jest.advanceTimersByTime(GUEST_DECK_TTL_MS + 60 * 1000);
       (service as any).cleanupExpiredDecks();
-
       const result = service.getDeck(mockSessionId, deckId);
       expect(result).toBeNull();
     });

@@ -191,7 +191,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
   });
 
   describe('Deck Creation API Restrictions', () => {
-    it('should deny GUEST users from creating decks via API', async () => {
+    it('should deny GUEST users from creating decks via main API (POST /api/decks)', async () => {
       const createDeckResponse = await request(app)
         .post('/api/decks')
         .set('Cookie', guestSessionCookie)
@@ -203,6 +203,24 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       expect(createDeckResponse.status).toBe(403);
       expect(createDeckResponse.body.success).toBe(false);
       expect(createDeckResponse.body.error).toContain('Guests may not create decks');
+    });
+
+    it('should allow GUEST users to create and save a deck via guest API (POST /api/guest/decks)', async () => {
+      const createRes = await request(app)
+        .post('/api/guest/decks')
+        .set('Cookie', guestSessionCookie)
+        .send({ name: 'Guest Session Deck', description: 'Session-scoped deck' });
+      expect(createRes.status).toBe(201);
+      expect(createRes.body.success).toBe(true);
+      expect(createRes.body.data.id).toMatch(/^guest_/);
+      const deckId = createRes.body.data.id;
+
+      const putRes = await request(app)
+        .put(`/api/guest/decks/${deckId}/cards`)
+        .set('Cookie', guestSessionCookie)
+        .send({ cards: [] });
+      expect(putRes.status).toBe(200);
+      expect(putRes.body.success).toBe(true);
     });
 
     it('should allow USER role users to create decks via API', async () => {

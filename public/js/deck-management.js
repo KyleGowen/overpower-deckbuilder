@@ -39,21 +39,17 @@ function hasUserDecksLoaded() {
  */
 async function loadUserDecks() {
     try {
-        // Check if user is authenticated first
         const currentUser = getCurrentUser();
         if (!currentUser) {
             console.log('No authenticated user, skipping deck load');
             return;
         }
-
-        const response = await fetch('/api/decks', {
-            credentials: 'include'
-        });
+        const isGuest = currentUser.role === 'GUEST';
+        const url = isGuest ? '/api/guest/decks' : '/api/decks';
+        const response = await fetch(url, { credentials: 'include' });
         const data = await response.json();
         if (data.success) {
             userDecks = data.data;
-            if (userDecks.length > 0) {
-            }
         } else {
             console.error('Failed to load decks:', data.error);
         }
@@ -186,7 +182,7 @@ function createDeckSelectionMenu(cardType, cardId, cardName, buttonElement) {
                 return;
             }
             
-            await addCardToDatabaseDeck(deckId, cardType, cardId, cardName);
+            await addCardToDeckFromSelection(deckId, cardType, cardId, cardName);
             menu.remove();
         });
         
@@ -211,33 +207,26 @@ function createDeckSelectionMenu(cardType, cardId, cardName, buttonElement) {
 }
 
 /**
- * Add card to a database deck
+ * Add card to a deck chosen from the deck-selection menu (Card Database view).
+ * +Deck is disabled for GUEST; this is only used for non-guest users.
+ * Named to avoid collision with deck-card-operations.js addCardToDeck(cardType, cardId) which uses currentDeckId.
  */
-async function addCardToDatabaseDeck(deckId, cardType, cardId, cardName) {
-    
+async function addCardToDeckFromSelection(deckId, cardType, cardId, cardName) {
     if (!deckId) {
         console.error('❌ ERROR: deckId is undefined or null');
         showNotification('Error: No deck selected', 'error');
         return;
     }
-    
+    const requestBody = { cardType, cardId, quantity: 1 };
+    const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
+    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/decks/${deckId}/cards`;
     try {
-        const requestBody = {
-            cardType: cardType,
-            cardId: cardId,
-            quantity: 1
-        };
-        
-        
-        const response = await fetch(`/api/decks/${deckId}/cards`, {
+        const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify(requestBody)
         });
-        
         if (response.ok) {
             showNotification(`Added ${cardName} to deck`, 'success');
         } else {

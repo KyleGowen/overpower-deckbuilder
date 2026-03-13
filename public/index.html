@@ -1049,11 +1049,10 @@
         // Disable "Add to Deck" buttons for guest users
         // disableAddToDeckButtons function moved to external file
 
-        // Enhanced function to disable buttons immediately and prevent flash
+        // Disable +Deck buttons for GUEST users
         function disableAddToDeckButtonsImmediate() {
-            if (isGuestUser()) {
-                // Use a more aggressive approach to catch buttons as they're created
-                const observer = new MutationObserver((mutations) => {
+            if (typeof isGuestUser !== 'function' || !isGuestUser()) return;
+            const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.type === 'childList') {
                             mutation.addedNodes.forEach((node) => {
@@ -1080,16 +1079,15 @@
                         }
                     });
                 });
-                
-                // Start observing
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-                
-                // Also disable existing buttons immediately
-                disableAddToDeckButtons();
-            }
+            
+            // Start observing
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            // Also disable existing buttons immediately
+            disableAddToDeckButtons();
         }
 
         // setupSearch function moved to external file
@@ -1330,7 +1328,6 @@
                     saveButton.title = 'Save is disabled in read-only mode';
                     saveButton.style.display = 'block';
                 } else if (typeof isGuestUser === 'function' && isGuestUser()) {
-                    // Disable Save button for guest users
                     saveButton.disabled = true;
                     saveButton.style.opacity = '0.5';
                     saveButton.style.cursor = 'not-allowed';

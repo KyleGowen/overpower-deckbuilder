@@ -100,8 +100,6 @@ function displayEvents(events) {
         `;
         
         tbody.appendChild(row);
-        
-        // Immediately disable Add to Deck button for guest users to prevent flash
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {
@@ -504,8 +502,6 @@ function displayPowerCards(cards) {
                 setTimeout(lockRowHeight, 1000);
             }
         }
-        
-        // Immediately disable Add to Deck button for guest users to prevent flash
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {
