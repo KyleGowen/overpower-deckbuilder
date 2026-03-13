@@ -1,0 +1,18 @@
+# Deck Background Images Directory
+
+## Purpose
+
+This directory holds **deck editor background images**. They are used as full-bleed backgrounds in the deck editor and are **auto-discovered** by `DeckBackgroundService` — there is no manifest or config to update when adding/removing files.
+
+## Rules
+
+- **Only PNG files** are included. Other formats are ignored by the service.
+- **Paths are relative to project root**: `src/resources/cards/images/backgrounds/<filename>.png`. The service returns and validates these paths; the frontend uses `/${path}` for `background-image: url()`.
+- **No thumbnails** — the card thumbnail pipeline (`generateCardThumbnails.ts`) does not process this directory. Do not add a `thumb/` subfolder here.
+- **Adding a new background**: drop a `.png` into this directory. No code changes required. New images appear in the picker after server restart or when the service cache expires (~15 min).
+- **Naming**: filenames are used as-is; the UI derives a short label by stripping `.png` and `notext` (e.g. `moriartyreapernotext.png` → "moriartyreaper"). Use descriptive, URL-safe names.
+
+## Related Context
+
+- Feature overview and code locations: `src/services/deck-background.context.md`
+- Service implementation: `src/services/deckBackgroundService.ts`

@@ -858,13 +858,21 @@ jobs:
         EXPECTED_COMMIT="${{ github.sha }}"
         echo "Expected commit: $EXPECTED_COMMIT"
 
+        # Allow time for nginx/cache to serve the new container after SSM reports Success
+        echo "Waiting 25s for traffic to switch to new container..."
+        sleep 25
+
         SUCCESS=0
-        for i in $(seq 1 12); do
+        DEPLOYED_COMMIT=""
+        HTTP_STATUS=""
+        LAST_HEALTH=""
+        for i in $(seq 1 20); do
           HEALTH=$(curl -s --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "")
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "000")
           DEPLOYED_COMMIT=$(echo "$HEALTH" | jq -r '.git.commit // ""' 2>/dev/null || echo "")
+          LAST_HEALTH="$HEALTH"
 
-          echo "[$i/12] HTTP: $HTTP_STATUS | deployed: ${DEPLOYED_COMMIT:-none} | expected: $EXPECTED_COMMIT"
+          echo "[$i/20] HTTP: $HTTP_STATUS | deployed: ${DEPLOYED_COMMIT:-none} | expected: $EXPECTED_COMMIT"
 
           if [ "$DEPLOYED_COMMIT" = "$EXPECTED_COMMIT" ]; then
             echo "Deployment verified: commit $DEPLOYED_COMMIT is live on production"
@@ -879,7 +887,11 @@ jobs:
           echo "Deployment verification failed"
           echo "Production is running: ${DEPLOYED_COMMIT:-unknown}"
           echo "Expected: $EXPECTED_COMMIT"
-          echo "The SSM deploy command may have failed. Check CloudWatch or EC2 logs for details."
+          echo "Last HTTP status: ${HTTP_STATUS:-unknown}"
+          echo "Last health response (first 500 chars):"
+          echo "$LAST_HEALTH" | head -c 500
+          echo ""
+          echo "If the deploy actually succeeded, production may be on the new commit but verification hit DNS/cache. Check EC2 container and nginx. Otherwise check SSM/CloudWatch for the blue-green deploy step."
           exit 1
         fi
 
