@@ -213,6 +213,7 @@ export async function initializeTestServer() {
 
 // Cleanup function to close the test server
 export async function closeTestServer() {
+  guestDeckPersistence.destroy();
   const server = testServer;
   if (server) {
     return new Promise<void>((resolve) => {
