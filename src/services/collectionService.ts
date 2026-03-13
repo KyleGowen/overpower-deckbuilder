@@ -144,7 +144,37 @@ export class CollectionService {
   }
 
   /**
-   * Remove card from collection
+   * Remove one copy of a card variant (cardId, cardType, imagePath) from the collection.
+   * Respects foil/alternate art via imagePath. Returns the updated card or null if last copy removed.
+   * Throws if card not in collection or quantity already 0.
+   */
+  async removeOneFromCollection(
+    collectionId: string,
+    cardId: string,
+    cardType: string,
+    imagePath: string
+  ): Promise<CollectionCardWithDetails | null> {
+    const quantity = await this.collectionsRepository.getQuantity(
+      collectionId,
+      cardId,
+      cardType,
+      imagePath
+    );
+    if (quantity < 1) {
+      throw new Error('Card not found in collection or quantity already 0');
+    }
+    const newQuantity = quantity - 1;
+    return this.updateCardQuantity(
+      collectionId,
+      cardId,
+      cardType,
+      newQuantity,
+      imagePath
+    );
+  }
+
+  /**
+   * Remove card from collection (all copies for cardId+cardType)
    */
   async removeCardFromCollection(
     collectionId: string,

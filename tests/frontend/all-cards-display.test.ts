@@ -490,7 +490,7 @@ describe('All Cards Display Functions', () => {
       expect(html).toContain('Log in to add to decks');
     });
 
-    it('should show +Collection button for ADMIN users', () => {
+    it('should show +Collection and -Collection buttons for any logged-in user', () => {
       mockGetCurrentUser.mockReturnValue({ role: 'ADMIN' });
 
       const card = {
@@ -504,9 +504,11 @@ describe('All Cards Display Functions', () => {
 
       expect(html).toContain('+Collection');
       expect(html).toContain('add-to-collection-btn');
+      expect(html).toContain('-Collection');
+      expect(html).toContain('remove-from-collection-btn');
     });
 
-    it('should hide +Collection button for non-ADMIN users', () => {
+    it('should show +Collection and -Collection for USER role', () => {
       mockGetCurrentUser.mockReturnValue({ role: 'USER' });
 
       const card = {
@@ -518,7 +520,24 @@ describe('All Cards Display Functions', () => {
 
       const html = renderCardCell(card);
 
-      expect(html).not.toContain('+Collection');
+      expect(html).toContain('+Collection');
+      expect(html).toContain('-Collection');
+    });
+
+    it('should show +Collection and -Collection for GUEST role', () => {
+      mockGetCurrentUser.mockReturnValue({ role: 'GUEST' });
+
+      const card = {
+        id: '1',
+        name: 'Test Card',
+        cardType: 'character',
+        image_path: 'test.webp'
+      };
+
+      const html = renderCardCell(card);
+
+      expect(html).toContain('+Collection');
+      expect(html).toContain('-Collection');
     });
 
     it('should handle horizontal card images', () => {

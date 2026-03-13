@@ -345,7 +345,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Border Radius**: `8px`
   - **Hover**: `background: rgba(255, 255, 255, 0.2)`; `border-color: rgba(255, 255, 255, 0.3)`
   - **Active**: `background: rgba(255, 255, 255, 0.15)`
-  - **CSS Classes**: `.add-to-deck-btn`, `.add-to-collection-btn` (in `database-view.css`)
+  - **CSS Classes**: `.add-to-deck-btn`, `.add-to-collection-btn`, `.remove-from-collection-btn` (in `database-view.css`). -Collection is disabled when the card variant is not in the collection (`opacity: 0.5`, `cursor: not-allowed`).
 - **Search Results**: Gold highlights for matching text
 - **Search Bar Styling**: 
   - **Advanced Universe Card Effect Search**: 480px width with centered alignment

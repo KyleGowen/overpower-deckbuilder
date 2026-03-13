@@ -9,6 +9,72 @@ let showUnownedCards = true;
 // GUEST sandbox localStorage key
 const GUEST_COLLECTION_KEY = 'guestCollection';
 
+// Database view: map of "cardId|cardType|imagePath" -> quantity for -Collection button state
+let databaseViewCollectionMap = null;
+
+function getCollectionMapKey(cardId, cardType, imagePath) {
+    return `${cardId}|${cardType}|${(imagePath != null && imagePath !== undefined) ? String(imagePath) : ''}`;
+}
+
+/**
+ * Fetch collection and build map for database view -Collection buttons.
+ * GUEST: build from localStorage; USER/ADMIN: fetch GET /api/collections/me/cards.
+ */
+async function fetchDatabaseViewCollection() {
+    if (isGuestUser()) {
+        const guestCards = loadGuestCollectionFromStorage();
+        databaseViewCollectionMap = new Map();
+        guestCards.forEach(c => {
+            const key = getCollectionMapKey(c.card_id, c.card_type, c.image_path);
+            databaseViewCollectionMap.set(key, c.quantity || 1);
+        });
+        return;
+    }
+    try {
+        const response = await fetch('/api/collections/me/cards', { credentials: 'include' });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.success || !Array.isArray(data.data)) return;
+        databaseViewCollectionMap = new Map();
+        data.data.forEach(c => {
+            const key = getCollectionMapKey(c.card_id, c.card_type, c.image_path);
+            databaseViewCollectionMap.set(key, c.quantity || 0);
+        });
+    } catch (e) {
+        console.error('Failed to fetch collection for database view:', e);
+    }
+}
+
+/**
+ * Get quantity for a card variant from the database view collection map.
+ * Returns 0 if map not built or variant not in collection.
+ */
+function getDatabaseViewCollectionQuantity(cardId, cardType, imagePath) {
+    if (!databaseViewCollectionMap) return 0;
+    const key = getCollectionMapKey(cardId, cardType, imagePath);
+    return databaseViewCollectionMap.get(key) || 0;
+}
+
+/**
+ * Refresh -Collection button state across the database view (disabled when quantity < 1).
+ * Fetches and builds the collection map if not yet built. Call after add/remove one or when tables render.
+ */
+async function refreshDatabaseViewCollectionButtons() {
+    if (!databaseViewCollectionMap) {
+        await fetchDatabaseViewCollection();
+    }
+    const buttons = document.querySelectorAll('.remove-from-collection-btn');
+    buttons.forEach(btn => {
+        const cardId = btn.getAttribute('data-card-id');
+        const cardType = btn.getAttribute('data-card-type');
+        const imagePath = btn.getAttribute('data-image-path') || '';
+        if (!cardId || !cardType) return;
+        const qty = getDatabaseViewCollectionQuantity(cardId, cardType, imagePath);
+        btn.disabled = qty < 1;
+        btn.title = qty < 1 ? 'Card not in collection' : 'Remove one copy from collection';
+    });
+}
+
 /**
  * Check if the current user is a GUEST
  */
@@ -740,32 +806,40 @@ async function addCardToCollectionFromDatabase(cardId, cardType, imagePath = nul
  */
 async function addCardToCollection(cardId, cardType, imagePath = null) {
     try {
-        // For GUEST users, store in localStorage
+        // For GUEST users, store in localStorage (key by card_id, card_type, image_path for foil/alt art)
         if (isGuestUser()) {
             const guestCards = loadGuestCollectionFromStorage();
-            const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
-            
+            const existingIndex = guestCards.findIndex(c =>
+                c.card_id === cardId &&
+                c.card_type === cardType &&
+                (c.image_path || '') === (imagePath || '')
+            );
+
             if (existingIndex >= 0) {
                 guestCards[existingIndex].quantity = (guestCards[existingIndex].quantity || 1) + 1;
             } else {
                 guestCards.push({
                     card_id: cardId,
                     card_type: cardType,
-                    image_path: imagePath,
+                    image_path: imagePath || null,
                     quantity: 1
                 });
             }
             
-            saveGuestCollectionToStorage(guestCards);
-            
+saveGuestCollectionToStorage(guestCards);
+
             // Clear search
             const searchInput = document.getElementById('collectionSearchInput');
             if (searchInput) searchInput.value = '';
             const searchResults = document.getElementById('collectionSearchResults');
             if (searchResults) searchResults.style.display = 'none';
-            
+
             await loadCollection();
-            
+            databaseViewCollectionMap = null;
+            if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+                refreshDatabaseViewCollectionButtons();
+            }
+
             if (typeof showNotification === 'function') {
                 showNotification('Card added to collection', 'success');
             }
@@ -825,8 +899,12 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
                 searchResults.style.display = 'none';
             }
 
-            // Reload collection
+            // Reload collection and refresh database view -Collection buttons
             await loadCollection();
+            databaseViewCollectionMap = null;
+            if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+                refreshDatabaseViewCollectionButtons();
+            }
 
             if (typeof showNotification === 'function') {
                 showNotification('Card added to collection', 'success');
@@ -856,11 +934,15 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
         return;
     }
 
-    // For GUEST users, update localStorage
+    // For GUEST users, update localStorage (key by card_id, card_type, image_path)
     if (isGuestUser()) {
         const guestCards = loadGuestCollectionFromStorage();
-        const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
-        
+        const existingIndex = guestCards.findIndex(c =>
+            c.card_id === cardId &&
+            c.card_type === cardType &&
+            (c.image_path || '') === (imagePath || '')
+        );
+
         if (newQuantity === 0) {
             if (existingIndex >= 0) {
                 guestCards.splice(existingIndex, 1);
@@ -952,25 +1034,97 @@ function handleCollectionQuantityClick(buttonElement, newQuantity) {
 }
 
 /**
- * Remove card from collection
+ * Remove one copy of a card variant from collection (database view -Collection button).
+ * Respects foil/alternate art via imagePath. No confirmation.
+ */
+async function removeOneFromCollection(cardId, cardType, imagePath) {
+    if (!cardId || !cardType) return;
+    const path = (imagePath != null && imagePath !== '') ? String(imagePath).trim() : '';
+
+    // For GUEST users, remove one from localStorage (key by card_id, card_type, image_path)
+    if (isGuestUser()) {
+        const guestCards = loadGuestCollectionFromStorage();
+        const existingIndex = guestCards.findIndex(c =>
+            c.card_id === cardId &&
+            c.card_type === cardType &&
+            (c.image_path || '') === path
+        );
+
+        if (existingIndex >= 0) {
+            const entry = guestCards[existingIndex];
+            const qty = (entry.quantity || 1) - 1;
+            if (qty < 1) {
+                guestCards.splice(existingIndex, 1);
+            } else {
+                entry.quantity = qty;
+            }
+            saveGuestCollectionToStorage(guestCards);
+        }
+
+        databaseViewCollectionMap = null;
+        if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+            refreshDatabaseViewCollectionButtons();
+        }
+        if (typeof showNotification === 'function') {
+            showNotification('One copy removed from collection', 'success');
+        }
+        return;
+    }
+
+    // For USER/ADMIN, call remove-one API
+    try {
+        const response = await fetch('/api/collections/me/cards/remove-one', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ cardId, cardType, imagePath: path || imagePath })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            if (typeof showNotification === 'function') {
+                showNotification(data.error || 'Failed to remove one from collection', 'error');
+            } else {
+                alert(data.error || 'Failed to remove one from collection');
+            }
+            return;
+        }
+
+        if (data.success) {
+            databaseViewCollectionMap = null;
+            if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+                refreshDatabaseViewCollectionButtons();
+            }
+        }
+        if (typeof showNotification === 'function') {
+            showNotification('One copy removed from collection', 'success');
+        }
+    } catch (error) {
+        console.error('Error removing one from collection:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Failed to remove one from collection', 'error');
+        } else {
+            alert('Failed to remove one from collection');
+        }
+    }
+}
+
+/**
+ * Remove card from collection (all copies for this card+type; used from collection view)
  */
 async function removeCardFromCollection(cardId, cardType) {
     if (!confirm('Are you sure you want to remove this card from your collection?')) {
         return;
     }
 
-    // For GUEST users, remove from localStorage
+    // For GUEST users, remove from localStorage (all entries for this card+type)
     if (isGuestUser()) {
         const guestCards = loadGuestCollectionFromStorage();
-        const existingIndex = guestCards.findIndex(c => c.card_id === cardId && c.card_type === cardType);
-        
-        if (existingIndex >= 0) {
-            guestCards.splice(existingIndex, 1);
-            saveGuestCollectionToStorage(guestCards);
-        }
-        
+        const filtered = guestCards.filter(c => !(c.card_id === cardId && c.card_type === cardType));
+        saveGuestCollectionToStorage(filtered);
+
         await loadCollection();
-        
+
         if (typeof showNotification === 'function') {
             showNotification('Card removed from collection', 'success');
         }
@@ -1325,6 +1479,9 @@ window.addCardToCollection = addCardToCollection;
 window.updateCollectionQuantity = updateCollectionQuantity;
 window.handleCollectionQuantityClick = handleCollectionQuantityClick;
 window.removeCardFromCollection = removeCardFromCollection;
+window.removeOneFromCollection = removeOneFromCollection;
+window.getDatabaseViewCollectionQuantity = getDatabaseViewCollectionQuantity;
+window.refreshDatabaseViewCollectionButtons = refreshDatabaseViewCollectionButtons;
 window.initializeCollectionView = initializeCollectionView;
 window.addCardToCollectionFromDatabase = addCardToCollectionFromDatabase;
 window.handleCollectionSearchResultClick = handleCollectionSearchResultClick;

@@ -608,5 +608,140 @@ describe('Collection API Endpoints Integration Tests', () => {
       expect(response.body.error).toContain('not found');
     });
   });
+
+  describe('POST /api/collections/me/cards/remove-one', () => {
+    const testImagePath = '/src/resources/cards/images/characters/test-char.webp';
+
+    beforeEach(async () => {
+      const collectionResult = await pool.query(
+        'SELECT id FROM collections WHERE user_id = $1',
+        [adminUser.id]
+      );
+      if (collectionResult.rows.length > 0) {
+        const collectionId = collectionResult.rows[0].id;
+        await pool.query('DELETE FROM collection_cards WHERE collection_id = $1', [collectionId]);
+      }
+    });
+
+    it('should require authentication', async () => {
+      const response = await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .send({ cardId: testCharacterId, cardType: 'character', imagePath: testImagePath })
+        .expect(401);
+
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should return 400 when missing cardId, cardType, or imagePath', async () => {
+      await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({ cardType: 'character', imagePath: testImagePath })
+        .expect(400);
+
+      await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({ cardId: testCharacterId, imagePath: testImagePath })
+        .expect(400);
+
+      await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({ cardId: testCharacterId, cardType: 'character' })
+        .expect(400);
+    });
+
+    it('should return 404 when card not in collection', async () => {
+      const response = await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({
+          cardId: testCharacterId,
+          cardType: 'character',
+          imagePath: testImagePath
+        })
+        .expect(404);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toMatch(/not found|already 0/i);
+    });
+
+    it('should remove one copy and return updated card', async () => {
+      await request(app)
+        .post('/api/collections/me/cards')
+        .set('Cookie', adminAuthCookie)
+        .send({
+          cardId: testCharacterId,
+          cardType: 'character',
+          quantity: 2,
+          imagePath: testImagePath
+        })
+        .expect(200);
+
+      const response = await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({
+          cardId: testCharacterId,
+          cardType: 'character',
+          imagePath: testImagePath
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).not.toBeNull();
+      expect(response.body.data.quantity).toBe(1);
+      expect(response.body.message).toContain('removed');
+
+      const getResponse = await request(app)
+        .get('/api/collections/me/cards')
+        .set('Cookie', adminAuthCookie)
+        .expect(200);
+
+      const entry = getResponse.body.data.find(
+        (c: any) => c.card_id === testCharacterId && c.image_path === testImagePath
+      );
+      expect(entry).toBeDefined();
+      expect(entry.quantity).toBe(1);
+    });
+
+    it('should remove last copy and return 200 with data null', async () => {
+      await request(app)
+        .post('/api/collections/me/cards')
+        .set('Cookie', adminAuthCookie)
+        .send({
+          cardId: testCharacterId,
+          cardType: 'character',
+          quantity: 1,
+          imagePath: '/images/remove-one-last.webp'
+        })
+        .expect(200);
+
+      const response = await request(app)
+        .post('/api/collections/me/cards/remove-one')
+        .set('Cookie', adminAuthCookie)
+        .send({
+          cardId: testCharacterId,
+          cardType: 'character',
+          imagePath: '/images/remove-one-last.webp'
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeNull();
+      expect(response.body.message).toContain('removed');
+
+      const getResponse = await request(app)
+        .get('/api/collections/me/cards')
+        .set('Cookie', adminAuthCookie)
+        .expect(200);
+
+      const entry = getResponse.body.data.find(
+        (c: any) => c.card_id === testCharacterId && c.image_path === '/images/remove-one-last.webp'
+      );
+      expect(entry).toBeUndefined();
+    });
+  });
 });
 

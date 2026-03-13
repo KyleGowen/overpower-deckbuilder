@@ -172,10 +172,11 @@ function displayTeamwork(teamwork) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('teamwork', '${card.id}', '${(card.card_type || '').replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'teamwork')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'teamwork', '/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="teamwork" data-image-path="/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'teamwork', '/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td>${card.to_use}</td>
@@ -185,6 +186,7 @@ function displayTeamwork(teamwork) {
             <td>${card.second_attack_bonus}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // Ally Universe
@@ -303,10 +305,11 @@ function displayTraining(cards) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('training', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'training')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'training', '/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="training" data-image-path="/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'training', '/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')}</strong></td>
@@ -316,6 +319,7 @@ function displayTraining(cards) {
             <td>${card.bonus}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // setupTrainingSearch function moved to external file
@@ -440,10 +444,11 @@ function displayBasicUniverse(cards) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('basic-universe', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'basic-universe')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'basic-universe', '/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="basic-universe" data-image-path="/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'basic-universe', '/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${card.card_name}</strong></td>
@@ -452,6 +457,7 @@ function displayBasicUniverse(cards) {
             <td>${card.bonus}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // setupBasicUniverseSearch function moved to external file

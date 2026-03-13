@@ -1012,6 +1012,103 @@ Update UI preferences for a specific deck.
 
 ---
 
+## Collection Endpoints
+
+Collection endpoints manage the authenticated user's card collection. GUEST users use a sandbox (localStorage) on the client; USER and ADMIN persist via these APIs.
+
+### GET /api/collections/me
+Get the current user's collection ID.
+
+**Authentication:** Required
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "user_id": "string"
+  }
+}
+```
+
+### GET /api/collections/me/cards
+Get all cards in the current user's collection.
+
+**Authentication:** Required
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "collection_id": "string",
+      "card_id": "string",
+      "card_type": "string",
+      "quantity": "number",
+      "image_path": "string",
+      "card_name": "string",
+      "set": "string"
+    }
+  ]
+}
+```
+
+### POST /api/collections/me/cards
+Add a card (or increment quantity) to the collection. Respects foil/alternate art via `imagePath`.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "cardId": "string",
+  "cardType": "string",
+  "quantity": "number (optional, default 1)",
+  "imagePath": "string (optional, used for foil/alternate art)"
+}
+```
+
+**Response:** `200` with added/updated card; `404` if card does not exist.
+
+### POST /api/collections/me/cards/remove-one
+Remove one copy of a card variant from the collection. Respects foil/alternate art via `imagePath` (same variant as when adding).
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "cardId": "string",
+  "cardType": "string",
+  "imagePath": "string"
+}
+```
+
+**Response:** `200` with `data` set to the updated card (or `null` if the last copy was removed); `404` if the card is not in the collection or quantity is already 0.
+
+### PUT /api/collections/me/cards/:cardId
+Update quantity for a card variant in the collection. Set quantity to 0 to remove the variant.
+
+**Authentication:** Required
+
+**Request Body:** `quantity`, `cardType`, `imagePath` (and optionally `oldImagePath`).
+
+**Response:** `200` with updated card; `404` if not found.
+
+### DELETE /api/collections/me/cards/:cardId
+Remove all copies of a card (by `cardId` + `cardType`) from the collection. Does not key by `imagePath`.
+
+**Authentication:** Required
+
+**Query:** `cardType` (required)
+
+**Response:** `200` on success; `404` if not found.
+
+---
+
 ## System Endpoints
 
 ### GET /health
@@ -1302,6 +1399,7 @@ Card images are served from the following static endpoints:
 - All timestamps are in ISO 8601 format
 - Card quantities default to 1 if not specified
 - Guest users have read-only access to decks
+- **Database view collection buttons:** +Collection is available to all logged-in users (GUEST = sandbox in localStorage, USER/ADMIN = persisted via API). -Collection removes one copy of the selected variant (card + image path); it is inactive when the variant is not in the collection. Foil and alternate art are tracked per `imagePath` in both the API and the GUEST sandbox.
 - Deck validation includes business rules (e.g., maximum 4 characters per deck)
 - UI preferences are stored per deck and persist across sessions
 - The health check endpoint provides comprehensive system status information

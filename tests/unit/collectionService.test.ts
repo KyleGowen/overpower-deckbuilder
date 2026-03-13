@@ -113,6 +113,19 @@ class MockCollectionsRepository {
     };
   }
 
+  async getQuantity(
+    collectionId: string,
+    cardId: string,
+    cardType: string,
+    imagePath: string
+  ): Promise<number> {
+    const cards = this.collectionCards.get(collectionId) || [];
+    const card = cards.find(
+      c => c.card_id === cardId && c.card_type === cardType && (c.image_path || '') === (imagePath || '')
+    );
+    return card ? card.quantity : 0;
+  }
+
   async removeCardFromCollection(
     collectionId: string,
     cardId: string,
@@ -870,6 +883,86 @@ describe('CollectionService', () => {
       // Verify all instances are removed
       const cards = await collectionService.getCollectionCards(collectionId);
       expect(cards.filter(c => c.card_id === cardId && c.card_type === cardType)).toHaveLength(0);
+    });
+  });
+
+  describe('removeOneFromCollection', () => {
+    it('should decrement quantity by one and return updated card', async () => {
+      const collectionId = 'collection-123';
+      const cardId = 'card-1';
+      const cardType = 'character';
+      const imagePath = '/images/card-1.webp';
+
+      mockRepository.setCardExists(cardId, cardType, true);
+      await collectionService.addCardToCollection(
+        collectionId,
+        cardId,
+        cardType,
+        3,
+        imagePath
+      );
+
+      const result = await collectionService.removeOneFromCollection(
+        collectionId,
+        cardId,
+        cardType,
+        imagePath
+      );
+
+      expect(result).not.toBeNull();
+      expect(result!.quantity).toBe(2);
+
+      const result2 = await collectionService.removeOneFromCollection(
+        collectionId,
+        cardId,
+        cardType,
+        imagePath
+      );
+      expect(result2!.quantity).toBe(1);
+    });
+
+    it('should remove last copy and return null', async () => {
+      const collectionId = 'collection-123';
+      const cardId = 'card-1';
+      const cardType = 'character';
+      const imagePath = '/images/card-1.webp';
+
+      mockRepository.setCardExists(cardId, cardType, true);
+      await collectionService.addCardToCollection(
+        collectionId,
+        cardId,
+        cardType,
+        1,
+        imagePath
+      );
+
+      const result = await collectionService.removeOneFromCollection(
+        collectionId,
+        cardId,
+        cardType,
+        imagePath
+      );
+
+      expect(result).toBeNull();
+
+      const cards = await collectionService.getCollectionCards(collectionId);
+      expect(cards.find(c => c.card_id === cardId && c.image_path === imagePath)).toBeUndefined();
+    });
+
+    it('should throw when card not in collection', async () => {
+      const collectionId = 'collection-123';
+      const cardId = 'card-1';
+      const cardType = 'character';
+      const imagePath = '/images/card-1.webp';
+
+      await expect(
+        collectionService.removeOneFromCollection(
+          collectionId,
+          cardId,
+          cardType,
+          imagePath
+        )
+      ).rejects.toThrow('Card not found in collection');
     });
   });
 

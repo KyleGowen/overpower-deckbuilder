@@ -239,9 +239,12 @@ function displayCharacters(characters) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('character', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'character')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
+                </button>
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="character" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">
+                    -Collection
                 </button>
                 ` : ''}
             </td>
@@ -310,6 +313,9 @@ function displayCharacters(characters) {
             }
         }
     });
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+        refreshDatabaseViewCollectionButtons();
+    }
 }
 
 /**
@@ -458,7 +464,21 @@ function navigateCardImage(groupId, direction) {
         
         const addToCollectionBtn = row.querySelector('.add-to-collection-btn');
         if (addToCollectionBtn) {
-            addToCollectionBtn.setAttribute('onclick', `addCardToCollectionFromDatabase('${newImage.id}', '${cardType}')`);
+            const newImagePath = (newImage.fullResPath || newImage.imagePath || '').replace(/'/g, "\\'");
+            addToCollectionBtn.setAttribute('onclick', `addCardToCollectionFromDatabase('${newImage.id}', '${cardType}', '${newImagePath}')`);
+        }
+        const removeFromCollectionBtn = row.querySelector('.remove-from-collection-btn');
+        if (removeFromCollectionBtn) {
+            const newImagePath = (newImage.fullResPath || newImage.imagePath || '').replace(/'/g, "\\'");
+            const newImagePathAttr = (newImage.fullResPath || newImage.imagePath || '').replace(/"/g, '&quot;');
+            removeFromCollectionBtn.setAttribute('data-card-id', newImage.id);
+            removeFromCollectionBtn.setAttribute('data-card-type', cardType);
+            removeFromCollectionBtn.setAttribute('data-image-path', newImagePathAttr);
+            removeFromCollectionBtn.setAttribute('onclick', `removeOneFromCollection('${newImage.id}', '${cardType}', '${newImagePath}')`);
+            if (typeof getDatabaseViewCollectionQuantity === 'function') {
+                const qty = getDatabaseViewCollectionQuantity(newImage.id, cardType, newImage.fullResPath || newImage.imagePath || '');
+                removeFromCollectionBtn.disabled = qty < 1;
+            }
         }
     }
     
@@ -679,9 +699,12 @@ function displaySpecialCards(specialCards) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('special', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'special')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'special', '${(currentImagePath || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
+                </button>
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="special" data-image-path="${(currentImagePath || '').replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'special', '${(currentImagePath || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">
+                    -Collection
                 </button>
                 ` : ''}
             </td>
@@ -753,6 +776,9 @@ function displaySpecialCards(specialCards) {
             }
         }
     });
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+        refreshDatabaseViewCollectionButtons();
+    }
 }
 
 /**
@@ -823,9 +849,12 @@ function displayLocations(locations) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('location', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'location')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
+                </button>
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="location" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">
+                    -Collection
                 </button>
                 ` : ''}
             </td>
@@ -882,6 +911,9 @@ function displayLocations(locations) {
             }
         }
     });
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+        refreshDatabaseViewCollectionButtons();
+    }
 }
 
 /**

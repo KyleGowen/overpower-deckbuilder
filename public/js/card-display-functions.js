@@ -35,16 +35,18 @@ function displayMissions(missions) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('mission', '${mission.id}', '${mission.card_name.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${mission.id}', 'mission')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${mission.id}', 'mission', '/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${mission.id}" data-card-type="mission" data-image-path="/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${mission.id}', 'mission', '/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td>${mission.mission_set}</td>
             <td>${mission.card_name}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // Display events
@@ -84,10 +86,11 @@ function displayEvents(events) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('event', '${event.id}', '${event.name.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${event.id}', 'event')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${event.id}', 'event', '/src/resources/cards/images/events/${mapImagePathToActualFile(event.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${event.id}" data-card-type="event" data-image-path="/src/resources/cards/images/events/${mapImagePathToActualFile(event.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${event.id}', 'event', '/src/resources/cards/images/events/${mapImagePathToActualFile(event.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${event.name}</strong></td>
@@ -110,6 +113,7 @@ function displayEvents(events) {
             }
         }
     });
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // Display aspects
@@ -138,10 +142,11 @@ function displayAspects(aspects) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('aspect', '${aspect.id}', '${aspect.card_name.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${aspect.id}', 'aspect')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${aspect.id}', 'aspect', '/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${aspect.id}" data-card-type="aspect" data-image-path="/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${aspect.id}', 'aspect', '/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${aspect.card_name}</strong></td>
@@ -151,6 +156,7 @@ function displayAspects(aspects) {
             <td class="one-per-deck-column">${aspect.is_one_per_deck ? 'Yes' : 'No'}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 /**
@@ -239,10 +245,11 @@ function displayAdvancedUniverse(advancedUniverse) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('advanced-universe', '${card.id}', '${card.name.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'advanced-universe')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'advanced-universe', '/src/resources/cards/images/${(card.image || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="advanced-universe" data-image-path="/src/resources/cards/images/${(card.image || '').replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'advanced-universe', '/src/resources/cards/images/${(card.image || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${card.name}</strong></td>
@@ -251,6 +258,7 @@ function displayAdvancedUniverse(advancedUniverse) {
             <td class="one-per-deck-advanced-column">${card.is_one_per_deck ? 'Yes' : 'No'}</td>
         </tr>
     `).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // Display teamwork cards
@@ -438,10 +446,11 @@ function displayPowerCards(cards) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('power', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN') ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'power')" style="margin-top: 4px; display: block;">
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'power', '${(currentImage.imagePath || currentImagePath || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="power" data-image-path="${(currentImage.imagePath || currentImagePath || '').replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'power', '${(currentImage.imagePath || currentImagePath || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${representative.power_type || representative.type || ''}</strong></td>
@@ -508,6 +517,7 @@ function displayPowerCards(cards) {
             }
         }
     });
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // Make functions globally available

@@ -605,6 +605,29 @@ export class CollectionsRepository {
   }
 
   /**
+   * Get quantity for a specific card variant (card_id, card_type, image_path) in a collection.
+   * Returns 0 if not found.
+   */
+  async getQuantity(
+    collectionId: string,
+    cardId: string,
+    cardType: string,
+    imagePath: string
+  ): Promise<number> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query<{ quantity: number }>(
+        'SELECT quantity FROM collection_cards WHERE collection_id = $1 AND card_id = $2 AND card_type = $3 AND image_path = $4',
+        [collectionId, cardId, cardType, imagePath]
+      );
+      if (result.rows.length === 0) return 0;
+      return result.rows[0].quantity;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
    * Remove card from collection
    */
   async removeCardFromCollection(

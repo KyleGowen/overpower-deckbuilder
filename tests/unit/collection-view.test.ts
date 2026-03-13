@@ -53,6 +53,7 @@ function loadModule() {
             updateCollectionQuantity,
             handleCollectionQuantityClick,
             removeCardFromCollection,
+            removeOneFromCollection,
             formatCardType,
             translateSet,
             getCardDisplayName,
@@ -872,17 +873,18 @@ describe('GUEST sandbox in addCardToCollection()', () => {
         expect(localStorageMock.setItem).toHaveBeenCalled();
     });
 
-    it('increments quantity if card already in GUEST collection', async () => {
-        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/img.webp' }];
+    it('increments quantity if same card variant already in GUEST collection', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/images/card-1.webp' }];
         localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
-        
+
         await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
-        
+
         const savedCall = localStorageMock.setItem.mock.calls.find(
             (call: string[]) => call[0] === GUEST_COLLECTION_KEY
         );
         expect(savedCall).toBeDefined();
         const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(1);
         expect(savedCards[0].quantity).toBe(2);
     });
 
@@ -899,6 +901,61 @@ describe('GUEST sandbox in addCardToCollection()', () => {
         expect(savedCards.length).toBe(1);
         expect(savedCards[0].card_id).toBe('card-1');
         expect(savedCards[0].quantity).toBe(1);
+    });
+
+    it('keys GUEST entries by image_path so foil/alt art are separate', async () => {
+        let stored: string = '[]';
+        localStorageMock.getItem.mockImplementation(() => stored);
+        localStorageMock.setItem.mockImplementation((k: string, v: string) => { stored = v; });
+
+        await fns.addCardToCollection('card-1', 'character', '/images/card-1-v1.webp');
+        await fns.addCardToCollection('card-1', 'character', '/images/card-1-v2.webp');
+
+        const savedCards = JSON.parse(stored);
+        expect(savedCards.length).toBe(2);
+        expect(savedCards.find((c: any) => c.image_path === '/images/card-1-v1.webp').quantity).toBe(1);
+        expect(savedCards.find((c: any) => c.image_path === '/images/card-1-v2.webp').quantity).toBe(1);
+    });
+});
+
+describe('GUEST sandbox in removeOneFromCollection()', () => {
+    beforeEach(() => {
+        loadModule();
+        setupDOM();
+        localStorageMock.clear();
+        localStorageMock.getItem.mockClear();
+        localStorageMock.setItem.mockClear();
+        (global.fetch as jest.Mock).mockReset();
+        mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
+    });
+
+    it('decrements quantity by one for GUEST', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 3, image_path: '/img.webp' }];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+
+        await fns.removeOneFromCollection('card-1', 'character', '/img.webp');
+
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(1);
+        expect(savedCards[0].quantity).toBe(2);
+    });
+
+    it('removes GUEST entry when quantity reaches 0', async () => {
+        const existing = [{ card_id: 'card-1', card_type: 'character', quantity: 1, image_path: '/img.webp' }];
+        localStorageMock.getItem.mockReturnValue(JSON.stringify(existing));
+
+        await fns.removeOneFromCollection('card-1', 'character', '/img.webp');
+
+        const savedCall = localStorageMock.setItem.mock.calls.find(
+            (call: string[]) => call[0] === GUEST_COLLECTION_KEY
+        );
+        expect(savedCall).toBeDefined();
+        const savedCards = JSON.parse(savedCall![1]);
+        expect(savedCards.length).toBe(0);
     });
 });
 

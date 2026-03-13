@@ -328,8 +328,8 @@ function renderCardCell(card) {
     const fullResPath = getCardImagePathForAllCards(card, cardType);
     const escapedName = cardName.replace(/'/g, "\\'");
 
-    // Check if user is ADMIN
-    const isAdmin = typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().role === 'ADMIN';
+    // Show collection buttons for any logged-in user (GUEST = sandbox, USER/ADMIN = persisted)
+    const hasUser = typeof getCurrentUser === 'function' && getCurrentUser();
     
     // Check if user is guest
     const isGuest = typeof isGuestUser === 'function' && isGuestUser();
@@ -387,10 +387,11 @@ function renderCardCell(card) {
                 <button class="add-to-deck-btn" ${deckButtonOnClick} ${deckButtonDisabled} style="margin-bottom: 4px; width: 100%;">
                     +Deck
                 </button>
-                ${isAdmin ? `
+                ${hasUser ? `
                 <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', '${apiCardType}', '${fullResPath.replace(/'/g, "\\'")}')" style="width: 100%;">
                     +Collection
                 </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="${apiCardType}" data-image-path="${fullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', '${apiCardType}', '${fullResPath.replace(/'/g, "\\'")}')" style="width: 100%; margin-top: 4px;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </div>
         </div>
@@ -414,6 +415,8 @@ function renderCardsInBatches(container, sortedCards) {
 
         if (index < sortedCards.length) {
             requestAnimationFrame(renderNextBatch);
+        } else if (typeof refreshDatabaseViewCollectionButtons === 'function') {
+            refreshDatabaseViewCollectionButtons();
         }
     }
 

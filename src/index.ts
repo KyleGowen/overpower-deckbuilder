@@ -1670,6 +1670,52 @@ app.post('/api/collections/me/cards', authenticateUser, async (req: Request, res
   }
 });
 
+// Remove one copy of a card variant from collection (respects foil/alternate art via imagePath)
+app.post('/api/collections/me/cards/remove-one', authenticateUser, async (req: Request, res) => {
+  try {
+    const { cardId, cardType, imagePath } = req.body;
+
+    if (!cardId || typeof cardId !== 'string' || cardId.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'cardId is required' });
+    }
+    if (!cardType || typeof cardType !== 'string' || cardType.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'cardType is required' });
+    }
+    if (!imagePath || typeof imagePath !== 'string' || imagePath.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'imagePath is required' });
+    }
+    if (!isValidCollectionCardType(cardType)) {
+      return res.status(400).json({ success: false, error: 'Invalid cardType' });
+    }
+
+    const collectionId = await collectionService.getOrCreateCollection(req.user!.id);
+    const updatedCard = await collectionService.removeOneFromCollection(
+      collectionId,
+      cardId.trim(),
+      cardType.trim(),
+      imagePath.trim()
+    );
+
+    res.json({
+      success: true,
+      data: updatedCard,
+      message: 'One copy removed from collection'
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Card not found in collection')) {
+      return res.status(404).json({
+        success: false,
+        error: error.message
+      });
+    }
+    console.error('Error removing one from collection:', error);
+    res.status(500).json({
+      success: false,
+      error: (error as { message?: string })?.message || 'Failed to remove one from collection'
+    });
+  }
+});
+
 // Update card quantity in collection
 app.put('/api/collections/me/cards/:cardId', authenticateUser, async (req: Request, res) => {
   try {
