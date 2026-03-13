@@ -191,7 +191,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.name).toBe('Updated Deck Name');
+      expect(response.body.data.metadata.name).toBe('Updated Deck Name');
     });
 
     it('should block non-owner from updating deck metadata', async () => {
@@ -405,8 +405,9 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         .get(`/api/decks/${testDeckId}/ui-preferences`)
         .set('Cookie', guestCookie);
 
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
+      // Production: only deck owner can view UI preferences; guest viewing another's deck gets 403
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
     });
   });
 
@@ -449,8 +450,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
       const readEndpoints = [
         { method: 'GET', path: '/api/decks' },
         { method: 'GET', path: `/api/decks/${testDeckId}` },
-        { method: 'GET', path: `/api/decks/${testDeckId}/cards` },
-        { method: 'GET', path: `/api/decks/${testDeckId}/ui-preferences` }
+        { method: 'GET', path: `/api/decks/${testDeckId}/cards` }
       ];
 
       for (const endpoint of readEndpoints) {
@@ -461,6 +461,11 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
       }
+      // UI preferences: only deck owner can read; guest gets 403
+      const uiPrefResponse = await request(app)
+        .get(`/api/decks/${testDeckId}/ui-preferences`)
+        .set('Cookie', guestCookie);
+      expect(uiPrefResponse.status).toBe(403);
     });
 
     it('should test deck deletion with a separate deck', async () => {

@@ -320,6 +320,9 @@ const deckBackgroundService = new DeckBackgroundService();
 // Initialize guest deck persistence (session-scoped, in-memory; not persisted to DB)
 const guestDeckPersistence = new GuestDeckPersistenceService();
 
+// Exported for test server bootstrap (M2) so test app can reuse same DB init and guest deck cleanup
+export { databaseInit, guestDeckPersistence };
+
 // Initialize foil card map repository
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 

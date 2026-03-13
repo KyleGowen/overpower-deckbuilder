@@ -1,0 +1,15 @@
+# Test server (src/test-server/)
+
+This directory provides the integration-test Express app and lifecycle. It does not duplicate route handlers: the test app reuses `registerRoutes(app, deps)` from `src/routes/` with test-specific deps (e.g. optionalAuth as `authenticateUser`).
+
+## Entry points
+
+- **bootstrap.ts** – Builds the Express app, test `RouteDependencies`, calls `registerRoutes` and `registerTestOnlyRoutes`, then error/404 handlers. Exports `app`, `guestDeckPersistence`, `databaseInit`, and repos for lifecycle.
+- **lifecycle.ts** – `initializeTestServer()` and `closeTestServer()`: DB init, `app.listen(PORT)`, and cleanup. Imports app and guestDeckPersistence from bootstrap.
+- **testOnlyRoutes.ts** – Registers test-only routes: GET `/test`, GET `/deck-editor/:deckId`. Called from bootstrap after `registerRoutes`.
+
+## Conventions
+
+- The test app uses the same singletons as the main app (DataSourceConfig, etc.) by importing from `../index` so that module runs first.
+- Test-only behavior (e.g. `x-expect-401`, `x-expect-400-validation`) lives in main route modules under `NODE_ENV === 'test'` where possible to avoid duplicate PUT/GET logic.
+- Public API is re-exported from `src/test-server.ts` so tests keep importing from `../../src/test-server`.

@@ -87,7 +87,17 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ```
 /src/
 ├── 📄 index.ts                     # Main server entry point
-└── 📄 test-server.ts               # Test server configuration
+└── 📄 test-server.ts               # Test server barrel (re-exports from test-server/)
+```
+
+### **Test Server (`/src/test-server/`)**
+Integration-test Express app; reuses `registerRoutes` from `src/routes/` with test deps (e.g. optional auth via session or `x-test-user-id`). Entry: [src/test-server.ts](src/test-server.ts).
+```
+/src/test-server/
+├── 📄 bootstrap.ts                 # Builds app, test RouteDependencies, registerRoutes, test-only routes
+├── 📄 lifecycle.ts                 # initializeTestServer(), closeTestServer()
+├── 📄 testOnlyRoutes.ts            # GET /test, GET /deck-editor/:deckId, lenient /users/:userId/decks
+└── 📄 .cursorrules                 # Directory context
 ```
 
 ### **Configuration (`/src/config/`)**

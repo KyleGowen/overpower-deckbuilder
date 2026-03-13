@@ -12,6 +12,7 @@ export interface RouteDependencies {
     getDecksByUserId: (userId: string) => Promise<unknown[]>;
     getDeckById: (id: string) => Promise<Record<string, unknown>>;
     getDeckSummaryWithAllCards: (id: string) => Promise<Record<string, unknown>>;
+    getDeckCards?: (deckId: string) => Promise<Array<{ type: string; cardId: string }>>;
     updateDeck: (id: string, updates: Record<string, unknown>) => Promise<Record<string, unknown>>;
     deleteDeck: (id: string) => Promise<boolean>;
     addCardToDeck: (deckId: string, cardType: string, cardId: string, quantity: number) => Promise<boolean>;

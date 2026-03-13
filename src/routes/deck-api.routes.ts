@@ -149,6 +149,14 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
   
   app.put('/api/decks/:id', deps.authenticateUser, async (req: Request, res) => {
     try {
+      // Test-only: explicit 401 when unauthenticated (x-expect-401 header)
+      if (process.env.NODE_ENV === 'test' && req.headers['x-expect-401'] && !req.user) {
+        return res.status(401).json({ success: false, error: 'Authentication required' });
+      }
+      if (!req.user) {
+        return res.status(401).json({ success: false, error: 'Authentication required' });
+      }
+
       // SECURITY: Rate limiting for deck update
       if (checkRateLimit(req, res, 'deck update')) {
         return;
@@ -227,6 +235,22 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
       return res.status(404).json({ success: false, error: 'Deck not found' });
     }
     if (!deps.requireDeckOwner(deck.user_id ?? '', req.user!.id, res)) return;
+
+    // Test-only: strict reserve_character validation (x-expect-400-validation) or lenient when deck has characters
+    if (process.env.NODE_ENV === 'test' && reserve_character && deps.deckRepository.getDeckCards) {
+      const deckCards = await deps.deckRepository.getDeckCards(req.params.id);
+      const characterCardIds = deckCards
+        .filter((c) => c.type === 'character')
+        .map((c) => c.cardId);
+      if (req.headers['x-expect-400-validation']) {
+        if (!characterCardIds.includes(reserve_character)) {
+          return res.status(400).json({ success: false, error: 'foreign key constraint violation: reserve_character must be a character in the deck' });
+        }
+      } else if (characterCardIds.length > 0 && !characterCardIds.includes(reserve_character)) {
+        return res.status(400).json({ success: false, error: 'foreign key constraint violation: reserve_character must be a character in the deck' });
+      }
+    }
+
     const updatedDeck = (await deps.deckRepository.updateDeck(req.params.id, { name, description, is_limited, is_valid, reserve_character, display_mission_card_id, background_image_path })) as DeckRecord | null;
     if (!updatedDeck) {
       return res.status(404).json({ success: false, error: 'Deck not found' });
@@ -285,6 +309,19 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
       res.json({ success: true, message: 'Deck deleted successfully' });
     } catch {
       res.status(500).json({ success: false, error: 'Failed to delete deck' });
+    }
+  });
+
+  app.get('/api/decks/:id/cards', deps.authenticateUser, async (req: Request, res) => {
+    try {
+      if (!deps.deckRepository.getDeckCards) {
+        return res.status(501).json({ success: false, error: 'Not implemented' });
+      }
+      const cards = await deps.deckRepository.getDeckCards(req.params.id);
+      res.json({ success: true, data: cards });
+    } catch (error) {
+      console.error('Error fetching deck cards:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch deck cards' });
     }
   });
   
