@@ -60,6 +60,7 @@ This is a Node.js/TypeScript deck building application for the Overpower card ga
 - Images are stored in `src/resources/cards/images/` with subdirectories by type
 - Use proper image path mapping for different card types
 - Include cache-busting when needed for development
+- **Deck editor card-view**: Show card images via **thumbnail first**, then **progressive swap to full-res** for character, location, and mission (using `toThumbnailPath` / `toThumbnailPathForType` from `card-image-utils.js`). Implementation: `deck-editor-rendering.js` (`getDeckEditorCardViewInitialImagePath`, `initDeckEditorCardViewProgressiveLoad`). Other card types (special, power, etc.) use full-res only; hover modal uses the same progressive pattern.
 
 ## File Organization
 - Keep related functionality together

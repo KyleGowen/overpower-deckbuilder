@@ -644,7 +644,12 @@
         if (modal && image && caption) {
             // Normalize path (ensure leading slash for relative paths)
             const fullResPath = (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) ? '/' + imagePath : imagePath;
-            const thumbnailPath = (typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(fullResPath) : fullResPath;
+            let thumbnailPath = fullResPath;
+            if (cardType === 'character' && typeof window.toThumbnailPath === 'function') {
+                thumbnailPath = window.toThumbnailPath(fullResPath);
+            } else if ((cardType === 'location' || cardType === 'mission') && typeof window.toThumbnailPathForType === 'function') {
+                thumbnailPath = window.toThumbnailPathForType(fullResPath, cardType === 'location' ? 'locations' : 'missions');
+            }
 
             // Progressive hover: show thumbnail first for instant display, then swap to full-res when loaded
             window._hoverModalRequestId = (window._hoverModalRequestId || 0) + 1;

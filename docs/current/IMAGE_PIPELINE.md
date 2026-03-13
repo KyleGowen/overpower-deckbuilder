@@ -124,3 +124,15 @@ Output example:
 
 ✅ Done: 5 generated, 145 skipped (up to date), 0 error(s)
 ```
+
+---
+
+## Deck editor card view
+
+The deck editor’s **card view** (cards in the deck with “Change Art”, etc.) uses **thumbnail-first + progressive full-res** for character, location, and mission so the panel fills quickly instead of waiting on full-resolution images.
+
+- **Initial load**: For character/location/mission, the visible `<img>` `src` is set to the thumbnail URL (via `toThumbnailPath` / `toThumbnailPathForType`). Other types (special, power, event, aspect, teamwork, ally-universe, etc.) have no thumbnails and use full-res only.
+- **Progressive swap**: After the card-view HTML is in the DOM, `initDeckEditorCardViewProgressiveLoad()` in `public/js/deck-editor-rendering.js` finds each `.card-view-image` with a `data-full-res` attribute. If the current `src` is not already the full-res URL, it preloads the full-res image and swaps `img.src` to full-res on load (same pattern as the card hover modal).
+- **Helpers**: `getDeckEditorCardViewInitialImagePath(fullResPath, cardType)` returns the thumbnail URL for char/loc/mission, or the full-res path for other types.
+
+Deck selection uses thumbnails (and in production, CDN) for list tiles. The deck editor uses thumbnails + progressive load from origin; the hover modal uses the same progressive pattern (thumbnail first, then full-res when loaded) for character, location, and mission.

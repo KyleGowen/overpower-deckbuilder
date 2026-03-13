@@ -1,6 +1,49 @@
 // deck-editor-rendering.js - Deck editor rendering functions
 // Extracted from public/index.html
 
+// ===== Deck editor card-view image loading (thumbnail-first + progressive full-res) =====
+
+/**
+ * Returns the initial image URL for a deck editor card-view tile.
+ * For character/location/mission we have thumbnails: return thumbnail so something appears fast.
+ * For other types (special, power, etc.) return full-res (no thumbnail exists).
+ * Relies on window.toThumbnailPath and window.toThumbnailPathForType from card-image-utils.js.
+ */
+function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
+    if (!fullResPath || typeof fullResPath !== 'string') return fullResPath;
+    if (cardType === 'character' && typeof window.toThumbnailPath === 'function') {
+        const thumb = window.toThumbnailPath(fullResPath);
+        return thumb !== fullResPath ? thumb : fullResPath;
+    }
+    if ((cardType === 'location' || cardType === 'mission') && typeof window.toThumbnailPathForType === 'function') {
+        const thumb = window.toThumbnailPathForType(fullResPath, cardType === 'location' ? 'locations' : 'missions');
+        return thumb !== fullResPath ? thumb : fullResPath;
+    }
+    return fullResPath;
+}
+
+/**
+ * After card-view HTML is in the DOM, progressively load full-res for tiles that show a thumbnail.
+ * For each .card-view-image with data-full-res different from current src, preload full-res and swap on load.
+ */
+function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
+    if (!deckCardsEditor) return;
+    const images = deckCardsEditor.querySelectorAll('.deck-card-card-view-item .card-view-image[data-full-res]');
+    images.forEach(function (img) {
+        const fullRes = img.getAttribute('data-full-res');
+        if (!fullRes) return;
+        // Skip if already showing full-res (e.g. non-thumb types); img.src is absolute URL, fullRes is path
+        if (img.src.indexOf(fullRes) !== -1) return;
+        const fullResImg = new Image();
+        fullResImg.onload = function () {
+            if (img.getAttribute('data-full-res') === fullRes) {
+                img.src = fullRes;
+            }
+        };
+        fullResImg.src = fullRes;
+    });
+}
+
 // ===== View toggle and list/card view rendering =====
 
 function toggleListView() {
@@ -1158,9 +1201,9 @@ function renderDeckCardsCardView() {
                         instanceAvailableCard = availableCard; // Fallback to original
                     }
                     
-                    // Get instance-specific image path (full-res — editor displays cards large, thumbnails look blurry)
-                    const instanceImagePath = getCardImagePath(instanceAvailableCard, card.type);
+                    // Instance image: thumbnail-first for character/location/mission, then progressive swap to full-res (see initDeckEditorCardViewProgressiveLoad)
                     const instanceFullResPath = getCardImagePath(instanceAvailableCard, card.type);
+                    const instanceImagePath = getDeckEditorCardViewInitialImagePath(instanceFullResPath, card.type);
 
                     // Create instance-specific Change Art button
                     const instanceChangeArtButton = changeArtButton.replace(
@@ -1218,6 +1261,9 @@ function renderDeckCardsCardView() {
     
     // Randomise foil vars for one-shot deck-editor shimmer elements
     initDeckEditorFoilElements(deckCardsEditor);
+    
+    // Thumbnail-first + progressive full-res for card-view images (character/location/mission)
+    initDeckEditorCardViewProgressiveLoad(deckCardsEditor);
     
     // Update deck summary and card count to ensure Draw Hand button state is correct
     updateDeckEditorCardCount();
