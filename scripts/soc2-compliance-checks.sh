@@ -15,6 +15,9 @@ PASS=0
 FAIL=0
 WARN=0
 
+# Route logic may live in index.ts or in src/routes/ (domain modules)
+ROUTE_SRCS="src/index.ts src/routes/"
+
 pass() { echo "  ✅ PASS: $1"; PASS=$((PASS + 1)); }
 fail() { echo "  ❌ FAIL: $1"; FAIL=$((FAIL + 1)); }
 warn() { echo "  ⚠️  WARN: $1"; WARN=$((WARN + 1)); }
@@ -30,7 +33,7 @@ else
   fail "Authentication middleware not found in AuthenticationService"
 fi
 
-if grep -q 'authenticateUser' src/index.ts 2>/dev/null; then
+if grep -q 'authenticateUser' src/index.ts 2>/dev/null || grep -rq 'authenticateUser' src/routes/ --include='*.ts' 2>/dev/null; then
   pass "Authentication middleware is wired into route handlers"
 else
   fail "Authentication middleware not applied to routes"
@@ -53,13 +56,14 @@ else
   fail "Centralized authorization helpers module missing"
 fi
 
-# Check: Admin-only endpoints are protected
+# Check: Admin-only endpoints are protected (routes may be in index or src/routes/)
 ADMIN_ENDPOINTS=("/api/users" "/api/debug/clear-cache" "/api/debug/clear-card-cache" "/api/database/status")
 ADMIN_PROTECTED=0
 for endpoint in "${ADMIN_ENDPOINTS[@]}"; do
-  # Check that endpoint handler uses requireAdmin or ADMIN role check
-  if grep -A5 "'${endpoint}'" src/index.ts 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
-    ((ADMIN_PROTECTED++))
+  if grep -A8 "'${endpoint}'" src/index.ts 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
+    ADMIN_PROTECTED=$((ADMIN_PROTECTED + 1))
+  elif grep -rA8 "'${endpoint}'" src/routes/ --include="*.ts" 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
+    ADMIN_PROTECTED=$((ADMIN_PROTECTED + 1))
   fi
 done
 if [ "$ADMIN_PROTECTED" -ge 3 ]; then
@@ -131,38 +135,40 @@ fi
 echo ""
 echo "━━━ CC6.8: Software Security ━━━"
 
-# Check: Input validation exists on mutation endpoints
-INPUT_VALIDATION_COUNT=$(grep -c 'status(400)' src/index.ts 2>/dev/null || echo "0")
+# Check: Input validation exists on mutation endpoints (in index or route modules)
+INPUT_VALIDATION_COUNT=$(grep -r 'status(400)' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+INPUT_VALIDATION_COUNT=${INPUT_VALIDATION_COUNT:-0}
 if [ "$INPUT_VALIDATION_COUNT" -ge 5 ]; then
   pass "Input validation present on endpoints ($INPUT_VALIDATION_COUNT validation responses)"
 else
   fail "Insufficient input validation ($INPUT_VALIDATION_COUNT checks found, need ≥5)"
 fi
 
-# Check: Rate limiting is implemented
-if grep -q 'checkRateLimit\|rateLimit\|rate.limit' src/index.ts 2>/dev/null; then
+# Check: Rate limiting is implemented (may be in helpers or route modules)
+if grep -q 'checkRateLimit\|rateLimit\|rate.limit' src/index.ts 2>/dev/null || grep -rq 'checkRateLimit\|rateLimit\|rate\.limit' src/routes/ --include="*.ts" 2>/dev/null; then
   pass "Rate limiting is implemented"
 else
   fail "No rate limiting found"
 fi
 
-# Check: Guest mutation blocking
-if grep -rq 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/index.ts 2>/dev/null; then
+# Check: Guest mutation blocking (may be in route modules)
+if grep -q 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/index.ts 2>/dev/null || grep -rq 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/routes/ --include="*.ts" 2>/dev/null; then
   pass "Guest user mutation blocking is enforced"
 else
   fail "No guest mutation blocking found"
 fi
 
-# Check: Deck ownership enforcement on write endpoints
-OWNERSHIP_CHECKS=$(grep -c 'requireDeckOwner\|userOwnsDeck\|user_id.*req\.user\.id' src/index.ts 2>/dev/null || echo "0")
+# Check: Deck ownership enforcement on write endpoints (in index or route modules)
+OWNERSHIP_CHECKS=$(grep -rE 'requireDeckOwner|userOwnsDeck|user_id.*req\.user\.id' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+OWNERSHIP_CHECKS=${OWNERSHIP_CHECKS:-0}
 if [ "$OWNERSHIP_CHECKS" -ge 3 ]; then
   pass "Resource ownership enforced on write endpoints ($OWNERSHIP_CHECKS checks)"
 else
   fail "Insufficient ownership enforcement ($OWNERSHIP_CHECKS checks, need ≥3)"
 fi
 
-# Check: Error responses don't leak stack traces to clients
-STACK_LEAKS=$(grep -n 'res\.\(json\|send\|status\).*stack' src/index.ts 2>/dev/null | head -5 || true)
+# Check: Error responses don't leak stack traces to clients (index or route modules)
+STACK_LEAKS=$(grep -rn 'res\.\(json\|send\|status\).*stack' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | head -5 || true)
 if [ -z "$STACK_LEAKS" ]; then
   pass "No stack traces leaked in HTTP responses"
 else
@@ -174,8 +180,9 @@ fi
 echo ""
 echo "━━━ CC7.1: Monitoring and Detection ━━━"
 
-# Check: Security events are logged
-SECURITY_LOGS=$(grep -c 'SECURITY' src/index.ts 2>/dev/null || echo "0")
+# Check: Security events are logged (may be in helpers or route modules)
+SECURITY_LOGS=$(grep -r 'SECURITY' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+SECURITY_LOGS=${SECURITY_LOGS:-0}
 if [ "$SECURITY_LOGS" -ge 3 ]; then
   pass "Security event logging present ($SECURITY_LOGS log statements)"
 else
@@ -189,8 +196,8 @@ else
   fail "Authentication failures may not be logged"
 fi
 
-# Check: Health check endpoint exists for availability monitoring
-if grep -q "'/health'" src/index.ts 2>/dev/null; then
+# Check: Health check endpoint exists for availability monitoring (index or route modules)
+if grep -q "'/health'" src/index.ts 2>/dev/null || grep -rq "'/health'" src/routes/ --include="*.ts" 2>/dev/null; then
   pass "Health check endpoint exists for availability monitoring"
 else
   fail "No health check endpoint found"
@@ -242,8 +249,8 @@ else
   fail "No session invalidation on logout"
 fi
 
-# Check: Read-only mode support (operational safety)
-if grep -q 'readOnly\|read.only\|readonly' src/index.ts 2>/dev/null; then
+# Check: Read-only mode support (operational safety; may be in helpers or route modules)
+if grep -q 'readOnly\|read\.only\|readonly' src/index.ts 2>/dev/null || grep -rq 'readOnly\|read\.only\|readonly' src/routes/ --include="*.ts" 2>/dev/null; then
   pass "Read-only mode support exists for operational safety"
 else
   warn "No read-only mode support found"
