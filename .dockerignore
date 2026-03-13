@@ -7,5 +7,12 @@ npm-debug.log
 infra
 data/sessions.json
 *.env
-dist
+tests
+docs
+coverage
+*.md
+.cursor
+*.test.ts
+*.spec.ts
+scripts
 
