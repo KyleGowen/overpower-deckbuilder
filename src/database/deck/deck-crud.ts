@@ -1,0 +1,491 @@
+import { Deck, DeckCard } from '../../types';
+import type { DeckRepositoryContext } from './context';
+
+/** Deck row from SELECT * FROM decks */
+type DeckRow = Record<string, unknown>;
+
+/** Deck list row with joined character/location/mission preview columns */
+interface DeckListRow extends DeckRow {
+  character_1_id?: string;
+  character_1_name?: string;
+  character_1_default_image?: string;
+  character_1_is_foil?: boolean;
+  character_2_id?: string;
+  character_2_name?: string;
+  character_2_default_image?: string;
+  character_2_is_foil?: boolean;
+  character_3_id?: string;
+  character_3_name?: string;
+  character_3_default_image?: string;
+  character_3_is_foil?: boolean;
+  character_4_id?: string;
+  character_4_name?: string;
+  character_4_default_image?: string;
+  character_4_is_foil?: boolean;
+  location_id?: string;
+  location_name?: string;
+  location_default_image?: string;
+  mission_1_id?: string;
+  mission_1_name?: string;
+  mission_1_default_image?: string;
+}
+
+interface DeckCardRow {
+  id: string;
+  card_type: string;
+  card_id: string;
+  quantity: number;
+  exclude_from_draw?: boolean;
+}
+
+export function mapDeckRowWithCards(
+  deckRow: DeckRow,
+  cards: Array<{ id: string; type: string; cardId: string; quantity: number; exclude_from_draw?: boolean }>
+): Deck {
+  return {
+    id: deckRow.id as string,
+    user_id: deckRow.user_id as string,
+    name: deckRow.name as string,
+    description: deckRow.description as string | undefined,
+    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
+    is_limited: deckRow.is_limited as boolean | undefined,
+    reserve_character: deckRow.reserve_character as string | undefined,
+    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
+    background_image_path: deckRow.background_image_path as string | undefined,
+    threat: deckRow.threat as number | undefined,
+    created_at: deckRow.created_at as string | undefined,
+    updated_at: deckRow.updated_at as string | undefined,
+    cards,
+  };
+}
+
+export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
+  const cards: DeckCard[] = [];
+
+  if (deckRow.character_1_id) {
+    cards.push({
+      id: `char1_${deckRow.id}`,
+      type: 'character',
+      cardId: deckRow.character_1_id,
+      quantity: 1,
+      defaultImage: deckRow.character_1_default_image,
+      name: deckRow.character_1_name,
+      is_foil: deckRow.character_1_is_foil ?? false,
+    });
+  }
+  if (deckRow.character_2_id) {
+    cards.push({
+      id: `char2_${deckRow.id}`,
+      type: 'character',
+      cardId: deckRow.character_2_id,
+      quantity: 1,
+      defaultImage: deckRow.character_2_default_image,
+      name: deckRow.character_2_name,
+      is_foil: deckRow.character_2_is_foil ?? false,
+    });
+  }
+  if (deckRow.character_3_id) {
+    cards.push({
+      id: `char3_${deckRow.id}`,
+      type: 'character',
+      cardId: deckRow.character_3_id,
+      quantity: 1,
+      defaultImage: deckRow.character_3_default_image,
+      name: deckRow.character_3_name,
+      is_foil: deckRow.character_3_is_foil ?? false,
+    });
+  }
+  if (deckRow.character_4_id) {
+    cards.push({
+      id: `char4_${deckRow.id}`,
+      type: 'character',
+      cardId: deckRow.character_4_id,
+      quantity: 1,
+      defaultImage: deckRow.character_4_default_image,
+      name: deckRow.character_4_name,
+      is_foil: deckRow.character_4_is_foil ?? false,
+    });
+  }
+  if (deckRow.location_id) {
+    cards.push({
+      id: `loc_${deckRow.id}`,
+      type: 'location',
+      cardId: deckRow.location_id,
+      quantity: 1,
+      defaultImage: deckRow.location_default_image,
+      name: deckRow.location_name,
+    });
+  }
+  if (deckRow.mission_1_id) {
+    cards.push({
+      id: `mission1_${deckRow.id}`,
+      type: 'mission',
+      cardId: deckRow.mission_1_id,
+      quantity: 1,
+      defaultImage: deckRow.mission_1_default_image,
+      name: deckRow.mission_1_name,
+    });
+  }
+
+  return {
+    id: deckRow.id as string,
+    user_id: deckRow.user_id as string,
+    name: deckRow.name as string,
+    description: deckRow.description as string | undefined,
+    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
+    is_limited: deckRow.is_limited as boolean | undefined,
+    is_valid: deckRow.is_valid as boolean | undefined,
+    card_count: deckRow.card_count as number | undefined,
+    threat: deckRow.threat as number | undefined,
+    reserve_character: deckRow.reserve_character as string | undefined,
+    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
+    background_image_path: deckRow.background_image_path as string | undefined,
+    created_at: deckRow.created_at as string | undefined,
+    updated_at: deckRow.updated_at as string | undefined,
+    cards,
+  };
+}
+
+export function mapDeckRowBasic(deckRow: DeckRow): Deck {
+  return {
+    id: deckRow.id as string,
+    user_id: deckRow.user_id as string,
+    name: deckRow.name as string,
+    description: deckRow.description as string | undefined,
+    ui_preferences: deckRow.ui_preferences as Deck['ui_preferences'],
+    is_limited: deckRow.is_limited as boolean | undefined,
+    is_valid: deckRow.is_valid as boolean | undefined,
+    card_count: deckRow.card_count as number | undefined,
+    threat: deckRow.threat as number | undefined,
+    reserve_character: deckRow.reserve_character as string | undefined,
+    display_mission_card_id: (deckRow.display_mission_card_id as string | null) ?? null,
+    background_image_path: deckRow.background_image_path as string | undefined,
+    created_at: deckRow.created_at as string | undefined,
+    updated_at: deckRow.updated_at as string | undefined,
+  };
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function createDeck(
+  ctx: DeckRepositoryContext,
+  userId: string,
+  name: string,
+  description?: string,
+  characterIds?: string[]
+): Promise<Deck> {
+  const client = await ctx.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const result = await client.query(
+      'INSERT INTO decks (user_id, name, description) VALUES ($1, $2, $3) RETURNING *',
+      [userId, name, description ?? null]
+    );
+
+    const deck = result.rows[0] as DeckRow;
+    const deckId = deck.id as string;
+
+    if (characterIds?.length) {
+      for (const characterId of characterIds) {
+        await client.query(
+          'INSERT INTO deck_cards (deck_id, card_type, card_id, quantity) VALUES ($1, $2, $3, $4)',
+          [deckId, 'character', characterId, 1]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+
+    const updatedDeckResult = await client.query(
+      'SELECT * FROM decks WHERE id = $1',
+      [deckId]
+    );
+    const updatedDeck = updatedDeckResult.rows[0] as DeckRow;
+    const newDeck = mapDeckRowBasic(updatedDeck);
+
+    ctx.cache.set(deckId, { deck: newDeck, timestamp: Date.now() });
+    ctx.cache.delete(`user_decks_${userId}`);
+
+    return newDeck;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ PostgreSQLDeckRepository.createDeck error:', error);
+    console.error('❌ CreateDeck error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : 'Unknown',
+      userId,
+      deckName: name,
+      description,
+      characterIds,
+    });
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getDeckById(
+  ctx: DeckRepositoryContext,
+  id: string
+): Promise<Deck | undefined> {
+  if (!UUID_REGEX.test(id)) {
+    return undefined;
+  }
+
+  const now = Date.now();
+  const cached = ctx.cache.get(id);
+  if (cached && now - cached.timestamp < ctx.cacheTtlMs) {
+    return cached.deck as Deck;
+  }
+
+  const client = await ctx.pool.connect();
+  try {
+    const deckResult = await client.query(
+      'SELECT * FROM decks WHERE id = $1',
+      [id]
+    );
+    if (deckResult.rows.length === 0) {
+      return undefined;
+    }
+
+    const deck = deckResult.rows[0] as DeckRow;
+    const cardsResult = await client.query(
+      'SELECT * FROM deck_cards WHERE deck_id = $1',
+      [id]
+    );
+    const cards = (cardsResult.rows as DeckCardRow[]).map((card) => ({
+      id: card.id,
+      type: card.card_type,
+      cardId: card.card_id,
+      quantity: card.quantity,
+      exclude_from_draw: card.exclude_from_draw ?? false,
+    }));
+
+    const fullDeck = mapDeckRowWithCards(deck, cards);
+    ctx.cache.set(id, { deck: fullDeck, timestamp: now });
+    return fullDeck;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getDecksByUserId(
+  ctx: DeckRepositoryContext,
+  userId: string
+): Promise<Deck[]> {
+  const cacheKey = `user_decks_${userId}`;
+  const now = Date.now();
+  const cached = ctx.cache.get(cacheKey);
+  if (cached && now - cached.timestamp < ctx.cacheTtlMs) {
+    return cached.deck as Deck[];
+  }
+
+  const client = await ctx.pool.connect();
+  try {
+    const deckResult = await client.query(
+      `
+        SELECT 
+          d.*,
+          c1.name as character_1_name,
+          c1.image_path as character_1_default_image,
+          c1.is_foil as character_1_is_foil,
+          c2.name as character_2_name,
+          c2.image_path as character_2_default_image,
+          c2.is_foil as character_2_is_foil,
+          c3.name as character_3_name,
+          c3.image_path as character_3_default_image,
+          c3.is_foil as character_3_is_foil,
+          c4.name as character_4_name,
+          c4.image_path as character_4_default_image,
+          c4.is_foil as character_4_is_foil,
+          l.name as location_name,
+          l.image_path as location_default_image,
+          dm1.mission_id as mission_1_id,
+          dm1.mission_name as mission_1_name,
+          dm1.mission_image_path as mission_1_default_image
+        FROM decks d
+        LEFT JOIN characters c1 ON d.character_1_id = c1.id
+        LEFT JOIN characters c2 ON d.character_2_id = c2.id
+        LEFT JOIN characters c3 ON d.character_3_id = c3.id
+        LEFT JOIN characters c4 ON d.character_4_id = c4.id
+        LEFT JOIN locations l ON d.location_id = l.id
+        LEFT JOIN LATERAL (
+          SELECT 
+            dc.card_id as mission_id,
+            m.name as mission_name,
+            m.image_path as mission_image_path
+          FROM deck_cards dc
+          JOIN missions m ON m.id = dc.card_id::uuid
+          WHERE dc.deck_id = d.id AND dc.card_type = 'mission'
+          ORDER BY
+            CASE
+              WHEN d.display_mission_card_id IS NOT NULL AND dc.card_id::uuid = d.display_mission_card_id THEN 0
+              ELSE 1
+            END,
+            m.set_number_int ASC NULLS LAST,
+            m.name ASC,
+            dc.card_id ASC
+          LIMIT 1
+        ) dm1 ON true
+        WHERE d.user_id = $1 
+        ORDER BY d.created_at DESC
+      `,
+      [userId]
+    );
+
+    if (deckResult.rows.length === 0) {
+      return [];
+    }
+
+    const decks = (deckResult.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+    ctx.cache.set(cacheKey, { deck: decks, timestamp: now });
+    return decks;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getDeckSummaryWithAllCards(
+  ctx: DeckRepositoryContext,
+  deckId: string
+): Promise<Deck | undefined> {
+  const client = await ctx.pool.connect();
+  try {
+    const deckResult = await client.query(
+      'SELECT * FROM decks WHERE id = $1',
+      [deckId]
+    );
+    if (deckResult.rows.length === 0) {
+      return undefined;
+    }
+
+    const deck = deckResult.rows[0] as DeckRow;
+    const cardsResult = await client.query(
+      'SELECT * FROM deck_cards WHERE deck_id = $1',
+      [deckId]
+    );
+    const cards = (cardsResult.rows as DeckCardRow[]).map((card) => ({
+      id: card.id,
+      type: card.card_type,
+      cardId: card.card_id,
+      quantity: card.quantity,
+    }));
+
+    const fullDeck = mapDeckRowWithCards(deck, cards);
+    ctx.cache.set(deckId, { deck: fullDeck, timestamp: Date.now() });
+    return fullDeck;
+  } finally {
+    client.release();
+  }
+}
+
+export async function getAllDecks(ctx: DeckRepositoryContext): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const result = await client.query(
+      'SELECT * FROM decks ORDER BY created_at'
+    );
+    return (result.rows as DeckRow[]).map(mapDeckRowBasic);
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateDeck(
+  ctx: DeckRepositoryContext,
+  id: string,
+  updates: Partial<Deck>
+): Promise<Deck | undefined> {
+  const client = await ctx.pool.connect();
+  try {
+    const setClause: string[] = [];
+    const values: unknown[] = [];
+    let paramCount = 1;
+
+    if (updates.name !== undefined) {
+      setClause.push(`name = $${paramCount++}`);
+      values.push(updates.name);
+    }
+    if (updates.description !== undefined) {
+      setClause.push(`description = $${paramCount++}`);
+      values.push(updates.description);
+    }
+    if (updates.ui_preferences !== undefined) {
+      setClause.push(`ui_preferences = $${paramCount++}`);
+      values.push(JSON.stringify(updates.ui_preferences));
+    }
+    if (updates.is_limited !== undefined) {
+      setClause.push(`is_limited = $${paramCount++}`);
+      values.push(updates.is_limited);
+    }
+    if (updates.is_valid !== undefined) {
+      setClause.push(`is_valid = $${paramCount++}`);
+      values.push(updates.is_valid);
+    }
+    if (updates.reserve_character !== undefined) {
+      setClause.push(`reserve_character = $${paramCount++}`);
+      values.push(updates.reserve_character);
+    }
+    if (updates.display_mission_card_id !== undefined) {
+      setClause.push(`display_mission_card_id = $${paramCount++}`);
+      values.push(updates.display_mission_card_id);
+    }
+    if (updates.background_image_path !== undefined) {
+      setClause.push(`background_image_path = $${paramCount++}`);
+      values.push(updates.background_image_path);
+    }
+
+    if (setClause.length === 0) {
+      return getDeckById(ctx, id);
+    }
+
+    setClause.push('updated_at = NOW()');
+    values.push(id);
+
+    const result = await client.query(
+      // nosemgrep: pg-sql-template-interpolation
+      `UPDATE decks SET ${setClause.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return undefined;
+    }
+
+    const deck = result.rows[0] as DeckRow;
+    const updatedDeck = mapDeckRowBasic(deck);
+    await ctx.invalidateDeck(id);
+    return updatedDeck;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteDeck(
+  ctx: DeckRepositoryContext,
+  id: string
+): Promise<boolean> {
+  const client = await ctx.pool.connect();
+  try {
+    const userResult = await client.query(
+      'SELECT user_id FROM decks WHERE id = $1',
+      [id]
+    );
+    const userId = userResult.rows[0]?.user_id as string | undefined;
+
+    const result = await client.query('DELETE FROM decks WHERE id = $1', [id]);
+    const success = (result.rowCount ?? 0) > 0;
+
+    if (success) {
+      ctx.cache.delete(id);
+      if (userId) {
+        ctx.cache.delete(`user_decks_${userId}`);
+      }
+    }
+    return success;
+  } finally {
+    client.release();
+  }
+}

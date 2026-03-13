@@ -14,7 +14,7 @@ Track progress by checking off items. Tackle in milestone order or by priority.
 |------|--------|------|------|--------|
 | **M1** | ☑ | Split app wiring from route/middleware registration | [src/index.ts](../../src/index.ts) (~460 lines) | Done: route registration → `src/routes/index.ts`, middleware setup → `src/middleware/setup.ts`. |
 | **M2** | ☑ | Extract test server and helpers into smaller modules | [src/test-server.ts](../../src/test-server.ts) (~1,746 lines) | Done: test server reuses `registerRoutes`; bootstrap and lifecycle in `src/test-server/`. |
-| **M3** | ☐ | Split deck repository by domain | [src/database/PostgreSQLDeckRepository.ts](../../src/database/PostgreSQLDeckRepository.ts) (~1,061 lines) | Split by domain: deck CRUD vs deck cards vs metadata, or extract query builders. |
+| **M3** | ☑ | Split deck repository by domain | [src/database/PostgreSQLDeckRepository.ts](../../src/database/PostgreSQLDeckRepository.ts) (~1,061 lines) | Done: split by domain — deck CRUD → `src/database/deck/deck-crud.ts`, deck cards → `deck-cards.ts`, metadata/auth → `deck-metadata.ts`; shared context and card validation in `deck/`. |
 | **M4** | ☐ | Refactor card repository | [src/database/PostgreSQLCardRepository.ts](../../src/database/PostgreSQLCardRepository.ts) (~842 lines) | Extract query/response mapping or domain slices. |
 | **M5** | ☐ | Split collections repository | [src/database/collectionsRepository.ts](../../src/database/collectionsRepository.ts) (~738 lines) | Split read vs write paths or by feature. |
 

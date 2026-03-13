@@ -1,0 +1,10 @@
+# Deck repository (domain split)
+
+Deck persistence is split by domain. The public entry point is `PostgreSQLDeckRepository` in `src/database/PostgreSQLDeckRepository.ts`, which delegates to modules in this directory.
+
+- **context.ts** — Shared context: pool, cache, cache TTL, and `invalidateDeck(deckId)`. Used by all deck modules.
+- **deck-crud.ts** — Deck CRUD: createDeck, getDeckById, getDecksByUserId, getDeckSummaryWithAllCards, getAllDecks, updateDeck, deleteDeck. Includes row mappers: mapDeckRowWithCards, mapDeckRowToListDeck, mapDeckRowBasic.
+- **deck-cards.ts** — Deck card operations: addCardToDeck, removeCardFromDeck, updateCardInDeck, removeAllCardsFromDeck, replaceAllCardsInDeck, getDeckCards, doesCardExistInDeck. Shared helper: cardExistsInCardTable (validates card exists in the appropriate card table).
+- **deck-metadata.ts** — UI preferences, stats, auth: updateUIPreferences, getUIPreferences, getDeckStats, userOwnsDeck.
+
+Do not add raw SQL in route handlers; keep queries here or in other `src/database/` modules.
