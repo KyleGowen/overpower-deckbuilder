@@ -2,7 +2,40 @@
 
 This report lists files that would benefit from refactoring later. No code changes were made in this phase. Use it as a backlog for future work.
 
-## Source (backend)
+---
+
+## Todo list (by milestone)
+
+Track progress by checking off items. Tackle in milestone order or by priority.
+
+### Backend (source)
+
+| ID   | Status | Task | File | Notes |
+|------|--------|------|------|--------|
+| **M1** | ☑ | Split app wiring from route/middleware registration | [src/index.ts](../../src/index.ts) (~460 lines) | Done: route registration → `src/routes/index.ts`, middleware setup → `src/middleware/setup.ts`. |
+| **M2** | ☐ | Extract test server and helpers into smaller modules | [src/test-server.ts](../../src/test-server.ts) (~1,746 lines) | Extract test helpers and app bootstrap into dedicated modules. |
+| **M3** | ☐ | Split deck repository by domain | [src/database/PostgreSQLDeckRepository.ts](../../src/database/PostgreSQLDeckRepository.ts) (~1,061 lines) | Split by domain: deck CRUD vs deck cards vs metadata, or extract query builders. |
+| **M4** | ☐ | Refactor card repository | [src/database/PostgreSQLCardRepository.ts](../../src/database/PostgreSQLCardRepository.ts) (~842 lines) | Extract query/response mapping or domain slices. |
+| **M5** | ☐ | Split collections repository | [src/database/collectionsRepository.ts](../../src/database/collectionsRepository.ts) (~738 lines) | Split read vs write paths or by feature. |
+
+### Tests (high line count)
+
+Adopt shared helpers (e.g. [tests/helpers/deckImportTestHelpers.ts](../../../tests/helpers/deckImportTestHelpers.ts)) and split by behavior where possible.
+
+| ID   | Status | Task | File | Lines (approx) |
+|------|--------|------|------|----------------|
+| **M6** | ☐ | Refactor deck-export-comprehensive tests | tests/unit/deck-export-comprehensive.test.ts | ~2,976 |
+| **M7** | ☐ | Refactor card-hover-modal tests | tests/unit/card-hover-modal.test.ts | ~2,231 |
+| **M8** | ☐ | Refactor draw-hand-ko-dimming tests | tests/unit/draw-hand-ko-dimming.test.ts | ~1,568 |
+| **M9** | ☐ | Refactor deck-import-character tests | tests/unit/deck-import-character.test.ts | ~1,411 |
+| **M10** | ☐ | Refactor deck-import-mission-event tests | tests/unit/deck-import-mission-event.test.ts | ~1,214 |
+| **M11** | ☐ | Refactor remaining large deck-import-* / deck-export-* tests | Other deck-import-* and deck-export-* files | 800–1,100 each |
+
+---
+
+## Original detail (reference)
+
+### Source (backend)
 
 | File | Lines (approx) | Notes |
 |------|----------------|-------|
@@ -12,9 +45,7 @@ This report lists files that would benefit from refactoring later. No code chang
 | [src/database/PostgreSQLCardRepository.ts](../../src/database/PostgreSQLCardRepository.ts) | ~842 | **Candidate:** Extract query/response mapping or domain slices. |
 | [src/database/collectionsRepository.ts](../../src/database/collectionsRepository.ts) | ~738 | Collection-specific logic. **Candidate:** Split read vs write paths or by feature. |
 
-## Tests (high line count)
-
-These are good candidates for shared helpers and splitting by behavior (see Phase 3 consolidation; more deck-import/deck-export files can adopt [tests/helpers/deckImportTestHelpers.ts](../../../tests/helpers/deckImportTestHelpers.ts) or similar):
+### Tests (high line count)
 
 | File | Lines (approx) |
 |------|----------------|

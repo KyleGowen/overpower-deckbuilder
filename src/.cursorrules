@@ -1,0 +1,6 @@
+# Backend source (src/)
+
+- **index.ts** is the app composition root: it creates the Express app, instantiates services/repos, applies middleware and routes, and starts the server.
+- **Middleware** lives in `src/middleware/`; app-wide middleware setup is in `src/middleware/setup.ts` (M1).
+- **Routes** are registered via `src/routes/index.ts`; route handlers receive dependencies from the composition root.
+- Refactor backlog: [docs/current/COMPLEXITY_REPORT.md](../../docs/current/COMPLEXITY_REPORT.md) (M1/M2, etc.).

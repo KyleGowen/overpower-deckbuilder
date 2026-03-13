@@ -1,0 +1,4 @@
+# Middleware
+
+- App-wide middleware lives here. **setup.ts** configures body parsing, cookie parsing, and static image mounts (called from index).
+- **authorizationHelpers.ts** and **newAccountRateLimiter.ts** provide auth and rate-limit helpers for route handlers.
