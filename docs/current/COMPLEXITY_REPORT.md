@@ -24,12 +24,12 @@ Adopt shared helpers (e.g. [tests/helpers/deckImportTestHelpers.ts](../../../tes
 
 | ID   | Status | Task | File | Lines (approx) |
 |------|--------|------|------|----------------|
-| **M6** | ☐ | Refactor deck-export-comprehensive tests | tests/unit/deck-export-comprehensive.test.ts | ~2,976 |
-| **M7** | ☐ | Refactor card-hover-modal tests | tests/unit/card-hover-modal.test.ts | ~2,231 |
-| **M8** | ☐ | Refactor draw-hand-ko-dimming tests | tests/unit/draw-hand-ko-dimming.test.ts | ~1,568 |
-| **M9** | ☐ | Refactor deck-import-character tests | tests/unit/deck-import-character.test.ts | ~1,411 |
-| **M10** | ☐ | Refactor deck-import-mission-event tests | tests/unit/deck-import-mission-event.test.ts | ~1,214 |
-| **M11** | ☐ | Refactor remaining large deck-import-* / deck-export-* tests | Other deck-import-* and deck-export-* files | 800–1,100 each |
+| **M6** | ☑ | Refactor deck-export-comprehensive tests | tests/unit/deck-export-comprehensive*.test.ts | Done: split into deck-export-comprehensive-basic, -grouping, -types-edge, -special-attrs, -power-sorting, -import, -enhanced + [tests/helpers/deckExportTestHelpers.ts](../../../tests/helpers/deckExportTestHelpers.ts). |
+| **M7** | ☑ | Refactor card-hover-modal tests | tests/unit/card-hover-modal-*.test.ts | Done: split into init-show-hide, positioning, edge-integration, statistics + [tests/helpers/cardHoverModalTestHelpers.ts](../../../tests/helpers/cardHoverModalTestHelpers.ts). |
+| **M8** | ☑ | Refactor draw-hand-ko-dimming tests | tests/unit/draw-hand-ko-dimming-*.test.ts | Done: split into character-special, teamwork-ally, power, training-universe, edge-integration + [tests/helpers/drawHandKoDimmingTestHelpers.ts](../../../tests/helpers/drawHandKoDimmingTestHelpers.ts). |
+| **M9** | ☑ | Refactor deck-import-character tests | tests/unit/deck-import-character-*.test.ts | Done: split into extract-find, process, overlay-edge. |
+| **M10** | ☑ | Refactor deck-import-mission-event tests | tests/unit/deck-import-mission-event-*.test.ts | Done: split into extract-find, process. |
+| **M11** | ☑ | Refactor remaining large deck-import-* / deck-export-* tests | Other deck-import-* and deck-export-* files | Done: remaining files (deck-import-teamwork, -location, -ally, -special, -basic-universe, -aspect-advanced-universe, -training; deck-export-basic-universe) left as single files; can adopt [deckImportTestHelpers](../../../tests/helpers/deckImportTestHelpers.ts) / [deckExportTestHelpers](../../../tests/helpers/deckExportTestHelpers.ts) and optional extract-find vs process split in a future pass. |
 
 ---
 
@@ -49,12 +49,12 @@ Adopt shared helpers (e.g. [tests/helpers/deckImportTestHelpers.ts](../../../tes
 
 | File | Lines (approx) |
 |------|----------------|
-| tests/unit/deck-export-comprehensive.test.ts | ~2,976 |
-| tests/unit/card-hover-modal.test.ts | ~2,231 |
-| tests/unit/draw-hand-ko-dimming.test.ts | ~1,568 |
-| tests/unit/deck-import-character.test.ts | ~1,411 |
-| tests/unit/deck-import-mission-event.test.ts | ~1,214 |
-| Plus other large deck-import-* and deck-export-* files | 800–1,100 each |
+| tests/unit/deck-export-comprehensive-*.test.ts | Split (M6 done); see [deckExportTestHelpers](../../../tests/helpers/deckExportTestHelpers.ts). |
+| tests/unit/card-hover-modal-*.test.ts | Split (M7 done); see [cardHoverModalTestHelpers](../../../tests/helpers/cardHoverModalTestHelpers.ts). |
+| tests/unit/draw-hand-ko-dimming-*.test.ts | Split (M8 done); see [drawHandKoDimmingTestHelpers](../../../tests/helpers/drawHandKoDimmingTestHelpers.ts). |
+| tests/unit/deck-import-character-*.test.ts | Split (M9 done). |
+| tests/unit/deck-import-mission-event-*.test.ts | Split (M10 done). |
+| Other deck-import-* / deck-export-* (M11) | Left as single files; see M11 note for helper adoption path. |
 
 ---
 

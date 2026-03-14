@@ -143,7 +143,7 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
 
 ### Where to add new tests
 
-- **Unit tests**: Add `*.test.ts` under `tests/unit/`. Use `tests/helpers/` for shared utilities (e.g. `apiClient.ts`, `deckImportTestHelpers.ts`).
+- **Unit tests**: Add `*.test.ts` under `tests/unit/`. Use `tests/helpers/` for shared utilities (e.g. `apiClient.ts`, `deckImportTestHelpers.ts`, `deckExportTestHelpers.ts`, `cardHoverModalTestHelpers.ts`, `drawHandKoDimmingTestHelpers.ts`). Large suites are split by behavior: deck-export-comprehensive (7 files using `deckExportTestHelpers`), card-hover-modal (4 files using `cardHoverModalTestHelpers`), draw-hand-ko-dimming (5 files using `drawHandKoDimmingTestHelpers`), deck-import-character (3 files: extract-find, process, overlay-edge), deck-import-mission-event (2 files: extract-find, process). See [tests/helpers/README.md](../../tests/helpers/README.md).
 - **Integration tests**: Add `*.test.ts` under `tests/integration/`. Match one of the category patterns above (e.g. `deck-save-security-*.test.ts` for deck save security) so the test runs in the right CI job. See `tests/integration/.cursorrules` for mandatory cleanup rules (track test users/decks, clean up in `finally`).
 - **Frontend tests**: Add `*.test.ts` under `tests/frontend/`.
 

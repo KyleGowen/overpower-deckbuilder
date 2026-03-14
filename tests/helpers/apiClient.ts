@@ -100,7 +100,7 @@ export class ApiClient {
   }
 
   // Generic request helper
-  async request(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, data?: any) {
+  async request(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, data?: unknown) {
     const methodLower = method.toLowerCase() as 'get' | 'post' | 'put' | 'delete';
     let req = request(this.app)[methodLower](path).set('Cookie', this.cookies);
     
