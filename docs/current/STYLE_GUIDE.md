@@ -1577,9 +1577,9 @@ The Card View is a deck visualization mode available to all users that displays 
 - **Transition**: `all 0.2s ease`
 - **Position**: `relative` (for absolute positioning of buttons)
 
-#### Landscape Cards
+#### Landscape Cards (type-specific aspect ratios)
 - **Target Types**: `[data-type="character"]`, `[data-type="location"]`, `[data-type="event"]`
-- **Dimensions**: `250px × 175px` (10:7 aspect ratio)
+- **Dimensions**: Type-specific so the display box matches thumb/deck selection aspect (no sizing shift when full-res loads): character `250px × 184px`, location `250px × 160px`, event `140px × 200px`.
 - **Layout**: `flex-direction: column`, `justify-content: flex-start`
 - **Alignment**: `align-items: center`
 
@@ -1591,7 +1591,7 @@ The Card View is a deck visualization mode available to all users that displays 
 
 ### Card Images
 #### Progressive image load (two-layer, no flash)
-For character, location, and mission we show a thumbnail first, then fade in full-res over it so there is no visible flash. Two layers: `.card-view-image-thumb` (thumbnail, `src` never changed) and `.card-view-image-full` (opacity 0 → 1 via `.card-view-image-full--loaded` when full-res loads). Implemented in `deck-editor-rendering.js` and `card-tables.css`; see [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md).
+For character, location, and mission we show a thumbnail first, then fade in full-res over it so there is no visible flash. Two layers: `.card-view-image-thumb` (thumbnail, `src` never changed) and `.card-view-image-full` (opacity 0 → 1 via `.card-view-image-full--loaded` when full-res loads). Implemented in `deck-editor-rendering.js` and `card-tables.css`; see [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md). Card view uses the same aspect ratio per type as the thumb config so thumb and full-res share the same crop box (no shift). The card hover modal uses `object-fit: cover` on the full-res layer so it fully covers the thumbnail.
 
 #### Portrait Image Styling
 - **Class**: `.card-view-image` (portrait cards)
@@ -1707,10 +1707,10 @@ For character, location, and mission we show a thumbnail first, then fade in ful
 ### Responsive Design
 #### Breakpoint System (75% Scaling)
 - **Desktop (Default)**: 175px × 250px (portrait), 250px × 175px (landscape)
-- **Large Tablet (≤1200px)**: 160px × 229px, 225px × 137px
-- **Tablet (≤1000px)**: 146px × 208px, 203px × 125px
-- **Small Tablet (≤800px)**: 131px × 188px, 183px × 113px
-- **Mobile (≤600px)**: 116px × 167px, 161px × 100px
+- **Large Tablet (≤1200px)**: portrait 160×229; character 225×166, location 225×144, event 126×180
+- **Tablet (≤1000px)**: portrait 146×208; character 203×149, location 203×130, event 114×162
+- **Small Tablet (≤800px)**: portrait 131×188; character 183×135, location 183×117, event 102×146
+- **Mobile (≤600px)**: portrait 116×167; character 161×118, location 161×103, event 90×129
 
 ### CSS Implementation
 ```css
@@ -1742,15 +1742,25 @@ For character, location, and mission we show a thumbnail first, then fade in ful
     position: relative;
 }
 
-/* Landscape Cards */
+/* Landscape Cards (type-specific aspect ratios; shared layout) */
 .deck-card-card-view-item[data-type="character"],
 .deck-card-card-view-item[data-type="location"],
 .deck-card-card-view-item[data-type="event"] {
-    width: 250px;
-    height: 175px;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+}
+.deck-card-card-view-item[data-type="character"] {
+    width: 250px;
+    height: 184px;
+}
+.deck-card-card-view-item[data-type="location"] {
+    width: 250px;
+    height: 160px;
+}
+.deck-card-card-view-item[data-type="event"] {
+    width: 140px;
+    height: 200px;
 }
 
 /* Card View Buttons */

@@ -717,19 +717,24 @@
             display: block;
         }
 
-        /* Two-layer progressive load: full-res fades in over thumb (no flash) */
+        /* Two-layer progressive load: full-res fades in over thumb; hide thumb when loaded to avoid edge bleed */
         .card-hover-image-wrap .card-hover-image-full {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
+            object-position: center top;
             opacity: 0;
             transition: opacity 0.2s ease-out;
+            z-index: 1;
         }
         .card-hover-image-wrap .card-hover-image-full.card-hover-image-full--loaded {
             opacity: 1;
+        }
+        .card-hover-image-wrap:has(.card-hover-image-full.card-hover-image-full--loaded) .card-hover-image:not(.card-hover-image-full) {
+            visibility: hidden;
         }
 
         .card-hover-caption {

@@ -253,16 +253,26 @@
             position: relative; /* Enable absolute positioning for buttons */
         }
         
-        /* Landscape orientation for character, location, and event cards */
+        /* Landscape orientation: type-specific aspect ratios to match thumb/deck selection (no shift when full-res loads) */
         .deck-card-card-view-item[data-type="character"],
         .deck-card-card-view-item[data-type="location"],
         .deck-card-card-view-item[data-type="event"] {
-            width: 250px; /* 75% of 333px for landscape */
-            height: 175px; /* 75% of 233px, taller to accommodate buttons underneath */
-            flex-direction: column; /* Keep vertical layout for buttons underneath */
+            flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Align content to top, not center */
-            /* Removed padding to allow image to fill frame */
+            justify-content: flex-start;
+        }
+        /* Card width fixed; height from content (wrap + margin + actions) */
+        .deck-card-card-view-item[data-type="character"] {
+            width: 250px;  /* aspect 380/280 → image 250×184 */
+            height: auto;
+        }
+        .deck-card-card-view-item[data-type="location"] {
+            width: 250px;  /* aspect 500/320 → image 250×160 */
+            height: auto;
+        }
+        .deck-card-card-view-item[data-type="event"] {
+            width: 140px;  /* aspect 280/400 → image 140×200 */
+            height: auto;
         }
         
         .deck-card-card-view-item:hover {
@@ -300,7 +310,7 @@
             overflow: hidden;
         }
         
-        /* Two-layer progressive load: thumb stays visible, full-res fades in on top (no flash) */
+        /* Two-layer progressive load: thumb visible until full-res loads, then thumb hidden to avoid edge bleed */
         .card-view-image-thumb,
         .card-view-image-full {
             position: absolute;
@@ -313,11 +323,16 @@
             display: block;
         }
         .card-view-image-full {
+            z-index: 1;
             opacity: 0;
             transition: opacity 0.2s ease-out;
         }
         .card-view-image-full.card-view-image-full--loaded {
             opacity: 1;
+        }
+        /* Once full-res is loaded, hide thumb so it never shows through at edges */
+        .card-foil-img-wrap:has(.card-view-image-full.card-view-image-full--loaded) .card-view-image-thumb {
+            visibility: hidden;
         }
         
         /* Portrait wrapper — fill frame, no margin below */
@@ -339,14 +354,23 @@
             object-position: center top;
         }
         
-        /* Landscape wrapper and image for character, location, and event cards */
+        /* Landscape wrapper: fixed height so image area matches thumb aspect exactly */
         .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap,
         .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap,
         .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-            flex-grow: 1;
+            flex-grow: 0;
             flex-shrink: 0;
             width: 100%;
             margin-bottom: 8px;
+        }
+        .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
+            height: 184px; /* aspect 250/184 = thumb 380/280 */
+        }
+        .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
+            height: 160px; /* aspect 250/160 = thumb 500/320 */
+        }
+        .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+            height: 200px; /* aspect 140/200 = thumb 280/400 */
         }
         
         .deck-card-card-view-item[data-type="character"] .card-view-image,
@@ -635,67 +659,115 @@
             transition: transform 0.2s ease;
         }
         
-        /* Responsive adjustments for Card View - 75% scaling */
+        /* Responsive: scale card width and wrap height so image area keeps thumb aspect */
         @media (max-width: 1200px) {
             .deck-card-card-view-item {
-                width: 160px; /* 75% of 175px */
-                height: 229px; /* 75% of 250px */
+                width: 160px;
+                height: 229px;
             }
-            /* Images use flex-grow - no fixed heights needed */
-            /* Landscape cards */
-            .deck-card-card-view-item[data-type="character"],
-            .deck-card-card-view-item[data-type="location"],
+            .deck-card-card-view-item[data-type="character"] {
+                width: 225px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
+                height: 166px;
+            }
+            .deck-card-card-view-item[data-type="location"] {
+                width: 225px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
+                height: 144px;
+            }
             .deck-card-card-view-item[data-type="event"] {
-                width: 225px; /* 75% of 300px */
-                height: 137px; /* 75% of 183px */
+                width: 126px;
+                height: auto;
             }
-            /* Images use flex-grow - no fixed heights needed */
+            .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+                height: 180px;
+            }
         }
         
         @media (max-width: 1000px) {
             .deck-card-card-view-item {
-                width: 146px; /* 75% of 175px */
-                height: 208px; /* 75% of 250px */
+                width: 146px;
+                height: 208px;
             }
-            /* Images use flex-grow - no fixed heights needed */
-            /* Landscape cards */
-            .deck-card-card-view-item[data-type="character"],
-            .deck-card-card-view-item[data-type="location"],
+            .deck-card-card-view-item[data-type="character"] {
+                width: 203px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
+                height: 149px;
+            }
+            .deck-card-card-view-item[data-type="location"] {
+                width: 203px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
+                height: 130px;
+            }
             .deck-card-card-view-item[data-type="event"] {
-                width: 203px; /* 75% of 271px */
-                height: 125px; /* 75% of 167px */
+                width: 114px;
+                height: auto;
             }
-            /* Images use flex-grow - no fixed heights needed */
+            .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+                height: 163px;
+            }
         }
         
         @media (max-width: 800px) {
             .deck-card-card-view-item {
-                width: 131px; /* 75% of 175px */
-                height: 188px; /* 75% of 250px */
+                width: 131px;
+                height: 188px;
             }
-            /* Images use flex-grow - no fixed heights needed */
-            /* Landscape cards */
-            .deck-card-card-view-item[data-type="character"],
-            .deck-card-card-view-item[data-type="location"],
+            .deck-card-card-view-item[data-type="character"] {
+                width: 183px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
+                height: 135px;
+            }
+            .deck-card-card-view-item[data-type="location"] {
+                width: 183px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
+                height: 117px;
+            }
             .deck-card-card-view-item[data-type="event"] {
-                width: 183px; /* 75% of 243px */
-                height: 113px; /* 75% of 150px */
+                width: 102px;
+                height: auto;
             }
-            /* Images use flex-grow - no fixed heights needed */
+            .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+                height: 146px;
+            }
         }
         
         @media (max-width: 600px) {
             .deck-card-card-view-item {
-                width: 116px; /* 75% of 175px */
-                height: 167px; /* 75% of 250px */
+                width: 116px;
+                height: 167px;
             }
-            /* Images use flex-grow - no fixed heights needed */
-            /* Landscape cards */
-            .deck-card-card-view-item[data-type="character"],
-            .deck-card-card-view-item[data-type="location"],
+            .deck-card-card-view-item[data-type="character"] {
+                width: 161px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
+                height: 118px;
+            }
+            .deck-card-card-view-item[data-type="location"] {
+                width: 161px;
+                height: auto;
+            }
+            .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
+                height: 103px;
+            }
             .deck-card-card-view-item[data-type="event"] {
-                width: 161px; /* 75% of 214px */
-                height: 100px; /* 75% of 133px */
+                width: 90px;
+                height: auto;
             }
-            /* Images use flex-grow - no fixed heights needed */
+            .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
+                height: 129px;
+            }
         }
