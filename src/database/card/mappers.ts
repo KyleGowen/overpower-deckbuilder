@@ -174,12 +174,14 @@ export function mapAdvancedUniverseRow(row: DbRow): AdvancedUniverse {
   };
 }
 
-/** AdvancedUniverse from getAll (includes card_description). */
-export function mapAdvancedUniverseRowWithSet(row: DbRow): AdvancedUniverse {
+/** AdvancedUniverse from getAll (includes card_description, set, set_number). */
+export function mapAdvancedUniverseRowWithSet(row: DbRow): AdvancedUniverse & { set?: string; set_number?: string | null } {
   const cardDesc = row.card_description as string | undefined;
   return {
     ...mapAdvancedUniverseRow(row),
     ...(cardDesc !== undefined && { card_description: cardDesc }),
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
   };
 }
 
@@ -224,9 +226,13 @@ export function mapAllyUniverseRow(row: DbRow): AllyUniverse {
   };
 }
 
-/** AllyUniverse from getAll (same shape as getById). */
-export function mapAllyUniverseRowWithSet(row: DbRow): AllyUniverse {
-  return mapAllyUniverseRow(row);
+/** AllyUniverse from getAll (includes set, set_number). */
+export function mapAllyUniverseRowWithSet(row: DbRow): AllyUniverse & { set?: string; set_number?: string | null } {
+  return {
+    ...mapAllyUniverseRow(row),
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
+  };
 }
 
 export function mapTrainingRow(row: DbRow): TrainingCard {
@@ -243,9 +249,13 @@ export function mapTrainingRow(row: DbRow): TrainingCard {
   };
 }
 
-/** TrainingCard from getAll (same shape as getById). */
-export function mapTrainingRowWithSet(row: DbRow): TrainingCard {
-  return mapTrainingRow(row);
+/** TrainingCard from getAll (includes set, set_number). */
+export function mapTrainingRowWithSet(row: DbRow): TrainingCard & { set?: string; set_number?: string | null } {
+  return {
+    ...mapTrainingRow(row),
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
+  };
 }
 
 export function mapBasicUniverseRow(row: DbRow): BasicUniverse {
@@ -261,7 +271,11 @@ export function mapBasicUniverseRow(row: DbRow): BasicUniverse {
   };
 }
 
-/** BasicUniverse from getAll (same shape as getById). */
-export function mapBasicUniverseRowWithSet(row: DbRow): BasicUniverse {
-  return mapBasicUniverseRow(row);
+/** BasicUniverse from getAll (includes set, set_number). */
+export function mapBasicUniverseRowWithSet(row: DbRow): BasicUniverse & { set?: string; set_number?: string | null } {
+  return {
+    ...mapBasicUniverseRow(row),
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
+  };
 }

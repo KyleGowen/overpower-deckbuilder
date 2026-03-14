@@ -149,9 +149,11 @@ function showGuestSandboxBanner() {
  */
 function mergeCollectionWithAllCards(owned, allCards) {
     // Build a lookup of owned cards: "card_id|card_type" -> collection record
+    // Normalize card_type (underscore -> hyphen) so API ally_universe matches allCards ally-universe
     const ownedLookup = new Map();
     owned.forEach(c => {
-        ownedLookup.set(`${c.card_id}|${c.card_type}`, c);
+        const key = `${c.card_id}|${(c.card_type || '').replace(/_/g, '-')}`;
+        ownedLookup.set(key, c);
     });
 
     const merged = [];
@@ -362,6 +364,7 @@ function getCardDisplayName(cardData, cardType) {
         return 'Unknown Card';
     }
 
+    cardType = (cardType || '').replace(/-/g, '_');
     const card = cardData.card_data;
 
     switch (cardType) {
