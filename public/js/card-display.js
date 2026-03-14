@@ -230,7 +230,7 @@ function displayCharacters(characters) {
                          decoding="async"
                          style="width: auto; max-width: 316px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
-                         onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}')"
+                         onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'character')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
@@ -431,8 +431,25 @@ function navigateCardImage(groupId, direction) {
         foilBadge.style.display = newImage.isFoil ? 'block' : 'none';
     }
 
-    // Update hover modal (pass full-res and foil state for shimmer in modal)
-    img.setAttribute('onmouseenter', `showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${newImage.name.replace(/'/g, "\\'")}', null, null, ${!!newImage.isFoil})`);
+    // Determine card type from groupId for hover modal progressive load
+    let navCardType = 'character';
+    if (groupId.startsWith('special-')) {
+        navCardType = 'special';
+    } else if (groupId.startsWith('power-')) {
+        navCardType = 'power';
+    } else if (groupId.startsWith('location-') || groupId.startsWith('loc-group-')) {
+        navCardType = 'location';
+    } else if (groupId.startsWith('mission-')) {
+        navCardType = 'mission';
+    } else if (groupId.startsWith('event-')) {
+        navCardType = 'event';
+    } else if (groupId.startsWith('aspect-')) {
+        navCardType = 'aspect';
+    }
+    const escapedNavCardId = String(newImage.id || '').replace(/'/g, "\\'");
+    const escapedNavCardType = String(navCardType || '').replace(/'/g, "\\'");
+    // Update hover modal (pass full-res, cardId, cardType for progressive load; foil state for shimmer)
+    img.setAttribute('onmouseenter', `showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${newImage.name.replace(/'/g, "\\'")}', '${escapedNavCardId}', '${escapedNavCardType}', ${!!newImage.isFoil})`);
     
     // Update current index
     container.setAttribute('data-current-index', currentIndex.toString());
@@ -688,7 +705,7 @@ function displaySpecialCards(specialCards) {
                          decoding="async"
                          style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                         onmouseenter="showCardHoverModal('${currentImagePath}', '${currentImageName.replace(/'/g, "\\'")}')"
+                         onmouseenter="showCardHoverModal('${(currentImagePath || '').replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'special')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
@@ -836,7 +853,7 @@ function displayLocations(locations) {
                          decoding="async"
                          style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
-                         onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}')"
+                         onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'location')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>

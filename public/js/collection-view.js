@@ -562,6 +562,8 @@ function displayCollectionCards(cards) {
         const escapedImagePathAttr = cardImage.replace(/"/g, '&quot;');
         const escapedDisplayName = (isFoil ? `${cardName} ✦ FOIL` : displayName).replace(/"/g, '&quot;');
         const escapedDisplayNameSingle = (isFoil ? `${cardName} ✦ FOIL` : cardName).replace(/'/g, "\\'");
+        const escapedCardIdHover = String(card.card_id || '').replace(/'/g, "\\'");
+        const escapedCardTypeHover = String(cardType || '').replace(/'/g, "\\'");
         const foilRowClass = isFoil ? ' collection-card-foil' : '';
 
         if (card.inCollection === false) {
@@ -580,7 +582,7 @@ function displayCollectionCards(cards) {
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
-                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', null, null, ${isFoil})"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity"></td>
                     <td class="collection-card-set-number">${setNumber || ''}</td>
@@ -607,7 +609,7 @@ function displayCollectionCards(cards) {
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
-                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', null, null, ${isFoil})"
+                    onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity">${card.quantity}</td>
                     <td class="collection-card-set-number">${setNumber || ''}</td>
@@ -759,6 +761,8 @@ function displayCollectionSearchResults(results) {
         // Escape single quotes in image path and card name for use in HTML attributes
         const escapedImagePath = (card.image || '').replace(/'/g, "\\'");
         const escapedCardName = (card.name || '').replace(/'/g, "\\'");
+        const escapedCardIdHover = String(card.id || '').replace(/'/g, "\\'");
+        const escapedCardTypeHover = String(card.type || '').replace(/'/g, "\\'");
         // After migration, alternate cards are separate cards, so we use the card's image directly
         const imagePath = card.image || card.image_path || '';
         const imagePathAttr = imagePath ? imagePath.replace(/"/g, '&quot;') : '';
@@ -769,7 +773,7 @@ function displayCollectionSearchResults(results) {
              data-card-type="${card.type}"
              data-image-path="${imagePathAttr}"
              onclick="handleCollectionSearchResultClick(this)"
-             onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedCardName}')"
+             onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedCardName}', '${escapedCardIdHover}', '${escapedCardTypeHover}')"
              onmouseleave="hideCardHoverModal()">
             <div class="collection-search-result-name">${card.name}</div>
             <div class="collection-search-result-type">${formatCardType(card.type)}</div>

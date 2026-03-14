@@ -4521,7 +4521,8 @@
             imgEl.src = newImage.imagePath;
             imgEl.alt = newImage.name;
             imgEl.setAttribute('data-full-res', fullPath);
-            imgEl.setAttribute('onmouseenter', "showCardHoverModal('" + (fullPath || '').replace(/'/g, "\\'") + "', '" + (newImage.name || '').replace(/'/g, "\\'") + "')");
+            const navCardType = (groupId && groupId.indexOf('loc-group-') === 0) ? 'location' : 'character';
+            imgEl.setAttribute('onmouseenter', "showCardHoverModal('" + (fullPath || '').replace(/'/g, "\\'") + "', '" + (newImage.name || '').replace(/'/g, "\\'") + "', '" + (newImage.id || '').replace(/'/g, "\\'") + "', '" + navCardType + "')");
             container.setAttribute('data-current-index', idx.toString());
         }
 
@@ -4614,7 +4615,7 @@
                     '<img id="' + groupId + '-img" data-src="' + currentPath + '" data-full-res="' + (currentImage.fullResPath || currentPath) + '" alt="' + esc(representative.name) + '" ' +
                     'style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;" ' +
                     'onerror="this.onerror=null; this.src=\'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg==\'; this.style.cursor=\'default\'; this.onclick=null;" ' +
-                    'onmouseenter="showCardHoverModal(\'' + esc(currentPath) + '\', \'' + esc(representative.name) + '\')" onmouseleave="hideCardHoverModal()" onclick="openModal(this)"></div></td>' +
+                    'onmouseenter="showCardHoverModal(\'' + esc(currentPath) + '\', \'' + esc(representative.name) + '\', \'' + esc(representative.id) + '\', \'location\')" onmouseleave="hideCardHoverModal()" onclick="openModal(this)"></div></td>' +
                     '<td><strong>' + (representative.name || '') + '</strong></td>' +
                     '<td class="' + threatClass + '">' + representative.threat_level + '</td>' +
                     '<td>' + (representative.special_ability || '') + '</td>';
@@ -8950,7 +8951,7 @@
                                 cardsHtml += `
                                     <div class="deck-card-editor-item preview-view special-card" draggable="true" data-index="${index}" 
                                          data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()">
                                         <div class="deck-card-editor-info">
                                             <div class="deck-card-editor-name">${(card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
@@ -9101,7 +9102,7 @@
                         cardsHtml += `
                                 <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass}" draggable="true" data-index="${index}" 
                                      ${bgImageData}
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()">
                                 <div class="deck-card-editor-info">
                                         <div class="deck-card-editor-name">${card.type === 'power' ? `${availableCard.value} - ${availableCard.power_type}` : (card.type === 'teamwork' ? availableCard.card_type : (availableCard.name || availableCard.card_name || getCardName(card))).replace(/\\'92/g, "'")}</div>
@@ -9355,7 +9356,7 @@
         }
         
         // Show card hover modal - two-layer: thumb stays visible, full-res fades in on top (no flash)
-        function showCardHoverModal(imagePath, cardName) {
+        function showCardHoverModal(imagePath, cardName, cardId, cardType) {
             const modal = document.getElementById('cardHoverModal');
             const image = document.getElementById('cardHoverImage');
             const caption = document.getElementById('cardHoverCaption');
@@ -9363,7 +9364,12 @@
             
             if (modal && image && caption) {
                 const fullResPath = (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) ? '/' + imagePath : imagePath;
-                const thumbnailPath = (typeof window.toThumbnailPath === 'function') ? window.toThumbnailPath(fullResPath) : fullResPath;
+                let thumbnailPath = fullResPath;
+                if (cardType === 'character' && typeof window.toThumbnailPath === 'function') {
+                    thumbnailPath = window.toThumbnailPath(fullResPath);
+                } else if ((cardType === 'location' || cardType === 'mission') && typeof window.toThumbnailPathForType === 'function') {
+                    thumbnailPath = window.toThumbnailPathForType(fullResPath, cardType === 'location' ? 'locations' : 'missions');
+                }
 
                 window._hoverModalRequestId = (window._hoverModalRequestId || 0) + 1;
                 const thisRequestId = window._hoverModalRequestId;
@@ -10394,7 +10400,7 @@
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
                                              data-render-key="${renderKey}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${representative.name}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(representative.name || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${representative.name}"
                                              title="${disabledTitle}">
@@ -10515,7 +10521,7 @@
                                              data-type="${category.type}" 
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${representative.card_name || representative.name}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(representative.card_name || representative.name || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${representative.card_name || representative.name}"
                                              title="${disabledTitle}">
@@ -10591,7 +10597,7 @@
                                              data-type="${category.type}" 
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${representative.name}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(representative.name || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${representative.name}">
                                             <div class="card-item-content">${representative.name}</div>
@@ -10663,7 +10669,7 @@
                                              data-type="${category.type}" 
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${representative.name}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(representative.name || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${representative.name}">
                                             <div class="card-item-content">${representative.name}</div>
@@ -10739,7 +10745,7 @@
                                              data-type="${category.type}" 
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${representative.name}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(representative.name || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${representative.name}">
                                             <div class="card-item-content">${representative.name}</div>
@@ -10807,7 +10813,7 @@
                                              draggable="true" 
                                              data-type="${category.type}" 
                                              data-id="${card.id}"
-                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                             onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
                                             <div class="card-item-content">${summary}</div>
@@ -10837,7 +10843,7 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
@@ -10854,7 +10860,7 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
@@ -10871,7 +10877,7 @@
                                          draggable="true" 
                                          data-type="${category.type}" 
                                          data-id="${card.id}"
-                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type)}', '${summary}')"
+                                         onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${summary}">
                                         <div class="card-item-content">${summary}</div>
@@ -10978,7 +10984,7 @@
                                              data-type="${category.type}" 
                                              data-id="${displayCard.id}"
                                              data-all-cards="${allCardsJson}"
-                                             onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${summary}')"
+                                             onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${summary}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                              onmouseleave="hideCardHoverModal()"
                                              data-name="${summary}">
                                             <div class="card-item-content">${summary}</div>
@@ -11041,7 +11047,7 @@
                                          data-type="${category.type}" 
                                          data-id="${displayCard.id}"
                                          data-all-cards="${allCardsJson}"
-                                         onmouseenter="showCardHoverModal('${displayCard.imagePath}', '${cardName}')"
+                                         onmouseenter="showCardHoverModal('${(displayCard.imagePath || '').replace(/'/g, "\\'")}', '${(cardName || '').replace(/'/g, "\\'")}', '${(displayCard.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                          onmouseleave="hideCardHoverModal()"
                                          data-name="${cardName}">
                                         <div class="card-item-content">${cardName}</div>

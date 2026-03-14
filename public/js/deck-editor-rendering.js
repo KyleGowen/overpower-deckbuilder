@@ -168,12 +168,13 @@ function renderDeckCardsListView() {
                     
                     const cardName = availableCard.name || availableCard.card_name || 'Unknown Card';
                     const imagePath = getCardImagePath(availableCard, card.type);
-                    
+                    const escapedCardId = (card.cardId || '').replace(/'/g, "\\'");
+                    const escapedCardType = (card.type || '').replace(/'/g, "\\'");
                     html += `
                         <div class="deck-list-item" 
                              data-card-id="${card.cardId}"
                              data-type="${card.type}"
-                             onmouseenter="showCardHoverModal('${imagePath}', '${cardName.replace(/'/g, "\\'")}')"
+                             onmouseenter="showCardHoverModal('${imagePath.replace(/'/g, "\\'")}', '${cardName.replace(/'/g, "\\'")}', '${escapedCardId}', '${escapedCardType}')"
                              onmouseleave="hideCardHoverModal()">
                             <div class="deck-list-item-quantity">${card.quantity}</div>
                             <div class="deck-list-item-name">
@@ -257,10 +258,11 @@ function renderDeckCardsListView() {
                     cardName = availableCard.name || availableCard.card_name || 'Unknown Card';
                 }
                 const imagePath = getCardImagePath(availableCard, card.type);
-                
+                const escapedCardId = (card.cardId || '').replace(/'/g, "\\'");
+                const escapedCardType = (card.type || '').replace(/'/g, "\\'");
                 html += `
                     <div class="deck-list-item" 
-                         onmouseenter="showCardHoverModal('${imagePath}', '${cardName.replace(/'/g, "\\'")}')"
+                         onmouseenter="showCardHoverModal('${imagePath.replace(/'/g, "\\'")}', '${cardName.replace(/'/g, "\\'")}', '${escapedCardId}', '${escapedCardType}')"
                          onmouseleave="hideCardHoverModal()">
                         <div class="deck-list-item-quantity">${card.quantity}</div>
                         <div class="deck-list-item-name">
@@ -1232,7 +1234,7 @@ function renderDeckCardsCardView() {
                              data-card-id="${card.cardId}"
                              data-type="${card.type}"
                              data-instance="${i + 1}"
-                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', null, null, ${instanceIsFoil})"
+                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}', ${instanceIsFoil})"
                              onmouseleave="hideCardHoverModal()">
                             <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
                                 ${useTwoLayer
@@ -1795,7 +1797,7 @@ async function displayDeckCardsForEditing() {
                         cardsHtml += `
                             <div class="deck-card-editor-item preview-view ${cardClass}" draggable="true" data-index="${index}" data-type="${card.type}"
                                  data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${cardDisplayName.replace(/'/g, "\\'")}')"
+                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${cardDisplayName.replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
                                  ondragstart="handleDeckCardDragStart(event)"
                                  ondragend="handleDeckCardDragEnd(event)"
@@ -1945,7 +1947,7 @@ async function displayDeckCardsForEditing() {
                             cardsHtml += `
                                 <div class="deck-card-editor-item preview-view power-card" draggable="true" data-index="${index}" data-type="${card.type}"
                                      data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${`${availableCard.value} - ${availableCard.power_type}`.replace(/'/g, "\\'")}')"
+                                     onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${`${availableCard.value} - ${availableCard.power_type}`.replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}')"
                                      onmouseleave="hideCardHoverModal()"
                                      ondragstart="handleDeckCardDragStart(event)"
                                      ondragend="handleDeckCardDragEnd(event)"
@@ -2037,7 +2039,7 @@ async function displayDeckCardsForEditing() {
                         cardsHtml += `
                             <div class="deck-card-editor-item preview-view power-card" draggable="true" data-index="${index}" data-type="${card.type}"
                                  data-bg-image="${getCardImagePath(availableCard, card.type)}"
-                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${`${availableCard.value} - ${availableCard.power_type}`.replace(/'/g, "\\'")}')"
+                                 onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${`${availableCard.value} - ${availableCard.power_type}`.replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
                                  ondragstart="handleDeckCardDragStart(event)"
                                  ondragend="handleDeckCardDragEnd(event)"
@@ -2319,7 +2321,7 @@ async function displayDeckCardsForEditing() {
                 cardsHtml += `
                         <div class="deck-card-editor-item preview-view ${characterClass} ${powerClass} ${locationClass} ${missionClass} ${eventClass} ${aspectClass} ${teamworkClass} ${allyUniverseClass} ${basicUniverseClass} ${advancedUniverseClass} ${trainingClass} ${koDimmedClass}" draggable="true" data-index="${index}" data-type="${card.type}" data-card-id="${card.cardId}"
                              ${bgImageData}
-                             onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type)}', '${cardDisplayNameForPreview.replace(/'/g, "\\'")}', null, null, ${tileHoverIsFoil})"
+                             onmouseenter="showCardHoverModal('${getCardImagePath(availableCard, card.type).replace(/'/g, "\\'")}', '${cardDisplayNameForPreview.replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}', ${tileHoverIsFoil})"
                          onmouseleave="hideCardHoverModal()"
                          ondragstart="handleDeckCardDragStart(event)"
                          ondragend="handleDeckCardDragEnd(event)"

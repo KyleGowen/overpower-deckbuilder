@@ -119,10 +119,14 @@ function displayDeckEditorSearchResults(results) {
     if (results.length === 0) {
         searchResults.innerHTML = '<div class="deck-editor-search-result">No cards found</div>';
     } else {
-        const htmlContent = results.map(card => `
+        const htmlContent = results.map(card => {
+            const escapedImage = (card.image || '').replace(/'/g, "\\'");
+            const escapedCardId = String(card.id || '').replace(/'/g, "\\'");
+            const escapedCardType = String(card.type || '').replace(/'/g, "\\'");
+            return `
             <div class="deck-editor-search-result" 
                  onclick="addCardToDeckFromSearch('${card.id}', '${card.type}', '${card.name.replace(/'/g, "\\'")}')"
-                 onmouseenter="showCardHoverModal('${card.image}', '${card.name.replace(/'/g, "\\'")}')"
+                 onmouseenter="showCardHoverModal('${escapedImage}', '${card.name.replace(/'/g, "\\'")}', '${escapedCardId}', '${escapedCardType}')"
                  onmouseleave="hideCardHoverModal()">
                 <div class="deck-editor-search-result-image" style="background-image: url('${card.image}')"></div>
                 <div class="deck-editor-search-result-info">
@@ -131,7 +135,8 @@ function displayDeckEditorSearchResults(results) {
                     ${card.character ? `<div class="deck-editor-search-result-character">${card.character}</div>` : ''}
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
         searchResults.innerHTML = htmlContent;
     }

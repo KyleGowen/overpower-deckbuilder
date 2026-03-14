@@ -374,7 +374,7 @@ function renderCardCell(card) {
                      decoding="async"
                      onload="${imageOnLoad}"
                      onerror="(function(img){var t=img.dataset.altTried;if(!t){img.dataset.altTried='1';var s=img.src||img.dataset.src;if(s&&s.endsWith('.webp')){img.src=s.replace(/\\.webp$/,'.png');return;}if(s&&s.endsWith('.png')){img.src=s.replace(/\\.png$/,'.webp');return;}}img.onerror=null;img.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iMTAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';img.style.cursor='default';})(this)"
-                     onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}', null, null, ${!!card.is_foil})"
+                     onmouseenter="showCardHoverModal('${fullResPath.replace(/'/g, "\\'")}', '${escapedName}', '${(card.id || '').replace(/'/g, "\\'")}', '${(cardType || '').replace(/'/g, "\\'")}', ${!!card.is_foil})"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">${foilWrapClose}
             </div>

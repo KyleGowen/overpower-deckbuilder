@@ -25,7 +25,7 @@ function displayMissions(missions) {
                      alt="${mission.card_name}" 
                      loading="lazy"
                      decoding="async"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image)}', '${mission.card_name.replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('/src/resources/cards/images/missions/${mapImagePathToActualFile(mission.image).replace(/'/g, "\\'")}', '${mission.card_name.replace(/'/g, "\\'")}', '${(mission.id || '').replace(/'/g, "\\'")}', 'mission')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)"
                      onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
@@ -78,7 +78,7 @@ function displayEvents(events) {
                      decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/events/${mapImagePathToActualFile(event.image)}', '${event.name.replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('/src/resources/cards/images/events/${mapImagePathToActualFile(event.image).replace(/'/g, "\\'")}', '${event.name.replace(/'/g, "\\'")}', '${(event.id || '').replace(/'/g, "\\'")}', 'event')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -132,7 +132,7 @@ function displayAspects(aspects) {
                      decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image)}', '${aspect.card_name.replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('/src/resources/cards/images/aspects/${mapImagePathToActualFile(aspect.image).replace(/'/g, "\\'")}', '${aspect.card_name.replace(/'/g, "\\'")}', '${(aspect.id || '').replace(/'/g, "\\'")}', 'aspect')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -236,7 +236,7 @@ function displayAdvancedUniverse(advancedUniverse) {
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                      onclick="openModal(this)"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/${card.image}', '${card.name.replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('/src/resources/cards/images/${(card.image || '').replace(/'/g, "\\'")}', '${card.name.replace(/'/g, "\\'")}', '${(card.id || '').replace(/'/g, "\\'")}', 'advanced-universe')"
                      onmouseleave="hideCardHoverModal()">
             </td>
             <td>
@@ -435,7 +435,7 @@ function displayPowerCards(cards) {
                          alt="${currentImageName}" 
                          style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                         onmouseenter="showCardHoverModal('${currentImagePath}', '${currentImageName.replace(/'/g, "\\'")}')"
+                         onmouseenter="showCardHoverModal('${(currentImagePath || '').replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'power')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
