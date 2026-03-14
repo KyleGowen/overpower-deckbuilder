@@ -681,10 +681,17 @@
                     fullResLayer.classList.remove('card-hover-image-full--loaded');
                     const fullResImg = new Image();
                     fullResImg.onload = function() {
-                        if (window._hoverModalRequestId === thisRequestId && fullResLayer) {
-                            fullResLayer.src = fullResPath;
-                            fullResLayer.classList.add('card-hover-image-full--loaded');
-                        }
+                        if (window._hoverModalRequestId !== thisRequestId || !fullResLayer) return;
+                        fullResLayer.src = fullResPath;
+                        fullResLayer.decode().then(function() {
+                            if (window._hoverModalRequestId === thisRequestId && fullResLayer) {
+                                fullResLayer.classList.add('card-hover-image-full--loaded');
+                            }
+                        }).catch(function() {
+                            if (window._hoverModalRequestId === thisRequestId && fullResLayer) {
+                                fullResLayer.classList.add('card-hover-image-full--loaded');
+                            }
+                        });
                     };
                     fullResImg.onerror = function() {
                         // Leave full-res layer hidden; thumb remains visible

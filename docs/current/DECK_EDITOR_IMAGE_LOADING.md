@@ -6,3 +6,5 @@ Deck editor card-view images use **thumbnail-first + progressive full-res** for 
 - **Hover modal**: Same two-layer pattern when thumb ≠ full-res (`card-hover-modal.js`): one img for thumb (shown immediately), one for full-res (opacity 0 → 1 when loaded). Uses `toThumbnailPath` and `toThumbnailPathForType` from `card-image-utils.js`.
 
 Path helpers: `getCardImagePath(..., { useThumbnail: true })`, `toThumbnailPath`, `toThumbnailPathForType`. Thumbnail generation and pipeline: see [IMAGE_PIPELINE.md](IMAGE_PIPELINE.md).
+
+**Best practice (two-layer, decode before reveal):** See [PROGRESSIVE_IMAGE_LOADING.md](PROGRESSIVE_IMAGE_LOADING.md) for the full rationale and the decode-before-reveal rule.

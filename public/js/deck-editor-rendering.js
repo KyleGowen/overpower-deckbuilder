@@ -25,7 +25,8 @@ function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
 /**
  * After card-view HTML is in the DOM, progressively load full-res for tiles that show a thumbnail.
  * Targets only .card-view-image-full (two-layer markup). Preloads full-res, then sets the full-res
- * layer's src and adds card-view-image-full--loaded so it fades in over the thumb (no flash).
+ * layer's src, waits for that layer's decode(), then adds card-view-image-full--loaded so it fades
+ * in over the thumb with no flash (decode-before-reveal). See docs/current/PROGRESSIVE_IMAGE_LOADING.md.
  */
 function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
     if (!deckCardsEditor) return;
@@ -35,10 +36,17 @@ function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
         if (!fullRes) return;
         const fullResImg = new Image();
         fullResImg.onload = function () {
-            if (img.getAttribute('data-full-res') === fullRes) {
-                img.src = fullRes;
-                img.classList.add('card-view-image-full--loaded');
-            }
+            if (img.getAttribute('data-full-res') !== fullRes) return;
+            img.src = fullRes;
+            img.decode().then(function () {
+                if (img.getAttribute('data-full-res') === fullRes) {
+                    img.classList.add('card-view-image-full--loaded');
+                }
+            }).catch(function () {
+                if (img.getAttribute('data-full-res') === fullRes) {
+                    img.classList.add('card-view-image-full--loaded');
+                }
+            });
         };
         fullResImg.onerror = function () {
             // Leave full-res layer hidden; thumbnail remains visible
