@@ -211,11 +211,12 @@ The modal is defined once in the HTML:
 - 100ms delay prevents rapid show/hide cycles when mouse moves quickly
 - Timeout is cleared if `showCardHoverModal()` is called again before hide completes
 
-### Image Loading
+### Image Loading and Two-Layer Progressive Load
 
-- Image source is set directly: `image.src = imagePath`
-- Error and load handlers are attached but currently do nothing
-- Future enhancement: Could show error state or loading indicator
+- For character/location/mission, the modal uses a **two-layer** setup: a base `#cardHoverImage` (thumbnail) and an optional `.card-hover-image-full` layer (full-res) that fades in when loaded. Paths come from `toThumbnailPath` / `toThumbnailPathForType` in `card-image-utils.js`.
+- **Clearing layers on each show**: The modal reuses a single shared `<img>` (and one full-res layer). Changing `img.src` to a new URL does **not** clear the current paint—the browser keeps showing the previous image until the new resource loads. That caused the "thumbnail locked to first hovered card" bug in collection view (e.g. FOIL section). **Fix:** at the start of every `showCardHoverModal` call, we clear the base image (`image.src = ''`) and the full-res layer (`fullResLayer.src = ''`, remove `card-hover-image-full--loaded`) before setting the new thumbnail/full-res. That way the modal never displays the previous card while the new one is loading.
+- Request ordering is guarded by `window._hoverModalRequestId`: when a full-res load completes, we only apply it if `thisRequestId === _hoverModalRequestId`, so an older load never overwrites a newer hover.
+- Error and load handlers are attached on the base image; the full-res layer stays hidden on error so the thumbnail remains visible.
 
 ## CSS Styling
 

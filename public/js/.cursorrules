@@ -2,3 +2,4 @@
 
 - **Vanilla JS only** — no frameworks. Entry points and load order are documented in [docs/FRONTEND_SCRIPT_MANIFEST.md](../../docs/FRONTEND_SCRIPT_MANIFEST.md).
 - Scripts are loaded via `<script src="">` in HTML; do not remove or rename files that are listed in the manifest without updating the manifest and HTML.
+- **Card hover modal** (`card-hover-modal.js`): Uses a single shared `#cardHoverImage` and optional `.card-hover-image-full` layer. On each `showCardHoverModal` call we **clear both layers first** (set `image.src = ''` and clear the full-res layer) before setting the new image URL(s), so the previous card is never shown while the new one loads (avoids "thumbnail locked to first hover" in collection/FOIL view). See [docs/card-hover-modal.md](../../docs/card-hover-modal.md).

@@ -107,6 +107,20 @@ describe('Card Hover Modal - Init and Show/Hide', () => {
 
             expect(mockModal.style.display).toBe('none');
         });
+
+        it('should update image when hovering a second card (no lock to first)', () => {
+            const pathA = '/src/resources/cards/images/specials/card_a.webp';
+            const pathB = '/src/resources/cards/images/specials/card_b.webp';
+            const mockEvent = createMockMouseEvent(100, 100);
+            (window as any).event = mockEvent;
+
+            window.showCardHoverModal!(pathA, 'Card A');
+            expect(mockImage.src).toContain('card_a.webp');
+
+            window.showCardHoverModal!(pathB, 'Card B');
+            expect(mockImage.src).toContain('card_b.webp');
+            expect(mockImage.src).not.toContain('card_a.webp');
+        });
     });
 
     describe('showCardHoverModal() - Timeout Management', () => {

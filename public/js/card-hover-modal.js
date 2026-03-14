@@ -642,6 +642,16 @@
         const stats = document.getElementById('cardHoverStats');
         
         if (modal && image && caption) {
+            // Clear both layers immediately so we never show the previous card while the new one loads
+            // (changing img.src does not clear the current paint until the new resource loads).
+            // See docs/card-hover-modal.md "Image Loading and Two-Layer Progressive Load".
+            image.src = '';
+            const existingFullResLayer = imageWrap ? imageWrap.querySelector('.card-hover-image-full') : null;
+            if (existingFullResLayer) {
+                existingFullResLayer.src = '';
+                existingFullResLayer.classList.remove('card-hover-image-full--loaded');
+            }
+
             // Normalize path (ensure leading slash for relative paths)
             const fullResPath = (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) ? '/' + imagePath : imagePath;
             let thumbnailPath = fullResPath;

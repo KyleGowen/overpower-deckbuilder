@@ -1,5 +1,9 @@
 # Cursor AI Assistant Rules for Overpower Deckbuilder
 
+## Local Admin Login
+- **When you need to log in locally as an ADMIN account**, use username **kyle** and password **test**
+- This applies only to local development; do not use or document these credentials in production or public docs
+
 ## Ship Command
 - **When the user says "ship", it means: commit and push everything to git**
 - Stage all changes, create a commit, and push to the remote
