@@ -1,8 +1,8 @@
 # Deck editor and card table CSS
 
 - **card-tables.css**: Styles for card tables (database view) and for the deck editor Tile View and Card View. Do not conflate with deck selection tiles (different CSS).
-- **Card View** (`.deck-cards-editor.card-view`): Each card is a `.deck-card-card-view-item` with `data-type` (character, location, event, mission, aspect, etc.). Two layout patterns:
-  - **Portrait**: Image fills frame; `.card-view-actions` **below** the frame (`position: absolute`, `bottom: -35px`). Applies to mission, aspect, special, power, teamwork, ally, basic_universe, advanced_universe, training only.
-  - **Unified frame (Events, character, location)**: Fixed-height `.card-foil-img-wrap`, `.card-view-actions` **inside** the frame below the image. Same layout for all three; character/location have different buttons (Change Art, Foil, KO, Reserve, etc.) but same structure as Events. **Do not alter event-only rules** — event styling must remain unchanged.
-- Exact dimensions and breakpoints are documented in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) (Deck Editor Card View Styling).
-- **Two-layer progressive load** (card-view and hover modal): Thumb + full-res are stacked; full-res fades in via `--loaded` class. Pattern and rationale (including decode-before-reveal): [docs/current/PROGRESSIVE_IMAGE_LOADING.md](../../docs/current/PROGRESSIVE_IMAGE_LOADING.md).
+- **Card View** (`.deck-cards-editor.card-view`): Each card is a `.deck-card-card-view-item` with `data-type` and `data-orientation`. **Orientation rule:** only character, location, and event are landscape; all other types are portrait. **Do not regress:** see [docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md](../../docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md).
+  - **Landscape** (character, location, event) — **reusable layout:** Card item and `.card-foil-img-wrap` have **no visible frame** (border: none, background: transparent, outline: none, box-shadow: none). Image fills wrap edge-to-edge with **bevelled corners** (border-radius: 8px on wrap and images). `.card-view-actions` in flow **below** the image with padding. Same CSS block for all three; only wrap height differs by type. Do not add border/background to item or wrap.
+  - **Portrait** (mission, special, aspect, power, etc.): Image fills frame; `.card-view-actions` **below** the frame (`position: absolute`, `bottom: -35px`).
+- Exact dimensions and breakpoints: [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) (Deck Editor Card View Styling).
+- **Two-layer progressive load** (card-view and hover modal): Thumb + full-res are stacked; full-res fades in via `--loaded` class. [docs/current/PROGRESSIVE_IMAGE_LOADING.md](../../docs/current/PROGRESSIVE_IMAGE_LOADING.md).

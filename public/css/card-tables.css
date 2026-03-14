@@ -253,15 +253,21 @@
             position: relative; /* Enable absolute positioning for buttons */
         }
         
-        /* Landscape orientation: type-specific aspect ratios to match thumb/deck selection (no shift when full-res loads) */
+        /* Landscape orientation (only character, location, event): image fills, bevelled corners, no frame; buttons below */
         .deck-card-card-view-item[data-type="character"],
         .deck-card-card-view-item[data-type="location"],
         .deck-card-card-view-item[data-type="event"] {
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             justify-content: flex-start;
+            padding: 0;
+            overflow: visible;
+            background: transparent !important;
+            border: none !important;
+            outline: none;
+            box-shadow: none;
         }
-        /* Card width fixed; height from content (wrap + margin + actions) */
+        /* Card width fixed; height from content (wrap + actions) */
         .deck-card-card-view-item[data-type="character"] {
             width: 250px;  /* aspect 380/280 → image 250×184 */
             height: auto;
@@ -271,7 +277,7 @@
             height: auto;
         }
         .deck-card-card-view-item[data-type="event"] {
-            width: 140px;  /* aspect 280/400 → image 140×200 */
+            width: 250px;  /* landscape, same as location 250×160 */
             height: auto;
         }
         
@@ -280,6 +286,20 @@
             border-color: #4ecdc4;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        /* Landscape: hover applies to image wrap only (frame stays around image); item still lifts */
+        .deck-card-card-view-item[data-type="character"]:hover,
+        .deck-card-card-view-item[data-type="location"]:hover,
+        .deck-card-card-view-item[data-type="event"]:hover {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            transform: translateY(-2px);
+        }
+        .deck-card-card-view-item[data-type="character"]:hover .card-foil-img-wrap,
+        .deck-card-card-view-item[data-type="location"]:hover .card-foil-img-wrap,
+        .deck-card-card-view-item[data-type="event"]:hover .card-foil-img-wrap {
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.35);
         }
         
         /* Card View Image */
@@ -354,31 +374,74 @@
             object-position: center top;
         }
         
-        /* Landscape wrapper: fixed height so image area matches thumb aspect exactly */
+        /* Landscape wrapper: image only, no frame; clip to bevelled corners; buttons sit below */
         .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap,
         .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap,
         .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
             flex-grow: 0;
             flex-shrink: 0;
             width: 100%;
-            margin-bottom: 8px;
+            margin: 0;
+            padding: 0 !important;
+            border-radius: 8px;
+            border: none !important;
+            background: transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
+            overflow: hidden;
+            box-sizing: border-box;
+            transition: box-shadow 0.2s ease;
         }
         .deck-card-card-view-item[data-type="character"] .card-foil-img-wrap {
             height: 184px; /* aspect 250/184 = thumb 380/280 */
         }
         .deck-card-card-view-item[data-type="location"] .card-foil-img-wrap {
-            height: 160px; /* aspect 250/160 = thumb 500/320 */
+            height: 160px; /* same frame treatment as character: 250×160, image fills wrap */
         }
         .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-            height: 200px; /* aspect 140/200 = thumb 280/400 */
+            height: 160px; /* landscape, same as location 250×160 */
         }
         
+        /* Landscape: image fills wrap edge-to-edge; bevelled corners (like character cards); no inner frame */
         .deck-card-card-view-item[data-type="character"] .card-view-image,
         .deck-card-card-view-item[data-type="location"] .card-view-image,
         .deck-card-card-view-item[data-type="event"] .card-view-image {
-            width: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none;
+            object-fit: cover;
             object-position: center top;
-            margin-right: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            border-radius: 8px !important;
+            display: block;
+            vertical-align: top;
+        }
+        .deck-card-card-view-item[data-type="character"] .card-view-image-thumb,
+        .deck-card-card-view-item[data-type="character"] .card-view-image-full,
+        .deck-card-card-view-item[data-type="location"] .card-view-image-thumb,
+        .deck-card-card-view-item[data-type="location"] .card-view-image-full,
+        .deck-card-card-view-item[data-type="event"] .card-view-image-thumb,
+        .deck-card-card-view-item[data-type="event"] .card-view-image-full {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            border-radius: 8px !important;
+        }
+        /* Location and event: show full image (no bottom crop); character keeps cover */
+        .deck-card-card-view-item[data-type="location"] .card-view-image,
+        .deck-card-card-view-item[data-type="location"] .card-view-image-thumb,
+        .deck-card-card-view-item[data-type="location"] .card-view-image-full,
+        .deck-card-card-view-item[data-type="event"] .card-view-image,
+        .deck-card-card-view-item[data-type="event"] .card-view-image-thumb,
+        .deck-card-card-view-item[data-type="event"] .card-view-image-full {
+            object-fit: contain !important;
+            object-position: center center !important;
         }
         
         /* Card View Actions Container */
@@ -405,12 +468,13 @@
             z-index: 10; /* Ensure buttons are visible */
         }
         
-        /* Landscape card actions positioning */
+        /* Landscape card actions: row below image with padding */
         .deck-card-card-view-item[data-type="character"] .card-view-actions,
         .deck-card-card-view-item[data-type="location"] .card-view-actions,
         .deck-card-card-view-item[data-type="event"] .card-view-actions {
-            margin-top: auto; /* Push buttons to bottom of card */
-            flex-shrink: 0; /* Prevent buttons from shrinking */
+            margin-top: auto;
+            flex-shrink: 0;
+            padding: 8px;
         }
         
         /* Card View Buttons */
@@ -680,11 +744,11 @@
                 height: 144px;
             }
             .deck-card-card-view-item[data-type="event"] {
-                width: 126px;
+                width: 225px;
                 height: auto;
             }
             .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-                height: 180px;
+                height: 144px;
             }
         }
         
@@ -708,11 +772,11 @@
                 height: 130px;
             }
             .deck-card-card-view-item[data-type="event"] {
-                width: 114px;
+                width: 203px;
                 height: auto;
             }
             .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-                height: 163px;
+                height: 130px;
             }
         }
         
@@ -736,11 +800,11 @@
                 height: 117px;
             }
             .deck-card-card-view-item[data-type="event"] {
-                width: 102px;
+                width: 183px;
                 height: auto;
             }
             .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-                height: 146px;
+                height: 117px;
             }
         }
         
@@ -764,10 +828,10 @@
                 height: 103px;
             }
             .deck-card-card-view-item[data-type="event"] {
-                width: 90px;
+                width: 161px;
                 height: auto;
             }
             .deck-card-card-view-item[data-type="event"] .card-foil-img-wrap {
-                height: 129px;
+                height: 103px;
             }
         }

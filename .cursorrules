@@ -109,6 +109,7 @@
 ## Style Guide Maintenance
 - **ALWAYS update the style guide (STYLE_GUIDE.md) when making visual changes to the application**
 - **NEVER make UI/UX changes without documenting them in the style guide**
+- **Deck editor Card View:** Before changing Card View layout or landscape/portrait styling, read [docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md](docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md). Do not add border/background to landscape card item or wrap; keep image fill and bevelled corners (border-radius: 8px). Update that doc and STYLE_GUIDE.md if you change the pattern.
 - When updating visual elements, include:
   1. **CSS class names and selectors used**
   2. **Exact color values, spacing, and positioning**

@@ -1199,7 +1199,10 @@ function renderDeckCardsCardView() {
                 // Check if this character is KO'd (for card view)
                 const isKOdCardView = card.type === 'character' && window.SimulateKO && window.SimulateKO.isKOd(card.cardId);
                 const koDimmedClassCardView = isKOdCardView ? 'ko-dimmed' : '';
-                
+
+                // Orientation: only character, location, event = landscape; all other types = portrait
+                const cardOrientation = (card.type === 'character' || card.type === 'location' || card.type === 'event') ? 'landscape' : 'portrait';
+
                 // Render multiple instances of the card based on quantity
                 for (let i = 0; i < quantity; i++) {
                     // Get instance-specific alternate card ID if it exists
@@ -1237,8 +1240,9 @@ function renderDeckCardsCardView() {
                         : '';
                     
                     cardsHtml += `
-                        <div class="deck-card-card-view-item ${koDimmedClassCardView}" 
-                             data-index="${index}" 
+                        <div class="deck-card-card-view-item ${koDimmedClassCardView}"
+                             data-orientation="${cardOrientation}"
+                             data-index="${index}"
                              data-card-id="${card.cardId}"
                              data-type="${card.type}"
                              data-instance="${i + 1}"
