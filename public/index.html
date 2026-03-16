@@ -2954,7 +2954,7 @@
                                     cardsHtml += `
                                         <div class="character-group">
                                             <div class="character-group-header" onclick="toggleCharacterGroup(this)">
-                                                <span>${htmlEscapedCharacterName} (${stackCards.length})</span>
+                                                <span>${htmlEscapedCharacterName}</span>
                                                 <div class="mission-set-controls">
                                                     <button class="add-all-btn" onclick="event.stopPropagation(); addAllCharacterStack('${escapedCharacterName}')">Add All</button>
                                                     <span class="collapse-icon">▶</span>
@@ -4225,7 +4225,7 @@
                 const groupHeader = group.querySelector('.character-group-header span');
                 if (!groupHeader) return;
 
-                const groupName = groupHeader.textContent.split(' (')[0].toLowerCase();
+                const groupName = groupHeader.textContent.toLowerCase().trim();
                 group.style.display = searchLower === '' || groupName.includes(searchLower) ? 'block' : 'none';
             });
         }

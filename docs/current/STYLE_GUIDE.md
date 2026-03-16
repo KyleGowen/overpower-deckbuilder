@@ -2547,6 +2547,7 @@ The Available Cards pane in the deck editor now includes a new top-level categor
 - **Controls container**: `.mission-set-controls`
 - **Add All button**: `.add-all-btn`
 - **Subdivision search input**: `.character-stack-name-search`
+- **Subdivision labels**: character name only (no per-subdivision card count suffix)
 
 Each group is one character and contains cards in this order:
 1. Original art character card (non-foil)
