@@ -645,6 +645,16 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     });
                 });
             }
+            
+            // Re-apply advanced universe filter now that deck characters are loaded
+            requestAnimationFrame(() => {
+                requestAnimationFrame(async () => {
+                    const advFilterCheckbox = document.getElementById('advancedUniverseCharacterFilter');
+                    if (advFilterCheckbox && advFilterCheckbox.checked) {
+                        await toggleAdvancedUniverseCharacterFilter();
+                    }
+                });
+            });
         } else {
             console.error('Failed to load deck for editing:', data.error);
             showNotification('Deck not found or access denied: ' + data.error, 'error');

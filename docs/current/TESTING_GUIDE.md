@@ -147,6 +147,12 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
 - **Integration tests**: Add `*.test.ts` under `tests/integration/`. Match one of the category patterns above (e.g. `deck-save-security-*.test.ts` for deck save security) so the test runs in the right CI job. See `tests/integration/.cursorrules` for mandatory cleanup rules (track test users/decks, clean up in `finally`).
 - **Frontend tests**: Add `*.test.ts` under `tests/frontend/`.
 
+### Character Stacks Coverage
+
+- **Unit coverage**: `tests/unit/card-filter-toggles.test.ts` includes Character Stacks coexistence behavior so Special Cards "Hide Unusables" does not accidentally filter Character Stacks subdivisions.
+- **Integration coverage**: `tests/integration/deck-editor-character-stacks.test.ts` verifies Character Stacks deck-editor wiring in HTML/JS (category config, Add All handler, search input, and ordering before Characters).
+- **When changing Character Stacks**: update both tests above and re-run `npm run test:unit` and `npm run test:integration`.
+
 ### 🔧 Test Configuration
 
 The tests use a separate test database (`overpower_test`) to avoid affecting your development data. The test database is automatically:

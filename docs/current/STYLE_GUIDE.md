@@ -29,6 +29,7 @@
 26. [Create Your First Deck Tile and Sample Decks](#create-your-first-deck-tile-and-sample-decks)
 27. [Foil Card Shimmer Effect](#foil-card-shimmer-effect)
 28. [Reserve Button Styling](#reserve-button-styling)
+29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
 
 ## Overview
 
@@ -2530,3 +2531,59 @@ When selected, the Reserve button darkens (grey tone) with a pressed-in inset sh
 - **Tile View**: Bottom-right of character card, in `.deck-card-editor-actions`
 - **Card View**: In the card action row
 - **List View**: `.deck-list-item .reserve-btn` with reduced font-size (10px) and padding
+
+## Deck Editor Available Cards Character Stacks
+
+### Overview
+
+The Available Cards pane in the deck editor now includes a new top-level category named **Character Stacks**. It appears as the first category above **Characters** and uses the same grouped subcategory pattern as existing grouped categories (for example, Power Cards groups).
+
+### Category and Group Structure
+
+- **Top-level category**: `Character Stacks` (`.card-category`, `.card-category-header`, `.card-category-content`)
+- **Group container**: `.character-group`
+- **Group header**: `.character-group-header`
+- **Group body**: `.character-group-content`
+- **Controls container**: `.mission-set-controls`
+- **Add All button**: `.add-all-btn`
+- **Subdivision search input**: `.character-stack-name-search`
+
+Each group is one character and contains cards in this order:
+1. Original art character card (non-foil)
+2. One of each special card for that character (non-foil, original-art preference)
+3. One of each Universe: Advanced card for that character (non-foil, original-art preference)
+
+`Any Character` cards are intentionally excluded from Character Stacks.
+
+### Visual Styling (Reused Existing Tokens)
+
+Character Stacks intentionally reuses existing Available Cards styling to match current functionality:
+
+- **Category header background**: `rgba(78, 205, 196, 0.2)` via `.card-category-header`
+- **Group header background**: `rgba(78, 205, 196, 0.1)` via `.character-group-header`
+- **Group hover background**: `rgba(78, 205, 196, 0.2)` via `.character-group-header:hover`
+- **Group border**: `1px solid rgba(255, 255, 255, 0.1)` via `.character-group`
+- **Search input styling** (shared with Characters search):
+  - Background: `rgba(255, 255, 255, 0.1)`
+  - Border: `1px solid rgba(78, 205, 196, 0.3)`
+  - Border radius: `4px`
+  - Font size: `0.8rem`
+  - Width: `150px`
+  - Margin-left: `12px`
+- **Add All button**:
+  - Background: `rgba(255, 255, 255, 0.1)`
+  - Border: `1px solid rgba(255, 255, 255, 0.2)`
+  - Padding: `4px 8px`
+  - Radius: `4px`
+  - Font size: `0.8rem`
+
+### Interaction Behavior
+
+- Groups are collapsed by default and expand/collapse using the existing `toggleCharacterGroup(...)` behavior.
+- Each group’s **Add All** adds one non-foil copy of each stack card to the current deck.
+- Add behavior routes through existing deck editor add rules, so limits and OPD constraints stay consistent with the rest of the editor.
+- Search input filters subdivisions by character name (group header text), matching the Characters category search interaction pattern.
+
+### Responsive Behavior
+
+Character Stacks uses the same responsive behavior as other Available Cards categories because it reuses existing card category and group classes; no additional breakpoints are introduced.

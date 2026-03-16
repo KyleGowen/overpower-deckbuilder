@@ -1448,6 +1448,170 @@ function addAllAdvancedUniverseCardsForCharacter(characterName) {
         });
 }
 
+function addAllCharacterStack(characterName) {
+    const isAlternateArtCard = (card) => {
+        const image = (card.image_path || card.image || '').toLowerCase();
+        return image.includes('/alternate/');
+    };
+
+    const sortPreferredOriginalArt = (cards) => cards.slice().sort((a, b) => {
+        const aIsAlternate = isAlternateArtCard(a);
+        const bIsAlternate = isAlternateArtCard(b);
+        if (aIsAlternate !== bIsAlternate) {
+            return aIsAlternate ? 1 : -1;
+        }
+
+        const aSet = (a.set || 'ERB').trim();
+        const bSet = (b.set || 'ERB').trim();
+        const aIsERB = aSet === 'ERB';
+        const bIsERB = bSet === 'ERB';
+        if (aIsERB !== bIsERB) {
+            return aIsERB ? -1 : 1;
+        }
+
+        const aName = (a.name || a.card_name || '').trim();
+        const bName = (b.name || b.card_name || '').trim();
+        return aName.localeCompare(bName);
+    });
+
+    const dedupeByNameWithOriginalFirst = (cards) => {
+        const byName = new Map();
+        cards.forEach(card => {
+            const name = (card.name || card.card_name || '').trim();
+            if (!name) return;
+            if (!byName.has(name)) {
+                byName.set(name, []);
+            }
+            byName.get(name).push(card);
+        });
+
+        return Array.from(byName.values())
+            .map(group => sortPreferredOriginalArt(group)[0])
+            .filter(Boolean)
+            .sort((a, b) => {
+                const aName = (a.name || a.card_name || '').trim();
+                const bName = (b.name || b.card_name || '').trim();
+                return aName.localeCompare(bName);
+            });
+    };
+
+    const specialCardMatchesCharacter = (card, targetCharacterName) => {
+        const specialCharacter = card.character || card.character_name || '';
+        if (specialCharacter === 'Any Character') {
+            return false;
+        }
+
+        if (specialCharacter.startsWith('Angry Mob') && targetCharacterName.startsWith('Angry Mob')) {
+            if (specialCharacter === 'Angry Mob') {
+                return true;
+            }
+
+            const hasVariantQualifier = specialCharacter.includes(':') || specialCharacter.includes(' - ');
+            if (hasVariantQualifier) {
+                const separator = specialCharacter.includes(':') ? ':' : ' - ';
+                const specialVariant = specialCharacter.split(separator)[1].trim();
+                const charVariantMatch = targetCharacterName.match(/\(([^)]+)\)/);
+                if (!charVariantMatch) return false;
+                const charVariant = charVariantMatch[1].trim();
+                const normalize = (value) => value.toLowerCase().replace(/\s+/g, ' ').trim().replace(/s$/, '');
+                return normalize(specialVariant) === normalize(charVariant);
+            }
+
+            return false;
+        }
+
+        return specialCharacter === targetCharacterName;
+    };
+
+    Promise.all([
+        fetch('/api/characters').then(response => response.json()),
+        fetch('/api/special-cards').then(response => response.json()),
+        fetch('/api/advanced-universe').then(response => response.json())
+    ])
+        .then(async ([charactersData, specialsData, advancedUniverseData]) => {
+            if (!charactersData.success || !Array.isArray(charactersData.data)) {
+                showNotification('Error loading character cards', 'error');
+                return;
+            }
+            if (!specialsData.success || !Array.isArray(specialsData.data)) {
+                showNotification('Error loading special cards', 'error');
+                return;
+            }
+            if (!advancedUniverseData.success || !Array.isArray(advancedUniverseData.data)) {
+                showNotification('Error loading Universe: Advanced cards', 'error');
+                return;
+            }
+
+            const characterCandidates = charactersData.data.filter(card =>
+                !card.is_foil &&
+                (card.name || '').trim() === characterName &&
+                (card.name || '').trim() !== 'Any Character'
+            );
+
+            if (characterCandidates.length === 0) {
+                showNotification(`No character card found for ${characterName}`, 'info');
+                return;
+            }
+
+            const characterCard = sortPreferredOriginalArt(characterCandidates)[0];
+            const specialCards = dedupeByNameWithOriginalFirst(
+                specialsData.data.filter(card => !card.is_foil && specialCardMatchesCharacter(card, characterName))
+            );
+            const advancedUniverseCards = dedupeByNameWithOriginalFirst(
+                advancedUniverseData.data.filter(card =>
+                    !card.is_foil &&
+                    (card.character || '').trim() === characterName &&
+                    (card.character || '').trim() !== 'Any Character'
+                )
+            );
+
+            const cardsInOrder = [
+                { cardType: 'character', card: characterCard },
+                ...specialCards.map(card => ({ cardType: 'special', card })),
+                ...advancedUniverseCards.map(card => ({ cardType: 'advanced-universe', card }))
+            ];
+
+            let addedCount = 0;
+            for (const stackEntry of cardsInOrder) {
+                const card = stackEntry.card;
+                const cardType = stackEntry.cardType;
+                if (!card || !card.id) {
+                    continue;
+                }
+
+                const foilId = window.foilCardMap && window.foilCardMap[card.id];
+                const alreadyInDeck = window.deckEditorCards.some(deckCard =>
+                    deckCard.type === cardType &&
+                    (deckCard.cardId === card.id || (foilId && deckCard.cardId === foilId))
+                );
+
+                if (alreadyInDeck) {
+                    continue;
+                }
+
+                await addCardToEditor(cardType, card.id, card.name || card.card_name || characterName);
+
+                const addedToDeck = window.deckEditorCards.some(deckCard =>
+                    deckCard.type === cardType &&
+                    (deckCard.cardId === card.id || (foilId && deckCard.cardId === foilId))
+                );
+
+                if (addedToDeck) {
+                    addedCount++;
+                }
+            }
+
+            if (addedCount > 0) {
+                showNotification(`Added ${addedCount} cards from ${characterName} stack`, 'success');
+            } else {
+                showNotification(`All cards from ${characterName} stack are already in the deck`, 'info');
+            }
+        })
+        .catch(() => {
+            showNotification('Error loading Character Stack cards', 'error');
+        });
+}
+
 
 // ===== addCardToEditor =====
 
@@ -1771,4 +1935,5 @@ window.removeUnusableBasicUniverse = removeUnusableBasicUniverse;
 window.removeUnusablePowerCards = removeUnusablePowerCards;
 window.addAllSpecialCardsForCharacter = addAllSpecialCardsForCharacter;
 window.addAllAdvancedUniverseCardsForCharacter = addAllAdvancedUniverseCardsForCharacter;
+window.addAllCharacterStack = addAllCharacterStack;
 window.addCardToEditor = addCardToEditor;

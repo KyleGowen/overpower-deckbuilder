@@ -2753,6 +2753,153 @@
                     }
                     results = fetched;
                 }
+
+                const getCategoryCards = (categoryType) => {
+                    const result = results.find(entry => entry.category.type === categoryType);
+                    return result && result.data && Array.isArray(result.data.data) ? result.data.data : [];
+                };
+
+                const isAlternateArtCard = (card) => {
+                    const image = (card.image_path || card.image || '').toLowerCase();
+                    return image.includes('/alternate/');
+                };
+
+                const sortPreferredOriginalArt = (cards) => cards.slice().sort((a, b) => {
+                    const aIsAlternate = isAlternateArtCard(a);
+                    const bIsAlternate = isAlternateArtCard(b);
+                    if (aIsAlternate !== bIsAlternate) {
+                        return aIsAlternate ? 1 : -1;
+                    }
+
+                    const aSet = (a.set || 'ERB').trim();
+                    const bSet = (b.set || 'ERB').trim();
+                    const aIsERB = aSet === 'ERB';
+                    const bIsERB = bSet === 'ERB';
+                    if (aIsERB !== bIsERB) {
+                        return aIsERB ? -1 : 1;
+                    }
+
+                    const aName = (a.name || a.card_name || '').trim();
+                    const bName = (b.name || b.card_name || '').trim();
+                    return aName.localeCompare(bName);
+                });
+
+                const dedupeByNameWithOriginalFirst = (cards) => {
+                    const byName = new Map();
+                    cards.forEach(card => {
+                        const name = (card.name || card.card_name || '').trim();
+                        if (!name) return;
+                        if (!byName.has(name)) {
+                            byName.set(name, []);
+                        }
+                        byName.get(name).push(card);
+                    });
+
+                    return Array.from(byName.values())
+                        .map(group => sortPreferredOriginalArt(group)[0])
+                        .filter(Boolean)
+                        .sort((a, b) => {
+                            const aName = (a.name || a.card_name || '').trim();
+                            const bName = (b.name || b.card_name || '').trim();
+                            return aName.localeCompare(bName);
+                        });
+                };
+
+                const specialCardMatchesCharacter = (card, characterName) => {
+                    const specialCharacter = card.character || card.character_name || '';
+
+                    // Character stacks intentionally exclude Any Character cards.
+                    if (specialCharacter === 'Any Character') {
+                        return false;
+                    }
+
+                    // Preserve Angry Mob variant behavior from existing Add All logic.
+                    if (specialCharacter.startsWith('Angry Mob') && characterName.startsWith('Angry Mob')) {
+                        if (specialCharacter === 'Angry Mob') {
+                            return true;
+                        }
+
+                        const hasVariantQualifier = specialCharacter.includes(':') || specialCharacter.includes(' - ');
+                        if (hasVariantQualifier) {
+                            const separator = specialCharacter.includes(':') ? ':' : ' - ';
+                            const specialVariant = specialCharacter.split(separator)[1].trim();
+                            const charVariantMatch = characterName.match(/\(([^)]+)\)/);
+                            if (!charVariantMatch) return false;
+                            const charVariant = charVariantMatch[1].trim();
+                            const normalize = (value) => value.toLowerCase().replace(/\s+/g, ' ').trim().replace(/s$/, '');
+                            return normalize(specialVariant) === normalize(charVariant);
+                        }
+
+                        return false;
+                    }
+
+                    return specialCharacter === characterName;
+                };
+
+                const characterCards = getCategoryCards('character').filter(card =>
+                    card && !card.is_foil && (card.name || '').trim() !== 'Any Character'
+                );
+                const specialCards = getCategoryCards('special').filter(card => card && !card.is_foil);
+                const advancedUniverseCards = getCategoryCards('advanced-universe').filter(card => card && !card.is_foil);
+
+                const characterGroups = new Map();
+                characterCards.forEach(card => {
+                    const characterName = (card.name || '').trim();
+                    if (!characterName) return;
+                    if (!characterGroups.has(characterName)) {
+                        characterGroups.set(characterName, []);
+                    }
+                    characterGroups.get(characterName).push(card);
+                });
+
+                const characterStackGroups = Array.from(characterGroups.keys())
+                    .sort((a, b) => a.localeCompare(b))
+                    .map(characterName => {
+                        const originalCharacterCard = sortPreferredOriginalArt(characterGroups.get(characterName))[0];
+                        if (!originalCharacterCard) return null;
+
+                        const matchedSpecials = specialCards.filter(card => specialCardMatchesCharacter(card, characterName));
+                        const matchedAdvancedUniverse = advancedUniverseCards.filter(card =>
+                            (card.character || '').trim() === characterName && (card.character || '').trim() !== 'Any Character'
+                        );
+
+                        const specialStackCards = dedupeByNameWithOriginalFirst(matchedSpecials).map(card => ({
+                            cardType: 'special',
+                            id: card.id,
+                            name: card.name || card.card_name || 'Unknown Special',
+                            imagePath: getCardImagePath(card, 'special')
+                        }));
+
+                        const advancedUniverseStackCards = dedupeByNameWithOriginalFirst(matchedAdvancedUniverse).map(card => ({
+                            cardType: 'advanced-universe',
+                            id: card.id,
+                            name: card.name || card.card_name || 'Unknown Universe: Advanced Card',
+                            imagePath: getCardImagePath(card, 'advanced-universe')
+                        }));
+
+                        return {
+                            characterName,
+                            cards: [
+                                {
+                                    cardType: 'character',
+                                    id: originalCharacterCard.id,
+                                    name: originalCharacterCard.name || originalCharacterCard.card_name || characterName,
+                                    imagePath: getCardImagePath(originalCharacterCard, 'character')
+                                },
+                                ...specialStackCards,
+                                ...advancedUniverseStackCards
+                            ]
+                        };
+                    })
+                    .filter(group => group && Array.isArray(group.cards) && group.cards.length > 0);
+
+                results = [
+                    {
+                        category: { type: 'character-stacks', name: 'Character Stacks', nameField: 'characterName' },
+                        data: { success: characterStackGroups.length > 0, data: characterStackGroups }
+                    },
+                    ...results
+                ];
                 
                 let categoriesHtml = '';
                 for (const { category, data } of results) {
@@ -2767,7 +2914,59 @@
                             // Map already populated by fetch-path or reused from loadAvailableCardsData
                             let cardsHtml = '';
                             
-                            if (category.type === 'character') {
+                            if (category.type === 'character-stacks') {
+                                cardsHtml = '';
+
+                                data.data.forEach(stackGroup => {
+                                    const stackCards = stackGroup.cards || [];
+                                    if (stackCards.length === 0) return;
+
+                                    const cardItems = stackCards.map(stackCard => {
+                                        const cardName = (stackCard.name || '').replace(/'/g, "\\'");
+                                        const escapedImagePath = (stackCard.imagePath || '').replace(/'/g, "\\'");
+                                        const escapedCardType = (stackCard.cardType || '').replace(/'/g, "\\'");
+                                        const escapedCardId = (stackCard.id || '').replace(/'/g, "\\'");
+                                        const displayName = stackCard.name || '';
+
+                                        return `
+                                            <div class="card-item"
+                                                 draggable="true"
+                                                 data-type="${stackCard.cardType}"
+                                                 data-id="${stackCard.id}"
+                                                 onmouseenter="showCardHoverModal('${escapedImagePath}', '${cardName}', '${escapedCardId}', '${escapedCardType}')"
+                                                 onmouseleave="hideCardHoverModal()"
+                                                 onclick="handleCardClick(event, '${stackCard.cardType}', '${stackCard.id}', '${cardName}')"
+                                                 data-name="${cardName}">
+                                                <div class="card-item-content">${displayName}</div>
+                                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${stackCard.cardType}', '${stackCard.id}', '${cardName}')" title="${stackCard.cardType === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                            </div>
+                                        `;
+                                    }).join('');
+
+                                    const escapedCharacterName = (stackGroup.characterName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                    const htmlEscapedCharacterName = (stackGroup.characterName || '')
+                                        .replace(/&/g, '&amp;')
+                                        .replace(/</g, '&lt;')
+                                        .replace(/>/g, '&gt;')
+                                        .replace(/"/g, '&quot;')
+                                        .replace(/'/g, '&#39;');
+
+                                    cardsHtml += `
+                                        <div class="character-group">
+                                            <div class="character-group-header" onclick="toggleCharacterGroup(this)">
+                                                <span>${htmlEscapedCharacterName} (${stackCards.length})</span>
+                                                <div class="mission-set-controls">
+                                                    <button class="add-all-btn" onclick="event.stopPropagation(); addAllCharacterStack('${escapedCharacterName}')">Add All</button>
+                                                    <span class="collapse-icon">▶</span>
+                                                </div>
+                                            </div>
+                                            <div class="character-group-content collapsed">
+                                                ${cardItems}
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                            } else if (category.type === 'character') {
                                 // Special handling for characters with stats
                                 const currentCharacterCount = window.deckEditorCards
                                     .filter(card => card.type === 'character')
@@ -3703,7 +3902,7 @@
                                             <div class="category-header-content">
                                                 <span>${category.name} (${data.data.length})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
-                                                    <input type="checkbox" id="advancedUniverseCharacterFilter" onchange="toggleAdvancedUniverseCharacterFilter()">
+                                                    <input type="checkbox" id="advancedUniverseCharacterFilter" checked onchange="toggleAdvancedUniverseCharacterFilter()">
                                                     <span class="toggle-label">Hide Unusables</span>
                                                 </label>
                                             </div>
@@ -3823,6 +4022,33 @@
                                         </div>
                                     </div>
                                 `;
+                            } else if (category.type === 'character-stacks') {
+                                // Character Stacks category - with name search by subdivision
+                                categoriesHtml += `
+                                    <div class="card-category">
+                                        <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
+                                            <div class="category-header-content">
+                                                <span>${category.name} (${data.data.length})</span>
+                                                <input type="text" class="character-stack-name-search" placeholder="Search names..." 
+                                                       onkeyup="filterCharacterStacksByName(this.value)" 
+                                                       onclick="expandCharacterCategoryIfNeeded(this); event.stopPropagation()"
+                                                       onmousedown="preventCategoryCollapse(event)"
+                                                       onselect="preventCategoryCollapse(event)"
+                                                       onfocus="preventCategoryCollapse(event)"
+                                                       onblur="preventCategoryCollapse(event)">
+                                            </div>
+                                            <div class="category-header-controls">
+                                                <span class="collapse-icon">${collapseIcon}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-category-content ${collapsedClass}" 
+                                             ondragover="handleAvailableCardDragOver(event)" 
+                                             ondragleave="handleAvailableCardDragLeave(event)"
+                                             ondrop="handleAvailableCardDrop(event)">
+                                            ${cardsHtml}
+                                        </div>
+                                    </div>
+                                `;
                             } else if (category.type === 'character') {
                                 // Special handling for characters with name search
                                 // Use grouped tile count instead of raw data length
@@ -3925,6 +4151,9 @@
                 // Update power cards filter to show correct counts after categories are loaded
                 updatePowerCardsFilter();
                 
+                // Apply advanced universe filter (checked by default)
+                updateAdvancedUniverseFilter();
+                
                 // Update Assist and Ambush dimming status after cards are loaded
                 updateAssistLimitStatus();
                 updateAmbushLimitStatus();
@@ -3959,8 +4188,10 @@
 
         // Filter characters by name in the Available Cards section
         function filterCharactersByName(searchTerm) {
-            // Find the character category specifically
-            const characterCategory = document.querySelector('.card-category');
+            // Find the character category by its dedicated search input.
+            const characterSearchInput = document.querySelector('.character-name-search');
+            if (!characterSearchInput) return;
+            const characterCategory = characterSearchInput.closest('.card-category');
             if (!characterCategory) return;
             
             const characterCards = characterCategory.querySelectorAll('.character-card');
@@ -3976,6 +4207,26 @@
                         card.style.display = 'none';
                     }
                 }
+            });
+        }
+
+        // Filter Character Stacks subdivisions by character name in Available Cards
+        function filterCharacterStacksByName(searchTerm) {
+            const characterStacksSearchInput = document.querySelector('.character-stack-name-search');
+            if (!characterStacksSearchInput) return;
+
+            const characterStacksCategory = characterStacksSearchInput.closest('.card-category');
+            if (!characterStacksCategory) return;
+
+            const characterGroups = characterStacksCategory.querySelectorAll('.character-group');
+            const searchLower = (searchTerm || '').toLowerCase().trim();
+
+            characterGroups.forEach(group => {
+                const groupHeader = group.querySelector('.character-group-header span');
+                if (!groupHeader) return;
+
+                const groupName = groupHeader.textContent.split(' (')[0].toLowerCase();
+                group.style.display = searchLower === '' || groupName.includes(searchLower) ? 'block' : 'none';
             });
         }
         // setupDragAndDrop function moved to external file

@@ -1,5 +1,18 @@
 # Cursor AI Assistant Rules for Overpower Deckbuilder
 
+## Codebase Search and Find — Use a Subagent
+- **Whenever the agent needs to find something in the codebase**, the agent MUST spawn a subagent that performs the search and returns the final results.
+- This applies to every **read or find task**: locating files, searching for text/symbols, answering "where is X?", "how does Y work?", file patterns, keyword search, or any exploration of the codebase.
+- **Use the `mcp_task` tool** with an appropriate subagent (e.g. `subagent_type: "explore"` for codebase search/exploration). Specify a clear task description and what the subagent should return (e.g. file paths, code locations, or a concise answer).
+- The main agent should treat the subagent’s response as the **final search/locate results** and use that to answer the user or perform follow-up steps—do not re-run the same search directly with other tools.
+- Exception: when the target is a single known file path the user already gave, reading that file directly is fine; the rule applies when the task is to **discover or locate** (find files, find text, find where something is implemented).
+
+## Unit Tests and Integration Tests — Run via Subagent
+- **When the user asks to run Unit Tests or Integration Tests**, the agent MUST spawn a subagent to run them; the subagent reports back to the main agent with the results.
+- Use the **`mcp_task`** tool (e.g. `subagent_type: "shell"`) to run **unit tests** (`npm run test:unit`) and/or **integration tests** (`npm run test:integration`) in a subagent. Give a clear task description (e.g. "Run unit tests and return pass/fail and any failure output").
+- **If the user asks for both** unit and integration tests, spawn **two subagents** (one for each) and run them **in parallel**; each reports back to the main agent.
+- The main agent uses the subagent(s) response(s) as the final test results—summarize for the user and, if there are failures, proceed with fixes or analysis as needed.
+
 ## Local Admin Login
 - **When you need to log in locally as an ADMIN account**, use username **kyle** and password **test**
 - This applies only to local development; do not use or document these credentials in production or public docs

@@ -132,4 +132,81 @@ describe('Card Filter Toggles', () => {
             window.updateSpecialCardsFilter!();
         });
     });
+
+    describe('toggleSpecialCardsCharacterFilter with Character Stacks present', () => {
+        it('should only filter the Special Cards category and leave Character Stacks visible', async () => {
+            document.body.innerHTML = `
+                <input type="checkbox" id="specialCardsCharacterFilter" checked>
+
+                <div class="card-category" id="characterStacksCategory">
+                    <div class="card-category-header">
+                        <div class="category-header-content">
+                            <span>Character Stacks (2)</span>
+                        </div>
+                    </div>
+                    <div class="card-category-content">
+                        <div class="character-group" id="stackRa">
+                            <div class="character-group-header"><span>Ra (7)</span></div>
+                        </div>
+                        <div class="character-group" id="stackZeus">
+                            <div class="character-group-header"><span>Zeus (6)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-category" id="specialCardsCategory">
+                    <div class="card-category-header">
+                        <div class="category-header-content">
+                            <span>Special Cards (2)</span>
+                        </div>
+                    </div>
+                    <div class="card-category-content">
+                        <div class="character-group" id="specialRa">
+                            <div class="character-group-header"><span>Ra (3)</span></div>
+                        </div>
+                        <div class="character-group" id="specialZeus">
+                            <div class="character-group-header"><span>Zeus (3)</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            (global as any).fetch = jest.fn().mockResolvedValue({
+                json: async () => ({
+                    success: true,
+                    data: [
+                        { id: 'char-ra', name: 'Ra' },
+                        { id: 'char-zeus', name: 'Zeus' }
+                    ]
+                })
+            });
+
+            window.availableCardsMap = new Map([
+                ['char-ra', { id: 'char-ra', name: 'Ra' }]
+            ]);
+            window.deckEditorCards = [
+                { type: 'character', cardId: 'char-ra', quantity: 1 }
+            ];
+
+            const stackRa = document.getElementById('stackRa') as HTMLElement;
+            const stackZeus = document.getElementById('stackZeus') as HTMLElement;
+            const specialRa = document.getElementById('specialRa') as HTMLElement;
+            const specialZeus = document.getElementById('specialZeus') as HTMLElement;
+
+            stackRa.style.display = 'block';
+            stackZeus.style.display = 'block';
+            specialRa.style.display = 'block';
+            specialZeus.style.display = 'block';
+
+            await window.toggleSpecialCardsCharacterFilter!();
+
+            // Character Stacks should not be filtered by the Special Cards toggle.
+            expect(stackRa.style.display).toBe('block');
+            expect(stackZeus.style.display).toBe('block');
+
+            // Special Cards should still filter against selected deck characters.
+            expect(specialRa.style.display).toBe('block');
+            expect(specialZeus.style.display).toBe('none');
+        });
+    });
 });

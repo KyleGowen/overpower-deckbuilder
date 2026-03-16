@@ -316,12 +316,14 @@ async function toggleSpecialCardsCharacterFilter() {
     
     const isChecked = filterCheckbox.checked;
     
-    // Find the special cards category by looking for the one with character groups
+    // Find the Special Cards category explicitly.
+    // Character Stacks also uses .character-group, so we cannot rely on that selector.
     const allCategories = document.querySelectorAll('.card-category');
     let specialCardsCategory = null;
     
     for (const category of allCategories) {
-        if (category.querySelector('.character-group')) {
+        const header = category.querySelector('.card-category-header span');
+        if (header && header.textContent.includes('Special Cards')) {
             specialCardsCategory = category;
             break;
         }

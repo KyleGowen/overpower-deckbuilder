@@ -6,3 +6,8 @@
   - **Portrait** (mission, special, aspect, power, etc.): Image fills frame; `.card-view-actions` **below** the frame (`position: absolute`, `bottom: -35px`).
 - Exact dimensions and breakpoints: [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) (Deck Editor Card View Styling).
 - **Two-layer progressive load** (card-view and hover modal): Thumb + full-res are stacked; full-res fades in via `--loaded` class. [docs/current/PROGRESSIVE_IMAGE_LOADING.md](../../docs/current/PROGRESSIVE_IMAGE_LOADING.md).
+- **Character Stacks Available Cards styles**:
+  - Uses existing available-cards category/group styles in `index.css`: `.card-category`, `.character-group`, `.character-group-header`, `.character-group-content`, `.add-all-btn`.
+  - Character Stacks subdivision search input uses `.character-stack-name-search` and intentionally matches `.character-name-search` styling.
+  - Keep shared selector parity between `.character-name-search` and `.character-stack-name-search` to avoid UI drift.
+  - Reference: [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) section "Deck Editor Available Cards Character Stacks".

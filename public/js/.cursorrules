@@ -4,3 +4,9 @@
 - Scripts are loaded via `<script src="">` in HTML; do not remove or rename files that are listed in the manifest without updating the manifest and HTML.
 - **Card hover modal** (`card-hover-modal.js`): Uses a single shared `#cardHoverImage` and optional `.card-hover-image-full` layer. On each `showCardHoverModal` call we **clear both layers first** (set `image.src = ''` and clear the full-res layer) before setting the new image URL(s), so the previous card is never shown while the new one loads (avoids "thumbnail locked to first hover" in collection/FOIL view). See [docs/card-hover-modal.md](../../docs/card-hover-modal.md).
 - **Progressive image loading** (deck editor card-view and card hover modal): Two-layer pattern — thumb stays visible, full-res fades in on top. **Decode before reveal:** set the full-res layer's `src`, then await that layer's `decode()` (with a `.catch()` fallback) before adding the `--loaded` class. Full best practice: [docs/current/PROGRESSIVE_IMAGE_LOADING.md](../../docs/current/PROGRESSIVE_IMAGE_LOADING.md). Deck-editor specifics: [docs/current/DECK_EDITOR_IMAGE_LOADING.md](../../docs/current/DECK_EDITOR_IMAGE_LOADING.md).
+- **Character Stacks (Available Cards)**:
+  - Rendered in `public/index.html` as the first available-cards category (`type: 'character-stacks'`).
+  - Subdivision name filtering is handled by `filterCharacterStacksByName()` (inline in `index.html`) and should only filter Character Stacks groups.
+  - Batch add behavior is handled by `addAllCharacterStack()` in `deck-card-operations.js`.
+  - `card-filter-toggles.js` must target categories by header label (e.g., `Special Cards`) when `.character-group` is shared by multiple categories.
+  - UI behavior and selectors are documented in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) under "Deck Editor Available Cards Character Stacks".
