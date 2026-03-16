@@ -1312,8 +1312,6 @@ async function removeUnusablePowerCards() {
 }
 
 function addAllSpecialCardsForCharacter(characterName) {
-    console.log(`Adding all special cards for character: ${characterName}`);
-    
     // Fetch special cards data to get the cards for this character
     fetch('/api/special-cards')
         .then(response => response.json())
@@ -1367,15 +1365,20 @@ function addAllSpecialCardsForCharacter(characterName) {
                 showNotification(`No special cards found for ${characterName}`, 'info');
                 return;
             }
-            
+
+            // Add All adds only non-foil cards; user can foil individually via the Foil button
+            const cardsToAdd = characterCards.filter(card => !card.is_foil);
+
             let addedCount = 0;
-            
-            characterCards.forEach(card => {
-                // Check if card is already in deck
-                const existingCard = window.deckEditorCards.find(deckCard => 
-                    deckCard.type === 'special' && deckCard.cardId === card.id
+
+            cardsToAdd.forEach(card => {
+                // Already in deck if we have this card as base or as foil (same logical card)
+                const foilId = window.foilCardMap && window.foilCardMap[card.id];
+                const existingCard = window.deckEditorCards.find(deckCard =>
+                    deckCard.type === 'special' &&
+                    (deckCard.cardId === card.id || (foilId && deckCard.cardId === foilId))
                 );
-                
+
                 if (!existingCard) {
                     addCardToEditor('special', card.id, card.name || card.card_name);
                     addedCount++;
@@ -1395,8 +1398,6 @@ function addAllSpecialCardsForCharacter(characterName) {
 }
 
 function addAllAdvancedUniverseCardsForCharacter(characterName) {
-    console.log(`Adding all advanced universe cards for character: ${characterName}`);
-    
     // Fetch advanced universe cards data to get the cards for this character
     fetch('/api/advanced-universe')
         .then(response => response.json())
@@ -1415,15 +1416,20 @@ function addAllAdvancedUniverseCardsForCharacter(characterName) {
                 showNotification(`No advanced universe cards found for ${characterName}`, 'info');
                 return;
             }
-            
+
+            // Add All adds only non-foil cards; user can foil individually via the Foil button
+            const cardsToAdd = characterCards.filter(card => !card.is_foil);
+
             let addedCount = 0;
-            
-            characterCards.forEach(card => {
-                // Check if card is already in deck
-                const existingCard = window.deckEditorCards.find(deckCard => 
-                    deckCard.type === 'advanced-universe' && deckCard.cardId === card.id
+
+            cardsToAdd.forEach(card => {
+                // Already in deck if we have this card as base or as foil (same logical card)
+                const foilId = window.foilCardMap && window.foilCardMap[card.id];
+                const existingCard = window.deckEditorCards.find(deckCard =>
+                    deckCard.type === 'advanced-universe' &&
+                    (deckCard.cardId === card.id || (foilId && deckCard.cardId === foilId))
                 );
-                
+
                 if (!existingCard) {
                     addCardToEditor('advanced-universe', card.id, card.name || card.card_name);
                     addedCount++;
