@@ -1,0 +1,331 @@
+{
+  "generatedAt": "2026-03-17T15:16:14.480Z",
+  "options": {
+    "files": [
+      "lower_gravity.webp",
+      "sacred_wafers_of_amsterdam.webp",
+      "protection_of_saint_michael.webp",
+      "300.webp",
+      "3_quick_strokes.webp",
+      "abner_perrys_lab_assistant.webp",
+      "a_jealous_god.webp",
+      "all_chips_on_the_table.webp",
+      "battle_of_wits.webp"
+    ],
+    "outJson": "/Users/kyle/cursored/docs/generated/special-function-icons-convergence-targeted.json",
+    "outSql": "/Users/kyle/cursored/migrations/generated/special-function-icons-convergence-targeted.sql",
+    "outReport": "/Users/kyle/cursored/docs/generated/special-function-icons-convergence-targeted.md",
+    "minAccept": 0.58,
+    "uncertainBelow": 0.72
+  },
+  "filesScanned": 9,
+  "questionableCards": [
+    {
+      "filename": "300.webp",
+      "notes": [
+        "Half hourglass (remainder of battle) (0.647)",
+        "Crossed swords (offensive action) (0.692)"
+      ]
+    },
+    {
+      "filename": "lower_gravity.webp",
+      "notes": [
+        "Half hourglass (remainder of battle) (0.720)"
+      ]
+    },
+    {
+      "filename": "sacred_wafers_of_amsterdam.webp",
+      "notes": [
+        "Shield (defensive action) (0.656)"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "filename": "3_quick_strokes.webp",
+      "imagePath": "specials/3_quick_strokes.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 1.0861878010950885,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 1.0183128250575872,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.9855407159760998,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_attached_paperclip",
+          "confidence": 0.7735477335981167,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": true,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "300.webp",
+      "imagePath": "specials/300.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.6466682704287418,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.6918353103708432,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 0.7366555518575113,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Half hourglass (remainder of battle) (0.647)",
+        "Crossed swords (offensive action) (0.692)"
+      ]
+    },
+    {
+      "filename": "a_jealous_god.webp",
+      "imagePath": "specials/a_jealous_god.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 1.0562202124090083,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 0.9916193385240701,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 1.035238093817488,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_astral_plane",
+          "confidence": 1.1342584697521976,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": true,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "abner_perrys_lab_assistant.webp",
+      "imagePath": "specials/abner_perrys_lab_assistant.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 1.050766644346449,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.7928069656074506,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_attached_paperclip",
+          "confidence": 0.8941625250125217,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "all_chips_on_the_table.webp",
+      "imagePath": "specials/all_chips_on_the_table.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.7421302444740887,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_astral_plane",
+          "confidence": 0.9933781265822066,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": false,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": true,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "battle_of_wits.webp",
+      "imagePath": "specials/battle_of_wits.webp",
+      "detections": [
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.7465731053713112,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "lower_gravity.webp",
+      "imagePath": "specials/lower_gravity.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.7195827209614234,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 1.0778535359162733,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_attached_paperclip",
+          "confidence": 1.0420810765992805,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": true,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Half hourglass (remainder of battle) (0.720)"
+      ]
+    },
+    {
+      "filename": "protection_of_saint_michael.webp",
+      "imagePath": "specials/protection_of_saint_michael.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.9710481649176714,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 1.0216186103065192,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 1.063933317217481,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_astral_plane",
+          "confidence": 0.8840141016430068,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": false,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": true,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "sacred_wafers_of_amsterdam.webp",
+      "imagePath": "specials/sacred_wafers_of_amsterdam.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.7303983524669543,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.913084432224534,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 0.6555535008363299,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": true,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Shield (defensive action) (0.656)"
+      ]
+    }
+  ]
+}

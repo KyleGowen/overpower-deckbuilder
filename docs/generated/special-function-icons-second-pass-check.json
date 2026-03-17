@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-03-17T14:36:06.242Z",
+  "options": {
+    "files": [
+      "300.webp",
+      "3_quick_strokes.webp",
+      "abner_perrys_lab_assistant.webp",
+      "a_jealous_god.webp",
+      "all_chips_on_the_table.webp",
+      "battle_of_wits.webp"
+    ],
+    "outJson": "/Users/kyle/cursored/docs/generated/special-function-icons-second-pass-check.json",
+    "outSql": "/Users/kyle/cursored/migrations/generated/special-function-icons-second-pass-check.sql",
+    "outReport": "/Users/kyle/cursored/docs/generated/special-function-icons-second-pass-check.md",
+    "minAccept": 0.58,
+    "uncertainBelow": 0.72
+  },
+  "filesScanned": 6,
+  "questionableCards": [
+    {
+      "filename": "3_quick_strokes.webp",
+      "notes": [
+        "Crossed swords (offensive action) (0.687)"
+      ]
+    },
+    {
+      "filename": "a_jealous_god.webp",
+      "notes": [
+        "Half hourglass (remainder of battle) (0.611)",
+        "Crossed swords (offensive action) (0.545)"
+      ]
+    },
+    {
+      "filename": "all_chips_on_the_table.webp",
+      "notes": [
+        "Full hourglass (remainder of game) (0.518)"
+      ]
+    },
+    {
+      "filename": "battle_of_wits.webp",
+      "notes": [
+        "Crossed swords (offensive action) (0.713)"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "filename": "3_quick_strokes.webp",
+      "imagePath": "specials/3_quick_strokes.webp",
+      "detections": [
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.6869638418906203,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Crossed swords (offensive action) (0.687)"
+      ]
+    },
+    {
+      "filename": "300.webp",
+      "imagePath": "specials/300.webp",
+      "detections": [
+        {
+          "label": "icon_defensive_shield",
+          "confidence": 1,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.8275562576774291,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": true,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "a_jealous_god.webp",
+      "imagePath": "specials/a_jealous_god.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_battle",
+          "confidence": 0.6110746429616489,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.5450305933082298,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": false,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": true,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Half hourglass (remainder of battle) (0.611)",
+        "Crossed swords (offensive action) (0.545)"
+      ]
+    },
+    {
+      "filename": "abner_perrys_lab_assistant.webp",
+      "imagePath": "specials/abner_perrys_lab_assistant.webp",
+      "detections": [
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.8280771420029881,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": []
+    },
+    {
+      "filename": "all_chips_on_the_table.webp",
+      "imagePath": "specials/all_chips_on_the_table.webp",
+      "detections": [
+        {
+          "label": "icon_remainder_of_game",
+          "confidence": 0.5182374047535551,
+          "assignedByHeuristic": false
+        },
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.7910093847472639,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Full hourglass (remainder of game) (0.518)"
+      ]
+    },
+    {
+      "filename": "battle_of_wits.webp",
+      "imagePath": "specials/battle_of_wits.webp",
+      "detections": [
+        {
+          "label": "icon_offensive_swords",
+          "confidence": 0.713107004501221,
+          "assignedByHeuristic": false
+        }
+      ],
+      "iconState": {
+        "icon_offensive_swords": true,
+        "icon_defensive_shield": false,
+        "icon_remainder_of_battle": false,
+        "icon_remainder_of_game": false,
+        "icon_attached_paperclip": false,
+        "icon_astral_plane": false,
+        "icon_first_action_only": false
+      },
+      "questionable": [
+        "Crossed swords (offensive action) (0.713)"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,44 @@
 ### Special card type icons and values
 
+## Function Icons (image iconography)
+
+Special-card image iconography is tracked separately from `icons`/`value` (which represent attack stat type and level).
+
+Database boolean fields on `special_cards`:
+
+- `icon_offensive_swords`
+- `icon_defensive_shield`
+- `icon_remainder_of_battle`
+- `icon_remainder_of_game`
+- `icon_attached_paperclip`
+- `icon_astral_plane`
+- `icon_first_action_only`
+
+Rulebook semantics (source: `src/resources/rules/Overpower_Rule-Book_Comprehensive_March_2025.pdf`):
+
+- **Crossed swords**: offensive action / attack-turn use.
+- **Shield**: defensive action / legal on defense.
+- **Half hourglass**: effect remains for the remainder of the battle.
+- **Full hourglass**: effect remains for the remainder of the game.
+- **Paperclip**: card remains attached to the character during its duration.
+- **Astral icon**: card remains in/uses Astral Plane timing/location.
+- **1ST icon**: first action only on the offensive turn.
+
+### Reusable scan workflow
+
+Use the reusable scanner CLI in `src/scripts/scanSpecialFunctionIcons.ts`:
+
+- Full scan: `npm run scan:special-function-icons`
+- Incremental scan: `npm run scan:special-function-icons:incremental -- --files=<file1.webp,file2.webp>`
+
+Outputs:
+
+- JSON: `docs/generated/special-function-icons-scan.json`
+- Review report (includes questionable cards): `docs/generated/special-function-icons-scan.md`
+- SQL updates: `migrations/generated/special-function-icons-updates.sql`
+
+When adding/updating Special images or rows, rerun the scanner and review the questionable-card section before finalizing migrations.
+
 - Generated from database effects (V24) with icon/value inference.
 - MultiPower without specified types shows Energy, Combat, Brute Force, Intelligence at the level; MultiPower with specific types shows only those.
 

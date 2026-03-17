@@ -1,0 +1,13 @@
+# Generated Docs Directory
+
+## Purpose
+
+Holds generated documentation artifacts produced by scripts. Files in this folder are generated outputs and should not be hand-edited unless explicitly noted.
+
+## Rules
+
+- Regenerate files using their source scripts instead of manual edits.
+- For special function-icon outputs, regenerate with:
+  - `npm run scan:special-function-icons`
+  - or incremental: `npm run scan:special-function-icons:incremental -- --files=<file.webp>`
+- Keep questionable-card reporting intact so review can happen before data migrations are finalized.

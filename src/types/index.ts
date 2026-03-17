@@ -82,6 +82,13 @@ export interface SpecialCard {
   is_assist: boolean;
   is_ambush: boolean;
   one_per_deck: boolean;
+  icon_offensive_swords?: boolean;
+  icon_defensive_shield?: boolean;
+  icon_remainder_of_battle?: boolean;
+  icon_remainder_of_game?: boolean;
+  icon_attached_paperclip?: boolean;
+  icon_astral_plane?: boolean;
+  icon_first_action_only?: boolean;
   banned?: boolean;     // Indicates if the card is banned from legal deck construction
   set_number?: string;  // e.g. "036F" for foil rows
   is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only

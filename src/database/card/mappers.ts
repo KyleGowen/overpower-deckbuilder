@@ -51,6 +51,13 @@ export function mapSpecialCardRow(row: DbRow): SpecialCard {
     is_assist: (row.assist as boolean) || false,
     is_ambush: (row.ambush as boolean) || false,
     one_per_deck: (row.one_per_deck as boolean) || false,
+    icon_offensive_swords: (row.icon_offensive_swords as boolean) || false,
+    icon_defensive_shield: (row.icon_defensive_shield as boolean) || false,
+    icon_remainder_of_battle: (row.icon_remainder_of_battle as boolean) || false,
+    icon_remainder_of_game: (row.icon_remainder_of_game as boolean) || false,
+    icon_attached_paperclip: (row.icon_attached_paperclip as boolean) || false,
+    icon_astral_plane: (row.icon_astral_plane as boolean) || false,
+    icon_first_action_only: (row.icon_first_action_only as boolean) || false,
     banned: (row.banned as boolean) || false,
     is_foil: (row.is_foil as boolean) || false,
   };

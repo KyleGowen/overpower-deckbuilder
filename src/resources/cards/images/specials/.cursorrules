@@ -1,0 +1,22 @@
+# Special Card Images Directory
+
+## Purpose
+
+This directory stores full-resolution Special card images used by `special_cards.image_path` records (typically `specials/<filename>.webp`).
+
+## Rules
+
+- **Source format**: `.webp` files only.
+- **No thumbnails**: Special cards are rendered from full-resolution images; do not add a `thumb/` directory here.
+- **Filename convention**: Keep URL-safe lowercase slug names that match DB `image_path` basenames.
+- **Function-icon scan is required**: whenever a new Special image is added (or an existing Special image changes), rerun:
+  - `npm run scan:special-function-icons` for full scan, or
+  - `npm run scan:special-function-icons:incremental -- --files=<file1.webp,file2.webp>`
+- **Backfill workflow**: regenerate SQL updates/migration output and review the questionable-cards report before considering iconography data complete.
+
+## Related Context
+
+- Scanner CLI: `src/scripts/scanSpecialFunctionIcons.ts`
+- Current scan outputs: `docs/generated/special-function-icons-scan.json`, `docs/generated/special-function-icons-scan.md`
+- Function-icon migration: `migrations/V235__Populate_special_function_icon_booleans.sql`
+- Rulebook source: `src/resources/rules/Overpower_Rule-Book_Comprehensive_March_2025.pdf`
