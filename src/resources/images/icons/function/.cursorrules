@@ -1,0 +1,10 @@
+This directory stores function icon image assets used by card rendering and icon pipelines.
+
+Reference:
+- `FUNCTION_ICON_DESCRIPTIONS.md` contains the canonical icon meaning text and rule notes.
+
+Conventions:
+- Keep file names in lowercase snake_case (e.g., reminder_of_game.png).
+- Use transparent-background PNG files.
+- Keep one file per function icon meaning; do not duplicate aliases.
+- Prefer replacing image content in-place over renaming once references exist.
