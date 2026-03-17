@@ -1,0 +1,16 @@
+# Image Icons
+
+Top-level icon images used across the application.
+
+## Power Type Icons (PNG)
+Used in the Special Cards table's Icon column (cell display and filter toggles):
+- energy.png — yellow atom symbol (Energy)
+- combat.png — orange shield/crossed-swords (Combat)
+- brute_force.png — green gem/boulder (Brute Force)
+- intelligence.png — blue book (Intelligence)
+- any-power.png — silver/white circle (Any-Power)
+
+Note: Multi-Power has no dedicated icon yet; falls back to "MP" text.
+
+## Subdirectories
+- function/ — white-on-transparent icons for the Function column (offensive, defensive, hourglasses, paperclip, astral)

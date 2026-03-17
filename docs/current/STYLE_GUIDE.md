@@ -359,15 +359,35 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Table Layout**: `table-layout: fixed !important; width: 100% !important;`
   - **Specificity**: Inline styles in `index.html` for highest CSS specificity override
   - **Responsive**: Maintains consistent width across different screen sizes
-- **Special Cards Function Column**:
-  - **Column order**: Image | Add to Deck | Name | Character | Card Effect | Value | Function
-  - **Width layout** (`#special-cards-table`): `15% | 10% | 16% | 14% | 24% | 9% | 12%`
-  - **Function icon render**:
+- **Special Cards Table Columns**:
+  - **Column order**: Image | Add to Deck | Name | Character | Card Effect | **Icon** | Value | Function
+  - **Width layout** (`#special-cards-table`): `14% | 9% | 15% | 13% | 21% | 8% | 8% | 12%`
+  - **Icon column** (power type icons from the `icons TEXT[]` DB column):
+    - Cell container: `.special-power-icons-cell` (`display: grid`, `grid-template-columns: repeat(2, 20px)`, centered, `gap: 4px`)
+    - Cell icon selector: `.special-power-type-icon` — fixed `20px × 20px`, `object-fit: contain`
+    - Empty state: `.special-function-icons-empty` (muted dash, same as Function column)
+    - Text fallback: `.special-icon-text-fallback` — used when no PNG is available (e.g. Multi-Power → "MP")
+    - Source images: `src/resources/images/icons/` — `energy.png`, `combat.png`, `brute_force.png`, `intelligence.png`, `any-power.png`
+  - **Icon header filter**:
+    - Outer container: `.icon-filter-container` (flex column, centered, `gap: 6px`)
+    - Toggle grid selector: `.special-power-filter-toggles` — `display: grid; grid-template-columns: repeat(2, 36px); gap: 6px`
+    - Toggle button selector: `.power-type-filter-toggle` — same `36px` square style as `.function-filter-toggle`
+    - Toggle icons: `<img>` at `20px × 20px` inside each button
+    - Active state: `.is-active` (teal highlight + slight lift) toggled on click
+    - Disabled state: `.is-disabled` + `button.disabled = true` (opacity 0.35, no pointer) when `No Icon` is active
+    - "No Icon" toggle: `#special-no-icon-toggle` checkbox + `.special-no-icon-toggle-label` (same style as `.special-no-value-toggle-label`)
+  - **Icon filter behavior**:
+    - No active toggles → no filter (all cards shown)
+    - One or more power type toggles active → OR logic: card must have at least one matching entry in its `icons` array
+    - **Multi-Power toggle** is special: matches any card with `icons.length >= 2` (two or more icons), regardless of which types
+    - When `No Icon` is checked: power type toggles are disabled and only cards with `null` or empty `icons` array match
+    - Combining icon type filter with other filters uses AND logic overall
+  - **Function icon render** (unchanged):
     - Container: `.special-function-icons-cell` (`display: flex`, wrapped, centered, `gap: 6px`)
     - Icon selector: `.special-function-icon`
-    - Exact size: fixed `32px x 32px` (min/max locked and non-flexing to prevent table stretch behavior)
+    - Exact size: fixed `32px x 32px` (min/max locked)
     - Empty state: `.special-function-icons-empty` (muted dash placeholder)
-  - **Function header filters**:
+  - **Function header filters** (unchanged):
     - Group selector: `.special-function-filter-toggles` (2-column grid of icon toggles)
     - Toggle selector: `.function-filter-toggle`
     - Visible toggle set: Offensive Action, Defensive Action, Remainder of Battle, Remainder of Game, Attach to a Character, Astral Plane
@@ -376,16 +396,14 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
     - Hover: brighter background/border
     - Active: `.is-active` with teal-highlighted background/border and slight lift
     - Accessibility: `aria-pressed` state and focus ring via `:focus-visible`
-  - **Filter behavior**:
-    - Existing text filters (Name, Character, Card Effect) remain AND logic
-    - Value filters support `=` (`#special-value-equals`), `Min` (`#special-value-min`), and `Max` (`#special-value-max`)
-    - `No value` toggle (`#special-no-value-toggle`) filters to rows where `value` is `NULL`
-    - `No value` visual style: `.special-no-value-toggle-label` uses `font-size: 0.8rem` and `padding-top: 4px` to separate it from the `Max` input.
-    - When `No value` is enabled, numeric `Value` inputs are disabled and ignored
-    - Function icon toggles use OR logic across selected icons
-    - Combined behavior: `text filters AND value filters AND (selected function icons as OR)`
-    - `Clear All Filters` resets text inputs, value inputs/toggle, and function icon toggles
-    - Clicking function filter icons (header or row) does not open the global image modal; only card art images should open previews.
+  - **Full filter behavior**:
+    - Text filters (Name, Character, Card Effect): substring match, AND with each other
+    - Value filters: `=` / `Min` / `Max` numeric inputs; `No value` toggle for NULL-only rows (disables numeric inputs)
+    - Icon power type toggles: OR logic within selected types; Multi-Power = 2+ icons; `No Icon` = null/empty icons
+    - Function icon toggles: OR logic across selected function icons
+    - Combined: `text AND value AND icon-type AND function-icons`
+    - `Clear All Filters` resets all of the above
+    - Power type icons and function icons do **not** open the global image modal on click
 
 ### Deck Builder (deck-builder.html)
 - **Two-Column Layout**: Card browser and deck viewer side by side

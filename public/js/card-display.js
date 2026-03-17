@@ -615,6 +615,62 @@ function getSpecialFunctionIcons(cardData) {
         }));
 }
 
+const POWER_TYPE_ICON_MAP = {
+    'Energy':      { path: '/src/resources/images/icons/energy.png',       label: 'Energy' },
+    'Combat':      { path: '/src/resources/images/icons/combat.png',        label: 'Combat' },
+    'Brute Force': { path: '/src/resources/images/icons/brute_force.png',   label: 'Brute Force' },
+    'Intelligence':{ path: '/src/resources/images/icons/intelligence.png',  label: 'Intelligence' },
+    'Any-Power':   { path: '/src/resources/images/icons/any-power.png',     label: 'Any-Power' },
+};
+
+function renderSpecialIconBadges(cardData) {
+    const icons = cardData && Array.isArray(cardData.icons) ? cardData.icons : [];
+    if (icons.length === 0) {
+        return '<span class="special-function-icons-empty" aria-hidden="true">-</span>';
+    }
+    const iconImgs = icons.map(icon => {
+        const cfg = POWER_TYPE_ICON_MAP[icon];
+        if (cfg) {
+            return `<img class="special-power-type-icon" src="${cfg.path}" alt="${cfg.label}" title="${cfg.label}" loading="lazy" decoding="async">`;
+        }
+        return `<span class="special-icon-text-fallback" title="${icon}">${icon}</span>`;
+    }).join('');
+    return `<div class="special-power-icons-cell">${iconImgs}</div>`;
+}
+
+const MULTI_POWER_TYPES = ['Energy', 'Combat', 'Brute Force', 'Intelligence'];
+
+function renderAllyStatTypeIcon(statType) {
+    if (!statType) return '<span>-</span>';
+    if (statType === 'Multi Power' || statType === 'Multi-Power') {
+        const icons = MULTI_POWER_TYPES.map(t => {
+            const cfg = POWER_TYPE_ICON_MAP[t];
+            return `<img class="special-power-type-icon" src="${cfg.path}" alt="${cfg.label}" title="${cfg.label}" loading="lazy" decoding="async">`;
+        }).join('');
+        return `<div class="special-power-icons-cell">${icons}</div>`;
+    }
+    const cfg = POWER_TYPE_ICON_MAP[statType];
+    if (cfg) {
+        return `<img class="special-power-type-icon" src="${cfg.path}" alt="${cfg.label}" title="${cfg.label}" loading="lazy" decoding="async">`;
+    }
+    return `<span class="special-icon-text-fallback" title="${statType}">${statType}</span>`;
+}
+
+function renderTeamworkValueCell(value, powerType) {
+    if (!value) return '<span>-</span>';
+    const num = value.trim().split(/\s+/)[0];
+    return `<span class="teamwork-value-icon-cell">${num} ${renderAllyStatTypeIcon(powerType)}</span>`;
+}
+
+function renderFollowupAttackTypes(value) {
+    if (!value) return '<span>-</span>';
+    const separator = value.includes(' + ') ? ' + ' : ' / ';
+    const parts = value.split(separator).map(p => p.trim());
+    const unique = parts[0] === parts[1] ? [parts[0]] : parts;
+    const icons = unique.map(part => renderAllyStatTypeIcon(part)).join('');
+    return `<span class="followup-icons-cell">${icons}</span>`;
+}
+
 function renderSpecialFunctionIcons(cardData) {
     const icons = getSpecialFunctionIcons(cardData);
     if (icons.length === 0) {
@@ -769,6 +825,7 @@ function displaySpecialCards(specialCards) {
             <td><strong>${representative.name}</strong></td>
             <td>${representative.character || ''}</td>
             <td>${formatSpecialCardEffect(representative.card_effect, representative)}</td>
+            <td>${renderSpecialIconBadges(representative)}</td>
             <td>${representative.value == null ? '' : representative.value}</td>
             <td>${renderSpecialFunctionIcons(representative)}</td>
         `;

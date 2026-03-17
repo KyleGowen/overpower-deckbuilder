@@ -65,6 +65,7 @@ describe('Card Data Display', () => {
         window.applyBasicUniverseFilters = jest.fn();
         (window as any).renderAllyStatTypeIcon = jest.fn(() => '<span>-</span>');
         (window as any).renderFollowupAttackTypes = jest.fn(() => '<span>-</span>');
+        (window as any).renderTeamworkValueCell = jest.fn((v: string) => v || '');
 
         new Function(code)();
         document.body.innerHTML = '';

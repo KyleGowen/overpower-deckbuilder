@@ -26,8 +26,13 @@ function closeModal() {
 function makeImagesClickable() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
-        // Function icons are interactive UI controls/indicators, not card art previews.
-        if (img.closest('.function-filter-toggle') || img.closest('.special-function-icons-cell')) {
+        // Interactive UI controls/indicators are not card art previews.
+        if (
+            img.closest('.function-filter-toggle') ||
+            img.closest('.special-function-icons-cell') ||
+            img.closest('.power-type-filter-toggle') ||
+            img.classList.contains('special-power-type-icon')
+        ) {
             return;
         }
         // Skip images that already have click handlers

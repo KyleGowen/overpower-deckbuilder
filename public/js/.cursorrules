@@ -10,10 +10,18 @@
   - Batch add behavior is handled by `addAllCharacterStack()` in `deck-card-operations.js`.
   - `card-filter-toggles.js` must target categories by header label (e.g., `Special Cards`) when `.character-group` is shared by multiple categories.
   - UI behavior and selectors are documented in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) under "Deck Editor Available Cards Character Stacks".
-- **DBV Special Cards Function filtering**:
-  - Rendering of Special-card function icons lives in `card-display.js` (`getSpecialFunctionIcons`, `renderSpecialFunctionIcons`).
-  - Header icon toggle filtering lives in `search-filter-functions.js` (`setupSpecialCardSearch` and icon-filter helpers).
-  - Value filtering also lives in `search-filter-functions.js` (`setupSpecialCardSearch`) via `#special-value-equals`, `#special-value-min`, `#special-value-max`, and `#special-no-value-toggle`.
-  - When `#special-no-value-toggle` is checked, numeric value inputs are disabled and ignored, and only `NULL` value rows match.
-  - Clear/reset behavior for these toggles lives in `filter-functions.js` (`clearSpecialCardFilters`).
-  - Keep UI behavior docs in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) and icon mapping in [docs/special-card-icons.md](../../docs/special-card-icons.md).
+- **DBV Special Cards — Icon, Value, and Function column filtering**:
+  - **Icon column** (power type icons from `special_cards.icons TEXT[]`):
+    - Cell rendering: `renderSpecialIconBadges()` in `card-display.js`; uses `POWER_TYPE_ICON_MAP` for PNG paths.
+    - Header toggle buttons: `.power-type-filter-toggle[data-power-type]` in the `.special-power-filter-toggles` grid.
+    - Filter logic in `search-filter-functions.js` (`setupSpecialCardSearch` → `performSpecialCardSearch`):
+      - Single/multiple toggles → OR match against `card.icons` array entries.
+      - `Multi-Power` toggle is special: matches cards with `card.icons.length >= 2` (not a literal string lookup).
+      - `#special-no-icon-toggle` → shows only cards with null/empty `icons`; disables all power type toggles.
+    - Clear/reset in `filter-functions.js` (`clearSpecialCardFilters`): removes `.is-active`/`.is-disabled`, clears `disabled`, unchecks `#special-no-icon-toggle`.
+    - Power type icon PNGs live in `src/resources/images/icons/` (energy, combat, brute_force, intelligence, any-power).
+    - Power type icons and function icons are excluded from `makeImagesClickable()` in `modal-ui.js`.
+  - **Value column** filtering: `#special-value-equals`, `#special-value-min`, `#special-value-max`, `#special-no-value-toggle` — all in `setupSpecialCardSearch`. When `#special-no-value-toggle` is checked, numeric inputs are disabled and only `NULL` value rows match.
+  - **Function column** icon toggle filtering: `getSelectedSpecialFunctionFilterFields()` / `cardMatchesFunctionIconFilters()` — OR logic across selected boolean icon fields.
+  - Combined filter order: `text AND value AND icon-type AND function-icons`.
+  - Keep UI behavior docs in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md).

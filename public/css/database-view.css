@@ -808,14 +808,14 @@ td:last-child {
 
 #special-cards-table th:nth-child(1), /* Image */
 #special-cards-table td:nth-child(1) {
-    width: 15% !important;
+    width: 14% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(2), /* Add to Deck */
 #special-cards-table td:nth-child(2) {
-    width: 10% !important;
+    width: 9% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
     min-width: 100px !important; /* Ensure button has enough room */
@@ -823,38 +823,84 @@ td:last-child {
 
 #special-cards-table th:nth-child(3), /* Name */
 #special-cards-table td:nth-child(3) {
-    width: 16% !important;
+    width: 15% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(4), /* Character */
 #special-cards-table td:nth-child(4) {
-    width: 14% !important;
+    width: 13% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(5), /* Card Effect */
 #special-cards-table td:nth-child(5) {
-    width: 24% !important;
+    width: 21% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
-#special-cards-table th:nth-child(6), /* Value */
+#special-cards-table th:nth-child(6), /* Icon */
 #special-cards-table td:nth-child(6) {
-    width: 9% !important;
+    width: 8% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
-#special-cards-table th:nth-child(7), /* Function */
+#special-cards-table th:nth-child(7), /* Value */
 #special-cards-table td:nth-child(7) {
+    width: 8% !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#special-cards-table th:nth-child(8), /* Function */
+#special-cards-table td:nth-child(8) {
     width: 12% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
+
+.special-power-icons-cell {
+    display: grid;
+    grid-template-columns: repeat(2, 20px);
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.special-power-type-icon {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    object-fit: contain;
+}
+
+.special-icon-text-fallback {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.teamwork-value-icon-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+}
+
+.followup-icons-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+}
+
 
 .special-function-icons-cell {
     display: flex;
@@ -899,6 +945,74 @@ td:last-child {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
     padding-top: 4px;
+    white-space: nowrap;
+}
+
+.icon-filter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.special-power-filter-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, 36px);
+    gap: 6px;
+    justify-items: center;
+}
+
+.power-type-filter-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.07);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    padding: 0;
+}
+
+.power-type-filter-toggle:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.power-type-filter-toggle.is-active {
+    background: rgba(75, 198, 186, 0.35);
+    border-color: rgba(75, 198, 186, 0.85);
+    transform: translateY(-1px);
+}
+
+.power-type-filter-toggle.is-disabled,
+.power-type-filter-toggle:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.power-type-filter-toggle img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.power-type-filter-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.02em;
+}
+
+.special-no-icon-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
     white-space: nowrap;
 }
 

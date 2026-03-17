@@ -43,11 +43,11 @@ describe('Basic Universe Type Filter - Simple', () => {
             expect(indexHtmlContent).toContain('id="basic-universe-tab"');
         });
 
-        it('should have Type filter checkboxes', () => {
-            expect(indexHtmlContent).toContain('value="Energy"');
-            expect(indexHtmlContent).toContain('value="Combat"');
-            expect(indexHtmlContent).toContain('value="Brute Force"');
-            expect(indexHtmlContent).toContain('value="Intelligence"');
+        it('should have Type filter toggle buttons', () => {
+            expect(indexHtmlContent).toContain('data-power-type="Energy"');
+            expect(indexHtmlContent).toContain('data-power-type="Combat"');
+            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
+            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
         });
 
         it('should have Clear All Filters button', () => {
@@ -78,18 +78,18 @@ describe('Basic Universe Type Filter - Simple', () => {
             expect(cardFilterTogglesContent).toContain('selectedTypes.includes(card.type)');
         });
 
-        it('should handle empty selection', () => {
-            expect(cardFilterTogglesContent).toContain('selectedTypes.length === 0');
+        it('should handle empty selection by showing all cards', () => {
+            expect(cardFilterTogglesContent).toContain('selectedTypes.length > 0');
         });
 
-        it('should show no cards when no types selected', () => {
-            expect(cardFilterTogglesContent).toContain('No types selected - showing no cards');
+        it('should filter to selected types when toggles are active', () => {
+            expect(cardFilterTogglesContent).toContain('selectedTypes.includes(card.type)');
         });
     });
 
     describe('Event Handling', () => {
-        it('should add event listeners to checkboxes', () => {
-            expect(cardDataDisplayContent).toContain('addEventListener(\'change\'');
+        it('should add click event listeners to toggle buttons', () => {
+            expect(cardDataDisplayContent).toContain('addEventListener(\'click\'');
         });
 
         it('should add event listeners to filter inputs', () => {
@@ -97,10 +97,9 @@ describe('Basic Universe Type Filter - Simple', () => {
         });
     });
 
-    describe('Console Logging', () => {
-        it('should include debug logging', () => {
-            expect(cardFilterTogglesContent).toContain('console.log(\'Selected types for filtering:\'');
-            expect(cardFilterTogglesContent).toContain('console.log(\'Filtered cards count:\'');
+    describe('Toggle State Management', () => {
+        it('should toggle is-active class on buttons', () => {
+            expect(cardDataDisplayContent).toContain('classList.toggle(\'is-active\')');
         });
     });
 

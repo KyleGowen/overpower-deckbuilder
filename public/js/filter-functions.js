@@ -83,6 +83,15 @@ function clearSpecialCardFilters() {
         toggle.classList.remove('is-active');
         toggle.setAttribute('aria-pressed', 'false');
     });
+
+    const powerTypeFilterToggles = document.querySelectorAll('#special-cards-table .power-type-filter-toggle');
+    powerTypeFilterToggles.forEach(toggle => {
+        toggle.classList.remove('is-active', 'is-disabled');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.disabled = false;
+    });
+    const noIconToggle = document.getElementById('special-no-icon-toggle');
+    if (noIconToggle) noIconToggle.checked = false;
     
     // Reload all special cards
     if (typeof loadSpecialCards === 'function') {
@@ -163,9 +172,11 @@ function clearTrainingFilters() {
 }
 
 function clearBasicUniverseFilters() {
-    // Clear basic universe filters
-    // Add specific filter clearing logic here if needed
-    applyFilters();
+    document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach(btn => {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
+    applyBasicUniverseFilters();
 }
 
 // Simple debounce utility
@@ -190,14 +201,11 @@ window.applyPowerCardFilters = async function applyPowerCardFilters() {
 
         let filtered = data.data;
 
-        // Filter by power type
-        const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="power-type"]:checked'))
-            .map(cb => cb.value);
+        // Filter by power type — active toggle buttons
+        const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab .power-type-filter-toggle.is-active'))
+            .map(btn => btn.dataset.powerType);
 
-        // If no types are selected, show no cards
-        if (selectedTypes.length === 0) {
-            filtered = [];
-        } else {
+        if (selectedTypes.length > 0) {
             filtered = filtered.filter(card => selectedTypes.includes(card.power_type));
         }
 
@@ -238,9 +246,17 @@ window.applyPowerCardFilters = async function applyPowerCardFilters() {
 }
 
 window.setupPowerCardsSearch = function setupPowerCardsSearch() {
-    // Initialize checkboxes to checked by default
-    const checkboxes = document.querySelectorAll('#power-cards-tab input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
+    // Wire power-type toggle buttons
+    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', String(btn.classList.contains('is-active')));
+            applyPowerCardFilters();
+        });
+    });
+
+    // Keep set checkboxes wired
+    document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="set"]').forEach(checkbox => {
         checkbox.checked = true;
         checkbox.addEventListener('change', applyPowerCardFilters);
     });
@@ -261,20 +277,23 @@ window.setupPowerCardsSearch = function setupPowerCardsSearch() {
 }
 
 window.clearPowerCardFilters = function clearPowerCardFilters() {
-    // Reset all checkboxes to checked
-    const checkboxes = document.querySelectorAll('#power-cards-tab input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
+    // Reset power-type toggle buttons
+    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach(btn => {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-pressed', 'false');
+    });
+
+    // Reset set checkboxes to checked
+    document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="set"]').forEach(checkbox => {
         checkbox.checked = true;
     });
 
     // Clear value range inputs
     const minValue = document.getElementById('power-value-min');
     const maxValue = document.getElementById('power-value-max');
-    
     if (minValue) minValue.value = '';
     if (maxValue) maxValue.value = '';
 
-    // Reapply filters
     applyPowerCardFilters();
 }
 

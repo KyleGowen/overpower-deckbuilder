@@ -179,9 +179,9 @@ function displayTeamwork(teamwork) {
                 <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="teamwork" data-image-path="/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'teamwork', '/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
-            <td>${card.to_use}</td>
-            <td>${card.acts_as}</td>
-            <td>${card.followup_attack_types}</td>
+            <td>${renderTeamworkValueCell(card.to_use, (card.to_use || '').trim().replace(/^\d+\s+/, ''))}</td>
+            <td>${renderTeamworkValueCell(card.acts_as, (card.to_use || '').trim().replace(/^\d+\s+/, ''))}</td>
+            <td>${renderFollowupAttackTypes(card.followup_attack_types)}</td>
             <td>${card.first_attack_bonus}</td>
             <td>${card.second_attack_bonus}</td>
         </tr>
@@ -257,7 +257,7 @@ function displayAllyUniverse(allies) {
             </td>
             <td><strong>${card.card_name}</strong></td>
             <td>${card.stat_to_use}</td>
-            <td>${card.stat_type_to_use}</td>
+            <td>${renderAllyStatTypeIcon(card.stat_type_to_use)}</td>
             <td>${card.attack_value}</td>
             <td>${card.attack_type}</td>
             <td>${card.card_text}</td>
@@ -313,8 +313,8 @@ function displayTraining(cards) {
                 ` : ''}
             </td>
             <td><strong>${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')}</strong></td>
-            <td>${card.type_1}</td>
-            <td>${card.type_2}</td>
+            <td>${renderAllyStatTypeIcon(card.type_1)}</td>
+            <td>${renderAllyStatTypeIcon(card.type_2)}</td>
             <td>${card.value_to_use}</td>
             <td>${card.bonus}</td>
         </tr>
@@ -342,15 +342,14 @@ async function loadBasicUniverse() {
 }
 
 function setupBasicUniverseSearch() {
-    // Initialize checkboxes to checked by default
-    const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = true;
-    });
-
-    // Add event listeners for filters
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', applyBasicUniverseFilters);
+    // Wire type filter toggle buttons
+    const typeToggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
+    typeToggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', String(btn.classList.contains('is-active')));
+            applyBasicUniverseFilters();
+        });
     });
 
     // Add event listeners for other filter inputs
@@ -452,7 +451,7 @@ function displayBasicUniverse(cards) {
                 ` : ''}
             </td>
             <td><strong>${card.card_name}</strong></td>
-            <td>${card.type}</td>
+            <td>${renderAllyStatTypeIcon(card.type)}</td>
             <td>${card.value_to_use}</td>
             <td>${card.bonus}</td>
         </tr>

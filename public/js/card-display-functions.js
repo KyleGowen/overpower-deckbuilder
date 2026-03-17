@@ -451,7 +451,7 @@ function displayPowerCards(cards) {
                 <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="power" data-image-path="${(currentImage.imagePath || currentImagePath || '').replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'power', '${(currentImage.imagePath || currentImagePath || '').replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
-            <td><strong>${representative.power_type || representative.type || ''}</strong></td>
+            <td>${renderAllyStatTypeIcon(representative.power_type || representative.type || '')}</td>
             <td>${representative.value || ''}</td>
             <td>${representative.set_name || 'Edgar Rice Burroughs and the World Legends'}</td>
         `;

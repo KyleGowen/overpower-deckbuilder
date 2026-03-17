@@ -30,6 +30,7 @@ describe('Special Cards Table Column Removal', () => {
           <th>Name</th>
           <th>Character</th>
           <th>Card Effect</th>
+          <th>Icon</th>
           <th>Value</th>
           <th>Function</th>
         </tr>
@@ -37,7 +38,24 @@ describe('Special Cards Table Column Removal', () => {
 
       // Count the number of <th> elements
       const headerMatches = mockTableHeader.match(/<th>/g);
-      expect(headerMatches).toHaveLength(7);
+      expect(headerMatches).toHaveLength(8);
+    });
+
+    it('should contain Icon column in header', () => {
+      const mockTableHeader = `
+        <tr>
+          <th>Image</th>
+          <th></th>
+          <th>Name</th>
+          <th>Character</th>
+          <th>Card Effect</th>
+          <th>Icon</th>
+          <th>Value</th>
+          <th>Function</th>
+        </tr>
+      `;
+
+      expect(mockTableHeader).toContain('Icon');
     });
 
     it('should not contain Card Type column in header', () => {
@@ -48,6 +66,7 @@ describe('Special Cards Table Column Removal', () => {
           <th>Name</th>
           <th>Character</th>
           <th>Card Effect</th>
+          <th>Icon</th>
           <th>Value</th>
           <th>Function</th>
         </tr>
@@ -67,6 +86,7 @@ describe('Special Cards Table Column Removal', () => {
           <td><strong>Card Name</strong></td>
           <td>Character Name</td>
           <td>Card Effect Description</td>
+          <td>Energy</td>
           <td>4</td>
           <td>Function Icons</td>
         </tr>
@@ -74,7 +94,7 @@ describe('Special Cards Table Column Removal', () => {
 
       // Count the number of <td> elements
       const rowMatches = mockTableRow.match(/<td>/g);
-      expect(rowMatches).toHaveLength(7);
+      expect(rowMatches).toHaveLength(8);
     });
 
     it('should not contain card_type data in table rows', () => {
@@ -85,6 +105,7 @@ describe('Special Cards Table Column Removal', () => {
           <td><strong>Card Name</strong></td>
           <td>Character Name</td>
           <td>Card Effect Description</td>
+          <td>Energy</td>
           <td>4</td>
           <td>Function Icons</td>
         </tr>
@@ -99,20 +120,21 @@ describe('Special Cards Table Column Removal', () => {
     it('should have correct colspan for loading message', () => {
       const mockLoadingRow = `
         <tr>
-          <td colspan="7" class="loading">Loading special cards...</td>
+          <td colspan="8" class="loading">Loading special cards...</td>
         </tr>
       `;
 
-      expect(mockLoadingRow).toContain('colspan="7"');
+      expect(mockLoadingRow).toContain('colspan="8"');
     });
 
     it('should not use outdated colspan values for loading message', () => {
       const mockLoadingRow = `
         <tr>
-          <td colspan="7" class="loading">Loading special cards...</td>
+          <td colspan="8" class="loading">Loading special cards...</td>
         </tr>
       `;
 
+      expect(mockLoadingRow).not.toContain('colspan="7"');
       expect(mockLoadingRow).not.toContain('colspan="6"');
       expect(mockLoadingRow).not.toContain('colspan="5"');
     });
@@ -129,12 +151,13 @@ describe('Special Cards Table Column Removal', () => {
           <th></th>
           <th></th>
           <th></th>
+          <th></th>
         </tr>
       `;
 
       // Count the number of <th> elements in filter row
       const filterMatches = mockFilterRow.match(/<th>/g);
-      expect(filterMatches).toHaveLength(7);
+      expect(filterMatches).toHaveLength(8);
     });
   });
 
@@ -181,10 +204,10 @@ describe('Special Cards Table Column Removal', () => {
 
   describe('Column Count Consistency', () => {
     it('should have consistent column count across all table elements', () => {
-      const headerColumns = 7; // Image, Add to Deck, Name, Character, Card Effect, Value, Function
-      const rowColumns = 7;    // Same as header
-      const filterColumns = 7; // Same as header
-      const loadingColspan = 7; // Matches the full table width in index.html
+      const headerColumns = 8; // Image, Add to Deck, Name, Character, Card Effect, Icon, Value, Function
+      const rowColumns = 8;    // Same as header
+      const filterColumns = 8; // Same as header
+      const loadingColspan = 8; // Matches the full table width in index.html
 
       expect(headerColumns).toBe(rowColumns);
       expect(headerColumns).toBe(filterColumns);

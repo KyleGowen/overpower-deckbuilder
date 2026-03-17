@@ -158,18 +158,12 @@ async function applyBasicUniverseFilters() {
 
         let filtered = data.data;
 
-        // Filter by type
-        const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-            .map(cb => cb.value);
-        console.log('Selected types for filtering:', selectedTypes);
-        
-        // If no types are selected, show no cards
-        if (selectedTypes.length === 0) {
-            filtered = [];
-            console.log('No types selected - showing no cards');
-        } else {
+        // Filter by type — active toggle buttons
+        const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active'))
+            .map(btn => btn.dataset.powerType);
+
+        if (selectedTypes.length > 0) {
             filtered = filtered.filter(card => selectedTypes.includes(card.type));
-            console.log('Filtered cards count:', filtered.length);
         }
 
         // Filter by value range

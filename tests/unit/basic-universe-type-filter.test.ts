@@ -112,18 +112,18 @@ describe('Basic Universe Type Filter', () => {
             expect(cardDataDisplayContent).toContain('function setupBasicUniverseSearch()');
         });
 
-        it('should initialize checkboxes to checked by default', () => {
+        it('should wire power-type toggle buttons with click listeners', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            expect(functionCode).toContain('checkbox.checked = true');
-            expect(functionCode).toContain('checkboxes.forEach(checkbox => {');
+            expect(functionCode).toContain('power-type-filter-toggle');
+            expect(functionCode).toContain('addEventListener(\'click\'');
         });
 
-        it('should add event listeners to checkboxes', () => {
+        it('should toggle is-active class on button click', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('checkbox.addEventListener(\'change\', applyBasicUniverseFilters)');
+            expect(functionCode).toContain('classList.toggle(\'is-active\')');
+            expect(functionCode).toContain('applyBasicUniverseFilters()');
         });
 
         it('should add event listeners to other filter inputs', () => {
@@ -158,30 +158,17 @@ describe('Basic Universe Type Filter', () => {
             expect(functionCode).toContain('fetch(\'/api/basic-universe\')');
         });
 
-        it('should filter by selected types', () => {
+        it('should filter by active toggle buttons', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('input[type="checkbox"]:checked');
+            expect(functionCode).toContain('power-type-filter-toggle.is-active');
             expect(functionCode).toContain('filtered.filter(card => selectedTypes.includes(card.type))');
         });
 
-        it('should show no cards when no types are selected', () => {
+        it('should show all cards when no toggles are active', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('if (selectedTypes.length === 0)');
-            expect(functionCode).toContain('filtered = []');
-            expect(functionCode).toContain('No types selected - showing no cards');
-        });
-
-        it('should include console logging for debugging', () => {
-            const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
-            expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('console.log(\'Selected types for filtering:\', selectedTypes)');
-            expect(functionCode).toContain('console.log(\'Filtered cards count:\', filtered.length)');
-            expect(functionCode).toContain('console.log(\'No types selected - showing no cards\')');
+            expect(functionCode).toContain('if (selectedTypes.length > 0)');
         });
 
         it('should handle value range filtering', () => {
@@ -215,12 +202,12 @@ describe('Basic Universe Type Filter', () => {
     });
 
     describe('Type Filter Integration', () => {
-        it('should have proper HTML structure for checkboxes', () => {
+        it('should have proper HTML structure for toggle buttons', () => {
             expect(indexHtmlContent).toContain('id="basic-universe-tab"');
-            expect(indexHtmlContent).toContain('value="Energy" checked');
-            expect(indexHtmlContent).toContain('value="Combat" checked');
-            expect(indexHtmlContent).toContain('value="Brute Force" checked');
-            expect(indexHtmlContent).toContain('value="Intelligence" checked');
+            expect(indexHtmlContent).toContain('data-power-type="Energy"');
+            expect(indexHtmlContent).toContain('data-power-type="Combat"');
+            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
+            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
         });
 
         it('should have Clear All Filters button', () => {
@@ -238,12 +225,8 @@ describe('Basic Universe Type Filter', () => {
         it('should handle empty selected types correctly', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            
-            // Should check for empty array
-            expect(functionCode).toContain('selectedTypes.length === 0');
-            
-            // Should set filtered to empty array
-            expect(functionCode).toContain('filtered = []');
+            // No active toggles = show all (selectedTypes.length > 0 guard)
+            expect(functionCode).toContain('selectedTypes.length > 0');
         });
 
         it('should filter cards by type when types are selected', () => {
@@ -255,11 +238,11 @@ describe('Basic Universe Type Filter', () => {
         });
 
         it('should maintain all filter types (Energy, Combat, Brute Force, Intelligence)', () => {
-            // Check that the HTML contains all four types
-            expect(indexHtmlContent).toContain('value="Energy"');
-            expect(indexHtmlContent).toContain('value="Combat"');
-            expect(indexHtmlContent).toContain('value="Brute Force"');
-            expect(indexHtmlContent).toContain('value="Intelligence"');
+            // Check that the HTML contains all four toggle buttons
+            expect(indexHtmlContent).toContain('data-power-type="Energy"');
+            expect(indexHtmlContent).toContain('data-power-type="Combat"');
+            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
+            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
         });
     });
 
@@ -287,9 +270,7 @@ describe('Basic Universe Type Filter', () => {
         it('should use efficient DOM queries', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            
-            // Should use efficient selectors
-            expect(functionCode).toContain('#basic-universe-tab input[type="checkbox"]:checked');
+            expect(functionCode).toContain('#basic-universe-tab .power-type-filter-toggle.is-active');
         });
 
         it('should avoid redundant API calls', () => {

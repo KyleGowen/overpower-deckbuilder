@@ -393,6 +393,8 @@ function setupSpecialCardSearch() {
     const valueMaxInput = document.getElementById('special-value-max');
     const noValueToggle = document.getElementById('special-no-value-toggle');
     const functionFilterToggles = document.querySelectorAll('#special-cards-table .function-filter-toggle');
+    const powerTypeFilterToggles = document.querySelectorAll('#special-cards-table .power-type-filter-toggle');
+    const noIconToggle = document.getElementById('special-no-icon-toggle');
 
     function setSpecialValueInputsDisabled(isDisabled) {
         [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
@@ -401,6 +403,24 @@ function setupSpecialCardSearch() {
             }
         });
     }
+
+    function setPowerTypeTogglesDisabled(isDisabled) {
+        powerTypeFilterToggles.forEach(btn => {
+            btn.disabled = isDisabled;
+            if (isDisabled) {
+                btn.classList.add('is-disabled');
+            } else {
+                btn.classList.remove('is-disabled');
+            }
+        });
+    }
+
+    function getSelectedPowerTypes() {
+        return Array.from(powerTypeFilterToggles)
+            .filter(btn => btn.classList.contains('is-active'))
+            .map(btn => btn.getAttribute('data-power-type'))
+            .filter(Boolean);
+    }
     
     // Function to perform search with current filter values
     async function performSpecialCardSearch() {
@@ -408,10 +428,12 @@ function setupSpecialCardSearch() {
         const characterTerm = characterSearchInput ? characterSearchInput.value.toLowerCase() : '';
         const effectTerm = effectSearchInput ? effectSearchInput.value.toLowerCase() : '';
         const noValueOnly = Boolean(noValueToggle && noValueToggle.checked);
+        const noIconOnly = Boolean(noIconToggle && noIconToggle.checked);
         const equalsValue = valueEqualsInput && valueEqualsInput.value !== '' ? parseInt(valueEqualsInput.value, 10) : null;
         const minValue = valueMinInput && valueMinInput.value !== '' ? parseInt(valueMinInput.value, 10) : null;
         const maxValue = valueMaxInput && valueMaxInput.value !== '' ? parseInt(valueMaxInput.value, 10) : null;
         const selectedIconFields = getSelectedSpecialFunctionFilterFields();
+        const selectedPowerTypes = noIconOnly ? [] : getSelectedPowerTypes();
         
         // If all search terms are empty, reload all cards
         if (
@@ -419,10 +441,12 @@ function setupSpecialCardSearch() {
             characterTerm.length === 0 &&
             effectTerm.length === 0 &&
             !noValueOnly &&
+            !noIconOnly &&
             equalsValue === null &&
             minValue === null &&
             maxValue === null &&
-            selectedIconFields.length === 0
+            selectedIconFields.length === 0 &&
+            selectedPowerTypes.length === 0
         ) {
             await loadSpecialCards();
             return;
@@ -437,8 +461,9 @@ function setupSpecialCardSearch() {
                     const nameMatch = nameTerm.length === 0 || (card.name || '').toLowerCase().includes(nameTerm);
                     const characterMatch = characterTerm.length === 0 || (card.character || '').toLowerCase().includes(characterTerm);
                     const effectMatch = effectTerm.length === 0 || (card.card_effect || '').toLowerCase().includes(effectTerm);
-                    const iconMatch = cardMatchesFunctionIconFilters(card, selectedIconFields);
+                    const functionIconMatch = cardMatchesFunctionIconFilters(card, selectedIconFields);
                     let valueMatch = true;
+                    let iconTypeMatch = true;
 
                     if (noValueOnly) {
                         valueMatch = card.value == null;
@@ -454,8 +479,18 @@ function setupSpecialCardSearch() {
                             valueMatch = valueMatch && hasNumericValue && card.value <= maxValue;
                         }
                     }
+
+                    if (noIconOnly) {
+                        iconTypeMatch = !card.icons || card.icons.length === 0;
+                    } else if (selectedPowerTypes.length > 0) {
+                        const multiPowerSelected = selectedPowerTypes.includes('Multi-Power');
+                        const specificTypes = selectedPowerTypes.filter(t => t !== 'Multi-Power');
+                        const matchesMultiPower = multiPowerSelected && Array.isArray(card.icons) && card.icons.length >= 2;
+                        const matchesSpecificType = specificTypes.length > 0 && Array.isArray(card.icons) && card.icons.some(icon => specificTypes.includes(icon));
+                        iconTypeMatch = matchesMultiPower || matchesSpecificType;
+                    }
                     
-                    return nameMatch && characterMatch && effectMatch && valueMatch && iconMatch;
+                    return nameMatch && characterMatch && effectMatch && valueMatch && functionIconMatch && iconTypeMatch;
                 });
                 
                 // Check if displaySpecialCards function exists
@@ -499,11 +534,30 @@ function setupSpecialCardSearch() {
         noValueToggle.dataset.specialSearchBound = 'true';
     }
 
+    powerTypeFilterToggles.forEach(toggle => {
+        if (toggle.dataset.specialSearchBound) {
+            return;
+        }
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('is-active');
+            toggle.setAttribute('aria-pressed', toggle.classList.contains('is-active') ? 'true' : 'false');
+            debouncedSpecialSearch();
+        });
+        toggle.dataset.specialSearchBound = 'true';
+    });
+
+    if (noIconToggle && !noIconToggle.dataset.specialSearchBound) {
+        noIconToggle.addEventListener('change', () => {
+            setPowerTypeTogglesDisabled(noIconToggle.checked);
+            debouncedSpecialSearch();
+        });
+        noIconToggle.dataset.specialSearchBound = 'true';
+    }
+
     functionFilterToggles.forEach(toggle => {
         if (toggle.dataset.specialSearchBound) {
             return;
         }
-
         toggle.addEventListener('click', () => {
             toggle.classList.toggle('is-active');
             toggle.setAttribute('aria-pressed', toggle.classList.contains('is-active') ? 'true' : 'false');
@@ -513,6 +567,7 @@ function setupSpecialCardSearch() {
     });
 
     setSpecialValueInputsDisabled(Boolean(noValueToggle && noValueToggle.checked));
+    setPowerTypeTogglesDisabled(Boolean(noIconToggle && noIconToggle.checked));
 }
 
 window.getSelectedSpecialFunctionFilterFields = getSelectedSpecialFunctionFilterFields;

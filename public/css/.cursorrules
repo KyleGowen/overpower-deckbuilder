@@ -11,10 +11,16 @@
   - Character Stacks subdivision search input uses `.character-stack-name-search` and intentionally matches `.character-name-search` styling.
   - Keep shared selector parity between `.character-name-search` and `.character-stack-name-search` to avoid UI drift.
   - Reference: [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) section "Deck Editor Available Cards Character Stacks".
-- **Database View Special Cards Function column**:
-  - Keep Special Cards Function column styles in `database-view.css` and width overrides in `card-tables.css` aligned.
-  - Function icons render with `.special-function-icon` at exact `64x64`.
-  - Header function filters use `.special-function-filter-toggles` and `.function-filter-toggle` with `.is-active` state.
-  - Special Cards Value filter UI uses `.column-filters` + `.filter-input.equals/.min/.max` and `.special-no-value-toggle-label`.
-  - Disabled numeric state for No Value toggle is styled by `#special-cards-table .filter-input:disabled`; keep this behavior aligned with JS toggle logic.
-  - Update [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) whenever Function column/toggle visuals change.
+- **Database View Special Cards columns (Icon, Value, Function)**:
+  - Column order and widths (all in `database-view.css` `nth-child` rules): `14% | 9% | 15% | 13% | 21% | 8%(Icon) | 8%(Value) | 12%(Function)`.
+  - **Icon column** styles:
+    - Cell grid: `.special-power-icons-cell` — `display: grid; grid-template-columns: repeat(2, 20px); gap: 4px; justify-content: center`.
+    - Cell icon: `.special-power-type-icon` — fixed `20px × 20px`.
+    - Text fallback: `.special-icon-text-fallback` — for icons without a PNG (e.g. Multi-Power).
+    - Filter toggle grid: `.special-power-filter-toggles` — `display: grid; grid-template-columns: repeat(2, 36px); gap: 6px`.
+    - Toggle button: `.power-type-filter-toggle` — same `36px` square style as `.function-filter-toggle`; active: `.is-active`; disabled: `.is-disabled`.
+    - "No Icon" label: `.special-no-icon-toggle-label` — same style as `.special-no-value-toggle-label`.
+    - Outer wrapper: `.icon-filter-container` — `display: flex; flex-direction: column; align-items: center; gap: 6px`.
+  - **Value filter** UI: `.column-filters` + `.filter-input.equals/.min/.max` and `.special-no-value-toggle-label`. Disabled state: `#special-cards-table .filter-input:disabled`.
+  - **Function column** styles: `.special-function-filter-toggles` (2-col grid), `.function-filter-toggle` (36px square), `.special-function-icon` (32px).
+  - Update [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) whenever any of these column/toggle visuals change.
