@@ -26,6 +26,10 @@ function closeModal() {
 function makeImagesClickable() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
+        // Function icons are interactive UI controls/indicators, not card art previews.
+        if (img.closest('.function-filter-toggle') || img.closest('.special-function-icons-cell')) {
+            return;
+        }
         // Skip images that already have click handlers
         if (!img.onclick) {
             img.style.cursor = 'pointer';

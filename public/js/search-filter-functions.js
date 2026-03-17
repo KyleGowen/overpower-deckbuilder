@@ -369,20 +369,41 @@ function setupTeamworkSearch() {
     });
 }
 
+function getSelectedSpecialFunctionFilterFields(root = document) {
+    return Array.from(root.querySelectorAll('#special-cards-table .function-filter-toggle.is-active'))
+        .map(toggle => toggle.getAttribute('data-icon-field'))
+        .filter(Boolean);
+}
+
+function cardMatchesFunctionIconFilters(card, selectedIconFields) {
+    if (!selectedIconFields || selectedIconFields.length === 0) {
+        return true;
+    }
+
+    return selectedIconFields.some(field => Boolean(card[field]));
+}
+
 function setupSpecialCardSearch() {
     // Set up column-specific search inputs
     const nameSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="name"]');
     const characterSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="character"]');
     const effectSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="card_effect"]');
+    const functionFilterToggles = document.querySelectorAll('#special-cards-table .function-filter-toggle');
     
     // Function to perform search with current filter values
     async function performSpecialCardSearch() {
         const nameTerm = nameSearchInput ? nameSearchInput.value.toLowerCase() : '';
         const characterTerm = characterSearchInput ? characterSearchInput.value.toLowerCase() : '';
         const effectTerm = effectSearchInput ? effectSearchInput.value.toLowerCase() : '';
+        const selectedIconFields = getSelectedSpecialFunctionFilterFields();
         
         // If all search terms are empty, reload all cards
-        if (nameTerm.length === 0 && characterTerm.length === 0 && effectTerm.length === 0) {
+        if (
+            nameTerm.length === 0 &&
+            characterTerm.length === 0 &&
+            effectTerm.length === 0 &&
+            selectedIconFields.length === 0
+        ) {
             await loadSpecialCards();
             return;
         }
@@ -393,11 +414,12 @@ function setupSpecialCardSearch() {
             
             if (data.success) {
                 const filteredSpecialCards = data.data.filter(card => {
-                    const nameMatch = nameTerm.length === 0 || card.name.toLowerCase().includes(nameTerm);
-                    const characterMatch = characterTerm.length === 0 || card.character.toLowerCase().includes(characterTerm);
-                    const effectMatch = effectTerm.length === 0 || card.card_effect.toLowerCase().includes(effectTerm);
+                    const nameMatch = nameTerm.length === 0 || (card.name || '').toLowerCase().includes(nameTerm);
+                    const characterMatch = characterTerm.length === 0 || (card.character || '').toLowerCase().includes(characterTerm);
+                    const effectMatch = effectTerm.length === 0 || (card.card_effect || '').toLowerCase().includes(effectTerm);
+                    const iconMatch = cardMatchesFunctionIconFilters(card, selectedIconFields);
                     
-                    return nameMatch && characterMatch && effectMatch;
+                    return nameMatch && characterMatch && effectMatch && iconMatch;
                 });
                 
                 // Check if displaySpecialCards function exists
@@ -411,18 +433,40 @@ function setupSpecialCardSearch() {
             console.error('Error searching special cards:', error);
         }
     }
+
+    const debouncedSpecialSearch = debounce(performSpecialCardSearch, 300);
     
     // Add event listeners to each search input
-    if (nameSearchInput) {
-        nameSearchInput.addEventListener('input', debounce(performSpecialCardSearch, 300));
+    if (nameSearchInput && !nameSearchInput.dataset.specialSearchBound) {
+        nameSearchInput.addEventListener('input', debouncedSpecialSearch);
+        nameSearchInput.dataset.specialSearchBound = 'true';
     }
-    if (characterSearchInput) {
-        characterSearchInput.addEventListener('input', debounce(performSpecialCardSearch, 300));
+    if (characterSearchInput && !characterSearchInput.dataset.specialSearchBound) {
+        characterSearchInput.addEventListener('input', debouncedSpecialSearch);
+        characterSearchInput.dataset.specialSearchBound = 'true';
     }
-    if (effectSearchInput) {
-        effectSearchInput.addEventListener('input', debounce(performSpecialCardSearch, 300));
+    if (effectSearchInput && !effectSearchInput.dataset.specialSearchBound) {
+        effectSearchInput.addEventListener('input', debouncedSpecialSearch);
+        effectSearchInput.dataset.specialSearchBound = 'true';
     }
+
+    functionFilterToggles.forEach(toggle => {
+        if (toggle.dataset.specialSearchBound) {
+            return;
+        }
+
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('is-active');
+            toggle.setAttribute('aria-pressed', toggle.classList.contains('is-active') ? 'true' : 'false');
+            debouncedSpecialSearch();
+        });
+        toggle.dataset.specialSearchBound = 'true';
+    });
 }
+
+window.getSelectedSpecialFunctionFilterFields = getSelectedSpecialFunctionFilterFields;
+window.cardMatchesFunctionIconFilters = cardMatchesFunctionIconFilters;
+window.setupSpecialCardSearch = setupSpecialCardSearch;
 
 function setupMissionSearch() {
     const searchInput = document.getElementById('search-input');

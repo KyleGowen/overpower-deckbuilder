@@ -359,6 +359,29 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Table Layout**: `table-layout: fixed !important; width: 100% !important;`
   - **Specificity**: Inline styles in `index.html` for highest CSS specificity override
   - **Responsive**: Maintains consistent width across different screen sizes
+- **Special Cards Function Column**:
+  - **Column order**: Image | Add to Deck | Name | Character | Card Effect | Function
+  - **Width layout** (`#special-cards-table`): `15% | 10% | 18% | 16% | 29% | 12%`
+  - **Function icon render**:
+    - Container: `.special-function-icons-cell` (`display: flex`, wrapped, centered, `gap: 6px`)
+    - Icon selector: `.special-function-icon`
+    - Exact size: fixed `32px x 32px` (min/max locked and non-flexing to prevent table stretch behavior)
+    - Empty state: `.special-function-icons-empty` (muted dash placeholder)
+  - **Function header filters**:
+    - Group selector: `.special-function-filter-toggles` (2-column grid of icon toggles)
+    - Toggle selector: `.function-filter-toggle`
+    - Visible toggle set: Offensive Action, Defensive Action, Remainder of Battle, Remainder of Game, Attach to a Character, Astral Plane
+    - Toggle icon size: `.function-filter-toggle img` is fixed at `24px x 24px`
+    - Default: `36px` square, translucent background, subtle white border
+    - Hover: brighter background/border
+    - Active: `.is-active` with teal-highlighted background/border and slight lift
+    - Accessibility: `aria-pressed` state and focus ring via `:focus-visible`
+  - **Filter behavior**:
+    - Existing text filters (Name, Character, Card Effect) remain AND logic
+    - Function icon toggles use OR logic across selected icons
+    - Combined behavior: `text filters AND (selected function icons as OR)`
+    - `Clear All Filters` resets both text inputs and function icon toggles
+    - Clicking function filter icons (header or row) does not open the global image modal; only card art images should open previews.
 
 ### Deck Builder (deck-builder.html)
 - **Two-Column Layout**: Card browser and deck viewer side by side

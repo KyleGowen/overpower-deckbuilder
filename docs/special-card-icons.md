@@ -14,6 +14,26 @@ Database boolean fields on `special_cards`:
 - `icon_astral_plane`
 - `icon_first_action_only`
 
+## DBV Function column and filtering
+
+Special Cards in DBV render a `Function` column from these same boolean fields.
+
+Field-to-icon mapping used in DBV:
+
+- `icon_offensive_swords` -> `/src/resources/images/icons/function/offensive_action.png`
+- `icon_defensive_shield` -> `/src/resources/images/icons/function/defensive_action.png`
+- `icon_remainder_of_battle` -> `/src/resources/images/icons/function/reminder_of_battle.png`
+- `icon_remainder_of_game` -> `/src/resources/images/icons/function/reminder_of_game.png`
+- `icon_attached_paperclip` -> `/src/resources/images/icons/function/attach_to_a_character.png`
+- `icon_astral_plane` -> `/src/resources/images/icons/function/astral_plane.png`
+- `icon_first_action_only` -> `/src/resources/images/icons/function/first_icon.png`
+
+DBV filtering behavior:
+
+- Function icon toggles in the Special Cards header use OR matching when multiple icons are selected.
+- Name/Character/Card Effect filters remain ANDed, then combined with the function filter result.
+- The `icon_first_action_only` mapping is still rendered in row icons when present, but the DBV header toggle is intentionally hidden because there are currently no Special cards with that flag set.
+
 Rulebook semantics (source: `src/resources/rules/Overpower_Rule-Book_Comprehensive_March_2025.pdf`):
 
 - **Crossed swords**: offensive action / attack-turn use.

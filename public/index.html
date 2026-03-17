@@ -254,6 +254,7 @@
                             <th>Name</th>
                             <th>Character</th>
                             <th>Card Effect</th>
+                            <th>Function</th>
                         </tr>
                         <tr class="filter-row">
                             <th>
@@ -269,11 +270,33 @@
                             <th>
                                 <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
                             </th>
+                            <th>
+                                <div class="special-function-filter-toggles" role="group" aria-label="Filter special cards by function icon">
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_offensive_swords" title="Offensive Action" aria-label="Toggle Offensive Action filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/offensive_action.png" alt="Offensive Action">
+                                    </button>
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_defensive_shield" title="Defensive Action" aria-label="Toggle Defensive Action filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/defensive_action.png" alt="Defensive Action">
+                                    </button>
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_remainder_of_battle" title="Remainder of Battle" aria-label="Toggle Remainder of Battle filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/reminder_of_battle.png" alt="Remainder of Battle">
+                                    </button>
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_remainder_of_game" title="Remainder of Game" aria-label="Toggle Remainder of Game filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/reminder_of_game.png" alt="Remainder of Game">
+                                    </button>
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_attached_paperclip" title="Attach to a Character" aria-label="Toggle Attach to a Character filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/attach_to_a_character.png" alt="Attach to a Character">
+                                    </button>
+                                    <button type="button" class="function-filter-toggle" data-icon-field="icon_astral_plane" title="Astral Plane" aria-label="Toggle Astral Plane filter" aria-pressed="false">
+                                        <img src="/src/resources/images/icons/function/astral_plane.png" alt="Astral Plane">
+                                    </button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="special-cards-tbody">
                         <tr>
-                            <td colspan="5" class="loading">Loading special cards...</td>
+                            <td colspan="6" class="loading">Loading special cards...</td>
                         </tr>
                     </tbody>
                 </table>

@@ -823,23 +823,107 @@ td:last-child {
 
 #special-cards-table th:nth-child(3), /* Name */
 #special-cards-table td:nth-child(3) {
-    width: 20% !important;
+    width: 18% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(4), /* Character */
 #special-cards-table td:nth-child(4) {
-    width: 20% !important;
+    width: 16% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(5), /* Card Effect */
 #special-cards-table td:nth-child(5) {
-    width: 35% !important;
+    width: 29% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+
+#special-cards-table th:nth-child(6), /* Function */
+#special-cards-table td:nth-child(6) {
+    width: 12% !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.special-function-icons-cell {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.special-function-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    flex: 0 0 32px;
+    margin: 0 !important;
+    object-fit: contain;
+}
+
+.special-function-icons-cell .special-function-icon:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.special-function-icons-empty {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.special-function-filter-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    justify-items: center;
+}
+
+.function-filter-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.07);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    padding: 0;
+}
+
+.function-filter-toggle:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.function-filter-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(75, 198, 186, 0.7);
+}
+
+.function-filter-toggle.is-active {
+    background: rgba(75, 198, 186, 0.35);
+    border-color: rgba(75, 198, 186, 0.85);
+    transform: translateY(-1px);
+}
+
+.function-filter-toggle img {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    margin: 0;
+    object-fit: contain;
 }
 
 /* All other tables - center aligned */

@@ -10,3 +10,8 @@
   - Batch add behavior is handled by `addAllCharacterStack()` in `deck-card-operations.js`.
   - `card-filter-toggles.js` must target categories by header label (e.g., `Special Cards`) when `.character-group` is shared by multiple categories.
   - UI behavior and selectors are documented in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) under "Deck Editor Available Cards Character Stacks".
+- **DBV Special Cards Function filtering**:
+  - Rendering of Special-card function icons lives in `card-display.js` (`getSpecialFunctionIcons`, `renderSpecialFunctionIcons`).
+  - Header icon toggle filtering lives in `search-filter-functions.js` (`setupSpecialCardSearch` and icon-filter helpers).
+  - Clear/reset behavior for these toggles lives in `filter-functions.js` (`clearSpecialCardFilters`).
+  - Keep UI behavior docs in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) and icon mapping in [docs/special-card-icons.md](../../docs/special-card-icons.md).

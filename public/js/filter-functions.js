@@ -64,6 +64,12 @@ function clearSpecialCardFilters() {
     if (nameSearchInput) nameSearchInput.value = '';
     if (characterSearchInput) characterSearchInput.value = '';
     if (effectSearchInput) effectSearchInput.value = '';
+
+    const functionFilterToggles = document.querySelectorAll('#special-cards-table .function-filter-toggle');
+    functionFilterToggles.forEach(toggle => {
+        toggle.classList.remove('is-active');
+        toggle.setAttribute('aria-pressed', 'false');
+    });
     
     // Reload all special cards
     if (typeof loadSpecialCards === 'function') {

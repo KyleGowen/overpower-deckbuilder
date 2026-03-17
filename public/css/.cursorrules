@@ -11,3 +11,8 @@
   - Character Stacks subdivision search input uses `.character-stack-name-search` and intentionally matches `.character-name-search` styling.
   - Keep shared selector parity between `.character-name-search` and `.character-stack-name-search` to avoid UI drift.
   - Reference: [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) section "Deck Editor Available Cards Character Stacks".
+- **Database View Special Cards Function column**:
+  - Keep Special Cards Function column styles in `database-view.css` and width overrides in `card-tables.css` aligned.
+  - Function icons render with `.special-function-icon` at exact `64x64`.
+  - Header function filters use `.special-function-filter-toggles` and `.function-filter-toggle` with `.is-active` state.
+  - Update [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) whenever Function column/toggle visuals change.

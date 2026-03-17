@@ -2,6 +2,8 @@
 
 Canonical descriptions for function icons used in OverPower card text and UI references.
 
+These icons are also used in the Database View (Special Cards tab) `Function` column and its header filter toggles.
+
 - `reminder_of_game.png` - **Reminder of Game (Full Hourglass):** Reminder of Game duration; these cards remain in play until the end of game, unless a card is played to remove it or its effects before its duration ends.
 - `reminder_of_battle.png` - **Reminder of Battle (Half Full Hourglass):** Reminder of Battle duration; cards with this icon remain in play until the end of the current battle they were played in unless a card is played to remove it or its effects before its duration ends.
 - `offensive_action.png` - **Offensive Action (Crossed Swords):** These cards may be played while it is your turn, as an offensive action. They cannot be played as a defensive action on your opponent's turn, unless they also have the Shield icon (below).

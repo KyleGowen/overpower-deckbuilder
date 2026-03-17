@@ -8,3 +8,11 @@ Conventions:
 - Use transparent-background PNG files.
 - Keep one file per function icon meaning; do not duplicate aliases.
 - Prefer replacing image content in-place over renaming once references exist.
+
+UI usage:
+- These assets are rendered in the Database View Special Cards `Function` column.
+- Header icon toggles in that table use the same files for filtering controls.
+- If icon files are added/renamed, update:
+  - `public/index.html` toggle markup
+  - `public/js/card-display.js` field-to-icon mapping
+  - `docs/special-card-icons.md` mapping table

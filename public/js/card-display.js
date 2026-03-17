@@ -594,6 +594,49 @@ function formatSpecialCardEffect(effectText, cardData = null) {
     return decodedText;
 }
 
+const SPECIAL_FUNCTION_ICON_CONFIGS = [
+    { field: 'icon_offensive_swords', filename: 'offensive_action.png', label: 'Offensive Action' },
+    { field: 'icon_defensive_shield', filename: 'defensive_action.png', label: 'Defensive Action' },
+    { field: 'icon_remainder_of_battle', filename: 'reminder_of_battle.png', label: 'Remainder of Battle' },
+    { field: 'icon_remainder_of_game', filename: 'reminder_of_game.png', label: 'Remainder of Game' },
+    { field: 'icon_attached_paperclip', filename: 'attach_to_a_character.png', label: 'Attach to a Character' },
+    { field: 'icon_astral_plane', filename: 'astral_plane.png', label: 'Astral Plane' },
+    { field: 'icon_first_action_only', filename: 'first_icon.png', label: 'First Action Only' }
+];
+
+function getSpecialFunctionIcons(cardData) {
+    if (!cardData) return [];
+
+    return SPECIAL_FUNCTION_ICON_CONFIGS
+        .filter(iconConfig => Boolean(cardData[iconConfig.field]))
+        .map(iconConfig => ({
+            ...iconConfig,
+            path: `/src/resources/images/icons/function/${iconConfig.filename}`
+        }));
+}
+
+function renderSpecialFunctionIcons(cardData) {
+    const icons = getSpecialFunctionIcons(cardData);
+    if (icons.length === 0) {
+        return '<span class="special-function-icons-empty" aria-hidden="true">-</span>';
+    }
+
+    return `
+        <div class="special-function-icons-cell">
+            ${icons.map(icon => `
+                <img
+                    class="special-function-icon"
+                    src="${icon.path}"
+                    alt="${icon.label}"
+                    title="${icon.label}"
+                    loading="lazy"
+                    decoding="async"
+                >
+            `).join('')}
+        </div>
+    `;
+}
+
 /**
  * Display special cards in the special cards table
  * Groups cards by name, universe, and card_type, showing a single row with navigation arrows for alternate arts
@@ -726,6 +769,7 @@ function displaySpecialCards(specialCards) {
             <td><strong>${representative.name}</strong></td>
             <td>${representative.character || ''}</td>
             <td>${formatSpecialCardEffect(representative.card_effect, representative)}</td>
+            <td>${renderSpecialFunctionIcons(representative)}</td>
         `;
         
         // Store image data in data attribute for navigation
@@ -987,4 +1031,6 @@ window.formatSpecialCardEffect = formatSpecialCardEffect;
 window.navigateCardImage = navigateCardImage;
 window.groupCardsByVariant = groupCardsByVariant;
 window.getCardImagePathForDisplay = getCardImagePathForDisplay;
+window.getSpecialFunctionIcons = getSpecialFunctionIcons;
+window.renderSpecialFunctionIcons = renderSpecialFunctionIcons;
 
