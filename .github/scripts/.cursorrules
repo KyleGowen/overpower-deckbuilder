@@ -1,0 +1,23 @@
+# .github/scripts Context
+
+## Purpose
+- Stores helper payloads/config files consumed directly by GitHub workflow steps.
+- These files support automation behavior but are not app runtime code.
+
+## Current Usage
+- `append-firebase-env.json` is used by deploy workflow SSM commands to append Firebase-related environment settings on EC2.
+
+## Conventions
+- Keep payload files deterministic and environment-safe.
+- Preserve compatibility with AWS SSM `send-command` expectations (quoting/escaping is critical).
+- Prefer additive, explicit commands over opaque command chains.
+- Keep file naming descriptive of the workflow step they support.
+
+## Agent Guidance
+- Validate any path/name changes against references in `.github/workflows/deploy.yml`.
+- Do not move these helpers to repository root scripts unless workflow references are updated.
+- Never introduce plaintext secrets into tracked helper payloads.
+
+## Distinction From Root scripts/
+- `.github/scripts/` is workflow-local helper data/config.
+- `scripts/` at repository root contains broader operational scripts and may be invoked by workflows.

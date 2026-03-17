@@ -1,0 +1,32 @@
+# GitHub Workflows Context
+
+## Purpose
+- This directory defines CI/CD pipelines run by GitHub Actions.
+- Workflows here gate merges and control production deploys.
+
+## Current Primary Workflow
+- `deploy.yml` runs:
+  - Build + lint
+  - Unit and integration tests
+  - Security/compliance scans
+  - Docker build and push
+  - Production migrations
+  - Blue-green deployment
+  - Production verification and post-deploy health checks
+
+## Conventions
+- Use explicit `needs` so job ordering is obvious and safe.
+- Keep production deploy steps idempotent and rollback-aware.
+- Prefer immutable image references (`$GITHUB_SHA`) for deploy correctness.
+- Keep verification strict: health endpoint + expected commit matching.
+- Add rich diagnostics on failure paths (port, container/image, upstream, health payload).
+
+## When Modifying Workflows
+- Preserve existing required checks unless there is a deliberate policy change.
+- Keep long shell blocks readable and segmented by step comments/log markers.
+- Avoid silent failures; fail fast on critical deploy/migration steps.
+- For test matrix changes, ensure categories remain balanced and maintainable.
+
+## Documentation Sync
+- If deployment flow changes, update `docs/current/DEPLOYMENT_STRATEGY.md`.
+- If CI expectations change for contributors, update `.github/README.md`.

@@ -1,0 +1,26 @@
+# .github Agent Context
+
+## Purpose
+- This directory contains GitHub automation and metadata for CI/CD, security checks, and production deployment.
+- Treat changes here as high impact: workflow edits can change test coverage, deploy behavior, and production safety.
+
+## Main Entry Points
+- `README.md`: operational reference for the GitHub automation setup.
+- `workflows/deploy.yml`: primary workflow for build, tests, scans, migrations, deploy, and post-deploy checks.
+- `scripts/`: workflow helper payloads/config files used by workflow steps.
+
+## Project-Specific Conventions
+- Keep workflow behavior deterministic and debuggable (explicit logs, clear failure reasons).
+- Prefer commit-SHA pinned production deploy logic over mutable tags for correctness.
+- Preserve deploy safety checks (health validation, rollback behavior, migration verification).
+- Keep CI changes backward compatible with existing branch protections and required checks.
+
+## Editing Rules For Agents
+- When editing workflow logic, update related documentation in `docs/current/DEPLOYMENT_STRATEGY.md` if behavior changes.
+- Avoid introducing hidden assumptions in inline shell; log values that are needed for deploy triage.
+- Keep secrets in GitHub/AWS secret stores only; never hardcode new credentials.
+- If adding new `.github` subdirectories, add a local `.cursorrules` file in that new directory.
+
+## Related Files Outside .github
+- `scripts/`: repository-level operational scripts referenced by some workflow jobs.
+- `docs/current/DEPLOYMENT_STRATEGY.md`: canonical deployment behavior documentation.
