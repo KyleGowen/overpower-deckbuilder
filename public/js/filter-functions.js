@@ -60,10 +60,23 @@ function clearSpecialCardFilters() {
     const nameSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="name"]');
     const characterSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="character"]');
     const effectSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="card_effect"]');
+    const valueEqualsInput = document.getElementById('special-value-equals');
+    const valueMinInput = document.getElementById('special-value-min');
+    const valueMaxInput = document.getElementById('special-value-max');
+    const noValueToggle = document.getElementById('special-no-value-toggle');
     
     if (nameSearchInput) nameSearchInput.value = '';
     if (characterSearchInput) characterSearchInput.value = '';
     if (effectSearchInput) effectSearchInput.value = '';
+    if (valueEqualsInput) valueEqualsInput.value = '';
+    if (valueMinInput) valueMinInput.value = '';
+    if (valueMaxInput) valueMaxInput.value = '';
+    if (noValueToggle) noValueToggle.checked = false;
+    [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
+        if (input) {
+            input.disabled = false;
+        }
+    });
 
     const functionFilterToggles = document.querySelectorAll('#special-cards-table .function-filter-toggle');
     functionFilterToggles.forEach(toggle => {

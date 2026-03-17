@@ -823,27 +823,34 @@ td:last-child {
 
 #special-cards-table th:nth-child(3), /* Name */
 #special-cards-table td:nth-child(3) {
-    width: 18% !important;
+    width: 16% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(4), /* Character */
 #special-cards-table td:nth-child(4) {
-    width: 16% !important;
+    width: 14% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 #special-cards-table th:nth-child(5), /* Card Effect */
 #special-cards-table td:nth-child(5) {
-    width: 29% !important;
+    width: 24% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
-#special-cards-table th:nth-child(6), /* Function */
+#special-cards-table th:nth-child(6), /* Value */
 #special-cards-table td:nth-child(6) {
+    width: 9% !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#special-cards-table th:nth-child(7), /* Function */
+#special-cards-table td:nth-child(7) {
     width: 12% !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -883,6 +890,27 @@ td:last-child {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
     justify-items: center;
+}
+
+.special-no-value-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    padding-top: 4px;
+    white-space: nowrap;
+}
+
+.special-no-value-toggle-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: #4ecdc4;
+}
+
+#special-cards-table .filter-input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .function-filter-toggle {

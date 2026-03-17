@@ -119,7 +119,7 @@ async function loadSpecialCards() {
     console.error('❌ Error loading special cards:', error);
     const tbody = (global as any).document.getElementById('special-cards-tbody');
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="4" class="error">Error loading special cards. Please try again.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="error">Error loading special cards. Please try again.</td></tr>';
     }
   }
 }
@@ -304,7 +304,7 @@ describe('Data Loading Functions', () => {
       await loadSpecialCards();
 
       expect(consoleSpy).toHaveBeenCalledWith('❌ Error loading special cards:', expect.any(Error));
-      expect(mockElement.innerHTML).toBe('<tr><td colspan="4" class="error">Error loading special cards. Please try again.</td></tr>');
+      expect(mockElement.innerHTML).toBe('<tr><td colspan="7" class="error">Error loading special cards. Please try again.</td></tr>');
       consoleSpy.mockRestore();
     });
 
@@ -316,7 +316,7 @@ describe('Data Loading Functions', () => {
       await loadSpecialCards();
 
       expect(consoleSpy).toHaveBeenCalledWith('❌ Error loading special cards:', expect.any(Error));
-      expect(mockElement.innerHTML).toBe('<tr><td colspan="4" class="error">Error loading special cards. Please try again.</td></tr>');
+      expect(mockElement.innerHTML).toBe('<tr><td colspan="7" class="error">Error loading special cards. Please try again.</td></tr>');
       consoleSpy.mockRestore();
     });
 

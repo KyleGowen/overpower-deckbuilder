@@ -96,9 +96,9 @@ describe('Special function icon rendering', () => {
 
     const row = document.querySelector('#special-cards-tbody tr');
     expect(row).toBeTruthy();
-    expect(row?.querySelectorAll('td')).toHaveLength(6);
+    expect(row?.querySelectorAll('td')).toHaveLength(7);
 
-    const functionCell = row?.querySelector('td:nth-child(6)');
+    const functionCell = row?.querySelector('td:nth-child(7)');
     expect(functionCell).toBeTruthy();
 
     const icons = functionCell?.querySelectorAll('img.special-function-icon') || [];

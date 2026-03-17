@@ -62,12 +62,12 @@ jobs:
       run: npx knip --production
 
   unit-tests:
-    name: Unit Tests (shard ${{ matrix.shard }}/4)
+    name: Unit Tests (shard ${{ matrix.shard }}/8)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
     - name: Checkout code
@@ -82,12 +82,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run unit tests (shard ${{ matrix.shard }}/4)
-      run: npx jest --config tests/config/jest.ci.config.js --coverage --shard=${{ matrix.shard }}/4
+    - name: Run unit tests (shard ${{ matrix.shard }}/8)
+      run: |
+        if [ "${{ matrix.shard }}" = "1" ]; then
+          npx jest --config tests/config/jest.ci.config.js --coverage --shard=${{ matrix.shard }}/8
+        else
+          npx jest --config tests/config/jest.ci.config.js --shard=${{ matrix.shard }}/8
+        fi
       timeout-minutes: 10
 
     - name: Upload coverage to Codecov (shard ${{ matrix.shard }})
-      if: success()
+      if: success() && matrix.shard == 1
       uses: codecov/codecov-action@v3
       with:
         directory: coverage/unit/

@@ -769,6 +769,7 @@ function displaySpecialCards(specialCards) {
             <td><strong>${representative.name}</strong></td>
             <td>${representative.character || ''}</td>
             <td>${formatSpecialCardEffect(representative.card_effect, representative)}</td>
+            <td>${representative.value == null ? '' : representative.value}</td>
             <td>${renderSpecialFunctionIcons(representative)}</td>
         `;
         

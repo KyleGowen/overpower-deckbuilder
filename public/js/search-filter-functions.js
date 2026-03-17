@@ -388,13 +388,29 @@ function setupSpecialCardSearch() {
     const nameSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="name"]');
     const characterSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="character"]');
     const effectSearchInput = document.querySelector('#special-cards-table .header-filter[data-column="card_effect"]');
+    const valueEqualsInput = document.getElementById('special-value-equals');
+    const valueMinInput = document.getElementById('special-value-min');
+    const valueMaxInput = document.getElementById('special-value-max');
+    const noValueToggle = document.getElementById('special-no-value-toggle');
     const functionFilterToggles = document.querySelectorAll('#special-cards-table .function-filter-toggle');
+
+    function setSpecialValueInputsDisabled(isDisabled) {
+        [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
+            if (input) {
+                input.disabled = isDisabled;
+            }
+        });
+    }
     
     // Function to perform search with current filter values
     async function performSpecialCardSearch() {
         const nameTerm = nameSearchInput ? nameSearchInput.value.toLowerCase() : '';
         const characterTerm = characterSearchInput ? characterSearchInput.value.toLowerCase() : '';
         const effectTerm = effectSearchInput ? effectSearchInput.value.toLowerCase() : '';
+        const noValueOnly = Boolean(noValueToggle && noValueToggle.checked);
+        const equalsValue = valueEqualsInput && valueEqualsInput.value !== '' ? parseInt(valueEqualsInput.value, 10) : null;
+        const minValue = valueMinInput && valueMinInput.value !== '' ? parseInt(valueMinInput.value, 10) : null;
+        const maxValue = valueMaxInput && valueMaxInput.value !== '' ? parseInt(valueMaxInput.value, 10) : null;
         const selectedIconFields = getSelectedSpecialFunctionFilterFields();
         
         // If all search terms are empty, reload all cards
@@ -402,6 +418,10 @@ function setupSpecialCardSearch() {
             nameTerm.length === 0 &&
             characterTerm.length === 0 &&
             effectTerm.length === 0 &&
+            !noValueOnly &&
+            equalsValue === null &&
+            minValue === null &&
+            maxValue === null &&
             selectedIconFields.length === 0
         ) {
             await loadSpecialCards();
@@ -418,8 +438,24 @@ function setupSpecialCardSearch() {
                     const characterMatch = characterTerm.length === 0 || (card.character || '').toLowerCase().includes(characterTerm);
                     const effectMatch = effectTerm.length === 0 || (card.card_effect || '').toLowerCase().includes(effectTerm);
                     const iconMatch = cardMatchesFunctionIconFilters(card, selectedIconFields);
+                    let valueMatch = true;
+
+                    if (noValueOnly) {
+                        valueMatch = card.value == null;
+                    } else {
+                        const hasNumericValue = card.value != null;
+                        if (equalsValue !== null) {
+                            valueMatch = valueMatch && hasNumericValue && card.value === equalsValue;
+                        }
+                        if (minValue !== null) {
+                            valueMatch = valueMatch && hasNumericValue && card.value >= minValue;
+                        }
+                        if (maxValue !== null) {
+                            valueMatch = valueMatch && hasNumericValue && card.value <= maxValue;
+                        }
+                    }
                     
-                    return nameMatch && characterMatch && effectMatch && iconMatch;
+                    return nameMatch && characterMatch && effectMatch && valueMatch && iconMatch;
                 });
                 
                 // Check if displaySpecialCards function exists
@@ -449,6 +485,19 @@ function setupSpecialCardSearch() {
         effectSearchInput.addEventListener('input', debouncedSpecialSearch);
         effectSearchInput.dataset.specialSearchBound = 'true';
     }
+    [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
+        if (input && !input.dataset.specialSearchBound) {
+            input.addEventListener('input', debouncedSpecialSearch);
+            input.dataset.specialSearchBound = 'true';
+        }
+    });
+    if (noValueToggle && !noValueToggle.dataset.specialSearchBound) {
+        noValueToggle.addEventListener('change', () => {
+            setSpecialValueInputsDisabled(noValueToggle.checked);
+            debouncedSpecialSearch();
+        });
+        noValueToggle.dataset.specialSearchBound = 'true';
+    }
 
     functionFilterToggles.forEach(toggle => {
         if (toggle.dataset.specialSearchBound) {
@@ -462,6 +511,8 @@ function setupSpecialCardSearch() {
         });
         toggle.dataset.specialSearchBound = 'true';
     });
+
+    setSpecialValueInputsDisabled(Boolean(noValueToggle && noValueToggle.checked));
 }
 
 window.getSelectedSpecialFunctionFilterFields = getSelectedSpecialFunctionFilterFields;

@@ -13,5 +13,7 @@
 - **DBV Special Cards Function filtering**:
   - Rendering of Special-card function icons lives in `card-display.js` (`getSpecialFunctionIcons`, `renderSpecialFunctionIcons`).
   - Header icon toggle filtering lives in `search-filter-functions.js` (`setupSpecialCardSearch` and icon-filter helpers).
+  - Value filtering also lives in `search-filter-functions.js` (`setupSpecialCardSearch`) via `#special-value-equals`, `#special-value-min`, `#special-value-max`, and `#special-no-value-toggle`.
+  - When `#special-no-value-toggle` is checked, numeric value inputs are disabled and ignored, and only `NULL` value rows match.
   - Clear/reset behavior for these toggles lives in `filter-functions.js` (`clearSpecialCardFilters`).
   - Keep UI behavior docs in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) and icon mapping in [docs/special-card-icons.md](../../docs/special-card-icons.md).

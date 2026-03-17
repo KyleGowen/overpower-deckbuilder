@@ -127,11 +127,12 @@
          * These inline styles override database-view.css
          * Column 1: Image - 15%
          * Column 2: Add to Deck - 10%
-         * Column 3: Name - 18%
-         * Column 4: Character - 16%
-         * Column 5: Card Effect - 29%
-         * Column 6: Function - 12%
-         * Total: 15% + 10% + 18% + 16% + 29% + 12% = 100%
+         * Column 3: Name - 16%
+         * Column 4: Character - 14%
+         * Column 5: Card Effect - 24%
+         * Column 6: Value - 9%
+         * Column 7: Function - 12%
+         * Total: 15% + 10% + 16% + 14% + 24% + 9% + 12% = 100%
          * ======================================== */
         #special-cards-table th:nth-child(1), #special-cards-table td:nth-child(1) { 
             width: 15% !important; 
@@ -141,15 +142,18 @@
             min-width: 100px !important;
         }
         #special-cards-table th:nth-child(3), #special-cards-table td:nth-child(3) { 
-            width: 18% !important; 
-        }
-        #special-cards-table th:nth-child(4), #special-cards-table td:nth-child(4) { 
             width: 16% !important; 
         }
+        #special-cards-table th:nth-child(4), #special-cards-table td:nth-child(4) { 
+            width: 14% !important; 
+        }
         #special-cards-table th:nth-child(5), #special-cards-table td:nth-child(5) { 
-            width: 29% !important; 
+            width: 24% !important; 
         }
         #special-cards-table th:nth-child(6), #special-cards-table td:nth-child(6) {
+            width: 9% !important;
+        }
+        #special-cards-table th:nth-child(7), #special-cards-table td:nth-child(7) {
             width: 12% !important;
         }
         

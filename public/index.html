@@ -254,6 +254,7 @@
                             <th>Name</th>
                             <th>Character</th>
                             <th>Card Effect</th>
+                            <th>Value</th>
                             <th>Function</th>
                         </tr>
                         <tr class="filter-row">
@@ -269,6 +270,17 @@
                             </th>
                             <th>
                                 <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <input type="number" id="special-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="0" max="99">
+                                    <input type="number" id="special-value-min" class="filter-input min" data-column="value" placeholder="Min" min="0" max="99">
+                                    <input type="number" id="special-value-max" class="filter-input max" data-column="value" placeholder="Max" min="0" max="99">
+                                    <label class="special-no-value-toggle-label">
+                                        <input type="checkbox" id="special-no-value-toggle">
+                                        <span>No value</span>
+                                    </label>
+                                </div>
                             </th>
                             <th>
                                 <div class="special-function-filter-toggles" role="group" aria-label="Filter special cards by function icon">
@@ -296,7 +308,7 @@
                     </thead>
                     <tbody id="special-cards-tbody">
                         <tr>
-                            <td colspan="6" class="loading">Loading special cards...</td>
+                            <td colspan="7" class="loading">Loading special cards...</td>
                         </tr>
                     </tbody>
                 </table>

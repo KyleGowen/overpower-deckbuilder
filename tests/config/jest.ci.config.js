@@ -15,10 +15,9 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'json'],
   // Reduce log noise in CI
   verbose: false,
-  // Let Jest use available cores for parallelism.
-  // GitHub-hosted runners have 4 vCPUs / 16 GB RAM (ubuntu-latest),
-  // which is more than enough for parallel workers.
-  maxWorkers: '50%',
+  // Pin to 2 workers — safe for 2-vCPU GitHub-hosted runners and avoids
+  // over-subscribing memory on runners with more cores.
+  maxWorkers: 2,
   // Force exit after tests complete (avoid hanging on open handles)
   forceExit: true,
 };

@@ -24,7 +24,7 @@ describe('Special Cards function toggle integration', () => {
       <table id="special-cards-table">
         <thead>
           <tr>
-            <th>Image</th><th></th><th>Name</th><th>Character</th><th>Card Effect</th><th>Function</th>
+            <th>Image</th><th></th><th>Name</th><th>Character</th><th>Card Effect</th><th>Value</th><th>Function</th>
           </tr>
           <tr class="filter-row">
             <th><button class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button></th>
@@ -32,6 +32,17 @@ describe('Special Cards function toggle integration', () => {
             <th><input type="text" class="header-filter" data-column="name"></th>
             <th><input type="text" class="header-filter" data-column="character"></th>
             <th><input type="text" class="header-filter" data-column="card_effect"></th>
+            <th>
+              <div class="column-filters">
+                <input type="number" id="special-value-equals" class="filter-input equals" data-column="value">
+                <input type="number" id="special-value-min" class="filter-input min" data-column="value">
+                <input type="number" id="special-value-max" class="filter-input max" data-column="value">
+                <label class="special-no-value-toggle-label">
+                  <input type="checkbox" id="special-no-value-toggle">
+                  <span>No value</span>
+                </label>
+              </div>
+            </th>
             <th>
               <button type="button" class="function-filter-toggle" data-icon-field="icon_offensive_swords" aria-pressed="false"></button>
               <button type="button" class="function-filter-toggle" data-icon-field="icon_defensive_shield" aria-pressed="false"></button>
@@ -50,9 +61,9 @@ describe('Special Cards function toggle integration', () => {
       json: async () => ({
         success: true,
         data: [
-          { id: 'off', name: 'Offense', character: 'A', card_effect: 'effect', icon_offensive_swords: true, icon_astral_plane: false, icon_defensive_shield: false },
-          { id: 'def', name: 'Defense', character: 'B', card_effect: 'effect', icon_offensive_swords: false, icon_astral_plane: false, icon_defensive_shield: true },
-          { id: 'ast', name: 'Astral', character: 'C', card_effect: 'effect', icon_offensive_swords: false, icon_astral_plane: true, icon_defensive_shield: false }
+          { id: 'off', name: 'Offense', character: 'A', value: 4, card_effect: 'effect', icon_offensive_swords: true, icon_astral_plane: false, icon_defensive_shield: false },
+          { id: 'def', name: 'Defense', character: 'B', value: 2, card_effect: 'effect', icon_offensive_swords: false, icon_astral_plane: false, icon_defensive_shield: true },
+          { id: 'ast', name: 'Astral', character: 'C', value: null, card_effect: 'effect', icon_offensive_swords: false, icon_astral_plane: true, icon_defensive_shield: false }
         ]
       })
     });
@@ -119,5 +130,38 @@ describe('Special Cards function toggle integration', () => {
     expect(offenseToggle.getAttribute('aria-pressed')).toBe('false');
     expect(nameInput.value).toBe('');
     expect((globalThis as any).loadSpecialCards).toHaveBeenCalled();
+  });
+
+  it('applies value filters and supports no value toggle behavior', async () => {
+    const equalsInput = document.getElementById('special-value-equals') as HTMLInputElement;
+    const minInput = document.getElementById('special-value-min') as HTMLInputElement;
+    const maxInput = document.getElementById('special-value-max') as HTMLInputElement;
+    const noValueToggle = document.getElementById('special-no-value-toggle') as HTMLInputElement;
+
+    equalsInput.value = '4';
+    equalsInput.dispatchEvent(new window.Event('input'));
+    await waitForDebounce();
+    await flushPromises();
+    let filtered = ((globalThis as any).displaySpecialCards as jest.Mock).mock.calls.at(-1)?.[0] ?? [];
+    expect(filtered.map((card: any) => card.id)).toEqual(['off']);
+
+    equalsInput.value = '';
+    minInput.value = '2';
+    maxInput.value = '4';
+    maxInput.dispatchEvent(new window.Event('input'));
+    await waitForDebounce();
+    await flushPromises();
+    filtered = ((globalThis as any).displaySpecialCards as jest.Mock).mock.calls.at(-1)?.[0] ?? [];
+    expect(filtered.map((card: any) => card.id)).toEqual(['off', 'def']);
+
+    noValueToggle.checked = true;
+    noValueToggle.dispatchEvent(new window.Event('change'));
+    await waitForDebounce();
+    await flushPromises();
+    expect(equalsInput.disabled).toBe(true);
+    expect(minInput.disabled).toBe(true);
+    expect(maxInput.disabled).toBe(true);
+    filtered = ((globalThis as any).displaySpecialCards as jest.Mock).mock.calls.at(-1)?.[0] ?? [];
+    expect(filtered.map((card: any) => card.id)).toEqual(['ast']);
   });
 });

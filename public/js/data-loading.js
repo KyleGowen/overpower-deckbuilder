@@ -159,7 +159,7 @@ async function loadSpecialCards() {
     } catch (error) {
         console.error('Error loading special cards:', error);
         document.getElementById('special-cards-tbody').innerHTML = 
-            '<tr><td colspan="5" class="error">Error loading special cards. Please try again.</td></tr>';
+            '<tr><td colspan="7" class="error">Error loading special cards. Please try again.</td></tr>';
     }
 }
 

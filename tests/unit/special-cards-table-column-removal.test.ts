@@ -22,28 +22,34 @@ describe('Special Cards Table Column Removal', () => {
 
   describe('Table Header Structure', () => {
     it('should have correct number of columns in special cards table header', () => {
-      // Mock table header HTML structure (after removal of Card Type column)
+      // Mock table header HTML structure (current database view)
       const mockTableHeader = `
         <tr>
           <th>Image</th>
+          <th></th>
           <th>Name</th>
           <th>Character</th>
           <th>Card Effect</th>
+          <th>Value</th>
+          <th>Function</th>
         </tr>
       `;
 
       // Count the number of <th> elements
       const headerMatches = mockTableHeader.match(/<th>/g);
-      expect(headerMatches).toHaveLength(4);
+      expect(headerMatches).toHaveLength(7);
     });
 
     it('should not contain Card Type column in header', () => {
       const mockTableHeader = `
         <tr>
           <th>Image</th>
+          <th></th>
           <th>Name</th>
           <th>Character</th>
           <th>Card Effect</th>
+          <th>Value</th>
+          <th>Function</th>
         </tr>
       `;
 
@@ -53,28 +59,34 @@ describe('Special Cards Table Column Removal', () => {
 
   describe('Table Row Structure', () => {
     it('should have correct number of columns in special cards table rows', () => {
-      // Mock table row HTML structure (after removal of Card Type column)
+      // Mock table row HTML structure in current DBV
       const mockTableRow = `
         <tr>
           <td><img src="..." alt="Card Name"></td>
+          <td><button class="add-to-deck-btn">+Deck</button></td>
           <td><strong>Card Name</strong></td>
           <td>Character Name</td>
           <td>Card Effect Description</td>
+          <td>4</td>
+          <td>Function Icons</td>
         </tr>
       `;
 
       // Count the number of <td> elements
       const rowMatches = mockTableRow.match(/<td>/g);
-      expect(rowMatches).toHaveLength(4);
+      expect(rowMatches).toHaveLength(7);
     });
 
     it('should not contain card_type data in table rows', () => {
       const mockTableRow = `
         <tr>
           <td><img src="..." alt="Card Name"></td>
+          <td><button class="add-to-deck-btn">+Deck</button></td>
           <td><strong>Card Name</strong></td>
           <td>Character Name</td>
           <td>Card Effect Description</td>
+          <td>4</td>
+          <td>Function Icons</td>
         </tr>
       `;
 
@@ -87,21 +99,22 @@ describe('Special Cards Table Column Removal', () => {
     it('should have correct colspan for loading message', () => {
       const mockLoadingRow = `
         <tr>
-          <td colspan="5" class="loading">Loading special cards...</td>
+          <td colspan="7" class="loading">Loading special cards...</td>
         </tr>
       `;
 
-      expect(mockLoadingRow).toContain('colspan="5"');
+      expect(mockLoadingRow).toContain('colspan="7"');
     });
 
-    it('should not have colspan="6" for loading message', () => {
+    it('should not use outdated colspan values for loading message', () => {
       const mockLoadingRow = `
         <tr>
-          <td colspan="5" class="loading">Loading special cards...</td>
+          <td colspan="7" class="loading">Loading special cards...</td>
         </tr>
       `;
 
       expect(mockLoadingRow).not.toContain('colspan="6"');
+      expect(mockLoadingRow).not.toContain('colspan="5"');
     });
   });
 
@@ -113,12 +126,15 @@ describe('Special Cards Table Column Removal', () => {
           <th></th>
           <th></th>
           <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
         </tr>
       `;
 
       // Count the number of <th> elements in filter row
       const filterMatches = mockFilterRow.match(/<th>/g);
-      expect(filterMatches).toHaveLength(4);
+      expect(filterMatches).toHaveLength(7);
     });
   });
 
@@ -148,6 +164,8 @@ describe('Special Cards Table Column Removal', () => {
         <td><strong>${mockCard.name}</strong></td>
         <td>${mockCard.character}</td>
         <td>${mockCard.card_effect}</td>
+        <td>4</td>
+        <td>Function Icons</td>
       `;
 
       // Verify the template doesn't contain card_type
@@ -163,14 +181,14 @@ describe('Special Cards Table Column Removal', () => {
 
   describe('Column Count Consistency', () => {
     it('should have consistent column count across all table elements', () => {
-      const headerColumns = 4; // Image, Name, Character, Card Effect
-      const rowColumns = 4;    // Same as header
-      const filterColumns = 4; // Same as header
-      const loadingColspan = 5; // Includes the Add to Deck button column in index.html
+      const headerColumns = 7; // Image, Add to Deck, Name, Character, Card Effect, Value, Function
+      const rowColumns = 7;    // Same as header
+      const filterColumns = 7; // Same as header
+      const loadingColspan = 7; // Matches the full table width in index.html
 
       expect(headerColumns).toBe(rowColumns);
       expect(headerColumns).toBe(filterColumns);
-      // Note: loadingColspan is 5 because index.html has an extra "Add to Deck" button column
+      expect(loadingColspan).toBe(headerColumns);
     });
   });
 });

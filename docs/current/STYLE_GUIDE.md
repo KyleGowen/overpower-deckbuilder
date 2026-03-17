@@ -360,8 +360,8 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Specificity**: Inline styles in `index.html` for highest CSS specificity override
   - **Responsive**: Maintains consistent width across different screen sizes
 - **Special Cards Function Column**:
-  - **Column order**: Image | Add to Deck | Name | Character | Card Effect | Function
-  - **Width layout** (`#special-cards-table`): `15% | 10% | 18% | 16% | 29% | 12%`
+  - **Column order**: Image | Add to Deck | Name | Character | Card Effect | Value | Function
+  - **Width layout** (`#special-cards-table`): `15% | 10% | 16% | 14% | 24% | 9% | 12%`
   - **Function icon render**:
     - Container: `.special-function-icons-cell` (`display: flex`, wrapped, centered, `gap: 6px`)
     - Icon selector: `.special-function-icon`
@@ -378,9 +378,13 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
     - Accessibility: `aria-pressed` state and focus ring via `:focus-visible`
   - **Filter behavior**:
     - Existing text filters (Name, Character, Card Effect) remain AND logic
+    - Value filters support `=` (`#special-value-equals`), `Min` (`#special-value-min`), and `Max` (`#special-value-max`)
+    - `No value` toggle (`#special-no-value-toggle`) filters to rows where `value` is `NULL`
+    - `No value` visual style: `.special-no-value-toggle-label` uses `font-size: 0.8rem` and `padding-top: 4px` to separate it from the `Max` input.
+    - When `No value` is enabled, numeric `Value` inputs are disabled and ignored
     - Function icon toggles use OR logic across selected icons
-    - Combined behavior: `text filters AND (selected function icons as OR)`
-    - `Clear All Filters` resets both text inputs and function icon toggles
+    - Combined behavior: `text filters AND value filters AND (selected function icons as OR)`
+    - `Clear All Filters` resets text inputs, value inputs/toggle, and function icon toggles
     - Clicking function filter icons (header or row) does not open the global image modal; only card art images should open previews.
 
 ### Deck Builder (deck-builder.html)

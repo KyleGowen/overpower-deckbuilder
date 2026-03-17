@@ -15,4 +15,6 @@
   - Keep Special Cards Function column styles in `database-view.css` and width overrides in `card-tables.css` aligned.
   - Function icons render with `.special-function-icon` at exact `64x64`.
   - Header function filters use `.special-function-filter-toggles` and `.function-filter-toggle` with `.is-active` state.
+  - Special Cards Value filter UI uses `.column-filters` + `.filter-input.equals/.min/.max` and `.special-no-value-toggle-label`.
+  - Disabled numeric state for No Value toggle is styled by `#special-cards-table .filter-input:disabled`; keep this behavior aligned with JS toggle logic.
   - Update [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) whenever Function column/toggle visuals change.
