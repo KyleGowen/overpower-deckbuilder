@@ -63,6 +63,8 @@ describe('Card Data Display', () => {
         window.openModal = jest.fn();
         window.showDeckSelection = jest.fn();
         window.applyBasicUniverseFilters = jest.fn();
+        (window as any).renderAllyStatTypeIcon = jest.fn(() => '<span>-</span>');
+        (window as any).renderFollowupAttackTypes = jest.fn(() => '<span>-</span>');
 
         new Function(code)();
         document.body.innerHTML = '';

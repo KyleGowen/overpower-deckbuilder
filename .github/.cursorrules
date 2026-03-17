@@ -21,6 +21,15 @@
 - Keep secrets in GitHub/AWS secret stores only; never hardcode new credentials.
 - If adding new `.github` subdirectories, add a local `.cursorrules` file in that new directory.
 
+## SSM Polling Pattern (Blue-Green Deploy)
+When sending an SSM command and polling for its result, ALWAYS follow this pattern:
+1. **Guard the command ID**: after `aws ssm send-command`, check that `CMD_ID` is non-empty and exit 1 immediately if it is.
+2. **Track success explicitly**: use a `DEPLOY_DONE=0` flag; set it to `1` only on `"Success"`; never treat loop fall-through as success.
+3. **Exit 1 on loop exhaustion**: if the polling loop completes all iterations without `DEPLOY_DONE=1`, exit 1 with a diagnostic message.
+4. **Never rely on `|| echo "Pending"` as a benign fallback** in a polling loop — an empty/invalid CMD_ID will return `"Pending"` forever and silently exhaust the loop.
+
+Violating any of these rules causes the deploy step to appear successful while no actual deployment ran, and the Verify step will fail with a misleading "old commit still live" error.
+
 ## Related Files Outside .github
 - `scripts/`: repository-level operational scripts referenced by some workflow jobs.
 - `docs/current/DEPLOYMENT_STRATEGY.md`: canonical deployment behavior documentation.

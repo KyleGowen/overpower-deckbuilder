@@ -297,11 +297,26 @@ deploy:
 **Process**:
 1. **Commit-Pinned Image**: Build and push both `:$GITHUB_SHA` and `:latest`
 2. **Authoritative Deploy Tag**: Deploy uses `:$GITHUB_SHA` only (never `:latest`)
-3. **Blue-Green Start**: Launch new container on idle port (`3000`/`3001`)
-4. **Pre-Switch Health Gate**: Validate app+DB health from `localhost:$NEW_PORT/health`
+3. **Blue-Green Start**: Launch new container on idle port (`3000`/`3001`) via SSM `AWS-RunShellScript`
+4. **Pre-Switch Health Gate**: Validate app+DB health from `localhost:$NEW_PORT/health` (30s startup wait + up to 36 × 5s polls)
 5. **Traffic Switch**: Update nginx upstream and reload after successful checks
 6. **Finalize**: Rename container, persist active port, run Flyway repair/migrate
 7. **External Verification**: Poll production `/health` and require exact SHA match
+
+#### SSM Polling and Timing Budget
+
+The Blue-Green Deploy step sends a single SSM `AWS-RunShellScript` command (timeout: 540s) and polls for its completion in GitHub Actions (90 × 5s = 450s max).
+
+Expected timing per phase:
+- ECR image pull: ~1–2 min (varies by layer cache state)
+- Container startup + health gate: 30s wait + up to 3 min polls = ~3.5 min max
+- nginx switch + finalize: ~15s
+- **Total SSM script budget: ≤ 9 min (matches `--timeout-seconds 540`)**
+
+**Critical invariants for the polling loop** (enforced in `deploy.yml`):
+- `CMD_ID` must be non-empty after `send-command`; empty = deploy was never sent → exit 1 immediately
+- `DEPLOY_DONE` flag is set only on `"Success"`; if the loop exhausts all 90 polls without `Success` → exit 1
+- Relying on loop fall-through as a success signal is a bug — the loop will return `"Pending"` indefinitely if `CMD_ID` is empty or the SSM command stalls
 
 #### Deployment Commands
 ```bash
@@ -416,6 +431,29 @@ SKIP_MIGRATIONS=false
 #### 3. Container Startup Failures
 **Symptoms**: Container exits immediately after starting
 **Solution**: Check container logs and environment variables
+
+#### 4. "Verify Deployment" Fails — Production Still on Old Commit
+**Symptoms**: `Deployment verification failed` — health endpoint returns old commit SHA after all 20 polls
+**Root cause**: The Blue-Green Deploy step completed without error but no deployment actually ran. This happens when `aws ssm send-command` fails silently (empty `CMD_ID`) and the polling loop exhausts all 90 iterations returning `"Pending"` before falling through.
+**Diagnosis**:
+```bash
+# Check if a new SSM command was created around the time of the failed run
+aws ssm list-command-invocations \
+  --instance-id i-04493611b99785f28 \
+  --region us-west-2 \
+  --max-results 5 \
+  --query 'CommandInvocations[*].{CommandId:CommandId,Status:Status,RequestedDateTime:RequestedDateTime}' \
+  --output table
+
+# Fetch stdout/stderr of the most recent command
+aws ssm get-command-invocation \
+  --command-id <COMMAND_ID> \
+  --instance-id i-04493611b99785f28 \
+  --region us-west-2 \
+  --query '{Status:Status,StdOut:StandardOutputContent,StdErr:StandardErrorContent}' \
+  --output json
+```
+**Fix**: Ensure `CMD_ID` guard and `DEPLOY_DONE` loop-exhaustion check are present in `deploy.yml` (see "SSM Polling and Timing Budget" section above). Re-push to main to trigger a fresh deployment.
 
 ### Debugging Commands
 ```bash
