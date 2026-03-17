@@ -742,6 +742,9 @@ jobs:
     needs: [run-migrations]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    concurrency:
+      group: production-deploy-${{ github.ref }}
+      cancel-in-progress: false
     
     steps:
     - name: Configure AWS credentials
@@ -758,10 +761,13 @@ jobs:
     - name: Blue-Green Deploy
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         ECR_URI="$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}"
+        EXPECTED_COMMIT="$IMAGE_TAG"
         echo "Sending blue-green deploy command (fire-and-forget)..."
         echo "ECR URI: $ECR_URI"
+        echo "Deploying image tag: $IMAGE_TAG"
 
         CMD_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
@@ -774,12 +780,14 @@ jobs:
             \"echo \\\"Switching: port \$CURRENT_PORT -> \$NEW_PORT\\\"\",
             \"echo '--- Step 1: Pull new image ---'\",
             \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_URI\",
-            \"docker pull $ECR_URI:latest\",
+            \"docker pull $ECR_URI:$IMAGE_TAG\",
             \"echo 'Image pulled.'\",
+            \"docker image inspect $ECR_URI:$IMAGE_TAG --format '{{index .RepoDigests 0}}' || true\",
             \"echo '--- Step 2: Start new container on idle port ---'\",
             \"docker stop overpower-app-new || true\",
             \"docker rm overpower-app-new || true\",
-            \"docker run -d --name overpower-app-new --restart unless-stopped -p \$NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=true $ECR_URI:latest\",
+            \"docker run -d --name overpower-app-new --restart unless-stopped -p \$NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=true $ECR_URI:$IMAGE_TAG\",
+            \"docker inspect overpower-app-new --format '{{.Image}}' || true\",
             \"echo \\\"New container started on port \$NEW_PORT\\\"\",
             \"echo '--- Step 3: Health check new container ---'\",
             \"echo 'Waiting 30s for container to start before first health check...'\",
@@ -812,6 +820,9 @@ jobs:
             \"  exit 1\",
             \"fi\",
             \"echo 'New container is healthy'\",
+            \"NEW_COMMIT=\$(cat /tmp/new_health.json | jq -r '.git.commit // \\\"\\\"' 2>/dev/null || echo '')\",
+            \"echo \\\"New container health commit: \${NEW_COMMIT:-unknown}\\\"\",
+            \"echo \\\"Expected commit: $IMAGE_TAG\\\"\",
             \"echo '--- Step 4: Switch nginx traffic ---'\",
             \"sed -i \\\"s/localhost:\$CURRENT_PORT/localhost:\$NEW_PORT/g\\\" /etc/nginx/conf.d/excelsior.cards.conf\",
             \"nginx -t\",
@@ -857,6 +868,7 @@ jobs:
         echo "Verifying deployment via production health endpoint..."
         EXPECTED_COMMIT="${{ github.sha }}"
         echo "Expected commit: $EXPECTED_COMMIT"
+        echo "Expected image tag: $EXPECTED_COMMIT"
 
         # Allow time for nginx/cache to serve the new container after SSM reports Success
         echo "Waiting 25s for traffic to switch to new container..."
@@ -867,8 +879,10 @@ jobs:
         HTTP_STATUS=""
         LAST_HEALTH=""
         for i in $(seq 1 20); do
-          HEALTH=$(curl -s --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "")
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://excelsior.cards/health" 2>/dev/null || echo "000")
+          CACHE_BUSTER=$(date +%s%N)
+          HEALTH_URL="http://excelsior.cards/health?cb=$CACHE_BUSTER"
+          HEALTH=$(curl -s --max-time 15 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$HEALTH_URL" 2>/dev/null || echo "")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$HEALTH_URL" 2>/dev/null || echo "000")
           DEPLOYED_COMMIT=$(echo "$HEALTH" | jq -r '.git.commit // ""' 2>/dev/null || echo "")
           LAST_HEALTH="$HEALTH"
 
@@ -888,9 +902,27 @@ jobs:
           echo "Production is running: ${DEPLOYED_COMMIT:-unknown}"
           echo "Expected: $EXPECTED_COMMIT"
           echo "Last HTTP status: ${HTTP_STATUS:-unknown}"
+          echo "Last health URL: ${HEALTH_URL:-unknown}"
           echo "Last health response (first 500 chars):"
           echo "$LAST_HEALTH" | head -c 500
           echo ""
+          echo "Collecting EC2 deployment diagnostics..."
+          DIAG_CMD_ID=$(aws ssm send-command \
+            --instance-ids ${{ env.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "echo Active port: $(cat /opt/app/active_port 2>/dev/null || echo unknown)",
+              "echo Nginx upstream: $(grep -o \"localhost:[0-9]*\" /etc/nginx/conf.d/excelsior.cards.conf | head -1)",
+              "docker ps --format \"table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\""
+            ]' \
+            --output text --query 'Command.CommandId' 2>/dev/null || echo "")
+          if [ -n "$DIAG_CMD_ID" ]; then
+            sleep 8
+            aws ssm get-command-invocation \
+              --command-id "$DIAG_CMD_ID" \
+              --instance-id ${{ env.EC2_INSTANCE_ID }} \
+              --query 'StandardOutputContent' --output text || true
+          fi
           echo "If the deploy actually succeeded, production may be on the new commit but verification hit DNS/cache. Check EC2 container and nginx. Otherwise check SSM/CloudWatch for the blue-green deploy step."
           exit 1
         fi

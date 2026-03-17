@@ -284,41 +284,44 @@ run-migrations:
 
 ### 3. Application Deployment Stage
 
-#### Nuclear Deployment Strategy
+#### Blue-Green SHA-Pinned Deployment Strategy
 ```yaml
 deploy:
   name: Deploy to Production
   needs: [run-migrations]
+  concurrency:
+    group: production-deploy-${{ github.ref }}
+    cancel-in-progress: false
 ```
 
 **Process**:
-1. **System Cleanup**: `docker system prune -af` (nuclear option)
-2. **ECR Login**: Authenticate with AWS ECR
-3. **Image Pull**: `docker pull --no-cache $ECR_URI:latest`
-4. **Container Cleanup**: Stop and remove all existing containers
-5. **Fresh Container**: Start new container with latest image
-6. **Health Check**: Verify container is running
-7. **Flyway Repair**: Run Flyway repair if needed
+1. **Commit-Pinned Image**: Build and push both `:$GITHUB_SHA` and `:latest`
+2. **Authoritative Deploy Tag**: Deploy uses `:$GITHUB_SHA` only (never `:latest`)
+3. **Blue-Green Start**: Launch new container on idle port (`3000`/`3001`)
+4. **Pre-Switch Health Gate**: Validate app+DB health from `localhost:$NEW_PORT/health`
+5. **Traffic Switch**: Update nginx upstream and reload after successful checks
+6. **Finalize**: Rename container, persist active port, run Flyway repair/migrate
+7. **External Verification**: Poll production `/health` and require exact SHA match
 
 #### Deployment Commands
 ```bash
-# Nuclear cleanup
-docker system prune -af
-docker volume prune -f
-docker network prune -f
+# Pull authoritative image tag for this workflow run
+docker pull $ECR_URI:$GITHUB_SHA
 
-# Force pull latest image
-docker pull --no-cache $ECR_URI:latest
+# Start candidate container on idle port
+docker run -d --name overpower-app-new --restart unless-stopped \
+  -p $NEW_PORT:3000 --env-file /opt/app/.env \
+  -e SKIP_MIGRATIONS=true $ECR_URI:$GITHUB_SHA
 
-# Stop and remove all containers
-docker stop $(docker ps -aq) || true
-docker rm $(docker ps -aq) || true
+# Validate candidate health before switch
+curl -s http://localhost:$NEW_PORT/health | jq '.status, .database.status, .git.commit'
 
-# Start fresh container
-docker run -d --name overpower-app --restart unless-stopped \
-  -p 3000:3000 --env-file /opt/app/.env \
-  -e SKIP_MIGRATIONS=false $ECR_URI:latest
+# Switch nginx upstream to new port and reload
+sed -i "s/localhost:$CURRENT_PORT/localhost:$NEW_PORT/g" /etc/nginx/conf.d/excelsior.cards.conf
+nginx -t && nginx -s reload
 ```
+
+`latest` remains a convenience tag for manual inspection and caching. Production correctness is tied to the commit SHA tag and verified by matching `/health.git.commit` to `${{ github.sha }}`.
 
 ## Environment Configuration
 
