@@ -1,0 +1,68 @@
+# infra/ — Terraform AWS Infrastructure
+
+## Purpose
+This directory contains all Terraform configuration for the Excelsior Deckbuilder AWS infrastructure. All resources are managed here; apply manually — CI does **not** run `terraform apply`.
+
+## State
+State is **local** (no remote backend). Coordinate with Kyle before applying to avoid conflicts. Never commit `terraform.tfstate` or `terraform.tfstate.backup`.
+
+## File Map
+
+| File | Purpose |
+|---|---|
+| `main.tf` | Provider config (AWS, archive, random, null); no remote backend |
+| `variables.tf` | All input variable declarations with defaults |
+| `outputs.tf` | Exported values — CloudFront domain, S3 bucket name, EC2 info, RDS endpoints, etc. |
+| `networking.tf` | VPC, subnets, internet gateway, route tables, security groups |
+| `ec2.tf` | EC2 app instance (t2.micro), Elastic IP, IAM role/policies for EC2 (SSM + ECR access) |
+| `rds.tf` | RDS PostgreSQL instance (db.t4g.micro) |
+| `ecr.tf` | ECR Docker image repository (`op-deckbuilder-repo`) |
+| `cloudfront.tf` | CloudFront CDN distribution — EC2 origin (default) + S3 origin (card images) |
+| `s3.tf` | S3 bucket for static card image assets; OAC-only access (no public access) |
+| `ssm.tf` | SSM Parameter Store — DB credentials, app env, Firebase config, CDN base URL |
+| `dns.tf` | Route 53 hosted zone + A/CNAME/MX/DKIM records |
+| `ssl.tf` | ACM SSL/TLS certificate |
+| `ses.tf` | SES email sending config for `excelsior.cards` |
+| `nginx.tf` | Nginx reverse-proxy config deployed to EC2 via SSM/user-data |
+| `iam.tf` | IAM policy granting CI user S3 write access to the assets bucket |
+
+## Key Architecture Facts
+
+- **`excelsior.cards` A record → EC2 Elastic IP directly** — NOT to CloudFront. The domain bypasses CloudFront entirely for normal app requests.
+- **CloudFront** is only reachable at its auto-generated `*.cloudfront.net` domain. The server injects this as `CDN_BASE_URL` (SSM parameter) at container startup → `window.APP_CDN_BASE` in the frontend.
+- **CloudFront origins:**
+  - Default behavior → EC2 (all app traffic)
+  - Ordered behavior `/src/resources/cards/images/*` → S3 bucket (card images only)
+- **S3 bucket** (`excelsior-cards-assets-dev`) is fully private; only CloudFront can read from it via OAC (Origin Access Control). Direct public HTTP access returns 403.
+- **OAC not OAI** — always use `aws_cloudfront_origin_access_control` for new S3 origins. OAI is legacy and deprecated.
+
+## Workflow
+
+```bash
+# Always plan before apply:
+terraform plan
+
+# Review the plan carefully — changes affect live production
+terraform apply
+
+# Get output values:
+terraform output assets_bucket_name
+terraform output -raw cloudfront_domain_name
+```
+
+## IAM for CI (GitHub Actions)
+
+The CI pipeline uses `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` stored as GitHub Actions secrets. These belong to an IAM user whose username is tracked in `var.ci_iam_username`. The `iam.tf` file defines the S3 write policy and attaches it to this user.
+
+## Infrastructure Spend Lock
+
+> ⛔ **NEVER add or upgrade paid AWS resources without explicit instruction from Kyle.**
+
+See [`docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md`](../docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md) for upgrade options with cost estimates. All options are documented there — do NOT implement anything from it unless explicitly directed.
+
+Locked actions (require explicit Kyle approval):
+- Upgrading EC2 instance type
+- Upgrading RDS instance class
+- Adding Redis / ElastiCache
+- Adding any new paid AWS service (load balancer, NAT gateway, etc.)
+- Changes to `infra/` that increase the AWS bill
