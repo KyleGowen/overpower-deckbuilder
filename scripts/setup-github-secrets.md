@@ -8,6 +8,7 @@ You need to set up the following secrets in your GitHub repository:
 
 1. `AWS_ACCESS_KEY_ID`
 2. `AWS_SECRET_ACCESS_KEY`
+3. `AWS_S3_ASSETS_BUCKET` — S3 bucket name for card image assets (used by the sync-images job). Value: run `cd infra && terraform output -raw assets_bucket_name`.
 
 ## Step-by-Step Setup
 
@@ -88,6 +89,10 @@ After creating the IAM user:
    - Name: `AWS_SECRET_ACCESS_KEY`
    - Value: [Your AWS Secret Access Key]
 
+   **Secret 3 (required for Sync Card Images to S3):**
+   - Name: `AWS_S3_ASSETS_BUCKET`
+   - Value: Run `cd infra && terraform output -raw assets_bucket_name` and paste the output (the S3 bucket must exist; apply Terraform first if needed).
+
 6. Click "Add secret" for each one
 
 ### 5. Verify Setup
@@ -129,6 +134,9 @@ After creating the IAM user:
 - Check that the Dockerfile exists
 - Verify all dependencies are available
 - Check for any build errors in the logs
+
+**"Sync Card Images to S3" / "Invalid bucket name" (empty bucket):**
+- The `AWS_S3_ASSETS_BUCKET` secret is not set or is empty. Add it in Settings → Secrets and variables → Actions. Value: `cd infra && terraform output -raw assets_bucket_name`. See [docs/current/CLOUDFRONT_CDN.md](../docs/current/CLOUDFRONT_CDN.md) for CDN/S3 setup.
 
 ### Getting Help
 

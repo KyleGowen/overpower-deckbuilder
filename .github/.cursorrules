@@ -33,3 +33,6 @@ Violating any of these rules causes the deploy step to appear successful while n
 ## Related Files Outside .github
 - `scripts/`: repository-level operational scripts referenced by some workflow jobs.
 - `docs/current/DEPLOYMENT_STRATEGY.md`: canonical deployment behavior documentation.
+
+## Deploy secrets
+- The **sync-images** job (Sync Card Images to S3) requires the `AWS_S3_ASSETS_BUCKET` GitHub Actions secret. Value: `cd infra && terraform output -raw assets_bucket_name`. If this secret is missing or empty, the job fails with "Invalid bucket name" because the S3 URI becomes `s3:///...`. See `scripts/setup-github-secrets.md` and `docs/current/CLOUDFRONT_CDN.md`.

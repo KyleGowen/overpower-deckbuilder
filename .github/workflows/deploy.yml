@@ -633,6 +633,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: Validate S3 assets bucket secret
+      run: |
+        if [ -z "${{ secrets.AWS_S3_ASSETS_BUCKET }}" ]; then
+          echo "::error::AWS_S3_ASSETS_BUCKET secret is not set. Add it in repo Settings → Secrets and variables → Actions. Value: \`cd infra && terraform output -raw assets_bucket_name\`"
+          exit 1
+        fi
+
     - name: Sync card images to S3
       run: |
         echo "📦 Syncing card images to S3..."
