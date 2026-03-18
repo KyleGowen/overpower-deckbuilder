@@ -3,6 +3,11 @@
 
 // ===== mapDatabaseIdToDeckCardId, mapCardIdToDatabaseId, mapImagePathToActualFile, getCardImagePath =====
 
+// CDN base URL injected by the server via /js/app-config.js (sets window.APP_CDN_BASE).
+// In production this is the CloudFront domain; empty string in local dev.
+// Card images are served from S3 via CloudFront in production and from local disk in dev.
+const _CARD_IMAGE_CDN_BASE = (typeof window !== 'undefined' && window.APP_CDN_BASE || '').replace(/\/$/, '');
+
 function mapDatabaseIdToDeckCardId(databaseId, cardType) {
     // This function is deprecated after UUID migration
     // We'll use a different approach based on card names or other attributes
@@ -76,9 +81,9 @@ function ensureLocationPathHasTypeFolder(path) {
     return path;
 }
 
-// Helper function to get card image path
-// options: { useThumbnail: boolean } - when true, return thumbnail path for character images
-function getCardImagePath(card, cardType, options) {
+// Internal path builder — returns a relative /src/resources/cards/images/... path.
+// Use getCardImagePath() publicly; it applies the CDN prefix on top.
+function _getCardImagePathRaw(card, cardType, options) {
     const useThumbnail = options && options.useThumbnail === true;
     function maybeThumbnail(path) {
         if (!useThumbnail || !path) return path;
@@ -221,7 +226,14 @@ function getCardImagePath(card, cardType, options) {
         return `/src/resources/cards/images/placeholder.webp`;
     }
 }
-// Helper function to load available cards data for lookup
+// Public entry point — wraps _getCardImagePathRaw and prepends the CDN base URL.
+// In local dev (CDN_BASE_URL not set) the prefix is empty and paths stay relative,
+// so Express static middleware serves images from disk as before.
+function getCardImagePath(card, cardType, options) {
+    const path = _getCardImagePathRaw(card, cardType, options);
+    if (!path || !_CARD_IMAGE_CDN_BASE || path.startsWith('http')) return path;
+    return _CARD_IMAGE_CDN_BASE + path;
+}
 
 // Export all functions to window for backward compatibility
 window.mapDatabaseIdToDeckCardId = mapDatabaseIdToDeckCardId;
