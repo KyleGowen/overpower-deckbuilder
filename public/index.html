@@ -611,8 +611,7 @@
                             <th>Card Name</th>
                             <th>Stat to Use</th>
                             <th>Stat Type</th>
-                            <th>Attack Value</th>
-                            <th>Attack Type</th>
+                            <th>Attack</th>
                             <th>Card Text</th>
                         </tr>
                         <tr class="filter-row">
@@ -625,12 +624,11 @@
                             <th></th>
                             <th></th>
                             <th></th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="ally-universe-tbody">
                         <tr>
-                            <td colspan="7" class="loading">Loading allies...</td>
+                            <td colspan="6" class="loading">Loading allies...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1739,9 +1737,33 @@
                         showMainApp(); // This will load general app data (characters, etc.)
                     }
                 } else {
-                    window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, before showLoginModal');
-                    await showLoginModal();
-                    window.__flashDebug && window.__flashDebug('DOMContentLoaded: after showLoginModal');
+                    if (authResult.deckId) {
+                        // Unauthenticated user visiting a shared deck link — auto-login as guest for read-only viewing
+                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, deck URL detected, auto-guest-login');
+                        const guestResult = await window.authService.guestLogin();
+                        if (guestResult.success) {
+                            currentUser = window.authService.getCurrentUser();
+                            window.currentUser = currentUser;
+                            if (typeof updateUserWelcome === 'function') updateUserWelcome();
+                            document.body.classList.add('guest-user');
+                            // Set ?readonly=true in URL so loadDeckForEditing skips the guest clone flow
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('readonly', 'true');
+                            window.history.replaceState({}, '', url.toString());
+                            const databaseView = document.getElementById('database-view');
+                            if (databaseView) databaseView.classList.add('view-removed');
+                            loadMainAppDataInBackground();
+                            await loadDeckForEditing(authResult.deckId, authResult.urlUserId, true);
+                            showDeckEditor();
+                        } else {
+                            window.__flashDebug && window.__flashDebug('DOMContentLoaded: guest auto-login failed, showing login modal');
+                            await showLoginModal();
+                        }
+                    } else {
+                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, before showLoginModal');
+                        await showLoginModal();
+                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: after showLoginModal');
+                    }
                 }
             } catch (error) {
                 console.error('❌ Error during page initialization:', error);

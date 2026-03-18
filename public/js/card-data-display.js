@@ -258,8 +258,7 @@ function displayAllyUniverse(allies) {
             <td><strong>${card.card_name}</strong></td>
             <td>${card.stat_to_use}</td>
             <td>${renderAllyStatTypeIcon(card.stat_type_to_use)}</td>
-            <td>${card.attack_value}</td>
-            <td>${card.attack_type}</td>
+            <td>${renderTeamworkValueCell(String(card.attack_value), card.attack_type)}</td>
             <td>${card.card_text}</td>
         </tr>
     `).join('');

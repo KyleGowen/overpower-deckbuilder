@@ -224,7 +224,8 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     const isGuest = currentUser && currentUser.role === 'GUEST';
     const isDbDeck = typeof deckId === 'string' && deckId.length > 0 && !deckId.startsWith('guest_');
-    if (isGuest && isDbDeck) {
+    const isReadOnlyQuery = new URLSearchParams(window.location.search).get('readonly') === 'true';
+    if (isGuest && isDbDeck && !isReadOnlyQuery) {
         try {
             const res = await fetch(`/api/decks/${deckId}`, { credentials: 'include' });
             const json = await res.json();

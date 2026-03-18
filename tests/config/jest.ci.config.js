@@ -11,7 +11,7 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { diagnostics: false }],
   },
-  // Override coverage reporters to include JSON for shard merging
+  // Override coverage reporters to include JSON for Codecov upload
   coverageReporters: ['text', 'lcov', 'json'],
   // Reduce log noise in CI
   verbose: false,
@@ -20,4 +20,7 @@ module.exports = {
   maxWorkers: 2,
   // Force exit after tests complete (avoid hanging on open handles)
   forceExit: true,
+  // Consistent cache path so actions/cache can persist timing data between runs,
+  // enabling --shard to distribute tests by estimated runtime rather than file index.
+  cacheDirectory: '/tmp/jest-cache',
 };
