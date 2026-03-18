@@ -17,6 +17,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
 ├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
 ├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
+├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration
 ├── 📄 package.json                 # Node.js dependencies and scripts
 ├── 📄 tsconfig.json                # TypeScript configuration
 ├── 📄 jest.config.js               # Jest testing configuration
