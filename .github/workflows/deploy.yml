@@ -61,9 +61,11 @@ jobs:
     - name: Run Knip (unused code scan)
       run: npx knip --production
 
+  # Checkout can occasionally be slow on some runners; re-running the job usually helps.
   unit-tests:
     name: Unit Tests (shard ${{ matrix.shard }}/8)
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +74,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        sparse-checkout: |
+          /*
+          !/src/resources/cards/images/
+        sparse-checkout-cone-mode: false
 
     - name: Setup Node.js
       uses: actions/setup-node@v4

@@ -5,6 +5,7 @@ terraform.tfstate
 terraform.tfstate.backup
 *.tfplan
 *.tfplan.*
+tfplan
 .terraformrc
 terraform.rc
 

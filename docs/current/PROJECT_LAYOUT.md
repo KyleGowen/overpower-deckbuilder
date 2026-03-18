@@ -294,7 +294,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 ├── 📄 email_forwarder.zip          # Email forwarder deployment package
 ├── 📄 terraform.tfstate            # Terraform state file
 ├── 📄 terraform.tfstate.backup     # Terraform state backup
-├── 📄 tfplan                       # Terraform plan file
+├── 📄 plan.tfplan                 # Terraform plan output (gitignored; do not commit)
 └── 📄 README.md                    # Infrastructure documentation
 ```
 

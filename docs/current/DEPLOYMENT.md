@@ -91,6 +91,10 @@ The deploy script and EC2 user_data automatically fetch Firebase config from SSM
 - `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_APP_ID` — client config for the frontend
 - `FIREBASE_SERVICE_ACCOUNT_JSON` — server-only, full JSON string for token verification
 
+### Terraform plan files (security)
+
+Never commit Terraform plan files; they can contain sensitive variable values (e.g. Firebase service account JSON). The repo ignores `infra/tfplan`, `*.tfplan`, and `plan.tfplan`. The domain deploy script (`infra/deploy-domain.sh`) uses `terraform plan -out=plan.tfplan` so the output filename is ignored by `.gitignore`. If you run `terraform plan` manually, use `-out=plan.tfplan` or another `*.tfplan` name and do not commit the file.
+
 ## Deployment Process
 
 ### 1. Build Phase

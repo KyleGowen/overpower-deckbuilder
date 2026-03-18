@@ -33,9 +33,9 @@ if [ ! -d ".terraform" ]; then
     terraform init
 fi
 
-# Plan the deployment
+# Plan the deployment (use plan.tfplan so *.tfplan in .gitignore prevents accidental commit)
 echo "📋 Planning deployment..."
-terraform plan -out=tfplan
+terraform plan -out=plan.tfplan
 
 # Ask for confirmation
 echo ""
@@ -54,10 +54,10 @@ fi
 
 # Apply the changes
 echo "🚀 Applying changes..."
-terraform apply tfplan
+terraform apply plan.tfplan
 
-# Clean up plan file
-rm -f tfplan
+# Clean up plan file (contains sensitive data; never commit)
+rm -f plan.tfplan
 
 echo ""
 echo "✅ Domain configuration deployed successfully!"

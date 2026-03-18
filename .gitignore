@@ -155,6 +155,9 @@ src/resources/cards/images/locations/thumb/
 *_backup_*/
 BACKUP_*/
 
+# Terraform plan files (can contain secrets; e.g. terraform plan -out=tfplan)
+infra/tfplan
+
 # Firebase service account (sensitive - used for Terraform)
 infra/firebase-service-account.json
 
