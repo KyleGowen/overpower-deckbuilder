@@ -187,4 +187,15 @@ output "ssl_certificate_arn" {
   value       = var.enable_ssl ? var.ssl_certificate_arn : null
 }
 
+# S3 Assets Bucket
+output "assets_bucket_name" {
+  description = "S3 bucket name for card image assets — use as AWS_S3_ASSETS_BUCKET GitHub Actions secret"
+  value       = aws_s3_bucket.card_images.bucket
+}
+
+output "assets_bucket_arn" {
+  description = "S3 bucket ARN for card image assets"
+  value       = aws_s3_bucket.card_images.arn
+}
+
 # Note: Data source for current AWS account is defined in main.tf
