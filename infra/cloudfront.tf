@@ -14,6 +14,7 @@ resource "aws_cloudfront_distribution" "card_images" {
   comment     = "Card images CDN for excelsior.cards"
   price_class = "PriceClass_100" # US, Canada, Europe only — lowest cost tier
 
+  # Origin 1: EC2 instance (app traffic and any non-image paths)
   origin {
     # CloudFront requires a DNS hostname — raw IP addresses are not accepted.
     # excelsior.cards resolves to the EC2 EIP via Route53, so this is equivalent.
@@ -28,7 +29,37 @@ resource "aws_cloudfront_distribution" "card_images" {
     }
   }
 
-  # Cache behavior for card images — long TTL since images are immutable by filename
+  # Origin 2: S3 bucket for card image assets (OAC-authenticated)
+  origin {
+    domain_name              = aws_s3_bucket.card_images.bucket_regional_domain_name
+    origin_id                = "s3-assets-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.card_images.id
+  }
+
+  # Ordered behavior: card images are served from S3, not EC2.
+  # This path pattern is evaluated BEFORE the default_cache_behavior.
+  # Long TTL is safe — images are content-addressed by filename and never mutated in place.
+  ordered_cache_behavior {
+    path_pattern           = "/src/resources/cards/images/*"
+    target_origin_id       = "s3-assets-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 86400    # 1 day default
+    max_ttl     = 31536000 # 1 year maximum
+  }
+
+  # Default behavior: all other traffic proxied to EC2
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
