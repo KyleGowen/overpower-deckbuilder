@@ -668,7 +668,7 @@ jobs:
         
     - name: Create environment file on EC2
       run: |
-        aws ssm send-command \
+        COMMAND_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
           --parameters 'commands=[
@@ -688,15 +688,23 @@ jobs:
             "echo FLYWAY_USER=postgres >> /opt/app/.env",
             "echo FLYWAY_PASSWORD=TempPassword123! >> /opt/app/.env"
           ]' \
-          --output text --query 'Command.CommandId'
+          --output text --query 'Command.CommandId')
+        echo "Waiting for .env creation (command $COMMAND_ID)..."
+        aws ssm wait command-executed \
+          --command-id "$COMMAND_ID" \
+          --instance-id ${{ env.EC2_INSTANCE_ID }}
 
     - name: Append Firebase config to .env
       run: |
-        aws ssm send-command \
+        COMMAND_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
           --parameters file://.github/scripts/append-firebase-env.json \
-          --output text --query 'Command.CommandId'
+          --output text --query 'Command.CommandId')
+        echo "Waiting for Firebase config append (command $COMMAND_ID)..."
+        aws ssm wait command-executed \
+          --command-id "$COMMAND_ID" \
+          --instance-id ${{ env.EC2_INSTANCE_ID }}
 
     - name: Append CDN_BASE_URL to .env
       run: |
