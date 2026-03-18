@@ -119,7 +119,7 @@ function displayAspects(aspects) {
     const tbody = document.getElementById('aspects-tbody');
     
     if (aspects.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No aspects found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">No aspects found</td></tr>';
         return;
     }
     
@@ -150,6 +150,8 @@ function displayAspects(aspects) {
             <td><strong>${aspect.card_name}</strong></td>
             <td>${aspect.location}</td>
             <td>${formatSpecialCardEffect(aspect.aspect_description || aspect.card_effect || 'No description available')}</td>
+            <td>${renderSpecialIconBadges(aspect)}</td>
+            <td>${aspect.value != null ? aspect.value : '-'}</td>
             <td class="fortifications-column">${aspect.is_fortification ? 'Yes' : 'No'}</td>
             <td class="one-per-deck-column">${aspect.is_one_per_deck ? 'Yes' : 'No'}</td>
         </tr>

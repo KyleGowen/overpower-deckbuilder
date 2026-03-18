@@ -31,7 +31,8 @@ function makeImagesClickable() {
             img.closest('.function-filter-toggle') ||
             img.closest('.special-function-icons-cell') ||
             img.closest('.power-type-filter-toggle') ||
-            img.classList.contains('special-power-type-icon')
+            img.classList.contains('special-power-type-icon') ||
+            img.classList.contains('column-header-icon')
         ) {
             return;
         }

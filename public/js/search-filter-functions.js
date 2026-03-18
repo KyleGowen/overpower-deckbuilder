@@ -133,118 +133,142 @@ function setupLocationSearch() {
 }
 
 function setupAspectSearch() {
-    // Set up main search input functionality (if it exists)
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', async (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            if (searchTerm.length === 0) {
-                // Reload all aspects
-                await loadAspects();
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/aspects');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const filteredAspects = data.data.filter(aspect => 
-                        aspect.card_name.toLowerCase().includes(searchTerm) ||
-                        aspect.location.toLowerCase().includes(searchTerm) ||
-                        (aspect.aspect_description && aspect.aspect_description.toLowerCase().includes(searchTerm)) ||
-                        (aspect.card_effect && aspect.card_effect.toLowerCase().includes(searchTerm))
-                    );
-                    displayAspects(filteredAspects);
-                }
-            } catch (error) {
-                console.error('Error searching aspects:', error);
-            }
-        });
-    }
-
-    // Set up card name search input functionality
     const nameSearchInput = document.querySelector('#aspects-table .header-filter[data-column="card_name"]');
-    if (nameSearchInput) {
-        nameSearchInput.addEventListener('input', async (e) => {
-            const nameTerm = e.target.value.toLowerCase();
-
-            if (nameTerm.length === 0) {
-                await loadAspects();
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/aspects');
-                const data = await response.json();
-
-                if (data.success) {
-                    const filteredAspects = data.data.filter(aspect =>
-                        aspect.card_name.toLowerCase().includes(nameTerm)
-                    );
-                    displayAspects(filteredAspects);
-                }
-            } catch (error) {
-                console.error('Error searching aspects by name:', error);
-            }
-        });
-    }
-
-    // Set up location search input functionality
     const locationSearchInput = document.querySelector('#aspects-table .header-filter[data-column="location"]');
-    if (locationSearchInput) {
-        locationSearchInput.addEventListener('input', async (e) => {
-            const locationTerm = e.target.value.toLowerCase();
-
-            if (locationTerm.length === 0) {
-                await loadAspects();
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/aspects');
-                const data = await response.json();
-
-                if (data.success) {
-                    const filteredAspects = data.data.filter(aspect =>
-                        aspect.location.toLowerCase().includes(locationTerm)
-                    );
-                    displayAspects(filteredAspects);
-                }
-            } catch (error) {
-                console.error('Error searching aspects by location:', error);
-            }
-        });
-    }
-
-    // Set up card effect search input functionality
     const effectSearchInput = document.querySelector('#aspects-table .header-filter[data-column="card_effect"]');
-    if (effectSearchInput) {
-        effectSearchInput.addEventListener('input', async (e) => {
-            const effectTerm = e.target.value.toLowerCase();
+    const valueEqualsInput = document.getElementById('aspect-value-equals');
+    const valueMinInput = document.getElementById('aspect-value-min');
+    const valueMaxInput = document.getElementById('aspect-value-max');
+    const noValueToggle = document.getElementById('aspect-no-value-toggle');
+    const noIconToggle = document.getElementById('aspect-no-icon-toggle');
+    const powerTypeFilterToggles = document.querySelectorAll('#aspects-table .power-type-filter-toggle');
 
-            if (effectTerm.length === 0) {
-                await loadAspects();
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/aspects');
-                const data = await response.json();
-
-                if (data.success) {
-                    const filteredAspects = data.data.filter(aspect => {
-                        const effectText = (aspect.aspect_description || aspect.card_effect || '').toString();
-                        return effectText.toLowerCase().includes(effectTerm);
-                    });
-                    displayAspects(filteredAspects);
-                }
-            } catch (error) {
-                console.error('Error searching aspects by card effect:', error);
-            }
+    function setAspectValueInputsDisabled(isDisabled) {
+        [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
+            if (input) input.disabled = isDisabled;
         });
     }
+
+    function setAspectPowerTypeTogglesDisabled(isDisabled) {
+        powerTypeFilterToggles.forEach(btn => {
+            btn.disabled = isDisabled;
+            btn.classList.toggle('is-disabled', isDisabled);
+        });
+    }
+
+    function getSelectedAspectPowerTypes() {
+        return Array.from(powerTypeFilterToggles)
+            .filter(btn => btn.classList.contains('is-active'))
+            .map(btn => btn.getAttribute('data-power-type'))
+            .filter(Boolean);
+    }
+
+    async function performAspectSearch() {
+        const nameTerm = nameSearchInput ? nameSearchInput.value.toLowerCase() : '';
+        const locationTerm = locationSearchInput ? locationSearchInput.value.toLowerCase() : '';
+        const effectTerm = effectSearchInput ? effectSearchInput.value.toLowerCase() : '';
+        const noValueOnly = Boolean(noValueToggle && noValueToggle.checked);
+        const noIconOnly = Boolean(noIconToggle && noIconToggle.checked);
+        const equalsValue = valueEqualsInput && valueEqualsInput.value !== '' ? parseInt(valueEqualsInput.value, 10) : null;
+        const minValue = valueMinInput && valueMinInput.value !== '' ? parseInt(valueMinInput.value, 10) : null;
+        const maxValue = valueMaxInput && valueMaxInput.value !== '' ? parseInt(valueMaxInput.value, 10) : null;
+        const selectedPowerTypes = noIconOnly ? [] : getSelectedAspectPowerTypes();
+
+        if (
+            nameTerm.length === 0 &&
+            locationTerm.length === 0 &&
+            effectTerm.length === 0 &&
+            !noValueOnly &&
+            !noIconOnly &&
+            equalsValue === null &&
+            minValue === null &&
+            maxValue === null &&
+            selectedPowerTypes.length === 0
+        ) {
+            await loadAspects();
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/aspects');
+            const data = await response.json();
+            if (data.success) {
+                const filtered = data.data.filter(aspect => {
+                    const nameMatch = nameTerm.length === 0 || (aspect.card_name || '').toLowerCase().includes(nameTerm);
+                    const locationMatch = locationTerm.length === 0 || (aspect.location || '').toLowerCase().includes(locationTerm);
+                    const effectText = (aspect.aspect_description || aspect.card_effect || '').toString();
+                    const effectMatch = effectTerm.length === 0 || effectText.toLowerCase().includes(effectTerm);
+
+                    let valueMatch = true;
+                    if (noValueOnly) {
+                        valueMatch = aspect.value == null;
+                    } else {
+                        const hasNumericValue = aspect.value != null;
+                        if (equalsValue !== null) valueMatch = valueMatch && hasNumericValue && aspect.value === equalsValue;
+                        if (minValue !== null) valueMatch = valueMatch && hasNumericValue && aspect.value >= minValue;
+                        if (maxValue !== null) valueMatch = valueMatch && hasNumericValue && aspect.value <= maxValue;
+                    }
+
+                    let iconTypeMatch = true;
+                    if (noIconOnly) {
+                        iconTypeMatch = !aspect.icons || aspect.icons.length === 0;
+                    } else if (selectedPowerTypes.length > 0) {
+                        const multiPowerSelected = selectedPowerTypes.includes('Multi-Power');
+                        const specificTypes = selectedPowerTypes.filter(t => t !== 'Multi-Power');
+                        const matchesMultiPower = multiPowerSelected && Array.isArray(aspect.icons) && aspect.icons.length >= 2;
+                        const matchesSpecificType = specificTypes.length > 0 && Array.isArray(aspect.icons) && aspect.icons.some(icon => specificTypes.includes(icon));
+                        iconTypeMatch = matchesMultiPower || matchesSpecificType;
+                    }
+
+                    return nameMatch && locationMatch && effectMatch && valueMatch && iconTypeMatch;
+                });
+                displayAspects(filtered);
+            }
+        } catch (error) {
+            console.error('Error searching aspects:', error);
+        }
+    }
+
+    const debouncedAspectSearch = debounce(performAspectSearch, 300);
+
+    [nameSearchInput, locationSearchInput, effectSearchInput].forEach(input => {
+        if (input && !input.dataset.aspectSearchBound) {
+            input.addEventListener('input', debouncedAspectSearch);
+            input.dataset.aspectSearchBound = 'true';
+        }
+    });
+    [valueEqualsInput, valueMinInput, valueMaxInput].forEach(input => {
+        if (input && !input.dataset.aspectSearchBound) {
+            input.addEventListener('input', debouncedAspectSearch);
+            input.dataset.aspectSearchBound = 'true';
+        }
+    });
+    if (noValueToggle && !noValueToggle.dataset.aspectSearchBound) {
+        noValueToggle.addEventListener('change', () => {
+            setAspectValueInputsDisabled(noValueToggle.checked);
+            debouncedAspectSearch();
+        });
+        noValueToggle.dataset.aspectSearchBound = 'true';
+    }
+    powerTypeFilterToggles.forEach(btn => {
+        if (btn.dataset.aspectSearchBound) return;
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', String(btn.classList.contains('is-active')));
+            debouncedAspectSearch();
+        });
+        btn.dataset.aspectSearchBound = 'true';
+    });
+    if (noIconToggle && !noIconToggle.dataset.aspectSearchBound) {
+        noIconToggle.addEventListener('change', () => {
+            setAspectPowerTypeTogglesDisabled(noIconToggle.checked);
+            debouncedAspectSearch();
+        });
+        noIconToggle.dataset.aspectSearchBound = 'true';
+    }
+
+    setAspectValueInputsDisabled(Boolean(noValueToggle && noValueToggle.checked));
+    setAspectPowerTypeTogglesDisabled(Boolean(noIconToggle && noIconToggle.checked));
 }
 
 function setupAdvancedUniverseSearch() {

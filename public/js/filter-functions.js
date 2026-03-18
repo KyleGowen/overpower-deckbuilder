@@ -119,19 +119,31 @@ function clearAdvancedUniverseFilters() {
 }
 
 function clearAspectsFilters() {
-    // Clear aspects search inputs
     const nameSearchInput = document.querySelector('#aspects-table .header-filter[data-column="card_name"]');
     const locationSearchInput = document.querySelector('#aspects-table .header-filter[data-column="location"]');
     const effectSearchInput = document.querySelector('#aspects-table .header-filter[data-column="card_effect"]');
-
     if (nameSearchInput) nameSearchInput.value = '';
     if (locationSearchInput) locationSearchInput.value = '';
     if (effectSearchInput) effectSearchInput.value = '';
 
-    // Reload all aspects
-    if (typeof loadAspects === 'function') {
-        loadAspects();
-    }
+    document.querySelectorAll('#aspects-table .power-type-filter-toggle').forEach(btn => {
+        btn.classList.remove('is-active', 'is-disabled');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.disabled = false;
+    });
+
+    const noIconToggle = document.getElementById('aspect-no-icon-toggle');
+    if (noIconToggle) noIconToggle.checked = false;
+
+    ['aspect-value-equals', 'aspect-value-min', 'aspect-value-max'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.disabled = false; }
+    });
+
+    const noValueToggle = document.getElementById('aspect-no-value-toggle');
+    if (noValueToggle) noValueToggle.checked = false;
+
+    if (typeof loadAspects === 'function') loadAspects();
 }
 
 

@@ -149,7 +149,7 @@ describe('Aspects Column Visibility', () => {
             expect(headerRowMatch).toBeTruthy();
             const headerRow = headerRowMatch![0];
             const headerMatches = headerRow.match(/<th[^>]*>/g);
-            expect(headerMatches).toHaveLength(7); // Image, empty column, Card Name, Location, Card Effect, Fortifications, One Per Deck
+            expect(headerMatches).toHaveLength(9); // Image, empty column, Card Name, Location, Card Effect, Icon, Value, Fortifications, One Per Deck
             
             // Count filter row cells
             const filterRowMatches = aspectsTable.match(/<tr class="filter-row">[\s\S]*?<\/tr>/);
@@ -157,7 +157,7 @@ describe('Aspects Column Visibility', () => {
             
             const filterRow = filterRowMatches![0];
             const filterCellMatches = filterRow.match(/<th[^>]*>/g);
-            expect(filterCellMatches).toHaveLength(7); // Should match header count
+            expect(filterCellMatches).toHaveLength(9); // Should match header count
         });
 
         it('should have proper colspan for loading message', () => {
@@ -170,7 +170,7 @@ describe('Aspects Column Visibility', () => {
             const aspectsTable = aspectsTableMatch![0];
             
             // Should have correct colspan for loading message
-            expect(aspectsTable).toContain('<td colspan="6" class="loading">Loading aspects...</td>');
+            expect(aspectsTable).toContain('<td colspan="9" class="loading">Loading aspects...</td>');
         });
     });
 
