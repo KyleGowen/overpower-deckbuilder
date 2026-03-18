@@ -616,9 +616,35 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "✅ Images pushed to ECR"
 
+  sync-images:
+    name: Sync Card Images to S3
+    needs: [build, unit-tests, knip, semgrep, trivy, soc2-compliance, integration-tests]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Sync card images to S3
+      run: |
+        echo "📦 Syncing card images to S3..."
+        aws s3 sync src/resources/cards/images/ \
+          s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/cards/images/ \
+          --delete \
+          --cache-control "public, max-age=31536000, immutable"
+        echo "✅ Card images synced to S3"
+
   run-migrations:
     name: Run Production Migrations
-    needs: [build-docker]
+    needs: [build-docker, sync-images]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
