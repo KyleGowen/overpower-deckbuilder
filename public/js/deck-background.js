@@ -372,8 +372,9 @@ class DeckBackgroundManager {
       // Apply background image to modal-content so it covers draw-hand-section and modal-body
       // Header and stats bar have solid backgrounds so they won't show the image
       if (modalContent) {
-        const cdnBase = window.APP_CDN_BASE || '';
-        const imageUrl = `${cdnBase}/${this.selectedBackground}`;
+        const cdnBase = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+        const pathNorm = String(this.selectedBackground).replace(/^\//, '');
+        const imageUrl = pathNorm ? (cdnBase ? `${cdnBase}/${pathNorm}` : `/${pathNorm}`) : this.selectedBackground;
         modalContent.style.backgroundImage = `url(${imageUrl})`;
         modalContent.style.backgroundSize = 'cover';
         modalContent.style.backgroundPosition = 'center';

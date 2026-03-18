@@ -89,12 +89,14 @@
     };
 
     // Optional deck background image (same path format used by deck editor background manager)
+    // Normalize path to avoid double slash when path already starts with /
     window.DeckSelection.getDeckTileBackgroundInfo = (backgroundImagePath) => {
         const deckTileBackgroundPath = backgroundImagePath || null;
-        const cdnBase = window.APP_CDN_BASE || '';
-        const deckTileBackgroundUrl = deckTileBackgroundPath
-            ? `${cdnBase}/${String(deckTileBackgroundPath).replace(/'/g, '%27')}`
-            : null;
+        const cdnBase = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+        const pathNorm = deckTileBackgroundPath
+            ? String(deckTileBackgroundPath).replace(/^\//, '').replace(/'/g, '%27')
+            : '';
+        const deckTileBackgroundUrl = pathNorm ? (cdnBase ? `${cdnBase}/${pathNorm}` : `/${pathNorm}`) : null;
         const deckTileBackgroundClass = deckTileBackgroundUrl ? ' deck-tile--has-bg' : '';
         const deckTileBackgroundStyle = deckTileBackgroundUrl
             ? ` style="--deck-tile-bg: url('${deckTileBackgroundUrl}')"`

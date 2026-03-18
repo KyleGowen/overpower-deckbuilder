@@ -693,6 +693,15 @@ jobs:
           --cache-control "public, max-age=31536000, immutable"
         echo "✅ Card images synced to S3"
 
+    - name: Verify S3 sync (ensure bucket has card images)
+      run: |
+        COUNT=$(aws s3 ls s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/cards/images/ --recursive 2>/dev/null | wc -l)
+        if [ "$COUNT" -lt 1 ]; then
+          echo "::error::S3 bucket has no objects under src/resources/cards/images/. Sync may have failed or AWS_S3_ASSETS_BUCKET may not match the Terraform bucket (run: cd infra && terraform output -raw assets_bucket_name)"
+          exit 1
+        fi
+        echo "✅ Verified $COUNT objects in S3 under src/resources/cards/images/"
+
   run-migrations:
     name: Run Production Migrations
     needs: [build-docker, sync-images]
@@ -887,6 +896,24 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Verify CDN_BASE_URL in .env on EC2
+      run: |
+        CMD_ID=$(aws ssm send-command \
+          --instance-ids ${{ env.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "if ! grep -q \"^CDN_BASE_URL=\" /opt/app/.env 2>/dev/null; then echo \"ERROR: /opt/app/.env missing CDN_BASE_URL (run-migrations must append it)\"; exit 1; fi",
+            "echo \"CDN_BASE_URL is set in /opt/app/.env\""
+          ]' \
+          --output text --query 'Command.CommandId')
+        aws ssm wait command-executed --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }}
+        INV=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id ${{ env.EC2_INSTANCE_ID }})
+        if [ "$(echo "$INV" | jq -r '.Status')" != "Success" ]; then
+          echo "::error::CDN_BASE_URL not found in /opt/app/.env. Deck selection images will not load from CDN."
+          echo "$INV" | jq -r '.StandardErrorContent // .StandardOutputContent'
+          exit 1
+        fi
 
     - name: Blue-Green Deploy
       env:
