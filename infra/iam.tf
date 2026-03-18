@@ -50,9 +50,41 @@ resource "aws_iam_policy" "ci_s3_assets" {
   })
 }
 
+# Policy granting CI read access to the CDN_BASE_URL SSM parameter (used by deploy workflow).
+# Only created when var.ci_iam_username is non-empty.
+resource "aws_iam_policy" "ci_ssm_cdn_base_url" {
+  count       = var.ci_iam_username != "" ? 1 : 0
+  name        = "${var.project_name}-ci-ssm-cdn-base-url-policy"
+  description = "Allows CI/CD (GitHub Actions) to read CDN_BASE_URL for deploy step"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter"
+        ]
+        Resource = aws_ssm_parameter.cdn_base_url.arn
+      }
+    ]
+  })
+
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-ci-ssm-cdn-base-url-policy"
+  })
+}
+
 # Attach the S3 assets policy to the CI user
 resource "aws_iam_user_policy_attachment" "ci_s3_assets" {
   count      = var.ci_iam_username != "" ? 1 : 0
   user       = data.aws_iam_user.ci_user[0].user_name
   policy_arn = aws_iam_policy.ci_s3_assets[0].arn
+}
+
+# Attach the SSM CDN_BASE_URL read policy to the CI user
+resource "aws_iam_user_policy_attachment" "ci_ssm_cdn_base_url" {
+  count      = var.ci_iam_username != "" ? 1 : 0
+  user       = data.aws_iam_user.ci_user[0].user_name
+  policy_arn = aws_iam_policy.ci_ssm_cdn_base_url[0].arn
 }
