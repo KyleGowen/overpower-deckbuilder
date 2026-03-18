@@ -6,15 +6,12 @@
  * Ensures login modal exists before showing it
  */
 async function showLoginModal() {
-    window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: start');
     // Ensure login modal exists before trying to show it
     let loginModal = document.getElementById('loginModal');
-    window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: loginModal in DOM=' + !!loginModal);
     
     if (!loginModal) {
         // login.js (loaded via defer) always defines loadLoginTemplate globally,
         // including its own createFallbackLoginModal fallback on fetch error.
-        window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: loginModal absent, calling loadLoginTemplate');
         if (typeof loadLoginTemplate === 'function') {
             await loadLoginTemplate();
         } else if (typeof window.loadLoginTemplate === 'function') {
@@ -22,12 +19,10 @@ async function showLoginModal() {
         }
         
         loginModal = document.getElementById('loginModal');
-        window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: after loadLoginTemplate, loginModal=' + !!loginModal);
     }
     
     // Show the login modal if it exists, and ensure login view is visible (not signup view)
     if (loginModal) {
-        window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: setting loginModal.style.display = flex');
         loginModal.style.display = 'flex';
         const loginView = document.getElementById('loginView');
         const signupView = document.getElementById('signupView');
@@ -37,14 +32,12 @@ async function showLoginModal() {
     
     // Hide main application views
     const mainContainer = document.getElementById('mainContainer');
-    window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: hiding mainContainer (present=' + !!mainContainer + ')');
     if (mainContainer) mainContainer.style.display = 'none';
     
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
     if (databaseView) databaseView.classList.add('view-removed');
     if (deckBuilder) deckBuilder.classList.add('view-removed');
-    window.__flashDebug && window.__flashDebug('auth-app-init.showLoginModal: done');
 }
 
 /**
@@ -52,8 +45,6 @@ async function showLoginModal() {
  * Used when directing users to create an account (e.g., from GUEST sandbox banner)
  */
 async function showSignupModal() {
-    window.__flashDebug && window.__flashDebug('auth-app-init.showSignupModal: start');
-    
     // First ensure the login modal exists and is visible
     await showLoginModal();
     
@@ -66,8 +57,6 @@ async function showSignupModal() {
     // Clear any previous errors
     if (typeof hideLoginError === 'function') hideLoginError();
     if (typeof hideSignupError === 'function') hideSignupError();
-    
-    window.__flashDebug && window.__flashDebug('auth-app-init.showSignupModal: done');
 }
 
 /**
@@ -173,25 +162,14 @@ async function signup(credentials) {
  * Logout current user and redirect to home page
  */
 async function logout() {
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: START');
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: loginModal visible BEFORE authService.logout?',
-        (function() { var lm = document.getElementById('loginModal'); return lm ? 'display=' + (lm.style.display || '(css)') : 'absent'; })()
-    );
     await window.authService.logout();
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: authService.logout() RETURNED');
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: loginModal state AFTER authService.logout',
-        (function() { var lm = document.getElementById('loginModal'); return lm ? 'display=' + (lm.style.display || '(css)') : 'absent'; })()
-    );
     currentUser = null;
     // Hide main UI immediately to prevent flash before redirect
     const mainContainer = document.getElementById('mainContainer');
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: hiding mainContainer (present=' + !!mainContainer + ', current=' + (mainContainer ? mainContainer.style.display || '(css)' : 'n/a') + ')');
     if (mainContainer) mainContainer.style.display = 'none';
     const databaseView = document.getElementById('database-view');
     const deckBuilder = document.getElementById('deck-builder');
     if (databaseView) databaseView.classList.add('view-removed');
     if (deckBuilder) deckBuilder.classList.add('view-removed');
-    // Redirect to root page
-    window.__flashDebug && window.__flashDebug('auth-app-init.logout: ABOUT TO REDIRECT to / — this is the last log on this page');
     window.location.href = '/';
 }

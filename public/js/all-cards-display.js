@@ -280,13 +280,15 @@ function getCardImagePathForAllCards(card, cardType, options) {
     if (typeof getCardImagePathForDisplay === 'function') {
         return getCardImagePathForDisplay(card, cardType, options);
     }
+    const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+    function withCdn(path) { return cdn ? cdn + path : path; }
     const imagePath = (card.image_path || card.image || '').trim();
-    if (!imagePath) return '/src/resources/cards/images/placeholder.webp';
+    if (!imagePath) return withCdn('/src/resources/cards/images/placeholder.webp');
     if (imagePath.startsWith('/src/resources/cards/images/')) {
         if (cardType === 'location' && imagePath.match(/\/images\/alternate\//) && !imagePath.includes('/locations/alternate/')) {
-            return imagePath.replace('/images/alternate/', '/images/locations/alternate/');
+            return withCdn(imagePath.replace('/images/alternate/', '/images/locations/alternate/'));
         }
-        return imagePath;
+        return withCdn(imagePath);
     }
     const typePrefixes = ['characters/', 'missions/', 'specials/', 'locations/', 'events/', 'aspects/', 'power-cards/', 'teamwork-universe/', 'ally-universe/', 'training-universe/', 'basic-universe/', 'advanced-universe/'];
     const hasTypePrefix = typePrefixes.some(p => imagePath.startsWith(p));
@@ -296,7 +298,7 @@ function getCardImagePathForAllCards(card, cardType, options) {
     if (cardType === 'location' && result.includes('/alternate/') && !result.includes('/locations/alternate/')) {
         result = result.replace('/images/alternate/', '/images/locations/alternate/');
     }
-    return result;
+    return withCdn(result);
 }
 
 /**

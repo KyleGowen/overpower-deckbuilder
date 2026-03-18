@@ -1565,93 +1565,18 @@
             return response;
         };
         
-        // ---- FLASH DEBUG: global helper + MutationObserver ----
-        // Buffer persists across redirects so we can see what happened on the PREVIOUS page
-        var __flashBuf = [];
-        window.__flashDebug = function(label, extra) {
-            var t = performance.now().toFixed(1);
-            var mc = document.getElementById('mainContainer');
-            var lm = document.getElementById('loginModal');
-            var mcVal = mc ? (mc.style.display || '(css)') : 'absent';
-            var lmVal = lm ? (lm.style.display || '(css)') : 'absent';
-            var msg = '[FLASH ' + t + 'ms] ' + label + (extra ? ' ' + extra : '') + ' | mc=' + mcVal + ' | lm=' + lmVal;
-            __flashBuf.push(msg);
-            // Keep last 80 entries in sessionStorage so they survive redirect
-            try {
-                var saved = JSON.parse(sessionStorage.getItem('__flashBuf') || '[]');
-                saved.push(msg);
-                if (saved.length > 80) saved = saved.slice(-80);
-                sessionStorage.setItem('__flashBuf', JSON.stringify(saved));
-            } catch(e) {}
-            console.log(
-                '%c' + msg,
-                'color:#f0a; font-weight:bold;'
-            );
-            console.trace();
-        };
-        // On page load, dump any logs saved from the PREVIOUS page (before redirect)
-        (function() {
-            try {
-                var prev = JSON.parse(sessionStorage.getItem('__flashBufPrev') || '[]');
-                if (prev.length > 0) {
-                    console.log('%c[FLASH — PREVIOUS PAGE BEFORE REDIRECT (' + prev.length + ' entries)]', 'color:#0ff; font-weight:bold; font-size:13px;');
-                    prev.forEach(function(m) { console.log('%c' + m, 'color:#0ff;'); });
-                    console.log('%c[FLASH — END PREVIOUS PAGE LOGS]', 'color:#0ff; font-weight:bold;');
-                }
-                sessionStorage.removeItem('__flashBufPrev');
-            } catch(e) {}
-        })();
-        // On unload (redirect/close), move current buffer to "prev" slot for next page to read
-        window.addEventListener('beforeunload', function() {
-            try {
-                var mc = document.getElementById('mainContainer');
-                var lm = document.getElementById('loginModal');
-                var snap = '[FLASH UNLOAD] page navigating away | mc=' + (mc ? (mc.style.display || '(css)') : 'absent') + ' | lm=' + (lm ? (lm.style.display || '(css)') : 'absent') + ' | url=' + window.location.href;
-                __flashBuf.push(snap);
-                sessionStorage.setItem('__flashBufPrev', JSON.stringify(__flashBuf));
-                sessionStorage.removeItem('__flashBuf');
-            } catch(e) {}
-        });
-        const __flashObserver = new MutationObserver(function(mutations) {
-            for (var i = 0; i < mutations.length; i++) {
-                var m = mutations[i];
-                if (m.type === 'attributes' && m.attributeName === 'style') {
-                    var id = m.target.id;
-                    if (id === 'mainContainer' || id === 'loginModal') {
-                        window.__flashDebug('MutationObserver: style changed on #' + id, 'new="' + m.target.style.display + '"');
-                    }
-                }
-                if (m.type === 'childList') {
-                    m.addedNodes.forEach(function(n) {
-                        if (n.id === 'loginModal' || n.id === 'mainContainer') {
-                            window.__flashDebug('MutationObserver: #' + n.id + ' added to DOM', 'display="' + (n.style && n.style.display || '(css)') + '"');
-                        }
-                    });
-                }
-            }
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            __flashObserver.observe(document.body, { attributes: true, subtree: true, childList: true, attributeFilter: ['style'] });
-            window.__flashDebug('MutationObserver attached');
-        });
-        // ---- END FLASH DEBUG helper ----
-
         // Check for stored user immediately to prevent any flash (guard: getCurrentUser may not be loaded yet with defer)
         (function() {
-            window.__flashDebug && window.__flashDebug('IIFE start', 'localStorage.currentUser=' + !!localStorage.getItem('currentUser'));
             const storedUser = (typeof getCurrentUser === 'function' ? getCurrentUser() : null) ||
                 (window.authService && typeof window.authService.getCurrentUser === 'function' ? window.authService.getCurrentUser() : null);
-            window.__flashDebug && window.__flashDebug('IIFE storedUser result', 'storedUser=' + !!storedUser);
             if (storedUser) {
                 currentUser = storedUser;
                 // mainContainer starts hidden by default; show it immediately for authenticated users
                 var mc = document.getElementById('mainContainer');
-                window.__flashDebug && window.__flashDebug('IIFE: showing mainContainer for stored user');
                 if (mc) mc.style.display = 'block';
                 // Hide login modal immediately if we have a stored user
                 document.addEventListener('DOMContentLoaded', function() {
                     const loginModal = document.getElementById('loginModal');
-                    window.__flashDebug && window.__flashDebug('IIFE DOMContentLoaded: hiding loginModal for stored user', 'loginModal=' + !!loginModal);
                     if (loginModal) {
                         loginModal.style.display = 'none';
                     }
@@ -1679,16 +1604,11 @@
         // loadGlobalNav function moved to external file
 
         document.addEventListener('DOMContentLoaded', async () => {
-            window.__flashDebug && window.__flashDebug('DOMContentLoaded: handler start');
             try {
                 // Load global navigation first
-                window.__flashDebug && window.__flashDebug('DOMContentLoaded: before loadGlobalNav');
                 await loadGlobalNav();
-                window.__flashDebug && window.__flashDebug('DOMContentLoaded: after loadGlobalNav');
                 
-                window.__flashDebug && window.__flashDebug('DOMContentLoaded: before checkAuthentication');
                 const authResult = await checkAuthentication();
-                window.__flashDebug && window.__flashDebug('DOMContentLoaded: after checkAuthentication', 'isAuthenticated=' + authResult.isAuthenticated);
                 currentUser = authResult.currentUser; // Update global currentUser after checkAuthentication
                 window.currentUser = currentUser; // Also set on window for modules to access
 
@@ -1707,8 +1627,7 @@
                     }
                     if (authResult.deckId) {
                         // Going directly to deck editor - skip showing main app to avoid flash
-                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: authenticated, going to deck editor', 'deckId=' + authResult.deckId);
-                        
+
                         // Ensure database view is hidden to prevent flash
                         const databaseView = document.getElementById('database-view');
                         if (databaseView) {
@@ -1733,13 +1652,11 @@
                         showDeckEditor();
                     } else {
                         // No deck ID - show main app normally
-                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: authenticated, calling showMainApp');
                         showMainApp(); // This will load general app data (characters, etc.)
                     }
                 } else {
                     if (authResult.deckId) {
                         // Unauthenticated user visiting a shared deck link — auto-login as guest for read-only viewing
-                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, deck URL detected, auto-guest-login');
                         const guestResult = await window.authService.guestLogin();
                         if (guestResult.success) {
                             currentUser = window.authService.getCurrentUser();
@@ -1756,18 +1673,14 @@
                             await loadDeckForEditing(authResult.deckId, authResult.urlUserId, true);
                             showDeckEditor();
                         } else {
-                            window.__flashDebug && window.__flashDebug('DOMContentLoaded: guest auto-login failed, showing login modal');
                             await showLoginModal();
                         }
                     } else {
-                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: NOT authenticated, before showLoginModal');
                         await showLoginModal();
-                        window.__flashDebug && window.__flashDebug('DOMContentLoaded: after showLoginModal');
                     }
                 }
             } catch (error) {
                 console.error('❌ Error during page initialization:', error);
-                window.__flashDebug && window.__flashDebug('DOMContentLoaded: ERROR, calling showLoginModal fallback', String(error));
                 // Fallback: show login modal if initialization fails
                 await showLoginModal();
             }
@@ -1776,7 +1689,6 @@
             
             // Logout button event listener
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                window.__flashDebug && window.__flashDebug('LOGOUT BUTTON CLICKED', 'url=' + window.location.href);
                 logout(e);
             });
             

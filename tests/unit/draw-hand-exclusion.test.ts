@@ -14,7 +14,7 @@
 import fs from 'fs';
 import path from 'path';
 
-// Extend Window interface for test globals
+// Extend Window interface for test globals (shape must match draw-hand-ui-wrappers.test.ts / draw-hand-module.test.ts)
 declare global {
     interface Window {
         DrawHand?: {
@@ -23,6 +23,8 @@ declare global {
             displayDrawnCards: (cards: any[]) => void;
             getDrawnCards: () => any[];
             refresh?: () => void;
+            toggle?: () => void;
+            close?: () => void;
         };
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
@@ -106,7 +108,7 @@ describe('Draw Hand Exclusion Feature Tests', () => {
         (window as any).showNotification = jest.fn();
 
         // Initialize module
-        window.DrawHand?.init();
+        window.DrawHand!.init();
     });
 
     afterEach(() => {
@@ -162,12 +164,12 @@ describe('Draw Hand Exclusion Feature Tests', () => {
                 return callCount / 20; // Deterministic but varied
             });
 
-            window.DrawHand?.drawHand();
+            window.DrawHand!.drawHand();
 
             Math.random = originalRandom;
 
             // Should have 8 cards, excluding the one with exclude_from_draw: true
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             const excludedCard = drawnCards.find((c: any) => c.cardId === 'training-1' && c.exclude_from_draw === true);
             
             expect(excludedCard).toBeUndefined();
@@ -204,12 +206,12 @@ describe('Draw Hand Exclusion Feature Tests', () => {
                 return callCount / 20;
             });
 
-            window.DrawHand?.drawHand();
+            window.DrawHand!.drawHand();
 
             Math.random = originalRandom;
 
             // Training card should be eligible for drawing
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             const hasTraining = drawnCards.some((c: any) => c.type === 'training');
             
             // May or may not be drawn due to randomness, but should be eligible
@@ -239,8 +241,8 @@ describe('Draw Hand Exclusion Feature Tests', () => {
             (window as any).deckEditorCards = mockDeckEditorCards;
 
             // Should not throw and should treat undefined as false
-            expect(() => window.DrawHand?.drawHand()).not.toThrow();
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            expect(() => window.DrawHand!.drawHand()).not.toThrow();
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             expect(drawnCards.length).toBeGreaterThanOrEqual(7);
         });
 
@@ -277,12 +279,12 @@ describe('Draw Hand Exclusion Feature Tests', () => {
                 return callCount / 20;
             });
 
-            window.DrawHand?.drawHand();
+            window.DrawHand!.drawHand();
 
             Math.random = originalRandom;
 
             // Should exclude all cards with exclude_from_draw: true
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             const excludedCards = drawnCards.filter((c: any) => c.exclude_from_draw === true);
             
             expect(excludedCards.length).toBe(0);
@@ -630,8 +632,8 @@ describe('Draw Hand Exclusion Feature Tests', () => {
             (window as any).deckEditorCards = mockDeckEditorCards;
 
             // Should not throw, should return empty or minimal draw
-            expect(() => window.DrawHand?.drawHand()).not.toThrow();
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            expect(() => window.DrawHand!.drawHand()).not.toThrow();
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             expect(drawnCards.length).toBe(0);
         });
 
@@ -651,9 +653,9 @@ describe('Draw Hand Exclusion Feature Tests', () => {
 
             (window as any).deckEditorCards = mockDeckEditorCards;
 
-            window.DrawHand?.drawHand();
+            window.DrawHand!.drawHand();
 
-            const drawnCards = window.DrawHand?.getDrawnCards() || [];
+            const drawnCards = window.DrawHand!.getDrawnCards() || [];
             const excludedCard = drawnCards.find((c: any) => c.cardId === 'power-1');
             
             expect(excludedCard).toBeUndefined();

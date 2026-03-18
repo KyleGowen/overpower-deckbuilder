@@ -9,7 +9,7 @@ declare global {
     interface Window {
         SimulateKO?: {
             init?: () => void;
-            shouldDimCard: (card: unknown, availableCardsMap: Map<string, unknown>, deckCards: unknown[]) => boolean;
+            shouldDimCard: (card: any, availableCardsMap: Map<string, any>, deckCards: any[]) => boolean;
         };
     }
 }

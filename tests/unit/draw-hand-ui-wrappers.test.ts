@@ -12,13 +12,15 @@
 import fs from 'fs';
 import path from 'path';
 
-// Extend Window interface for test globals
+// Extend Window interface for test globals (shape must match draw-hand-exclusion.test.ts / draw-hand-module.test.ts)
 declare global {
     interface Window {
         DrawHand?: {
             init: () => void;
-            refresh: () => void;
+            drawHand?: () => void;
             displayDrawnCards: (cards: any[]) => void;
+            getDrawnCards?: () => any[];
+            refresh: () => void;
             toggle: () => void;
             close: () => void;
         };

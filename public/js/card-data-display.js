@@ -1,6 +1,19 @@
 // card-data-display.js - Card-type data loading and display functions
 // Extracted from public/index.html
 
+function getCardImageUrlForDisplay(card, cardType) {
+    if (typeof window.getCardImagePath === 'function') {
+        return window.getCardImagePath(
+            { ...card, image_path: card.image_path || card.image },
+            cardType
+        );
+    }
+    const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+    const folder = { teamwork: 'teamwork-universe', 'ally-universe': 'ally-universe', training: 'training-universe', 'basic-universe': 'basic-universe' }[cardType] || cardType;
+    const raw = '/src/resources/cards/images/' + folder + '/' + mapImagePathToActualFile(card.image || card.image_path || '');
+    return cdn ? cdn + raw : raw;
+}
+
 async function loadMissions() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('missions');
     if (cached) {
@@ -155,16 +168,20 @@ function displayTeamwork(teamwork) {
         return aPowerType.localeCompare(bPowerType);
     });
     
-    tbody.innerHTML = sortedTeamwork.map(card => `
+    tbody.innerHTML = sortedTeamwork.map(card => {
+        const imagePath = getCardImageUrlForDisplay(card, 'teamwork');
+        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        return `
         <tr>
             <td>
-                <img src="/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image)}" 
+                <img src="${imagePath.replace(/"/g, '&quot;')}" 
                      alt="${card.card_type || ''}" 
                      loading="lazy"
                      decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_type || '').replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_type || '').replace(/'/g, "\\'")}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -173,10 +190,10 @@ function displayTeamwork(teamwork) {
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'teamwork', '/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'teamwork', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="teamwork" data-image-path="/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'teamwork', '/src/resources/cards/images/teamwork-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="teamwork" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'teamwork', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td>${renderTeamworkValueCell(card.to_use, (card.to_use || '').trim().replace(/^\d+\s+/, ''))}</td>
@@ -185,7 +202,8 @@ function displayTeamwork(teamwork) {
             <td>${card.first_attack_bonus}</td>
             <td>${card.second_attack_bonus}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
@@ -237,16 +255,20 @@ function displayAllyUniverse(allies) {
         return aType.localeCompare(bType);
     });
     
-    tbody.innerHTML = sortedAllies.map(card => `
+    tbody.innerHTML = sortedAllies.map(card => {
+        const imagePath = getCardImageUrlForDisplay(card, 'ally-universe');
+        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        return `
         <tr>
             <td>
-                <img src="/src/resources/cards/images/ally-universe/${mapImagePathToActualFile(card.image)}" 
+                <img src="${imagePathAttr}" 
                      alt="${card.card_name}" 
                      loading="lazy"
                      decoding="async"
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/ally-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -261,7 +283,8 @@ function displayAllyUniverse(allies) {
             <td>${renderTeamworkValueCell(String(card.attack_value), card.attack_type)}</td>
             <td>${card.card_text}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // setupAllyUniverseSearch function moved to external file
@@ -289,14 +312,18 @@ function displayTraining(cards) {
         tbody.innerHTML = '<tr><td colspan="7">No training found</td></tr>';
         return;
     }
-    tbody.innerHTML = cards.map(card => `
+    tbody.innerHTML = cards.map(card => {
+        const imagePath = getCardImageUrlForDisplay(card, 'training');
+        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        return `
         <tr>
             <td>
-                <img src="/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image)}" 
+                <img src="${imagePathAttr}" 
                      alt="${card.card_name}" 
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -305,10 +332,10 @@ function displayTraining(cards) {
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'training', '/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'training', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="training" data-image-path="/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'training', '/src/resources/cards/images/training-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="training" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'training', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')}</strong></td>
@@ -317,7 +344,8 @@ function displayTraining(cards) {
             <td>${card.value_to_use}</td>
             <td>${card.bonus}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
@@ -427,14 +455,18 @@ function displayBasicUniverse(cards) {
         return aBonus - bBonus;
     });
     
-    tbody.innerHTML = sortedCards.map(card => `
+    tbody.innerHTML = sortedCards.map(card => {
+        const imagePath = getCardImageUrlForDisplay(card, 'basic-universe');
+        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        return `
         <tr>
             <td>
-                <img src="/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image)}" 
+                <img src="${imagePathAttr}" 
                      alt="${card.card_name}" 
                      style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                      onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image)}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)">
             </td>
@@ -443,10 +475,10 @@ function displayBasicUniverse(cards) {
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'basic-universe', '/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'basic-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="basic-universe" data-image-path="/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', 'basic-universe', '/src/resources/cards/images/basic-universe/${mapImagePathToActualFile(card.image).replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="basic-universe" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'basic-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
             <td><strong>${card.card_name}</strong></td>
@@ -454,7 +486,8 @@ function displayBasicUniverse(cards) {
             <td>${card.value_to_use}</td>
             <td>${card.bonus}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
