@@ -91,8 +91,9 @@
     // Optional deck background image (same path format used by deck editor background manager)
     window.DeckSelection.getDeckTileBackgroundInfo = (backgroundImagePath) => {
         const deckTileBackgroundPath = backgroundImagePath || null;
+        const cdnBase = window.APP_CDN_BASE || '';
         const deckTileBackgroundUrl = deckTileBackgroundPath
-            ? `/${String(deckTileBackgroundPath).replace(/'/g, '%27')}`
+            ? `${cdnBase}/${String(deckTileBackgroundPath).replace(/'/g, '%27')}`
             : null;
         const deckTileBackgroundClass = deckTileBackgroundUrl ? ' deck-tile--has-bg' : '';
         const deckTileBackgroundStyle = deckTileBackgroundUrl

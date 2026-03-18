@@ -700,14 +700,25 @@ jobs:
 
     - name: Append CDN_BASE_URL to .env
       run: |
-        aws ssm send-command \
+        CDN_BASE_URL=$(aws ssm get-parameter \
+          --name /op-deckbuilder/dev/app/cdn_base_url \
+          --region us-west-2 \
+          --query Parameter.Value \
+          --output text)
+        if [ -z "$CDN_BASE_URL" ]; then
+          echo "ERROR: CDN_BASE_URL SSM parameter is empty — aborting deployment"
+          exit 1
+        fi
+        echo "CDN_BASE_URL fetched: $CDN_BASE_URL"
+        COMMAND_ID=$(aws ssm send-command \
           --instance-ids ${{ env.EC2_INSTANCE_ID }} \
           --document-name "AWS-RunShellScript" \
-          --parameters 'commands=[
-            "CDN_BASE_URL=$(aws ssm get-parameter --name /op-deckbuilder/dev/app/cdn_base_url --region us-west-2 --query Parameter.Value --output text 2>/dev/null || echo \"\")",
-            "if [ -n \"$CDN_BASE_URL\" ]; then echo \"CDN_BASE_URL=$CDN_BASE_URL\" >> /opt/app/.env && echo \"CDN_BASE_URL appended to .env\"; else echo \"CDN_BASE_URL not set in SSM, skipping\"; fi"
-          ]' \
-          --output text --query 'Command.CommandId'
+          --parameters "commands=[\"echo 'CDN_BASE_URL=${CDN_BASE_URL}' >> /opt/app/.env\"]" \
+          --output text --query 'Command.CommandId')
+        echo "Waiting for SSM command $COMMAND_ID to complete..."
+        aws ssm wait command-executed \
+          --command-id "$COMMAND_ID" \
+          --instance-id ${{ env.EC2_INSTANCE_ID }}
 
     - name: Copy Flyway configuration to EC2
       run: |
