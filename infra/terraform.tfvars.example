@@ -14,3 +14,8 @@ firebase_app_id      = "YOUR_FIREBASE_APP_ID"
 #   terraform apply -var "firebase_service_account_json=$(cat infra/firebase-service-account.json)"
 # Leave empty below; do NOT paste raw JSON in tfvars.
 firebase_service_account_json = ""
+
+# CI/CD (GitHub Actions): IAM username for the deploy user. Required for the sync-images job
+# (Sync Card Images to S3). Set to the user whose access keys are in AWS_ACCESS_KEY_ID /
+# AWS_SECRET_ACCESS_KEY. Run: aws iam list-users --query 'Users[*].UserName'
+# ci_iam_username = "github-actions-deploy"

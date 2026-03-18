@@ -36,3 +36,4 @@ Violating any of these rules causes the deploy step to appear successful while n
 
 ## Deploy secrets
 - The **sync-images** job (Sync Card Images to S3) requires the `AWS_S3_ASSETS_BUCKET` GitHub Actions secret. Value: `cd infra && terraform output -raw assets_bucket_name`. If this secret is missing or empty, the job fails with "Invalid bucket name" because the S3 URI becomes `s3:///...`. See `scripts/setup-github-secrets.md` and `docs/current/CLOUDFRONT_CDN.md`.
+- The CI IAM user (e.g. `github-actions-deploy`) must have the S3 assets policy attached. Set `ci_iam_username` in infra (e.g. in `terraform.tfvars`) to that IAM username and run `terraform apply`; otherwise the sync job fails with "not authorized to perform: s3:ListBucket". See `infra/iam.tf`.

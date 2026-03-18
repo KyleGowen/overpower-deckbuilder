@@ -154,6 +154,8 @@ aws s3 sync src/resources/cards/images/ \
 
 **Required GitHub Actions secret:** `AWS_S3_ASSETS_BUCKET` — set to the bucket name output by `terraform output assets_bucket_name`.
 
+**Required IAM:** The CI user (whose keys are in `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) must have the S3 assets policy attached. Terraform does this when `ci_iam_username` is set: in `infra/`, set `ci_iam_username` to that IAM username (e.g. `github-actions-deploy`) in `terraform.tfvars` or via `-var`, then run `terraform apply`. If it is not set, the sync-images job fails with "not authorized to perform: s3:ListBucket". See `infra/iam.tf` and [scripts/setup-github-secrets.md](../../scripts/setup-github-secrets.md) troubleshooting.
+
 ### One-time manual seed
 
 When setting up a new environment, seed the bucket before first deployment:

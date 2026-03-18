@@ -138,6 +138,9 @@ After creating the IAM user:
 **"Sync Card Images to S3" / "Invalid bucket name" (empty bucket):**
 - The `AWS_S3_ASSETS_BUCKET` secret is not set or is empty. Add it in Settings → Secrets and variables → Actions. Value: `cd infra && terraform output -raw assets_bucket_name`. See [docs/current/CLOUDFRONT_CDN.md](../docs/current/CLOUDFRONT_CDN.md) for CDN/S3 setup.
 
+**"Sync Card Images to S3" / "AccessDenied" / "not authorized to perform: s3:ListBucket":**
+- The CI IAM user (e.g. `github-actions-deploy`) does not have the S3 assets policy attached. Terraform creates and attaches it only when `ci_iam_username` is set. In `infra/`: set `ci_iam_username = "github-actions-deploy"` (or your CI user name) in `terraform.tfvars` (or pass `-var 'ci_iam_username=github-actions-deploy'`), then run `terraform apply`. See [infra/iam.tf](../infra/iam.tf) and [docs/current/CLOUDFRONT_CDN.md](../docs/current/CLOUDFRONT_CDN.md).
+
 ### Getting Help
 
 If you encounter issues:

@@ -136,13 +136,22 @@ resource "aws_ssm_parameter" "firebase_app_id" {
   tags        = { Name = "${var.project_name}-firebase-app-id", Environment = var.environment }
 }
 
+# Service account JSON is sensitive and often passed via -var at apply time, not stored in tfvars.
+# Count is based on Firebase being configured (firebase_project_id) so the parameter is not
+# destroyed when the JSON var is empty. Value is ignored after create so we don't overwrite
+# the secret when running plan/apply without -var "firebase_service_account_json=...".
+# To set or rotate the secret: pass -var at apply, or use: aws ssm put-parameter --overwrite ...
 resource "aws_ssm_parameter" "firebase_service_account_json" {
-  count       = var.firebase_service_account_json != "" ? 1 : 0
+  count       = var.firebase_project_id != "" ? 1 : 0
   name        = "/${var.project_name}/${var.environment}/firebase/service_account_json"
   type        = "SecureString"
   value       = var.firebase_service_account_json
   description = "Firebase Admin SDK service account JSON"
   tags        = { Name = "${var.project_name}-firebase-service-account", Environment = var.environment }
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # Application port
