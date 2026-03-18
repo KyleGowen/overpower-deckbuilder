@@ -15,4 +15,7 @@ coverage
 *.test.ts
 *.spec.ts
 scripts
+# Card images are served from S3/CloudFront in production — not baked into the Docker image.
+# Local dev still serves them from disk via Express static middleware (CDN_BASE_URL is empty).
+src/resources/cards/images
 
