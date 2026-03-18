@@ -140,6 +140,13 @@ variable "firebase_service_account_json" {
   sensitive   = true
 }
 
+# CI/CD IAM Configuration
+variable "ci_iam_username" {
+  description = "IAM username for the CI/CD user (GitHub Actions). Credentials are stored as AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY in GitHub Actions secrets. Run 'aws iam list-users' to find the username."
+  type        = string
+  default     = ""
+}
+
 # Tags
 variable "common_tags" {
   description = "Common tags to apply to all resources"
