@@ -6,7 +6,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const characters = await deps.cardRepository.getAllCharacters();
       res.json({ success: true, data: characters });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching characters:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch characters' });
     }
   });
@@ -15,7 +16,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const locations = await deps.cardRepository.getAllLocations();
       res.json({ success: true, data: locations });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching locations:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch locations' });
     }
   });
@@ -24,7 +26,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const specialCards = await deps.cardRepository.getAllSpecialCards();
       res.json({ success: true, data: specialCards });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching special cards:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch special cards' });
     }
   });
@@ -33,7 +36,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const missions = await deps.cardRepository.getAllMissions();
       res.json({ success: true, data: missions });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching missions:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch missions' });
     }
   });
@@ -42,7 +46,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const events = await deps.cardRepository.getAllEvents();
       res.json({ success: true, data: events });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching events:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch events' });
     }
   });
@@ -51,7 +56,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const aspects = await deps.cardRepository.getAllAspects();
       res.json({ success: true, data: aspects });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching aspects:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch aspects' });
     }
   });
@@ -60,7 +66,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const advancedUniverse = await deps.cardRepository.getAllAdvancedUniverse();
       res.json({ success: true, data: advancedUniverse });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching advanced universe:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch advanced universe' });
     }
   });
@@ -69,7 +76,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const teamwork = await deps.cardRepository.getAllTeamwork();
       res.json({ success: true, data: teamwork });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching teamwork:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch teamwork' });
     }
   });
@@ -78,7 +86,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const ally = await deps.cardRepository.getAllAllyUniverse();
       res.json({ success: true, data: ally });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching ally universe:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch ally universe' });
     }
   });
@@ -87,7 +96,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const training = await deps.cardRepository.getAllTraining();
       res.json({ success: true, data: training });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching training cards:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch training cards' });
     }
   });
@@ -96,7 +106,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const basicUniverse = await deps.cardRepository.getAllBasicUniverse();
       res.json({ success: true, data: basicUniverse });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching basic universe cards:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch basic universe cards' });
     }
   });
@@ -105,7 +116,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const powerCards = await deps.cardRepository.getAllPowerCards();
       res.json({ success: true, data: powerCards });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching power cards:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch power cards' });
     }
   });
@@ -114,7 +126,8 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
     try {
       const entries = await deps.foilCardMapRepository.getFoilCardMap();
       res.json({ success: true, data: entries });
-    } catch {
+    } catch (error) {
+      console.error('Error fetching foil card map:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch foil card map' });
     }
   });
