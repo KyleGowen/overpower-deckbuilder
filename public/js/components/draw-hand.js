@@ -190,7 +190,7 @@
                 cardElement.title = availableCard.name || availableCard.card_name || card.name || 'Unknown Card';
             } else {
                 // Fallback for unknown cards
-                cardElement.style.backgroundImage = 'url("/src/resources/cards/images/placeholder.webp")';
+                cardElement.style.backgroundImage = 'url("' + (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp")';
                 cardElement.title = 'Unknown Card';
             }
             

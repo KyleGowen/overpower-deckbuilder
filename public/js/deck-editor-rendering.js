@@ -1238,7 +1238,8 @@ function renderDeckCardsCardView() {
                     const instanceFoilButton = instanceHasFoilVersion
                         ? `<button class="foil-btn card-view-btn${instanceIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index}, ${i})">Foil</button>`
                         : '';
-                    
+                    const placeholderUrl = (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp';
+                    const placeholderUrlAttr = placeholderUrl.replace(/'/g, "\\'");
                     cardsHtml += `
                         <div class="deck-card-card-view-item ${koDimmedClassCardView}"
                              data-orientation="${cardOrientation}"
@@ -1250,9 +1251,9 @@ function renderDeckCardsCardView() {
                              onmouseleave="hideCardHoverModal()">
                             <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
                                 ${useTwoLayer
-                                    ? `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-thumb" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">
-                                <img data-full-res="${instanceFullResPath.replace(/"/g, '&quot;')}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-full" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">`
-                                    : `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='/src/resources/cards/images/placeholder.webp';">`
+                                    ? `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-thumb" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">
+                                <img data-full-res="${instanceFullResPath.replace(/"/g, '&quot;')}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-full" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`
+                                    : `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`
                                 }
                             </div>
                             <div class="card-view-actions">
@@ -2461,7 +2462,7 @@ async function displayDeckCardsForEditing() {
 
 // ===== Background rendering, expansion state, deck type/list sections =====
 
-const CARD_PLACEHOLDER = '/src/resources/cards/images/placeholder.webp';
+const CARD_PLACEHOLDER = (typeof window !== 'undefined' && window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp';
 
 function loadBackgroundImageForTile(el) {
     const bgImage = el.getAttribute('data-bg-image');

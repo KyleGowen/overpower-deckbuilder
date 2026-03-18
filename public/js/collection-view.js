@@ -274,9 +274,10 @@ function getCardImagePath(cardData, cardType, options) {
         }
         return path;
     }
+    const cdnBase = (typeof window !== 'undefined' && window.APP_CDN_BASE || '').replace(/\/$/, '');
 
     if (!cardData || !cardData.image_path) {
-        return '/src/resources/cards/images/placeholder.webp';
+        return cdnBase + '/src/resources/cards/images/placeholder.webp';
     }
 
     const imagePath = cardData.image_path.trim();
@@ -287,7 +288,7 @@ function getCardImagePath(cardData, cardType, options) {
         if (cardType === 'location' && path.includes('/alternate/') && !path.includes('/locations/alternate/')) {
             path = path.replace('/images/alternate/', '/images/locations/alternate/');
         }
-        return maybeThumbnail(path);
+        return cdnBase + maybeThumbnail(path);
     }
 
     // If it's just a filename (like "placeholder_aspect.webp" or "angry_mob__industrial_age_.webp")
@@ -335,7 +336,7 @@ function getCardImagePath(cardData, cardType, options) {
             default:
                 constructedPath = '/src/resources/cards/images/placeholder.webp';
         }
-        return constructedPath;
+        return cdnBase + constructedPath;
     }
 
     // If it has a partial path (like "characters/alternate/zorro.png" or "alternate/draculas_armory.png"), construct full path
@@ -345,15 +346,15 @@ function getCardImagePath(cardData, cardType, options) {
         if (cardType === 'location' && imagePath.startsWith('alternate/') && !imagePath.startsWith('locations/')) {
             fullPath = 'locations/' + imagePath;
         }
-        return maybeThumbnail(`/src/resources/cards/images/${fullPath}`);
+        return cdnBase + maybeThumbnail(`/src/resources/cards/images/${fullPath}`);
     }
 
     // Fallback: ensure it starts with / to make it absolute
     if (imagePath && !imagePath.startsWith('/')) {
-        return '/src/resources/cards/images/placeholder.webp';
+        return cdnBase + '/src/resources/cards/images/placeholder.webp';
     }
 
-    return maybeThumbnail(imagePath) || '/src/resources/cards/images/placeholder.webp';
+    return cdnBase + (maybeThumbnail(imagePath) || '/src/resources/cards/images/placeholder.webp');
 }
 
 /**
