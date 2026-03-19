@@ -25,3 +25,28 @@
   - **Function column** icon toggle filtering: `getSelectedSpecialFunctionFilterFields()` / `cardMatchesFunctionIconFilters()` — OR logic across selected boolean icon fields.
   - Combined filter order: `text AND value AND icon-type AND function-icons`.
   - Keep UI behavior docs in [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md).
+
+## CDN Image URLs in DBV Display Functions — Required Pattern
+
+**NEVER hardcode `/src/resources/cards/images/...` directly in `<img src>` attributes** inside DBV display functions (`displayMissions`, `displayEvents`, `displayAspects`, etc.). In production, card images are served exclusively from S3/CloudFront (Docker excludes `src/resources/cards/images/`), so hardcoded app-relative paths will 404.
+
+**Always compute `imagePath` per card using `window.getCardImagePath`:**
+
+```js
+let imagePath;
+if (typeof window.getCardImagePath === 'function') {
+    imagePath = window.getCardImagePath({ ...card, image_path: card.image_path || card.image }, 'TYPE');
+} else {
+    const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+    const raw = '/src/resources/cards/images/TYPE/' + mapImagePathToActualFile(card.image || '');
+    imagePath = cdn ? cdn + raw : raw;
+}
+const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+```
+
+Then use `imagePathAttr` in `<img src>` and `imagePathEscaped` in `onmouseenter`/`onclick`/collection button handlers.
+
+**Why this works:** `/js/app-config.js` is loaded synchronously (no `defer`) before all other scripts, so `window.APP_CDN_BASE` is always set when deferred scripts execute. Module-level CDN constants (e.g., `_CARD_IMAGE_CDN_BASE` in `card-image-utils.js`, `CDN_BASE` in `deckTileImages.js`) are captured correctly because the IIFE/module runs after `app-config.js`.
+
+**Files fixed (March 2026):** `displayEvents`, `displayMissions`, `displayAspects` in `card-display-functions.js`. The `displayAdvancedUniverse` function had the correct pattern and was the reference implementation. `displayLocations` and `displayPowerCards` in `card-display.js` already use `getCardImagePathForDisplay` which delegates to `window.getCardImagePath`.
