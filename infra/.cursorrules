@@ -36,6 +36,16 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 - **S3 bucket** (`excelsior-cards-assets-dev`) is fully private; only CloudFront can read from it via OAC (Origin Access Control). Direct public HTTP access returns 403.
 - **OAC not OAI** — always use `aws_cloudfront_origin_access_control` for new S3 origins. OAI is legacy and deprecated.
 
+## CDN / Card Image Gotchas (Lessons Learned)
+
+- **Thumbnails are not in git** — `src/resources/cards/images/characters/thumb/`, `missions/thumb/`, and `locations/thumb/` are in `.gitignore`. The `sync-images` CI job **must** run `npm run generate:thumbnails` before `aws s3 sync`, or S3 will never have thumbnails.
+- **Background images ARE in git** — `src/resources/cards/images/backgrounds/*.png` are tracked. They sync to S3 automatically and will load even if thumbnails are broken.
+- **Docker image has no card images** — `.dockerignore` excludes `src/resources/cards/images/`. In production, card images can only come from CloudFront/S3. Local dev uses Express static because `CDN_BASE_URL` is empty.
+- **`CDN_BASE` is captured at module init time** — `public/js/deck-selection/deckTileImages.js` captures `window.APP_CDN_BASE` into a constant `CDN_BASE` when the IIFE runs. If `app-config.js` somehow hasn't executed yet, `CDN_BASE` will be `''` for the entire page load even if `window.APP_CDN_BASE` is set later. `app-config.js` must stay as a synchronous `<script>` tag before other deck-selection scripts.
+- **AWS_S3_ASSETS_BUCKET secret must match Terraform output** — verify with `cd infra && terraform output -raw assets_bucket_name`. A mismatch means sync-images writes to a different bucket than CloudFront reads from.
+- **Diagnosing blank images**: check `/js/app-config.js` in the browser — should return `window.APP_CDN_BASE = "https://....cloudfront.net";`. If empty, `CDN_BASE_URL` is missing from the container's `.env`.
+- **Double-slash URL bug** — when building `cdnBase + '/' + path` and `path` already starts with `/`, the result is a double slash (e.g. `https://cdn.net//src/...`). Always normalize: strip trailing `/` from `cdnBase` and leading `/` from `path` before joining.
+
 ## Workflow
 
 ```bash

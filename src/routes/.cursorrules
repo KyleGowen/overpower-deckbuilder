@@ -4,3 +4,14 @@
 - **Shared helpers** (rate limit, read-only mode, guest session, collection card type) live in **helpers.ts**; import from `./helpers` in route modules that need them.
 - **Registration is split by domain:** auth (**auth.routes.ts**), card API (**card-api.routes.ts**), users/debug (**users-debug.routes.ts**), guest decks (**guest-decks.routes.ts**), deck API (**deck-api.routes.ts**), collections (**collections.routes.ts**), pages/SPA (**pages.routes.ts**), static/health (**static-health.routes.ts**). **decks.routes.ts** is the sub-router for GET /api/decks, mounted at `/api` from index.
 - Handlers receive dependencies from the composition root via `deps`; do not import services from src/index inside route handlers—use `deps` only.
+
+## Error Handling in Route Handlers
+- **ALWAYS use `catch (error)` — never bare `catch {}`** in route handlers. Silent catch blocks make production 500s completely undiagnosable.
+- **ALWAYS log before responding**: `console.error('Error fetching X:', error)` then `res.status(500).json(...)`.
+- The only exception is when the error variable is genuinely not needed (e.g. a trivial default fallback) — in those cases use `catch {}` with a comment explaining why.
+- See `card-api.routes.ts` for the correct pattern applied to all card API routes.
+
+## /js/app-config.js (auth.routes.ts)
+- Serves `window.APP_CDN_BASE = "<CDN_BASE_URL>";` from `process.env.CDN_BASE_URL`.
+- This route is public (no auth) and cached 5 minutes (`Cache-Control: public, max-age=300`).
+- In production `CDN_BASE_URL` must be set in the container's `.env`; in local dev it is empty and card images are served from disk via Express static.

@@ -213,6 +213,15 @@
 - Thumbnail generation runs automatically via `npm run dev` and `npm run build` — no manual step needed in CI
 - Full workflow documented in [`docs/current/IMAGE_PIPELINE.md`](docs/current/IMAGE_PIPELINE.md)
 
+## Card Images in Production — Critical Architecture
+
+- **`src/resources/cards/images/` is excluded from the Docker image** (`.dockerignore`). In production, ALL card images (characters, missions, locations, thumbnails, specials, etc.) must come from S3/CloudFront. The Express static middleware is only a local-dev fallback.
+- **Thumbnails (`thumb/` directories) are gitignored** — they are never in the git repo. The `sync-images` CI job runs `npm run generate:thumbnails` first so thumbnails are generated before `aws s3 sync` pushes them to S3.
+- **Background images are NOT gitignored** — `src/resources/cards/images/backgrounds/*.png` are committed to git, sync to S3 normally, and will load even if thumbnail generation breaks.
+- **Deck selection blank card slots** (teal outlines, no image, clean console) almost always means thumbnails are missing from S3. Check: (1) sync-images job ran successfully, (2) `AWS_S3_ASSETS_BUCKET` secret matches `terraform output -raw assets_bucket_name`, (3) `/js/app-config.js` returns a non-empty `APP_CDN_BASE`.
+- **CDN URL construction**: always strip trailing `/` from `cdnBase` and leading `/` from the path before joining to avoid double-slash URLs (`https://cdn.net//src/...`) that some origins reject. The `deckTileImages.js` helper uses `CDN_BASE + '/src/resources/...'` (no slash between base and path) — never `${cdnBase}/${path}` when `path` starts with `/`.
+- **`CDN_BASE` is a module-level constant** in `deckTileImages.js` (captured at IIFE init time from `window.APP_CDN_BASE`). `/js/app-config.js` must load synchronously via `<script>` before deck-selection scripts or `CDN_BASE` will be `''` for the whole page load.
+
 ## Infrastructure Spend Lock
 
 > ⛔ **NEVER implement any paid AWS infrastructure change without explicit instruction from Kyle.**
