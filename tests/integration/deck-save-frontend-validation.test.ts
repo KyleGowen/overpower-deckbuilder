@@ -530,8 +530,8 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
                     if (!card.cardId || card.cardId.trim().length === 0) {
                         return { valid: false, error: `Card at index ${i}: cardId is required` };
                     }
-                    if (card.quantity < 1 || card.quantity > 10) {
-                        return { valid: false, error: `Card at index ${i}: quantity must be between 1 and 10` };
+                    if (card.quantity < 1 || card.quantity > 100) {
+                        return { valid: false, error: `Card at index ${i}: quantity must be between 1 and 100` };
                     }
                 }
                 return { valid: true };
@@ -579,8 +579,8 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
                     if (!card.cardId || card.cardId.trim().length === 0) {
                         return { valid: false, error: `Card at index ${i}: cardId is required` };
                     }
-                    if (card.quantity < 1 || card.quantity > 10) {
-                        return { valid: false, error: `Card at index ${i}: quantity must be between 1 and 10` };
+                    if (card.quantity < 1 || card.quantity > 100) {
+                        return { valid: false, error: `Card at index ${i}: quantity must be between 1 and 100` };
                     }
                 }
                 return { valid: true };

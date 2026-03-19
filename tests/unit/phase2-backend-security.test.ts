@@ -306,18 +306,18 @@ describe('Phase 2 Backend Security', () => {
         mockRequest.body = { 
           cardType: 'character',
           cardId: 'card123',
-          quantity: 15
+          quantity: 101
         };
         
         const validateCardAddition = jest.fn().mockReturnValue({
           isValid: false,
-          error: 'Quantity must be a number between 1 and 10'
+          error: 'Quantity must be a number between 1 and 100'
         });
         
         const result = validateCardAddition(mockRequest.body) as { isValid: boolean; error: string };
         
         expect(result.isValid).toBe(false);
-        expect(result.error).toContain('between 1 and 10');
+        expect(result.error).toContain('between 1 and 100');
       });
 
       test('should validate cards array for bulk operations', () => {

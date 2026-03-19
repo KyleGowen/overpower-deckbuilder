@@ -349,7 +349,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should validate maximum card limit', async () => {
@@ -563,12 +563,12 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should handle excessive quantities', async () => {
             const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 11 }
+                { cardType: 'character', cardId: 'test-char-1', quantity: 101 }
             ];
 
             const response = await request(app)
@@ -578,7 +578,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should handle non-numeric quantities', async () => {
@@ -593,7 +593,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
     });
 

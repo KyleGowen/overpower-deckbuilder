@@ -754,6 +754,31 @@ async function saveDeckChanges() {
         }
     });
 
+    const parseApiErrorResponse = async (response) => {
+        const fallbackMessage = `Failed to save deck cards: ${response.status} ${response.statusText}`;
+
+        try {
+            const responseBody = await response.json();
+            const specificMessage = responseBody?.error || responseBody?.details;
+            if (specificMessage) {
+                return specificMessage;
+            }
+        } catch (jsonError) {
+            console.warn('[saveDeckChanges] Failed to parse error response JSON:', jsonError);
+        }
+
+        try {
+            const textBody = await response.text();
+            if (textBody) {
+                return textBody;
+            }
+        } catch (textError) {
+            console.warn('[saveDeckChanges] Failed to parse error response text:', textError);
+        }
+
+        return fallbackMessage;
+    };
+
     try {
         let deckId = currentDeckId;
 
@@ -856,14 +881,14 @@ async function saveDeckChanges() {
         });
         
         if (!replaceResponse.ok) {
-            const errorText = await replaceResponse.text();
+            const saveErrorMessage = await parseApiErrorResponse(replaceResponse);
             console.error('💾 [saveDeckChanges] Failed to save deck cards:', {
                 status: replaceResponse.status,
                 statusText: replaceResponse.statusText,
-                error: errorText,
+                error: saveErrorMessage,
                 endpoint: cardsEndpoint
             });
-            throw new Error(`Failed to save deck cards: ${replaceResponse.status} ${replaceResponse.statusText}`);
+            throw new Error(saveErrorMessage);
         }
         
         // Check validation status before saving
@@ -1009,7 +1034,8 @@ async function saveDeckChanges() {
         
     } catch (error) {
         console.error('Error saving deck changes:', error);
-        showNotification('Failed to save deck changes', 'error');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save deck changes';
+        showNotification(errorMessage, 'error');
     }
 }
 

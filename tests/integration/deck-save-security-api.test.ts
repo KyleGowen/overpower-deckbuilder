@@ -127,12 +127,12 @@ describe('Deck Save Security - API Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should validate maximum quantity', async () => {
             const invalidCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 11 }
+                { cardType: 'character', cardId: 'test-char-1', quantity: 101 }
             ];
 
             const response = await request(app)
@@ -142,7 +142,7 @@ describe('Deck Save Security - API Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should validate cards array is provided', async () => {

@@ -23,6 +23,8 @@ let isDeckLimited = false;
 function validateDeck(deckCards) {
     const errors = [];
     const warnings = [];
+    const getCardDisplayName = (availableCard) => (availableCard?.name || availableCard?.card_name || '').trim();
+    const isAngryMobCharacter = (availableCard) => getCardDisplayName(availableCard).startsWith('Angry Mob');
     
     // Count card types
     const cardCounts = {};
@@ -72,15 +74,19 @@ function validateDeck(deckCards) {
     // Rule 1.6: Angry Mob character restrictions
     const angryMobCharacters = characterCards.filter(card => {
         const availableCard = availableCardsMap.get(card.cardId);
-        return availableCard && (availableCard.name === 'Angry Mob' || availableCard.card_name === 'Angry Mob');
+        return availableCard && isAngryMobCharacter(availableCard);
     });
     
     if (angryMobCharacters.length > 0) {
         const otherCharacters = characterCards.filter(card => {
             const availableCard = availableCardsMap.get(card.cardId);
-            return availableCard && availableCard.name !== 'Angry Mob' && availableCard.card_name !== 'Angry Mob';
+            return availableCard && !isAngryMobCharacter(availableCard);
         });
         
+        if (angryMobCharacters.length > 1) {
+            errors.push('Only one Angry Mob character variant is allowed');
+        }
+
         if (otherCharacters.length > 0) {
             errors.push('Angry Mob cannot be used with other characters');
         }

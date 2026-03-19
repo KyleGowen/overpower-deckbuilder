@@ -285,7 +285,7 @@ describe('Deck Save Security - Simple Integration Tests', () => {
                 .expect(400);
 
             expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 10');
+            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
         });
 
         it('should validate cards array is provided', async () => {

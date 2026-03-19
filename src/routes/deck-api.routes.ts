@@ -3,6 +3,7 @@ import { blockInReadOnlyMode, checkRateLimit } from './helpers';
 import type { DeckApiRoutesDeps, DeckRecord, DeckValidationError } from './types';
 
 export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRoutesDeps): void {
+  const MAX_CARD_QUANTITY_PER_ENTRY = 100;
   // Deck management API routes
   app.post('/api/decks', deps.authenticateUser, async (req: Request, res) => {
     try {
@@ -357,8 +358,8 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
         return res.status(400).json({ success: false, error: 'Card ID must be 100 characters or less' });
       }
       
-      if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 1 || quantity > 10)) {
-        return res.status(400).json({ success: false, error: 'Quantity must be a number between 1 and 10' });
+      if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 1 || quantity > MAX_CARD_QUANTITY_PER_ENTRY)) {
+        return res.status(400).json({ success: false, error: `Quantity must be a number between 1 and ${MAX_CARD_QUANTITY_PER_ENTRY}` });
       }
       
       // SECURITY: Check if user owns this deck
@@ -518,8 +519,8 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
           return res.status(400).json({ success: false, error: `Card at index ${i}: cardId is required and must be a non-empty string` });
         }
         
-        if (card.quantity !== undefined && (typeof card.quantity !== 'number' || card.quantity < 1 || card.quantity > 10)) {
-          return res.status(400).json({ success: false, error: `Card at index ${i}: quantity must be a number between 1 and 10` });
+        if (card.quantity !== undefined && (typeof card.quantity !== 'number' || card.quantity < 1 || card.quantity > MAX_CARD_QUANTITY_PER_ENTRY)) {
+          return res.status(400).json({ success: false, error: `Card at index ${i}: quantity must be a number between 1 and ${MAX_CARD_QUANTITY_PER_ENTRY}` });
         }
       }
       
@@ -592,8 +593,8 @@ export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRou
         return res.status(400).json({ success: false, error: 'Card ID must be 100 characters or less' });
       }
       
-      if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 1 || quantity > 10)) {
-        return res.status(400).json({ success: false, error: 'Quantity must be a number between 1 and 10' });
+      if (quantity !== undefined && (typeof quantity !== 'number' || quantity < 1 || quantity > MAX_CARD_QUANTITY_PER_ENTRY)) {
+        return res.status(400).json({ success: false, error: `Quantity must be a number between 1 and ${MAX_CARD_QUANTITY_PER_ENTRY}` });
       }
       
       // SECURITY: Check if user owns this deck

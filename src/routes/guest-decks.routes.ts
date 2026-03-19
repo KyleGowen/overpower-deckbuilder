@@ -4,6 +4,7 @@ import { requireGuestSession, transformGuestDeckToListItem } from './helpers';
 import type { GuestDeckRoutesDeps } from './types';
 
 export function registerGuestDeckRoutes(app: express.Application, deps: GuestDeckRoutesDeps): void {
+  const MAX_CARD_QUANTITY_PER_ENTRY = 100;
   app.post('/api/guest/decks', deps.authenticateUser, async (req: Request, res) => {
     try {
       const sessionId = requireGuestSession(req, res);
@@ -158,8 +159,8 @@ export function registerGuestDeckRoutes(app: express.Application, deps: GuestDec
         if (!card.cardId || typeof card.cardId !== 'string' || card.cardId.trim().length === 0) {
           return res.status(400).json({ success: false, error: `Card at index ${i}: cardId is required` });
         }
-        if (card.quantity !== undefined && (typeof card.quantity !== 'number' || card.quantity < 1 || card.quantity > 10)) {
-          return res.status(400).json({ success: false, error: `Card at index ${i}: quantity must be 1-10` });
+        if (card.quantity !== undefined && (typeof card.quantity !== 'number' || card.quantity < 1 || card.quantity > MAX_CARD_QUANTITY_PER_ENTRY)) {
+          return res.status(400).json({ success: false, error: `Card at index ${i}: quantity must be between 1 and ${MAX_CARD_QUANTITY_PER_ENTRY}` });
         }
       }
 
@@ -208,7 +209,9 @@ export function registerGuestDeckRoutes(app: express.Application, deps: GuestDec
       if (!cardId || typeof cardId !== 'string' || cardId.trim().length === 0) {
         return res.status(400).json({ success: false, error: 'Card ID is required and must be a non-empty string' });
       }
-      const qty = quantity === undefined ? 1 : (typeof quantity === 'number' && quantity >= 1 && quantity <= 10 ? quantity : 1);
+      const qty = quantity === undefined
+        ? 1
+        : (typeof quantity === 'number' && quantity >= 1 && quantity <= MAX_CARD_QUANTITY_PER_ENTRY ? quantity : 1);
 
       const currentCards = existing.cards || [];
       const validationError = await deps.validateCardAddition(currentCards, cardType, cardId, qty);
