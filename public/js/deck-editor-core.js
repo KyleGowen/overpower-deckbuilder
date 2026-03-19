@@ -1132,14 +1132,28 @@ function updateBackgroundButtonState() {
     const backgroundBtn = document.getElementById('backgroundBtn');
     if (!backgroundBtn) return;
     
-    // Background is an edit-only feature; keep it visible but disabled in any read-only state
-    const shouldDisable = typeof isReadOnlyMode !== 'undefined' && isReadOnlyMode;
+    // Disable only when deck is forced read-only (non-owner or readonly URL).
+    // Preserve availability gating from deck-background.js (loading/unavailable states).
+    const isForcedReadOnly = !!window.isForcedReadOnlyMode;
+    const hasBackgroundsFlag = backgroundBtn.dataset
+        ? backgroundBtn.dataset.hasBackgrounds
+        : (typeof backgroundBtn.getAttribute === 'function'
+            ? backgroundBtn.getAttribute('data-has-backgrounds')
+            : backgroundBtn._hasBackgrounds);
+    const hasBackgrounds = hasBackgroundsFlag !== 'false';
+    const shouldDisable = isForcedReadOnly || !hasBackgrounds;
     backgroundBtn.disabled = shouldDisable;
     
-    if (shouldDisable) {
+    if (isForcedReadOnly) {
         backgroundBtn.style.opacity = '0.5';
         backgroundBtn.style.cursor = 'not-allowed';
         backgroundBtn.title = 'Background is disabled in read-only mode';
+    } else if (!hasBackgrounds) {
+        backgroundBtn.style.opacity = '0.5';
+        backgroundBtn.style.cursor = 'not-allowed';
+        if (!backgroundBtn.title) {
+            backgroundBtn.title = 'Backgrounds unavailable';
+        }
     } else {
         backgroundBtn.style.opacity = '1';
         backgroundBtn.style.cursor = 'pointer';

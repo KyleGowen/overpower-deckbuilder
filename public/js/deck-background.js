@@ -11,6 +11,22 @@ class DeckBackgroundManager {
     this.modal = null;
   }
 
+  setBackgroundAvailabilityFlag(backgroundBtn, hasBackgrounds) {
+    const flagValue = hasBackgrounds ? 'true' : 'false';
+    if (backgroundBtn && backgroundBtn.dataset) {
+      backgroundBtn.dataset.hasBackgrounds = flagValue;
+      return;
+    }
+    // Unit-test DOM mocks may not implement dataset/setAttribute.
+    if (backgroundBtn && typeof backgroundBtn.setAttribute === 'function') {
+      backgroundBtn.setAttribute('data-has-backgrounds', flagValue);
+      return;
+    }
+    if (backgroundBtn) {
+      backgroundBtn._hasBackgrounds = flagValue;
+    }
+  }
+
   /**
    * Initialize the background manager
    * @param {string} deckId - The deck ID
@@ -46,8 +62,13 @@ class DeckBackgroundManager {
       const backgroundBtn = document.getElementById('backgroundBtn');
       if (backgroundBtn && backgroundBtn.style.visibility !== 'hidden') {
         const hasBackgrounds = Array.isArray(this.availableBackgrounds) && this.availableBackgrounds.length > 0;
+        this.setBackgroundAvailabilityFlag(backgroundBtn, hasBackgrounds);
         backgroundBtn.disabled = !hasBackgrounds;
         backgroundBtn.title = hasBackgrounds ? '' : 'Backgrounds unavailable';
+        // Re-apply canonical visual state (cursor/opacity/title precedence).
+        if (typeof window.updateBackgroundButtonState === 'function') {
+          window.updateBackgroundButtonState();
+        }
       }
     }
   }
@@ -174,9 +195,11 @@ class DeckBackgroundManager {
 
       // If backgrounds haven't loaded yet, keep disabled until they do
       if (!this.availableBackgrounds || this.availableBackgrounds.length === 0) {
+        this.setBackgroundAvailabilityFlag(backgroundBtn, false);
         backgroundBtn.disabled = true;
         backgroundBtn.title = 'Backgrounds loading...';
       } else {
+        this.setBackgroundAvailabilityFlag(backgroundBtn, true);
         backgroundBtn.disabled = false;
         backgroundBtn.title = '';
       }
