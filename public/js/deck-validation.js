@@ -248,6 +248,13 @@ function updateCharacterLimitStatus() {
     const uniqueCharacterCount = window.deckEditorCards
         .filter(card => card.type === 'character')
         .length;
+    const normalizeCharacterFamily = (name) => {
+        const normalizedName = (name || '').trim();
+        if (normalizedName.startsWith('Angry Mob')) {
+            return 'Angry Mob';
+        }
+        return normalizedName;
+    };
     
     characterCards.forEach((card, index) => {
         try {
@@ -278,6 +285,19 @@ function updateCharacterLimitStatus() {
                     deckCard.type === 'character' && deckCard.cardId === cardId
                 );
             }
+
+            // Character families like Angry Mob variants are mutually exclusive
+            const selectedCharacterNames = window.deckEditorCards
+                .filter(deckCard => deckCard.type === 'character')
+                .map(deckCard => {
+                    const deckCardData = window.availableCardsMap.get(deckCard.cardId);
+                    return deckCardData ? (deckCardData.name || deckCardData.card_name || '').trim() : '';
+                });
+            const cardFamily = normalizeCharacterFamily(cardName);
+            const hasFamilyAlreadySelected = selectedCharacterNames.some(selectedName =>
+                normalizeCharacterFamily(selectedName) === cardFamily
+            );
+            isExistingCharacter = isExistingCharacter || hasFamilyAlreadySelected;
         
             // Disable if we have 4 different characters OR if this character (or any alternate art) is already in the deck
             const shouldDisable = uniqueCharacterCount >= 4 || isExistingCharacter;

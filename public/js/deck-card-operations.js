@@ -1617,13 +1617,41 @@ function addAllCharacterStack(characterName) {
 
 async function addCardToEditor(cardType, cardId, cardName) {
     try {
+        const getCharacterNameByCardId = (id) => {
+            const cardData = window.availableCardsMap.get(id);
+            return cardData ? (cardData.name || cardData.card_name || '').trim() : '';
+        };
+        const normalizeCharacterFamily = (name) => {
+            const normalizedName = (name || '').trim();
+            if (normalizedName.startsWith('Angry Mob')) {
+                return 'Angry Mob';
+            }
+            return normalizedName;
+        };
+
         // Check character limit before adding
         if (cardType === 'character') {
+            const incomingCharacterName = getCharacterNameByCardId(cardId) || (cardName || '').trim();
+            const incomingCharacterFamily = normalizeCharacterFamily(incomingCharacterName);
+
             // Check if we already have this character in the deck
             const existingCharacter = window.deckEditorCards.find(card => card.type === 'character' && card.cardId === cardId);
             
             if (existingCharacter) {
                 showNotification('This character is already in your deck', 'error');
+                return;
+            }
+
+            // Block selecting another variant in the same character family (e.g., Angry Mob variants)
+            const hasCharacterFamilyConflict = window.deckEditorCards
+                .filter(card => card.type === 'character')
+                .some(card => normalizeCharacterFamily(getCharacterNameByCardId(card.cardId)) === incomingCharacterFamily);
+            if (hasCharacterFamilyConflict) {
+                if (incomingCharacterFamily === 'Angry Mob') {
+                    showNotification('Only one Angry Mob variant can be selected', 'error');
+                } else {
+                    showNotification('This character is already in your deck', 'error');
+                }
                 return;
             }
             
