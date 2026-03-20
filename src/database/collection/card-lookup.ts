@@ -1,4 +1,5 @@
 import { PoolClient } from 'pg';
+import { resolveSetDisplayName } from '../setsLookup';
 
 const CARD_TABLE_BY_TYPE: Record<string, string> = {
   character: 'characters',
@@ -96,7 +97,8 @@ export interface FetchCardDataResult {
 export async function fetchCardDataForCollectionCard(
   client: PoolClient,
   cardId: string,
-  cardType: string
+  cardType: string,
+  setNameCache?: Map<string, string>
 ): Promise<FetchCardDataResult> {
   const query = QUERY_FETCH_CARD[cardType];
   const out: FetchCardDataResult = { cardData: null, cardName: '', set: 'ERB' };
@@ -112,7 +114,8 @@ export async function fetchCardDataForCollectionCard(
     }
     const row = result.rows[0] as Record<string, unknown>;
     out.cardData = row;
-    out.set = (row.set as string) || 'ERB';
+    const rawSet = (row.set as string) || 'ERB';
+    out.set = await resolveSetDisplayName(client, rawSet, setNameCache);
 
     switch (cardType) {
       case 'power':

@@ -1,6 +1,8 @@
 import { CollectionService } from '../../src/services/collectionService';
 import { CollectionsRepository, CollectionCardWithDetails, CollectionCard } from '../../src/database/collectionsRepository';
 
+const ERB_DISPLAY = 'Edgar Rice Burroughs and the World Legends';
+
 // Mock the CollectionsRepository
 class MockCollectionsRepository {
   private collections: Map<string, string> = new Map(); // userId -> collectionId
@@ -58,7 +60,7 @@ class MockCollectionsRepository {
       created_at: new Date(),
       updated_at: new Date(),
       card_name: `Card ${cardId}`,
-      set: 'ERB'
+      set: ERB_DISPLAY
     };
 
     cards.push(newCard);
@@ -252,7 +254,7 @@ describe('CollectionService', () => {
       expect(cards).toEqual([]);
     });
 
-    it('should return cards with translated set names', async () => {
+    it('should return set display names from repository unchanged', async () => {
       const collectionId = 'collection-123';
       const card: CollectionCardWithDetails = {
         id: 'cc-1',
@@ -264,17 +266,17 @@ describe('CollectionService', () => {
         created_at: new Date(),
         updated_at: new Date(),
         card_name: 'Test Card',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       mockRepository.addCardToMockCollection(collectionId, card);
 
       const cards = await collectionService.getCollectionCards(collectionId);
       
       expect(cards).toHaveLength(1);
-      expect(cards[0].set).toBe('Edgar Rice Burroughs and the World Legends');
+      expect(cards[0].set).toBe(ERB_DISPLAY);
     });
 
-    it('should translate multiple cards with ERB set', async () => {
+    it('should preserve set for multiple cards', async () => {
       const collectionId = 'collection-123';
       const card1: CollectionCardWithDetails = {
         id: 'cc-1',
@@ -286,7 +288,7 @@ describe('CollectionService', () => {
         created_at: new Date(),
         updated_at: new Date(),
         card_name: 'Card 1',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       const card2: CollectionCardWithDetails = {
         id: 'cc-2',
@@ -298,7 +300,7 @@ describe('CollectionService', () => {
         created_at: new Date(),
         updated_at: new Date(),
         card_name: 'Card 2',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       mockRepository.addCardToMockCollection(collectionId, card1);
       mockRepository.addCardToMockCollection(collectionId, card2);
@@ -306,8 +308,8 @@ describe('CollectionService', () => {
       const cards = await collectionService.getCollectionCards(collectionId);
       
       expect(cards).toHaveLength(2);
-      expect(cards[0].set).toBe('Edgar Rice Burroughs and the World Legends');
-      expect(cards[1].set).toBe('Edgar Rice Burroughs and the World Legends');
+      expect(cards[0].set).toBe(ERB_DISPLAY);
+      expect(cards[1].set).toBe(ERB_DISPLAY);
     });
 
     it('should preserve other set codes', async () => {
@@ -332,7 +334,7 @@ describe('CollectionService', () => {
       expect(cards[0].set).toBe('UNKNOWN');
     });
 
-    it('should handle null set codes', async () => {
+    it('should pass through null set from repository', async () => {
       const collectionId = 'collection-123';
       const card: CollectionCardWithDetails = {
         id: 'cc-1',
@@ -351,7 +353,7 @@ describe('CollectionService', () => {
       const cards = await collectionService.getCollectionCards(collectionId);
       
       expect(cards).toHaveLength(1);
-      expect(cards[0].set).toBe('Edgar Rice Burroughs and the World Legends');
+      expect(cards[0].set).toBeNull();
     });
   });
 
@@ -505,7 +507,7 @@ describe('CollectionService', () => {
         created_at: new Date(),
         updated_at: new Date(),
         card_name: 'Test Card',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       mockRepository.addCardToMockCollection(collectionId, existingCard);
 
@@ -597,7 +599,7 @@ describe('CollectionService', () => {
         created_at: new Date('2020-01-01'),
         updated_at: new Date('2020-01-01'),
         card_name: 'Old Card',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       const newerCard: CollectionCardWithDetails = {
         id: 'new-id',
@@ -609,7 +611,7 @@ describe('CollectionService', () => {
         created_at: new Date('2021-01-01'),
         updated_at: new Date('2021-01-01'),
         card_name: 'New Card',
-        set: 'ERB'
+        set: ERB_DISPLAY
       };
       mockRepository.addCardToMockCollection(collectionId, olderCard);
       mockRepository.addCardToMockCollection(collectionId, newerCard);

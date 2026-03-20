@@ -8,6 +8,7 @@ import { registerDeckApiRoutes } from './deck-api.routes';
 import { registerCollectionRoutes } from './collections.routes';
 import { registerPageRoutes } from './pages.routes';
 import { registerStaticAndHealthRoutes } from './static-health.routes';
+import { registerSetsRoutes } from './sets.routes';
 import type { RouteDependencies } from './types';
 
 export type { RouteDependencies } from './types';
@@ -20,6 +21,7 @@ export function registerRoutes(app: express.Application, deps: RouteDependencies
   registerGuestDeckRoutes(app, deps);
   registerDeckApiRoutes(app, deps);
   registerCollectionRoutes(app, deps);
+  registerSetsRoutes(app, deps);
   registerPageRoutes(app, deps);
   registerStaticAndHealthRoutes(app, deps);
 }

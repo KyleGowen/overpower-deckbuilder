@@ -9,6 +9,14 @@ let showUnownedCards = true;
 // GUEST sandbox localStorage key
 const GUEST_COLLECTION_KEY = 'guestCollection';
 
+/** Uppercase set code → display name; seeded for offline / before GET /api/sets */
+const DEFAULT_COLLECTION_SET_NAMES = new Map([
+    ['ERB', 'Edgar Rice Burroughs and the World Legends'],
+    ['SKY', 'Skybound'],
+]);
+let collectionSetNamesByCode = new Map(DEFAULT_COLLECTION_SET_NAMES);
+let collectionSetNamesFetched = false;
+
 // Database view: map of "cardId|cardType|imagePath" -> quantity for -Collection button state
 let databaseViewCollectionMap = null;
 
@@ -220,21 +228,61 @@ function mergeCollectionWithAllCards(owned, allCards) {
 }
 
 /**
- * Translate set code to display name
+ * Load set code → display name from GET /api/sets (uses `sets.name` in DB). Safe to call multiple times.
+ */
+async function ensureCollectionSetNamesLoaded() {
+    if (collectionSetNamesFetched) {
+        return;
+    }
+    collectionSetNamesFetched = true;
+    try {
+        const res = await fetch('/api/sets', { credentials: 'include' });
+        if (!res.ok) {
+            return;
+        }
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+            const map = new Map();
+            for (const row of data.data) {
+                if (row.code) {
+                    map.set(String(row.code).trim().toUpperCase(), row.name);
+                }
+            }
+            collectionSetNamesByCode = map;
+        }
+    } catch (e) {
+        console.error('Failed to load /api/sets:', e);
+    }
+}
+
+/**
+ * Display name for a set: looks up `sets.name` by code, or passes through values already resolved by the API.
  */
 function translateSet(setCode) {
-    if (!setCode) {
-        return 'Edgar Rice Burroughs and the World Legends';
+    const erbDefault = collectionSetNamesByCode.get('ERB')
+        || DEFAULT_COLLECTION_SET_NAMES.get('ERB')
+        || 'Edgar Rice Burroughs and the World Legends';
+    if (setCode == null || setCode === '') {
+        return erbDefault;
     }
+    const s = String(setCode).trim();
+    const upper = s.toUpperCase();
+    const byCode = collectionSetNamesByCode.get(upper);
+    if (byCode) {
+        return byCode;
+    }
+    return s;
+}
 
-    switch (setCode.toUpperCase()) {
-        case 'ERB':
-            return 'Edgar Rice Burroughs and the World Legends';
-        case 'SKY':
-            return 'Skybound';
-        default:
-            return setCode;
+/**
+ * Main ERB line only (set code ERB or unset). Promo/expansion codes (ERBP, TFCP, SKY, …)
+ * get no "(Alternate Art)" suffix — the Set column already distinguishes them.
+ */
+function isMainErbSetCode(setCode) {
+    if (setCode == null || String(setCode).trim() === '') {
+        return true;
     }
+    return String(setCode).trim().toUpperCase() === 'ERB';
 }
 
 /**
@@ -424,6 +472,8 @@ function getCardDisplayName(cardData, cardType) {
  */
 async function loadCollection() {
     try {
+        await ensureCollectionSetNamesLoaded();
+
         // For GUEST users, load from localStorage instead of API
         if (isGuestUser()) {
             collectionCards = loadGuestCollectionFromStorage();
@@ -575,10 +625,11 @@ function displayCollectionCards(cards) {
         // Use high number for null values so they sort last
         const setNumberValue = setNumber ? parseInt(setNumber) : 999999;
 
-        // Check if this is an alternate art or foil
+        // Alternate art label only for main ERB rows; promos/expansions use Set column instead
         const isAlternateArt = card.image_path && card.image_path.includes('/alternate/');
+        const showAlternateArtLabel = isAlternateArt && isMainErbSetCode(card.set);
         const isFoil = !!(card.is_foil);
-        let displayName = isAlternateArt ? `${cardName} (Alternate Art)` : cardName;
+        let displayName = showAlternateArtLabel ? `${cardName} (Alternate Art)` : cardName;
         if (isFoil) {
             displayName = `${cardName} <span class="collection-foil-badge">✦ FOIL</span>`;
         }

@@ -29,16 +29,10 @@ export class CollectionService {
   }
 
   /**
-   * Get all cards in user's collection with translated set names
+   * Get all cards in user's collection (set field is display name from `sets.name` via repository)
    */
   async getCollectionCards(collectionId: string): Promise<CollectionCardWithDetails[]> {
-    const cards = await this.collectionsRepository.getCollectionCards(collectionId);
-    
-    // Translate set codes to display names
-    return cards.map(card => ({
-      ...card,
-      set: this.translateSet(card.set)
-    }));
+    return await this.collectionsRepository.getCollectionCards(collectionId);
   }
 
   /**

@@ -56,6 +56,7 @@ function loadModule() {
             removeOneFromCollection,
             formatCardType,
             translateSet,
+            isMainErbSetCode,
             getCardDisplayName,
             sortCollectionTable,
             isGuestUser,
@@ -100,6 +101,36 @@ function setupDOM(extraHtml = '') {
         <input type="checkbox" id="showUnownedToggle" checked>
         ${extraHtml}
     `;
+}
+
+/** loadCollection always calls GET /api/sets before the collection API */
+function mockFetchSetsOkOnce() {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+            success: true,
+            data: [
+                { code: 'ERB', name: 'Edgar Rice Burroughs and the World Legends' },
+                { code: 'SKY', name: 'Skybound' },
+            ],
+        }),
+    });
+}
+
+/** GUEST flows still run loadCollection → /api/sets (no collection API) */
+function wireDefaultSetsFetchMock() {
+    (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+            success: true,
+            data: [
+                { code: 'ERB', name: 'Edgar Rice Burroughs and the World Legends' },
+                { code: 'SKY', name: 'Skybound' },
+            ],
+        }),
+    });
 }
 
 // ─── mergeCollectionWithAllCards ─────────────────────────────────────────────
@@ -334,6 +365,62 @@ describe('displayCollectionCards()', () => {
         expect(document.querySelector('#collection-table')).not.toBeNull();
         expect(document.querySelector('thead')).not.toBeNull();
     });
+
+    it('appends (Alternate Art) for ERB alternate image_path rows', () => {
+        const row = {
+            card_id: 'pow-erb-alt',
+            card_type: 'power',
+            inCollection: true,
+            quantity: 1,
+            set: 'ERB',
+            image_path: 'power-cards/alternate/8_combat.webp',
+            is_foil: false,
+            card_data: { set_number: '304', value: 8, power_type: 'Combat' },
+        };
+        fns.displayCollectionCards([row]);
+        const nameCell = document.querySelector('.collection-card-name');
+        expect(nameCell?.textContent).toContain('(Alternate Art)');
+    });
+
+    it('does not append (Alternate Art) for non-ERB sets with alternate image_path', () => {
+        const variants = [
+            {
+                card_id: 'pow-sky',
+                card_type: 'power',
+                inCollection: true,
+                quantity: 1,
+                set: 'SKY',
+                image_path: 'power-cards/alternate/7_anypower.png',
+                is_foil: false,
+                card_data: { set_number: '475', value: 7, power_type: 'Any-Power' },
+            },
+            {
+                card_id: 'pow-tfcp',
+                card_type: 'power',
+                inCollection: true,
+                quantity: 1,
+                set: 'TFCP',
+                image_path: 'power-cards/alternate/7_combat.png',
+                is_foil: false,
+                card_data: { set_number: '301', value: 7, power_type: 'Combat' },
+            },
+            {
+                card_id: 'pow-erbp',
+                card_type: 'power',
+                inCollection: true,
+                quantity: 1,
+                set: 'ERBP',
+                image_path: 'power-cards/alternate/5_multipower.webp',
+                is_foil: false,
+                card_data: { set_number: '7', value: 5, power_type: 'Multi Power' },
+            },
+        ];
+        for (const row of variants) {
+            fns.displayCollectionCards([row]);
+            const nameCell = document.querySelector('.collection-card-name');
+            expect(nameCell?.textContent).not.toContain('(Alternate Art)');
+        }
+    });
 });
 
 // ─── toggleUnownedCards() ────────────────────────────────────────────────────
@@ -456,6 +543,26 @@ describe('translateSet()', () => {
     });
 });
 
+// ─── isMainErbSetCode() ───────────────────────────────────────────────────────
+
+describe('isMainErbSetCode()', () => {
+    beforeAll(() => loadModule());
+
+    it('is true for null, empty, and ERB (any case)', () => {
+        expect(fns.isMainErbSetCode(null)).toBe(true);
+        expect(fns.isMainErbSetCode('')).toBe(true);
+        expect(fns.isMainErbSetCode('   ')).toBe(true);
+        expect(fns.isMainErbSetCode('ERB')).toBe(true);
+        expect(fns.isMainErbSetCode('erb')).toBe(true);
+    });
+
+    it('is false for promo and expansion set codes', () => {
+        expect(fns.isMainErbSetCode('ERBP')).toBe(false);
+        expect(fns.isMainErbSetCode('TFCP')).toBe(false);
+        expect(fns.isMainErbSetCode('SKY')).toBe(false);
+    });
+});
+
 // ─── loadCollection() ────────────────────────────────────────────────────────
 
 describe('loadCollection()', () => {
@@ -468,6 +575,7 @@ describe('loadCollection()', () => {
 
     it('renders collection cards on successful API response', async () => {
         const apiCards = [makeOwned('card-1', 'character')];
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
@@ -484,6 +592,7 @@ describe('loadCollection()', () => {
     });
 
     it('shows an error message when the API returns non-ok status', async () => {
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 500
@@ -496,6 +605,7 @@ describe('loadCollection()', () => {
     });
 
     it('shows error message on 403 (unexpected error since all authenticated users can access)', async () => {
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
             status: 403
@@ -511,6 +621,7 @@ describe('loadCollection()', () => {
 
     it('falls back to owned-only display when allCardsData is unavailable', async () => {
         const apiCards = [makeOwned('card-1', 'character')];
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
@@ -530,6 +641,7 @@ describe('loadCollection()', () => {
 
     it('shows all cards including unowned when allCardsData is available', async () => {
         const apiCards = [makeOwned('card-1', 'character')];
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
@@ -550,6 +662,7 @@ describe('loadCollection()', () => {
     });
 
     it('shows error state on network failure', async () => {
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
         await fns.loadCollection();
@@ -677,7 +790,7 @@ describe('handleCollectionQuantityClick()', () => {
             status: 200,
             json: async () => ({ success: true, data: {} })
         });
-        // Second fetch for loadCollection reload
+        mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
@@ -860,16 +973,21 @@ describe('GUEST sandbox in addCardToCollection()', () => {
         localStorageMock.getItem.mockClear();
         localStorageMock.setItem.mockClear();
         (global.fetch as jest.Mock).mockReset();
+        wireDefaultSetsFetchMock();
         mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
         (window as any).allCardsData = [makeAllCard('card-1', 'character')];
     });
 
-    it('saves to localStorage instead of calling API for GUEST', async () => {
+    it('saves to localStorage; only fetches /api/sets for labels (not collection API)', async () => {
         localStorageMock.getItem.mockReturnValue('[]');
         
         await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
         
-        expect(global.fetch).not.toHaveBeenCalled();
+        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.objectContaining({ credentials: 'include' }));
+        expect(global.fetch).not.toHaveBeenCalledWith(
+            '/api/collections/me/cards',
+            expect.anything()
+        );
         expect(localStorageMock.setItem).toHaveBeenCalled();
     });
 
@@ -926,6 +1044,7 @@ describe('GUEST sandbox in removeOneFromCollection()', () => {
         localStorageMock.getItem.mockClear();
         localStorageMock.setItem.mockClear();
         (global.fetch as jest.Mock).mockReset();
+        wireDefaultSetsFetchMock();
         mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
     });
 
@@ -967,6 +1086,7 @@ describe('GUEST sandbox in updateCollectionQuantity()', () => {
         localStorageMock.getItem.mockClear();
         localStorageMock.setItem.mockClear();
         (global.fetch as jest.Mock).mockReset();
+        wireDefaultSetsFetchMock();
         mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
         (window as any).allCardsData = [makeAllCard('card-1', 'character')];
     });
@@ -977,7 +1097,11 @@ describe('GUEST sandbox in updateCollectionQuantity()', () => {
         
         await fns.updateCollectionQuantity('card-1', 'character', 5, '/img.webp');
         
-        expect(global.fetch).not.toHaveBeenCalled();
+        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.anything());
+        expect(global.fetch).not.toHaveBeenCalledWith(
+            expect.stringMatching(/\/api\/collections\/me\/cards/),
+            expect.anything()
+        );
         const savedCall = localStorageMock.setItem.mock.calls.find(
             (call: string[]) => call[0] === GUEST_COLLECTION_KEY
         );
@@ -1009,6 +1133,7 @@ describe('GUEST sandbox in removeCardFromCollection()', () => {
         localStorageMock.getItem.mockClear();
         localStorageMock.setItem.mockClear();
         (global.fetch as jest.Mock).mockReset();
+        wireDefaultSetsFetchMock();
         mockCurrentUser = { role: 'GUEST', id: 'guest-123' };
         (window as any).allCardsData = [makeAllCard('card-1', 'character')];
         // Mock confirm to return true
@@ -1024,7 +1149,11 @@ describe('GUEST sandbox in removeCardFromCollection()', () => {
         
         await fns.removeCardFromCollection('card-1', 'character');
         
-        expect(global.fetch).not.toHaveBeenCalled();
+        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.anything());
+        expect(global.fetch).not.toHaveBeenCalledWith(
+            '/api/collections/me/cards',
+            expect.anything()
+        );
         const savedCall = localStorageMock.setItem.mock.calls.find(
             (call: string[]) => call[0] === GUEST_COLLECTION_KEY
         );

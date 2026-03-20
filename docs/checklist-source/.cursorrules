@@ -1,0 +1,6 @@
+# docs/checklist-source
+
+Static markdown snapshots of each tab of the **OverPower Check List** Google Sheet (collection / checklist source of truth).
+
+- **Regenerate**: `python3 scripts/export-overpower-checklist-markdown.py` (requires network).
+- **Canonical doc**: `docs/current/COLLECTION_CHECKLIST_SOURCE.md` — how the app uses the checklist.

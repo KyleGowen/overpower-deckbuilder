@@ -3,6 +3,7 @@
 The **OverPower Check List** is the source of truth for collection card names and numbers in Excelsior Deckbuilder.
 
 - **URL**: [Kyle's Copy of OverPower Check List](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit?gid=1007221192#gid=1007221192)
+- **Local markdown (all tabs)**: [`docs/checklist-source/`](../checklist-source/README.md) — one `.md` file per sheet tab, regenerated with `python3 scripts/export-overpower-checklist-markdown.py`
 - **Use**: Correcting or populating card names and `set_number` (the "#" column) in the database so the Collection interface shows correct names and numbers and can sort by them.
 
 ## How it’s used

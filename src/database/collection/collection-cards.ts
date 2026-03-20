@@ -15,12 +15,14 @@ export async function getCollectionCards(
     );
 
     const cardsWithDetails: CollectionCardWithDetails[] = [];
+    const setNameCache = new Map<string, string>();
 
     for (const cc of collectionCardsResult.rows) {
       const { cardData, cardName, set } = await fetchCardDataForCollectionCard(
         client,
         cc.card_id,
-        cc.card_type
+        cc.card_type,
+        setNameCache
       );
 
       const cardEntry: CollectionCardWithDetails = {
