@@ -4577,9 +4577,8 @@
             const tbody = document.getElementById('locations-tbody');
             tbody.innerHTML = '';
 
-            // Group locations by name and set (alternate arts are separate rows with same name)
             const grouped = typeof window.groupCardsByVariant === 'function'
-                ? window.groupCardsByVariant(locations, 'name', 'set')
+                ? window.groupCardsByVariant(locations, 'name', 'set', { mergeAcrossSets: true })
                 : groupLocationsByNameFallback(locations);
 
             grouped.forEach((group) => {
@@ -4634,7 +4633,8 @@
         function groupLocationsByNameFallback(locations) {
             const groups = new Map();
             (locations || []).forEach(loc => {
-                const key = (loc.name || '') + '|' + (loc.set || 'ERB');
+                if (loc.is_foil) return;
+                const key = (loc.name || '') + '|location';
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key).push(loc);
             });

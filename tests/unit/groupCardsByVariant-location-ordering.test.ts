@@ -48,4 +48,20 @@ describe('groupCardsByVariant location ordering', () => {
     expect(group[0].image_path).not.toContain('alternate/');
     expect(group[1].image_path).toContain('alternate/');
   });
+
+  it('merges ERB base and ERBP alternate into one group when mergeAcrossSets is true', () => {
+    const locations = [
+      { id: 'erbp', name: 'Asclepieion', set: 'ERBP', image_path: 'alternate/asclepieion.png' },
+      { id: 'erb', name: 'Asclepieion', set: 'ERB', image_path: 'asclepieion.webp' }
+    ];
+    const grouped = (window as any).groupCardsByVariant(locations, 'name', 'set', { mergeAcrossSets: true });
+    const key = 'Asclepieion|character';
+    const group = grouped.get(key);
+    expect(group).toBeDefined();
+    expect(group).toHaveLength(2);
+    expect(group[0].set).toBe('ERB');
+    expect(group[0].image_path).not.toContain('alternate/');
+    expect(group[1].set).toBe('ERBP');
+    expect(group[1].image_path).toContain('alternate/');
+  });
 });

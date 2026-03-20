@@ -20,8 +20,12 @@
  * Group cards by name, universe, and card type
  * Returns a map where key is "name|universe|type" and value is array of cards
  * Original art (non-alternate) is placed first in each group
+ *
+ * @param options.mergeAcrossSets When true (locations list), key is "name|type" so ERB base + ERBP
+ *   alternate art for the same location name share one row and art navigation (set no longer splits rows).
  */
-function groupCardsByVariant(cards, nameField = 'name', universeField = 'universe') {
+function groupCardsByVariant(cards, nameField = 'name', universeField = 'universe', options = {}) {
+    const mergeAcrossSets = options && options.mergeAcrossSets === true;
     const groups = new Map();
     
     cards.forEach(card => {
@@ -29,7 +33,9 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
         const name = card[nameField] || card.name || '';
         const set = card[universeField] || card.set || 'ERB';
         const cardType = card.card_type || 'character';
-        const key = `${name}|${set}|${cardType}`;
+        const key = mergeAcrossSets
+            ? `${name}|${cardType}`
+            : `${name}|${set}|${cardType}`;
         
         if (!groups.has(key)) {
             groups.set(key, []);
@@ -898,16 +904,15 @@ function displaySpecialCards(specialCards) {
 
 /**
  * Display location cards in the locations table
- * Groups locations by name and set, showing a single row with navigation arrows for alternate arts
- * (matches the character art switcher behavior)
+ * Groups locations by name (across sets), showing a single row with navigation arrows for alternate arts
+ * (ERB base + ERBP promo alternate are one row — same physical location)
  */
 function displayLocations(locations) {
     const tbody = document.getElementById('locations-tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Group locations by name and set (alternate arts are separate rows with same name)
-    const groupedLocations = groupCardsByVariant(locations, 'name', 'set');
+    const groupedLocations = groupCardsByVariant(locations, 'name', 'set', { mergeAcrossSets: true });
 
     groupedLocations.forEach((group) => {
         if (group.length === 0) return;
