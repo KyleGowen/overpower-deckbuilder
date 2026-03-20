@@ -17,6 +17,19 @@ function getCollectionMapKey(cardId, cardType, imagePath) {
 }
 
 /**
+ * Card Database UI uses hyphenated universe types; collection API and DB use underscores.
+ */
+function normalizeCollectionCardTypeForApi(cardType) {
+    if (!cardType || typeof cardType !== 'string') return cardType;
+    const map = {
+        'basic-universe': 'basic_universe',
+        'advanced-universe': 'advanced_universe',
+        'ally-universe': 'ally_universe',
+    };
+    return map[cardType] || cardType;
+}
+
+/**
  * Fetch collection and build map for database view -Collection buttons.
  * GUEST: build from localStorage; USER/ADMIN: fetch GET /api/collections/me/cards.
  */
@@ -51,8 +64,16 @@ async function fetchDatabaseViewCollection() {
  */
 function getDatabaseViewCollectionQuantity(cardId, cardType, imagePath) {
     if (!databaseViewCollectionMap) return 0;
-    const key = getCollectionMapKey(cardId, cardType, imagePath);
-    return databaseViewCollectionMap.get(key) || 0;
+    const normalized = normalizeCollectionCardTypeForApi(cardType);
+    let key = getCollectionMapKey(cardId, normalized, imagePath);
+    let qty = databaseViewCollectionMap.get(key);
+    if (qty != null) return qty;
+    // Legacy guest localStorage may still use hyphenated universe types
+    if (normalized !== cardType) {
+        key = getCollectionMapKey(cardId, cardType, imagePath);
+        return databaseViewCollectionMap.get(key) || 0;
+    }
+    return 0;
 }
 
 /**
@@ -814,12 +835,13 @@ async function addCardToCollectionFromDatabase(cardId, cardType, imagePath = nul
  */
 async function addCardToCollection(cardId, cardType, imagePath = null) {
     try {
+        const resolvedType = normalizeCollectionCardTypeForApi(cardType);
         // For GUEST users, store in localStorage (key by card_id, card_type, image_path for foil/alt art)
         if (isGuestUser()) {
             const guestCards = loadGuestCollectionFromStorage();
             const existingIndex = guestCards.findIndex(c =>
                 c.card_id === cardId &&
-                c.card_type === cardType &&
+                c.card_type === resolvedType &&
                 (c.image_path || '') === (imagePath || '')
             );
 
@@ -828,7 +850,7 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
             } else {
                 guestCards.push({
                     card_id: cardId,
-                    card_type: cardType,
+                    card_type: resolvedType,
                     image_path: imagePath || null,
                     quantity: 1
                 });
@@ -857,7 +879,7 @@ saveGuestCollectionToStorage(guestCards);
         // For authenticated users (USER/ADMIN), use API
         const requestBody = {
             cardId: cardId,
-            cardType: cardType,
+            cardType: resolvedType,
             quantity: 1
         };
         
@@ -942,14 +964,23 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
         return;
     }
 
+    const resolvedType = normalizeCollectionCardTypeForApi(cardType);
+
     // For GUEST users, update localStorage (key by card_id, card_type, image_path)
     if (isGuestUser()) {
         const guestCards = loadGuestCollectionFromStorage();
-        const existingIndex = guestCards.findIndex(c =>
+        let existingIndex = guestCards.findIndex(c =>
             c.card_id === cardId &&
-            c.card_type === cardType &&
+            c.card_type === resolvedType &&
             (c.image_path || '') === (imagePath || '')
         );
+        if (existingIndex < 0 && resolvedType !== cardType) {
+            existingIndex = guestCards.findIndex(c =>
+                c.card_id === cardId &&
+                c.card_type === cardType &&
+                (c.image_path || '') === (imagePath || '')
+            );
+        }
 
         if (newQuantity === 0) {
             if (existingIndex >= 0) {
@@ -957,10 +988,13 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
             }
         } else if (existingIndex >= 0) {
             guestCards[existingIndex].quantity = newQuantity;
+            if (guestCards[existingIndex].card_type !== resolvedType) {
+                guestCards[existingIndex].card_type = resolvedType;
+            }
         } else {
             guestCards.push({
                 card_id: cardId,
-                card_type: cardType,
+                card_type: resolvedType,
                 image_path: imagePath,
                 quantity: newQuantity
             });
@@ -975,7 +1009,7 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
     const url = `/api/collections/me/cards/${cardId}`;
     const requestBody = {
         quantity: newQuantity,
-        cardType: cardType,
+        cardType: resolvedType,
         imagePath: imagePath
     };
 
@@ -1047,16 +1081,24 @@ function handleCollectionQuantityClick(buttonElement, newQuantity) {
  */
 async function removeOneFromCollection(cardId, cardType, imagePath) {
     if (!cardId || !cardType) return;
+    const resolvedType = normalizeCollectionCardTypeForApi(cardType);
     const path = (imagePath != null && imagePath !== '') ? String(imagePath).trim() : '';
 
     // For GUEST users, remove one from localStorage (key by card_id, card_type, image_path)
     if (isGuestUser()) {
         const guestCards = loadGuestCollectionFromStorage();
-        const existingIndex = guestCards.findIndex(c =>
+        let existingIndex = guestCards.findIndex(c =>
             c.card_id === cardId &&
-            c.card_type === cardType &&
+            c.card_type === resolvedType &&
             (c.image_path || '') === path
         );
+        if (existingIndex < 0 && resolvedType !== cardType) {
+            existingIndex = guestCards.findIndex(c =>
+                c.card_id === cardId &&
+                c.card_type === cardType &&
+                (c.image_path || '') === path
+            );
+        }
 
         if (existingIndex >= 0) {
             const entry = guestCards[existingIndex];
@@ -1085,7 +1127,7 @@ async function removeOneFromCollection(cardId, cardType, imagePath) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ cardId, cardType, imagePath: path || imagePath })
+            body: JSON.stringify({ cardId, cardType: resolvedType, imagePath: path || imagePath })
         });
 
         const data = await response.json();
@@ -1125,10 +1167,14 @@ async function removeCardFromCollection(cardId, cardType) {
         return;
     }
 
+    const resolvedType = normalizeCollectionCardTypeForApi(cardType);
+
     // For GUEST users, remove from localStorage (all entries for this card+type)
     if (isGuestUser()) {
         const guestCards = loadGuestCollectionFromStorage();
-        const filtered = guestCards.filter(c => !(c.card_id === cardId && c.card_type === cardType));
+        const filtered = guestCards.filter(c =>
+            !(c.card_id === cardId && (c.card_type === resolvedType || c.card_type === cardType))
+        );
         saveGuestCollectionToStorage(filtered);
 
         await loadCollection();
@@ -1141,7 +1187,7 @@ async function removeCardFromCollection(cardId, cardType) {
 
     // For authenticated users (USER/ADMIN), use API
     try {
-        const response = await fetch(`/api/collections/me/cards/${cardId}?cardType=${encodeURIComponent(cardType)}`, {
+        const response = await fetch(`/api/collections/me/cards/${cardId}?cardType=${encodeURIComponent(resolvedType)}`, {
             method: 'DELETE',
             credentials: 'include'
         });

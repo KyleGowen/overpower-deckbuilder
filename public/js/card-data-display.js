@@ -276,6 +276,12 @@ function displayAllyUniverse(allies) {
                 <button class="add-to-deck-btn" onclick="showDeckSelection('ally-universe', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
+                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'ally-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
+                    +Collection
+                </button>
+                <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="ally-universe" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'ally-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
+                ` : ''}
             </td>
             <td><strong>${card.card_name}</strong></td>
             <td>${card.stat_to_use}</td>
@@ -285,6 +291,7 @@ function displayAllyUniverse(allies) {
         </tr>
     `;
     }).join('');
+    if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
 // setupAllyUniverseSearch function moved to external file
