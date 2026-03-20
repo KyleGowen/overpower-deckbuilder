@@ -66,7 +66,7 @@
 
 | Card Name | Card Type | Character | Card Effect | One Per Deck | Cataclysm! | Ambush! | Assist! |
 |-----------|-----------|-----------|--------------|-------------|------------|---------|---------|
-| Janjong Duare Mintep | Special Card | Carson of Venus | For remainder of game, any attack made on Carson may be moved to this card. Carson may not defend this card. Discard this card after 1 hit. May be played from Reserve. **One Per Deck** | true | false | false | false |
+| Janjong Duare Mintep | Special Card | Carson of Venus | For remainder of game, any attack made on Carson's team may be moved to this card. Carson's team may not defend this card. Discard this card after 1 hit. May be played from Reserve. **One Per Deck** | true | false | false | false |
 | On the Razor's Edge | Special Card | Carson of Venus | Avoid 1 attack.  | false | false | false | false |
 | Telepathic Resistance | Special Card | Carson of Venus | Target character may not use cards with an Energy icon for remainder of battle.  | false | false | false | false |
 | Sometimes Piracy is the Best Option | Special Card | Carson of Venus | Acts as level 7 Brute Force attack or level 5 Intelligence defense. If used to defend, Opponent's turn immediately ends.  | false | false | false | false |
