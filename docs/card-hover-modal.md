@@ -214,6 +214,7 @@ The modal is defined once in the HTML:
 ### Image Loading and Two-Layer Progressive Load
 
 - For character/location/mission, the modal uses a **two-layer** setup: a base `#cardHoverImage` (thumbnail) and an optional `.card-hover-image-full` layer (full-res) that fades in when loaded. Paths come from `toThumbnailPath` / `toThumbnailPathForType` in `card-image-utils.js`.
+- **Location thumbnails** are generated with **`contain`** (not `cover`) in `generateCardThumbnails.ts` so the thumb bitmap is not vertically cropped before full-res loads—promo location art is often taller than the 500×320 thumb canvas.
 - **Clearing layers on each show**: The modal reuses a single shared `<img>` (and one full-res layer). Changing `img.src` to a new URL does **not** clear the current paint—the browser keeps showing the previous image until the new resource loads. That caused the "thumbnail locked to first hovered card" bug in collection view (e.g. FOIL section). **Fix:** at the start of every `showCardHoverModal` call, we clear the base image (`image.src = ''`) and the full-res layer (`fullResLayer.src = ''`, remove `card-hover-image-full--loaded`) before setting the new thumbnail/full-res. That way the modal never displays the previous card while the new one is loading.
 - Request ordering is guarded by `window._hoverModalRequestId`: when a full-res load completes, we only apply it if `thisRequestId === _hoverModalRequestId`, so an older load never overwrites a newer hover.
 - Error and load handlers are attached on the base image; the full-res layer stays hidden on error so the thumbnail remains visible.
@@ -233,8 +234,8 @@ The modal is defined once in the HTML:
 
 ### Image (`.card-hover-image`)
 
-- `max-width: 345px` - Maximum width constraint
-- `max-height: 483px` - Maximum height constraint
+- Default: `max-width: 345px`, `max-height: 483px`
+- **`data-card-type="location"`** and **`"event"`**: `max-width: 480px` (wider landscape footprint); `max-height` stays `483px`
 - `width: auto` / `height: auto` - Maintains aspect ratio
 - `object-fit: contain` - Fits image within bounds
 - `border-radius: 6px` - Rounded corners

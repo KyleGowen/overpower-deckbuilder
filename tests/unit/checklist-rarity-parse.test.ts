@@ -1,4 +1,5 @@
 import {
+  normalizeRarityForDb,
   parseChecklistMarkdown,
   parsePowerFromChecklist,
 } from '../../scripts/data-maintenance/populate-rarity-from-checklist';
@@ -42,5 +43,19 @@ describe('checklist rarity parse helpers', () => {
       value: 5,
     });
     expect(parsePowerFromChecklist('foo', 'Power Card')).toBeNull();
+  });
+
+  it('normalizeRarityForDb maps checklist and legacy strings to canonical tiers', () => {
+    expect(normalizeRarityForDb('Common')).toBe('Common');
+    expect(normalizeRarityForDb('COMMON')).toBe('Common');
+    expect(normalizeRarityForDb('Common slot, rare drop')).toBe('Common');
+    expect(normalizeRarityForDb('*RARE')).toBe('Rare');
+    expect(normalizeRarityForDb('*ULTRA RARE')).toBe('Ultra Rare');
+    expect(normalizeRarityForDb('*Uncommon slot, rare drop')).toBe('Uncommon');
+    expect(normalizeRarityForDb('ultra-rare')).toBe('Ultra Rare');
+    expect(normalizeRarityForDb('ultrarare')).toBe('Ultra Rare');
+    expect(normalizeRarityForDb('')).toBeNull();
+    expect(normalizeRarityForDb('   ')).toBeNull();
+    expect(normalizeRarityForDb('Mythic')).toBeNull();
   });
 });

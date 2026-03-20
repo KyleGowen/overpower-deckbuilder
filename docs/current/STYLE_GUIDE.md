@@ -286,7 +286,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
       - `.deck-tile-title` uses **Info Blue** at ~90% opacity (`rgba(72, 219, 251, 0.9)`) and a retro-futuristic system font stack (`"Trebuchet MS"`, `"Avenir Next"`, `"Segoe UI"`, `system-ui`)
     - **Preview sizing**:
       - Characters stack: `.deck-character-card-display` (`190px × 140px`, overlap via `margin-left: -38px`)
-      - Location preview: `.deck-tile-preview-card.deck-tile-location-preview` (`250px × 160px`, border `rgba(254, 202, 87, 0.45)`)
+      - Location preview: `.deck-tile-preview-card.deck-tile-location-preview` (`250px × 160px`, border `rgba(254, 202, 87, 0.45)`). Thumbnails are **`contain`**-fitted into the 500×320 source canvas (2× retina) with dark letterboxing so tall promo / alternate location art is not cropped (see `IMAGE_PIPELINE.md`).
       - Mission preview: `.deck-tile-preview-card.deck-tile-mission-preview` (`140px × 200px`)
       - Empty preview state (no selection): `.deck-tile-preview-card--empty`
         - **Goal**: empty **Location** and **Mission** slots should match empty **Character** slots
@@ -356,6 +356,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Hover**: `background: rgba(255, 255, 255, 0.2)`; `border-color: rgba(255, 255, 255, 0.3)`
   - **Active**: `background: rgba(255, 255, 255, 0.15)`
   - **CSS Classes**: `.add-to-deck-btn`, `.add-to-collection-btn`, `.remove-from-collection-btn` (in `database-view.css`). -Collection is disabled when the card variant is not in the collection (`opacity: 0.5`, `cursor: not-allowed`).
+  - **Collection table sort** (`public/js/collection-view.js`): sort by **#** uses `data-card-set-code` (raw `ERB` / `ERBP` / `SKY`, …) as the **primary** key, then foil vs non-foil, then numeric `data-set-number` (checklist # with trailing `F` stripped for the numeric tier). Do **not** sort on translated set display names — that split ERB rows and hid prize-pack hero #s (536–544) out of sequence.
 - **Search Results**: Gold highlights for matching text
 - **Search Bar Styling**: 
   - **Advanced Universe Card Effect Search**: 480px width with centered alignment
@@ -1649,7 +1650,7 @@ The Card View is a deck visualization mode available to all users that displays 
 
 ### Card Images
 #### Progressive image load (two-layer, no flash)
-For character, location, and mission we show a thumbnail first, then fade in full-res over it so there is no visible flash. Two layers: `.card-view-image-thumb` (thumbnail, `src` never changed) and `.card-view-image-full` (opacity 0 → 1 via `.card-view-image-full--loaded` when full-res loads). Implemented in `deck-editor-rendering.js` and `card-tables.css`; see [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md). Card view uses the same aspect ratio per type as the thumb config so thumb and full-res share the same crop box (no shift). The card hover modal uses `object-fit: contain` on the full-res layer so landscape cards (e.g. locations) are not clipped at the bottom.
+For character, location, and mission we show a thumbnail first, then fade in full-res over it so there is no visible flash. Two layers: `.card-view-image-thumb` (thumbnail, `src` never changed) and `.card-view-image-full` (opacity 0 → 1 via `.card-view-image-full--loaded` when full-res loads). Implemented in `deck-editor-rendering.js` and `card-tables.css`; see [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md). Card view uses the same aspect ratio per type as the thumb config so thumb and full-res share the same crop box (no shift). **Location** thumbnails are generated with **`contain`** (see `generateCardThumbnails.ts`) so the thumb layer is not pre-cropped before full-res loads. The **card hover modal** (`.card-hover-modal`) uses `object-fit: contain` on images; for `data-card-type="location"` and `"event"`, `.card-hover-image` allows **`max-width: 480px`** (vs `345px` default) so wide landscape art uses the horizontal modal footprint better.
 
 #### Portrait Image Styling
 - **Class**: `.card-view-image` (portrait cards)

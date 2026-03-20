@@ -13,6 +13,7 @@ const GUEST_COLLECTION_KEY = 'guestCollection';
 const DEFAULT_COLLECTION_SET_NAMES = new Map([
     ['ERB', 'Edgar Rice Burroughs and the World Legends'],
     ['SKY', 'Skybound'],
+    ['SKYP', 'Skybound - Promos'],
 ]);
 let collectionSetNamesByCode = new Map(DEFAULT_COLLECTION_SET_NAMES);
 let collectionSetNamesFetched = false;
@@ -283,6 +284,23 @@ function isMainErbSetCode(setCode) {
         return true;
     }
     return String(setCode).trim().toUpperCase() === 'ERB';
+}
+
+/** Stable product line for table sort (do not use translated set display names — they can split ERB rows). */
+function collectionSortSetCodeForCard(card) {
+    const raw = (card?.set ?? card?.card_data?.set ?? '').toString().trim();
+    if (!raw) return 'ERB';
+    return raw.toUpperCase();
+}
+
+/** Numeric tier for # sort: 538F → 538; invalid → 999999 (foil tie-break uses data-is-foil). */
+function collectionSetNumberSortNumeric(card) {
+    const raw = card?.card_data?.set_number;
+    const s = raw != null ? String(raw).trim() : '';
+    if (!s) return 999999;
+    const core = s.replace(/f$/i, '');
+    const n = parseInt(core, 10);
+    return Number.isFinite(n) ? n : 999999;
 }
 
 /**
@@ -619,11 +637,11 @@ function displayCollectionCards(cards) {
         const cardName = getCardDisplayName(card, cardType);
         const cardImage = getCardImagePath(card, cardType);
         const cardSet = translateSet(card.set);
+        const sortSetCode = collectionSortSetCodeForCard(card);
 
         // Get set_number from card_data
-        const setNumber = card.card_data?.set_number || '';
-        // Use high number for null values so they sort last
-        const setNumberValue = setNumber ? parseInt(setNumber) : 999999;
+        const setNumber = card.card_data?.set_number != null ? String(card.card_data.set_number).trim() : '';
+        const setNumberValue = collectionSetNumberSortNumeric(card);
 
         // Alternate art label only for main ERB rows; promos/expansions use Set column instead
         const isAlternateArt = card.image_path && card.image_path.includes('/alternate/');
@@ -655,6 +673,7 @@ function displayCollectionCards(cards) {
                     data-image-path="${escapedImagePathAttr}"
                     data-quantity="-1"
                     data-set-number="${setNumberValue}"
+                    data-card-set-code="${sortSetCode.replace(/"/g, '&quot;')}"
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
@@ -682,6 +701,7 @@ function displayCollectionCards(cards) {
                     data-image-path="${escapedImagePathAttr}"
                     data-quantity="${card.quantity}"
                     data-set-number="${setNumberValue}"
+                    data-card-set-code="${sortSetCode.replace(/"/g, '&quot;')}"
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
@@ -1336,22 +1356,24 @@ function sortCollectionTable(table, sortField, direction) {
                 return direction === 'asc' ? av - bv : bv - av;
             }
             case 'set_number': {
-                // Primary: set name alphabetically (Edgar… < Skybound, so ERB always first)
-                const aSet = (a.getAttribute('data-card-set') || '').toLowerCase();
-                const bSet = (b.getAttribute('data-card-set') || '').toLowerCase();
-                if (aSet !== bSet) {
+                // Primary: set code (ERB, ERBP, SKY, …) — not translated display name (avoids splitting same-line cards)
+                const aCode = (a.getAttribute('data-card-set-code') || 'ERB').toUpperCase();
+                const bCode = (b.getAttribute('data-card-set-code') || 'ERB').toUpperCase();
+                if (aCode !== bCode) {
                     return direction === 'asc'
-                        ? aSet < bSet ? -1 : 1
-                        : aSet < bSet ? 1 : -1;
+                        ? aCode < bCode ? -1 : aCode > bCode ? 1 : 0
+                        : aCode < bCode ? 1 : aCode > bCode ? -1 : 0;
                 }
                 // Secondary: foil cards always sort after non-foil (regardless of sort direction)
                 const aFoil = a.getAttribute('data-is-foil') === 'true';
                 const bFoil = b.getAttribute('data-is-foil') === 'true';
                 if (aFoil !== bFoil) return aFoil ? 1 : -1;
-                // Tertiary: set_number numerically
-                const av = parseInt(a.getAttribute('data-set-number') || '999999');
-                const bv = parseInt(b.getAttribute('data-set-number') || '999999');
-                return direction === 'asc' ? av - bv : bv - av;
+                // Tertiary: set_number numerically (data-set-number is pre-normalized; NaN-safe)
+                const av = parseInt(a.getAttribute('data-set-number') || '999999', 10);
+                const bv = parseInt(b.getAttribute('data-set-number') || '999999', 10);
+                const aNum = Number.isFinite(av) ? av : 999999;
+                const bNum = Number.isFinite(bv) ? bv : 999999;
+                return direction === 'asc' ? aNum - bNum : bNum - aNum;
             }
             case 'name': {
                 const av = (a.getAttribute('data-card-name') || '').toLowerCase();
@@ -1361,8 +1383,8 @@ function sortCollectionTable(table, sortField, direction) {
                 return 0;
             }
             case 'set': {
-                const av = (a.getAttribute('data-card-set') || '').toLowerCase();
-                const bv = (b.getAttribute('data-card-set') || '').toLowerCase();
+                const av = (a.getAttribute('data-card-set-code') || 'ERB').toLowerCase();
+                const bv = (b.getAttribute('data-card-set-code') || 'ERB').toLowerCase();
                 if (av < bv) return direction === 'asc' ? -1 : 1;
                 if (av > bv) return direction === 'asc' ? 1 : -1;
                 return 0;

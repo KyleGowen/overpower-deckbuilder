@@ -97,7 +97,7 @@ async function searchAllCards(searchTerm) {
         if (advanced.success) advanced.data.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'advanced') add(c, 'advanced-universe', c.name, c.character); });
         if (teamwork.success) teamwork.data.forEach(c => { const n = (c.to_use || c.name)?.toLowerCase(); const ch = c.character?.toLowerCase(); if (n?.includes(st) || ch?.includes(st) || ch === st || st === 'teamwork') add(c, 'teamwork', c.to_use || c.name, c.character); });
         if (ally.success) ally.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
-        if (training.success) training.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
+        if (training.success) training.data.forEach(c => !c.is_foil && (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
         if (basic.success) basic.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));
         if (power.success) power.data.forEach(c => ((c.power_type?.toLowerCase().includes(st)) || st === 'power card') && add(c, 'power', c.power_type, null));
         if (locations.success) locations.data.forEach(c => (c.name?.toLowerCase().includes(st) || st === 'location') && add(c, 'location', c.name, null));

@@ -684,18 +684,29 @@ describe('sortCollectionTable() set_number compound sort', () => {
      * Build a minimal table with rows carrying the data attributes that the
      * sort function reads.  Returns the tbody element.
      */
-    function buildTable(rows: Array<{ setName: string; setNumber: number; name: string }>) {
+    function buildTable(
+        rows: Array<{ setName: string; setNumber: number; name: string; setCode?: string; isFoil?: boolean }>
+    ) {
         document.body.innerHTML = `
             <table id="collection-table" data-sort="set_number" data-sort-dir="asc">
                 <tbody>
-                    ${rows.map(r => `
+                    ${rows
+                        .map((r) => {
+                            const code =
+                                r.setCode ??
+                                (r.setName.toLowerCase().includes('sky') ? 'SKY' : 'ERB');
+                            const foil = r.isFoil === true ? 'true' : 'false';
+                            return `
                         <tr class="collection-card-item"
                             data-card-set="${r.setName}"
+                            data-card-set-code="${code}"
                             data-set-number="${r.setNumber}"
+                            data-is-foil="${foil}"
                             data-card-name="${r.name}"
                             data-quantity="1">
-                        </tr>
-                    `).join('')}
+                        </tr>`;
+                        })
+                        .join('')}
                 </tbody>
             </table>
         `;
@@ -761,6 +772,34 @@ describe('sortCollectionTable() set_number compound sort', () => {
             r => (r as HTMLElement).getAttribute('data-card-name')
         );
         expect(names).toEqual(['ERB 1', 'ERB no-num']);
+    });
+
+    it('non-foil sorts before foil for same numeric # within ERB', () => {
+        const table = buildTable([
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 538, name: '538 Foil', isFoil: true },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setNumber: 538, name: '538 NF', isFoil: false },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'asc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        expect(names).toEqual(['538 NF', '538 Foil']);
+    });
+
+    it('ERB promo (ERBP) groups separately from ERB by set code', () => {
+        const table = buildTable([
+            { setName: 'Promos display', setCode: 'ERBP', setNumber: 316, name: 'Promo power' },
+            { setName: 'Edgar Rice Burroughs and the World Legends', setCode: 'ERB', setNumber: 536, name: 'Prize hero' },
+        ]);
+
+        fns.sortCollectionTable(table, 'set_number', 'asc');
+
+        const names = Array.from(table.querySelectorAll('tr')).map(
+            r => (r as HTMLElement).getAttribute('data-card-name')
+        );
+        expect(names).toEqual(['Prize hero', 'Promo power']);
     });
 });
 

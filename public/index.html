@@ -3593,14 +3593,17 @@
                                 `;
                             }).join('');
                         } else if (category.type === 'training') {
-                            // Special handling for training cards - show summary with types and bonus
-                            cardsHtml = data.data.map(card => {
+                            // List non-foil rows only; foil-only promos (e.g. ERBP) use foil_card_map + deck Foil toggle
+                            const trainingListCards = data.data.filter(card => !card.is_foil);
+                            cardsHtml = trainingListCards.map(card => {
                                 const summary = `${card.card_name.replace(/^Training \(/, '').replace(/\)$/, '')} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → ${card.bonus})`;
                                 
                                 // Check if this training card is One Per Deck and already in deck
                                 const isOnePerDeck = card.one_per_deck === true || card.is_one_per_deck === true;
-                                const isOnePerDeckInDeck = isOnePerDeck && window.deckEditorCards.some(deckCard => 
-                                    deckCard.type === 'training' && deckCard.cardId === card.id
+                                const foilId = window.foilCardMap && window.foilCardMap[card.id];
+                                const isOnePerDeckInDeck = isOnePerDeck && window.deckEditorCards.some(deckCard =>
+                                    deckCard.type === 'training' &&
+                                    (deckCard.cardId === card.id || (foilId && deckCard.cardId === foilId))
                                 );
                                 
                                 const disabledClass = isOnePerDeckInDeck ? 'disabled' : '';
@@ -4054,11 +4057,12 @@
                                 `;
                             } else if (category.type === 'training') {
                                 // Training category - with filter toggle
+                                const trainingSidebarCount = data.data.filter(c => !c.is_foil).length;
                                 categoriesHtml += `
                                     <div class="card-category">
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
-                                                <span>${category.name} (${data.data.length})</span>
+                                                <span>${category.name} (${trainingSidebarCount})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="trainingCharacterFilter" onchange="toggleTrainingCharacterFilter()">
                                                     <span class="toggle-label">Hide Unusables</span>

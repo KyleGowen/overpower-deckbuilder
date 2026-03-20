@@ -6,17 +6,34 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import sharp from 'sharp';
+import sharp, { type ResizeOptions } from 'sharp';
 
 const IMAGE_EXTENSIONS = ['.webp', '.png', '.jpg', '.jpeg', '.gif'];
 const WEBP_QUALITY = 80;
 
+/** When true, every thumbnail is regenerated (ignores mtime skip). Use after changing resize strategy. */
+const FORCE_REGENERATE = process.argv.includes('--force');
+
 // Dimensions are 2× the CSS pixel display sizes for retina/HiDPI sharpness.
 // The browser requests a 190×140 image slot but on a 2× screen needs 380×280 source pixels to stay crisp.
-const THUMB_CONFIGS: Record<string, { width: number; height: number }> = {
-  characters: { width: 380, height: 280 },
-  locations:  { width: 500, height: 320 },
-  missions:   { width: 280, height: 400 },
+type ThumbResizeConfig = {
+  width: number;
+  height: number;
+  fit: NonNullable<ResizeOptions['fit']>;
+  /** Used with fit 'contain' / 'fill' — letterbox/pad to canvas size */
+  background?: ResizeOptions['background'];
+};
+
+const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
+  characters: { width: 380, height: 280, fit: 'cover' },
+  // Locations (incl. ERBP promo alternates) use varied aspect ratios; cover cropped top/bottom in hovers and lists.
+  locations: {
+    width: 500,
+    height: 320,
+    fit: 'contain',
+    background: { r: 26, g: 26, b: 26, alpha: 1 },
+  },
+  missions: { width: 280, height: 400, fit: 'cover' },
 };
 
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
@@ -52,6 +69,7 @@ function getThumbnailPath(sourcePath: string, sourceDir: string, thumbDir: strin
 }
 
 function shouldSkip(sourcePath: string, thumbPath: string): boolean {
+  if (FORCE_REGENERATE) return false;
   if (!fs.existsSync(thumbPath)) return false;
   const sourceStat = fs.statSync(sourcePath);
   const thumbStat = fs.statSync(thumbPath);
@@ -62,7 +80,7 @@ async function processDirectory(
   sourceDir: string,
   thumbDir: string,
   label: string,
-  thumbConfig: { width: number; height: number }
+  thumbConfig: ThumbResizeConfig
 ): Promise<{ processed: number; skipped: number; errors: number }> {
   const imageFiles = getAllImageFiles(sourceDir);
   let processed = 0;
@@ -79,8 +97,14 @@ async function processDirectory(
 
     try {
       fs.mkdirSync(path.dirname(thumbPath), { recursive: true });
+      const resizeOpts: ResizeOptions = {
+        width: thumbConfig.width,
+        height: thumbConfig.height,
+        fit: thumbConfig.fit,
+        ...(thumbConfig.background ? { background: thumbConfig.background } : {}),
+      };
       await sharp(sourcePath)
-        .resize({ width: thumbConfig.width, height: thumbConfig.height, fit: 'cover' })
+        .resize(resizeOpts)
         .webp({ quality: WEBP_QUALITY })
         .toFile(thumbPath);
       processed++;
@@ -98,7 +122,10 @@ async function processDirectory(
 
 async function generateThumbnails(): Promise<void> {
   console.log('🖼️  Generating card thumbnails (characters, missions, locations)...');
-  console.log('   Dimensions: characters 380×280, locations 500×320, missions 280×400 (2× retina) | WebP quality:', WEBP_QUALITY);
+  if (FORCE_REGENERATE) {
+    console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
+  }
+  console.log('   Dimensions: characters 380×280 (cover), locations 500×320 (contain), missions 280×400 (cover) (2× retina) | WebP quality:', WEBP_QUALITY);
   console.log('');
 
   let totalProcessed = 0;
@@ -115,7 +142,7 @@ async function generateThumbnails(): Promise<void> {
     }
 
     const config = THUMB_CONFIGS[dirName];
-    console.log(`📁 ${dirName}/  (${config.width}×${config.height})`);
+    console.log(`📁 ${dirName}/  (${config.width}×${config.height}, ${config.fit})`);
     const { processed, skipped, errors } = await processDirectory(sourceDir, thumbDir, dirName, config);
     totalProcessed += processed;
     totalSkipped += skipped;

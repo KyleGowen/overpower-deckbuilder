@@ -10881,8 +10881,10 @@
                                 `;
                             }).join('');
                         } else if (category.type === 'training') {
-                            // Special handling for training cards - show summary with types and bonus
-                            cardsHtml = data.data.map(card => {
+                            // List non-foil rows only; foil promo variants (e.g. ERBP Sekhmet) pair via foil_card_map + Foil button
+                            const trainingListCards = data.data.filter(card => !card.is_foil);
+                            uniqueCardCount = trainingListCards.length;
+                            cardsHtml = trainingListCards.map(card => {
                                 const summary = `${card.card_name} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → +${card.bonus})`;
                                 return `
                                     <div class="card-item" 

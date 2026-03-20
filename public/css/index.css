@@ -720,6 +720,13 @@
             display: block;
         }
 
+        /* Landscape location/event art: default max-width was portrait-biased and squeezed wide cards */
+        .card-hover-modal[data-card-type="location"] .card-hover-image,
+        .card-hover-modal[data-card-type="event"] .card-hover-image {
+            max-width: 480px;
+            max-height: 483px;
+        }
+
         /* Two-layer progressive load: full-res fades in over thumb; hide thumb when loaded to avoid edge bleed */
         .card-hover-image-wrap .card-hover-image-full {
             position: absolute;

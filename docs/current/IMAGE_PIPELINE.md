@@ -46,6 +46,13 @@ Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either r
 
 To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` **and** the corresponding CSS in `public/css/deck-selection.css`.
 
+### Resize fit (`cover` vs `contain`)
+
+- **Characters** and **missions**: thumbnails use Sharp **`cover`** (fills the box; may crop edges).
+- **Locations**: thumbnails use **`contain`** with a dark gray letterbox (`#1a1a1a`-style). Promo / alternate location art often has a taller aspect ratio than the 250×160 tile box; **`cover` was cropping the top and bottom** in deck tiles, card DB tables, and the hover preview (thumb layer). **`contain`** keeps the full card visible; letterboxing is expected in the slot.
+
+After changing resize behavior, regenerate all location thumbs once: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
+
 ---
 
 ## Adding New Card Images

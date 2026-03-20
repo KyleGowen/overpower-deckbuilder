@@ -3,6 +3,9 @@
 // User roles enum
 export type UserRole = 'GUEST' | 'USER' | 'ADMIN';
 
+/** Checklist / DB rarity; NULL allowed (e.g. ERBP promos). Enforced in DB via CHECK on card tables. */
+export type CardRarity = 'Common' | 'Uncommon' | 'Rare' | 'Ultra Rare';
+
 // User table
 export interface User {
   id: string;
@@ -45,7 +48,7 @@ export interface Character {
   image: string;
   image_path?: string; // Optional for backward compatibility, same as image
   set_number?: string; // e.g. "035" or "035F" for foil rows
-  rarity?: string | null; // Checklist rarity; null if unknown / promo not in source
+  rarity?: CardRarity | null; // null if unknown / promo not in source
   is_foil?: boolean;   // TRUE for foil card rows; foil effect applied via CSS only
 }
 
@@ -58,7 +61,7 @@ export interface Location {
   image_path?: string;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 // Card types for future expansion
@@ -95,7 +98,7 @@ export interface SpecialCard {
   icon_first_action_only?: boolean;
   banned?: boolean;     // Indicates if the card is banned from legal deck construction
   set_number?: string;  // e.g. "036F" for foil rows
-  rarity?: string | null;
+  rarity?: CardRarity | null;
   is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
 }
 
@@ -107,7 +110,7 @@ export interface Mission {
   image_path?: string;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface Event {
@@ -121,7 +124,7 @@ export interface Event {
   one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface Aspect {
@@ -139,7 +142,7 @@ export interface Aspect {
   is_one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface AdvancedUniverse {
@@ -154,7 +157,7 @@ export interface AdvancedUniverse {
   is_one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface Teamwork {
@@ -171,7 +174,7 @@ export interface Teamwork {
   one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface AllyUniverse {
@@ -188,7 +191,7 @@ export interface AllyUniverse {
   one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface TrainingCard {
@@ -201,9 +204,10 @@ export interface TrainingCard {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  is_foil?: boolean; // Foil-only promo rows pair with base via foil_card_map; hidden from add-card lists
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface BasicUniverse {
@@ -217,7 +221,7 @@ export interface BasicUniverse {
   one_per_deck: boolean;
   set?: string;
   set_number?: string | null;
-  rarity?: string | null;
+  rarity?: CardRarity | null;
 }
 
 export interface PowerCard {
@@ -231,7 +235,7 @@ export interface PowerCard {
   set_name?: string;    // Set display name from sets table
   one_per_deck: boolean; // Whether this card can only be included once per deck
   set_number?: string;  // e.g. "473F" for foil rows
-  rarity?: string | null;
+  rarity?: CardRarity | null;
   is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
 }
 

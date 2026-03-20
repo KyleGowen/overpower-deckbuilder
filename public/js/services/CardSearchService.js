@@ -36,7 +36,7 @@
                 else if (type === 'advanced-universe' && (name.includes(term) || charName.includes(term) || charName === term || term === 'advanced')) match = true;
                 else if (type === 'teamwork' && ((card.to_use || card.name || '').toLowerCase().includes(term) || charName.includes(term) || charName === term || term === 'teamwork')) match = true;
                 else if (type === 'ally-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'ally')) match = true;
-                else if (type === 'training' && ((card.card_name || '').toLowerCase().includes(term) || term === 'training')) match = true;
+                else if (type === 'training' && !card.is_foil && ((card.card_name || '').toLowerCase().includes(term) || term === 'training')) match = true;
                 else if (type === 'basic-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'basic')) match = true;
                 else if (type === 'power' && ((card.power_type || '').toLowerCase().includes(term) || term === 'power card')) match = true;
                 else if (type === 'location' && (name.includes(term) || term === 'location')) match = true;
@@ -228,6 +228,7 @@
 
                 if (training.success) {
                     training.data.forEach(card => {
+                        if (card.is_foil) return;
                         const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'training';
                         if (nameMatch || typeMatch) {

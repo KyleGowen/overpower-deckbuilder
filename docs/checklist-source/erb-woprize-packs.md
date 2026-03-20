@@ -6,7 +6,7 @@ Edgar Rice Burroughs WoPrize / prize-pack style entries (set prefix ERB, card #,
 - **This tab**: [open tab](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit?gid=1934819538#gid=1934819538) (gid `1934819538`)
 - **Exported**: CSV via Google `export?format=csv&gid=` — regenerate with `python3 scripts/export-overpower-checklist-markdown.py`
 
-Prize-pack **character** alternates in the DB use `image_path` under `characters/alternate/*PrizePack_Alt*` and must use the **prize-pack #** (e.g. 539 for prize Sherlock), not the booster base character # — otherwise deck editor **Select Art** captions duplicate. See migrations `V246__Fix_prize_pack_character_set_numbers.sql` and `V247__Sherlock_prize_pack_set_number_all_extensions.sql` (Sherlock prize art: `.jpg`/`.png`/any extension). (542 / 544 have no separate `*PrizePack*` asset in the DB yet; booster alts keep their own numbers.)
+Prize-pack **character** alternates in the DB use `image_path` under `characters/alternate/*PrizePack*` / `*PrizePack_Alt*` and must use the **prize-pack #** (e.g. 539 for prize Sherlock), not the booster base character # — otherwise deck editor **Select Art** captions duplicate. See migrations `V246`–`V247`, `V250` (Count prize pack), and `V251__Add_Sheriff_of_Nottingham_prize_pack_alternate.sql` (Sheriff **542**: `SherrifOfNottingham-PrizePack.png` — note spelling on file).
 
 ## Data
 

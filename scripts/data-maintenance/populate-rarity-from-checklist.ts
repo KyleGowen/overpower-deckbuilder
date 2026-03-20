@@ -15,6 +15,28 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+/** Matches DB CHECK on card tables (see migrations/V252). */
+export type CanonicalCardRarity = 'Common' | 'Uncommon' | 'Rare' | 'Ultra Rare';
+
+/**
+ * Map checklist / legacy DB strings to canonical rarity (matches V252 SQL).
+ * Returns null if empty after trim or if the value is not a known tier (caller should warn, not write).
+ */
+export function normalizeRarityForDb(raw: string): CanonicalCardRarity | null {
+  const collapsed = raw
+    .trim()
+    .replace(/^\*+\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!collapsed) return null;
+  const key = collapsed.toLowerCase();
+  if (key === 'common' || key === 'common slot, rare drop') return 'Common';
+  if (key === 'uncommon' || key === 'uncommon slot, rare drop') return 'Uncommon';
+  if (key === 'rare') return 'Rare';
+  if (key === 'ultra rare' || key === 'ultrarare' || key === 'ultra-rare') return 'Ultra Rare';
+  return null;
+}
+
 /** checklist.md is main-line ERB; never copy its rarity onto ERBP promo rows (duplicate #s / shared power keys). */
 const NOT_ERBP = ' AND (set IS DISTINCT FROM \'ERBP\')';
 
@@ -105,14 +127,20 @@ async function run(): Promise<void> {
   const rows = parseChecklistMarkdown(md);
 
   const unmatched: string[] = [];
+  const rarityWarnings: string[] = [];
   const updates: { label: string; count: number }[] = [];
 
   const client = await pool.connect();
   try {
     for (const row of rows) {
       const { setNum, cardName, cardSpecial, rarity } = row;
-      const r = rarity.trim();
-      if (!r) continue;
+      const rRaw = rarity.trim();
+      if (!rRaw) continue;
+      const norm = normalizeRarityForDb(rRaw);
+      if (norm === null) {
+        rarityWarnings.push(`Unmapped rarity "${rRaw}" | #${setNum} | ${cardName.trim()}`);
+        continue;
+      }
 
       const cs = cardSpecial.trim();
       const cn = cardName.trim();
@@ -136,7 +164,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE power_cards SET rarity = $1 WHERE name = $2 AND power_type = $3 AND value = $4${NOT_ERBP}`,
-              [r, power.name, power.power_type, power.value]
+              [norm, power.name, power.power_type, power.value]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`power ${power.name}`, count);
@@ -150,7 +178,7 @@ async function run(): Promise<void> {
               `SELECT COUNT(*)::int AS c FROM locations WHERE set_number = $1${NOT_ERBP}`,
               [setNum]
             )
-          : await client.query(`UPDATE locations SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [r, setNum]);
+          : await client.query(`UPDATE locations SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [norm, setNum]);
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`location ${setNum}`, count);
         if (!done) unmatched.push(`location ${setNum} ${cn}`);
@@ -163,7 +191,7 @@ async function run(): Promise<void> {
               `SELECT COUNT(*)::int AS c FROM aspects WHERE set_number = $1${NOT_ERBP}`,
               [setNum]
             )
-          : await client.query(`UPDATE aspects SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [r, setNum]);
+          : await client.query(`UPDATE aspects SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [norm, setNum]);
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`aspect ${setNum}`, count);
         if (!done) unmatched.push(`aspect ${setNum} ${cn}`);
@@ -178,7 +206,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE ally_universe_cards SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`ally ${setNum}`, count);
@@ -194,7 +222,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE basic_universe_cards SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`basic ${setNum}`, count);
@@ -210,7 +238,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE training_cards SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`training ${setNum}`, count);
@@ -226,7 +254,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE teamwork_cards SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`teamwork ${setNum}`, count);
@@ -240,7 +268,7 @@ async function run(): Promise<void> {
               `SELECT COUNT(*)::int AS c FROM missions WHERE set_number = $1${NOT_ERBP}`,
               [setNum]
             )
-          : await client.query(`UPDATE missions SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [r, setNum]);
+          : await client.query(`UPDATE missions SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [norm, setNum]);
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`mission ${setNum}`, count);
         if (!done) unmatched.push(`mission ${setNum}`);
@@ -253,7 +281,7 @@ async function run(): Promise<void> {
               `SELECT COUNT(*)::int AS c FROM events WHERE set_number = $1${NOT_ERBP}`,
               [setNum]
             )
-          : await client.query(`UPDATE events SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [r, setNum]);
+          : await client.query(`UPDATE events SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`, [norm, setNum]);
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`event ${setNum}`, count);
         if (!done) unmatched.push(`event ${setNum}`);
@@ -269,7 +297,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE characters SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         if (count > 0) {
@@ -290,7 +318,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE characters SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`character ${setNum}`, count);
@@ -303,7 +331,7 @@ async function run(): Promise<void> {
               )
             : await client.query(
                 `UPDATE characters SET rarity = $1 WHERE LOWER(TRIM(name)) = LOWER(TRIM($2))${NOT_ERBP}`,
-                [r, base]
+                [norm, base]
               );
           const c2 = dryRun ? res2.rows[0].c : res2.rowCount ?? 0;
           record(`character by name ${base}`, c2);
@@ -321,7 +349,7 @@ async function run(): Promise<void> {
             )
           : await client.query(
               `UPDATE special_cards SET rarity = $1 WHERE set_number = $2${NOT_ERBP}`,
-              [r, setNum]
+              [norm, setNum]
             );
         const count = dryRun ? res.rows[0].c : res.rowCount ?? 0;
         record(`special ${setNum}`, count);
@@ -340,6 +368,12 @@ async function run(): Promise<void> {
     console.log(dryRun ? 'Dry run (counts of rows that would be updated):\n' : 'Applied row updates:\n');
     for (const [label, count] of [...merged.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
       if (count > 0) console.log(`  ${label}: ${count}`);
+    }
+
+    if (rarityWarnings.length > 0) {
+      console.log(`\nUnmapped checklist rarity (${rarityWarnings.length}) — rows skipped (fix checklist or extend normalizeRarityForDb):`);
+      for (const w of rarityWarnings.slice(0, 80)) console.log(`  - ${w}`);
+      if (rarityWarnings.length > 80) console.log(`  ... and ${rarityWarnings.length - 80} more`);
     }
 
     if (unmatched.length > 0) {

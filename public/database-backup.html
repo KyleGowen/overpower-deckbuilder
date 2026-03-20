@@ -10294,8 +10294,9 @@
                                 `;
                             }).join('');
                         } else if (category.type === 'training') {
-                            // Special handling for training cards - show summary with types and bonus
-                            cardsHtml = data.data.map(card => {
+                            // Non-foil rows only; foil promos pair via foil_card_map (same as deck-builder.html)
+                            const trainingListCards = data.data.filter(card => !card.is_foil);
+                            cardsHtml = trainingListCards.map(card => {
                                 const summary = `${card.card_name} - ${card.type_1} + ${card.type_2} (${card.value_to_use} → +${card.bonus})`;
                                 return `
                                     <div class="card-item" 
@@ -10524,11 +10525,12 @@
                                 `;
                             } else if (category.type === 'training') {
                                 // Training category - with filter toggle
+                                const trainingSidebarCount = data.data.filter(c => !c.is_foil).length;
                                 categoriesHtml += `
                                     <div class="card-category">
                                         <div class="card-category-header ${collapsedClass}" onclick="toggleCategory(this)">
                                             <div class="category-header-content">
-                                                <span>${category.name} (${data.data.length})</span>
+                                                <span>${category.name} (${trainingSidebarCount})</span>
                                                 <label class="filter-toggle" onclick="event.stopPropagation()">
                                                     <input type="checkbox" id="trainingCharacterFilter" onchange="toggleTrainingCharacterFilter()">
                                                     <span class="toggle-label">Hide Unusables</span>

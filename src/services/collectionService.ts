@@ -16,6 +16,8 @@ export class CollectionService {
         return 'Edgar Rice Burroughs and the World Legends';
       case 'SKY':
         return 'Skybound';
+      case 'SKYP':
+        return 'Skybound - Promos';
       default:
         return setCode;
     }

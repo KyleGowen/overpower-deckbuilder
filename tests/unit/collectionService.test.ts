@@ -207,6 +207,16 @@ describe('CollectionService', () => {
       expect(result).toBe('Skybound');
     });
 
+    it('should translate SKYP to Skybound - Promos', () => {
+      const result = collectionService.translateSet('SKYP');
+      expect(result).toBe('Skybound - Promos');
+    });
+
+    it('should translate skyp (lowercase) to Skybound - Promos', () => {
+      const result = collectionService.translateSet('skyp');
+      expect(result).toBe('Skybound - Promos');
+    });
+
     it('should return original code for unknown set codes', () => {
       const result = collectionService.translateSet('UNKNOWN');
       expect(result).toBe('UNKNOWN');
