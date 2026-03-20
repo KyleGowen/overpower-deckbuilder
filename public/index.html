@@ -3357,7 +3357,8 @@
                                     const allCards = group.map(card => ({
                                         id: card.id,
                                         imagePath: getCardImagePath(card, category.type),
-                                        name: card.name
+                                        name: card.name,
+                                        is_foil: !!card.is_foil
                                     }));
                                     const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                                     

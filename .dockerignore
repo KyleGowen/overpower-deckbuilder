@@ -16,6 +16,9 @@ coverage
 *.spec.ts
 scripts
 # Card images are served from S3/CloudFront in production — not baked into the Docker image.
-# Local dev still serves them from disk via Express static middleware (CDN_BASE_URL is empty).
-src/resources/cards/images
+# Exception: `backgrounds/` must be in the image so GET /api/deck-backgrounds can readdir() and
+# validateBackgroundPath() works on save. (~25 PNGs, small vs. the full card tree.)
+src/resources/cards/images/**
+!src/resources/cards/images/backgrounds
+!src/resources/cards/images/backgrounds/**
 

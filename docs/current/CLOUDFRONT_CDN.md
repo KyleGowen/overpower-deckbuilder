@@ -240,7 +240,7 @@ window.APP_CDN_BASE = "";
 
 All image path functions return relative paths like `/src/resources/cards/images/characters/spider_man.webp`. Express static middleware serves these directly from `src/resources/cards/images/` on disk. **Local development behavior is completely unchanged.**
 
-The `.dockerignore` excludes `src/resources/cards/images` from the Docker build context, so production Docker images do not contain card images. This only affects the Docker build — it does not affect `npm run dev` (which runs directly from the host filesystem).
+The `.dockerignore` excludes almost all of `src/resources/cards/images` from the Docker build context so production images stay small. **`src/resources/cards/images/backgrounds/` is re-included** so the server can list deck backgrounds (`/api/deck-backgrounds`) and validate paths on save. Card art and thumbnails remain CDN-only. This only affects the Docker build — it does not affect `npm run dev` (which runs directly from the host filesystem).
 
 ---
 
