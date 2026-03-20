@@ -1576,6 +1576,7 @@ function initializeCollectionView() {
 // Expose functions globally for inline HTML usage
 window.translateSet = translateSet;
 window.translateUniverse = translateSet; // Backward compatibility alias
+window.ensureCollectionSetNamesLoaded = ensureCollectionSetNamesLoaded;
 window.formatCardType = formatCardType;
 window.loadCollection = loadCollection;
 window.displayCollectionCards = displayCollectionCards;

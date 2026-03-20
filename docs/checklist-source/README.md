@@ -17,6 +17,8 @@ Requires a network connection and that the sheet remains accessible the same way
 python3 scripts/export-overpower-checklist-markdown.py
 ```
 
+The export script post-processes **Checklist Promos** so level 8 power **alternate-art** rows (`8A`–`8I` titles like `8E - Zeus`) get **ERB promos —** prepended to **Location**, distinguishing them from the core **ERB** set in `checklist.md` / the database `set` code `ERB`.
+
 If Google adds or renames tabs, update the `SHEETS` list in that script (discover new `gid` values from the sheet URL or from **Share → Publish to web** / HTML view).
 
 ## Canonical usage in the app

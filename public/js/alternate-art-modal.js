@@ -17,6 +17,123 @@ function maybeThumbnailForDisplay(imagePath, cardType) {
     return imagePath;
 }
 
+/**
+ * ERB-world promo / con-exclusive characters (ERBP) are alternate prints of the same hero as ERB.
+ * Include them when gathering character art options (same as power cards across sets).
+ */
+function characterSetsAlignForAlternateArts(setA, setB) {
+    const norm = (s) => {
+        const t = s != null && String(s).trim() !== '' ? String(s).trim() : 'ERB';
+        return t;
+    };
+    const a = norm(setA);
+    const b = norm(setB);
+    if (a === b) return true;
+    const erbWorld = new Set(['ERB', 'ERBP']);
+    return erbWorld.has(a) && erbWorld.has(b);
+}
+
+/** Set code for an art-choice row (payload may omit `set`; fall back to availableCardsMap). */
+function resolveSetCodeForArtChoice(card) {
+    if (card && card.set != null && String(card.set).trim() !== '') {
+        return String(card.set).trim();
+    }
+    if (card && card.id && window.availableCardsMap) {
+        const meta = window.availableCardsMap.get(card.id);
+        if (meta && meta.set != null && String(meta.set).trim() !== '') {
+            return String(meta.set).trim();
+        }
+    }
+    return 'ERB';
+}
+
+/** Friendly display name from set code (GET /api/sets + defaults via collection-view's translateSet). */
+function friendlySetDisplayNameFromCode(code) {
+    if (typeof window.translateSet === 'function') {
+        return window.translateSet(code);
+    }
+    const c = code != null && String(code).trim() !== '' ? String(code).trim() : 'ERB';
+    return c;
+}
+
+/** Full card row from availableCardsMap when present; else lightweight payload from data-all-cards. */
+function metaForArtChoice(card) {
+    if (card && card.id && window.availableCardsMap) {
+        const meta = window.availableCardsMap.get(card.id);
+        if (meta) return meta;
+    }
+    return card;
+}
+
+/** Sort key for checklist # (209, 519, 519F, 035F). Missing # sorts last within set. */
+function setNumberSortTuple(setNumRaw) {
+    const s = setNumRaw != null ? String(setNumRaw).trim().toUpperCase() : '';
+    if (!s) return [Number.MAX_SAFE_INTEGER, 1, ''];
+    const foil = s.endsWith('F');
+    const core = foil ? s.slice(0, -1) : s;
+    const n = parseInt(core, 10);
+    const num = Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+    const foilOrder = foil ? 1 : 0;
+    return [num, foilOrder, s];
+}
+
+/**
+ * Order Select Art options: set code (A→Z), then card #, then image path.
+ * Uses metaForArtChoice so set_number/set match API rows.
+ */
+function compareArtChoicesBySetThenNumber(a, b) {
+    const codeA = resolveSetCodeForArtChoice(a);
+    const codeB = resolveSetCodeForArtChoice(b);
+    const setCmp = codeA.localeCompare(codeB, undefined, { sensitivity: 'base' });
+    if (setCmp !== 0) return setCmp;
+
+    const metaA = metaForArtChoice(a);
+    const metaB = metaForArtChoice(b);
+    const snA = metaA.set_number != null ? metaA.set_number : a.set_number;
+    const snB = metaB.set_number != null ? metaB.set_number : b.set_number;
+    const tA = setNumberSortTuple(snA);
+    const tB = setNumberSortTuple(snB);
+    if (tA[0] !== tB[0]) return tA[0] - tB[0];
+    if (tA[1] !== tB[1]) return tA[1] - tB[1];
+    return String(a.imagePath || '').localeCompare(String(b.imagePath || ''), undefined, { sensitivity: 'base' });
+}
+
+/**
+ * Labels: {friendly set} - {set_number} ({rarity}); omit -set_number / (rarity) when empty.
+ * Matches src/utils/formatAlternateArtCaption.ts — keep in sync.
+ */
+function buildArtOptionLabels(orderedCards) {
+    return orderedCards.map((card) => {
+        const meta = metaForArtChoice(card);
+        const code = resolveSetCodeForArtChoice(card);
+        const friendly = friendlySetDisplayNameFromCode(code);
+        const snRaw = meta.set_number != null ? meta.set_number : card.set_number;
+        const setNum = snRaw != null && String(snRaw).trim() !== '' ? String(snRaw).trim() : '';
+        const rRaw = meta.rarity != null ? meta.rarity : card.rarity;
+        const rarity = rRaw != null && String(rRaw).trim() !== '' ? String(rRaw).trim() : '';
+        let s = friendly;
+        if (setNum) s += ` - ${setNum}`;
+        if (rarity) s += ` (${rarity})`;
+        return s;
+    });
+}
+
+/** Wait for GET /api/sets so translateSet() has full code → name map (deck editor may never open Collection). */
+function withSetDisplayNamesReady(buildUi) {
+    const go = () => {
+        try {
+            buildUi();
+        } catch (e) {
+            console.error('Alternate art modal:', e);
+        }
+    };
+    if (typeof window.ensureCollectionSetNamesLoaded === 'function') {
+        Promise.resolve(window.ensureCollectionSetNamesLoaded()).then(go).catch(go);
+        return;
+    }
+    go();
+}
+
 // ===== showAlternateArtSelectionModal, showAlternateArtSelectionForExistingCard =====
 
 window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(cardType, cardName, allCards) {
@@ -61,7 +178,8 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
         showNotification(`Cannot add more than 1 copy of "${cardName}" - One Per Deck`, 'error');
         return;
     }
-    
+
+    withSetDisplayNamesReady(() => {
     // Create modal overlay (uses CSS class)
     const overlay = document.createElement('div');
     overlay.className = 'alternate-art-modal';
@@ -88,15 +206,9 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
         }
     }
     
-    // Sort options deterministically:
-    // original art first, then alternates by image path (so numbering is stable).
-    const sortedCards = [...uniqueCards].sort((a, b) => {
-        const aIsAlternate = (a.imagePath || '').includes('/alternate/');
-        const bIsAlternate = (b.imagePath || '').includes('/alternate/');
-        if (aIsAlternate && !bIsAlternate) return 1;
-        if (!aIsAlternate && bIsAlternate) return -1;
-        return String(a.imagePath || '').localeCompare(String(b.imagePath || ''), undefined, { sensitivity: 'base' });
-    });
+    const sortedCards = [...uniqueCards].sort(compareArtChoicesBySetThenNumber);
+
+    const artLabels = buildArtOptionLabels(sortedCards);
 
     // Add each card as an option
     sortedCards.forEach((card, index) => {
@@ -115,7 +227,7 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
         img.decoding = 'async';
         
         const label = document.createElement('span');
-        label.textContent = index === 0 ? 'Original Art' : `Alternate Art ${index}`;
+        label.textContent = artLabels[index] || friendlySetDisplayNameFromCode(resolveSetCodeForArtChoice(card));
         
         cardOption.appendChild(img);
         cardOption.appendChild(label);
@@ -196,6 +308,7 @@ window.showAlternateArtSelectionModal = function showAlternateArtSelectionModal(
     
     // Add to document
     document.body.appendChild(overlay);
+    });
 };
 
 /**
@@ -244,11 +357,12 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
             const iterCardType = card.cardType || card.type || '';
             if ((iterCardType === 'character' || id.startsWith('char_')) && 
                 (card.name || '').trim() === name && 
-                (card.set || 'ERB').trim() === set) {
+                characterSetsAlignForAlternateArts(card.set, set)) {
                 allAlternateArts.push({
                     id: card.id || id,
                     imagePath: getCardImagePath(card, 'character'),
-                    name: (card.name || '').trim()
+                    name: (card.name || '').trim(),
+                    set: ((card.set || 'ERB') + '').trim() || 'ERB'
                 });
             }
         });
@@ -266,7 +380,8 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
                 allAlternateArts.push({
                     id: card.id || id,
                     imagePath: getCardImagePath(card, 'special'),
-                    name: (card.name || card.card_name || '').trim()
+                    name: (card.name || card.card_name || '').trim(),
+                    set: ((card.set || 'ERB') + '').trim() || 'ERB'
                 });
             }
         });
@@ -285,7 +400,8 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
                 allAlternateArts.push({
                     id: card.id || id,
                     imagePath: getCardImagePath(card, 'power'),
-                    name: `${value} - ${powerType}`
+                    name: `${value} - ${powerType}`,
+                    set: ((card.set || 'ERB') + '').trim() || 'ERB'
                 });
             }
         });
@@ -299,7 +415,8 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
                 allAlternateArts.push({
                     id: card.id || id,
                     imagePath: getCardImagePath(card, 'location'),
-                    name: (card.name || '').trim()
+                    name: (card.name || '').trim(),
+                    set: ((card.set || 'ERB') + '').trim() || 'ERB'
                 });
             }
         });
@@ -316,28 +433,7 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
         }
     }
     
-    // Sort: ERB set first, then original art first, then alternates
-    uniqueAlternateArts.sort((a, b) => {
-        // First, prioritize ERB set cards
-        const aCard = Array.from(window.availableCardsMap.values()).find(c => c.id === a.id);
-        const bCard = Array.from(window.availableCardsMap.values()).find(c => c.id === b.id);
-        const aSet = (aCard?.set || 'ERB').trim();
-        const bSet = (bCard?.set || 'ERB').trim();
-        const aIsERB = aSet === 'ERB';
-        const bIsERB = bSet === 'ERB';
-        
-        if (aIsERB && !bIsERB) return -1; // ERB first
-        if (!aIsERB && bIsERB) return 1;  // ERB first
-        
-        // Then sort by original vs alternate art
-        const aIsAlternate = a.imagePath.includes('/alternate/');
-        const bIsAlternate = b.imagePath.includes('/alternate/');
-        if (aIsAlternate && !bIsAlternate) return 1;
-        if (!aIsAlternate && bIsAlternate) return -1;
-        
-        // Finally, make alternate ordering stable and predictable
-        return String(a.imagePath || '').localeCompare(String(b.imagePath || ''), undefined, { sensitivity: 'base' });
-    });
+    uniqueAlternateArts.sort(compareArtChoicesBySetThenNumber);
     
     if (uniqueAlternateArts.length <= 1) {
         console.log('No alternate arts found for this card');
@@ -345,7 +441,8 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
     }
     
     const cardName = availableCard.name || availableCard.card_name || 'Unknown';
-    
+
+    withSetDisplayNamesReady(() => {
     // Create modal overlay
     const overlay = document.createElement('div');
     overlay.className = 'alternate-art-modal';
@@ -364,6 +461,8 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
     
     // Find current card index in uniqueAlternateArts using the currently selected card ID
     const currentCardIndex = uniqueAlternateArts.findIndex(art => art.id === currentCardId);
+
+    const artLabels = buildArtOptionLabels(uniqueAlternateArts);
     
     // Add each card as an option
     uniqueAlternateArts.forEach((card, index) => {
@@ -382,20 +481,7 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
         img.decoding = 'async';
         
         const label = document.createElement('span');
-        // Label: first non-alternate is "Original Art", alternates are numbered sequentially
-        const isAlternate = card.imagePath.includes('/alternate/');
-        if (!isAlternate) {
-            label.textContent = 'Original Art';
-        } else {
-            // Count how many alternates come before this one
-            let alternateCount = 0;
-            for (let i = 0; i < index; i++) {
-                if (uniqueAlternateArts[i].imagePath.includes('/alternate/')) {
-                    alternateCount++;
-                }
-            }
-            label.textContent = `Alternate Art ${alternateCount + 1}`;
-        }
+        label.textContent = artLabels[index] || friendlySetDisplayNameFromCode(resolveSetCodeForArtChoice(card));
         
         cardOption.appendChild(img);
         cardOption.appendChild(label);
@@ -476,6 +562,7 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
     });
     
     document.body.appendChild(overlay);
+    });
 };
 
 

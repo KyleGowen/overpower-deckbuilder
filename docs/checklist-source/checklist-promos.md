@@ -1,6 +1,6 @@
 # Checklist Promos
 
-Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card category, type, title, location, year, notes).
+Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card category, type, title, location, year, notes). Level 8 power alternate arts are prefixed **ERB promos —** in Location on export (promotional releases, not the core ERB numbered set).
 
 - **Spreadsheet**: [OverPower Check List](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit)
 - **This tab**: [open tab](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit?gid=1403717334#gid=1403717334) (gid `1403717334`)
@@ -12,10 +12,10 @@ Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card ca
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | FALSE | Info Card | Welcome to OverPower World Legends |  | World Legends Inaugural Promo (1 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
 | FALSE | Character Card | Dracula |  | World Legends Inaugural Promo (1 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM, Inherent ability says "Target character" instead of "1 of opponent's characters"; this is the only version of Dracula with this Inherent Ability text |
-| FALSE | Power Card | 8E - Zeus |  | World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
-| FALSE | Power Card | 8C - Zorro |  | World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
-| FALSE | Power Card | 8B - Beowulf and Grendal |  | World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
-| FALSE | Power Card | 8I - Dracula |  | World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
+| FALSE | Power Card | 8E - Zeus |  | ERB promos — World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
+| FALSE | Power Card | 8C - Zorro |  | ERB promos — World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
+| FALSE | Power Card | 8B - Beowulf and Grendal |  | ERB promos — World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
+| FALSE | Power Card | 8I - Dracula |  | ERB promos — World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
 | FALSE | Power Card | 6A - Zeus character sketch |  | World Legends Inaugural Promo (1 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM |
 | FALSE | Power Card | 5M - Cthulhu |  | World Legends Inaugural Promo (3 per pack) |  | TRUE | 2022 | 2022 BMG & Associates TM, non-foil versions available in box smooth and linen texture card stock |
 | FALSE | Power Card | 5M - Cthulhu |  | NAOL Promo Exclusive theorangeking.com | TRUE |  | 2022 | 2022 BMG & Associates TM, non-foil versions available in box smooth and linen texture card stock |
@@ -53,7 +53,7 @@ Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card ca
 | FALSE | Power Card | 5A - Ma'at character sketch |  | World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 |  |
 | FALSE | Power Card | 6A - Zeus character sketch |  | World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 |  |
 | FALSE | Power Card | 7A - Mayasura character sketch |  | World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 |  |
-| FALSE | Power Card | 8A - Osiris character sketch |  | World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 |  |
+| FALSE | Power Card | 8A - Osiris character sketch |  | ERB promos — World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 |  |
 | FALSE | Character Card | Dracula |  | World Legends Any Hero Essentials Promo Pack | TRUE |  | 2023 | Corrected Inherent Ability |
 | FALSE | Special | Any Character | Gunnr: Battle Valkyrie | NAOL - OKC Shootout 2023 Tourney Promo Card |  | TRUE | 2023 |  |
 | FALSE | Special | Any Character | Valkyrie Hildr | NAOL - Peace Bridge 2023 Tourney Promo Card |  | TRUE | 2023 |  |

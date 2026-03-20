@@ -132,6 +132,23 @@ describe('Alternate Power Cards Integration Tests', () => {
       
       console.log('✅ 8 - Intelligence has alternate image:', alternateCard?.image_path);
     });
+
+    it('should classify level 8 alternate power art as ERBP (promo), not main ERB', async () => {
+      const paths = [
+        'power-cards/alternate/8_intelligence.webp',
+        'power-cards/alternate/8_energy.webp',
+        'power-cards/alternate/8_combat.webp',
+        'power-cards/alternate/8_brute_force.webp',
+      ];
+      const result = await pool.query<{ image_path: string; set: string }>(
+        `SELECT image_path, set FROM power_cards WHERE image_path = ANY($1::text[])`,
+        [paths]
+      );
+      expect(result.rows).toHaveLength(4);
+      for (const row of result.rows) {
+        expect(row.set).toBe('ERBP');
+      }
+    });
   });
 
   describe('Database Structure and Data Integrity', () => {

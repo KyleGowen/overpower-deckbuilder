@@ -4,7 +4,7 @@ The **OverPower Check List** is the source of truth for collection card names an
 
 - **URL**: [Kyle's Copy of OverPower Check List](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit?gid=1007221192#gid=1007221192)
 - **Local markdown (all tabs)**: [`docs/checklist-source/`](../checklist-source/README.md) — one `.md` file per sheet tab, regenerated with `python3 scripts/export-overpower-checklist-markdown.py`
-- **Use**: Correcting or populating card names and `set_number` (the "#" column) in the database so the Collection interface shows correct names and numbers and can sort by them.
+- **Use**: Correcting or populating card names, `set_number` (the "#" column), and **`rarity`** in the database so the Collection interface and deck editor **Select Art** captions stay aligned with the official list.
 
 ## How it’s used
 
@@ -12,7 +12,8 @@ The **OverPower Check List** is the source of truth for collection card names an
   - Update database rows where `name` (or the relevant display name column) is NULL or empty.
   - Populate or fix `set_number` (and optionally `set`) on card tables (e.g. `ally_universe_cards`, `basic_universe_cards`, `training_cards`, `advanced_universe_cards`, and others that have these columns).
 - **Migrations**: SQL migrations that fix names or set numbers should align with this checklist (e.g. by exporting the sheet to CSV or maintaining a static mapping derived from it).
-- **Scripts**: Any script that bulk-updates card names or set numbers (e.g. under `scripts/`) should use an export or structured data from this checklist so the app stays consistent with the official list.
+- **Scripts**: Any script that bulk-updates card names, set numbers, or rarity (e.g. `scripts/data-maintenance/populate-rarity-from-checklist.ts`) should use `docs/checklist-source/checklist.md` (or an export derived from it) so the app stays consistent with the official list. That script **does not** set `rarity` on **`ERBP`** (ERB Promos) rows—promos use `checklist-promos.md` and intentionally have **NULL** `rarity` so the Select Art modal shows set + number only.
+- **Con exclusives**: Leonidas New York Comic Con alternate art (`characters/alternate/Leonidas-ComicConExclusive.*`) is stored as **`set = 'ERBP'`** with **NULL** `rarity` and **NULL** `set_number` / `set_number_foil` (see `migrations/V249__Leonidas_ComicCon_character_to_ERBP.sql`) so it is not confused with main-set **139** or alt-hero **508**.
 
 ## Options for applying checklist data
 

@@ -3029,12 +3029,16 @@
                                 
                                 const isCharacterLimitReached = currentCharacterCount >= 4;
                                 
-                                // Group characters by name and set (same type, name, set = same card)
+                                // Group characters by name and set (same type, name, set = same card).
+                                // ERBP (ERB Promos / con exclusives) merges with ERB so alternate promo art stays in one tile.
                                 const groups = new Map();
                                 data.data.forEach(card => {
                                     const name = (card.name || '').trim();
                                     let set = (card.set || 'ERB').trim();
                                     if (!set || set === '') {
+                                        set = 'ERB';
+                                    }
+                                    if (set === 'ERBP') {
                                         set = 'ERB';
                                     }
                                     
@@ -3094,7 +3098,10 @@
                                     const allCards = group.map(card => ({
                                         id: card.id,
                                         imagePath: getCardImagePath(card, category.type),
-                                        name: card.name
+                                        name: card.name,
+                                        set: (card.set || 'ERB'),
+                                        set_number: card.set_number != null ? card.set_number : null,
+                                        rarity: card.rarity != null ? card.rarity : null
                                     }));
                                     const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                                     
@@ -3358,7 +3365,10 @@
                                         id: card.id,
                                         imagePath: getCardImagePath(card, category.type),
                                         name: card.name,
-                                        is_foil: !!card.is_foil
+                                        is_foil: !!card.is_foil,
+                                        set: (card.set || 'ERB'),
+                                        set_number: card.set_number != null ? card.set_number : null,
+                                        rarity: card.rarity != null ? card.rarity : null
                                     }));
                                     const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                                     
@@ -3758,7 +3768,10 @@
                                     const allCards = group.map(card => ({
                                         id: card.id,
                                         imagePath: getCardImagePath(card, category.type),
-                                        name: `${card.value} - ${card.power_type}`
+                                        name: `${card.value} - ${card.power_type}`,
+                                        set: (card.set || 'ERB'),
+                                        set_number: card.set_number != null ? card.set_number : null,
+                                        rarity: card.rarity != null ? card.rarity : null
                                     }));
                                     const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                                     
@@ -3859,7 +3872,10 @@
                                 const allCards = group.map(card => ({
                                     id: card.id,
                                     imagePath: getCardImagePath(card, category.type),
-                                    name: card.name
+                                    name: card.name,
+                                    set: (card.set || 'ERB'),
+                                    set_number: card.set_number != null ? card.set_number : null,
+                                    rarity: card.rarity != null ? card.rarity : null
                                 }));
                                 const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                                 const displayCard = allCards[0];

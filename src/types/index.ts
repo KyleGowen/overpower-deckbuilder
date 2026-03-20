@@ -45,6 +45,7 @@ export interface Character {
   image: string;
   image_path?: string; // Optional for backward compatibility, same as image
   set_number?: string; // e.g. "035" or "035F" for foil rows
+  rarity?: string | null; // Checklist rarity; null if unknown / promo not in source
   is_foil?: boolean;   // TRUE for foil card rows; foil effect applied via CSS only
 }
 
@@ -55,6 +56,9 @@ export interface Location {
   special_ability: string;
   image: string;
   image_path?: string;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 // Card types for future expansion
@@ -91,6 +95,7 @@ export interface SpecialCard {
   icon_first_action_only?: boolean;
   banned?: boolean;     // Indicates if the card is banned from legal deck construction
   set_number?: string;  // e.g. "036F" for foil rows
+  rarity?: string | null;
   is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
 }
 
@@ -100,6 +105,9 @@ export interface Mission {
   card_name: string;
   image: string;
   image_path?: string;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface Event {
@@ -111,6 +119,9 @@ export interface Event {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface Aspect {
@@ -126,6 +137,9 @@ export interface Aspect {
   value?: number | null; // level associated with icons, when applicable
   is_fortification: boolean;
   is_one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface AdvancedUniverse {
@@ -138,6 +152,9 @@ export interface AdvancedUniverse {
   image: string;
   image_path?: string;
   is_one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface Teamwork {
@@ -152,6 +169,9 @@ export interface Teamwork {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface AllyUniverse {
@@ -166,6 +186,9 @@ export interface AllyUniverse {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface TrainingCard {
@@ -178,6 +201,9 @@ export interface TrainingCard {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface BasicUniverse {
@@ -189,6 +215,9 @@ export interface BasicUniverse {
   image: string;
   image_path?: string;
   one_per_deck: boolean;
+  set?: string;
+  set_number?: string | null;
+  rarity?: string | null;
 }
 
 export interface PowerCard {
@@ -202,6 +231,7 @@ export interface PowerCard {
   set_name?: string;    // Set display name from sets table
   one_per_deck: boolean; // Whether this card can only be included once per deck
   set_number?: string;  // e.g. "473F" for foil rows
+  rarity?: string | null;
   is_foil?: boolean;    // TRUE for foil card rows; foil effect applied via CSS only
 }
 

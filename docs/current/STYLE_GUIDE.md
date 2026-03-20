@@ -237,6 +237,15 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Box Shadow**: `0 8px 32px rgba(0, 0, 0, 0.5)`
 - <span style="display: inline-block; width: 20px; height: 20px; background-color: #34495e; border: 1px solid #ccc; vertical-align: middle;"></span> (95% opacity)
 
+#### Select Art modal (deck editor — alternate art picker)
+- **CSS**: `public/css/index.css` — `.alternate-art-modal .art-option span` (caption under each thumbnail)
+- **Caption text** (built in `public/js/alternate-art-modal.js`): friendly set name from `translateSet` / `/api/sets`, then optional ` - {set_number}` when the card row has a non-empty checklist `#`, then optional ` ({rarity})` only when `rarity` is non-empty (omit parentheses entirely if rarity is null/empty). `data-all-cards` on deck tiles includes `set_number` and `rarity` when present so labels work before `availableCardsMap` hydration. **ERB Promos** (`set` code `ERBP`, friendly name “…World Legends - Promos”) keep **`rarity` NULL** in the database so promos never show a checklist-derived rarity suffix.
+- **Option order**: thumbnails are sorted by **set code** (A→Z), then by **checklist / `set_number`** (numeric, with non-foil before foil for the same number, e.g. `519` then `519F`), then by `imagePath` for ties. Same logic for “add from deck builder” and “change art on card in deck.”
+- **ERB + ERBP character grouping**: Characters with **`set = 'ERBP'`** (promos / con exclusives) are **grouped with the same-named ERB hero** for deck-editor tiles (`data-all-cards`) and for **Change Art** (`characterSetsAlignForAlternateArts` in `alternate-art-modal.js`). DB rows keep real `set` codes so captions still show “…Promos” where appropriate; only the picker/grouping key treats `ERBP` as part of the ERB-world hero. Deck builder: `groupCardsForDeckBuilder` uses `set` as fallback when `universe` is missing and normalizes **ERBP → ERB** for character keys.
+- **Font size**: `0.9rem`
+- **Font weight**: `500`
+- **Color**: `#e6e6e6` (~10% darker than `#ffffff` for captions on dark tiles)
+
 ### Input Fields
 
 #### Text Input

@@ -168,6 +168,11 @@
 - `npm run build` - Build the project
 - `npm run dev` - Start development server
 
+## Flyway migrations — local dev
+- **Whenever the agent adds or edits SQL under `migrations/`**, finish the task by running **`npm run migrate`** from the repo root (after the migration file is in place).
+- **Restart the local development server** after migrating: stop any existing `npm run dev` process, then start it again. Migrations alone do not refresh in-memory server caches (e.g. card data); a restart ensures schema and data match what the API serves.
+- Treat **migrate + restart** as part of the same workflow as the code change—do not wait for the user to ask unless they explicitly prefer otherwise.
+
 ## Integration Test Output Format
 - **ALWAYS provide table-style output when running integration tests**
 - Use the format with columns: Test Suite | Passed | Failed | Total | Status

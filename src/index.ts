@@ -382,6 +382,9 @@ async function initializeServer() {
     
     // First, initialize database with Flyway migrations and data
     await databaseInit.initializeDatabase();
+
+    // Migrations may have changed card rows; drop cached /api/characters (etc.) from any prior in-process state
+    (cardRepository as { clearCaches?: () => void }).clearCaches?.();
     
     // Then initialize the in-memory repositories
     await Promise.all([

@@ -21,6 +21,7 @@ export function mapCharacterRow(row: DbRow): Character {
     name: row.name as string,
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
     energy: row.energy as number,
     combat: row.combat as number,
     brute_force: row.brute_force as number,
@@ -45,6 +46,7 @@ export function mapSpecialCardRow(row: DbRow): SpecialCard {
     image_path: row.image_path as string,
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
     ...(icons !== undefined && { icons }),
     value: (row.value as number) ?? null,
     is_cataclysm: (row.cataclysm as boolean) || false,
@@ -73,6 +75,7 @@ export function mapPowerCardRow(row: DbRow): PowerCard {
     image_path: row.image_path as string,
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
     set_name: (row.set_name as string) || 'Edgar Rice Burroughs and the World Legends',
     one_per_deck: (row.one_per_deck as boolean) || false,
     is_foil: (row.is_foil as boolean) || false,
@@ -90,12 +93,13 @@ export function mapLocationRow(row: DbRow): Location {
   };
 }
 
-/** Location from getAll (includes set, set_number). Return type matches Location; extra fields omitted at use site if needed. */
-export function mapLocationRowWithSet(row: DbRow): Location & { set?: string; set_number?: string | null } {
+/** Location from getAll (includes set, set_number, rarity). Return type matches Location; extra fields omitted at use site if needed. */
+export function mapLocationRowWithSet(row: DbRow): Location & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapLocationRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -109,12 +113,13 @@ export function mapMissionRow(row: DbRow): Mission {
   };
 }
 
-/** Mission from getAll (includes set, set_number, name). */
-export function mapMissionRowWithSet(row: DbRow): Mission & { set?: string; set_number?: string | null; name?: string } {
+/** Mission from getAll (includes set, set_number, rarity, name). */
+export function mapMissionRowWithSet(row: DbRow): Mission & { set?: string; set_number?: string | null; rarity?: string | null; name?: string } {
   return {
     ...mapMissionRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
     name: row.name as string,
   };
 }
@@ -132,12 +137,13 @@ export function mapEventRow(row: DbRow): Event {
   };
 }
 
-/** Event from getAll (includes set, set_number). */
-export function mapEventRowWithSet(row: DbRow): Event & { set?: string; set_number?: string | null } {
+/** Event from getAll (includes set, set_number, rarity). */
+export function mapEventRowWithSet(row: DbRow): Event & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapEventRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -155,7 +161,7 @@ export function mapAspectRow(row: DbRow): Aspect {
   };
 }
 
-/** Aspect from getAll (includes aspect_description, icons, value). */
+/** Aspect from getAll (includes aspect_description, icons, value, set, set_number, rarity). */
 export function mapAspectRowWithSet(row: DbRow): Aspect {
   const aspectDesc = row.aspect_description as string | undefined;
   const icons = row.icons as string[] | undefined;
@@ -165,6 +171,9 @@ export function mapAspectRowWithSet(row: DbRow): Aspect {
     ...(aspectDesc !== undefined && { aspect_description: aspectDesc }),
     ...(icons !== undefined && { icons }),
     ...(value !== undefined && { value }),
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -181,14 +190,15 @@ export function mapAdvancedUniverseRow(row: DbRow): AdvancedUniverse {
   };
 }
 
-/** AdvancedUniverse from getAll (includes card_description, set, set_number). */
-export function mapAdvancedUniverseRowWithSet(row: DbRow): AdvancedUniverse & { set?: string; set_number?: string | null } {
+/** AdvancedUniverse from getAll (includes card_description, set, set_number, rarity). */
+export function mapAdvancedUniverseRowWithSet(row: DbRow): AdvancedUniverse & { set?: string; set_number?: string | null; rarity?: string | null } {
   const cardDesc = row.card_description as string | undefined;
   return {
     ...mapAdvancedUniverseRow(row),
     ...(cardDesc !== undefined && { card_description: cardDesc }),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -208,12 +218,13 @@ export function mapTeamworkRow(row: DbRow): Teamwork {
   };
 }
 
-/** Teamwork from getAll (includes set, set_number). */
-export function mapTeamworkRowWithSet(row: DbRow): Teamwork & { set?: string; set_number?: string | null } {
+/** Teamwork from getAll (includes set, set_number, rarity). */
+export function mapTeamworkRowWithSet(row: DbRow): Teamwork & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapTeamworkRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -233,12 +244,13 @@ export function mapAllyUniverseRow(row: DbRow): AllyUniverse {
   };
 }
 
-/** AllyUniverse from getAll (includes set, set_number). */
-export function mapAllyUniverseRowWithSet(row: DbRow): AllyUniverse & { set?: string; set_number?: string | null } {
+/** AllyUniverse from getAll (includes set, set_number, rarity). */
+export function mapAllyUniverseRowWithSet(row: DbRow): AllyUniverse & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapAllyUniverseRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -256,12 +268,13 @@ export function mapTrainingRow(row: DbRow): TrainingCard {
   };
 }
 
-/** TrainingCard from getAll (includes set, set_number). */
-export function mapTrainingRowWithSet(row: DbRow): TrainingCard & { set?: string; set_number?: string | null } {
+/** TrainingCard from getAll (includes set, set_number, rarity). */
+export function mapTrainingRowWithSet(row: DbRow): TrainingCard & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapTrainingRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }
 
@@ -278,11 +291,12 @@ export function mapBasicUniverseRow(row: DbRow): BasicUniverse {
   };
 }
 
-/** BasicUniverse from getAll (includes set, set_number). */
-export function mapBasicUniverseRowWithSet(row: DbRow): BasicUniverse & { set?: string; set_number?: string | null } {
+/** BasicUniverse from getAll (includes set, set_number, rarity). */
+export function mapBasicUniverseRowWithSet(row: DbRow): BasicUniverse & { set?: string; set_number?: string | null; rarity?: string | null } {
   return {
     ...mapBasicUniverseRow(row),
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as string) ?? null,
   };
 }

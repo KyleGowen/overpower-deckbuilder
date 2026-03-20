@@ -28,7 +28,8 @@ SHEETS: list[tuple[str, str, str, str]] = [
         "1403717334",
         "checklist-promos.md",
         "Checklist Promos",
-        "Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card category, type, title, location, year, notes).",
+        "Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card category, type, title, location, year, notes). "
+        "Level 8 power alternate arts are prefixed **ERB promos —** in Location on export (promotional releases, not the core ERB numbered set).",
     ),
     (
         "1934819538",
@@ -43,6 +44,46 @@ SHEETS: list[tuple[str, str, str, str]] = [
         "Full ERB-set style checklist including Have, Set, #, name, special, rarity, location, and notes.",
     ),
 ]
+
+# Level 8 power promo / alternate-art titles in Checklist Promos (e.g. "8E - Zeus", "8A - Osiris character sketch").
+_LEVEL_8_POWER_ALT_TITLE = re.compile(r"^8[A-Z] -")
+_ERB_PROMOS_LOC_PREFIX = "ERB promos — "
+
+
+def _col_index(header: list[str], name: str) -> int:
+    for i, h in enumerate(header):
+        if h.strip() == name:
+            return i
+    return -1
+
+
+def postprocess_checklist_promos_rows(rows: list[list[str]]) -> list[list[str]]:
+    """Tag level 8 power alternate-art rows as ERB promos in Location (not ambiguous with core ERB set)."""
+    if not rows:
+        return rows
+    header = rows[0]
+    # Google CSV uses "Card Category" for values like Power Card / Character Card, and "Type" for the main title (e.g. 8E - Zeus).
+    ci = _col_index(header, "Card Category")
+    type_col = _col_index(header, "Type")
+    li = _col_index(header, "Location")
+    if ci < 0 or type_col < 0 or li < 0:
+        return rows
+    ncols = len(header)
+    out: list[list[str]] = [header]
+    for r in rows[1:]:
+        row = list(r)
+        if len(row) < ncols:
+            row.extend([""] * (ncols - len(row)))
+        else:
+            row = row[:ncols]
+        kind = row[ci].strip()
+        title_line = row[type_col].strip()
+        loc = row[li].strip()
+        if kind == "Power Card" and _LEVEL_8_POWER_ALT_TITLE.match(title_line):
+            if not loc.startswith("ERB promos"):
+                row[li] = f"{_ERB_PROMOS_LOC_PREFIX}{loc}" if loc else "ERB promos"
+        out.append(row)
+    return out
 
 
 def cell_md(value: str) -> str:
@@ -88,6 +129,8 @@ def main() -> None:
         raw = fetch_csv(gid)
         reader = csv.reader(io.StringIO(raw))
         rows = list(reader)
+        if filename == "checklist-promos.md":
+            rows = postprocess_checklist_promos_rows(rows)
         md_path = out_dir / filename
         tab_url = f"{EDIT_URL}?gid={gid}#gid={gid}"
         content = (
