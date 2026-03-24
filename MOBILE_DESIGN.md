@@ -22,16 +22,16 @@ This document is the **source of truth** for mobile and dual–layout-mode work 
 | Card database           | `[public/css/card-tables.css](public/css/card-tables.css)`, `[public/css/database-view.css](public/css/database-view.css)`           | Fixed tables, wide filters (e.g. missions filters `min-width`).                                               |
 | Collection              | `[public/css/collection-view.css](public/css/collection-view.css)`                                                                   | 1400px max-width; small checkboxes in places.                                                                 |
 | Deck selection          | `[public/css/deck-selection.css](public/css/deck-selection.css)`                                                                     | 44×44 menu pattern in places.                                                                                 |
-| Global nav              | `[public/components/globalNav.css](public/components/globalNav.css)`, `[public/css/mobile-layout.css](public/css/mobile-layout.css)` | `@media` at 900px / 600px; under `.layout-mobile`, stacked header + 44px targets in `mobile-layout.css` (M1). |
+| Global nav              | `[public/components/globalNav.css](public/components/globalNav.css)`, `[public/css/mobile-layout.css](public/css/mobile-layout.css)` | `@media` at 900px / 600px; under `.layout-mobile`, **row header** (logo left, 2×2 app grid + welcome) + 44px targets — see **§10**. Desktop: **`header-nav-cluster`** is `display: contents`. |
 
 
 ---
 
 ## 3. Breakpoint audit
 
-- **STYLE_GUIDE** documents Mobile `768px`, Tablet `900px`, Desktop `901px+`.
+- **STYLE_GUIDE** documents legacy **Mobile** `768px` for some older `@media` rules; **client layout mode** uses **`900px`** so the stacked shell matches the former “tablet” band (see below).
 - **Codebase** historically used many thresholds (500, 600, 700, 768, 800, 900, 1000, 1200px) without a single token.
-- **Canonical layout-mode breakpoint:** `**768px`** — aligned with STYLE_GUIDE; exposed as CSS variable `**--layout-mobile-max: 768px**` on `:root` in `[public/css/mobile-layout.css](public/css/mobile-layout.css)` and mirrored in `layout-mode.js` (`LAYOUT_MOBILE_MAX_PX`).
+- **Canonical layout-mode breakpoint:** `**900px`** — `layout-mobile` for `max-width: 900px`, `layout-desktop` for `901px+` (avoids a cramped desktop shell between 769–900). Exposed as `**--layout-mobile-max: 900px**` on `:root` in `[public/css/mobile-layout.css](public/css/mobile-layout.css)` and mirrored in `layout-mode.js` (`LAYOUT_MOBILE_MAX_PX`).
 
 ---
 
@@ -48,7 +48,7 @@ This document is the **source of truth** for mobile and dual–layout-mode work 
 ## 5. Dual-interface strategy (industry standard)
 
 - **Not recommended as default:** server **User-Agent** routing (fragile; wrong for narrow desktop windows).
-- **Implemented:** `**matchMedia('(max-width: 768px)')`**, `**change**` listener on resize/orientation (with resize fallback where needed), root class `**layout-mobile**` / `**layout-desktop**`. *(Width-only for now; `(pointer: coarse)` is not used in `[layout-mode.js](public/js/layout-mode.js)` but could augment detection later.)*
+- **Implemented:** `**matchMedia('(max-width: 900px)')`**, `**change**` listener on resize/orientation (with resize fallback where needed), root class `**layout-mobile**` / `**layout-desktop**`. *(Width-only for now; `(pointer: coarse)` is not used in `[layout-mode.js](public/js/layout-mode.js)` but could augment detection later.)*
 - **Override:** `localStorage.setItem('preferDesktopLayout','1')` forces desktop layout class even on narrow viewports; remove key to restore breakpoint behavior. `**window.setPreferDesktopLayout(true|false)*`* in `[layout-mode.js](public/js/layout-mode.js)` updates storage and reapplies classes. (Product may add a “Desktop site” link later.)
 - **FOUC mitigation:** A blocking `[layout-mode.js](public/js/layout-mode.js)` `<script>` in `[public/index.html](public/index.html)` `<head>` (before main CSS) runs `applyLayoutMode()` synchronously on load so `<html>` usually has the correct class before first paint.
 - **Styling:** `[public/css/mobile-layout.css](public/css/mobile-layout.css)` — rules scoped under `**.layout-mobile`** so desktop layout is unchanged.
@@ -146,6 +146,11 @@ Small, desktop-neutral PRs; check off below as completed.
 | Agent context: `public/css`, `public/js`, `public/components`, `public/.cursorrules` (layout-mobile, MOBILE_DESIGN pointers) | M2b / shell | done                                              |
 | Jest `Window` merge fixes (`getCardImagePath`, `SimulateKO`, deck globals)                                                   | M6          | done                                              |
 | `index.html` head order regression (`layout-mode-and-viewport.test.ts`)                                                      | M6          | done                                              |
+| Global nav mobile: **2×2** app grid, **`header-nav-cluster`**, **`syncHeaderCollectionLayout`** / **`collection-tab-hidden`** | M1          | done                                              |
+| Global nav mobile: logo column **30.4%** / **134px** cap, **`padding-top: 0`** bar, **`align-items: flex-start`** on **`.header-left`** | M1 | done |
+| Global nav mobile: welcome **`justify-content: flex-end`**; account dropdown **50%** width, **`right: 0`**                    | M1          | done                                              |
+| DBV **All** tab: remove inline **5-col** grid on **`#all-cards-grid-container`**; single column ≤900px + **`.layout-mobile`** | M2c         | done                                              |
+| DBV **All** tab cells: **+Deck** row then **-Collection \| +Collection** (`mobile-layout.css` grid on **`.card-content-bottom`**) | M2c | done |
 
 
 **M0 — Foundation**
@@ -157,7 +162,7 @@ Small, desktop-neutral PRs; check off below as completed.
 
 **M1 — Layout mode + shell** (complete)
 
-- `layout-mode.js` + `mobile-layout.css` linked from `[public/index.html](public/index.html)`; narrow viewports get `layout-mobile` and a stacked global nav (see `mobile-layout.css` global nav block).
+- `layout-mode.js` + `mobile-layout.css` linked from `[public/index.html](public/index.html)`; narrow viewports get `layout-mobile` and a **mobile global header** (logo left, 2×2 app controls, welcome row — **§10**; rules in `mobile-layout.css` global nav block).
 - **Verification:** `[tests/unit/layout-mode-and-viewport.test.ts](tests/unit/layout-mode-and-viewport.test.ts)` (automated); manual steps in `[docs/current/TESTING_GUIDE.md](docs/current/TESTING_GUIDE.md)` § *Mobile milestone M1*.
 - DRY HTML if a second shell is ever added.
 - Optional deferred non-critical CSS on mobile (measure first).
@@ -180,7 +185,7 @@ Small, desktop-neutral PRs; check off below as completed.
 
 ## 8. Risks and open decisions
 
-- **Tablet behavior:** width-only `matchMedia` may classify large phones vs small tablets; document product choice in future revision.
+- **Tablet / narrow window behavior:** `layout-mobile` applies up to **900px** so the stacked shell covers small tablets and the 769–900px band where the desktop header overlapped DB controls; large phones vs small tablets may still feel similar—optional future `(pointer: coarse)` augmentation noted in §5.
 - **Resize thrash:** layout-mode uses `matchMedia` `change` events.
 - **Read-only vs edit:** do not show misleading Save on M5a flows; match desktop auth.
 - **Open:** “Desktop site” UX copy and placement; optional cookie mirror of `localStorage` override.
@@ -192,4 +197,31 @@ Small, desktop-neutral PRs; check off below as completed.
 - `[docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md)` — Responsive Design + Mobile layout mode section
 - `[docs/current/PROJECT_LAYOUT.md](docs/current/PROJECT_LAYOUT.md)` — repo map
 - `[docs/FRONTEND_SCRIPT_MANIFEST.md](docs/FRONTEND_SCRIPT_MANIFEST.md)` — script load order
+
+---
+
+## 10. Recent implementation notes (global nav + DBV All tab)
+
+Use this section as **agent context** for what shipped after the base M1/M2c milestones. Primary code: [`public/components/globalNav.html`](public/components/globalNav.html), [`public/components/globalNav.js`](public/components/globalNav.js), [`public/css/mobile-layout.css`](public/css/mobile-layout.css), [`public/js/all-cards-display.js`](public/js/all-cards-display.js), [`public/index.html`](public/index.html).
+
+### 10.1 Global header under `.layout-mobile`
+
+- **Structure:** **[`header-nav-cluster`](public/components/globalNav.html)** wraps **`.header-center`** (2×2 controls) and **`.header-right`** (user menu). On **desktop**, **[`.header-nav-cluster`](public/components/globalNav.css)** uses **`display: contents`** so the absolute-centered tab bar + **`.header-right`** layout is unchanged.
+- **2×2 grid:** **[`.header-app-actions`](public/components/globalNav.html)** contains **`.app-tabs`** (three view buttons) and **`#newDeckBtn`**. **`mobile-layout.css`** sets **`display: grid`** **`1fr 1fr`** with **`display: contents`** on **`.app-tabs`** so four items participate in one grid. Placement: row 1 **Card Database** \| **Collection**; row 2 **Deck Builder** \| **+ Deck** (IDs **`#databaseViewBtn`**, **`#collectionViewBtn`**, **`#deckBuilderBtn`**, **`#newDeckBtn`**).
+- **Logged out / no `getCurrentUser`:** **[`syncHeaderCollectionLayout()`](public/components/globalNav.js)** hides Collection and adds **`.collection-tab-hidden`** on **`.header-app-actions`** so **Card Database** spans the top row (no empty cell). Called from **`updateUserWelcome()`** after greeting/menu updates.
+- **Logo column:** **`.header-left`** **`flex: 0 0 30.4%`**, **`max-width: 134px`** (~20% smaller than an earlier 168px cap). **`.unified-header`** uses **`padding: 0 10px 8px`** (no top padding). **`.header-left`** uses **`align-items: flex-start`** so the logo is not vertically centered in the tall stretch column (avoids a false “gap above logo”).
+- **Welcome row:** **`.user-menu-toggle`** **`justify-content: flex-end`** so text and ▶ align with the right column of buttons.
+- **Account dropdown:** **`.user-menu-dropdown`** **`width` / `max-width: 50%`**, **`left: auto`**, **`right: 0`**, **`min-width: 0`** (overrides component **`min-width: 260px`** for narrow half-width panel).
+
+### 10.2 Card Database — “All” tab (`.layout-mobile` and narrow viewport)
+
+- **`#all-cards-grid-container`** must **not** use an inline **`grid-template-columns: repeat(5, …)`** (removed from [`public/index.html`](public/index.html)); column count comes from **[`database-view.css`](public/css/database-view.css)** (`@media (max-width: 900px)` → single column) and **`mobile-layout.css`** under **`.layout-mobile`**.
+- **Per-cell actions:** Under **`.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom`**, CSS grid places **+Deck** full width, then **-Collection** (left) and **+Collection** (right) on the next row (DOM order differs; explicit grid placement). Comment anchor in **`mobile-layout.css`**: `All tab cell actions`.
+
+### 10.3 Tests and docs map
+
+- **Unit:** [`tests/unit/layout-mode-and-viewport.test.ts`](tests/unit/layout-mode-and-viewport.test.ts) — `layout-mode.js`, **`mobile-layout.css`** fragments (DBV tabs, All grid, global nav grid, user menu alignment, dropdown width).
+- **Integration:** [`tests/integration/global-nav-integration.test.ts`](tests/integration/global-nav-integration.test.ts) — served **`globalNav.html`** / **`.css`** include **`header-nav-cluster`**, **`header-app-actions`**.
+- **Style spec:** [`docs/current/STYLE_GUIDE.md`](docs/current/STYLE_GUIDE.md) — *Mobile Adaptations* / *Mobile layout mode* (global nav + DBV bullets).
+- **Manual QA:** [`docs/current/TESTING_GUIDE.md`](docs/current/TESTING_GUIDE.md) — § *Mobile milestone M1* and *M2c* (updated for All tab + header).
 

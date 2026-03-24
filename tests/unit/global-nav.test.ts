@@ -816,13 +816,10 @@ describe('Global Navigation Component', () => {
     });
 
     describe('Global Navigation Layout', () => {
-      test('should have proper element order in header-right', () => {
-        // Test that the elements are in the correct order:
-        // 1. + Deck button
-        // 2. User menu (Welcome, User! ▶)
+      test('should expose + Deck and user menu for layout', () => {
         const newDeckBtn = mockDocument.getElementById('newDeckBtn');
         const userMenuToggle = mockDocument.getElementById('userMenuToggle');
-        
+
         expect(newDeckBtn).toBeDefined();
         expect(userMenuToggle).toBeDefined();
       });

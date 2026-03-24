@@ -92,7 +92,9 @@ describe('Global Nav Integration Tests', () => {
       // Verify the HTML structure
       expect(response.text).toContain('<div class="unified-header">');
       expect(response.text).toContain('<div class="header-left">');
+      expect(response.text).toContain('<div class="header-nav-cluster">');
       expect(response.text).toContain('<div class="header-center">');
+      expect(response.text).toContain('class="header-app-actions"');
       expect(response.text).toContain('<div class="header-right">');
       expect(response.text).toContain('onclick="switchToDatabaseView()"');
       expect(response.text).toContain('onclick="switchToDeckBuilder()"');
@@ -109,6 +111,8 @@ describe('Global Nav Integration Tests', () => {
       expect(response.text).toContain('.header-left');
       expect(response.text).toContain('.header-center');
       expect(response.text).toContain('.header-right');
+      expect(response.text).toContain('.header-app-actions');
+      expect(response.text).toContain('.header-nav-cluster');
       expect(response.text).toContain('.app-tab-button');
       expect(response.text).toContain('.create-deck-btn');
       expect(response.text).toContain('.logout-btn');

@@ -3,20 +3,21 @@
     <div class="header-left">
         <img src="/src/resources/images/logo/logo5.png" alt="Excelsior Deckbuilder" class="header-logo" onclick="console.log('Main header logo clicked'); event.preventDefault(); event.stopPropagation(); return false;">
     </div>
+    <div class="header-nav-cluster">
     <div class="header-center">
-        <div class="app-tabs">
-            <button class="app-tab-button" id="databaseViewBtn" onclick="switchToDatabaseView()">Card Database</button>
-            <button class="app-tab-button active" id="deckBuilderBtn" onclick="switchToDeckBuilder()">Deck Builder</button>
-            <button class="app-tab-button" id="collectionViewBtn" onclick="switchToCollectionView()" style="display: none;">Collection</button>
+        <div class="header-app-actions">
+            <div class="app-tabs">
+                <button class="app-tab-button" id="databaseViewBtn" onclick="switchToDatabaseView()">Card Database</button>
+                <button class="app-tab-button active" id="deckBuilderBtn" onclick="switchToDeckBuilder()">Deck Builder</button>
+                <button class="app-tab-button" id="collectionViewBtn" onclick="switchToCollectionView()" style="display: none;">Collection</button>
+            </div>
+            <button id="newDeckBtn" class="new-deck-btn" onclick="createNewDeck()">+ Deck</button>
         </div>
     </div>
     <div class="header-right">
         <!-- Compatibility: legacy userWelcome span for older tests -->
         <span id="userWelcome" style="display:none">Welcome, <span id="currentUsernameHidden"></span>!</span>
 
-        <!-- Create Deck Button in Global Nav -->
-        <button id="newDeckBtn" class="new-deck-btn" onclick="createNewDeck()">+ Deck</button>
-        
         <div id="userMenu" class="user-menu">
             <button id="userMenuToggle" class="user-menu-toggle" onclick="toggleUserMenu(event)">
                 <span id="currentUserGreeting">Welcome, <span id="currentUsername"></span>!</span>
@@ -69,5 +70,6 @@
             <!-- Compatibility: legacy Create Deck button hook for tests -->
             <button id="createDeckBtn" class="create-deck-btn" onclick="createNewDeck()" style="display:none">+ Create Deck</button>
                 <button id="logoutBtn" class="logout-btn" style="display:none">Log Out</button>
+    </div>
     </div>
 </div>

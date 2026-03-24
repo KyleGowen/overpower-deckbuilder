@@ -152,17 +152,23 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
 - **Automated (unit):** [`tests/unit/layout-mode-and-viewport.test.ts`](../../tests/unit/layout-mode-and-viewport.test.ts) covers:
   - `layout-mode.js`: `layout-mobile` / `layout-desktop` classes, `LAYOUT_MOBILE_MAX_PX`, `setPreferDesktopLayout`, and `layout-mode-change` events on `window`.
   - `public/index.html`: `layout-mode.js` and `viewport-positioning.js` load before the first app stylesheet; `mobile-layout.css` is included.
-  - `mobile-layout.css`: M1 global-nav block (stacked `.unified-header`, static `.header-center`, 44px tab/menu targets, full-width user dropdown).
-- **Manual:** Narrow viewport (≤768px), confirm stacked nav and tap targets; optional `preferDesktopLayout` override — see [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (roadmap M1).
+  - `mobile-layout.css`: global nav under `.layout-mobile` — **row** `.unified-header` (logo column + `.header-nav-cluster`), **2×2** `.header-app-actions` grid, **`.user-menu-toggle`** `justify-content: flex-end`, **`.user-menu-dropdown`** half width (`50%`, `right: 0`), 44px targets on tabs / **+ Deck** / menu toggle. See [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10**.
+- **Manual:** Viewport **≤900px** (`layout-mobile` on `<html>`). Confirm:
+  - **Logo** sits at the **top** of the left column (no false vertical gap); bar uses **no top padding** on `.unified-header`.
+  - **Four controls** in a **2×2** grid: Card Database \| Collection / Deck Builder \| + Deck; tap targets feel usable.
+  - **Welcome** line and ▶ are **right-aligned** with the right column of buttons.
+  - Open account menu: dropdown is about **half** the cluster width, **right-aligned**; actions still tappable.
+  - Optional **`preferDesktopLayout`** override restores desktop chrome — see [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §5–§8.
 
 ### Mobile milestone M2c (Card Database / DBV)
 
-- **Automated:** No dedicated CSS regression suite; run full `npm run test:unit` after DBV changes.
-- **Manual:** Viewport ≤768px (or `layout-mobile` on `<html>`). Open **Card Database** from global nav.
+- **Automated:** No dedicated CSS regression suite; run full `npm run test:unit` after DBV changes. [`layout-mode-and-viewport.test.ts`](../../tests/unit/layout-mode-and-viewport.test.ts) asserts fragments of `mobile-layout.css` for DBV **All** grid (single column), **All** tab cell button grid, and DB category **tab-container** caps.
+- **Manual:** Viewport ≤900px (or `layout-mobile` on `<html>`). Open **Card Database** from global nav.
+  - **All tab:** Grid is **one card per row** (not five across). Each tile: **+Deck** full width on first action row; **-Collection** and **+Collection** side-by-side on the second row.
   - **Characters (default tab):** Each character appears as a **card block** (stacked fields with labels); image and **Deck & collection** actions are usable; alternate-art **‹ ›** controls work; no clipped row heights after rotating or resizing.
   - **Another tab** (e.g. Special Cards or Missions): Filters wrap; tables scroll horizontally where columns remain wide; header filter inputs are tappable (≥44px height where styled).
-  - **Layout toggle:** Resize across 768px or use `preferDesktopLayout` — Characters table returns to desktop row layout with height locks; no stale inline locks on mobile.
-- **Reference:** [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) milestone M2c; styles in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css); character `data-label` + locks in [`public/js/card-display.js`](../../public/js/card-display.js).
+  - **Layout toggle:** Resize across **900px** (layout-mode threshold) or use `preferDesktopLayout` — Characters table returns to desktop row layout with height locks; no stale inline locks on mobile.
+- **Reference:** [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) milestone M2c and **§10.2** (All tab); styles in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css); character `data-label` + locks in [`public/js/card-display.js`](../../public/js/card-display.js); All-tab markup from [`public/js/all-cards-display.js`](../../public/js/all-cards-display.js).
 
 ### Character Stacks Coverage
 

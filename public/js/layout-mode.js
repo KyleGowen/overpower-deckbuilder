@@ -3,7 +3,8 @@
  * See /MOBILE_DESIGN.md and docs/current/STYLE_GUIDE.md (Mobile layout mode).
  */
 (function layoutModeInit() {
-    var PX = 768;
+    /** Max viewport width (px) for layout-mobile; 901+ uses desktop shell (avoids cramped 769–900 band). */
+    var PX = 900;
 
     function preferDesktop() {
         try {

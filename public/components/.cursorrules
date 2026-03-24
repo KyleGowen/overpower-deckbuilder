@@ -1,5 +1,12 @@
 # Global navigation and shared components (`public/components/`)
 
-- **globalNav:** [`globalNav.html`](globalNav.html) markup, [`globalNav.css`](globalNav.css), [`globalNav.js`](globalNav.js). Injected into `#globalNav` from [`public/js/app-initialization.js`](../js/app-initialization.js).
-- **Z-index:** Global nav dropdowns, popups, and tooltips use **z-index: 9999** so they stay above main content (see repo [.cursorrules](../../.cursorrules)).
-- **Mobile:** Narrow-width rules may use existing `@media` in `globalNav.css`; **layout-mode** adds `layout-mobile` on `<html>` — add mobile nav tweaks under `html.layout-mobile` in [`public/css/mobile-layout.css`](../css/mobile-layout.css) or extend `globalNav.css` with `html.layout-mobile` selectors as needed. Roadmap: [/MOBILE_DESIGN.md](../../MOBILE_DESIGN.md).
+- **globalNav:** [`globalNav.html`](globalNav.html), [`globalNav.css`](globalNav.css), [`globalNav.js`](globalNav.js). Injected into `#globalNav` from [`public/js/app-initialization.js`](../js/app-initialization.js).
+- **Desktop layout:** **[`.header-nav-cluster`](globalNav.html)** wraps **`.header-center`** + **`.header-right`**. **[`globalNav.css`](globalNav.css)** sets **`.header-nav-cluster { display: contents }`** so flex children behave like **logo \| centered tabs+Deck \| user menu** (tabs and **+ Deck** live in **`.header-app-actions`** inside **`.header-center`**).
+- **Mobile (`html.layout-mobile`):** Rules live in [`public/css/mobile-layout.css`](../css/mobile-layout.css) — not only `globalNav.css` `@media`. Full spec: **[`/MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §10.1**.
+  - **Row header:** **`.unified-header`** flex row — **`.header-left`** (logo, **`flex-start`** alignment, **`max-width: 134px`**, **`flex: 0 0 30.4%`**) + **`.header-nav-cluster`** (column: grid + welcome).
+  - **2×2 grid:** **`.header-app-actions`** — **`display: grid`** **`1fr 1fr`**; **`.app-tabs { display: contents }`**; explicit **`#databaseViewBtn`**, **`#collectionViewBtn`**, **`#deckBuilderBtn`**, **`#newDeckBtn`** grid cells.
+  - **Collection hidden:** **[`syncHeaderCollectionLayout()`](globalNav.js)** (called from **`updateUserWelcome`**) sets **`display: none`** on Collection and adds **`.collection-tab-hidden`** on **`.header-app-actions`** so Card Database spans row 1.
+  - **Welcome:** **`.user-menu-toggle`** **`justify-content: flex-end`**. **Dropdown:** **`.user-menu-dropdown`** **`width/max-width: 50%`**, **`right: 0`**, **`min-width: 0`**.
+  - **Bar padding:** **`.unified-header`** **`padding: 0 10px 8px`** (no top padding).
+- **Z-index:** Global nav dropdowns, popups, and tooltips use **z-index: 9999** (see repo [.cursorrules](../../.cursorrules)).
+- **Roadmap / milestones:** [/MOBILE_DESIGN.md](../../MOBILE_DESIGN.md).

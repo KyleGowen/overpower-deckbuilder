@@ -657,27 +657,27 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 
 ## Responsive Design
 
-**Authoritative mobile roadmap and architecture:** [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (repo root).
+**Authoritative mobile roadmap and architecture:** [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (repo root). **Agent-oriented implementation notes** for the current global header (2×2 grid, dropdown width, logo column) and DBV **All** tab live in **MOBILE_DESIGN §10**.
 
 ### Breakpoints
-- **Mobile**: `max-width: 768px` — also used for **client layout mode** (`matchMedia`); see *Mobile layout mode* below.
-- **Tablet**: `max-width: 900px` (still used in some legacy CSS; consolidate over time)
-- **Desktop**: `min-width: 901px`
+- **Client layout mode (authoritative):** **`max-width: 900px`** → `<html>` gets **`layout-mobile`** (stacked shell, `mobile-layout.css`); **`min-width: 901px`** → **`layout-desktop`**. This matches the former “tablet” upper bound so **769–900px** does not use the wide desktop header (which overlapped DB tabs and nav actions).
+- **Legacy / misc `@media`:** Some older rules still use **`768px`** or other values; prefer **`--layout-mobile-max`** / `LAYOUT_MOBILE_MAX_PX` for anything tied to the **same** shell as `layout-mode.js`.
 
 ### Mobile layout mode (`layout-mobile` / `layout-desktop`)
 
-- **Mechanism:** [`public/js/layout-mode.js`](/public/js/layout-mode.js) runs early in [`public/index.html`](/public/index.html) and sets **`layout-mobile`** or **`layout-desktop`** on `<html>` using **`window.matchMedia('(max-width: 768px)')`**, not User-Agent sniffing.
+- **Mechanism:** [`public/js/layout-mode.js`](/public/js/layout-mode.js) runs early in [`public/index.html`](/public/index.html) and sets **`layout-mobile`** or **`layout-desktop`** on `<html>` using **`window.matchMedia('(max-width: 900px)')`**, not User-Agent sniffing.
 - **Override:** `localStorage.setItem('preferDesktopLayout','1')` forces desktop layout on narrow viewports; remove the key to restore breakpoint behavior. API: `window.setPreferDesktopLayout(true|false)`.
 - **Styles:** [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) — rules are scoped under **`.layout-mobile`** so desktop layout is unchanged.
-- **CSS token:** `:root { --layout-mobile-max: 768px; }` in `mobile-layout.css` (keep in sync with `LAYOUT_MOBILE_MAX_PX` in JS).
+- **CSS token:** `:root { --layout-mobile-max: 900px; }` in `mobile-layout.css` (keep in sync with `LAYOUT_MOBILE_MAX_PX` in JS).
 
 ### Mobile Adaptations (current direction)
 
 - **Deck editor:** Under `.layout-mobile`, deck panes **stack vertically**; resizable divider hidden; list view **stacks** the two deck columns (single-column reading flow). Full parity with STYLE_GUIDE “single column deck builder” is **incremental** — see `MOBILE_DESIGN.md` milestones.
-- **Stacked Navigation (M1):** Under `.layout-mobile`, the unified header uses normal document flow (tabs are not absolutely centered), full-width rows, wrapping tabs/actions, and **44px** minimum tap targets for primary controls. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). Legacy `@media (max-width: 900px)` rules in [`public/components/globalNav.css`](/public/components/globalNav.css) still apply at wider breakpoints when `layout-desktop` is active.
+- **Stacked Navigation (M1):** Under `.layout-mobile`, **[`.header-nav-cluster`](/public/components/globalNav.html)** groups **`.header-center`** (2×2 button grid) and **`.header-right`** (welcome / account row). **`.user-menu-toggle`** uses **`justify-content: flex-end`** so the greeting and ▶ sit on the **right**, aligned with the **Collection** / **+ Deck** column. **`.unified-header`** is a **horizontal** flex row: **logo** on the **left** (~**30.4%** width, capped **134px**, ~**20%** smaller than the prior **168px** cap), cluster **fills the rest**. **`.header-app-actions`** uses **`display: grid`** **`1fr 1fr`** × **`minmax(44px,1fr)`** twice; **`.app-tabs`** uses **`display: contents`** so **Card Database** | **Collection** sit on **row 1**, **Deck Builder** | **+ Deck** on **row 2** (explicit **`#databaseViewBtn`** / **`#collectionViewBtn`** / **`#deckBuilderBtn`** / **`#newDeckBtn`** placement). **`.app-tab-button`** and **`.new-deck-btn`** share the same **min-height**, **padding**, and **font-size** so all four cells match. Logged-out users: [`syncHeaderCollectionLayout`](/public/components/globalNav.js) adds **`.collection-tab-hidden`** so **Card Database** spans the top row when Collection is hidden. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). Desktop: **`.header-nav-cluster`** is **`display: contents`** in [`public/components/globalNav.css`](/public/components/globalNav.css) so the existing centered-tabs + **`.header-right`** layout is unchanged. Legacy **`@media (max-width: 900px)`** in `globalNav.css` still applies when **`layout-desktop`** is active at narrow widths.
 - **Touch Targets:** Minimum **44px** for interactive controls; utility **`.touch-target-min`** in `mobile-layout.css` (apply where controls are still small).
 - **Card database (M2c, `.layout-mobile`):** Rules live in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) under the **Card database** and **Characters tab — card rows** sections.
-  - **Shell:** `#database-view.database-section` uses tighter horizontal padding; **`.stats`** is a two-column grid; **`.tab-button`** is at least **44px** tall, `flex: 1 1 calc(50% - 4px)` for a two-up wrap.
+  - **Shell:** `#database-view.database-section` uses tighter horizontal padding; **`.stats`** is a two-column grid; **`.tab-container`** is **`max-width: 732px`** centered (`margin: auto`) so database tab buttons do not grow wider between **769–900px** than they would at a **768px** viewport (same inner width after shell padding). Under `.layout-mobile`, **`.tab-container`** uses **`align-items: stretch`** (overriding desktop **`center`**) so both **`.tab-row`** bands share the same full width—otherwise each row shrink-wraps and paired buttons misalign between rows. **`.tab-row`** is **`width: 100%`** with **`justify-content: flex-start`**. **`.tab-button`** is at least **44px** tall, `flex: 1 1 calc(50% - 4px)` for a two-up wrap inside that cap. The **All** tab (**`[data-tab="all-cards"]`**) uses **`flex: 0 0 100%`** so it spans the full row; other tabs stay two per row.
+  - **All tab (card tiles):** **`#all-cards-grid-container`** has **no** inline grid column count in [`public/index.html`](/public/index.html) (column layout comes from [`public/css/database-view.css`](/public/css/database-view.css) breakpoints). At **`max-width: 900px`**, the grid is a **single column** (`minmax(0, 1fr)`). Under **`.layout-mobile`** on wider viewports, **`mobile-layout.css`** keeps the same **one card per row** for the All tab. Inside each **`.all-cards-cell`**, **`.card-content-bottom`** is a **two-column CSS grid**: **+Deck** spans the first action row; **-Collection** and **+Collection** share the second row (left and right), matching the requested order despite DOM order in [`public/js/all-cards-display.js`](/public/js/all-cards-display.js).
   - **Controls:** `.search-input`, `.header-filter`, `.filter-input`, `.clear-filters-btn`, `.add-to-deck-btn` / collection buttons, `.power-type-filter-toggle` / `.function-filter-toggle`, and inherent-ability `.ability-toggle` / `.toggle-label` meet or approach **44px** touch targets.
   - **Wide filters:** Advanced Universe `card_effect`, Locations `special_ability`, and Events `game_effect` header filters use **width/max-width 100%** under `.layout-mobile` (overrides `card-tables.css` fixed widths).
   - **Missions / Special:** `#missions-table` mission-set and game-effect cells and `#missions-table .checkbox-group` min-widths are relaxed; `#special-cards-table` column 2 `min-width` cleared for scroll.
@@ -748,13 +748,13 @@ Consider implementing CSS custom properties for easier theme management:
 - **Padding**: `0 16px`
 - **Display**: `flex`; `align-items: center`; `justify-content: space-between`
 
-### Mobile layout mode (`.layout-mobile`, max-width 768px)
+### Mobile layout mode (`.layout-mobile`, max-width 900px)
 - **Location**: [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) — selectors prefixed with `.layout-mobile .unified-header`, `.header-center`, `.app-tabs`, `.user-menu`, etc.
-- **Header**: Column stack (`flex-direction: column`); **`height: auto`** so the bar can grow with wrapped tabs and actions.
-- **Tab bar**: `.header-center` is **`position: static`** (overrides desktop absolute centering) so tabs do not overlap the logo or the right cluster.
-- **Primary controls**: `.app-tab-button`, `.new-deck-btn`, and `.user-menu-toggle` use **`min-height: 44px`** (and tab **`min-width: 44px`**) with slightly increased padding.
-- **User menu dropdown**: **`left: 0; right: 0`** with **`max-width: 100%`** of the menu container so the panel stays on-screen on narrow widths.
-- **Logo**: `.header-logo` **`margin-top: 0`**; **`max-width: 140px`** in this mode.
+- **Header**: **`unified-header`** is a **row** (logo left, **`.header-nav-cluster`** right); **`height: auto`** so the bar can grow with the 2×2 grid and welcome row.
+- **Tab bar**: `.header-center` is **`position: static`** (overrides desktop absolute centering) so the grid does not overlap the logo or the right cluster.
+- **Primary controls**: `.app-tab-button`, `.new-deck-btn`, and `.user-menu-toggle` use **`min-height: 44px`** (and tab **`min-width: 44px`**) with slightly increased padding; **`.user-menu-toggle`** is **`justify-content: flex-end`** (right-aligned under the 2×2 grid).
+- **User menu dropdown**: **`width` / `max-width: 50%`**, **`left: auto; right: 0`** (right-aligned under the toggle, half the **`.user-menu`** width; overrides desktop **`min-width: 260px`** via **`min-width: 0`**).
+- **Logo**: `.header-left` caps at **`max-width: 134px`** (**~20%** smaller than the previous **168px**); **`align-items: flex-start`** so the mark is not vertically centered in the tall column (which looked like padding above the logo). **`.unified-header`** uses **`padding-top: 0`**. `.header-logo` uses **`width: 100%`** / **`max-width: 100%`** (**`margin-top: 0`**).
 
 ### Colors
 - **Background**: `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`

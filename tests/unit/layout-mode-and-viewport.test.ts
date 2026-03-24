@@ -75,7 +75,7 @@ describe('layout-mode.js', () => {
 
         expect(win.document.documentElement.classList.contains('layout-mobile')).toBe(true);
         expect(win.document.documentElement.classList.contains('layout-desktop')).toBe(false);
-        expect(win.LAYOUT_MOBILE_MAX_PX).toBe(768);
+        expect(win.LAYOUT_MOBILE_MAX_PX).toBe(900);
         expect(win.isLayoutMobile()).toBe(true);
         dom.window.close();
     });
@@ -193,18 +193,36 @@ describe('mobile-layout.css (M1 shell)', () => {
     it('includes global nav stacking and 44px touch targets under .layout-mobile', () => {
         const cssPath = path.join(__dirname, '../../public/css/mobile-layout.css');
         const css = readFileSync(cssPath, 'utf8');
-        expect(css).toContain('Global nav — stacked shell');
+        expect(css).toMatch(/--layout-mobile-max:\s*900px/);
+        expect(css).toMatch(/#database-view\s+\.tab-container[\s\S]*?max-width:\s*732px/);
+        expect(css).toMatch(/\.layout-mobile\s+#database-view\s+\.tab-container[\s\S]*?align-items:\s*stretch/);
+        expect(css).toMatch(/\.layout-mobile\s+#database-view\s+\.tab-row[\s\S]*?width:\s*100%/);
+        expect(css).toMatch(/\.tab-button\[data-tab="all-cards"\][\s\S]*?flex:\s*0\s+0\s+100%/);
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#all-cards-grid-container[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/
+        );
+        expect(css).toContain('All tab cell actions: row 1 = +Deck full width');
+        expect(css).toContain('Global nav — logo left; 2×2 app grid');
+        expect(css).toMatch(/\.layout-mobile\s+\.unified-header[\s\S]*?flex-direction:\s*row/);
         expect(css).toContain('.layout-mobile .unified-header');
-        expect(css).toContain('flex-direction: column');
         expect(css).toContain('.layout-mobile .header-center');
         expect(css).toContain('position: static');
-        expect(css).toContain('.layout-mobile .app-tab-button');
+        expect(css).toMatch(
+            /\.layout-mobile\s+\.header-app-actions[\s\S]*?grid-template-columns:\s*1fr\s+1fr/
+        );
+        expect(css).toContain('.layout-mobile .header-nav-cluster');
+        expect(css).toContain('.layout-mobile .header-app-actions .app-tab-button');
         expect(css).toContain('min-height: 44px');
-        expect(css).toContain('.layout-mobile .new-deck-btn');
-        expect(css).toContain('.layout-mobile .user-menu-toggle');
-        expect(css).toContain('.layout-mobile .user-menu-dropdown');
-        expect(css).toContain('left: 0');
-        expect(css).toContain('right: 0');
+        expect(css).toContain('.layout-mobile #newDeckBtn');
+        expect(css).toMatch(
+            /\.layout-mobile\s+\.user-menu-toggle[\s\S]*?justify-content:\s*flex-end/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+\.user-menu-dropdown[\s\S]*?width:\s*50%[\s\S]*?max-width:\s*50%/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+\.user-menu-dropdown[\s\S]*?left:\s*auto[\s\S]*?right:\s*0/
+        );
     });
 });
 
@@ -220,5 +238,7 @@ describe('public/index.html mobile layout wiring', () => {
         expect(vpIdx).toBeGreaterThan(layoutIdx);
         expect(firstAppCss).toBeGreaterThan(vpIdx);
         expect(mobileCssIdx).toBeGreaterThan(firstAppCss);
+        expect(html).toContain('<div id="all-cards-grid-container">');
+        expect(html).not.toMatch(/id="all-cards-grid-container"[^>]*repeat\(5/);
     });
 });

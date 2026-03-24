@@ -1990,9 +1990,9 @@ table {
     }
 }
 
-/* Responsive: 2 columns on mobile */
-@media (max-width: 768px) {
+/* Responsive: 1 column at narrow widths (matches layout-mode 900px band) */
+@media (max-width: 900px) {
     #all-cards-grid-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: minmax(0, 1fr);
     }
 }

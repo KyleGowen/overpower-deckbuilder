@@ -3,7 +3,7 @@
  * Desktop (.layout-desktop) is unchanged. See /MOBILE_DESIGN.md
  */
 :root {
-    --layout-mobile-max: 768px;
+    --layout-mobile-max: 900px;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -93,13 +93,24 @@
     padding: 14px 12px;
 }
 
+/* Cap tab strip to ~768px-viewport inner width (768 − mainContainer 16px − db section 20px) so 769–900px
+   doesn’t stretch .tab-button wider than on a true narrow phone. */
 .layout-mobile #database-view .tab-container {
     padding-left: 0;
     padding-right: 0;
+    max-width: 732px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    /* .tab-container defaults to align-items: center — shrink-wraps each .tab-row to content, so the
+       two .tab-row bands (7 vs 6 tabs) got different widths and mismatched two-column button sizes. */
+    align-items: stretch;
 }
 
 .layout-mobile #database-view .tab-row {
-    justify-content: stretch;
+    width: 100%;
+    justify-content: flex-start;
     gap: 8px;
 }
 
@@ -110,6 +121,55 @@
     max-width: 100%;
     box-sizing: border-box;
     padding: 10px 12px;
+}
+
+/* "All" alone on first row (full width); remaining first-row tabs wrap two per row. */
+.layout-mobile #database-view .tab-button[data-tab="all-cards"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* All tab: one card tile per row under client mobile layout. */
+.layout-mobile #database-view #all-cards-grid-container {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* All tab cell actions: row 1 = +Deck full width; row 2 = -Collection | +Collection (visual order). */
+.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom > div:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+}
+
+.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom .add-to-deck-btn {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    margin-top: 0;
+}
+
+.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom .remove-from-collection-btn {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100% !important;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom .add-to-collection-btn {
+    grid-column: 2;
+    grid-row: 3;
+    width: 100% !important;
+    margin-top: 0 !important;
 }
 
 .layout-mobile #database-view .search-input,
@@ -329,69 +389,129 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* Global nav — stacked shell, no absolute-centered tabs (M1)                  */
+/* Global nav — logo left; 2×2 app grid; welcome row (M1 mobile shell)         */
 /* -------------------------------------------------------------------------- */
 .layout-mobile .unified-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
+    flex-wrap: nowrap;
     height: auto;
     min-height: 0;
     gap: 10px;
-    padding: 8px 10px;
+    /* No top padding — avoids extra space above the logo */
+    padding: 0 10px 8px;
     margin-bottom: 12px;
 }
 
-.layout-mobile .header-left,
-.layout-mobile .header-center,
-.layout-mobile .header-right {
-    flex: none;
-    width: 100%;
+.layout-mobile .header-nav-cluster {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.layout-mobile .header-left {
+    flex: 0 0 30.4%;
+    max-width: 134px; /* ~20% smaller than 168px cap */
+    width: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .layout-mobile .header-center {
     position: static;
     left: auto;
     transform: none;
-    display: flex;
-    justify-content: center;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    flex: none;
 }
 
-.layout-mobile .header-left {
-    display: flex;
-    justify-content: center;
+.layout-mobile .header-right {
+    flex: none;
+    width: 100%;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 8px;
 }
 
 .layout-mobile .header-logo {
     margin-top: 0;
-    max-width: 140px;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
 }
 
-.layout-mobile .header-right {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.layout-mobile .app-tabs {
-    flex-wrap: wrap;
-    justify-content: center;
+/* Row1: Card Database | Collection — Row2: Deck Builder | + Deck (DOM order differs; grid placement fixes it) */
+.layout-mobile .header-app-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(44px, 1fr) minmax(44px, 1fr);
     gap: 8px;
     width: 100%;
-}
-
-.layout-mobile .app-tab-button {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 10px 14px;
+    min-width: 0;
     box-sizing: border-box;
 }
 
-.layout-mobile .new-deck-btn {
+.layout-mobile .header-app-actions .app-tabs {
+    display: contents;
+}
+
+.layout-mobile #databaseViewBtn {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.layout-mobile #collectionViewBtn {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.layout-mobile #deckBuilderBtn {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.layout-mobile #newDeckBtn {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+/* Logged-out: Collection hidden — span Card Database across top row */
+.layout-mobile .header-app-actions.collection-tab-hidden #databaseViewBtn {
+    grid-column: 1 / -1;
+    grid-row: 1;
+}
+
+.layout-mobile .header-app-actions.collection-tab-hidden #deckBuilderBtn {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.layout-mobile .header-app-actions.collection-tab-hidden #newDeckBtn {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.layout-mobile .header-app-actions .app-tab-button,
+.layout-mobile .header-app-actions .new-deck-btn {
+    width: 100%;
     min-height: 44px;
-    padding: 10px 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 10px 6px;
     box-sizing: border-box;
+    font-size: 11px;
+    line-height: 1.15;
+    font-weight: 600;
+    align-self: stretch;
+    justify-self: stretch;
 }
 
 .layout-mobile .user-menu {
@@ -402,17 +522,17 @@
 .layout-mobile .user-menu-toggle {
     min-height: 44px;
     width: 100%;
-    justify-content: center;
+    justify-content: flex-end;
     padding: 10px 12px;
     box-sizing: border-box;
 }
 
 .layout-mobile .user-menu-dropdown {
-    left: 0;
+    left: auto;
     right: 0;
-    width: auto;
+    width: 50%;
     min-width: 0;
-    max-width: 100%;
+    max-width: 50%;
     box-sizing: border-box;
 }
 

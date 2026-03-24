@@ -19,6 +19,11 @@
     flex: 0 0 auto;
 }
 
+/* Wraps .header-center + .header-right; display:contents keeps desktop flex/absolute layout unchanged */
+.header-nav-cluster {
+    display: contents;
+}
+
 .header-logo {
     max-width: 120px; /* Smaller to fit compact header */
     height: auto;
@@ -34,6 +39,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* App tabs + +Deck in one horizontal group (centered bar on desktop; single row on .layout-mobile) */
+.header-app-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 .header-right {

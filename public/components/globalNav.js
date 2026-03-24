@@ -289,21 +289,27 @@ function switchToCollectionView() {
     }
 }
 
+/** Mobile header grid: when Collection is hidden (logged out), .collection-tab-hidden spans Card Database across row 1. */
+function syncHeaderCollectionLayout() {
+    const collectionBtn = document.getElementById('collectionViewBtn');
+    const actions = document.querySelector('.header-app-actions');
+    if (!actions) return;
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (!collectionBtn) {
+        actions.classList.add('collection-tab-hidden');
+        return;
+    }
+    if (currentUser) {
+        collectionBtn.removeAttribute('style');
+        actions.classList.remove('collection-tab-hidden');
+    } else {
+        collectionBtn.style.display = 'none';
+        actions.classList.add('collection-tab-hidden');
+    }
+}
+
 // Initialize global navigation
 function initializeGlobalNav() {
-    
-    // Show Collection button for all authenticated users
-    // Note: This will be updated again in updateUserWelcome() after authentication
-    const currentUser = getCurrentUser();
-    const collectionBtn = document.getElementById('collectionViewBtn');
-    if (collectionBtn) {
-        if (currentUser) {
-            collectionBtn.removeAttribute('style'); // Remove inline style to use default
-        } else {
-            collectionBtn.style.display = 'none';
-        }
-    }
-    
     // Initialize user menu
     setupUserMenu();
     
@@ -352,20 +358,8 @@ function updateUserWelcome() {
         const usernameElement = document.getElementById('currentUsername');
         if (usernameElement) usernameElement.textContent = displayName;
         buildUserMenuOptions(currentUser);
-        
-        // Show Collection button for all authenticated users
-        const collectionBtn = document.getElementById('collectionViewBtn');
-        if (collectionBtn) {
-            collectionBtn.style.display = ''; // Remove inline style to use default
-            collectionBtn.removeAttribute('style'); // Remove the style attribute entirely
-        }
-    } else {
-        // Hide Collection button if no user
-        const collectionBtn = document.getElementById('collectionViewBtn');
-        if (collectionBtn) {
-            collectionBtn.style.display = 'none';
-        }
     }
+    syncHeaderCollectionLayout();
 }
 
 function setupUserMenu() {
