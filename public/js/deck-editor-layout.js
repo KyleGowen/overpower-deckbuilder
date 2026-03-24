@@ -1,6 +1,9 @@
 // deck-editor-layout.js - Deck editor layout and resizable divider
 // Extracted from public/index.html
 
+/** List columns in deck list view (see /MOBILE_DESIGN.md). */
+window.DECK_LIST_LAYOUT = { desktopColumns: 2, mobileColumns: 1 };
+
 // ===== enforce layout functions, setupLayoutObserver =====
 
 function enforceListViewHorizontalLayout() {
@@ -118,10 +121,23 @@ function enforceTwoColumnLayoutInListView() {
     if (!deckCardsEditor || !deckCardsEditor.classList.contains('list-view')) {
         return;
     }
-    
+
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+        deckCardsEditor.style.setProperty('display', 'flex', 'important');
+        deckCardsEditor.style.setProperty('gap', '16px', 'important');
+        deckCardsEditor.style.setProperty('align-items', 'stretch', 'important');
+        deckCardsEditor.style.setProperty('flex-direction', 'column', 'important');
+        deckCardsEditor.querySelectorAll('.deck-column').forEach((column) => {
+            column.style.setProperty('flex', '1 1 auto', 'important');
+            column.style.setProperty('width', '100%', 'important');
+            column.style.setProperty('max-width', '100%', 'important');
+        });
+        return;
+    }
+
     // Enforcing two-column layout for list view
-    
-    // List view ALWAYS uses exactly 2 columns - no responsive behavior
+
+    // Desktop list view: exactly 2 columns
     // Force exactly 2 columns with CSS
     deckCardsEditor.style.setProperty('display', 'flex', 'important');
     deckCardsEditor.style.setProperty('gap', '20px', 'important');
@@ -198,9 +214,10 @@ function initializeResizableDivider() {
     if (!divider || !deckPane || !cardSelectorPane || !layout) {
         return;
     }
-    
-    
-    
+
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+        return;
+    }
 
     let isResizing = false;
     let startX = 0;
@@ -579,3 +596,15 @@ window.enforceListViewHorizontalLayout = enforceListViewHorizontalLayout;
 window.ultraAggressiveLayoutEnforcement = ultraAggressiveLayoutEnforcement;
 window.enforceTwoColumnLayoutInListView = enforceTwoColumnLayoutInListView;
 window.setupLayoutObserver = setupLayoutObserver;
+
+window.addEventListener('layout-mode-change', function onLayoutModeChange() {
+    try {
+        enforceTwoColumnLayoutInListView();
+        void ultraAggressiveLayoutEnforcement();
+        if (typeof window.isLayoutMobile === 'function' && !window.isLayoutMobile()) {
+            initializeResizableDivider();
+        }
+    } catch {
+        /* ignore */
+    }
+});

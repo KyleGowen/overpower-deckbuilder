@@ -4,6 +4,8 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 
 ## public/index.html (main SPA - canonical)
 
+- /js/layout-mode.js (sync, before CSS — sets `layout-mobile` / `layout-desktop` on `<html>`)
+- /js/viewport-positioning.js (sync — `clampRectToViewport` for floating UI)
 - /js/auth-service.js
 - /js/components/simulate-ko.js
 - /js/components/draw-hand.js

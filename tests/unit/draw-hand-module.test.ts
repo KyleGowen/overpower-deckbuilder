@@ -30,13 +30,16 @@ declare global {
             refresh: () => void;
         };
         SimulateKO?: {
+            init?: () => void;
+            toggleKOCharacter?: (cardId: string, index: number, renderFunctions: any) => Promise<void>;
             shouldDimCard: (card: any, availableCardsMap: Map<string, any>, deckCards: any[]) => boolean;
+            applyDimming?: () => void;
         };
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
         drawnCards?: any[];
         displayDrawnCards?: (cards: any[]) => void;
-        getCardImagePath?: (card: any, type: string) => string;
+        getCardImagePath?: (card: any, type: string, options?: { useThumbnail?: boolean }) => string;
     }
 }
 

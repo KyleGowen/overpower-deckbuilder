@@ -33,8 +33,8 @@ const mockDeckCardsEditor = {
 // Extend Window interface for TypeScript (match draw-hand-ko-dimming-edge-integration.test.ts)
 declare global {
     interface Window {
-        deckEditorCards?: unknown[];
-        availableCardsMap?: Map<string, unknown>;
+        deckEditorCards?: any[];
+        availableCardsMap?: Map<string, any>;
     }
 }
 

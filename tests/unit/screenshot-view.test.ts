@@ -17,7 +17,7 @@ declare global {
         setupScreenshotDragAndDrop?: () => void;
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
-        getCardImagePath?: (card: any, type: string) => string;
+        getCardImagePath?: (card: any, type: string, options?: { useThumbnail?: boolean }) => string;
         currentDeckData?: any;
     }
 }

@@ -1,0 +1,5 @@
+# Global navigation and shared components (`public/components/`)
+
+- **globalNav:** [`globalNav.html`](globalNav.html) markup, [`globalNav.css`](globalNav.css), [`globalNav.js`](globalNav.js). Injected into `#globalNav` from [`public/js/app-initialization.js`](../js/app-initialization.js).
+- **Z-index:** Global nav dropdowns, popups, and tooltips use **z-index: 9999** so they stay above main content (see repo [.cursorrules](../../.cursorrules)).
+- **Mobile:** Narrow-width rules may use existing `@media` in `globalNav.css`; **layout-mode** adds `layout-mobile` on `<html>` — add mobile nav tweaks under `html.layout-mobile` in [`public/css/mobile-layout.css`](../css/mobile-layout.css) or extend `globalNav.css` with `html.layout-mobile` selectors as needed. Roadmap: [/MOBILE_DESIGN.md](../../MOBILE_DESIGN.md).

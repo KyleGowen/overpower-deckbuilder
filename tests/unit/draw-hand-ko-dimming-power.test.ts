@@ -9,7 +9,9 @@ declare global {
     interface Window {
         SimulateKO?: {
             init?: () => void;
-            shouldDimCard: (card: unknown, availableCardsMap: Map<string, unknown>, deckCards: unknown[]) => boolean;
+            toggleKOCharacter?: (cardId: string, index: number, renderFunctions: any) => Promise<void>;
+            shouldDimCard: (card: any, availableCardsMap: Map<string, any>, deckCards: any[]) => boolean;
+            applyDimming?: () => void;
         };
     }
 }

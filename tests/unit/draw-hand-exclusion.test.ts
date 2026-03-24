@@ -29,7 +29,7 @@ declare global {
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
         drawnCards?: any[];
-        getCardImagePath?: (card: any, type: string) => string;
+        getCardImagePath?: (card: any, type: string, options?: { useThumbnail?: boolean }) => string;
         drawTrainingCard?: (cardId: string, index: number) => Promise<void>;
         renderDeckCardsCardView?: () => Promise<void>;
         displayDeckCardsForEditing?: () => Promise<void>;

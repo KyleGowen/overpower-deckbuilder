@@ -1,0 +1,121 @@
+/**
+ * Mobile / narrow layout — scoped under .layout-mobile on <html>.
+ * Desktop (.layout-desktop) is unchanged. See /MOBILE_DESIGN.md
+ */
+:root {
+    --layout-mobile-max: 768px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Touch utility (apply to interactive controls where missing)               */
+/* -------------------------------------------------------------------------- */
+.layout-mobile .touch-target-min {
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Deck editor: stacked panes, no side-by-side squeeze                        */
+/* -------------------------------------------------------------------------- */
+.layout-mobile .deck-editor-layout {
+    flex-direction: column !important;
+    overflow-x: hidden;
+}
+
+.layout-mobile .deck-pane,
+.layout-mobile .card-selector-pane {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+}
+
+.layout-mobile #resizableDivider {
+    display: none !important;
+}
+
+.layout-mobile .deck-editor-layout.preview-read-only-mode .card-selector-pane,
+.layout-mobile body.preview-read-only-mode .deck-editor-layout .card-selector-pane {
+    /* preview already hides selector on desktop; ensure full width deck */
+    width: 100% !important;
+}
+
+/* List view: stack the two deck columns vertically */
+.layout-mobile .deck-cards-editor.list-view {
+    flex-direction: column !important;
+    gap: 16px !important;
+}
+
+.layout-mobile .deck-cards-editor.list-view .deck-column {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Card database: filters and tables                                           */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #missions-table .column-filters,
+.layout-mobile .column-filters {
+    min-width: 0 !important;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+.layout-mobile .database-section .filter-row,
+.layout-mobile .database-view .filter-row {
+    flex-wrap: wrap;
+}
+
+.layout-mobile .database-section .data-table-wrapper,
+.layout-mobile #database-view .table-scroll,
+.layout-mobile .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Collection                                                                 */
+/* -------------------------------------------------------------------------- */
+.layout-mobile .collection-checkbox,
+.layout-mobile .collection-view input[type="checkbox"] {
+    min-width: 44px;
+    min-height: 44px;
+    width: auto;
+    height: auto;
+    transform: scale(1.15);
+    transform-origin: center;
+}
+
+.layout-mobile .collection-card-row,
+.layout-mobile .collection-grid .collection-item {
+    padding: 8px 4px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Deck list (deck builder home tiles)                                         */
+/* -------------------------------------------------------------------------- */
+.layout-mobile .deck-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+}
+
+.layout-mobile .deck-card.deck-tile {
+    max-width: 100%;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Global shell / container                                                    */
+/* -------------------------------------------------------------------------- */
+.layout-mobile .container,
+.layout-mobile #mainContainer {
+    max-width: 100% !important;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.layout-mobile .modal-content {
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
+}

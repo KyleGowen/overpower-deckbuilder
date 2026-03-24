@@ -22,15 +22,16 @@ declare global {
             close: () => void;
         };
         SimulateKO?: {
-            init: () => void;
-            toggleKOCharacter: (cardId: string, index: number, renderFunctions: any) => Promise<void>;
+            init?: () => void;
+            toggleKOCharacter?: (cardId: string, index: number, renderFunctions: any) => Promise<void>;
             shouldDimCard: (card: any, availableCardsMap: Map<string, any>, deckCards: any[]) => boolean;
+            applyDimming?: () => void;
         };
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
         drawnCards?: any[];
         displayDrawnCards?: (cards: any[]) => void;
-        getCardImagePath?: (card: any, type: string) => string;
+        getCardImagePath?: (card: any, type: string, options?: { useThumbnail?: boolean }) => string;
     }
 }
 
@@ -100,7 +101,7 @@ describe('Draw Hand KO Integration', () => {
         (window as any).currentUser = { id: 1, username: 'testuser' }; // Required for toggleKOCharacter
 
         // Initialize modules
-        if (window.SimulateKO) {
+        if (window.SimulateKO?.init) {
             window.SimulateKO.init();
         }
         if (window.DrawHand) {
@@ -164,7 +165,7 @@ describe('Draw Hand KO Integration', () => {
 
             // KO a character - await the async function to ensure setTimeout is set up
             // The function awaits renderTileView, then sets up setTimeout
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.toggleKOCharacter) {
                 await window.SimulateKO.toggleKOCharacter('char-1', 0, mockRenderFunctions);
             }
 
@@ -217,7 +218,7 @@ describe('Draw Hand KO Integration', () => {
 
             // KO a character - await the async function to ensure setTimeout is set up
             // The function awaits renderTileView, then sets up setTimeout
-            if (window.SimulateKO && window.DrawHand) {
+            if (window.SimulateKO?.toggleKOCharacter && window.DrawHand) {
                 await window.SimulateKO.toggleKOCharacter('char-1', 0, mockRenderFunctions);
             }
 
@@ -277,7 +278,7 @@ describe('Draw Hand KO Integration', () => {
             };
 
             // KO a character - start async operation
-            const togglePromise = window.SimulateKO
+            const togglePromise = window.SimulateKO?.toggleKOCharacter
                 ? window.SimulateKO.toggleKOCharacter('char-1', 0, mockRenderFunctions)
                 : Promise.resolve();
 
@@ -312,7 +313,7 @@ describe('Draw Hand KO Integration', () => {
         it('should dim cards in draw hand when character is KO\'d', () => {
             // KO the character
             (window as any).koCharacters = new Set(['char-1']);
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.init) {
                 window.SimulateKO.init();
             }
 
@@ -332,7 +333,7 @@ describe('Draw Hand KO Integration', () => {
 
         it('should not dim cards when no characters are KO\'d', () => {
             (window as any).koCharacters = new Set();
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.init) {
                 window.SimulateKO.init();
             }
 
@@ -358,7 +359,7 @@ describe('Draw Hand KO Integration', () => {
 
             // KO character first
             (window as any).koCharacters = new Set(['char-1']);
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.init) {
                 window.SimulateKO.init();
             }
 
@@ -380,14 +381,14 @@ describe('Draw Hand KO Integration', () => {
                 renderTileView: jest.fn()
             };
 
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.toggleKOCharacter) {
                 // First toggle KO's, second toggle un-KO's
                 await window.SimulateKO.toggleKOCharacter('char-1', 0, mockRenderFunctions);
             }
 
             // Clear KO state manually for test
             (window as any).koCharacters = new Set();
-            if (window.SimulateKO) {
+            if (window.SimulateKO?.init) {
                 window.SimulateKO.init();
             }
 

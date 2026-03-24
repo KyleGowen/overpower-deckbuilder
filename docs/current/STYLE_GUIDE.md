@@ -657,16 +657,26 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 
 ## Responsive Design
 
+**Authoritative mobile roadmap and architecture:** [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (repo root).
+
 ### Breakpoints
-- **Mobile**: `max-width: 768px`
-- **Tablet**: `max-width: 900px`
+- **Mobile**: `max-width: 768px` — also used for **client layout mode** (`matchMedia`); see *Mobile layout mode* below.
+- **Tablet**: `max-width: 900px` (still used in some legacy CSS; consolidate over time)
 - **Desktop**: `min-width: 901px`
 
-### Mobile Adaptations
-- **Single Column**: Deck builder switches to single column
-- **Stacked Navigation**: Header elements stack vertically
-- **Smaller Text**: Reduced font sizes for mobile
-- **Touch Targets**: Minimum 44px for touch elements
+### Mobile layout mode (`layout-mobile` / `layout-desktop`)
+
+- **Mechanism:** [`public/js/layout-mode.js`](/public/js/layout-mode.js) runs early in [`public/index.html`](/public/index.html) and sets **`layout-mobile`** or **`layout-desktop`** on `<html>` using **`window.matchMedia('(max-width: 768px)')`**, not User-Agent sniffing.
+- **Override:** `localStorage.setItem('preferDesktopLayout','1')` forces desktop layout on narrow viewports; remove the key to restore breakpoint behavior. API: `window.setPreferDesktopLayout(true|false)`.
+- **Styles:** [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) — rules are scoped under **`.layout-mobile`** so desktop layout is unchanged.
+- **CSS token:** `:root { --layout-mobile-max: 768px; }` in `mobile-layout.css` (keep in sync with `LAYOUT_MOBILE_MAX_PX` in JS).
+
+### Mobile Adaptations (current direction)
+
+- **Deck editor:** Under `.layout-mobile`, deck panes **stack vertically**; resizable divider hidden; list view **stacks** the two deck columns (single-column reading flow). Full parity with STYLE_GUIDE “single column deck builder” is **incremental** — see `MOBILE_DESIGN.md` milestones.
+- **Stacked Navigation:** Global nav retains existing `@media` rules; further stacking under `.layout-mobile` may be added in later milestones.
+- **Touch Targets:** Minimum **44px** for interactive controls; utility **`.touch-target-min`** in `mobile-layout.css` (apply where controls are still small).
+- **Card database / collection:** Horizontal scroll reduced via `.layout-mobile` rules (e.g. filter `min-width` relaxed, table wrappers scroll).
 
 ### Tablet Adaptations
 - **Flexible Grids**: Auto-fit columns with minimum widths

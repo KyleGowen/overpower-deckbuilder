@@ -6090,15 +6090,3 @@
     }
 }
 
-
-        min-width: 100px;
-    }
-    
-    .deck-editor-layout.force-two-pane .deck-pane,
-    .deck-editor-layout.force-two-pane .card-selector-pane {
-        min-width: 100px;
-    }
-}
-
-
-

@@ -24,3 +24,10 @@
   - **Value filter** UI: `.column-filters` + `.filter-input.equals/.min/.max` and `.special-no-value-toggle-label`. Disabled state: `#special-cards-table .filter-input:disabled`.
   - **Function column** styles: `.special-function-filter-toggles` (2-col grid), `.function-filter-toggle` (36px square), `.special-function-icon` (32px).
   - Update [docs/current/STYLE_GUIDE.md](../../docs/current/STYLE_GUIDE.md) whenever any of these column/toggle visuals change.
+
+## Mobile / `layout-mobile`
+
+- **Roadmap and milestones:** [/MOBILE_DESIGN.md](../../MOBILE_DESIGN.md) (repo root). Breakpoint source of truth: **`--layout-mobile-max`** in `mobile-layout.css` (keep aligned with `layout-mode.js`).
+- **Scope mobile-specific rules** under **`html.layout-mobile`** (or `.layout-mobile` descendant of `html` with class on root) in [`public/css/mobile-layout.css`](../css/mobile-layout.css). Avoid widening desktop tables for mobile—prefer stacked filters, scroll wrappers, or card-row patterns per `MOBILE_DESIGN.md`.
+- **Touch targets:** Prefer **44px** minimum; utility class **`.touch-target-min`** in `mobile-layout.css` where individual controls are undersized.
+- **DBV files:** `card-tables.css`, `database-view.css` — M2b agent context and M2c UX work stay documented in `MOBILE_DESIGN.md` refactor log.
