@@ -138,14 +138,14 @@
 ## Server Health Check Requirements
 - **ALWAYS use the health check endpoint when verifying server status**
 - **NEVER use basic curl or simple port checks for server verification**
-- Use `curl -s http://localhost:3000/health | jq .` for health checks
+- **Local dev default port is 8085** (`process.env.PORT || 8085` in `src/index.ts`). Use `curl -s http://localhost:8085/health | jq .` for health checks unless `PORT` is set differently.
 - **ALWAYS format health check output in a friendly, readable format**
 - Include key metrics like status, uptime, database connectivity, and response time
 - **ALWAYS include latest git commit and migration information in health check summaries**
 - Present health check results with clear status indicators (✅/❌)
 - Use this command for friendly formatted output:
   ```bash
-  curl -s http://localhost:3000/health | jq -r '
+  curl -s http://localhost:8085/health | jq -r '
   "🏥 Server Health Check
   ┌─────────────────────────────────────────────────────────────┐
   │ Status: " + (if .status == "OK" then "✅ OK" else "❌ ERROR" end) + "                                               │

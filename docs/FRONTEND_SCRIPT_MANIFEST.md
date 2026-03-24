@@ -5,6 +5,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 ## public/index.html (main SPA - canonical)
 
 - /js/layout-mode.js (sync, before CSS — sets `layout-mobile` / `layout-desktop` on `<html>`)
+- /js/characters-stat-filter-tabs.js (sync, after layout-mode — DBV `#characters-table` mobile stat tab UI)
 - /js/viewport-positioning.js (sync — `clampRectToViewport` for floating UI)
 - /js/auth-service.js
 - /js/components/simulate-ko.js
@@ -58,6 +59,12 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/deck-selection/deckTilesRenderer.js
 - /js/deck-selection/deckTileMenu.js
 - /js/deck-selection/index.js
+
+## public/deck-builder.html (embedded DBV subset)
+
+- /js/layout-mode.js (after viewport meta, sync)
+- /css/mobile-layout.css (with database-view.css)
+- /js/characters-stat-filter-tabs.js (before card-image-utils.js)
 
 ## Orphaned (never loaded by any HTML)
 

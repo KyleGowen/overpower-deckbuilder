@@ -87,6 +87,49 @@ function groupCardsByVariant(cards, nameField = 'name', universeField = 'univers
     return new Map(sortedEntries);
 }
 
+function escapeHtmlText(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+/**
+ * Up to three lines under character art on mobile DBV: name, inherent ability, "set - number".
+ * Line 1: full DB `name` (parentheses are part of the card identity, not the product set).
+ * Line 2: `special_abilities` when non-empty (plain text; same field as Inherent Abilities column).
+ * Line 3: `translateSet(set|universe)` plus padded `set_number` (no checklist total suffix).
+ */
+function characterMobileCaptionLines(card) {
+    const line1 = String(card && card.name != null ? card.name : '').trim();
+    const codeRaw = card && card.set != null ? card.set : card && card.universe != null ? card.universe : 'ERB';
+    const code = String(codeRaw != null ? codeRaw : 'ERB').trim() || 'ERB';
+    const setLabel = (typeof window !== 'undefined' && typeof window.translateSet === 'function')
+        ? window.translateSet(code)
+        : code;
+    const snRaw = card && card.set_number != null ? String(card.set_number).trim() : '';
+    let line2 = '';
+    if (snRaw) {
+        if (snRaw.includes('/')) {
+            line2 = `${setLabel} - ${snRaw}`;
+        } else {
+            const foil = /F$/i.test(snRaw);
+            const core = foil ? snRaw.slice(0, -1) : snRaw;
+            const n = parseInt(core, 10);
+            const padded = Number.isFinite(n) ? String(n).padStart(3, '0') : snRaw;
+            const suffix = foil ? 'F' : '';
+            const numPart = `${padded}${suffix}`;
+            line2 = `${setLabel} - ${numPart}`;
+        }
+    } else {
+        line2 = setLabel;
+    }
+    const rawAbility = card && card.special_abilities != null ? String(card.special_abilities) : '';
+    const line3 = rawAbility.replace(/\s+/g, ' ').trim();
+    return { line1, line2: line2.trim(), line3 };
+}
+
 /**
  * Get the image path for a card, handling both image_path and image fields
  * options: { useThumbnail: boolean } - when true, return thumbnail for character images
@@ -165,6 +208,22 @@ function preloadAlternateImages(imageData) {
 /** True when root layout mode is mobile; skip table row height locks (M2c card rows). */
 function isLayoutMobileForCardDisplay() {
     return typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+}
+
+/**
+ * Match All-tab DBV tile behavior (all-cards-display): landscape art uses .horizontal-card
+ * (mobile-layout.css mirrors .all-cards-cell img.horizontal-card).
+ * @param {HTMLImageElement} img
+ */
+function applyDbvHorizontalCardClass(img) {
+    if (!img || !img.naturalWidth || !img.naturalHeight) {
+        return;
+    }
+    if (img.naturalWidth > img.naturalHeight) {
+        img.classList.add('horizontal-card');
+    } else {
+        img.classList.remove('horizontal-card');
+    }
 }
 
 /**
@@ -296,13 +355,19 @@ function displayCharacters(characters) {
         else if (representative.threat_level >= 18) threatClass = 'threat-medium';
         
         // Prepare image data for navigation (thumbnail for display, fullRes for modal)
-        const imageData = group.map(card => ({
-            id: card.id,
-            imagePath: getCardImagePathForDisplay(card, 'character', { useThumbnail: true }),
-            fullResPath: getCardImagePathForDisplay(card, 'character'),
-            name: card.name,
-            isFoil: !!(card.is_foil)
-        }));
+        const imageData = group.map(card => {
+            const cap = characterMobileCaptionLines(card);
+            return {
+                id: card.id,
+                imagePath: getCardImagePathForDisplay(card, 'character', { useThumbnail: true }),
+                fullResPath: getCardImagePathForDisplay(card, 'character'),
+                name: card.name,
+                isFoil: !!(card.is_foil),
+                mobileCaptionLine1: cap.line1,
+                mobileCaptionLine2: cap.line2,
+                mobileCaptionLine3: cap.line3
+            };
+        });
         
         // Create unique identifier for this card group
         const groupId = `char-group-${representative.id}`;
@@ -319,11 +384,17 @@ function displayCharacters(characters) {
         const currentImagePath = currentImage.imagePath;
         const currentFullResPath = currentImage.fullResPath || currentImagePath;
         const currentImageName = currentImage.name;
-        
+        const capLines = characterMobileCaptionLines(representative);
+        const capSetHtml = `<div class="characters-mobile-card-caption__set"${capLines.line2 ? '' : ' style="display:none;"'}">${capLines.line2 ? escapeHtmlText(capLines.line2) : ''}</div>`;
+        const capAbilityHtml = `<div class="characters-mobile-card-caption__ability"${capLines.line3 ? '' : ' style="display:none;"'}">${capLines.line3 ? escapeHtmlText(capLines.line3) : ''}</div>`;
+        const characterDbvImgStyle = isLayoutMobileForCardDisplay()
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: auto; max-width: 316px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td data-label="Image">
-                <div class="card-image-container">
+                <div class="card-image-container${hasMultipleImages ? ' card-image-container--with-nav' : ''}">
                     ${navArrows}
                     <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:none;">✦ FOIL</span>
                     <img id="${groupId}-img"
@@ -333,22 +404,27 @@ function displayCharacters(characters) {
                          alt="${currentImageName}"
                          loading="lazy"
                          decoding="async"
-                         style="width: auto; max-width: 316px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
+                         style="${characterDbvImgStyle}"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
                          onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'character')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${escapeHtmlText(capLines.line1)}</div>
+                    ${capAbilityHtml}
+                    ${capSetHtml}
+                </div>
             </td>
-            <td data-label="Deck &amp; collection">
+            <td>
                 <button class="add-to-deck-btn" onclick="showDeckSelection('character', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="character" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="character" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'character', '${currentFullResPath.replace(/'/g, "\\'")}')" disabled title="Card not in collection">
                     -Collection
                 </button>
                 ` : ''}
@@ -371,6 +447,14 @@ function displayCharacters(characters) {
         
         const img = row.querySelector('img');
         if (img) {
+            const syncOrientation = function () {
+                applyDbvHorizontalCardClass(img);
+            };
+            if (img.complete && img.naturalWidth) {
+                syncOrientation();
+            } else {
+                img.addEventListener('load', syncOrientation, { once: true });
+            }
             applyCharacterImageRowHeightLock(row);
         }
         if (typeof isGuestUser === 'function' && isGuestUser()) {
@@ -478,10 +562,45 @@ function navigateCardImage(groupId, direction) {
         }
     }
     
+    img.classList.remove('horizontal-card');
     img.src = newImagePath;
     img.alt = newImage.name;
     const fullResPath = newImage.fullResPath || newImagePath;
     img.setAttribute('data-full-res', fullResPath);
+
+    const syncDbvImgOrientation = () => {
+        applyDbvHorizontalCardClass(img);
+    };
+    img.addEventListener('load', syncDbvImgOrientation, { once: true });
+
+    const capNameEl = row ? row.querySelector('.characters-mobile-card-caption__name') : null;
+    const capSetEl = row ? row.querySelector('.characters-mobile-card-caption__set') : null;
+    const capAbilityEl = row ? row.querySelector('.characters-mobile-card-caption__ability') : null;
+    if (capNameEl) {
+        capNameEl.textContent = newImage.mobileCaptionLine1 != null && String(newImage.mobileCaptionLine1).trim() !== ''
+            ? newImage.mobileCaptionLine1
+            : (newImage.name != null ? String(newImage.name) : '');
+    }
+    if (capSetEl) {
+        const t = newImage.mobileCaptionLine2 != null ? String(newImage.mobileCaptionLine2).trim() : '';
+        if (t) {
+            capSetEl.textContent = t;
+            capSetEl.style.removeProperty('display');
+        } else {
+            capSetEl.textContent = '';
+            capSetEl.style.display = 'none';
+        }
+    }
+    if (capAbilityEl) {
+        const ab = newImage.mobileCaptionLine3 != null ? String(newImage.mobileCaptionLine3).trim() : '';
+        if (ab) {
+            capAbilityEl.textContent = ab;
+            capAbilityEl.style.removeProperty('display');
+        } else {
+            capAbilityEl.textContent = '';
+            capAbilityEl.style.display = 'none';
+        }
+    }
 
     // Apply or remove foil shimmer effect on the container
     if (newImage.isFoil) {

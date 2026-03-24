@@ -291,6 +291,57 @@ td:last-child {
  * FILTER SYSTEM
  * ======================================== */
 
+/* Screen-reader-only labels (e.g. icon-only stat filter tabs on mobile) */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Characters DBV: five stats merged into one th (desktop = five columns; mobile = tabbed, see mobile-layout.css) */
+html:not(.layout-mobile) #characters-table .characters-stat-tablist {
+    display: none;
+}
+
+html:not(.layout-mobile) #characters-table .characters-stat-filters-th {
+    vertical-align: top;
+    text-align: center;
+}
+
+html:not(.layout-mobile) #characters-table .characters-stat-filters {
+    width: 100%;
+}
+
+html:not(.layout-mobile) #characters-table .characters-stat-inputs-and-clear {
+    display: contents;
+}
+
+html:not(.layout-mobile) #characters-table .characters-filter-clear-inline {
+    display: none !important;
+}
+
+html:not(.layout-mobile) #characters-table .characters-stat-panels {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+}
+
+html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-stat-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Table filter row styling */
 .filter-row th {
     padding: 8px 4px;

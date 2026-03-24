@@ -41,6 +41,7 @@ function setupSearch() {
     // Only target filter inputs within the characters tab, not all filter inputs
     const filterInputs = document.querySelectorAll('#characters-tab .filter-input');
     const clearFiltersBtn = document.getElementById('clear-filters');
+    const clearFiltersMobileBtn = document.getElementById('clear-filters-mobile');
     const hasInherentAbilityToggle = document.getElementById('has-inherent-ability');
     const hasNoInherentAbilityToggle = document.getElementById('has-no-inherent-ability');
     
@@ -68,9 +69,12 @@ function setupSearch() {
         hasNoInherentAbilityToggle.addEventListener('change', applyFilters);
     }
     
-    // Setup clear filters button
+    // Setup clear filters button (desktop + mobile inline in stat row)
     if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener('click', clearAllFilters);
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+    }
+    if (clearFiltersMobileBtn) {
+        clearFiltersMobileBtn.addEventListener('click', clearAllFilters);
     }
 }
 

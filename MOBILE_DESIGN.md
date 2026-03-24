@@ -87,10 +87,10 @@ flowchart TB
 | ----------------- | ------------------------------------------------------------------- | ---------- | ------------------------------------------------- | ------- |
 | **M0**            | Baseline docs, STYLE_GUIDE alignment, breakpoint audit in this file | —          | This doc + STYLE_GUIDE updates landed             | done    |
 | **M1**            | `matchMedia` layout mode, shell hooks, `mobile-layout.css`          | M0         | Narrow viewport gets `layout-mobile` + usable nav | done    |
-| **M2** (umbrella) | Card database mobile-first                                          | M1         | M2a–M2c met                                       | done    |
+| **M2** (umbrella) | Card database mobile-first                                          | M1         | M2a–M2c met                                       | in progress |
 | **M2a**           | DB-scoped CSS/JS hygiene                                            | M1         | DBV files cleaned; no desktop regressions         | done    |
 | **M2b**           | `.cursorrules` + agent context for DBV + mobile                     | M2a        | Rules committed                                   | done    |
-| **M2c**           | Touch-first DBV browse/filter                                       | M2b        | Usable DB on phone without table-only UX          | done    |
+| **M2c**           | Touch-first DBV browse/filter                                       | M2b        | Every DBV tab usable on phone (see tab checklist) | in progress |
 | **M3**            | Deck list / selection mobile                                        | M2c        | Deck tiles/menus usable                           | pending |
 | **M4**            | Collection mobile                                                   | M3         | Collection usable                                 | pending |
 | **M5** (umbrella) | Deck editor mobile                                                  | M4         | M5a + M5b met                                     | pending |
@@ -109,6 +109,26 @@ Roadmap **Status** values are `**pending`**, `**in progress**`, or `**done**`. T
 | **M2a** | Hygiene in `card-tables.css`, `database-view.css`, touched DBV JS                                                                    |
 | **M2b** | `[public/css/.cursorrules](public/css/.cursorrules)`, `[public/js/.cursorrules](public/js/.cursorrules)` DBV + `layout-mobile` notes |
 | **M2c** | Mobile DBV UX (card rows, stacked filters, etc.)                                                                                     |
+
+#### M2c — database view tabs (mobile UX)
+
+Per-tab delivery for the Card Database (`#database-view`). **Status** values: `pending`, `in progress`, `done` (same as the roadmap table above).
+
+| Tab (UI label)           | `data-tab` / container id                     | Status      |
+| ------------------------ | --------------------------------------------- | ----------- |
+| **All**                  | `all-cards` / `all-cards-tab`                 | done        |
+| **Characters**           | `characters` / `characters-tab`               | in progress |
+| **Special Cards**        | `special-cards` / `special-cards-tab`       | pending     |
+| **Universe: Advanced**   | `advanced-universe` / `advanced-universe-tab` | pending     |
+| **Locations**            | `locations` / `locations-tab`                 | pending     |
+| **Aspects**              | `aspects` / `aspects-tab`                     | pending     |
+| **Missions**             | `missions` / `missions-tab`                   | pending     |
+| **Events**               | `events` / `events-tab`                       | pending     |
+| **Universe: Teamwork**   | `teamwork` / `teamwork-tab`                   | pending     |
+| **Universe: Ally**       | `ally-universe` / `ally-universe-tab`         | pending     |
+| **Universe: Training**   | `training` / `training-tab`                 | pending     |
+| **Universe: Basic**      | `basic-universe` / `basic-universe-tab`       | pending     |
+| **Power Cards**          | `power-cards` / `power-cards-tab`             | pending     |
 
 
 ### M5 sub-milestones
@@ -151,6 +171,7 @@ Small, desktop-neutral PRs; check off below as completed.
 | Global nav mobile: welcome **`justify-content: flex-end`**; account dropdown **50%** width, **`right: 0`**                    | M1          | done                                              |
 | DBV **All** tab: remove inline **5-col** grid on **`#all-cards-grid-container`**; single column ≤900px + **`.layout-mobile`** | M2c         | done                                              |
 | DBV **All** tab cells: **+Deck** row then **-Collection \| +Collection** (`mobile-layout.css` grid on **`.card-content-bottom`**) | M2c | done |
+| DBV Characters: **tabbed stat filters** (merged `colspan=5` header cell, `characters-stat-filter-tabs.js`) | M2c | done |
 
 
 **M0 — Foundation**
@@ -171,10 +192,10 @@ Small, desktop-neutral PRs; check off below as completed.
 
 - Extract row vs container boundaries when touching DBV files for hygiene.
 
-**M2c** (complete)
+**M2c** (in progress — tab checklist under **M2c — database view tabs** above)
 
 - Filter/toolbar extraction for sheet UI — **still deferred** (see refactor log).
-- **Delivered:** `mobile-layout.css` DBV shell, tabs, touch targets, fluid wide filters, missions/special min-width relax; Characters tab **card-row** layout with `data-label` on tbody cells and height-lock coordination in `card-display.js` (`isLayoutMobile`, `layout-mode-change`).
+- **Shipped so far:** `mobile-layout.css` DBV shell, tab chrome, touch targets, fluid wide filters, missions/special min-width relax; **All** tab grid and per-cell actions (see §10.2). **Characters** tab: **card-row** layout with `data-label` on most tbody cells (not the actions column); **name/stat `td` cells hidden on mobile** (`tbody td:nth-child(n+3)`); **caption** under the image on mobile (`characters-mobile-card-caption`: name, optional inherent ability, set/number); **actions** cell uses the same **+Deck** / **-Collection \| +Collection** grid as **All**; height-lock coordination in `card-display.js` (`isLayoutMobile`, `layout-mode-change`). **Characters stat filters:** five stat filter columns merged into one **`th` (`colspan=5`)** with **icon tabs** (`.characters-stat-tablist` / `.characters-stat-tab`) and a single visible **`.characters-stat-panel.is-active`** on `.layout-mobile`; desktop shows all five `.column-filters` groups in one row (`database-view.css`). **`characters-stat-filter-tabs.js`** handles tab clicks and `layout-mode-change`. **Semantics:** unchanged — `=` exact value; Min/Max inclusive range; `applyFilters` in `card-filter-toggles.js` ANDs active constraints per `data-column`.
 - **Verification:** [docs/current/TESTING_GUIDE.md](docs/current/TESTING_GUIDE.md) § *Mobile milestone M2c (Card Database / DBV)*.
 
 **M5a**
@@ -217,10 +238,15 @@ Use this section as **agent context** for what shipped after the base M1/M2c mil
 
 - **`#all-cards-grid-container`** must **not** use an inline **`grid-template-columns: repeat(5, …)`** (removed from [`public/index.html`](public/index.html)); column count comes from **[`database-view.css`](public/css/database-view.css)** (`@media (max-width: 900px)` → single column) and **`mobile-layout.css`** under **`.layout-mobile`**.
 - **Per-cell actions:** Under **`.layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom`**, CSS grid places **+Deck** full width, then **-Collection** (left) and **+Collection** (right) on the next row (DOM order differs; explicit grid placement). Comment anchor in **`mobile-layout.css`**: `All tab cell actions`.
+- **Characters tab row actions:** Under **`.layout-mobile #characters-table tbody td:nth-child(2)`**, the same grid pattern (**+Deck** full width; **-Collection** left, **+Collection** right). The actions **`td`** has **no** **`data-label`** so mobile does not show a **Deck & collection** pseudo label (`displayCharacters` in **`public/js/card-display.js`**).
+- **Characters tab stats on mobile:** **`tbody td:nth-child(n+3)`** (**name** through **inherent abilities**) use **`display: none`** under **`.layout-mobile`** — card rows are **image + actions** only; filters still run against hidden cells.
+- **All + Characters tile art (`.layout-mobile`):** Desktop **All** tab keeps **`max-width: 200px`** in **`database-view.css`**. Under **`.layout-mobile`**, **`mobile-layout.css`** sets **`#database-view`** custom properties **`--dbv-mobile-tile-img-max`** (`min(100%, calc(100vw - 28px))`) and **`--dbv-mobile-tile-img-landscape-max-h`** (`min(56vw, 480px)`), and overrides **`.all-cards-img-wrap`**, **`.all-cards-cell img`**, and **`.horizontal-card`** so single-column tiles use nearly the full row width — **Characters** uses the same tokens so both tabs stay visually matched.
+- **Characters tab image size (mobile):** **`tbody td:first-child .card-image-container`**: **`display: flex`**, **`width: 100%`**, **`max-width: 100%`**, **`margin-inline: auto`** (**prev | img | next**). **`img`**: **`max-width: var(--dbv-mobile-tile-img-max)`**, **`flex: 0 1 auto`**, **`object-fit: contain`**. Landscape art adds **`horizontal-card`** (same rule as **`all-cards-display.js`**: **`naturalWidth > naturalHeight`**); scoped **`max-height: var(--dbv-mobile-tile-img-landscape-max-h)`**. **`applyDbvHorizontalCardClass`** in **`card-display.js`** on image **`load`** and after **`navigateCardImage`** **`src`** changes. Inline **`max-width: 316px`** still skipped when **`isLayoutMobile()`**; mobile inline styles omit **`width` / `max-width`** so CSS owns dimensions. Caption **`max-width`** still **`min(444px, 100%)`** for long set lines.
+- **Characters tab caption (mobile):** **`characters-mobile-card-caption`** under the image (**`characterMobileCaptionLines`** in **`card-display.js`**): line 1 = full **`name`**; line 2 = **`special_abilities`** when non-empty (same as Inherent Abilities column), **`.characters-mobile-card-caption__ability`**; line 3 = **`translateSet(set)`** + **`set_number`** (not text from parentheses — those stay on line 1); **`navigateCardImage`** syncs all lines when changing art.
 
 ### 10.3 Tests and docs map
 
-- **Unit:** [`tests/unit/layout-mode-and-viewport.test.ts`](tests/unit/layout-mode-and-viewport.test.ts) — `layout-mode.js`, **`mobile-layout.css`** fragments (DBV tabs, All grid, global nav grid, user menu alignment, dropdown width).
+- **Unit:** [`tests/unit/layout-mode-and-viewport.test.ts`](tests/unit/layout-mode-and-viewport.test.ts) — `layout-mode.js`, **`mobile-layout.css`**: global nav + DBV **All** strip (M1 describe), and **DBV Characters tab** (`describe` **`mobile-layout.css (DBV Characters tab)`**): **`--dbv-mobile-tile-*`**, All-tab image overrides, **`#characters-table`** card rows, hidden stats columns, action grid, art + **`horizontal-card`**, mobile caption classes, nav arrow touch targets.
 - **Integration:** [`tests/integration/global-nav-integration.test.ts`](tests/integration/global-nav-integration.test.ts) — served **`globalNav.html`** / **`.css`** include **`header-nav-cluster`**, **`header-app-actions`**.
 - **Style spec:** [`docs/current/STYLE_GUIDE.md`](docs/current/STYLE_GUIDE.md) — *Mobile Adaptations* / *Mobile layout mode* (global nav + DBV bullets).
 - **Manual QA:** [`docs/current/TESTING_GUIDE.md`](docs/current/TESTING_GUIDE.md) — § *Mobile milestone M1* and *M2c* (updated for All tab + header).

@@ -1,7 +1,8 @@
 # Excelsior Deckbuilder API Documentation
 
 ## Base URL
-- **Development**: `http://localhost:3000`
+- **Development** (`npm run dev`): `http://localhost:8085` (default from `src/index.ts`; override with `PORT`)
+- **Docker image**: listens on **3000** (`Dockerfile` sets `PORT=3000`)
 - **Production**: `https://your-domain.com`
 
 ## Authentication
@@ -1348,12 +1349,12 @@ This endpoint performs a thorough health check of the entire system, including d
 
 **Basic Health Check:**
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:8085/health
 ```
 
 **Health Check with Status Code:**
 ```bash
-curl -w "%{http_code}" http://localhost:3000/health
+curl -w "%{http_code}" http://localhost:8085/health
 ```
 
 **Monitoring Integration:**

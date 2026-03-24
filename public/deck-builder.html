@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/layout-mode.js"></script>
     <title>Excelsior Deckbuilder - Characters Database</title>
     <style>
         body {
@@ -3365,6 +3366,8 @@
     <!-- Global Navigation Component -->
     <link rel="stylesheet" href="/components/globalNav.css">
     <link rel="stylesheet" href="/css/database-view.css">
+    <link rel="stylesheet" href="/css/mobile-layout.css">
+    <script src="/js/characters-stat-filter-tabs.js"></script>
     <script src="/js/card-image-utils.js"></script>
     <script src="/components/globalNav.js"></script>
 </head>
@@ -3470,49 +3473,72 @@
                             <th>Threat Level</th>
                             <th>Inherent Abilities</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
+                        <tr class="filter-row characters-filter-row">
+                            <th class="characters-filter-clear-th">
                                 <button id="clear-filters" class="clear-filters-btn">Clear All Filters</button>
                             </th>
-                            <th>
+                            <th class="characters-filter-name-th">
                                 <input type="text" class="header-filter" placeholder="Search names...">
                             </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="energy" placeholder="=" min="0" max="8">
-                                    <input type="number" class="filter-input min" data-column="energy" placeholder="Min" min="0" max="8">
-                                    <input type="number" class="filter-input max" data-column="energy" placeholder="Max" min="0" max="8">
+                            <th colspan="5" class="characters-stat-filters-th">
+                                <div class="characters-stat-filters">
+                                    <div class="characters-stat-tablist" role="tablist" aria-label="Filter by stat">
+                                        <button type="button" class="characters-stat-tab" role="tab" data-stat-tab="energy" id="characters-stat-tab-energy" aria-controls="characters-stat-panel-energy" aria-selected="true" title="Energy">
+                                            <img src="/src/resources/images/icons/energy.png" alt="" class="special-power-type-icon column-header-icon">
+                                            <span class="visually-hidden">Energy</span>
+                                        </button>
+                                        <button type="button" class="characters-stat-tab" role="tab" data-stat-tab="combat" id="characters-stat-tab-combat" aria-controls="characters-stat-panel-combat" aria-selected="false" tabindex="-1" title="Combat">
+                                            <img src="/src/resources/images/icons/combat.png" alt="" class="special-power-type-icon column-header-icon">
+                                            <span class="visually-hidden">Combat</span>
+                                        </button>
+                                        <button type="button" class="characters-stat-tab" role="tab" data-stat-tab="brute_force" id="characters-stat-tab-brute_force" aria-controls="characters-stat-panel-brute_force" aria-selected="false" tabindex="-1" title="Brute Force">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="" class="special-power-type-icon column-header-icon">
+                                            <span class="visually-hidden">Brute Force</span>
+                                        </button>
+                                        <button type="button" class="characters-stat-tab" role="tab" data-stat-tab="intelligence" id="characters-stat-tab-intelligence" aria-controls="characters-stat-panel-intelligence" aria-selected="false" tabindex="-1" title="Intelligence">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="" class="special-power-type-icon column-header-icon">
+                                            <span class="visually-hidden">Intelligence</span>
+                                        </button>
+                                        <button type="button" class="characters-stat-tab" role="tab" data-stat-tab="threat_level" id="characters-stat-tab-threat_level" aria-controls="characters-stat-panel-threat_level" aria-selected="false" tabindex="-1" title="Threat Level">
+                                            <img src="/src/resources/images/icons/threat.png" alt="" class="special-power-type-icon column-header-icon">
+                                            <span class="visually-hidden">Threat Level</span>
+                                        </button>
+                                    </div>
+                                    <div class="characters-stat-inputs-and-clear">
+                                    <div class="characters-stat-panels">
+                                        <div class="column-filters characters-stat-panel is-active" data-stat-panel="energy" id="characters-stat-panel-energy" role="tabpanel" aria-labelledby="characters-stat-tab-energy">
+                                            <input type="number" class="filter-input equals" data-column="energy" placeholder="=" min="0" max="8">
+                                            <input type="number" class="filter-input min" data-column="energy" placeholder="Min" min="0" max="8">
+                                            <input type="number" class="filter-input max" data-column="energy" placeholder="Max" min="0" max="8">
+                                        </div>
+                                        <div class="column-filters characters-stat-panel" data-stat-panel="combat" id="characters-stat-panel-combat" role="tabpanel" aria-labelledby="characters-stat-tab-combat">
+                                            <input type="number" class="filter-input equals" data-column="combat" placeholder="=" min="0" max="8">
+                                            <input type="number" class="filter-input min" data-column="combat" placeholder="Min" min="0" max="8">
+                                            <input type="number" class="filter-input max" data-column="combat" placeholder="Max" min="0" max="8">
+                                        </div>
+                                        <div class="column-filters characters-stat-panel" data-stat-panel="brute_force" id="characters-stat-panel-brute_force" role="tabpanel" aria-labelledby="characters-stat-tab-brute_force">
+                                            <input type="number" class="filter-input equals" data-column="brute_force" placeholder="=" min="0" max="8">
+                                            <input type="number" class="filter-input min" data-column="brute_force" placeholder="Min" min="0" max="8">
+                                            <input type="number" class="filter-input max" data-column="brute_force" placeholder="Max" min="0" max="8">
+                                        </div>
+                                        <div class="column-filters characters-stat-panel" data-stat-panel="intelligence" id="characters-stat-panel-intelligence" role="tabpanel" aria-labelledby="characters-stat-tab-intelligence">
+                                            <input type="number" class="filter-input equals" data-column="intelligence" placeholder="=" min="0" max="8">
+                                            <input type="number" class="filter-input min" data-column="intelligence" placeholder="Min" min="0" max="8">
+                                            <input type="number" class="filter-input max" data-column="intelligence" placeholder="Max" min="0" max="8">
+                                        </div>
+                                        <div class="column-filters characters-stat-panel" data-stat-panel="threat_level" id="characters-stat-panel-threat_level" role="tabpanel" aria-labelledby="characters-stat-tab-threat_level">
+                                            <input type="number" class="filter-input equals" data-column="threat_level" placeholder="=" min="0">
+                                            <input type="number" class="filter-input min" data-column="threat_level" placeholder="Min" min="0">
+                                            <input type="number" class="filter-input max" data-column="threat_level" placeholder="Max" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="characters-filter-clear-inline">
+                                        <button type="button" id="clear-filters-mobile" class="clear-filters-btn">Clear All Filters</button>
+                                    </div>
+                                    </div>
                                 </div>
                             </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="combat" placeholder="=" min="0" max="8">
-                                    <input type="number" class="filter-input min" data-column="combat" placeholder="Min" min="0" max="8">
-                                    <input type="number" class="filter-input max" data-column="combat" placeholder="Max" min="0" max="8">
-                                </div>
-                            </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="brute_force" placeholder="=" min="0" max="8">
-                                    <input type="number" class="filter-input min" data-column="brute_force" placeholder="Min" min="0" max="8">
-                                    <input type="number" class="filter-input max" data-column="brute_force" placeholder="Max" min="0" max="8">
-                                </div>
-                            </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="intelligence" placeholder="=" min="0" max="8">
-                                    <input type="number" class="filter-input min" data-column="intelligence" placeholder="Min" min="0" max="8">
-                                    <input type="number" class="filter-input max" data-column="intelligence" placeholder="Max" min="0" max="8">
-                                </div>
-                            </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="threat_level" placeholder="=" min="0">
-                                    <input type="number" class="filter-input min" data-column="threat_level" placeholder="Min" min="0">
-                                    <input type="number" class="filter-input max" data-column="threat_level" placeholder="Max" min="0">
-                                </div>
-                            </th>
-                            <th>
+                            <th class="characters-filter-abilities-th">
                                 <div class="inherent-abilities-filters">
                                     <label class="toggle-label">
                                         <input type="checkbox" id="has-inherent-ability" class="ability-toggle">
@@ -4359,6 +4385,7 @@
             const headerFilters = document.querySelectorAll('.header-filter');
             const filterInputs = document.querySelectorAll('.filter-input');
             const clearFiltersBtn = document.getElementById('clear-filters');
+            const clearFiltersMobileBtn = document.getElementById('clear-filters-mobile');
             const hasInherentAbilityToggle = document.getElementById('has-inherent-ability');
             const hasNoInherentAbilityToggle = document.getElementById('has-no-inherent-ability');
             
@@ -4380,8 +4407,13 @@
                 hasNoInherentAbilityToggle.addEventListener('change', applyFilters);
             }
             
-            // Setup clear filters button
-            clearFiltersBtn.addEventListener('click', clearAllFilters);
+            // Setup clear filters button (desktop + mobile inline in stat row)
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', clearAllFilters);
+            }
+            if (clearFiltersMobileBtn) {
+                clearFiltersMobileBtn.addEventListener('click', clearAllFilters);
+            }
         }
 
         // Apply all active filters

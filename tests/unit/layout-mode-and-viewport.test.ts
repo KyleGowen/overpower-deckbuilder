@@ -226,6 +226,88 @@ describe('mobile-layout.css (M1 shell)', () => {
     });
 });
 
+/**
+ * DBV Characters tab under `.layout-mobile`: card-row tbody, art sizing tied to All tab tokens,
+ * three-line caption, +Deck / collection grid. Spec: MOBILE_DESIGN.md §10.2–10.3; CSS mobile-layout.css.
+ */
+describe('mobile-layout.css (DBV Characters tab)', () => {
+    let css: string;
+
+    beforeAll(() => {
+        const cssPath = path.join(__dirname, '../../public/css/mobile-layout.css');
+        css = readFileSync(cssPath, 'utf8');
+    });
+
+    it('defines --dbv-mobile-tile-* on #database-view and applies them to All-tab tile images', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s*\{[\s\S]*?--dbv-mobile-tile-img-max:\s*min\(\s*100%\s*,\s*calc\(\s*100vw\s*-\s*28px\s*\)\s*\)/m
+        );
+        expect(css).toMatch(/--dbv-mobile-tile-img-landscape-max-h:\s*min\(\s*56vw\s*,\s*480px\s*\)/);
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-img-wrap[\s\S]*?max-width:\s*var\(\s*--dbv-mobile-tile-img-max\s*\)/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-cell\s+img\.horizontal-card[\s\S]*?max-height:\s*var\(\s*--dbv-mobile-tile-img-landscape-max-h\s*\)/
+        );
+    });
+
+    it('lays out Character rows as cards and hides name/stat columns on mobile', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+tr[\s\S]*?display:\s*block[\s\S]*?border-radius:\s*10px/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:nth-child\(n\+3\)[\s\S]*?display:\s*none\s*!important/
+        );
+    });
+
+    it('uses the same +Deck / collection action grid as the All tab', () => {
+        expect(css).toContain('Characters row actions: +Deck full width');
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:nth-child\(2\)[\s\S]*?display:\s*grid[\s\S]*?grid-template-columns:\s*1fr\s+1fr/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:nth-child\(2\)\s+\.add-to-deck-btn[\s\S]*?grid-column:\s*1\s*\/\s*-1/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:nth-child\(2\)\s+\.remove-from-collection-btn[\s\S]*?grid-row:\s*2/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:nth-child\(2\)\s+\.add-to-collection-btn[\s\S]*?grid-column:\s*2/
+        );
+    });
+
+    it('sizes Character art with DBV tile tokens and landscape horizontal-card max-height', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container[\s\S]*?width:\s*100%[\s\S]*?max-width:\s*100%/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container\s+img[\s\S]*?max-width:\s*var\(\s*--dbv-mobile-tile-img-max\s*\)\s*!important/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container\s+img\.horizontal-card[\s\S]*?max-height:\s*var\(\s*--dbv-mobile-tile-img-landscape-max-h\s*\)\s*!important/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+\.card-nav-arrow[\s\S]*?min-width:\s*44px/
+        );
+    });
+
+    it('shows the mobile caption stack with name, ability, and set line font sizes', () => {
+        expect(css).toMatch(/#characters-table\s+\.characters-mobile-card-caption\s*\{[\s\S]*?display:\s*none/);
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?flex-direction:\s*column[\s\S]*?max-width:\s*min\(\s*444px\s*,\s*100%\s*\)/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*1\.0625rem/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ability[\s\S]*?font-size:\s*0\.875rem[\s\S]*?word-break:\s*break-word/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set[\s\S]*?font-size:\s*0\.8125rem/
+        );
+    });
+});
+
 describe('public/index.html mobile layout wiring', () => {
     it('loads layout-mode and viewport-positioning before first app stylesheet and includes mobile-layout.css', () => {
         const indexPath = path.join(__dirname, '../../public/index.html');
