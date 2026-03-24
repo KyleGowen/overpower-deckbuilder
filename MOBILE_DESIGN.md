@@ -83,7 +83,7 @@ flowchart TB
 | **M0** | Baseline docs, STYLE_GUIDE alignment, breakpoint audit in this file | — | This doc + STYLE_GUIDE updates landed | done |
 | **M1** | `matchMedia` layout mode, shell hooks, `mobile-layout.css` | M0 | Narrow viewport gets `layout-mobile` + usable nav | done |
 | **M2** (umbrella) | Card database mobile-first | M1 | M2a–M2c met | pending |
-| **M2a** | DB-scoped CSS/JS hygiene | M1 | DBV files cleaned; no desktop regressions | pending |
+| **M2a** | DB-scoped CSS/JS hygiene | M1 | DBV files cleaned; no desktop regressions | done |
 | **M2b** | `.cursorrules` + agent context for DBV + mobile | M2a | Rules committed | pending |
 | **M2c** | Touch-first DBV browse/filter | M2b | Usable DB on phone without table-only UX | pending |
 | **M3** | Deck list / selection mobile | M2c | Deck tiles/menus usable | pending |
@@ -127,7 +127,7 @@ Small, desktop-neutral PRs; check off below as completed.
 | DRY entry HTML | M1 | n/a (single `index.html`) |
 | Optional CSS load order split | M1 | deferred (profile first) |
 | Global nav stacked shell under `.layout-mobile` (flow layout, 44px targets) | M1 | done |
-| DB: separate data from table chrome | M2a–M2c | in progress via mobile CSS |
+| DB: separate data from table chrome | M2a–M2c | done (M2a: DB tables vs deck Card View CSS split) |
 | Filter / toolbar extraction | M2c | deferred (larger refactor) |
 | Touch-target utilities (`.touch-target-min`) | M2c | done (base utilities in `mobile-layout.css`) |
 | Deck editor layout config (`DECK_LIST_COLUMNS_MOBILE`) | M5a–M5b | done |

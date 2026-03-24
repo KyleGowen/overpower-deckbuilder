@@ -7,16 +7,16 @@ This document captures the **final, correct** Card View layout pattern so we nev
 - **Landscape (exactly three types):** Character, location, and event **must** be landscape (horizontal aspect). No other types use landscape.
 - **Portrait (all other types):** Mission, special, aspect, power, teamwork, ally-universe, training, basic-universe, advanced-universe **must** be portrait.
 
-Orientation is set in `public/js/deck-editor-rendering.js` via `data-orientation="landscape"` or `"portrait"` on each `.deck-card-card-view-item`. CSS in `public/css/card-tables.css` targets `[data-type="character"]`, `[data-type="location"]`, and `[data-type="event"]` for landscape; all other types use portrait rules.
+Orientation is set in `public/js/deck-editor-rendering.js` via `data-orientation="landscape"` or `"portrait"` on each `.deck-card-card-view-item`. CSS in `public/css/deck-editor-card-view.css` targets `[data-type="character"]`, `[data-type="location"]`, and `[data-type="event"]` for landscape; all other types use portrait rules.
 
 ## Reusable layouts
 
 **Yes — the layouts are reusable.** The same CSS pattern is applied to all landscape cards (character, location, event) and all portrait cards (mission, special, etc.). Only dimensions (wrap height/width) differ by type; the structure and "no frame, image fills, bevelled corners, buttons below" behavior are shared.
 
-- **Landscape:** One shared block in `card-tables.css` for `.deck-card-card-view-item[data-type="character"]`, `[data-type="location"]`, and `[data-type="event"]` (and their `.card-foil-img-wrap`, `.card-view-image`, `.card-view-actions`). Type-specific rules only set wrap height (e.g. character 184px, location 160px, event 160px).
+- **Landscape:** One shared block in `deck-editor-card-view.css` for `.deck-card-card-view-item[data-type="character"]`, `[data-type="location"]`, and `[data-type="event"]` (and their `.card-foil-img-wrap`, `.card-view-image`, `.card-view-actions`). Wrap heights use `--cv-char-wrap-h` and `--cv-loc-ev-wrap-h` (defaults 184px / 160px; scaled at `@media` breakpoints).
 - **Portrait:** One shared block for all other types via `:not([data-type="character"]):not([data-type="location"]):not([data-type="event"])`.
 
-To add a new card type: assign it either landscape or portrait in `renderDeckCardsCardView()` (`data-type` and `data-orientation`) and, if landscape, add one selector and one height line in the landscape block; no new layout structure is required.
+To add a new card type: assign it either landscape or portrait in `renderDeckCardsCardView()` (`data-type` and `data-orientation`) and, if landscape, extend the shared landscape block (selector + dimensions or custom properties); no new layout structure is required.
 
 ## Landscape pattern (character, location, event) — do not regress
 
@@ -64,7 +64,7 @@ Goal: **Image fills the frame with bevelled (rounded) corners; no visible border
 
 ## Files to touch when changing Card View layout
 
-- **CSS:** `public/css/card-tables.css` (landscape and portrait blocks, responsive breakpoints).
+- **CSS:** `public/css/deck-editor-card-view.css` (landscape and portrait blocks, responsive `--cv-*` variables).
 - **JS:** `public/js/deck-editor-rendering.js` (orientation logic, `data-type` / `data-orientation`).
 - **Context:** `public/css/.cursorrules` (Card View bullets).
 - **Docs:** `docs/current/STYLE_GUIDE.md` (Deck Editor Card View Styling), this file.

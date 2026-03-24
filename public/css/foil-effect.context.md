@@ -35,7 +35,7 @@ Add `.foil-shimmer` to the **immediate wrapper** of a `<img>`. Never to the
 ```
 
 The wrapper must have `overflow: hidden` (provided by `.foil-shimmer` base rule
-and `.card-foil-img-wrap` in both `foil-effect.css` and `card-tables.css`).
+and `.card-foil-img-wrap` in both `foil-effect.css` and `deck-editor-card-view.css`).
 
 For the **deck-editor card view**, also add `.foil-once` (one-shot static mode):
 

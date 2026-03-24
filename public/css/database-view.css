@@ -1,16 +1,8 @@
-/* ========================================
- * DATABASE VIEW CSS - STEP 2 REFACTORING
- * ========================================
- * 
- * This file contains all CSS styles specific to the database view functionality.
- * Extracted from public/css/index.css and public/database.html during Step 2
- * of the database view refactoring project.
- * 
- * Purpose: Dedicated styling for database view components
- * Created: Step 2 of database view refactoring
- * Dependencies: Requires base styles from index.css for body, container, etc.
- * 
- * ======================================== */
+/*
+ * Card database view (#database-view) — layout, tabs, stats, grids, and shared DB chrome.
+ * Depends on index.css for shell/base. Table column overrides: card-tables.css.
+ * Mobile overrides: mobile-layout.css under html.layout-mobile. Roadmap: MOBILE_DESIGN.md (M2a–M2c).
+ */
 
 /* ========================================
  * CARD IMAGE NAVIGATION ARROWS
@@ -81,6 +73,7 @@
     margin-top: 6px;
 }
 
+/* Container: section chrome around stats, tabs, and table area */
 .database-section {
     background: transparent;
     border-radius: 15px;
@@ -89,6 +82,7 @@
     border: none;
 }
 
+/* Row: title + actions within a database section */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -103,7 +97,7 @@
 }
 
 /* ========================================
- * STATS CONTAINER
+ * STATS — grid container + cells
  * ======================================== */
 
 .stats {
@@ -113,6 +107,7 @@
     margin-bottom: 8px; /* tighter space below stats */
 }
 
+/* Row cell: one stat block inside .stats */
 .stat-card {
     background: rgba(255, 255, 255, 0.1);
     padding: 20px;
@@ -146,7 +141,7 @@
 }
 
 /* ========================================
- * TAB NAVIGATION
+ * TAB NAVIGATION — .tab-container stacks .tab-row bands
  * ======================================== */
 
 .tab-container {
@@ -160,6 +155,7 @@
     width: 100%;
 }
 
+/* Row: one wrap line of .tab-button elements */
 .tab-row {
     display: flex;
     gap: 12px;

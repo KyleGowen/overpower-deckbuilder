@@ -1,6 +1,7 @@
 # Deck editor and card table CSS
 
-- **card-tables.css**: Styles for card tables (database view) and for the deck editor Tile View and Card View. Do not conflate with deck selection tiles (different CSS).
+- **card-tables.css**: Card database tables only — column widths, header filters, checkbox filter chrome. Not deck editor Card View.
+- **deck-editor-card-view.css**: Deck editor **Card View** only (`.deck-cards-editor.card-view`). Loaded after `card-tables.css`, before `mobile-layout.css`. Do not conflate with deck selection tiles (different CSS).
 - **Card View** (`.deck-cards-editor.card-view`): Each card is a `.deck-card-card-view-item` with `data-type` and `data-orientation`. **Orientation rule:** only character, location, and event are landscape; all other types are portrait. **Do not regress:** see [docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md](../../docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md).
   - **Landscape** (character, location, event) — **reusable layout:** Card item and `.card-foil-img-wrap` have **no visible frame** (border: none, background: transparent, outline: none, box-shadow: none). Image fills wrap edge-to-edge with **bevelled corners** (border-radius: 8px on wrap and images). `.card-view-actions` in flow **below** the image with padding. Same CSS block for all three; only wrap height differs by type. Do not add border/background to item or wrap.
   - **Portrait** (mission, special, aspect, power, etc.): Image fills frame; `.card-view-actions` **below** the frame (`position: absolute`, `bottom: -35px`).
@@ -31,4 +32,4 @@
 - **Scope mobile-specific rules** under **`html.layout-mobile`** (or `.layout-mobile` descendant of `html` with class on root) in [`public/css/mobile-layout.css`](../css/mobile-layout.css). Avoid widening desktop tables for mobile—prefer stacked filters, scroll wrappers, or card-row patterns per `MOBILE_DESIGN.md`.
 - **Global nav (M1):** Stacked `.unified-header`, static `.header-center`, 44px tab/menu targets, and full-width user dropdown live in `mobile-layout.css` (not only `globalNav.css` `@media` rules).
 - **Touch targets:** Prefer **44px** minimum; utility class **`.touch-target-min`** in `mobile-layout.css` where individual controls are undersized.
-- **DBV files:** `card-tables.css`, `database-view.css` — M2b agent context and M2c UX work stay documented in `MOBILE_DESIGN.md` refactor log.
+- **DBV files:** `database-view.css`, `card-tables.css`; deck Card View: `deck-editor-card-view.css`. M2b agent context and M2c UX: `MOBILE_DESIGN.md` refactor log.
