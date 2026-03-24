@@ -674,7 +674,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 ### Mobile Adaptations (current direction)
 
 - **Deck editor:** Under `.layout-mobile`, deck panes **stack vertically**; resizable divider hidden; list view **stacks** the two deck columns (single-column reading flow). Full parity with STYLE_GUIDE “single column deck builder” is **incremental** — see `MOBILE_DESIGN.md` milestones.
-- **Stacked Navigation:** Global nav retains existing `@media` rules; further stacking under `.layout-mobile` may be added in later milestones.
+- **Stacked Navigation (M1):** Under `.layout-mobile`, the unified header uses normal document flow (tabs are not absolutely centered), full-width rows, wrapping tabs/actions, and **44px** minimum tap targets for primary controls. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). Legacy `@media (max-width: 900px)` rules in [`public/components/globalNav.css`](/public/components/globalNav.css) still apply at wider breakpoints when `layout-desktop` is active.
 - **Touch Targets:** Minimum **44px** for interactive controls; utility **`.touch-target-min`** in `mobile-layout.css` (apply where controls are still small).
 - **Card database / collection:** Horizontal scroll reduced via `.layout-mobile` rules (e.g. filter `min-width` relaxed, table wrappers scroll).
 
@@ -741,6 +741,14 @@ Consider implementing CSS custom properties for easier theme management:
 - **Height**: 56–64px depending on content
 - **Padding**: `0 16px`
 - **Display**: `flex`; `align-items: center`; `justify-content: space-between`
+
+### Mobile layout mode (`.layout-mobile`, max-width 768px)
+- **Location**: [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) — selectors prefixed with `.layout-mobile .unified-header`, `.header-center`, `.app-tabs`, `.user-menu`, etc.
+- **Header**: Column stack (`flex-direction: column`); **`height: auto`** so the bar can grow with wrapped tabs and actions.
+- **Tab bar**: `.header-center` is **`position: static`** (overrides desktop absolute centering) so tabs do not overlap the logo or the right cluster.
+- **Primary controls**: `.app-tab-button`, `.new-deck-btn`, and `.user-menu-toggle` use **`min-height: 44px`** (and tab **`min-width: 44px`**) with slightly increased padding.
+- **User menu dropdown**: **`left: 0; right: 0`** with **`max-width: 100%`** of the menu container so the panel stays on-screen on narrow widths.
+- **Logo**: `.header-logo` **`margin-top: 0`**; **`max-width: 140px`** in this mode.
 
 ### Colors
 - **Background**: `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`

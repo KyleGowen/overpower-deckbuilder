@@ -9,7 +9,7 @@ This document is the **source of truth** for mobile and dual–layout-mode work 
 - **Single HTML shell:** Express serves [`public/index.html`](public/index.html) for `/`, deck routes, collection, and `/data` via [`src/routes/pages.routes.ts`](src/routes/pages.routes.ts). No separate mobile HTML or server-side device routing.
 - **Views:** One global CSS/JS bundle; views toggle with classes such as `view-removed`.
 - **Global chrome:** [`public/components/globalNav.html`](public/components/globalNav.html) injected into `#globalNav` from [`public/js/app-initialization.js`](public/js/app-initialization.js).
-- **Layout mode (implemented):** **Desktop** vs **mobile** layout mode is determined on the **client** using **`window.matchMedia`** and optional **user override** (`localStorage` key `preferDesktopLayout`). Root element classes: `layout-desktop` / `layout-mobile`. See [`public/js/layout-mode.js`](public/js/layout-mode.js).
+- **Layout mode (implemented):** **Desktop** vs **mobile** layout mode is determined on the **client** using **`window.matchMedia`** and optional **user override** (`localStorage` key `preferDesktopLayout`). Root element classes: `layout-desktop` / `layout-mobile`. See [`public/js/layout-mode.js`](public/js/layout-mode.js). **Shell hooks:** `window.isLayoutMobile()`, `window.applyLayoutMode()`, `window.LAYOUT_MOBILE_MAX_PX`, `window.setPreferDesktopLayout`, and the document event **`layout-mode-change`** (used e.g. by [`deck-editor-layout.js`](public/js/deck-editor-layout.js) to reflow when the user resizes or toggles desktop preference).
 
 ---
 
@@ -21,7 +21,7 @@ This document is the **source of truth** for mobile and dual–layout-mode work 
 | Card database | [`public/css/card-tables.css`](public/css/card-tables.css), [`public/css/database-view.css`](public/css/database-view.css) | Fixed tables, wide filters (e.g. missions filters `min-width`). |
 | Collection | [`public/css/collection-view.css`](public/css/collection-view.css) | 1400px max-width; small checkboxes in places. |
 | Deck selection | [`public/css/deck-selection.css`](public/css/deck-selection.css) | 44×44 menu pattern in places. |
-| Global nav | [`public/components/globalNav.css`](public/components/globalNav.css) | Partial `@media` at 900px / 600px. |
+| Global nav | [`public/components/globalNav.css`](public/components/globalNav.css), [`public/css/mobile-layout.css`](public/css/mobile-layout.css) | `@media` at 900px / 600px; under `.layout-mobile`, stacked header + 44px targets in `mobile-layout.css` (M1). |
 
 ---
 
@@ -46,9 +46,9 @@ This document is the **source of truth** for mobile and dual–layout-mode work 
 ## 5. Dual-interface strategy (industry standard)
 
 - **Not recommended as default:** server **User-Agent** routing (fragile; wrong for narrow desktop windows).
-- **Implemented:** **`matchMedia('(max-width: 768px)')`** (+ optional `(pointer: coarse)` hint in JS), **`change`** listener on resize/orientation, root class **`layout-mobile`** / **`layout-desktop`**.
-- **Override:** `localStorage.setItem('preferDesktopLayout','1')` forces desktop layout class even on narrow viewports; remove key to restore breakpoint behavior. (Product may add a “Desktop site” link later.)
-- **FOUC mitigation:** Inline snippet in [`public/index.html`](public/index.html) `<head>` runs before main CSS to set initial layout class.
+- **Implemented:** **`matchMedia('(max-width: 768px)')`**, **`change`** listener on resize/orientation (with resize fallback where needed), root class **`layout-mobile`** / **`layout-desktop`**. *(Width-only for now; `(pointer: coarse)` is not used in [`layout-mode.js`](public/js/layout-mode.js) but could augment detection later.)*
+- **Override:** `localStorage.setItem('preferDesktopLayout','1')` forces desktop layout class even on narrow viewports; remove key to restore breakpoint behavior. **`window.setPreferDesktopLayout(true|false)`** in [`layout-mode.js`](public/js/layout-mode.js) updates storage and reapplies classes. (Product may add a “Desktop site” link later.)
+- **FOUC mitigation:** A blocking [`layout-mode.js`](public/js/layout-mode.js) `<script>` in [`public/index.html`](public/index.html) `<head>` (before main CSS) runs `applyLayoutMode()` synchronously on load so `<html>` usually has the correct class before first paint.
 - **Styling:** [`public/css/mobile-layout.css`](public/css/mobile-layout.css) — rules scoped under **`.layout-mobile`** so desktop layout is unchanged.
 
 ---
@@ -78,20 +78,22 @@ flowchart TB
   M5b --> M6
 ```
 
-| Milestone | What we deliver | Depends on | Done when |
-|-----------|-----------------|------------|-----------|
-| **M0** | Baseline docs, STYLE_GUIDE alignment, breakpoint audit in this file | — | This doc + STYLE_GUIDE updates landed |
-| **M1** | `matchMedia` layout mode, shell hooks, `mobile-layout.css` | M0 | Narrow viewport gets `layout-mobile` + usable nav |
-| **M2** (umbrella) | Card database mobile-first | M1 | M2a–M2c met |
-| **M2a** | DB-scoped CSS/JS hygiene | M1 | DBV files cleaned; no desktop regressions |
-| **M2b** | `.cursorrules` + agent context for DBV + mobile | M2a | Rules committed |
-| **M2c** | Touch-first DBV browse/filter | M2b | Usable DB on phone without table-only UX |
-| **M3** | Deck list / selection mobile | M2c | Deck tiles/menus usable |
-| **M4** | Collection mobile | M3 | Collection usable |
-| **M5** (umbrella) | Deck editor mobile | M4 | M5a + M5b met |
-| **M5a** | Read-only deck viewing | M4 | Non-owner / readonly routes readable |
-| **M5b** | Owned deck editing | M5a | Owner edit/save on mobile |
-| **M6** | Tests, tablet policy, z-index pass | M5b | CI / docs |
+| Milestone | What we deliver | Depends on | Done when | Status |
+|-----------|-----------------|------------|-----------|--------|
+| **M0** | Baseline docs, STYLE_GUIDE alignment, breakpoint audit in this file | — | This doc + STYLE_GUIDE updates landed | done |
+| **M1** | `matchMedia` layout mode, shell hooks, `mobile-layout.css` | M0 | Narrow viewport gets `layout-mobile` + usable nav | done |
+| **M2** (umbrella) | Card database mobile-first | M1 | M2a–M2c met | pending |
+| **M2a** | DB-scoped CSS/JS hygiene | M1 | DBV files cleaned; no desktop regressions | pending |
+| **M2b** | `.cursorrules` + agent context for DBV + mobile | M2a | Rules committed | pending |
+| **M2c** | Touch-first DBV browse/filter | M2b | Usable DB on phone without table-only UX | pending |
+| **M3** | Deck list / selection mobile | M2c | Deck tiles/menus usable | pending |
+| **M4** | Collection mobile | M3 | Collection usable | pending |
+| **M5** (umbrella) | Deck editor mobile | M4 | M5a + M5b met | pending |
+| **M5a** | Read-only deck viewing | M4 | Non-owner / readonly routes readable | pending |
+| **M5b** | Owned deck editing | M5a | Owner edit/save on mobile | pending |
+| **M6** | Tests, tablet policy, z-index pass | M5b | CI / docs | pending |
+
+Roadmap **Status** values are **`pending`**, **`in progress`**, or **`done`**. They track delivery of each milestone row above. The **Refactor completion log** in §7 tracks smaller incremental items and may show status per line independently.
 
 ### M2 sub-milestones
 
@@ -124,6 +126,7 @@ Small, desktop-neutral PRs; check off below as completed.
 | Viewport / clamp helpers (`viewport-positioning.js`) | M0 | done |
 | DRY entry HTML | M1 | n/a (single `index.html`) |
 | Optional CSS load order split | M1 | deferred (profile first) |
+| Global nav stacked shell under `.layout-mobile` (flow layout, 44px targets) | M1 | done |
 | DB: separate data from table chrome | M2a–M2c | in progress via mobile CSS |
 | Filter / toolbar extraction | M2c | deferred (larger refactor) |
 | Touch-target utilities (`.touch-target-min`) | M2c | done (base utilities in `mobile-layout.css`) |
@@ -139,8 +142,10 @@ Small, desktop-neutral PRs; check off below as completed.
 - Global CSS hygiene outside DBV-only passes.
 - Shared viewport clamp helper for modals/menus.
 
-**M1 — Layout mode + shell**
+**M1 — Layout mode + shell** (complete)
 
+- `layout-mode.js` + `mobile-layout.css` linked from [`public/index.html`](public/index.html); narrow viewports get `layout-mobile` and a stacked global nav (see `mobile-layout.css` global nav block).
+- **Verification:** [`tests/unit/layout-mode-and-viewport.test.ts`](tests/unit/layout-mode-and-viewport.test.ts) (automated); manual steps in [`docs/current/TESTING_GUIDE.md`](docs/current/TESTING_GUIDE.md) § *Mobile milestone M1*.
 - DRY HTML if a second shell is ever added.
 - Optional deferred non-critical CSS on mobile (measure first).
 

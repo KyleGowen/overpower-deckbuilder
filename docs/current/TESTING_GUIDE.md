@@ -147,6 +147,14 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
 - **Integration tests**: Add `*.test.ts` under `tests/integration/`. Match one of the category patterns above (e.g. `deck-save-security-*.test.ts` for deck save security) so the test runs in the right CI job. See `tests/integration/.cursorrules` for mandatory cleanup rules (track test users/decks, clean up in `finally`).
 - **Frontend tests**: Add `*.test.ts` under `tests/frontend/`.
 
+### Mobile milestone M1 (layout mode + shell)
+
+- **Automated (unit):** [`tests/unit/layout-mode-and-viewport.test.ts`](../../tests/unit/layout-mode-and-viewport.test.ts) covers:
+  - `layout-mode.js`: `layout-mobile` / `layout-desktop` classes, `LAYOUT_MOBILE_MAX_PX`, `setPreferDesktopLayout`, and `layout-mode-change` events on `window`.
+  - `public/index.html`: `layout-mode.js` and `viewport-positioning.js` load before the first app stylesheet; `mobile-layout.css` is included.
+  - `mobile-layout.css`: M1 global-nav block (stacked `.unified-header`, static `.header-center`, 44px tab/menu targets, full-width user dropdown).
+- **Manual:** Narrow viewport (≤768px), confirm stacked nav and tap targets; optional `preferDesktopLayout` override — see [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (roadmap M1).
+
 ### Character Stacks Coverage
 
 - **Unit coverage**: `tests/unit/card-filter-toggles.test.ts` includes Character Stacks coexistence behavior so Special Cards "Hide Unusables" does not accidentally filter Character Stacks subdivisions.
