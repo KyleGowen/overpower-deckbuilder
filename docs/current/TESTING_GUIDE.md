@@ -155,6 +155,15 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
   - `mobile-layout.css`: M1 global-nav block (stacked `.unified-header`, static `.header-center`, 44px tab/menu targets, full-width user dropdown).
 - **Manual:** Narrow viewport (≤768px), confirm stacked nav and tap targets; optional `preferDesktopLayout` override — see [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) (roadmap M1).
 
+### Mobile milestone M2c (Card Database / DBV)
+
+- **Automated:** No dedicated CSS regression suite; run full `npm run test:unit` after DBV changes.
+- **Manual:** Viewport ≤768px (or `layout-mobile` on `<html>`). Open **Card Database** from global nav.
+  - **Characters (default tab):** Each character appears as a **card block** (stacked fields with labels); image and **Deck & collection** actions are usable; alternate-art **‹ ›** controls work; no clipped row heights after rotating or resizing.
+  - **Another tab** (e.g. Special Cards or Missions): Filters wrap; tables scroll horizontally where columns remain wide; header filter inputs are tappable (≥44px height where styled).
+  - **Layout toggle:** Resize across 768px or use `preferDesktopLayout` — Characters table returns to desktop row layout with height locks; no stale inline locks on mobile.
+- **Reference:** [`/MOBILE_DESIGN.md`](/MOBILE_DESIGN.md) milestone M2c; styles in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css); character `data-label` + locks in [`public/js/card-display.js`](../../public/js/card-display.js).
+
 ### Character Stacks Coverage
 
 - **Unit coverage**: `tests/unit/card-filter-toggles.test.ts` includes Character Stacks coexistence behavior so Special Cards "Hide Unusables" does not accidentally filter Character Stacks subdivisions.

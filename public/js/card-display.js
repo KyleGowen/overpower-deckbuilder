@@ -162,6 +162,105 @@ function preloadAlternateImages(imageData) {
     });
 }
 
+/** True when root layout mode is mobile; skip table row height locks (M2c card rows). */
+function isLayoutMobileForCardDisplay() {
+    return typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+}
+
+/**
+ * Lock character image cell + row height so alternate-art navigation does not reflow (desktop only).
+ * @param {HTMLTableRowElement} row
+ */
+function applyCharacterImageRowHeightLock(row) {
+    if (isLayoutMobileForCardDisplay()) {
+        return;
+    }
+    const imageCell = row.querySelector('td:nth-child(1)');
+    const img = row.querySelector('td:nth-child(1) img');
+    if (!imageCell || !img || imageCell.dataset.heightLocked) {
+        return;
+    }
+    const lockRowHeight = () => {
+        if (isLayoutMobileForCardDisplay() || imageCell.dataset.heightLocked) {
+            return;
+        }
+        const cellHeight = imageCell.offsetHeight;
+        const rowHeight = row.offsetHeight;
+        if (cellHeight > 0) {
+            imageCell.style.height = cellHeight + 'px';
+            imageCell.style.minHeight = cellHeight + 'px';
+            imageCell.style.maxHeight = cellHeight + 'px';
+            imageCell.dataset.heightLocked = 'true';
+        }
+        if (rowHeight > 0) {
+            row.style.height = rowHeight + 'px';
+            row.style.minHeight = rowHeight + 'px';
+            row.style.maxHeight = rowHeight + 'px';
+            row.dataset.heightLocked = 'true';
+        }
+    };
+    if (img.complete) {
+        setTimeout(lockRowHeight, 100);
+    } else {
+        img.addEventListener('load', lockRowHeight, { once: true });
+        setTimeout(lockRowHeight, 1000);
+    }
+}
+
+/** Clear desktop height locks on character rows (e.g. layout switch to mobile). */
+function clearCharacterRowHeightLocks() {
+    const tbody = document.getElementById('characters-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((r) => {
+        r.style.removeProperty('height');
+        r.style.removeProperty('min-height');
+        r.style.removeProperty('max-height');
+        delete r.dataset.heightLocked;
+        const ic = r.querySelector('td:nth-child(1)');
+        if (ic) {
+            ic.style.removeProperty('height');
+            ic.style.removeProperty('min-height');
+            ic.style.removeProperty('max-height');
+            delete ic.dataset.heightLocked;
+        }
+        const imgEl = r.querySelector('img');
+        if (imgEl) {
+            imgEl.style.removeProperty('max-height');
+            imgEl.style.removeProperty('object-fit');
+        }
+    });
+}
+
+/** Re-apply height locks after switching to desktop layout. */
+function refreshCharacterTableHeightLocks() {
+    if (isLayoutMobileForCardDisplay()) {
+        return;
+    }
+    clearCharacterRowHeightLocks();
+    const tbody = document.getElementById('characters-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((row) => {
+        if (!row.querySelector('td:nth-child(1) img')) {
+            return;
+        }
+        applyCharacterImageRowHeightLock(row);
+    });
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('layout-mode-change', function onCharacterDbvLayoutModeChange() {
+        if (isLayoutMobileForCardDisplay()) {
+            clearCharacterRowHeightLocks();
+        } else {
+            refreshCharacterTableHeightLocks();
+        }
+    });
+}
+
 /**
  * Display character cards in the characters table
  * Groups cards by name and universe, showing a single row with navigation arrows for alternate arts
@@ -223,7 +322,7 @@ function displayCharacters(characters) {
         
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>
+            <td data-label="Image">
                 <div class="card-image-container">
                     ${navArrows}
                     <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:none;">✦ FOIL</span>
@@ -241,7 +340,7 @@ function displayCharacters(characters) {
                          onclick="openModal(this)">
                 </div>
             </td>
-            <td>
+            <td data-label="Deck &amp; collection">
                 <button class="add-to-deck-btn" onclick="showDeckSelection('character', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
@@ -254,13 +353,13 @@ function displayCharacters(characters) {
                 </button>
                 ` : ''}
             </td>
-            <td><strong>${representative.name}</strong></td>
-            <td>${representative.energy}</td>
-            <td>${representative.combat}</td>
-            <td>${representative.brute_force}</td>
-            <td>${representative.intelligence}</td>
-            <td class="${threatClass}">${representative.threat_level}</td>
-            <td>${representative.special_abilities || ''}</td>
+            <td data-label="Name"><strong>${representative.name}</strong></td>
+            <td data-label="Energy">${representative.energy}</td>
+            <td data-label="Combat">${representative.combat}</td>
+            <td data-label="Brute Force">${representative.brute_force}</td>
+            <td data-label="Intelligence">${representative.intelligence}</td>
+            <td data-label="Threat Level" class="${threatClass}">${representative.threat_level}</td>
+            <td data-label="Inherent Abilities">${representative.special_abilities || ''}</td>
         `;
         
         // Store image data in data attribute for navigation
@@ -272,39 +371,7 @@ function displayCharacters(characters) {
         
         const img = row.querySelector('img');
         if (img) {
-            const lockRowHeight = () => {
-                const imageCell = row.querySelector('td:nth-child(1)');
-                if (imageCell && !imageCell.dataset.heightLocked) {
-                    // Lock both the cell and the row height
-                    const cellHeight = imageCell.offsetHeight;
-                    const rowHeight = row.offsetHeight;
-                    
-                    if (cellHeight > 0) {
-                        imageCell.style.height = cellHeight + 'px';
-                        imageCell.style.minHeight = cellHeight + 'px';
-                        imageCell.style.maxHeight = cellHeight + 'px';
-                        imageCell.dataset.heightLocked = 'true';
-                    }
-                    
-                    // Also lock the row height to prevent table recalculation
-                    if (rowHeight > 0) {
-                        row.style.height = rowHeight + 'px';
-                        row.style.minHeight = rowHeight + 'px';
-                        row.style.maxHeight = rowHeight + 'px';
-                        row.dataset.heightLocked = 'true';
-                    }
-                }
-            };
-            
-            if (img.complete) {
-                // Image already loaded
-                setTimeout(lockRowHeight, 100);
-            } else {
-                // Wait for image to load
-                img.addEventListener('load', lockRowHeight, { once: true });
-                // Fallback timeout
-                setTimeout(lockRowHeight, 1000);
-            }
+            applyCharacterImageRowHeightLock(row);
         }
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
@@ -339,19 +406,17 @@ function navigateCardImage(groupId, direction) {
         return; // No navigation needed for single image
     }
     
-    // Get the row and preserve locked height before changing image
+    // Get the row and preserve locked height before changing image (desktop table layout only)
     const row = container.closest('tr');
     const imageCell = row ? row.querySelector('td:nth-child(1)') : null;
     let lockedCellHeight = null;
     let lockedRowHeight = null;
-    
-    // Always lock heights if not already locked (defensive approach)
-    if (imageCell) {
+    const useHeightLocks = !isLayoutMobileForCardDisplay();
+
+    if (useHeightLocks && imageCell) {
         if (imageCell.dataset.heightLocked) {
-            // Preserve the locked cell height
             lockedCellHeight = imageCell.style.height || imageCell.style.minHeight || imageCell.offsetHeight + 'px';
         } else {
-            // Lock the height now if not already locked
             const cellHeight = imageCell.offsetHeight;
             if (cellHeight > 0) {
                 lockedCellHeight = cellHeight + 'px';
@@ -362,13 +427,11 @@ function navigateCardImage(groupId, direction) {
             }
         }
     }
-    
-    if (row) {
+
+    if (useHeightLocks && row) {
         if (row.dataset.heightLocked) {
-            // Preserve the locked row height
             lockedRowHeight = row.style.height || row.style.minHeight || row.offsetHeight + 'px';
         } else {
-            // Lock the height now if not already locked
             const rowHeight = row.offsetHeight;
             if (rowHeight > 0) {
                 lockedRowHeight = rowHeight + 'px';
@@ -395,26 +458,22 @@ function navigateCardImage(groupId, direction) {
     const img = document.getElementById(`${groupId}-img`);
     const newImagePath = newImage.imagePath;
     
-    // If we have locked heights, maintain them BEFORE changing the image
-    // Use setProperty with important to prevent override
-    if (lockedCellHeight && imageCell) {
+    if (useHeightLocks && lockedCellHeight && imageCell) {
         imageCell.style.setProperty('height', lockedCellHeight, 'important');
         imageCell.style.setProperty('min-height', lockedCellHeight, 'important');
         imageCell.style.setProperty('max-height', lockedCellHeight, 'important');
     }
-    
-    if (lockedRowHeight && row) {
+
+    if (useHeightLocks && lockedRowHeight && row) {
         row.style.setProperty('height', lockedRowHeight, 'important');
         row.style.setProperty('min-height', lockedRowHeight, 'important');
         row.style.setProperty('max-height', lockedRowHeight, 'important');
     }
-    
-    // Constrain the image to never exceed the locked cell height
-    if (lockedCellHeight && imageCell) {
-        // Set max-height on the image itself to prevent expansion
+
+    if (useHeightLocks && lockedCellHeight && imageCell) {
         const cellHeightValue = parseFloat(lockedCellHeight);
         if (!isNaN(cellHeightValue)) {
-            img.style.setProperty('max-height', (cellHeightValue - 20) + 'px', 'important'); // 20px padding/margin
+            img.style.setProperty('max-height', (cellHeightValue - 20) + 'px', 'important');
             img.style.setProperty('object-fit', 'contain', 'important');
         }
     }
@@ -503,9 +562,8 @@ function navigateCardImage(groupId, direction) {
         }
     }
     
-    // Re-apply locked heights after image loads to ensure they're maintained
-    // Use multiple timeouts to catch any layout recalculation
-    if ((lockedCellHeight || lockedRowHeight) && img) {
+    // Re-apply locked heights after image loads to ensure they're maintained (desktop only)
+    if (useHeightLocks && (lockedCellHeight || lockedRowHeight) && img) {
         const reapplyHeights = () => {
             if (lockedCellHeight && imageCell && imageCell.dataset.heightLocked) {
                 imageCell.style.setProperty('height', lockedCellHeight, 'important');

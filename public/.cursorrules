@@ -1,4 +1,5 @@
 # Public frontend (static assets)
 
 - **Mobile roadmap:** [/MOBILE_DESIGN.md](../MOBILE_DESIGN.md) — layout mode (`layout-mobile` / `layout-desktop`), milestones M0–M6, DBV sub-milestones M2a–M2c, deck M5a–M5b.
+- **Card Database (DBV) agent context (M2b):** [`css/.cursorrules`](css/.cursorrules) (DBV CSS, `layout-mobile` scoping), [`js/.cursorrules`](js/.cursorrules) (DBV modules, filters, CDN image pattern).
 - **Entry HTML:** Canonical app shell is [`index.html`](index.html). Layout scripts: [`js/layout-mode.js`](js/layout-mode.js), [`js/viewport-positioning.js`](js/viewport-positioning.js). Mobile overrides: [`css/mobile-layout.css`](css/mobile-layout.css).

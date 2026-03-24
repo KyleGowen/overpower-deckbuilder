@@ -103,6 +103,7 @@
 - **When creating a new directory, ALWAYS add a `.cursorrules` file in that directory** to give Cursor context for that area of the codebase.
 - The file should briefly describe the directory’s purpose, main entry points, and any conventions or patterns used there (see existing `src/.cursorrules`, `src/middleware/.cursorrules`, `src/routes/.cursorrules` for examples).
 - **Keep each directory’s `.cursorrules` up to date** when you add, remove, or refactor files in that directory—update the description so it stays accurate.
+- **Card Database (DBV) + mobile layout mode:** Detailed agent context is in [`public/.cursorrules`](public/.cursorrules) (shell entry, `MOBILE_DESIGN.md` pointer), [`public/css/.cursorrules`](public/css/.cursorrules) (DBV CSS files, Special columns, `html.layout-mobile` scoping), and [`public/js/.cursorrules`](public/js/.cursorrules) (layout hooks, DBV display/filter patterns, CDN image rules). Milestones **M2a–M2c** and **`layout-mobile`** strategy: [`MOBILE_DESIGN.md`](MOBILE_DESIGN.md).
 
 ## Project-Specific Guidelines
 - This is a TypeScript/Node.js project with Jest testing
