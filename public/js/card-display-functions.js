@@ -251,17 +251,38 @@ function formatAdvancedUniverseCardEffect(effectText, cardData = null) {
     return decodedText;
 }
 
+/** Same mobile list-art gate as Special Cards (layout-mobile or narrow DBV viewport). */
+function advancedUniverseUseMobileListArt() {
+    if (typeof window !== 'undefined' && typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+        return true;
+    }
+    try {
+        return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+    } catch {
+        return false;
+    }
+}
+
 // Display advanced universe cards
 function displayAdvancedUniverse(advancedUniverse) {
     const tbody = document.getElementById('advanced-universe-tbody');
     if (!tbody) return;
-    
+
     if (advancedUniverse.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6">No advanced universe cards found</td></tr>';
         return;
     }
-    
-    tbody.innerHTML = advancedUniverse.map(card => {
+
+    const useMobileListArt = advancedUniverseUseMobileListArt();
+    const esc = typeof window.escapeHtmlText === 'function'
+        ? window.escapeHtmlText
+        : (s) => String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+
+    tbody.innerHTML = advancedUniverse.map((card) => {
         let imagePath;
         if (typeof window.getCardImagePath === 'function') {
             imagePath = window.getCardImagePath({ ...card, image_path: card.image_path || card.image }, 'advanced-universe');
@@ -274,19 +295,40 @@ function displayAdvancedUniverse(advancedUniverse) {
         }
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        const effectHtml = formatAdvancedUniverseCardEffect(
+            card.card_description || card.card_effect || 'No description available',
+            card
+        );
+        const charTrim = card.character != null ? String(card.character).trim() : '';
+        const charCaptionLine = charTrim
+            ? `<div class="characters-mobile-card-caption__character">${esc(charTrim)}</div>`
+            : '';
+        const opdCaption = esc(`One per deck: ${card.is_one_per_deck ? 'Yes' : 'No'}`);
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
         return `
         <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${card.name}" 
-                     class="card-image"
-                     loading="lazy"
-                     decoding="async"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onclick="openModal(this)"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${card.name.replace(/'/g, "\\'")}', '${(card.id || '').replace(/'/g, "\\'")}', 'advanced-universe')"
-                     onmouseleave="hideCardHoverModal()">
+            <td data-label="Image">
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${card.name}"
+                         data-dbv-lightbox-context="advanced-universe"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onclick="openModal(this)"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${card.name.replace(/'/g, "\\'")}', '${(card.id || '').replace(/'/g, "\\'")}', 'advanced-universe')"
+                         onmouseleave="hideCardHoverModal()">
+                </div>
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${esc(card.name)}</div>
+                    ${charCaptionLine}
+                    <div class="characters-mobile-card-caption__ability">${effectHtml}</div>
+                    <div class="characters-mobile-card-caption__opd">${opdCaption}</div>
+                </div>
             </td>
             <td>
                 <button class="add-to-deck-btn" onclick="showDeckSelection('advanced-universe', '${card.id}', '${card.name.replace(/'/g, "\\'")}', this)">
@@ -299,13 +341,39 @@ function displayAdvancedUniverse(advancedUniverse) {
                 <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="advanced-universe" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'advanced-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
-            <td><strong>${card.name}</strong></td>
-            <td>${card.character}</td>
-            <td>${formatAdvancedUniverseCardEffect(card.card_description || card.card_effect || 'No description available', card)}</td>
-            <td class="one-per-deck-advanced-column">${card.is_one_per_deck ? 'Yes' : 'No'}</td>
+            <td data-label="Name"><strong>${card.name}</strong></td>
+            <td data-label="Character">${card.character}</td>
+            <td data-label="Card Effect">${effectHtml}</td>
+            <td class="one-per-deck-advanced-column" data-label="One Per Deck">${card.is_one_per_deck ? 'Yes' : 'No'}</td>
         </tr>
     `;
     }).join('');
+
+    tbody.querySelectorAll('tr').forEach((row) => {
+        const img = row.querySelector('td:first-child img');
+        if (!img) return;
+        const syncOrientation = () => {
+            if (typeof window.applyDbvHorizontalCardClass === 'function') {
+                window.applyDbvHorizontalCardClass(img);
+            }
+        };
+        if (img.complete && img.naturalWidth) {
+            syncOrientation();
+        } else {
+            img.addEventListener('load', syncOrientation, { once: true });
+        }
+    });
+
+    if (typeof isGuestUser === 'function' && isGuestUser()) {
+        tbody.querySelectorAll('.add-to-deck-btn').forEach((addToDeckBtn) => {
+            addToDeckBtn.disabled = true;
+            addToDeckBtn.style.opacity = '0.5';
+            addToDeckBtn.style.cursor = 'not-allowed';
+            addToDeckBtn.title = 'Log in to add to decks...';
+            addToDeckBtn.setAttribute('data-guest-disabled', 'true');
+        });
+    }
+
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 

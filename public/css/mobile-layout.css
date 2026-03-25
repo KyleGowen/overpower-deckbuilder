@@ -102,18 +102,18 @@
 /*
  * DBV single-column tiles (All + Characters + Special tbody): desktop All tab caps art at 200px in database-view.css.
  * On phones that reads tiny; use nearly full row width so both tabs stay matched and legible.
- * Characters mobile rows: portrait img uses --dbv-mobile-table-portrait-img* (vw); landscape .horizontal-card uses flex + --dbv-mobile-tile-img-max / landscape max-height. Special tab overrides on #special-cards-table: --dbv-mobile-special-* (portrait width min(100%,870px), not 100vw — avoids clip vs shell padding).
+ * Horizontal art sizing uses % of the row / container (and cqw for landscape max-height), not 100vw — avoids clip vs shell padding and horizontal scroll inside .table-container. Special tab still overrides on #special-cards-table: --dbv-mobile-special-*.
  * Unit tests: tests/unit/layout-mode-and-viewport.test.ts — describe "mobile-layout.css (DBV Characters tab)".
  */
 .layout-mobile #database-view {
-    --dbv-mobile-tile-img-max: min(100%, calc(100vw - 28px));
-    --dbv-mobile-tile-img-landscape-max-h: min(56vw, 480px);
+    container-type: inline-size;
+    --dbv-mobile-tile-img-max: 100%;
+    --dbv-mobile-tile-img-landscape-max-h: min(56cqw, 480px);
     /*
-     * Character/Special tbody portrait art: flex + % alone often leaves width at intrinsic pixels (tiny).
-     * Use viewport-based targets; narrower when prev/next arrows reserve space (--with-nav).
+     * Character tbody portrait: width resolves against .card-image-container; with-nav subtracts arrow columns (44+44+8).
      */
-    --dbv-mobile-table-portrait-img: min(calc(100vw - 36px), 580px);
-    --dbv-mobile-table-portrait-img-with-nav: min(calc(100vw - 120px), 520px);
+    --dbv-mobile-table-portrait-img: min(100%, 580px);
+    --dbv-mobile-table-portrait-img-with-nav: min(calc(100% - 96px), 520px);
 }
 
 .layout-mobile #database-view #all-cards-grid-container .all-cards-img-wrap {
@@ -285,6 +285,11 @@
 /* Special cards: Add-to-deck column (desktop table widths; mobile tbody overrides below) */
 .layout-mobile #special-cards-table th:nth-child(2),
 .layout-mobile #special-cards-table td:nth-child(2) {
+    min-width: 0 !important;
+}
+
+.layout-mobile #advanced-universe-table th:nth-child(2),
+.layout-mobile #advanced-universe-table td:nth-child(2) {
     min-width: 0 !important;
 }
 
@@ -842,6 +847,285 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/* Universe: Advanced — filter shell + card rows (match Special, layout-mobile) */
+/* -------------------------------------------------------------------------- */
+/* Beat database-view.css th width:% !important (same rationale as Special). */
+.layout-mobile #advanced-universe-table thead {
+    display: block;
+    width: 100%;
+}
+
+.layout-mobile #advanced-universe-table thead tr:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row {
+    --specials-header-shell-bg: rgba(10, 28, 32, 0.96);
+    --specials-header-shell-border: rgba(78, 205, 196, 0.38);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 4px;
+    border: 1px solid var(--specials-header-shell-border);
+    border-radius: 12px;
+    background: var(--specials-header-shell-bg);
+    padding: 12px;
+    box-sizing: border-box;
+    gap: 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th {
+    display: block;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-spacer-th,
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-opd-th {
+    display: none !important;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-clear-th,
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-character-th,
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-effect-th {
+    flex: 1 1 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-clear-th {
+    order: 1;
+    padding: 0 0 10px 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-character-th {
+    order: 2;
+    padding: 0 0 10px 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row > th.advanced-filter-effect-th {
+    order: 3;
+    padding: 0 0 12px 0;
+}
+
+.layout-mobile #advanced-universe-table thead tr.advanced-universe-filter-row .header-filter {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
+.layout-mobile #advanced-universe-table {
+    --dbv-mobile-special-portrait-img: min(100%, 870px);
+    --dbv-mobile-special-tile-img-max: 100%;
+    --dbv-mobile-special-tile-img-landscape-max-h: min(84vw, 720px);
+    table-layout: auto !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.layout-mobile #advanced-universe-table tbody tr {
+    display: block;
+    margin-bottom: 14px;
+    padding: 12px 12px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #advanced-universe-table tbody td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 0;
+    border: none;
+    text-align: right;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child::before {
+    display: none;
+}
+
+.layout-mobile #advanced-universe-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4ecdc4;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: auto;
+    text-align: left;
+    flex: 0 0 auto;
+    padding-top: 3px;
+    max-width: 45%;
+}
+
+.layout-mobile #advanced-universe-table tbody td:nth-child(2) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.layout-mobile #advanced-universe-table tbody td:nth-child(2) .add-to-deck-btn {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.layout-mobile #advanced-universe-table tbody td:nth-child(2) .remove-from-collection-btn {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:nth-child(2) .add-to-collection-btn {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:nth-child(n + 3) {
+    display: none !important;
+}
+
+.layout-mobile #advanced-universe-table tbody tr[data-height-locked='true'],
+.layout-mobile #advanced-universe-table tbody td:nth-child(1)[data-height-locked='true'] {
+    overflow: visible !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .card-image-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    box-sizing: border-box;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+    flex: 0 0 auto !important;
+    width: var(--dbv-mobile-special-portrait-img) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .card-image-container img.horizontal-card {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: var(--dbv-mobile-special-tile-img-max) !important;
+    height: auto !important;
+    max-height: var(--dbv-mobile-special-tile-img-landscape-max-h) !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .characters-mobile-card-caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    width: 100%;
+    max-width: min(666px, 100%);
+    margin: 10px auto 0;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__name {
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: #fff;
+    line-height: 1.25;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__character {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.35;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__ability {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.35;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.layout-mobile #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__opd {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.3;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Characters tab — card rows (M2c); tbody only; filters stay in thead        */
 /* Character art, caption, action grid, hidden stats: same test file as --dbv-mobile-tile-* above. */
 /* -------------------------------------------------------------------------- */
@@ -1109,6 +1393,7 @@
 }
 
 .layout-mobile #characters-table {
+    table-layout: auto !important;
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
@@ -1224,6 +1509,7 @@
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
+    max-height: none !important;
     object-fit: contain !important;
 }
 
@@ -1233,6 +1519,7 @@
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
+    max-height: none !important;
     object-fit: contain !important;
 }
 
@@ -1738,6 +2025,199 @@
     #database-view #special-cards-table tbody td:first-child .characters-mobile-card-caption__cataclysm,
     #database-view #special-cards-table tbody td:first-child .characters-mobile-card-caption__assist,
     #database-view #special-cards-table tbody td:first-child .characters-mobile-card-caption__ambush {
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.3;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Universe: Advanced — viewport mirror (narrow + layout-desktop), same as Special rationale */
+    #database-view #advanced-universe-table {
+        --dbv-mobile-special-portrait-img: min(100%, 870px);
+        --dbv-mobile-special-tile-img-max: 100%;
+        --dbv-mobile-special-tile-img-landscape-max-h: min(84vw, 720px);
+        table-layout: auto !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    #database-view #advanced-universe-table tbody tr {
+        display: block;
+        margin-bottom: 14px;
+        padding: 12px 12px 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    #database-view #advanced-universe-table tbody td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 8px;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 0;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child::before {
+        display: none;
+    }
+
+    #database-view #advanced-universe-table tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #4ecdc4;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-right: auto;
+        text-align: left;
+        flex: 0 0 auto;
+        padding-top: 3px;
+        max-width: 45%;
+    }
+
+    #database-view #advanced-universe-table tbody td:nth-child(2) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    #database-view #advanced-universe-table tbody td:nth-child(2) .add-to-deck-btn {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #database-view #advanced-universe-table tbody td:nth-child(2) .remove-from-collection-btn {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:nth-child(2) .add-to-collection-btn {
+        grid-column: 2;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:nth-child(n + 3) {
+        display: none !important;
+    }
+
+    #database-view #advanced-universe-table tbody tr[data-height-locked='true'],
+    #database-view #advanced-universe-table tbody td:nth-child(1)[data-height-locked='true'] {
+        overflow: visible !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .card-image-container {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: auto;
+        box-sizing: border-box;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+        flex: 0 0 auto !important;
+        width: var(--dbv-mobile-special-portrait-img) !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .card-image-container img.horizontal-card {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: var(--dbv-mobile-special-tile-img-max) !important;
+        height: auto !important;
+        max-height: var(--dbv-mobile-special-tile-img-landscape-max-h) !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .characters-mobile-card-caption {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
+        width: 100%;
+        max-width: min(666px, 100%);
+        margin: 10px auto 0;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__name {
+        font-weight: 700;
+        font-size: 1.0625rem;
+        color: #fff;
+        line-height: 1.25;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__character {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.35;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__ability {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.35;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    #database-view #advanced-universe-table tbody td:first-child .characters-mobile-card-caption__opd {
         font-size: 0.8125rem;
         color: rgba(255, 255, 255, 0.78);
         line-height: 1.3;

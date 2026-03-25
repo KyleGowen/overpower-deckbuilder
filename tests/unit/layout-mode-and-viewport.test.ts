@@ -251,11 +251,13 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
 
     it('defines --dbv-mobile-tile-* on #database-view and applies them to All-tab tile images', () => {
         expect(css).toMatch(
-            /\.layout-mobile\s+#database-view\s*\{[\s\S]*?--dbv-mobile-tile-img-max:\s*min\(\s*100%\s*,\s*calc\(\s*100vw\s*-\s*28px\s*\)\s*\)/m
+            /\.layout-mobile\s+#database-view\s*\{[\s\S]*?container-type:\s*inline-size[\s\S]*?--dbv-mobile-tile-img-max:\s*100%/m
         );
-        expect(css).toMatch(/--dbv-mobile-tile-img-landscape-max-h:\s*min\(\s*56vw\s*,\s*480px\s*\)/);
-        expect(css).toMatch(/--dbv-mobile-table-portrait-img:\s*min\(\s*calc\(\s*100vw\s*-\s*36px\s*\)\s*,\s*580px\s*\)/);
-        expect(css).toMatch(/--dbv-mobile-table-portrait-img-with-nav:\s*min\(\s*calc\(\s*100vw\s*-\s*120px\s*\)\s*,\s*520px\s*\)/);
+        expect(css).toMatch(/--dbv-mobile-tile-img-landscape-max-h:\s*min\(\s*56cqw\s*,\s*480px\s*\)/);
+        expect(css).toMatch(/--dbv-mobile-table-portrait-img:\s*min\(\s*100%\s*,\s*580px\s*\)/);
+        expect(css).toMatch(
+            /--dbv-mobile-table-portrait-img-with-nav:\s*min\(\s*calc\(\s*100%\s*-\s*96px\s*\)\s*,\s*520px\s*\)/
+        );
         expect(css).toMatch(
             /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-img-wrap[\s\S]*?max-width:\s*var\(\s*--dbv-mobile-tile-img-max\s*\)/
         );
@@ -265,6 +267,9 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
     });
 
     it('lays out Character rows as cards and hides name/stat columns on mobile', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#characters-table\s*\{[\s\S]*?table-layout:\s*auto\s*!important/
+        );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+tr[\s\S]*?display:\s*block[\s\S]*?border-radius:\s*10px/
         );
@@ -294,7 +299,7 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container[\s\S]*?width:\s*100%[\s\S]*?max-width:\s*100%/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?width:\s*var\(\s*--dbv-mobile-table-portrait-img\s*\)\s*!important/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?width:\s*var\(\s*--dbv-mobile-table-portrait-img\s*\)\s*!important[\s\S]*?max-height:\s*none\s*!important/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container\s+img\.horizontal-card[\s\S]*?max-height:\s*var\(\s*--dbv-mobile-tile-img-landscape-max-h\s*\)\s*!important/

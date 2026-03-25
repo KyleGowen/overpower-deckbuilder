@@ -401,24 +401,24 @@
                             <th>Card Effect</th>
                             <th class="one-per-deck-advanced-column">One Per Deck</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
+                        <tr class="filter-row advanced-universe-filter-row">
+                            <th class="advanced-filter-clear-th">
                                 <button class="clear-filters-btn" onclick="clearAdvancedUniverseFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th></th>
-                            <th>
+                            <th class="advanced-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="advanced-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="advanced-filter-character-th">
                                 <input type="text" class="header-filter" placeholder="Search characters..." data-column="character">
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
+                            <th class="advanced-filter-effect-th">
+                                <input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect">
                             </th>
-                            <th class="one-per-deck-advanced-column"></th>
+                            <th class="one-per-deck-advanced-column advanced-filter-opd-th"></th>
                         </tr>
                     </thead>
                     <tbody id="advanced-universe-tbody">
                         <tr>
-                            <td colspan="5" class="loading">Loading advanced universe cards...</td>
+                            <td colspan="6" class="loading">Loading advanced universe cards...</td>
                         </tr>
                     </tbody>
                 </table>

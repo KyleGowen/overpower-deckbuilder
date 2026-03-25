@@ -1514,6 +1514,8 @@ function lockAllSpecialCardRowHeights() {
 }
 
 // Make functions globally available
+window.escapeHtmlText = escapeHtmlText;
+window.applyDbvHorizontalCardClass = applyDbvHorizontalCardClass;
 window.displayCharacters = displayCharacters;
 window.displaySpecialCards = displaySpecialCards;
 window.lockAllSpecialCardRowHeights = lockAllSpecialCardRowHeights;
