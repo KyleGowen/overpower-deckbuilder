@@ -124,8 +124,12 @@
     max-width: var(--dbv-mobile-tile-img-max);
 }
 
+/* All-tab grid: match portrait tile width (desktop .horizontal-card uses width:auto + max-height, which shrinks landscape art). Characters tab still uses --dbv-mobile-tile-img-landscape-max-h on tbody img.horizontal-card. */
 .layout-mobile #database-view #all-cards-grid-container .all-cards-cell img.horizontal-card {
-    max-height: var(--dbv-mobile-tile-img-landscape-max-h);
+    width: 100%;
+    max-width: var(--dbv-mobile-tile-img-max);
+    height: auto;
+    max-height: none;
 }
 
 .layout-mobile #database-view .stats {

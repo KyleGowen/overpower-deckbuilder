@@ -20,7 +20,7 @@ Fixes for one surface do not fix the other. Screenshots and reports should name 
 ### What we tried
 
 1. **Shared viewport tokens on `#database-view`**  
-   - `--dbv-mobile-tile-img-max`, `--dbv-mobile-tile-img-landscape-max-h` (nearly full row vs landscape height cap).  
+   - `--dbv-mobile-tile-img-max`, `--dbv-mobile-tile-img-landscape-max-h` (nearly full row width; landscape **height** cap for **table** rows — All-tab grid **`horizontal-card`** uses **`width: 100%`** + **`max-height: none`** for width parity with portrait tiles).  
    - **Files:** `public/css/mobile-layout.css` (All tab + table rows).
 
 2. **Flex + `width: 100%` on tbody `img`**  

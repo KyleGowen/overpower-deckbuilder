@@ -260,7 +260,7 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
             /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-img-wrap[\s\S]*?max-width:\s*var\(\s*--dbv-mobile-tile-img-max\s*\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-cell\s+img\.horizontal-card[\s\S]*?max-height:\s*var\(\s*--dbv-mobile-tile-img-landscape-max-h\s*\)/
+            /\.layout-mobile\s+#database-view\s+#all-cards-grid-container\s+\.all-cards-cell\s+img\.horizontal-card[\s\S]*?width:\s*100%[\s\S]*?max-height:\s*none/
         );
     });
 
