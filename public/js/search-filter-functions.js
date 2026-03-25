@@ -665,6 +665,32 @@ function populateMissionsMissionSetSelect() {
 
 window.populateMissionsMissionSetSelect = populateMissionsMissionSetSelect;
 
+function populateEventsMissionSetSelect() {
+    const sel = document.getElementById('events-mission-set-filter');
+    if (!sel) return;
+    const data = window.eventsData || [];
+    const prev = sel.value;
+    const sets = [...new Set(data.map((e) => e.mission_set).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    sel.innerHTML = '';
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = 'All';
+    sel.appendChild(allOpt);
+    sets.forEach((s) => {
+        const o = document.createElement('option');
+        o.value = s;
+        o.textContent = s;
+        sel.appendChild(o);
+    });
+    if (prev && sets.includes(prev)) {
+        sel.value = prev;
+    } else {
+        sel.value = '';
+    }
+}
+
+window.populateEventsMissionSetSelect = populateEventsMissionSetSelect;
+
 function setupMissionSearch() {
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', async () => {
@@ -729,87 +755,105 @@ function applyMissionFilters() {
 window.applyMissionFilters = applyMissionFilters;
 
 function setupEventSearch() {
-    // Set up main search input functionality (if it exists)
     const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', async (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            if (searchTerm.length === 0) {
-                // Reload all events
-                await loadEvents();
+    if (searchInput && !searchInput.dataset.eventsDbvSearchBound) {
+        searchInput.dataset.eventsDbvSearchBound = 'true';
+        searchInput.addEventListener('input', async () => {
+            if (!document.querySelector('.tab-button.active[data-tab="events"]')) {
                 return;
             }
-
-            try {
-                const response = await fetch('/api/events');
-                const data = await response.json();
-                
-                if (data.success) {
-                    const filteredEvents = data.data.filter(event => 
-                        event.name.toLowerCase().includes(searchTerm) ||
-                        event.mission_set.toLowerCase().includes(searchTerm) ||
-                        event.game_effect.toLowerCase().includes(searchTerm)
-                    );
-                    displayEvents(filteredEvents);
+            if (!window.eventsData || window.eventsData.length === 0) {
+                if (typeof loadEvents === 'function') {
+                    await loadEvents();
                 }
-            } catch (error) {
-                console.error('Error searching events:', error);
+                return;
             }
+            applyEventsFilters();
         });
     }
 
-    // Set up Game Effect search input functionality
     const gameEffectSearchInput = document.querySelector('#events-table .header-filter[data-column="game_effect"]');
-    if (gameEffectSearchInput) {
-        gameEffectSearchInput.addEventListener('input', async (e) => {
-            const effectTerm = e.target.value.toLowerCase();
-
-            if (effectTerm.length === 0) {
-                await loadEvents();
+    if (gameEffectSearchInput && !gameEffectSearchInput.dataset.eventsGameEffectBound) {
+        gameEffectSearchInput.dataset.eventsGameEffectBound = 'true';
+        gameEffectSearchInput.addEventListener('input', async () => {
+            if (!window.eventsData || window.eventsData.length === 0) {
+                if (typeof loadEvents === 'function') {
+                    await loadEvents();
+                }
                 return;
             }
-
-            try {
-                const response = await fetch('/api/events');
-                const data = await response.json();
-
-                if (data.success) {
-                    const filteredEvents = data.data.filter(event =>
-                        event.game_effect.toLowerCase().includes(effectTerm)
-                    );
-                    displayEvents(filteredEvents);
-                }
-            } catch (error) {
-                console.error('Error searching events by game effect:', error);
-            }
+            applyEventsFilters();
         });
     }
 
-    // Set up checkbox event listeners for mission set filtering
-    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((checkbox) => {
+        if (checkbox.dataset.eventsFilterBound) {
+            return;
+        }
+        checkbox.dataset.eventsFilterBound = 'true';
         checkbox.addEventListener('change', applyEventsFilters);
     });
+
+    const missionSetSelect = document.getElementById('events-mission-set-filter');
+    if (missionSetSelect && !missionSetSelect.dataset.eventsMissionFilterBound) {
+        missionSetSelect.dataset.eventsMissionFilterBound = 'true';
+        missionSetSelect.addEventListener('change', applyEventsFilters);
+    }
 }
 
 function applyEventsFilters() {
-    const selectedMissionSets = Array.from(document.querySelectorAll('#events-tab input[type="checkbox"]:checked'))
-        .map(checkbox => checkbox.value);
-    
-    if (selectedMissionSets.length === 0) {
-        // If no mission sets selected, show none
-        document.getElementById('events-tbody').innerHTML = '<tr><td colspan="5" class="no-results">No mission sets selected</td></tr>';
+    const tbody = document.getElementById('events-tbody');
+    if (!tbody) {
         return;
     }
-    
-    // Filter events based on selected mission sets
+
     const events = window.eventsData || [];
-    const filteredEvents = events.filter(event => 
-        selectedMissionSets.includes(event.mission_set)
-    );
-    
-    displayEvents(filteredEvents);
+    const searchInput = document.getElementById('search-input');
+    const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+    let pool = events;
+
+    if (rawTerm) {
+        pool = events.filter((event) => {
+            const n = (event.name && String(event.name).toLowerCase()) || '';
+            const ms = (event.mission_set && String(event.mission_set).toLowerCase()) || '';
+            const ge = (event.game_effect && String(event.game_effect).toLowerCase()) || '';
+            return n.includes(rawTerm) || ms.includes(rawTerm) || ge.includes(rawTerm);
+        });
+    }
+
+    const gameEffectInput = document.querySelector('#events-table .header-filter[data-column="game_effect"]');
+    const effectTerm = gameEffectInput && gameEffectInput.value ? gameEffectInput.value.trim().toLowerCase() : '';
+    if (effectTerm) {
+        pool = pool.filter((event) => {
+            const ge = (event.game_effect && String(event.game_effect).toLowerCase()) || '';
+            return ge.includes(effectTerm);
+        });
+    }
+
+    if (missionsFilterUsesMobileSelect()) {
+        const sel = document.getElementById('events-mission-set-filter');
+        const v = sel && sel.value ? sel.value : '';
+        if (!v) {
+            displayEvents(pool);
+            return;
+        }
+        displayEvents(pool.filter((e) => e.mission_set === v));
+        return;
+    }
+
+    const selectedMissionSets = Array.from(
+        document.querySelectorAll('#events-tab input[type="checkbox"]:checked')
+    ).map((checkbox) => checkbox.value);
+
+    if (selectedMissionSets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-results">No mission sets selected</td></tr>';
+        return;
+    }
+
+    displayEvents(pool.filter((event) => selectedMissionSets.includes(event.mission_set)));
 }
+
+window.applyEventsFilters = applyEventsFilters;
 
 function setupAllyUniverseSearch() {
     const searchInput = document.getElementById('search-input');

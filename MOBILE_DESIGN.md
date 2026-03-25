@@ -122,10 +122,10 @@ Per-tab delivery for the Card Database (`#database-view`). **Status** values: `p
 | **Characters**         | `characters` / `characters-tab`               | done    |
 | **Special Cards**      | `special-cards` / `special-cards-tab`         | done    |
 | **Universe: Advanced** | `advanced-universe` / `advanced-universe-tab` | pending |
-| **Locations**          | `locations` / `locations-tab`                 | pending |
+| **Locations**          | `locations` / `locations-tab`                 | done    |
 | **Aspects**            | `aspects` / `aspects-tab`                     | done    |
 | **Missions**           | `missions` / `missions-tab`                   | **done** — see **§10.6** and [`docs/current/DBV_MISSIONS_MOBILE.md`](docs/current/DBV_MISSIONS_MOBILE.md) |
-| **Events**             | `events` / `events-tab`                       | pending |
+| **Events**             | `events` / `events-tab`                       | done    |
 | **Universe: Teamwork** | `teamwork` / `teamwork-tab`                   | pending |
 | **Universe: Ally**     | `ally-universe` / `ally-universe-tab`         | pending |
 | **Universe: Training** | `training` / `training-tab`                   | pending |
@@ -176,6 +176,7 @@ Small, desktop-neutral PRs; check off below as completed.
 | DBV Characters: **tabbed stat filters** (merged `colspan=5` header cell, `characters-stat-filter-tabs.js`)                              | M2c         | done                                              |
 | DBV **Aspects** tab (mobile filter shell, value/no-value chrome, caption, actions grid; no pseudo **Actions** label)                  | M2c         | done                                              |
 | DBV **Missions** tab (mobile mission-set `<select>`, vertical card rows, caption, search ∩ set filter)                                | M2c         | done                                              |
+| DBV **Events** tab (mobile mission-set `<select>`, game effect filter, Locations-style card rows, caption: name / set / effect / flavor) | M2c         | done                                              |
 
 
 **M0 — Foundation**

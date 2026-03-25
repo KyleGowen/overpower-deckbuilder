@@ -389,33 +389,46 @@
             <thead>
                 <tr>
                     <th>Image</th>
+                    <th></th>
                     <th>Name</th>
                     <th>Mission Set</th>
                     <th>Game Effect</th>
                     <th>Flavor Text</th>
                 </tr>
-                <tr class="filter-row">
-                    <th>
-                        <button class="clear-filters-btn" onclick="clearEventsFilters()">Clear All Filters</button>
+                <tr class="filter-row events-filter-row">
+                    <th class="events-filter-clear-th">
+                        <button type="button" id="clear-events-filters-desktop" class="clear-filters-btn" onclick="clearEventsFilters()">Clear All Filters</button>
                     </th>
-                    <th></th>
-                    <th>
-                        <div class="column-filters">
-                            <div class="checkbox-group">
+                    <th class="events-filter-spacer-th" aria-hidden="true"></th>
+                    <th class="events-filter-name-th" aria-hidden="true"></th>
+                    <th class="events-filter-sets-th">
+                        <div class="column-filters events-column-filters">
+                            <div class="events-mobile-set-row">
+                                <label class="events-mobile-set-label" for="events-mission-set-filter">Mission set</label>
+                                <div class="events-mobile-set-select-clear-row">
+                                    <select id="events-mission-set-filter" class="events-mission-set-filter" aria-label="Filter events by mission set">
+                                        <option value="">All</option>
+                                    </select>
+                                    <button type="button" id="clear-events-filters-mobile" class="clear-filters-btn clear-filters-btn--events-mobile-inline" onclick="clearEventsFilters()">Clear filters</button>
+                                </div>
+                            </div>
+                            <div class="checkbox-group events-checkbox-group">
                                 <label><input type="checkbox" value="King of the Jungle" checked> King of the Jungle</label>
                                 <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
                                 <label><input type="checkbox" value="Time Wars: Rise of the Gods" checked> Time Wars: Rise of the Gods</label>
-                                <label><input type="checkbox" value="Warlord of Mars" checked> Warlord of Mars</label>
+                                <label><input type="checkbox" value="The Warlord of Mars" checked> Warlord of Mars</label>
                             </div>
                         </div>
                     </th>
-                    <th></th>
-                    <th></th>
+                    <th class="events-filter-effect-th">
+                        <input type="text" class="header-filter" placeholder="Search effects..." data-column="game_effect" aria-label="Filter events by game effect">
+                    </th>
+                    <th class="events-filter-flavor-th" aria-hidden="true"></th>
                 </tr>
             </thead>
             <tbody id="events-tbody">
                 <tr>
-                    <td colspan="5" class="loading">Loading events...</td>
+                    <td colspan="6" class="loading">Loading events...</td>
                 </tr>
             </tbody>
         </table>

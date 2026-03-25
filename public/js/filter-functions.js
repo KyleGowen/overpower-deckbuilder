@@ -171,14 +171,23 @@ function clearMissionsFilters() {
 }
 
 function clearEventsFilters() {
-    // Clear events search inputs
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+
     const gameEffectSearchInput = document.querySelector('#events-table .header-filter[data-column="game_effect"]');
-    
     if (gameEffectSearchInput) gameEffectSearchInput.value = '';
 
-    // Reload all events
+    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
+        cb.checked = true;
+    });
+
+    const missionSetSelect = document.getElementById('events-mission-set-filter');
+    if (missionSetSelect) missionSetSelect.value = '';
+
     if (typeof loadEvents === 'function') {
         loadEvents();
+    } else if (typeof applyEventsFilters === 'function') {
+        applyEventsFilters();
     }
 }
 

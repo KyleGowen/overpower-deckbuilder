@@ -125,67 +125,137 @@ function displayMissions(missions) {
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
-// Display events
+// Display events (desktop table + mobile card rows; single art — no nav arrows)
 function displayEvents(events) {
     const tbody = document.getElementById('events-tbody');
-    
+    if (!tbody) return;
+
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
     if (events.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6">No events found</td></tr>';
         return;
     }
-    
-    // Sort events by mission set first, then by name alphabetically
-    const sortedEvents = events.sort((a, b) => {
+
+    const sortedEvents = [...events].sort((a, b) => {
         if (a.mission_set !== b.mission_set) {
-            return a.mission_set.localeCompare(b.mission_set);
+            return String(a.mission_set || '').localeCompare(String(b.mission_set || ''));
         }
-        return a.name.localeCompare(b.name);
+        return String(a.name || '').localeCompare(String(b.name || ''));
     });
-    
+
     tbody.innerHTML = '';
-    
-    sortedEvents.forEach(event => {
+
+    const useMobileList =
+        typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay();
+
+    function eventImagePaths(ev) {
+        if (typeof window.getCardImagePathForDisplay === 'function') {
+            const thumb = window.getCardImagePathForDisplay(
+                { ...ev, image_path: ev.image_path || ev.image },
+                'event',
+                { useThumbnail: true }
+            );
+            const full = window.getCardImagePathForDisplay({ ...ev, image_path: ev.image_path || ev.image }, 'event');
+            return { thumb, full: full || thumb };
+        }
         let imagePath;
         if (typeof window.getCardImagePath === 'function') {
-            imagePath = window.getCardImagePath({ ...event, image_path: event.image_path || event.image }, 'event');
+            imagePath = window.getCardImagePath({ ...ev, image_path: ev.image_path || ev.image }, 'event');
         } else {
             const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
-            const raw = '/src/resources/cards/images/events/' + mapImagePathToActualFile(event.image || '');
+            const raw = '/src/resources/cards/images/events/' + mapImagePathToActualFile(ev.image || '');
             imagePath = cdn ? cdn + raw : raw;
         }
-        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+        return { thumb: imagePath, full: imagePath };
+    }
+
+    sortedEvents.forEach((event) => {
+        const { thumb: imagePath, full: fullResPath } = eventImagePaths(event);
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        const fullResEscaped = (fullResPath || imagePath).replace(/'/g, "\\'");
+        const fullResAttr = (fullResPath || imagePath).replace(/"/g, '&quot;');
+        const namePlain = event.name != null ? String(event.name) : '';
+        const nameEsc = esc(namePlain);
+        const nameJs = namePlain.replace(/'/g, "\\'");
+        const missionSetPlain = event.mission_set != null ? String(event.mission_set).trim() : '';
+        const gameEffectPlain = event.game_effect != null ? String(event.game_effect) : '';
+        const flavorStripped = String(event.flavor_text != null ? event.flavor_text : '').replace(/^\*|\*$/g, '');
+
+        const eventDbvImgStyle = useMobileList
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+        const capSet = `<div class="characters-mobile-card-caption__set"${missionSetPlain ? '' : ' style="display:none;"'}>${missionSetPlain ? esc(missionSetPlain) : ''}</div>`;
+        const capEffect = `<div class="characters-mobile-card-caption__game-effect"${gameEffectPlain.trim() ? '' : ' style="display:none;"'}>${gameEffectPlain.trim() ? esc(gameEffectPlain) : ''}</div>`;
+        const capFlavor = `<div class="characters-mobile-card-caption__flavor"${flavorStripped.trim() ? '' : ' style="display:none;"'}>${flavorStripped.trim() ? esc(flavorStripped.trim()) : ''}</div>`;
+
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${event.name}" 
-                     loading="lazy"
-                     decoding="async"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${event.name.replace(/'/g, "\\'")}', '${(event.id || '').replace(/'/g, "\\'")}', 'event')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+            <td data-label="Image">
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         data-full-res="${fullResAttr}"
+                         alt="${nameEsc}"
+                         loading="lazy"
+                         decoding="async"
+                         style="${eventDbvImgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${fullResEscaped}', '${nameJs}', '${String(event.id || '').replace(/'/g, "\\'")}', 'event')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${nameEsc}</div>
+                    ${capSet}
+                    ${capEffect}
+                    ${capFlavor}
+                </div>
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('event', '${event.id}', '${event.name.replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('event', '${event.id}', '${nameJs}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${event.id}', 'event', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
+                ${typeof getCurrentUser === 'function' && getCurrentUser()
+                    ? `
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${event.id}', 'event', '${fullResEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${event.id}" data-card-type="event" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${event.id}', 'event', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
-                ` : ''}
+                <button class="remove-from-collection-btn" data-card-id="${event.id}" data-card-type="event" data-image-path="${fullResAttr}" onclick="removeOneFromCollection('${event.id}', 'event', '${fullResEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
+                `
+                    : ''}
             </td>
             <td><strong>${event.name}</strong></td>
             <td>${event.mission_set}</td>
             <td>${event.game_effect}</td>
             <td><em>${event.flavor_text.replace(/^\*|\*$/g, '')}</em></td>
         `;
-        
+
         tbody.appendChild(row);
+
+        const img = row.querySelector('img');
+        if (img && typeof window.applyDbvHorizontalCardClass === 'function') {
+            const syncOrientation = function () {
+                window.applyDbvHorizontalCardClass(img);
+            };
+            if (img.complete && img.naturalWidth) {
+                syncOrientation();
+            } else {
+                img.addEventListener('load', syncOrientation, { once: true });
+            }
+            if (typeof window.applyCharacterImageRowHeightLock === 'function') {
+                window.applyCharacterImageRowHeightLock(row);
+            }
+        }
+
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');
             if (addToDeckBtn) {

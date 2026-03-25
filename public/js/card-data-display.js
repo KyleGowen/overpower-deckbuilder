@@ -48,7 +48,9 @@ async function loadEvents() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('events');
     if (cached) {
         window.eventsData = cached;
-        displayEvents(cached);
+        if (typeof populateEventsMissionSetSelect === 'function') populateEventsMissionSetSelect();
+        if (typeof applyEventsFilters === 'function') applyEventsFilters();
+        else displayEvents(cached);
         return;
     }
     try {
@@ -58,7 +60,9 @@ async function loadEvents() {
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('events', data.data);
             window.eventsData = data.data;
-            displayEvents(data.data);
+            if (typeof populateEventsMissionSetSelect === 'function') populateEventsMissionSetSelect();
+            if (typeof applyEventsFilters === 'function') applyEventsFilters();
+            else displayEvents(data.data);
         }
     } catch (error) {
         console.error('Error loading events:', error);

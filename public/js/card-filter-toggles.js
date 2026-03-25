@@ -129,26 +129,6 @@ async function applyLocationFilters() {
     }
 }
 
-// Events filtering
-function applyEventsFilters() {
-    const selectedMissionSets = Array.from(document.querySelectorAll('#events-tab input[type="checkbox"]:checked'))
-        .map(checkbox => checkbox.value);
-    
-    if (selectedMissionSets.length === 0) {
-        // If no mission sets selected, show none
-        document.getElementById('events-tbody').innerHTML = '<tr><td colspan="5" class="no-results">No mission sets selected</td></tr>';
-        return;
-    }
-    
-    // Filter events based on selected mission sets
-    const events = window.eventsData || [];
-    const filteredEvents = events.filter(event => 
-        selectedMissionSets.includes(event.mission_set)
-    );
-    
-    displayEvents(filteredEvents);
-}
-
 // Basic Universe filtering
 async function applyBasicUniverseFilters() {
     try {
@@ -1307,7 +1287,6 @@ function updateAllyUniverseFilter() {
 // Export all functions to window for backward compatibility
 window.applyFilters = applyFilters;
 window.applyLocationFilters = applyLocationFilters;
-window.applyEventsFilters = applyEventsFilters;
 window.applyBasicUniverseFilters = applyBasicUniverseFilters;
 window.toggleEventsMissionFilter = toggleEventsMissionFilter;
 window.toggleSpecialCardsCharacterFilter = toggleSpecialCardsCharacterFilter;

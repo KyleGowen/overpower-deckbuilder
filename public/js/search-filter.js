@@ -55,6 +55,9 @@ function clearAllFiltersGlobally() {
     const missionsMissionSetSelect = document.getElementById('missions-mission-set-filter');
     if (missionsMissionSetSelect) missionsMissionSetSelect.value = '';
 
+    const eventsMissionSetSelect = document.getElementById('events-mission-set-filter');
+    if (eventsMissionSetSelect) eventsMissionSetSelect.value = '';
+
     isClearingFilters = false;
 }
 

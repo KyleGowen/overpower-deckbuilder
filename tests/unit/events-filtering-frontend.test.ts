@@ -1,445 +1,296 @@
 /**
- * Unit tests for Events Mission Set filtering functionality
- * Tests the setupEventSearch and applyEventsFilters functions
+ * Unit tests for DBV Events filtering (mission set, game effect, search).
+ * Logic mirrors public/js/search-filter-functions.js applyEventsFilters / setupEventSearch.
  */
 
 import { JSDOM } from 'jsdom';
 
-// Mock DOM environment
-const dom = new JSDOM(`
-<!DOCTYPE html>
-<html>
-<head></head>
-<body>
-    <div id="events-tab">
-        <input type="text" id="search-input" placeholder="Search events...">
-        <div class="filter-row">
-            <input type="checkbox" value="King of the Jungle" id="king-jungle">
-            <label for="king-jungle">King of the Jungle</label>
-            <input type="checkbox" value="The Call of Cthulhu" id="cthulhu" checked>
-            <label for="cthulhu">The Call of Cthulhu</label>
-            <input type="checkbox" value="Time Wars: Rise of the Gods" id="time-wars" checked>
-            <label for="time-wars">Time Wars: Rise of the Gods</label>
-            <input type="checkbox" value="Warlord of Mars" id="warlord" checked>
-            <label for="warlord">Warlord of Mars</label>
-        </div>
-        <table>
-            <tbody id="events-tbody">
-                <tr><td>Event 1</td><td>King of the Jungle</td></tr>
-                <tr><td>Event 2</td><td>The Call of Cthulhu</td></tr>
-                <tr><td>Event 3</td><td>Time Wars: Rise of the Gods</td></tr>
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-`);
+const dom = new JSDOM(
+    `<!DOCTYPE html>
+<html><head></head><body>
+  <button class="tab-button active" data-tab="events"></button>
+  <input type="text" id="search-input" value="">
+  <div id="events-tab">
+    <input type="checkbox" value="King of the Jungle" id="king-jungle">
+    <input type="checkbox" value="The Call of Cthulhu" id="cthulhu" checked>
+    <input type="checkbox" value="Time Wars: Rise of the Gods" id="time-wars" checked>
+    <input type="checkbox" value="The Warlord of Mars" id="warlord" checked>
+  </div>
+  <table id="events-table">
+    <thead><tr><th><input type="text" class="header-filter" data-column="game_effect" value=""></th></tr></thead>
+  </table>
+  <select id="events-mission-set-filter"><option value="">All</option></select>
+  <table><tbody id="events-tbody"></tbody></table>
+</body></html>`
+);
 
-// Set up global objects
 global.window = dom.window as any;
 global.document = dom.window.document;
-global.fetch = jest.fn();
 
-// Extend window interface for our test functions
+Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(() => ({ matches: false, addEventListener: jest.fn(), removeEventListener: jest.fn() })),
+});
+
 interface TestWindow extends Window {
-    eventsData?: any[] | undefined;
+    eventsData?: any[];
     displayEvents?: jest.Mock;
     loadEvents?: jest.Mock;
-    applyEventsFilters?: jest.Mock;
 }
 
 const testWindow = global.window as TestWindow;
 
-// Mock the external functions that would be loaded from other files
+testWindow.displayEvents = jest.fn();
+testWindow.loadEvents = jest.fn();
+
 testWindow.eventsData = [
     { name: 'Event 1', mission_set: 'King of the Jungle', game_effect: 'Test effect 1' },
     { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
     { name: 'Event 3', mission_set: 'Time Wars: Rise of the Gods', game_effect: 'Test effect 3' },
-    { name: 'Event 4', mission_set: 'Warlord of Mars', game_effect: 'Test effect 4' }
+    { name: 'Event 4', mission_set: 'The Warlord of Mars', game_effect: 'Test effect 4' },
 ];
 
-// Mock displayEvents function
-testWindow.displayEvents = jest.fn();
-
-// Mock loadEvents function
-testWindow.loadEvents = jest.fn();
-
-// Import the functions we want to test (these would be from the external JS file)
-function setupEventSearch() {
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
-    searchInput.addEventListener('input', async (e) => {
-        const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
-        
-        if (searchTerm.length === 0) {
-            // Reload all events
-            await testWindow.loadEvents!();
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/events');
-            const data = await response.json();
-            
-            if (data.success) {
-                const filteredEvents = data.data.filter((event: any) => 
-                    event.name.toLowerCase().includes(searchTerm) ||
-                    event.mission_set.toLowerCase().includes(searchTerm) ||
-                    event.game_effect.toLowerCase().includes(searchTerm)
-                );
-                testWindow.displayEvents!(filteredEvents);
-            }
-        } catch (error) {
-            console.error('Error searching events:', error);
-        }
-    });
-
-    // Set up checkbox event listeners for mission set filtering
-    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', applyEventsFilters);
-    });
+function missionsFilterUsesMobileSelect(): boolean {
+    if (document.documentElement.classList.contains('layout-mobile')) {
+        return true;
+    }
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 900px)').matches) {
+        return true;
+    }
+    return false;
 }
 
 function applyEventsFilters() {
-    const selectedMissionSets = Array.from(document.querySelectorAll('#events-tab input[type="checkbox"]:checked'))
-        .map(checkbox => (checkbox as HTMLInputElement).value);
-    
-    if (selectedMissionSets.length === 0) {
-        // If no mission sets selected, show none
-        const tbody = document.getElementById('events-tbody');
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="5" class="no-results">No mission sets selected</td></tr>';
-        }
+    const tbody = document.getElementById('events-tbody');
+    if (!tbody) {
         return;
     }
-    
-    // Filter events based on selected mission sets
+
     const events = testWindow.eventsData || [];
-    const filteredEvents = events.filter((event: any) => 
-        selectedMissionSets.includes(event.mission_set)
+    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+    const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+    let pool = events;
+
+    if (rawTerm) {
+        pool = events.filter((event) => {
+            const n = (event.name && String(event.name).toLowerCase()) || '';
+            const ms = (event.mission_set && String(event.mission_set).toLowerCase()) || '';
+            const ge = (event.game_effect && String(event.game_effect).toLowerCase()) || '';
+            return n.includes(rawTerm) || ms.includes(rawTerm) || ge.includes(rawTerm);
+        });
+    }
+
+    const gameEffectInput = document.querySelector(
+        '#events-table .header-filter[data-column="game_effect"]'
+    ) as HTMLInputElement | null;
+    const effectTerm = gameEffectInput && gameEffectInput.value ? gameEffectInput.value.trim().toLowerCase() : '';
+    if (effectTerm) {
+        pool = pool.filter((event) => {
+            const ge = (event.game_effect && String(event.game_effect).toLowerCase()) || '';
+            return ge.includes(effectTerm);
+        });
+    }
+
+    if (missionsFilterUsesMobileSelect()) {
+        const sel = document.getElementById('events-mission-set-filter') as HTMLSelectElement | null;
+        const v = sel && sel.value ? sel.value : '';
+        if (!v) {
+            testWindow.displayEvents!(pool);
+            return;
+        }
+        testWindow.displayEvents!(pool.filter((e) => e.mission_set === v));
+        return;
+    }
+
+    const selectedMissionSets = Array.from(document.querySelectorAll('#events-tab input[type="checkbox"]:checked')).map(
+        (checkbox) => (checkbox as HTMLInputElement).value
     );
-    
-    testWindow.displayEvents!(filteredEvents);
+
+    if (selectedMissionSets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-results">No mission sets selected</td></tr>';
+        return;
+    }
+
+    testWindow.displayEvents!(pool.filter((event) => selectedMissionSets.includes(event.mission_set)));
 }
 
-describe('Events Mission Set Filtering', () => {
+function setupEventSearch() {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    if (searchInput && !searchInput.dataset.eventsDbvSearchBound) {
+        searchInput.dataset.eventsDbvSearchBound = 'true';
+        searchInput.addEventListener('input', async () => {
+            if (!document.querySelector('.tab-button.active[data-tab="events"]')) {
+                return;
+            }
+            if (!testWindow.eventsData || testWindow.eventsData.length === 0) {
+                await testWindow.loadEvents!();
+                return;
+            }
+            applyEventsFilters();
+        });
+    }
+
+    const gameEffectSearchInput = document.querySelector(
+        '#events-table .header-filter[data-column="game_effect"]'
+    ) as HTMLInputElement;
+    if (gameEffectSearchInput && !gameEffectSearchInput.dataset.eventsGameEffectBound) {
+        gameEffectSearchInput.dataset.eventsGameEffectBound = 'true';
+        gameEffectSearchInput.addEventListener('input', async () => {
+            if (!testWindow.eventsData || testWindow.eventsData.length === 0) {
+                await testWindow.loadEvents!();
+                return;
+            }
+            applyEventsFilters();
+        });
+    }
+
+    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((checkbox) => {
+        if ((checkbox as HTMLInputElement).dataset.eventsFilterBound) {
+            return;
+        }
+        (checkbox as HTMLInputElement).dataset.eventsFilterBound = 'true';
+        checkbox.addEventListener('change', applyEventsFilters);
+    });
+
+    const missionSetSelect = document.getElementById('events-mission-set-filter') as HTMLSelectElement;
+    if (missionSetSelect && !missionSetSelect.dataset.eventsMissionFilterBound) {
+        missionSetSelect.dataset.eventsMissionFilterBound = 'true';
+        missionSetSelect.addEventListener('change', applyEventsFilters);
+    }
+}
+
+describe('Events DBV filtering', () => {
     beforeEach(() => {
-        // Reset DOM state
         const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
         checkboxes.forEach((checkbox, index) => {
-            (checkbox as HTMLInputElement).checked = index > 0; // First unchecked, others checked
+            (checkbox as HTMLInputElement).checked = index > 0;
         });
-        
-        // Reset tbody content
-        const tbody = document.getElementById('events-tbody');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr><td>Event 1</td><td>King of the Jungle</td></tr>
-                <tr><td>Event 2</td><td>The Call of Cthulhu</td></tr>
-                <tr><td>Event 3</td><td>Time Wars: Rise of the Gods</td></tr>
-            `;
-        }
-        
-        // Clear mocks
+        const searchInput = document.getElementById('search-input') as HTMLInputElement;
+        searchInput.value = '';
+        const ge = document.querySelector('#events-table .header-filter[data-column="game_effect"]') as HTMLInputElement;
+        ge.value = '';
+        const sel = document.getElementById('events-mission-set-filter') as HTMLSelectElement;
+        sel.value = '';
+        document.documentElement.classList.remove('layout-mobile');
         jest.clearAllMocks();
     });
 
-    describe('setupEventSearch', () => {
-        test('should attach event listeners to all Mission Set checkboxes', () => {
-            // Get the checkboxes and spy on their addEventListener method
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            const addEventListenerSpies = Array.from(checkboxes).map(checkbox => 
-                jest.spyOn(checkbox, 'addEventListener')
-            );
-            
-            setupEventSearch();
-            
-            // Should have called addEventListener for each checkbox (4 checkboxes)
-            addEventListenerSpies.forEach(spy => {
-                expect(spy).toHaveBeenCalledWith('change', expect.any(Function));
-            });
-            
-            addEventListenerSpies.forEach(spy => spy.mockRestore());
-        });
-
-        test('should attach input event listener to search input', () => {
-            const searchInput = document.getElementById('search-input') as HTMLInputElement;
-            const addEventListenerSpy = jest.spyOn(searchInput, 'addEventListener');
-            
-            setupEventSearch();
-            
-            // Should have called addEventListener for the search input
-            expect(addEventListenerSpy).toHaveBeenCalledWith('input', expect.any(Function));
-            
-            addEventListenerSpy.mockRestore();
-        });
-    });
-
-    describe('applyEventsFilters', () => {
-        test('should filter events based on selected Mission Sets', () => {
-            // Set up: Only "The Call of Cthulhu" and "Time Wars: Rise of the Gods" checked
+    describe('applyEventsFilters (desktop checkboxes)', () => {
+        it('filters by checked mission sets', () => {
             const cthulhuCheckbox = document.getElementById('cthulhu') as HTMLInputElement;
             const timeWarsCheckbox = document.getElementById('time-wars') as HTMLInputElement;
             const kingJungleCheckbox = document.getElementById('king-jungle') as HTMLInputElement;
             const warlordCheckbox = document.getElementById('warlord') as HTMLInputElement;
-            
+
             cthulhuCheckbox.checked = true;
             timeWarsCheckbox.checked = true;
             kingJungleCheckbox.checked = false;
             warlordCheckbox.checked = false;
-            
+
             applyEventsFilters();
-            
-            // Should call displayEvents with filtered events
-            expect(testWindow.displayEvents).toHaveBeenCalledWith([
-                { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
-                { name: 'Event 3', mission_set: 'Time Wars: Rise of the Gods', game_effect: 'Test effect 3' }
-            ]);
-        });
 
-        test('should show no events when no Mission Sets are selected', () => {
-            // Set up: Uncheck all checkboxes
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
-            });
-            
-            applyEventsFilters();
-            
-            // Should show "No mission sets selected" message
-            const tbody = document.getElementById('events-tbody');
-            expect(tbody?.innerHTML).toBe('<tr><td colspan="5" class="no-results">No mission sets selected</td></tr>');
-            
-            // Should not call displayEvents
-            expect(testWindow.displayEvents).not.toHaveBeenCalled();
-        });
-
-        test('should show all events when all Mission Sets are selected', () => {
-            // Set up: Check all checkboxes
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = true;
-            });
-            
-            applyEventsFilters();
-            
-            // Should call displayEvents with all events
-            expect(testWindow.displayEvents).toHaveBeenCalledWith(testWindow.eventsData);
-        });
-
-        test('should handle single Mission Set selection', () => {
-            // Set up: Only "King of the Jungle" checked
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
-            });
-            const kingJungleCheckbox = document.getElementById('king-jungle') as HTMLInputElement;
-            kingJungleCheckbox.checked = true;
-            
-            applyEventsFilters();
-            
-            // Should call displayEvents with only King of the Jungle events
-            expect(testWindow.displayEvents).toHaveBeenCalledWith([
-                { name: 'Event 1', mission_set: 'King of the Jungle', game_effect: 'Test effect 1' }
-            ]);
-        });
-
-        test('should handle empty eventsData gracefully', () => {
-            // Set up: Empty eventsData
-            const originalEventsData = testWindow.eventsData;
-            testWindow.eventsData = [];
-            
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = true;
-            });
-            
-            applyEventsFilters();
-            
-            // Should call displayEvents with empty array
-            expect(testWindow.displayEvents).toHaveBeenCalledWith([]);
-            
-            // Restore original data
-            testWindow.eventsData = originalEventsData;
-        });
-
-        test('should handle undefined eventsData gracefully', () => {
-            // Set up: Undefined eventsData
-            const originalEventsData = testWindow.eventsData;
-            testWindow.eventsData = undefined;
-            
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = true;
-            });
-            
-            applyEventsFilters();
-            
-            // Should call displayEvents with empty array
-            expect(testWindow.displayEvents).toHaveBeenCalledWith([]);
-            
-            // Restore original data
-            testWindow.eventsData = originalEventsData;
-        });
-    });
-
-    describe('Checkbox Event Handling', () => {
-        test('should trigger filtering when checkbox is changed', () => {
-            // Set up event listeners
-            setupEventSearch();
-            
-            // Spy on applyEventsFilters
-            const applyEventsFiltersSpy = jest.fn();
-            testWindow.applyEventsFilters = applyEventsFiltersSpy;
-            
-            // Manually attach the event listener to test it
-            const kingJungleCheckbox = document.getElementById('king-jungle') as HTMLInputElement;
-            kingJungleCheckbox.addEventListener('change', applyEventsFiltersSpy);
-            
-            // Trigger change event
-            kingJungleCheckbox.checked = true;
-            kingJungleCheckbox.dispatchEvent(new dom.window.Event('change'));
-            
-            // Should have called applyEventsFilters
-            expect(applyEventsFiltersSpy).toHaveBeenCalledTimes(1);
-        });
-
-        test('should handle multiple checkbox changes', () => {
-            // Set up event listeners
-            setupEventSearch();
-            
-            // Spy on applyEventsFilters
-            const applyEventsFiltersSpy = jest.fn();
-            testWindow.applyEventsFilters = applyEventsFiltersSpy;
-            
-            // Get all checkboxes
-            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
-            
-            // Manually attach event listeners to test them
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', applyEventsFiltersSpy);
-            });
-            
-            // Trigger change events on multiple checkboxes
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = !(checkbox as HTMLInputElement).checked;
-                checkbox.dispatchEvent(new dom.window.Event('change'));
-            });
-            
-            // Should have called applyEventsFilters for each checkbox
-            expect(applyEventsFiltersSpy).toHaveBeenCalledTimes(checkboxes.length);
-        });
-    });
-
-    describe('Search Input Functionality', () => {
-        test('should handle empty search term by reloading all events', async () => {
-            // Set up event listeners
-            setupEventSearch();
-            
-            const searchInput = document.getElementById('search-input') as HTMLInputElement;
-            
-            // Trigger input event with empty value
-            searchInput.value = '';
-            searchInput.dispatchEvent(new dom.window.Event('input'));
-            
-            // Should call loadEvents
-            expect(testWindow.loadEvents).toHaveBeenCalled();
-        });
-
-        test('should filter events based on search term', async () => {
-            // Mock fetch response
-            const mockEvents = [
-                { name: 'Test Event', mission_set: 'Test Set', game_effect: 'Test effect' }
-            ];
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                json: async () => ({ success: true, data: mockEvents })
-            });
-            
-            // Set up event listeners
-            setupEventSearch();
-            
-            const searchInput = document.getElementById('search-input') as HTMLInputElement;
-            
-            // Trigger input event with search term
-            searchInput.value = 'test';
-            searchInput.dispatchEvent(new dom.window.Event('input'));
-            
-            // Wait for async operations
-            await new Promise(resolve => setTimeout(resolve, 0));
-            
-            // Should call displayEvents with filtered results
-            expect(testWindow.displayEvents).toHaveBeenCalledWith(mockEvents);
-        });
-
-        test('should handle search API errors gracefully', async () => {
-            // Mock fetch to reject
-            (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
-            
-            // Spy on console.error
-            const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-            
-            // Set up event listeners
-            setupEventSearch();
-            
-            const searchInput = document.getElementById('search-input') as HTMLInputElement;
-            
-            // Trigger input event with search term
-            searchInput.value = 'test';
-            searchInput.dispatchEvent(new dom.window.Event('input'));
-            
-            // Wait for async operations
-            await new Promise(resolve => setTimeout(resolve, 0));
-            
-            // Should log error
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error searching events:', expect.any(Error));
-            
-            consoleErrorSpy.mockRestore();
-        });
-    });
-
-    describe('Integration Tests', () => {
-        test('should work end-to-end with checkbox changes', () => {
-            // Set up the complete system
-            setupEventSearch();
-            
-            // Initially: King of the Jungle unchecked, others checked
-            const kingJungleCheckbox = document.getElementById('king-jungle') as HTMLInputElement;
-            const cthulhuCheckbox = document.getElementById('cthulhu') as HTMLInputElement;
-            
-            expect(kingJungleCheckbox.checked).toBe(false);
-            expect(cthulhuCheckbox.checked).toBe(true);
-            
-            // Apply initial filters
-            applyEventsFilters();
-            
-            // Should show events for checked Mission Sets
             expect(testWindow.displayEvents).toHaveBeenCalledWith([
                 { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
                 { name: 'Event 3', mission_set: 'Time Wars: Rise of the Gods', game_effect: 'Test effect 3' },
-                { name: 'Event 4', mission_set: 'Warlord of Mars', game_effect: 'Test effect 4' }
             ]);
-            
-            // Now check King of the Jungle
-            kingJungleCheckbox.checked = true;
-            kingJungleCheckbox.dispatchEvent(new dom.window.Event('change'));
-            
-            // Should now include King of the Jungle events
-            expect(testWindow.displayEvents).toHaveBeenLastCalledWith(testWindow.eventsData);
         });
 
-        test('should handle rapid checkbox changes', () => {
-            // Set up the complete system
+        it('shows no-results when no mission sets checked', () => {
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
+                (cb as HTMLInputElement).checked = false;
+            });
+            applyEventsFilters();
+            const tbody = document.getElementById('events-tbody')!;
+            expect(tbody.innerHTML).toContain('colspan="6"');
+            expect(tbody.innerHTML).toContain('No mission sets selected');
+            expect(testWindow.displayEvents).not.toHaveBeenCalled();
+        });
+
+        it('shows all events when all mission sets checked', () => {
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
+                (cb as HTMLInputElement).checked = true;
+            });
+            applyEventsFilters();
+            expect(testWindow.displayEvents).toHaveBeenCalledWith(testWindow.eventsData);
+        });
+
+        it('applies game effect substring filter', () => {
+            (document.querySelector('#events-table .header-filter[data-column="game_effect"]') as HTMLInputElement).value =
+                'effect 2';
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
+                (cb as HTMLInputElement).checked = true;
+            });
+            applyEventsFilters();
+            expect(testWindow.displayEvents).toHaveBeenCalledWith([
+                { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
+            ]);
+        });
+
+        it('combines search input with mission sets', () => {
+            (document.getElementById('search-input') as HTMLInputElement).value = 'cthulhu';
+            document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
+                (cb as HTMLInputElement).checked = true;
+            });
+            applyEventsFilters();
+            expect(testWindow.displayEvents).toHaveBeenCalledWith([
+                { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
+            ]);
+        });
+    });
+
+    describe('applyEventsFilters (mobile select)', () => {
+        it('filters by mission set select when layout-mobile', () => {
+            document.documentElement.classList.add('layout-mobile');
+            const sel = document.getElementById('events-mission-set-filter') as HTMLSelectElement;
+            sel.innerHTML =
+                '<option value="">All</option><option value="The Call of Cthulhu">The Call of Cthulhu</option>';
+            sel.value = 'The Call of Cthulhu';
+
+            applyEventsFilters();
+
+            expect(testWindow.displayEvents).toHaveBeenCalledWith([
+                { name: 'Event 2', mission_set: 'The Call of Cthulhu', game_effect: 'Test effect 2' },
+            ]);
+        });
+
+        it('shows all when select is All on mobile', () => {
+            document.documentElement.classList.add('layout-mobile');
+            const sel = document.getElementById('events-mission-set-filter') as HTMLSelectElement;
+            sel.value = '';
+            applyEventsFilters();
+            expect(testWindow.displayEvents).toHaveBeenCalledWith(testWindow.eventsData);
+        });
+    });
+
+    describe('setupEventSearch', () => {
+        it('binds checkbox change handlers once', () => {
+            const checkboxes = document.querySelectorAll('#events-tab input[type="checkbox"]');
+            const spies = Array.from(checkboxes).map((c) => jest.spyOn(c, 'addEventListener'));
             setupEventSearch();
-            
-            const kingJungleCheckbox = document.getElementById('king-jungle') as HTMLInputElement;
-            
-            // Rapidly toggle the checkbox multiple times
-            for (let i = 0; i < 5; i++) {
-                kingJungleCheckbox.checked = !kingJungleCheckbox.checked;
-                kingJungleCheckbox.dispatchEvent(new dom.window.Event('change'));
-            }
-            
-            // Should have called displayEvents multiple times
-            expect(testWindow.displayEvents).toHaveBeenCalledTimes(5);
+            spies.forEach((s) => expect(s).toHaveBeenCalledWith('change', expect.any(Function)));
+            spies.forEach((s) => s.mockRestore());
+        });
+
+        it('search input triggers applyEventsFilters on events tab with data', async () => {
+            setupEventSearch();
+            const searchInput = document.getElementById('search-input') as HTMLInputElement;
+            searchInput.value = 'Event 1';
+            searchInput.dispatchEvent(new dom.window.Event('input'));
+            await Promise.resolve();
+            expect(testWindow.loadEvents).not.toHaveBeenCalled();
+            expect(testWindow.displayEvents).toHaveBeenCalled();
+        });
+
+        it('search input calls loadEvents when eventsData empty', async () => {
+            const saved = testWindow.eventsData ?? [];
+            testWindow.eventsData = [];
+            setupEventSearch();
+            const searchInput = document.getElementById('search-input') as HTMLInputElement;
+            searchInput.value = 'x';
+            searchInput.dispatchEvent(new dom.window.Event('input'));
+            await Promise.resolve();
+            expect(testWindow.loadEvents).toHaveBeenCalled();
+            testWindow.eventsData = [...saved];
         });
     });
 });

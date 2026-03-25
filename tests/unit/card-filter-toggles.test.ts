@@ -6,8 +6,9 @@
  * Tests the card-type filter toggle functions extracted from index.html:
  * - applyFilters() for character database filtering
  * - applyLocationFilters() for location threat-level filtering
- * - applyEventsFilters() for events mission-set filtering
  * - update*Filter() helper functions
+ *
+ * Note: applyEventsFilters lives in search-filter-functions.js (unified DBV events filters).
  */
 
 import fs from 'fs';
@@ -17,7 +18,6 @@ declare global {
     interface Window {
         applyFilters?: () => Promise<void>;
         applyLocationFilters?: () => Promise<void>;
-        applyEventsFilters?: () => void;
         applyBasicUniverseFilters?: () => Promise<void>;
         updateSpecialCardsFilter?: () => void;
         updateAdvancedUniverseFilter?: () => void;
@@ -40,7 +40,6 @@ declare global {
         showNotification?: (msg: string, type: string) => void;
         displayCharacters?: (chars: any[]) => void;
         displayLocations?: (locs: any[]) => void;
-        displayEvents?: (events: any[]) => void;
         displayBasicUniverse?: (cards: any[]) => void;
     }
 }
@@ -68,10 +67,6 @@ describe('Card Filter Toggles', () => {
             expect(typeof window.applyLocationFilters).toBe('function');
         });
 
-        it('should export applyEventsFilters to window', () => {
-            expect(typeof window.applyEventsFilters).toBe('function');
-        });
-
         it('should export all toggle filter functions to window', () => {
             expect(typeof window.toggleEventsMissionFilter).toBe('function');
             expect(typeof window.toggleSpecialCardsCharacterFilter).toBe('function');
@@ -91,37 +86,6 @@ describe('Card Filter Toggles', () => {
             expect(typeof window.updateTeamworkFilter).toBe('function');
             expect(typeof window.updateTrainingFilter).toBe('function');
             expect(typeof window.updateAllyUniverseFilter).toBe('function');
-        });
-    });
-
-    describe('applyEventsFilters', () => {
-        it('should show "no mission sets selected" when none checked', () => {
-            document.body.innerHTML = `
-                <div id="events-tab"></div>
-                <table><tbody id="events-tbody"></tbody></table>
-            `;
-            window.eventsData = [];
-            window.applyEventsFilters!();
-            const tbody = document.getElementById('events-tbody')!;
-            expect(tbody.innerHTML).toContain('No mission sets selected');
-        });
-
-        it('should filter events by checked mission sets', () => {
-            document.body.innerHTML = `
-                <div id="events-tab">
-                    <input type="checkbox" value="Alpha" checked>
-                </div>
-                <table><tbody id="events-tbody"></tbody></table>
-            `;
-            window.eventsData = [
-                { id: '1', mission_set: 'Alpha', name: 'Event A' },
-                { id: '2', mission_set: 'Beta', name: 'Event B' },
-            ];
-            window.displayEvents = jest.fn();
-            window.applyEventsFilters!();
-            expect(window.displayEvents).toHaveBeenCalledWith(
-                expect.arrayContaining([expect.objectContaining({ mission_set: 'Alpha' })])
-            );
         });
     });
 

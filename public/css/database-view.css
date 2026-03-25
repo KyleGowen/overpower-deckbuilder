@@ -850,6 +850,15 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Events: mobile mission-set row + inline clear (see mobile-layout.css) */
+#events-table .events-mobile-set-row {
+    display: none;
+}
+
+#events-table #clear-events-filters-mobile.clear-filters-btn--events-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;

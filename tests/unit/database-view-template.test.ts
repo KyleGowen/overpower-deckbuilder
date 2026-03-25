@@ -115,6 +115,9 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="events-tab"');
             expect(templateContent).toContain('id="events-table"');
             expect(templateContent).toContain('id="events-tbody"');
+            expect(templateContent).toContain('id="events-mission-set-filter"');
+            expect(templateContent).toContain('events-filter-row');
+            expect(templateContent).toContain('events-checkbox-group');
             expect(templateContent).toContain('onclick="clearEventsFilters()"');
         });
 
@@ -186,7 +189,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('value="King of the Jungle"');
             expect(templateContent).toContain('value="The Call of Cthulhu"');
             expect(templateContent).toContain('value="Time Wars: Rise of the Gods"');
-            expect(templateContent).toContain('value="Warlord of Mars"');
+            expect(templateContent).toContain('value="The Warlord of Mars"');
         });
 
         it('should contain power type checkboxes', () => {
