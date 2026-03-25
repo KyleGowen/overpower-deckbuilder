@@ -198,7 +198,7 @@ function displayAspects(aspects) {
  */
 function formatAdvancedUniverseCardEffect(effectText, cardData = null) {
     if (!effectText) return '';
-    
+
     // Decode HTML entities in the text
     let decodedText = effectText
         .replace(/\\'93/g, "'")  // Left single quotation mark (escaped)
@@ -210,7 +210,7 @@ function formatAdvancedUniverseCardEffect(effectText, cardData = null) {
         .replace(/&lt;/g, '<')   // Less than
         .replace(/&gt;/g, '>')   // Greater than
         .replace(/&nbsp;/g, ' '); // Non-breaking spaces
-    
+
     // Define special keywords and desired display order (One Per Deck last)
     const orderedKeywords = ['**One Per Deck**'];
     const foundKeywords = [];
@@ -295,15 +295,12 @@ function displayAdvancedUniverse(advancedUniverse) {
         }
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
-        const effectHtml = formatAdvancedUniverseCardEffect(
-            card.card_description || card.card_effect || 'No description available',
-            card
-        );
+        const rawEffect = card.card_description || card.card_effect || 'No description available';
+        const effectHtml = formatAdvancedUniverseCardEffect(rawEffect, card);
         const charTrim = card.character != null ? String(card.character).trim() : '';
         const charCaptionLine = charTrim
             ? `<div class="characters-mobile-card-caption__character">${esc(charTrim)}</div>`
             : '';
-        const opdCaption = esc(`One per deck: ${card.is_one_per_deck ? 'Yes' : 'No'}`);
         const imgStyle = useMobileListArt
             ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
             : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
@@ -327,7 +324,6 @@ function displayAdvancedUniverse(advancedUniverse) {
                     <div class="characters-mobile-card-caption__name">${esc(card.name)}</div>
                     ${charCaptionLine}
                     <div class="characters-mobile-card-caption__ability">${effectHtml}</div>
-                    <div class="characters-mobile-card-caption__opd">${opdCaption}</div>
                 </div>
             </td>
             <td>
