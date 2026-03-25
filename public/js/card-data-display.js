@@ -123,9 +123,80 @@ async function loadAdvancedUniverse() {
 // toggleOnePerDeckAdvancedColumn function moved to external file
 
 // Teamwork functions
+function teamworkUseMobileListArt() {
+    if (typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay()) {
+        return true;
+    }
+    if (typeof window.isNarrowViewportDbvBand === 'function' && window.isNarrowViewportDbvBand()) {
+        return true;
+    }
+    return false;
+}
+
+/** Trailing power-type token after a leading "N " prefix (To Use / Acts As). */
+function teamworkPowerTypeFromValue(value) {
+    return String(value || '').trim().replace(/^\d+\s+/, '').trim();
+}
+
+/** Leading integer from To Use string, or null. */
+function teamworkNumericFromToUse(toUse) {
+    const m = String(toUse || '').trim().match(/^(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+function formatTeamworkBonusNormalized(raw) {
+    const t = String(raw ?? '').trim().replace(/^\+/, '');
+    return `+${t === '' ? '0' : t}`;
+}
+
+/**
+ * Mobile caption HTML (To Use / Acts As, bonuses + follow-ups, set + number). Uses card-display.js helpers.
+ * Exposed for unit tests.
+ */
+function buildTeamworkMobileCaptionHtml(card) {
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
+    const toType = teamworkPowerTypeFromValue(card.to_use);
+    const line1Left = typeof renderTeamworkValueCell === 'function'
+        ? renderTeamworkValueCell(card.to_use, toType)
+        : '';
+    const line1Right =
+        typeof renderTeamworkActsAsCell === 'function'
+            ? renderTeamworkActsAsCell(card.acts_as, card.to_use)
+            : typeof renderTeamworkValueCell === 'function'
+              ? renderTeamworkValueCell(card.acts_as, teamworkPowerTypeFromValue(card.acts_as))
+              : '';
+    const follow = typeof renderFollowupAttackTypes === 'function'
+        ? renderFollowupAttackTypes(card.followup_attack_types)
+        : '';
+    const b1 = formatTeamworkBonusNormalized(card.first_attack_bonus);
+    const b2 = formatTeamworkBonusNormalized(card.second_attack_bonus);
+    const line2 = `<span class="characters-mobile-card-caption__teamwork-followup">${follow}</span><span class="characters-mobile-card-caption__teamwork-bonuses"> ${b1}/${b2}</span>`;
+    const setLine =
+        typeof window.dbvSetCaptionLineFromCard === 'function' ? window.dbvSetCaptionLineFromCard(card) : '';
+    const line3 = setLine.trim()
+        ? `<div class="characters-mobile-card-caption__teamwork-set-line">${esc(setLine)}</div>`
+        : '';
+    return `
+                <div class="characters-mobile-card-caption characters-mobile-card-caption--teamwork">
+                    <div class="characters-mobile-card-caption__teamwork-line1">${line1Left}<span class="characters-mobile-card-caption__teamwork-sep"> - </span>${line1Right}</div>
+                    <div class="characters-mobile-card-caption__teamwork-line2">${line2}</div>
+                    ${line3}
+                </div>`;
+}
+
 async function loadTeamwork() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('teamwork');
     if (cached) {
+        window.teamworkData = cached;
         displayTeamwork(cached);
         return;
     }
@@ -135,6 +206,7 @@ async function loadTeamwork() {
         
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('teamwork', data.data);
+            window.teamworkData = data.data;
             displayTeamwork(data.data);
         }
     } catch (error) {
@@ -144,57 +216,96 @@ async function loadTeamwork() {
 
 function displayTeamwork(teamwork) {
     const tbody = document.getElementById('teamwork-tbody');
-    
-    if (teamwork.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No teamwork cards found</td></tr>';
+    if (!tbody) {
         return;
     }
-    
-    // Sort teamwork cards by OverPower type order: Energy, Combat, Brute Force, Intelligence, Any-Power
+
+    const theadRow = document.querySelector('#teamwork-table thead tr:first-child');
+    const colCount = theadRow && theadRow.querySelectorAll('th').length ? theadRow.querySelectorAll('th').length : 7;
+
+    if (!teamwork || teamwork.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colCount}">No teamwork cards found</td></tr>`;
+        return;
+    }
+
+    const useMobileListArt = teamworkUseMobileListArt();
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
     const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Any-Power'];
-    const sortedTeamwork = teamwork.sort((a, b) => {
+    const sortedTeamwork = [...teamwork].sort((a, b) => {
         const aType = a.to_use || '';
         const bType = b.to_use || '';
-        
-        // Extract the power type from "X Energy", "X Combat", etc.
-        const aPowerType = aType.replace(/^\d+\s+/, '');
-        const bPowerType = bType.replace(/^\d+\s+/, '');
-        
+
+        const aPowerType = String(aType).replace(/^\d+\s+/, '');
+        const bPowerType = String(bType).replace(/^\d+\s+/, '');
+
         const aIndex = preferredOrder.indexOf(aPowerType);
         const bIndex = preferredOrder.indexOf(bPowerType);
-        
-        // If both are in preferred order, sort by their position
+
         if (aIndex !== -1 && bIndex !== -1) {
             return aIndex - bIndex;
         }
-        
-        // If only one is in preferred order, prioritize it
         if (aIndex !== -1) return -1;
         if (bIndex !== -1) return 1;
-        
-        // If neither is in preferred order, sort alphabetically
         return aPowerType.localeCompare(bPowerType);
     });
-    
-    tbody.innerHTML = sortedTeamwork.map(card => {
+
+    tbody.innerHTML = sortedTeamwork.map((card) => {
         const imagePath = getCardImageUrlForDisplay(card, 'teamwork');
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
-        return `
-        <tr>
-            <td>
-                <img src="${imagePath.replace(/"/g, '&quot;')}" 
-                     alt="${card.card_type || ''}" 
+        const nameEsc = String(card.card_type || '').replace(/'/g, "\\'");
+        const idEsc = String(card.id || '').replace(/'/g, "\\'");
+
+        const toPower = teamworkPowerTypeFromValue(card.to_use);
+
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+        const captionHtml = useMobileListArt ? buildTeamworkMobileCaptionHtml(card) : '';
+
+        const imgCellInner = useMobileListArt
+            ? `
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${esc(card.card_type || '')}"
+                         data-dbv-lightbox-context="teamwork"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'teamwork')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}`
+            : `
+                <img src="${imagePathAttr}"
+                     alt="${esc(card.card_type || '')}"
                      loading="lazy"
                      decoding="async"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_type || '').replace(/'/g, "\\'")}')"
+                     style="${imgStyle}"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'teamwork')"
                      onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+                     onclick="openModal(this)">`;
+
+        return `
+        <tr>
+            <td${useMobileListArt ? ' data-label="Image"' : ''}>
+                ${imgCellInner}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('teamwork', '${card.id}', '${(card.card_type || '').replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('teamwork', '${card.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
@@ -204,8 +315,8 @@ function displayTeamwork(teamwork) {
                 <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="teamwork" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${card.id}', 'teamwork', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
                 ` : ''}
             </td>
-            <td>${renderTeamworkValueCell(card.to_use, (card.to_use || '').trim().replace(/^\d+\s+/, ''))}</td>
-            <td>${renderTeamworkValueCell(card.acts_as, (card.to_use || '').trim().replace(/^\d+\s+/, ''))}</td>
+            <td>${renderTeamworkValueCell(card.to_use, toPower)}</td>
+            <td>${typeof renderTeamworkActsAsCell === 'function' ? renderTeamworkActsAsCell(card.acts_as, card.to_use) : renderTeamworkValueCell(card.acts_as, teamworkPowerTypeFromValue(card.acts_as))}</td>
             <td>${renderFollowupAttackTypes(card.followup_attack_types)}</td>
             <td>${card.first_attack_bonus}</td>
             <td>${card.second_attack_bonus}</td>
@@ -537,6 +648,11 @@ window.loadAspects = loadAspects;
 window.loadAdvancedUniverse = loadAdvancedUniverse;
 window.loadTeamwork = loadTeamwork;
 window.displayTeamwork = displayTeamwork;
+window.teamworkUseMobileListArt = teamworkUseMobileListArt;
+window.teamworkPowerTypeFromValue = teamworkPowerTypeFromValue;
+window.teamworkNumericFromToUse = teamworkNumericFromToUse;
+window.formatTeamworkBonusNormalized = formatTeamworkBonusNormalized;
+window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml;
 window.loadAllyUniverse = loadAllyUniverse;
 window.displayAllyUniverse = displayAllyUniverse;
 window.loadTraining = loadTraining;

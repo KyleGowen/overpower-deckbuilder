@@ -3776,21 +3776,62 @@
                             <th>1st Attack Bonus</th>
                             <th>2nd Attack Bonus</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
-                                <button class="clear-filters-btn" onclick="clearTeamworkFilters()">Clear All Filters</button>
+                        <tr class="filter-row teamwork-filter-row">
+                            <th class="teamwork-filter-clear-th">
+                                <button type="button" class="clear-filters-btn" onclick="clearTeamworkFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <th class="teamwork-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="teamwork-filter-controls-th" colspan="6">
+                                <div class="teamwork-mobile-filter-shell column-filters">
+                                    <div class="teamwork-filter-icon-row">
+                                        <div class="icon-filter-container">
+                                            <div class="special-power-filter-toggles teamwork-to-use-power-toggles" role="group" aria-label="Filter teamwork by To Use power type">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="teamwork-icon-mobile-trailing">
+                                            <button type="button" id="clear-teamwork-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--teamwork-mobile-inline" onclick="clearTeamworkFilters()">Clear filters</button>
+                                        </div>
+                                    </div>
+                                    <div class="teamwork-filter-value-shell">
+                                        <div class="special-value-filters-inner">
+                                            <div class="column-filters teamwork-value-filters-inner">
+                                                <input type="number" id="teamwork-to-use-equals" class="filter-input equals teamwork-to-use-value-input" placeholder="=" min="0" max="99" aria-label="To Use equals">
+                                                <input type="number" id="teamwork-to-use-min" class="filter-input min teamwork-to-use-value-input" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
+                                                <input type="number" id="teamwork-to-use-max" class="filter-input max teamwork-to-use-value-input" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
+                                                <button type="button" id="teamwork-to-use-value-clear" class="teamwork-to-use-value-clear-btn" title="Clear To Use value filters" aria-label="Clear To Use value filters">
+                                                    <svg class="teamwork-to-use-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="teamwork-tbody">
                         <tr>
-                            <td colspan="7" class="loading">Loading teamwork cards...</td>
+                            <td colspan="8" class="loading">Loading teamwork cards...</td>
                         </tr>
                     </tbody>
                 </table>

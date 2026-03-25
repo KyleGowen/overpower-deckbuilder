@@ -192,9 +192,26 @@ function clearEventsFilters() {
 }
 
 function clearTeamworkFilters() {
-    // Clear teamwork filters
-    // Add specific filter clearing logic here if needed
-    applyFilters();
+    document
+        .querySelectorAll('#teamwork-table .teamwork-to-use-power-toggles .power-type-filter-toggle')
+        .forEach((btn) => {
+            btn.classList.remove('is-active', 'is-disabled');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.disabled = false;
+        });
+    ['teamwork-to-use-equals', 'teamwork-to-use-min', 'teamwork-to-use-max'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = '';
+        }
+    });
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (typeof loadTeamwork === 'function') {
+        loadTeamwork();
+    }
 }
 
 function clearAllyUniverseFilters() {

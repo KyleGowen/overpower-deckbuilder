@@ -1175,6 +1175,36 @@ function renderTeamworkValueCell(value, powerType) {
     return `<span class="teamwork-value-icon-cell">${num} ${renderAllyStatTypeIcon(powerType)}</span>`;
 }
 
+/**
+ * Power-type token after leading digits on To Use (same idea as card-data-display teamworkPowerTypeFromValue).
+ */
+function teamworkToUsePowerTypeForIcon(toUse) {
+    const t = String(toUse ?? '').trim().replace(/^\d+\s+/, '').trim();
+    return t || 'Combat';
+}
+
+/**
+ * Acts As column / caption: "4 Attack" shows the same stat icon as To Use (card face), plus the word "Attack".
+ * @param {string} actsAs - e.g. "4 Attack"
+ * @param {string} [toUse] - e.g. "7 Energy"; icon for Attack matches this row's To Use power type
+ */
+function renderTeamworkActsAsCell(actsAs, toUse) {
+    if (!actsAs) return '<span>-</span>';
+    const trimmed = String(actsAs).trim();
+    const m = trimmed.match(/^(\d+)\s+(.+)$/);
+    if (!m) {
+        const fallbackType = trimmed.replace(/^\d+\s+/, '').trim();
+        return renderTeamworkValueCell(trimmed, fallbackType);
+    }
+    const num = m[1];
+    const rest = m[2].trim();
+    if (rest.toLowerCase() === 'attack') {
+        const attackIconType = teamworkToUsePowerTypeForIcon(toUse);
+        return `<span class="teamwork-value-icon-cell teamwork-acts-as-cell">${num} ${renderAllyStatTypeIcon(attackIconType)} <span class="teamwork-acts-as-type-label">${escapeHtmlText(rest)}</span></span>`;
+    }
+    return renderTeamworkValueCell(trimmed, rest);
+}
+
 function renderFollowupAttackTypes(value) {
     if (!value) return '<span>-</span>';
     const separator = value.includes(' + ') ? ' + ' : ' / ';
@@ -1629,4 +1659,5 @@ window.isLayoutMobileForCardDisplay = isLayoutMobileForCardDisplay;
 window.isNarrowViewportDbvBand = isNarrowViewportDbvBand;
 window.specialCardEffectPlainForMobileCaption = specialCardEffectPlainForMobileCaption;
 window.dbvSetCaptionLineFromCard = dbvSetCaptionLineFromCard;
+window.renderTeamworkActsAsCell = renderTeamworkActsAsCell;
 

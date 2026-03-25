@@ -859,6 +859,25 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Teamwork: mobile-only To Use filter shell (see mobile-layout.css); desktop keeps Clear All column only.
+   Do not use !important here — mobile-layout.css uses higher-specificity selectors to show these on
+   .layout-mobile and in @media (max-width: 900px) #database-view; !important would block those overrides. */
+#teamwork-table thead tr.teamwork-filter-row > th.teamwork-filter-controls-th {
+    display: none;
+}
+
+#teamwork-table thead tr.teamwork-filter-row > th.teamwork-filter-spacer-th {
+    display: none;
+}
+
+#teamwork-table .teamwork-mobile-filter-shell {
+    display: none;
+}
+
+#teamwork-table #clear-teamwork-filters-mobile-inline.clear-filters-btn--teamwork-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;
@@ -957,6 +976,12 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     font-size: 0.65rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.75);
+}
+
+.teamwork-acts-as-cell .teamwork-acts-as-type-label {
+    margin-left: 2px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .teamwork-value-icon-cell {
