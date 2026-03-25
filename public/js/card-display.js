@@ -1625,4 +1625,7 @@ window.groupCardsByVariant = groupCardsByVariant;
 window.getCardImagePathForDisplay = getCardImagePathForDisplay;
 window.getSpecialFunctionIcons = getSpecialFunctionIcons;
 window.renderSpecialFunctionIcons = renderSpecialFunctionIcons;
+window.isLayoutMobileForCardDisplay = isLayoutMobileForCardDisplay;
+window.isNarrowViewportDbvBand = isNarrowViewportDbvBand;
+window.specialCardEffectPlainForMobileCaption = specialCardEffectPlainForMobileCaption;
 

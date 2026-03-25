@@ -57,9 +57,11 @@ describe('Aspects Column Visibility', () => {
             
             const aspectsTable = aspectsTableMatch![0];
             
-            // Should contain filter row cells without hidden class
-            expect(aspectsTable).toContain('<th class="fortifications-column"></th>');
-            expect(aspectsTable).toContain('<th class="one-per-deck-column"></th>');
+            // Should contain filter row cells without hidden class (may include aspect-filter-* classes)
+            expect(aspectsTable).toContain('fortifications-column');
+            expect(aspectsTable).toContain('one-per-deck-column');
+            expect(aspectsTable).toContain('aspect-filter-fort-th');
+            expect(aspectsTable).toContain('aspect-filter-opd-th');
             
             // Should not contain hidden class on filter row cells
             expect(aspectsTable).not.toContain('class="fortifications-column hidden"');
@@ -80,13 +82,13 @@ describe('Aspects Column Visibility', () => {
 
         it('should render fortifications column without hidden class', () => {
             // Should contain fortifications column without hidden class in the file
-            expect(cardDisplayFunctionsContent).toContain('<td class="fortifications-column">${aspect.is_fortification ? \'Yes\' : \'No\'}</td>');
+            expect(cardDisplayFunctionsContent).toContain('<td class="fortifications-column" data-label="Fortifications">${aspect.is_fortification ? \'Yes\' : \'No\'}</td>');
             expect(cardDisplayFunctionsContent).not.toContain('class="fortifications-column hidden"');
         });
 
         it('should render one per deck column without hidden class', () => {
             // Should contain one per deck column without hidden class in the file
-            expect(cardDisplayFunctionsContent).toContain('<td class="one-per-deck-column">${aspect.is_one_per_deck ? \'Yes\' : \'No\'}</td>');
+            expect(cardDisplayFunctionsContent).toContain('<td class="one-per-deck-column" data-label="One Per Deck">${aspect.is_one_per_deck ? \'Yes\' : \'No\'}</td>');
             expect(cardDisplayFunctionsContent).not.toContain('class="one-per-deck-column hidden"');
         });
 
@@ -152,7 +154,7 @@ describe('Aspects Column Visibility', () => {
             expect(headerMatches).toHaveLength(9); // Image, empty column, Card Name, Location, Card Effect, Icon, Value, Fortifications, One Per Deck
             
             // Count filter row cells
-            const filterRowMatches = aspectsTable.match(/<tr class="filter-row">[\s\S]*?<\/tr>/);
+            const filterRowMatches = aspectsTable.match(/<tr class="filter-row aspects-filter-row">[\s\S]*?<\/tr>/);
             expect(filterRowMatches).toBeTruthy();
             
             const filterRow = filterRowMatches![0];

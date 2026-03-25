@@ -136,60 +136,142 @@ function displayEvents(events) {
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
+function aspectUseMobileListArt() {
+    if (typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay()) {
+        return true;
+    }
+    if (typeof window.isNarrowViewportDbvBand === 'function' && window.isNarrowViewportDbvBand()) {
+        return true;
+    }
+    return false;
+}
+
+function aspectMobileCaptionOptionalLine(className, text) {
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+    const t = text != null ? String(text).trim() : '';
+    return `<div class="${className}"${t ? '' : ' style="display:none;"'}>${t ? esc(t) : ''}</div>`;
+}
+
 // Display aspects
 function displayAspects(aspects) {
     const tbody = document.getElementById('aspects-tbody');
-    
+
     if (aspects.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9">No aspects found</td></tr>';
         return;
     }
-    
-    tbody.innerHTML = aspects.map(aspect => {
-        let imagePath;
-        if (typeof window.getCardImagePath === 'function') {
-            imagePath = window.getCardImagePath({ ...aspect, image_path: aspect.image_path || aspect.image }, 'aspect');
-        } else {
-            const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
-            const raw = '/src/resources/cards/images/aspects/' + mapImagePathToActualFile(aspect.image || '');
-            imagePath = cdn ? cdn + raw : raw;
-        }
-        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
-        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
-        return `
+
+    const useMobileListArt = aspectUseMobileListArt();
+    const plainEffect =
+        typeof window.specialCardEffectPlainForMobileCaption === 'function'
+            ? window.specialCardEffectPlainForMobileCaption
+            : (raw) => String(raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+    tbody.innerHTML = aspects
+        .map((aspect) => {
+            let imagePath;
+            if (typeof window.getCardImagePath === 'function') {
+                imagePath = window.getCardImagePath({ ...aspect, image_path: aspect.image_path || aspect.image }, 'aspect');
+            } else {
+                const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+                const raw = '/src/resources/cards/images/aspects/' + mapImagePathToActualFile(aspect.image || '');
+                imagePath = cdn ? cdn + raw : raw;
+            }
+            const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+            const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+            const nameEsc = aspect.card_name.replace(/'/g, "\\'");
+            const idEsc = (aspect.id || '').replace(/'/g, "\\'");
+            const effectSource = aspect.aspect_description || aspect.card_effect || '';
+            const effectPlainForCaption = plainEffect(effectSource);
+            const effectTdHtml = formatSpecialCardEffect(
+                aspect.aspect_description || aspect.card_effect || 'No description available'
+            );
+
+            const imgStyle = useMobileListArt
+                ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+                : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+            const esc =
+                typeof window.escapeHtmlText === 'function'
+                    ? window.escapeHtmlText
+                    : (s) =>
+                          String(s)
+                              .replace(/&/g, '&amp;')
+                              .replace(/</g, '&lt;')
+                              .replace(/>/g, '&gt;')
+                              .replace(/"/g, '&quot;');
+
+            const captionHtml = useMobileListArt
+                ? `
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${esc(aspect.card_name || '')}</div>
+                    ${aspectMobileCaptionOptionalLine('characters-mobile-card-caption__location', aspect.location || '')}
+                    ${aspectMobileCaptionOptionalLine('characters-mobile-card-caption__ability', effectPlainForCaption)}
+                    ${aspectMobileCaptionOptionalLine('characters-mobile-card-caption__fortification', aspect.is_fortification ? 'Fortification!' : '')}
+                    ${aspectMobileCaptionOptionalLine('characters-mobile-card-caption__opd', aspect.is_one_per_deck ? 'One Per Deck' : '')}
+                </div>`
+                : '';
+
+            return `
         <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${aspect.card_name}" 
-                     loading="lazy"
-                     decoding="async"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${aspect.card_name.replace(/'/g, "\\'")}', '${(aspect.id || '').replace(/'/g, "\\'")}', 'aspect')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+            <td data-label="Image">
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${aspect.card_name}"
+                         data-dbv-lightbox-context="aspect"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'aspect')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('aspect', '${aspect.id}', '${aspect.card_name.replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('aspect', '${aspect.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                ${typeof getCurrentUser === 'function' && getCurrentUser()
+                    ? `
                 <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${aspect.id}', 'aspect', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
                 <button class="remove-from-collection-btn" data-card-id="${aspect.id}" data-card-type="aspect" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${aspect.id}', 'aspect', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
-                ` : ''}
+                `
+                    : ''}
             </td>
-            <td><strong>${aspect.card_name}</strong></td>
-            <td>${aspect.location}</td>
-            <td>${formatSpecialCardEffect(aspect.aspect_description || aspect.card_effect || 'No description available')}</td>
-            <td>${renderSpecialIconBadges(aspect)}</td>
-            <td>${aspect.value != null ? aspect.value : '-'}</td>
-            <td class="fortifications-column">${aspect.is_fortification ? 'Yes' : 'No'}</td>
-            <td class="one-per-deck-column">${aspect.is_one_per_deck ? 'Yes' : 'No'}</td>
+            <td data-label="Card Name"><strong>${aspect.card_name}</strong></td>
+            <td data-label="Location">${aspect.location}</td>
+            <td data-label="Card Effect">${effectTdHtml}</td>
+            <td data-label="Icon">${renderSpecialIconBadges(aspect)}</td>
+            <td data-label="Value">${aspect.value != null ? aspect.value : '-'}</td>
+            <td class="fortifications-column" data-label="Fortifications">${aspect.is_fortification ? 'Yes' : 'No'}</td>
+            <td class="one-per-deck-column" data-label="One Per Deck">${aspect.is_one_per_deck ? 'Yes' : 'No'}</td>
         </tr>
     `;
-    }).join('');
+        })
+        .join('');
+
+    tbody.querySelectorAll('tr td:first-child img').forEach((img) => {
+        if (typeof window.applyDbvHorizontalCardClass === 'function') {
+            if (img.complete && img.naturalWidth) {
+                window.applyDbvHorizontalCardClass(img);
+            } else {
+                img.addEventListener('load', () => window.applyDbvHorizontalCardClass(img), { once: true });
+            }
+        }
+    });
+
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 

@@ -311,7 +311,7 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
 
     it('shows the mobile caption stack with name, ability, and set line font sizes', () => {
         expect(css).toMatch(
-            /#characters-table\s+\.characters-mobile-card-caption\s*,\s*#special-cards-table\s+\.characters-mobile-card-caption\s*,\s*#locations-table\s+\.characters-mobile-card-caption\s*\{[\s\S]*?display:\s*none/
+            /#characters-table\s+\.characters-mobile-card-caption\s*,\s*#special-cards-table\s+\.characters-mobile-card-caption\s*,\s*#locations-table\s+\.characters-mobile-card-caption\s*,\s*#aspects-table\s+\.characters-mobile-card-caption\s*\{[\s\S]*?display:\s*none/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?flex-direction:\s*column[\s\S]*?max-width:\s*min\(\s*444px\s*,\s*100%\s*\)/
@@ -495,5 +495,8 @@ describe('public/index.html mobile layout wiring', () => {
         expect(html).toContain('id="clear-special-filters-mobile"');
         expect(html).toContain('special-function-mobile-trailing');
         expect(html).toContain('clear-filters-btn--special-mobile-inline');
+        expect(html).toContain('aspects-filter-row');
+        expect(html).toContain('id="clear-aspects-filters-mobile"');
+        expect(html).toContain('clear-filters-btn--aspects-mobile-inline');
     });
 });

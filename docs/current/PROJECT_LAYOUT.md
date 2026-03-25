@@ -18,6 +18,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
 ├── 📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV row art + image modal sizing attempts; troubleshooting
 ├── 📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
+├── 📄 docs/current/DBV_ASPECTS_MOBILE.md  # Aspects DBV mobile: filter shell, caption, actions, files, unit tests
 ├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
 ├── 📁 docs/checklist-source/       # Markdown exports of each OverPower Check List tab (regenerate via scripts/export-overpower-checklist-markdown.py)
 ├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration

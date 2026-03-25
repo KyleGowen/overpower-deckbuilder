@@ -17,13 +17,15 @@ describe('Aspects Search Functionality', () => {
                         width: 100% !important;
                     }
                     
-                    #aspects-table th:nth-child(1), #aspects-table td:nth-child(1) { width: 15%; } /* Image */
+                    #aspects-table th:nth-child(1), #aspects-table td:nth-child(1) { width: 12%; } /* Image */
                     #aspects-table th:nth-child(2), #aspects-table td:nth-child(2) { width: 8%; }  /* Add to Deck */
-                    #aspects-table th:nth-child(3), #aspects-table td:nth-child(3) { width: 18%; } /* Card Name */
-                    #aspects-table th:nth-child(4), #aspects-table td:nth-child(4) { width: 12%; } /* Location */
-                    #aspects-table th:nth-child(5), #aspects-table td:nth-child(5) { width: 25%; } /* Card Effect */
-                    #aspects-table th:nth-child(6), #aspects-table td:nth-child(6) { width: 10%; } /* Fortifications */
-                    #aspects-table th:nth-child(7), #aspects-table td:nth-child(7) { width: 12%; } /* One Per Deck */
+                    #aspects-table th:nth-child(3), #aspects-table td:nth-child(3) { width: 14%; } /* Card Name */
+                    #aspects-table th:nth-child(4), #aspects-table td:nth-child(4) { width: 10%; } /* Location */
+                    #aspects-table th:nth-child(5), #aspects-table td:nth-child(5) { width: 20%; } /* Card Effect */
+                    #aspects-table th:nth-child(6), #aspects-table td:nth-child(6) { width: 8%; } /* Icon */
+                    #aspects-table th:nth-child(7), #aspects-table td:nth-child(7) { width: 8%; } /* Value */
+                    #aspects-table th:nth-child(8), #aspects-table td:nth-child(8) { width: 10%; } /* Fortifications */
+                    #aspects-table th:nth-child(9), #aspects-table td:nth-child(9) { width: 10%; } /* One Per Deck */
                     
                     #aspects-table .header-filter[data-column="card_name"] {
                         width: 100% !important;
@@ -60,25 +62,29 @@ describe('Aspects Search Functionality', () => {
                                 <th>Card Name</th>
                                 <th>Location</th>
                                 <th>Card Effect</th>
+                                <th>Icon</th>
+                                <th>Value</th>
                                 <th class="fortifications-column">Fortifications</th>
                                 <th class="one-per-deck-column">One Per Deck</th>
                             </tr>
-                            <tr class="filter-row">
-                                <th>
-                                    <button class="clear-filters-btn" onclick="clearAspectsFilters()">Clear All Filters</button>
+                            <tr class="filter-row aspects-filter-row">
+                                <th class="aspect-filter-clear-th">
+                                    <button type="button" id="clear-aspects-filters-desktop" class="clear-filters-btn">Clear All Filters</button>
                                 </th>
-                                <th></th>
-                                <th>
-                                    <input type="text" class="header-filter" placeholder="Search names..." data-column="card_name">
+                                <th class="aspect-filter-spacer-th" aria-hidden="true"></th>
+                                <th class="aspect-filter-name-th">
+                                    <input type="text" class="header-filter" placeholder="Search card name..." data-column="card_name">
                                 </th>
-                                <th>
-                                    <input type="text" class="header-filter" placeholder="Search locations..." data-column="location">
+                                <th class="aspect-filter-location-th">
+                                    <input type="text" class="header-filter" placeholder="Search location..." data-column="location">
                                 </th>
-                                <th>
-                                    <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
+                                <th class="aspect-filter-effect-th">
+                                    <input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect">
                                 </th>
-                                <th class="fortifications-column"></th>
-                                <th class="one-per-deck-column"></th>
+                                <th class="aspect-filter-icon-th"></th>
+                                <th class="aspect-filter-value-th"></th>
+                                <th class="fortifications-column aspect-filter-fort-th" aria-hidden="true"></th>
+                                <th class="one-per-deck-column aspect-filter-opd-th" aria-hidden="true"></th>
                             </tr>
                         </thead>
                         <tbody id="aspects-tbody">
@@ -88,6 +94,8 @@ describe('Aspects Search Functionality', () => {
                                 <td><strong>Amaru: Dragon Legend</strong></td>
                                 <td>Any Homebase</td>
                                 <td>Homebase makes a level 4 Energy attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck</td>
+                                <td>-</td>
+                                <td>-</td>
                                 <td>Yes</td>
                                 <td>Yes</td>
                             </tr>
@@ -97,6 +105,8 @@ describe('Aspects Search Functionality', () => {
                                 <td><strong>Cheshire Cat</strong></td>
                                 <td>Any Homebase</td>
                                 <td>Homebase makes a level 4 Intelligence attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck</td>
+                                <td>-</td>
+                                <td>-</td>
                                 <td>Yes</td>
                                 <td>Yes</td>
                             </tr>
@@ -106,6 +116,8 @@ describe('Aspects Search Functionality', () => {
                                 <td><strong>Isis</strong></td>
                                 <td>Any Homebase</td>
                                 <td>Homebase makes a level 2 MultiPower attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck</td>
+                                <td>-</td>
+                                <td>-</td>
                                 <td>Yes</td>
                                 <td>Yes</td>
                             </tr>
@@ -115,6 +127,8 @@ describe('Aspects Search Functionality', () => {
                                 <td><strong>Mallku</strong></td>
                                 <td>Any Homebase</td>
                                 <td>Homebase makes a level 4 Combat attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck</td>
+                                <td>-</td>
+                                <td>-</td>
                                 <td>Yes</td>
                                 <td>Yes</td>
                             </tr>
@@ -124,6 +138,8 @@ describe('Aspects Search Functionality', () => {
                                 <td><strong>Supay</strong></td>
                                 <td>Any Homebase</td>
                                 <td>Homebase makes a level 4 Brute Force attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck</td>
+                                <td>-</td>
+                                <td>-</td>
                                 <td>Yes</td>
                                 <td>Yes</td>
                             </tr>
@@ -289,12 +305,12 @@ describe('Aspects Search Functionality', () => {
             const table = document.querySelector('#aspects-table') as HTMLTableElement;
             const headerCells = table.querySelectorAll('thead tr:first-child th');
             
-            expect(headerCells.length).toBe(7);
+            expect(headerCells.length).toBe(9);
             
             // Check that column width styles are applied
             const firstCell = headerCells[0] as HTMLTableCellElement;
             const firstCellStyle = window.getComputedStyle(firstCell);
-            expect(firstCellStyle.width).toBe('15%');
+            expect(firstCellStyle.width).toBe('12%');
         });
     });
 
@@ -366,9 +382,9 @@ describe('Aspects Search Functionality', () => {
             const locationInput = document.querySelector('#aspects-table .header-filter[data-column="location"]') as HTMLInputElement;
             const effectInput = document.querySelector('#aspects-table .header-filter[data-column="card_effect"]') as HTMLInputElement;
 
-            expect(nameInput.placeholder).toBe('Search names...');
-            expect(locationInput.placeholder).toBe('Search locations...');
-            expect(effectInput.placeholder).toBe('Search effects...');
+            expect(nameInput.placeholder).toBe('Search card name...');
+            expect(locationInput.placeholder).toBe('Search location...');
+            expect(effectInput.placeholder).toBe('Search card text...');
         });
 
         test('should have correct data-column attributes', () => {

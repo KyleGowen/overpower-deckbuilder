@@ -477,61 +477,80 @@
                             <th class="fortifications-column">Fortifications</th>
                             <th class="one-per-deck-column">One Per Deck</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
-                                <button class="clear-filters-btn" onclick="clearAspectsFilters()">Clear All Filters</button>
+                        <tr class="filter-row aspects-filter-row">
+                            <th class="aspect-filter-clear-th">
+                                <button type="button" id="clear-aspects-filters-desktop" class="clear-filters-btn" onclick="clearAspectsFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search names..." data-column="card_name">
+                            <th class="aspect-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="aspect-filter-name-th">
+                                <input type="text" class="header-filter" placeholder="Search card name..." data-column="card_name">
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search locations..." data-column="location">
+                            <th class="aspect-filter-location-th">
+                                <input type="text" class="header-filter" placeholder="Search location..." data-column="location">
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
+                            <th class="aspect-filter-effect-th">
+                                <input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect">
                             </th>
-                            <th>
-                                <div class="icon-filter-container">
-                                    <div class="special-power-filter-toggles" role="group" aria-label="Filter aspects by power type icon">
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
-                                            <img src="/src/resources/images/icons/energy.png" alt="Energy">
-                                        </button>
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
-                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence">
-                                        </button>
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
-                                            <img src="/src/resources/images/icons/combat.png" alt="Combat">
-                                        </button>
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
-                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power">
-                                        </button>
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
-                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
-                                        </button>
-                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
-                                            <span class="power-type-filter-text">MP</span>
-                                        </button>
+                            <th class="aspect-filter-icon-th">
+                                <div class="aspect-filter-icon-row">
+                                    <div class="icon-filter-container">
+                                        <div class="special-power-filter-toggles" role="group" aria-label="Filter aspects by power type icon or no icon">
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                                <img src="/src/resources/images/icons/energy.png" alt="Energy">
+                                            </button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                                <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence">
+                                            </button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                                <img src="/src/resources/images/icons/combat.png" alt="Combat">
+                                            </button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                                <img src="/src/resources/images/icons/any-power.png" alt="Any-Power">
+                                            </button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                                <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
+                                            </button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                <span class="power-type-filter-text">MP</span>
+                                            </button>
+                                            <label class="special-no-icon-toggle-label" title="Show only cards with no power type icon">
+                                                <input type="checkbox" id="aspect-no-icon-toggle" class="visually-hidden" aria-label="No icon — show only cards without a power type icon">
+                                                <span class="special-no-icon-toggle-face" aria-hidden="true">
+                                                    <svg class="special-no-icon-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
-                                    <label class="special-no-icon-toggle-label">
-                                        <input type="checkbox" id="aspect-no-icon-toggle">
-                                        <span>No Icon</span>
-                                    </label>
+                                    <div class="aspect-icon-mobile-trailing">
+                                        <button type="button" id="clear-aspects-filters-mobile" class="clear-filters-btn clear-filters-btn--aspects-mobile-inline" onclick="clearAspectsFilters()">Clear filters</button>
+                                    </div>
                                 </div>
                             </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" id="aspect-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="0" max="99">
-                                    <input type="number" id="aspect-value-min" class="filter-input min" data-column="value" placeholder="Min" min="0" max="99">
-                                    <input type="number" id="aspect-value-max" class="filter-input max" data-column="value" placeholder="Max" min="0" max="99">
-                                    <label class="special-no-value-toggle-label">
-                                        <input type="checkbox" id="aspect-no-value-toggle">
-                                        <span>No value</span>
-                                    </label>
+                            <th class="aspect-filter-value-th">
+                                <div class="special-value-inputs-and-clear aspects-value-inputs-and-clear">
+                                    <div class="special-value-filters-inner">
+                                        <div class="column-filters">
+                                            <input type="number" id="aspect-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="0" max="99">
+                                            <input type="number" id="aspect-value-min" class="filter-input min" data-column="value" placeholder="Min" min="0" max="99">
+                                            <input type="number" id="aspect-value-max" class="filter-input max" data-column="value" placeholder="Max" min="0" max="99">
+                                            <label class="special-no-value-toggle-label" title="Show only cards with no numeric value">
+                                                <input type="checkbox" id="aspect-no-value-toggle" class="visually-hidden" aria-label="No value — show only cards with no numeric value">
+                                                <span class="special-no-value-toggle-face" aria-hidden="true">
+                                                    <svg class="special-no-value-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </th>
-                            <th class="fortifications-column"></th>
-                            <th class="one-per-deck-column"></th>
+                            <th class="fortifications-column aspect-filter-fort-th" aria-hidden="true"></th>
+                            <th class="one-per-deck-column aspect-filter-opd-th" aria-hidden="true"></th>
                         </tr>
                     </thead>
                     <tbody id="aspects-tbody">

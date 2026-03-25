@@ -206,21 +206,19 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="one-per-deck-advanced-toggle-text"');
         });
 
-        it('should contain aspects toggle controls', () => {
-            expect(templateContent).toContain('id="toggle-fortifications"');
-            expect(templateContent).toContain('onclick="toggleFortificationsColumn()"');
-            expect(templateContent).toContain('id="fortifications-toggle-text"');
-            expect(templateContent).toContain('id="toggle-one-per-deck"');
-            expect(templateContent).toContain('onclick="toggleOnePerDeckColumn()"');
-            expect(templateContent).toContain('id="one-per-deck-toggle-text"');
+        it('should not use deprecated aspects column toggle controls (matches live DBV)', () => {
+            expect(templateContent).not.toContain('id="toggle-fortifications"');
+            expect(templateContent).not.toContain('toggleFortificationsColumn');
+            expect(templateContent).not.toContain('id="toggle-one-per-deck"');
+            expect(templateContent).not.toContain('toggleOnePerDeckColumn');
         });
     });
 
     describe('Column Visibility Classes', () => {
-        it('should contain hidden column classes', () => {
+        it('should contain column visibility classes for advanced universe and aspects', () => {
             expect(templateContent).toContain('class="one-per-deck-advanced-column"');
-            expect(templateContent).toContain('class="fortifications-column hidden"');
-            expect(templateContent).toContain('class="one-per-deck-column hidden"');
+            expect(templateContent).toContain('class="fortifications-column">Fortifications</th>');
+            expect(templateContent).toContain('class="one-per-deck-column">One Per Deck</th>');
         });
     });
 
