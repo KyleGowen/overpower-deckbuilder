@@ -287,23 +287,23 @@
                             <th>Value</th>
                             <th>Function</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
-                                <button class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button>
+                        <tr class="filter-row special-cards-filter-row">
+                            <th class="special-filter-clear-th">
+                                <button type="button" id="clear-special-filters-desktop" class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search names..." data-column="name">
+                            <th class="special-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="special-filter-name-th">
+                                <input type="text" class="header-filter" placeholder="Search card name..." data-column="name">
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search characters..." data-column="character">
+                            <th class="special-filter-character-th">
+                                <input type="text" class="header-filter" placeholder="Search character..." data-column="character">
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect">
+                            <th class="special-filter-effect-th">
+                                <input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect">
                             </th>
-                            <th>
+                            <th class="special-filter-icon-th">
                                 <div class="icon-filter-container">
-                                    <div class="special-power-filter-toggles" role="group" aria-label="Filter special cards by power type icon">
+                                    <div class="special-power-filter-toggles" role="group" aria-label="Filter special cards by power type icon or no icon">
                                         <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
                                             <img src="/src/resources/images/icons/energy.png" alt="Energy">
                                         </button>
@@ -322,25 +322,39 @@
                                         <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
                                             <span class="power-type-filter-text">MP</span>
                                         </button>
+                                        <label class="special-no-icon-toggle-label" title="Show only cards with no power type icon">
+                                            <input type="checkbox" id="special-no-icon-toggle" class="visually-hidden" aria-label="No icon — show only cards without a power type icon">
+                                            <span class="special-no-icon-toggle-face" aria-hidden="true">
+                                                <svg class="special-no-icon-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                                    <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                    <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                </svg>
+                                            </span>
+                                        </label>
                                     </div>
-                                    <label class="special-no-icon-toggle-label">
-                                        <input type="checkbox" id="special-no-icon-toggle">
-                                        <span>No Icon</span>
-                                    </label>
                                 </div>
                             </th>
-                            <th>
-                                <div class="column-filters">
-                                    <input type="number" id="special-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="0" max="99">
-                                    <input type="number" id="special-value-min" class="filter-input min" data-column="value" placeholder="Min" min="0" max="99">
-                                    <input type="number" id="special-value-max" class="filter-input max" data-column="value" placeholder="Max" min="0" max="99">
-                                    <label class="special-no-value-toggle-label">
-                                        <input type="checkbox" id="special-no-value-toggle">
-                                        <span>No value</span>
-                                    </label>
+                            <th class="special-filter-value-th">
+                                <div class="special-value-inputs-and-clear">
+                                    <div class="special-value-filters-inner">
+                                        <div class="column-filters">
+                                            <input type="number" id="special-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="0" max="99">
+                                            <input type="number" id="special-value-min" class="filter-input min" data-column="value" placeholder="Min" min="0" max="99">
+                                            <input type="number" id="special-value-max" class="filter-input max" data-column="value" placeholder="Max" min="0" max="99">
+                                            <label class="special-no-value-toggle-label" title="Show only cards with no numeric value">
+                                                <input type="checkbox" id="special-no-value-toggle" class="visually-hidden" aria-label="No value — show only cards with no numeric value">
+                                                <span class="special-no-value-toggle-face" aria-hidden="true">
+                                                    <svg class="special-no-value-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </th>
-                            <th>
+                            <th class="special-filter-function-th">
                                 <div class="special-function-filter-toggles" role="group" aria-label="Filter special cards by function icon">
                                     <button type="button" class="function-filter-toggle" data-icon-field="icon_offensive_swords" title="Offensive Action" aria-label="Toggle Offensive Action filter" aria-pressed="false">
                                         <img src="/src/resources/images/icons/function/offensive_action.png" alt="Offensive Action">
@@ -360,6 +374,10 @@
                                     <button type="button" class="function-filter-toggle" data-icon-field="icon_astral_plane" title="Astral Plane" aria-label="Toggle Astral Plane filter" aria-pressed="false">
                                         <img src="/src/resources/images/icons/function/astral_plane.png" alt="Astral Plane">
                                     </button>
+                                </div>
+                                <div class="special-function-mobile-trailing">
+                                    <span class="special-function-filter-separator" aria-hidden="true">|</span>
+                                    <button type="button" id="clear-special-filters-mobile" class="clear-filters-btn clear-filters-btn--special-mobile-inline" onclick="clearSpecialCardFilters()">Clear filters</button>
                                 </div>
                             </th>
                         </tr>

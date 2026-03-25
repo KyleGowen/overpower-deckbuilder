@@ -104,11 +104,11 @@ describe('Special card function filters', () => {
                   <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" aria-pressed="false"></button>
                   <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" aria-pressed="false"></button>
                   <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" aria-pressed="false"></button>
+                  <label class="special-no-icon-toggle-label">
+                    <input type="checkbox" id="special-no-icon-toggle" class="visually-hidden" aria-label="No icon">
+                    <span class="special-no-icon-toggle-face" aria-hidden="true"></span>
+                  </label>
                 </div>
-                <label>
-                  <input type="checkbox" id="special-no-icon-toggle">
-                  <span>No Icon</span>
-                </label>
               </div>
             </th>
             <th>
@@ -117,8 +117,8 @@ describe('Special card function filters', () => {
                 <input type="number" id="special-value-min" class="filter-input min" data-column="value">
                 <input type="number" id="special-value-max" class="filter-input max" data-column="value">
                 <label class="special-no-value-toggle-label">
-                  <input type="checkbox" id="special-no-value-toggle">
-                  <span>No value</span>
+                  <input type="checkbox" id="special-no-value-toggle" class="visually-hidden" aria-label="No value">
+                  <span class="special-no-value-toggle-face" aria-hidden="true"></span>
                 </label>
               </div>
             </th>

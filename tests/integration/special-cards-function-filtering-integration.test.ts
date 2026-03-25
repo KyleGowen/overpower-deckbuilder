@@ -38,8 +38,8 @@ describe('Special Cards function toggle integration', () => {
                 <input type="number" id="special-value-min" class="filter-input min" data-column="value">
                 <input type="number" id="special-value-max" class="filter-input max" data-column="value">
                 <label class="special-no-value-toggle-label">
-                  <input type="checkbox" id="special-no-value-toggle">
-                  <span>No value</span>
+                  <input type="checkbox" id="special-no-value-toggle" class="visually-hidden" aria-label="No value">
+                  <span class="special-no-value-toggle-face" aria-hidden="true"></span>
                 </label>
               </div>
             </th>

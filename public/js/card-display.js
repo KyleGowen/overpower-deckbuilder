@@ -131,6 +131,110 @@ function characterMobileCaptionLines(card) {
 }
 
 /**
+ * Strip HTML tags / collapse whitespace for mobile caption text (DB `card_effect` may contain markup).
+ */
+function specialCardEffectPlainText(htmlOrText) {
+    if (htmlOrText == null) return '';
+    const s = String(htmlOrText).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return s;
+}
+
+/** Same token list as `formatSpecialCardEffect` — strip from mobile effect line (flags shown separately). */
+const SPECIAL_MOBILE_CAPTION_KEYWORD_TOKENS = [
+    '**Fortifications!**',
+    '**Cataclysm!**',
+    '**Assist!**',
+    '**Ambush!**',
+    '**One Per Deck**',
+];
+
+/**
+ * Plain card_effect for Special mobile caption: decode common entities, strip HTML, remove keyword lines.
+ */
+function specialCardEffectPlainForMobileCaption(htmlOrText) {
+    if (htmlOrText == null) return '';
+    let decoded = String(htmlOrText)
+        .replace(/\\'93/g, "'")
+        .replace(/\\'94/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&nbsp;/g, ' ');
+    let plain = specialCardEffectPlainText(decoded);
+    for (const kw of SPECIAL_MOBILE_CAPTION_KEYWORD_TOKENS) {
+        const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        plain = plain.replace(re, '');
+    }
+    plain = plain.replace(/\s+/g, ' ').trim();
+    if (plain.length > 220) {
+        plain = plain.slice(0, 217) + '…';
+    }
+    return plain;
+}
+
+function dbvSetCaptionLineFromCard(card) {
+    const codeRaw = card && card.set != null ? card.set : card && card.universe != null ? card.universe : 'ERB';
+    const code = String(codeRaw != null ? codeRaw : 'ERB').trim() || 'ERB';
+    const setLabel = (typeof window !== 'undefined' && typeof window.translateSet === 'function')
+        ? window.translateSet(code)
+        : code;
+    const snRaw = card && card.set_number != null ? String(card.set_number).trim() : '';
+    let setLine = '';
+    if (snRaw) {
+        if (snRaw.includes('/')) {
+            setLine = `${setLabel} - ${snRaw}`;
+        } else {
+            const foil = /F$/i.test(snRaw);
+            const core = foil ? snRaw.slice(0, -1) : snRaw;
+            const n = parseInt(core, 10);
+            const padded = Number.isFinite(n) ? String(n).padStart(3, '0') : snRaw;
+            const suffix = foil ? 'F' : '';
+            const numPart = `${padded}${suffix}`;
+            setLine = `${setLabel} - ${numPart}`;
+        }
+    } else {
+        setLine = setLabel;
+    }
+    return setLine.trim();
+}
+
+/**
+ * Mobile DBV caption under Special card art: name, character, effect, optional flag lines, set + number.
+ */
+function specialMobileCaption(card) {
+    const name = String(card && card.name != null ? card.name : '').trim();
+    const character = String(card && (card.character || card.character_name) != null ? (card.character || card.character_name) : '').trim();
+    const effect = specialCardEffectPlainForMobileCaption(card && card.card_effect != null ? card.card_effect : '');
+    const onePerDeck = card && (card.one_per_deck === true || card.is_one_per_deck === true) ? 'One per deck' : '';
+    const cataclysm = card && (card.is_cataclysm === true || card.cataclysm === true) ? 'Cataclysm' : '';
+    const assist = card && (card.is_assist === true || card.assist === true) ? 'Assist' : '';
+    const ambush = card && (card.is_ambush === true || card.ambush === true) ? 'Ambush' : '';
+    const set = dbvSetCaptionLineFromCard(card);
+    return { name, character, effect, onePerDeck, cataclysm, assist, ambush, set };
+}
+
+function specialMobileCaptionOptionalLine(className, text) {
+    const t = text != null ? String(text).trim() : '';
+    return `<div class="${className}"${t ? '' : ' style="display:none;"'}">${t ? escapeHtmlText(t) : ''}</div>`;
+}
+
+function buildSpecialMobileCaptionHtml(cap) {
+    return `
+                    <div class="characters-mobile-card-caption__name">${escapeHtmlText(cap.name)}</div>
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__character', cap.character)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__ability', cap.effect)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__opd', cap.onePerDeck)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__cataclysm', cap.cataclysm)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__assist', cap.assist)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__ambush', cap.ambush)}
+                    ${specialMobileCaptionOptionalLine('characters-mobile-card-caption__set', cap.set)}
+    `.trim();
+}
+
+/**
  * Get the image path for a card, handling both image_path and image fields
  * options: { useThumbnail: boolean } - when true, return thumbnail for character images
  */
@@ -208,6 +312,15 @@ function preloadAlternateImages(imageData) {
 /** True when root layout mode is mobile; skip table row height locks (M2c card rows). */
 function isLayoutMobileForCardDisplay() {
     return typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+}
+
+/** Matches layout-mode.js / mobile-layout.css DBV band; used for Special tab row art when layout-desktop + narrow. */
+function isNarrowViewportDbvBand() {
+    try {
+        return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+    } catch {
+        return false;
+    }
 }
 
 /**
@@ -316,6 +429,91 @@ if (typeof window !== 'undefined') {
             clearCharacterRowHeightLocks();
         } else {
             refreshCharacterTableHeightLocks();
+        }
+    });
+}
+
+/** Clear desktop height locks on special card rows (e.g. layout switch to mobile). */
+function clearSpecialRowHeightLocks() {
+    const tbody = document.getElementById('special-cards-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((r) => {
+        r.style.removeProperty('height');
+        r.style.removeProperty('min-height');
+        r.style.removeProperty('max-height');
+        delete r.dataset.heightLocked;
+        const ic = r.querySelector('td:nth-child(1)');
+        if (ic) {
+            ic.style.removeProperty('height');
+            ic.style.removeProperty('min-height');
+            ic.style.removeProperty('max-height');
+            delete ic.dataset.heightLocked;
+        }
+        const imgEl = r.querySelector('img');
+        if (imgEl) {
+            imgEl.style.removeProperty('max-height');
+            imgEl.style.removeProperty('object-fit');
+        }
+    });
+}
+
+/** Re-apply special row height locks after switching to desktop layout. */
+function refreshSpecialTableHeightLocks() {
+    if (isLayoutMobileForCardDisplay()) {
+        return;
+    }
+    clearSpecialRowHeightLocks();
+    const tbody = document.getElementById('special-cards-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((row) => {
+        if (!row.querySelector('td:nth-child(1) img')) {
+            return;
+        }
+        const imageCell = row.querySelector('td:nth-child(1)');
+        const img = row.querySelector('td:nth-child(1) img');
+        if (!imageCell || !img || imageCell.dataset.heightLocked) {
+            return;
+        }
+        const lockRowHeight = () => {
+            if (isLayoutMobileForCardDisplay() || imageCell.dataset.heightLocked) {
+                return;
+            }
+            const cellHeight = imageCell.offsetHeight;
+            const rowHeight = row.offsetHeight;
+            if (cellHeight > 0) {
+                const cellHeightStr = cellHeight + 'px';
+                imageCell.style.setProperty('height', cellHeightStr, 'important');
+                imageCell.style.setProperty('min-height', cellHeightStr, 'important');
+                imageCell.style.setProperty('max-height', cellHeightStr, 'important');
+                imageCell.dataset.heightLocked = 'true';
+            }
+            if (rowHeight > 0) {
+                const rowHeightStr = rowHeight + 'px';
+                row.style.setProperty('height', rowHeightStr, 'important');
+                row.style.setProperty('min-height', rowHeightStr, 'important');
+                row.style.setProperty('max-height', rowHeightStr, 'important');
+                row.dataset.heightLocked = 'true';
+            }
+        };
+        if (img.complete) {
+            setTimeout(lockRowHeight, 100);
+        } else {
+            img.addEventListener('load', lockRowHeight, { once: true });
+            setTimeout(lockRowHeight, 1000);
+        }
+    });
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('layout-mode-change', function onSpecialDbvLayoutModeChange() {
+        if (isLayoutMobileForCardDisplay()) {
+            clearSpecialRowHeightLocks();
+        } else {
+            refreshSpecialTableHeightLocks();
         }
     });
 }
@@ -473,6 +671,32 @@ function displayCharacters(characters) {
     }
 }
 
+function setDbvCaptionLineEl(row, selector, text) {
+    if (!row) return;
+    const el = row.querySelector(selector);
+    if (!el) return;
+    const t = text != null ? String(text).trim() : '';
+    if (t) {
+        el.textContent = t;
+        el.style.removeProperty('display');
+    } else {
+        el.textContent = '';
+        el.style.display = 'none';
+    }
+}
+
+function applySpecialMobileCaptionFromNav(row, cap) {
+    if (!row || !cap) return;
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__name', cap.name);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__character', cap.character);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__ability', cap.effect);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__opd', cap.onePerDeck);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__cataclysm', cap.cataclysm);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__assist', cap.assist);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__ambush', cap.ambush);
+    setDbvCaptionLineEl(row, '.characters-mobile-card-caption__set', cap.set);
+}
+
 /**
  * Navigate through alternate card images
  * @param {string} groupId - The unique identifier for the card group
@@ -573,32 +797,36 @@ function navigateCardImage(groupId, direction) {
     };
     img.addEventListener('load', syncDbvImgOrientation, { once: true });
 
-    const capNameEl = row ? row.querySelector('.characters-mobile-card-caption__name') : null;
-    const capSetEl = row ? row.querySelector('.characters-mobile-card-caption__set') : null;
-    const capAbilityEl = row ? row.querySelector('.characters-mobile-card-caption__ability') : null;
-    if (capNameEl) {
-        capNameEl.textContent = newImage.mobileCaptionLine1 != null && String(newImage.mobileCaptionLine1).trim() !== ''
-            ? newImage.mobileCaptionLine1
-            : (newImage.name != null ? String(newImage.name) : '');
-    }
-    if (capSetEl) {
-        const t = newImage.mobileCaptionLine2 != null ? String(newImage.mobileCaptionLine2).trim() : '';
-        if (t) {
-            capSetEl.textContent = t;
-            capSetEl.style.removeProperty('display');
-        } else {
-            capSetEl.textContent = '';
-            capSetEl.style.display = 'none';
+    if (row && newImage.mobileCaption && row.querySelector('.characters-mobile-card-caption__character')) {
+        applySpecialMobileCaptionFromNav(row, newImage.mobileCaption);
+    } else {
+        const capNameEl = row ? row.querySelector('.characters-mobile-card-caption__name') : null;
+        const capSetEl = row ? row.querySelector('.characters-mobile-card-caption__set') : null;
+        const capAbilityEl = row ? row.querySelector('.characters-mobile-card-caption__ability') : null;
+        if (capNameEl) {
+            capNameEl.textContent = newImage.mobileCaptionLine1 != null && String(newImage.mobileCaptionLine1).trim() !== ''
+                ? newImage.mobileCaptionLine1
+                : (newImage.name != null ? String(newImage.name) : '');
         }
-    }
-    if (capAbilityEl) {
-        const ab = newImage.mobileCaptionLine3 != null ? String(newImage.mobileCaptionLine3).trim() : '';
-        if (ab) {
-            capAbilityEl.textContent = ab;
-            capAbilityEl.style.removeProperty('display');
-        } else {
-            capAbilityEl.textContent = '';
-            capAbilityEl.style.display = 'none';
+        if (capSetEl) {
+            const t = newImage.mobileCaptionLine2 != null ? String(newImage.mobileCaptionLine2).trim() : '';
+            if (t) {
+                capSetEl.textContent = t;
+                capSetEl.style.removeProperty('display');
+            } else {
+                capSetEl.textContent = '';
+                capSetEl.style.display = 'none';
+            }
+        }
+        if (capAbilityEl) {
+            const ab = newImage.mobileCaptionLine3 != null ? String(newImage.mobileCaptionLine3).trim() : '';
+            if (ab) {
+                capAbilityEl.textContent = ab;
+                capAbilityEl.style.removeProperty('display');
+            } else {
+                capAbilityEl.textContent = '';
+                capAbilityEl.style.display = 'none';
+            }
         }
     }
 
@@ -949,47 +1177,63 @@ function displaySpecialCards(specialCards) {
         const representative = group[0];
         
         // Prepare image data for navigation (specials don't have thumbnails - imagePath is full res)
-        const imageData = group.map(card => ({
-            id: card.id,
-            imagePath: getCardImagePathForDisplay(card, 'special'),
-            fullResPath: getCardImagePathForDisplay(card, 'special'),
-            name: card.name,
-            isFoil: !!(card.is_foil)
-        }));
-        
+        const imageData = group.map(card => {
+            const cap = specialMobileCaption(card);
+            return {
+                id: card.id,
+                imagePath: getCardImagePathForDisplay(card, 'special'),
+                fullResPath: getCardImagePathForDisplay(card, 'special'),
+                name: card.name,
+                isFoil: !!(card.is_foil),
+                mobileCaption: cap
+            };
+        });
+
         // Create unique identifier for this card group
         const groupId = `special-group-${representative.id}`;
-        
+
         // Build navigation arrows HTML (only show if there are multiple images)
         const hasMultipleImages = imageData.length > 1;
         const navArrows = hasMultipleImages ? `
             <button class="card-nav-arrow card-nav-prev" onclick="navigateCardImage('${groupId}', -1)" aria-label="Previous art" type="button">‹</button>
             <button class="card-nav-arrow card-nav-next" onclick="navigateCardImage('${groupId}', 1)" aria-label="Next art" type="button">›</button>
         ` : '';
-        
+
         // Current image (starts with original art - index 0)
         const currentImage = imageData[0];
         const currentImagePath = currentImage.imagePath;
         const currentImageName = currentImage.name;
-        
+        const capLines = specialMobileCaption(representative);
+        const specialCaptionHtml = buildSpecialMobileCaptionHtml(capLines);
+        const specialUseMobileListArt =
+            isLayoutMobileForCardDisplay() || isNarrowViewportDbvBand();
+        const specialDbvImgStyle = specialUseMobileListArt
+            ? 'border-radius: 5px; cursor: pointer;'
+            : 'width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;';
+        const foilBadgeDisplay = currentImage.isFoil ? 'block' : 'none';
+
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>
-                <div class="card-image-container">
+            <td data-label="Image">
+                <div class="card-image-container${hasMultipleImages ? ' card-image-container--with-nav' : ''}">
                     ${navArrows}
-                    <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:none;">✦ FOIL</span>
+                    <span id="${groupId}-foil-badge" class="foil-card-badge" style="display:${foilBadgeDisplay};">✦ FOIL</span>
                     <img id="${groupId}-img"
                          src="${currentImagePath}"
                          data-src="${currentImagePath}"
                          data-full-res="${currentImagePath}"
+                         data-dbv-lightbox-context="special"
                          alt="${currentImageName}"
                          loading="lazy"
                          decoding="async"
-                         style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;"
+                         style="${specialDbvImgStyle}"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                          onmouseenter="showCardHoverModal('${(currentImagePath || '').replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'special')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
+                </div>
+                <div class="characters-mobile-card-caption">
+                    ${specialCaptionHtml}
                 </div>
             </td>
             <td>
@@ -1005,62 +1249,66 @@ function displaySpecialCards(specialCards) {
                 </button>
                 ` : ''}
             </td>
-            <td><strong>${representative.name}</strong></td>
-            <td>${representative.character || ''}</td>
-            <td>${formatSpecialCardEffect(representative.card_effect, representative)}</td>
-            <td>${renderSpecialIconBadges(representative)}</td>
-            <td>${representative.value == null ? '' : representative.value}</td>
-            <td>${renderSpecialFunctionIcons(representative)}</td>
+            <td data-label="Name"><strong>${representative.name}</strong></td>
+            <td data-label="Character">${representative.character || ''}</td>
+            <td data-label="Card Effect">${formatSpecialCardEffect(representative.card_effect, representative)}</td>
+            <td data-label="Icon">${renderSpecialIconBadges(representative)}</td>
+            <td data-label="Value">${representative.value == null ? '' : representative.value}</td>
+            <td data-label="Function">${renderSpecialFunctionIcons(representative)}</td>
         `;
-        
+
         // Store image data in data attribute for navigation
         row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
         row.querySelector('.card-image-container').setAttribute('data-current-index', '0');
         preloadAlternateImages(imageData);
-        
+
         tbody.appendChild(row);
-        
+
         const img = row.querySelector('img');
         if (img) {
-            const lockRowHeight = () => {
-                const imageCell = row.querySelector('td:nth-child(1)');
-                if (imageCell && !imageCell.dataset.heightLocked) {
-                    // Lock both the cell and the row height
-                    // Use setProperty with important to prevent override
-                    const cellHeight = imageCell.offsetHeight;
-                    const rowHeight = row.offsetHeight;
-                    
-                    if (cellHeight > 0) {
-                        const cellHeightStr = cellHeight + 'px';
-                        imageCell.style.setProperty('height', cellHeightStr, 'important');
-                        imageCell.style.setProperty('min-height', cellHeightStr, 'important');
-                        imageCell.style.setProperty('max-height', cellHeightStr, 'important');
-                        imageCell.dataset.heightLocked = 'true';
-                    }
-                    
-                    // Also lock the row height to prevent table recalculation
-                    if (rowHeight > 0) {
-                        const rowHeightStr = rowHeight + 'px';
-                        row.style.setProperty('height', rowHeightStr, 'important');
-                        row.style.setProperty('min-height', rowHeightStr, 'important');
-                        row.style.setProperty('max-height', rowHeightStr, 'important');
-                        row.dataset.heightLocked = 'true';
-                    }
-                }
+            const syncOrientation = function () {
+                applyDbvHorizontalCardClass(img);
             };
-            
-            if (img.complete) {
-                // Image already loaded
-                setTimeout(lockRowHeight, 100);
+            if (img.complete && img.naturalWidth) {
+                syncOrientation();
             } else {
-                // Wait for image to load
-                img.addEventListener('load', () => {
-                    lockRowHeight();
-                }, { once: true });
-                // Fallback timeout
-                setTimeout(() => {
-                    lockRowHeight();
-                }, 1000);
+                img.addEventListener('load', syncOrientation, { once: true });
+            }
+            if (!specialUseMobileListArt) {
+                const lockRowHeight = () => {
+                    const imageCell = row.querySelector('td:nth-child(1)');
+                    if (imageCell && !imageCell.dataset.heightLocked) {
+                        const cellHeight = imageCell.offsetHeight;
+                        const rowHeight = row.offsetHeight;
+
+                        if (cellHeight > 0) {
+                            const cellHeightStr = cellHeight + 'px';
+                            imageCell.style.setProperty('height', cellHeightStr, 'important');
+                            imageCell.style.setProperty('min-height', cellHeightStr, 'important');
+                            imageCell.style.setProperty('max-height', cellHeightStr, 'important');
+                            imageCell.dataset.heightLocked = 'true';
+                        }
+
+                        if (rowHeight > 0) {
+                            const rowHeightStr = rowHeight + 'px';
+                            row.style.setProperty('height', rowHeightStr, 'important');
+                            row.style.setProperty('min-height', rowHeightStr, 'important');
+                            row.style.setProperty('max-height', rowHeightStr, 'important');
+                            row.dataset.heightLocked = 'true';
+                        }
+                    }
+                };
+
+                if (img.complete) {
+                    setTimeout(lockRowHeight, 100);
+                } else {
+                    img.addEventListener('load', () => {
+                        lockRowHeight();
+                    }, { once: true });
+                    setTimeout(() => {
+                        lockRowHeight();
+                    }, 1000);
+                }
             }
         }
         if (typeof isGuestUser === 'function' && isGuestUser()) {
@@ -1218,9 +1466,12 @@ function displayLocations(locations) {
  * Matches the approach used for character rows
  */
 function lockAllSpecialCardRowHeights() {
+    if (isLayoutMobileForCardDisplay()) {
+        return;
+    }
     const table = document.getElementById('special-cards-table');
     if (!table) return;
-    
+
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
         const imageCell = row.querySelector('td:nth-child(1)');

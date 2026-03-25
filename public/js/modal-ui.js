@@ -8,16 +8,30 @@
  */
 function openModal(imgElement) {
     const fullResPath = imgElement.dataset && imgElement.dataset.fullRes ? imgElement.dataset.fullRes : imgElement.src;
+    const imageModal = document.getElementById('imageModal');
     document.getElementById('modalImage').src = fullResPath;
     document.getElementById('modalCaption').textContent = imgElement.alt;
-    document.getElementById('imageModal').style.display = 'block';
+    if (!imageModal) {
+        return;
+    }
+    const ctx = imgElement.dataset && imgElement.dataset.dbvLightboxContext;
+    if (ctx) {
+        imageModal.setAttribute('data-open-context', ctx);
+    } else {
+        imageModal.removeAttribute('data-open-context');
+    }
+    imageModal.style.display = 'block';
 }
 
 /**
  * Close image modal
  */
 function closeModal() {
-    document.getElementById('imageModal').style.display = 'none';
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.removeAttribute('data-open-context');
+        imageModal.style.display = 'none';
+    }
 }
 
 /**

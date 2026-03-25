@@ -51,9 +51,9 @@ const dom = new JSDOM(`
                 <tr class="filter-row">
                     <th><button class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button></th>
                     <th></th>
-                    <th><input type="text" class="header-filter" placeholder="Search names..." data-column="name"></th>
-                    <th><input type="text" class="header-filter" placeholder="Search characters..." data-column="character"></th>
-                    <th><input type="text" class="header-filter" placeholder="Search effects..." data-column="card_effect"></th>
+                    <th><input type="text" class="header-filter" placeholder="Search card name..." data-column="name"></th>
+                    <th><input type="text" class="header-filter" placeholder="Search character..." data-column="character"></th>
+                    <th><input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect"></th>
                 </tr>
             </thead>
             <tbody id="special-cards-tbody">

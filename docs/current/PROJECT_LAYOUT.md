@@ -16,6 +16,8 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md  # Deck editor Card View layout pattern (landscape/portrait, do not regress)
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
 ├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
+├── 📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV row art + image modal sizing attempts; troubleshooting
+├── 📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
 ├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
 ├── 📁 docs/checklist-source/       # Markdown exports of each OverPower Check List tab (regenerate via scripts/export-overpower-checklist-markdown.py)
 ├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration
@@ -370,6 +372,8 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 📄 docs/current/SERVER_STARTUP.md       # Server startup guide
 📄 docs/current/STYLE_GUIDE.md          # Code style guidelines
 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck / session deck attempts and why we disabled +Deck for GUEST
+📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV card row + #imageModal sizing attempts; troubleshooting
+📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
 ```
 
 ### Documentation map and context files
