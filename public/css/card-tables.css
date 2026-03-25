@@ -32,7 +32,8 @@
 #advanced-universe-table th:nth-child(6), #advanced-universe-table td:nth-child(6) { width: 7% !important; } /* One Per Deck */
 
 /* Locations Search Input Styling - Direct override */
-#locations-table .header-filter[data-column="special_ability"] {
+#locations-table .header-filter[data-column="special_ability"],
+#locations-table .header-filter[data-column="name"] {
     width: 480px !important;
     max-width: 480px !important;
     margin: 0 auto;

@@ -1183,6 +1183,25 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Locations: inline clear in threat strip on mobile only (see mobile-layout.css) */
+#locations-table #clear-location-filters-mobile.clear-filters-btn--locations-mobile-inline {
+    display: none;
+}
+
+#locations-table .locations-threat-inputs-and-clear {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+#locations-table .locations-threat-inputs-and-clear .filter-input {
+    width: auto;
+    min-width: 0;
+}
+
 .special-no-value-toggle-label input[type="checkbox"] {
     width: 14px;
     height: 14px;

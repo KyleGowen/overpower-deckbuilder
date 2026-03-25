@@ -311,7 +311,7 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
 
     it('shows the mobile caption stack with name, ability, and set line font sizes', () => {
         expect(css).toMatch(
-            /#characters-table\s+\.characters-mobile-card-caption\s*,\s*#special-cards-table\s+\.characters-mobile-card-caption\s*\{[\s\S]*?display:\s*none/
+            /#characters-table\s+\.characters-mobile-card-caption\s*,\s*#special-cards-table\s+\.characters-mobile-card-caption\s*,\s*#locations-table\s+\.characters-mobile-card-caption\s*\{[\s\S]*?display:\s*none/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?flex-direction:\s*column[\s\S]*?max-width:\s*min\(\s*444px\s*,\s*100%\s*\)/
@@ -324,6 +324,24 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set[\s\S]*?font-size:\s*0\.8125rem/
+        );
+    });
+
+    it('lays out Locations rows as cards with portrait max-height override and filter shell', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#locations-table\s+thead\s+tr\.locations-filter-row[\s\S]*?border-radius:\s*12px/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#locations-table\s+tbody\s+td:nth-child\(n\+3\)[\s\S]*?display:\s*none\s*!important/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#locations-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?max-height:\s*none\s*!important/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#locations-table\s+#clear-location-filters-mobile\.clear-filters-btn--locations-mobile-inline[\s\S]*?display:\s*inline-flex/
+        );
+        expect(css).toMatch(
+            /#database-view\s+#locations-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?max-height:\s*none\s*!important/
         );
     });
 });

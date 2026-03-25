@@ -265,6 +265,7 @@
 /* Wide header filters (card-tables.css) — fluid on narrow layout */
 .layout-mobile #advanced-universe-table .header-filter[data-column="card_effect"],
 .layout-mobile #locations-table .header-filter[data-column="special_ability"],
+.layout-mobile #locations-table .header-filter[data-column="name"],
 .layout-mobile #events-table .header-filter[data-column="game_effect"] {
     width: 100% !important;
     max-width: 100% !important;
@@ -928,6 +929,138 @@
     box-sizing: border-box !important;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Locations — filter shell (layout-mobile)                                    */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #locations-table thead {
+    display: block;
+    width: 100%;
+}
+
+.layout-mobile #locations-table thead tr:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row {
+    --specials-header-shell-bg: rgba(10, 28, 32, 0.96);
+    --specials-header-shell-border: rgba(78, 205, 196, 0.38);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 4px;
+    border: 1px solid var(--specials-header-shell-border);
+    border-radius: 12px;
+    background: var(--specials-header-shell-bg);
+    padding: 12px;
+    box-sizing: border-box;
+    gap: 0;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row > th {
+    display: block;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row > th.locations-filter-clear-th,
+.layout-mobile #locations-table thead tr.locations-filter-row > th.locations-filter-spacer-th {
+    display: none !important;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row > th.locations-filter-threat-th {
+    order: 1;
+    flex: 1 1 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 0 10px 0;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row > th.locations-filter-ability-th {
+    order: 2;
+    flex: 1 1 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 0 10px 0;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row > th.locations-filter-name-th {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0;
+}
+
+.layout-mobile #locations-table .locations-threat-inputs-and-clear {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.layout-mobile #locations-table .locations-threat-range-sep {
+    display: none;
+}
+
+.layout-mobile #locations-table .locations-threat-inputs-and-clear #location-threat-min {
+    flex: 4 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+}
+
+.layout-mobile #locations-table .locations-threat-inputs-and-clear #location-threat-max {
+    flex: 4 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+}
+
+.layout-mobile #locations-table #clear-location-filters-mobile.clear-filters-btn--locations-mobile-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 2 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: normal;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.layout-mobile #locations-table thead tr.locations-filter-row .header-filter {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
 .layout-mobile #advanced-universe-table {
     --dbv-mobile-special-portrait-img: min(100%, 870px);
     --dbv-mobile-special-tile-img-max: 100%;
@@ -1520,13 +1653,155 @@
     object-fit: contain !important;
 }
 
-/* Character / Special mobile caption (hidden on desktop via rule below). */
-#characters-table .characters-mobile-card-caption,
-#special-cards-table .characters-mobile-card-caption {
+/* -------------------------------------------------------------------------- */
+/* Locations tab — card rows (layout-mobile); mirrors Characters tbody        */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #locations-table {
+    table-layout: auto !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.layout-mobile #locations-table tbody tr {
+    display: block;
+    margin-bottom: 14px;
+    padding: 12px 12px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #locations-table tbody td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 0;
+    border: none;
+    text-align: right;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
+.layout-mobile #locations-table tbody td:first-child {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0;
+}
+
+.layout-mobile #locations-table tbody td:first-child::before {
     display: none;
 }
 
-.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption {
+.layout-mobile #locations-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4ecdc4;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: auto;
+    text-align: left;
+    flex: 0 0 auto;
+    padding-top: 3px;
+    max-width: 45%;
+}
+
+.layout-mobile #locations-table tbody td:nth-child(2) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.layout-mobile #locations-table tbody td:nth-child(2) .add-to-deck-btn {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.layout-mobile #locations-table tbody td:nth-child(2) .remove-from-collection-btn {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #locations-table tbody td:nth-child(2) .add-to-collection-btn {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #locations-table tbody td:nth-child(n+3) {
+    display: none !important;
+}
+
+.layout-mobile #locations-table tbody td:first-child .card-image-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    box-sizing: border-box;
+}
+
+.layout-mobile #locations-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+    flex: 0 0 auto !important;
+    width: var(--dbv-mobile-table-portrait-img) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #locations-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+    flex: 0 0 auto !important;
+    width: var(--dbv-mobile-table-portrait-img-with-nav) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #locations-table tbody td:first-child .card-image-container img.horizontal-card {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: var(--dbv-mobile-tile-img-max) !important;
+    height: auto !important;
+    max-height: var(--dbv-mobile-tile-img-landscape-max-h) !important;
+    object-fit: contain !important;
+}
+
+/* Character / Special / Locations mobile caption (hidden on desktop via rule below). */
+#characters-table .characters-mobile-card-caption,
+#special-cards-table .characters-mobile-card-caption,
+#locations-table .characters-mobile-card-caption {
+    display: none;
+}
+
+.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption,
+.layout-mobile #locations-table tbody td:first-child .characters-mobile-card-caption {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1539,20 +1814,23 @@
     box-sizing: border-box;
 }
 
-.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__name {
+.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__name,
+.layout-mobile #locations-table tbody td:first-child .characters-mobile-card-caption__name {
     font-weight: 700;
     font-size: 1.0625rem;
     color: #fff;
     line-height: 1.25;
 }
 
-.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__set {
+.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__set,
+.layout-mobile #locations-table tbody td:first-child .characters-mobile-card-caption__set {
     font-size: 0.8125rem;
     color: rgba(255, 255, 255, 0.88);
     line-height: 1.3;
 }
 
-.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__ability {
+.layout-mobile #characters-table tbody td:first-child .characters-mobile-card-caption__ability,
+.layout-mobile #locations-table tbody td:first-child .characters-mobile-card-caption__ability {
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.82);
     line-height: 1.35;
@@ -1562,7 +1840,8 @@
 }
 
 .layout-mobile #characters-table tbody .card-nav-arrow,
-.layout-mobile #special-cards-table tbody .card-nav-arrow {
+.layout-mobile #special-cards-table tbody .card-nav-arrow,
+.layout-mobile #locations-table tbody .card-nav-arrow {
     min-width: 44px;
     min-height: 44px;
     padding: 8px;
@@ -2203,7 +2482,186 @@
         word-break: break-word;
     }
 
-    #database-view #special-cards-table tbody .card-nav-arrow {
+    /* Locations — viewport mirror (narrow + layout-desktop); same rationale as Special / UA */
+    #database-view #locations-table {
+        table-layout: auto !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    #database-view #locations-table tbody tr {
+        display: block;
+        margin-bottom: 14px;
+        padding: 12px 12px 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    #database-view #locations-table tbody td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 8px;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+
+    #database-view #locations-table tbody td:first-child {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 0;
+    }
+
+    #database-view #locations-table tbody td:first-child::before {
+        display: none;
+    }
+
+    #database-view #locations-table tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #4ecdc4;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-right: auto;
+        text-align: left;
+        flex: 0 0 auto;
+        padding-top: 3px;
+        max-width: 45%;
+    }
+
+    #database-view #locations-table tbody td:nth-child(2) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    #database-view #locations-table tbody td:nth-child(2) .add-to-deck-btn {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #database-view #locations-table tbody td:nth-child(2) .remove-from-collection-btn {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #locations-table tbody td:nth-child(2) .add-to-collection-btn {
+        grid-column: 2;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #locations-table tbody td:nth-child(n + 3) {
+        display: none !important;
+    }
+
+    #database-view #locations-table tbody tr[data-height-locked='true'],
+    #database-view #locations-table tbody td:nth-child(1)[data-height-locked='true'] {
+        overflow: visible !important;
+    }
+
+    #database-view #locations-table tbody td:first-child .card-image-container {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: auto;
+        box-sizing: border-box;
+    }
+
+    #database-view #locations-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+        flex: 0 0 auto !important;
+        width: var(--dbv-mobile-table-portrait-img) !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #locations-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+        flex: 0 0 auto !important;
+        width: var(--dbv-mobile-table-portrait-img-with-nav) !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #locations-table tbody td:first-child .card-image-container img.horizontal-card {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: var(--dbv-mobile-tile-img-max) !important;
+        height: auto !important;
+        max-height: var(--dbv-mobile-tile-img-landscape-max-h) !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #locations-table tbody td:first-child .characters-mobile-card-caption {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
+        width: 100%;
+        max-width: min(444px, 100%);
+        margin: 10px auto 0;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    #database-view #locations-table tbody td:first-child .characters-mobile-card-caption__name {
+        font-weight: 700;
+        font-size: 1.0625rem;
+        color: #fff;
+        line-height: 1.25;
+    }
+
+    #database-view #locations-table tbody td:first-child .characters-mobile-card-caption__set {
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.88);
+        line-height: 1.3;
+    }
+
+    #database-view #locations-table tbody td:first-child .characters-mobile-card-caption__ability {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.35;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    #database-view #special-cards-table tbody .card-nav-arrow,
+    #database-view #locations-table tbody .card-nav-arrow {
         min-width: 44px;
         min-height: 44px;
         padding: 8px;

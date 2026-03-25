@@ -131,6 +131,45 @@ function characterMobileCaptionLines(card) {
 }
 
 /**
+ * Mobile DBV caption under location art: name, special ability, set line (same DOM order as characters).
+ */
+function locationMobileCaptionLines(loc) {
+    const line1 = String(loc && loc.name != null ? loc.name : '').trim();
+    const codeRaw = loc && loc.set != null ? loc.set : 'ERB';
+    const code = String(codeRaw != null ? codeRaw : 'ERB').trim() || 'ERB';
+    const setLabel = (typeof window !== 'undefined' && typeof window.translateSet === 'function')
+        ? window.translateSet(code)
+        : code;
+    const snRaw = loc && loc.set_number != null ? String(loc.set_number).trim() : '';
+    let line2 = '';
+    if (snRaw) {
+        if (snRaw.includes('/')) {
+            line2 = `${setLabel} - ${snRaw}`;
+        } else {
+            const foil = /F$/i.test(snRaw);
+            const core = foil ? snRaw.slice(0, -1) : snRaw;
+            const n = parseInt(core, 10);
+            const padded = Number.isFinite(n) ? String(n).padStart(3, '0') : snRaw;
+            const suffix = foil ? 'F' : '';
+            const numPart = `${padded}${suffix}`;
+            line2 = `${setLabel} - ${numPart}`;
+        }
+    } else {
+        line2 = setLabel;
+    }
+    const rawAbility = loc && loc.special_ability != null ? String(loc.special_ability) : '';
+    const line3 = rawAbility.replace(/\s+/g, ' ').trim();
+    return { line1, line2: line2.trim(), line3 };
+}
+
+function locationThreatCssClass(threatLevel) {
+    const t = Number(threatLevel);
+    if (t >= 3) return 'threat-high';
+    if (t >= 1) return 'threat-medium';
+    return 'threat-low';
+}
+
+/**
  * Strip HTML tags / collapse whitespace for mobile caption text (DB `card_effect` may contain markup).
  */
 function specialCardEffectPlainText(htmlOrText) {
@@ -423,12 +462,57 @@ function refreshCharacterTableHeightLocks() {
     });
 }
 
+/** Clear desktop height locks on location rows (e.g. layout switch to mobile). */
+function clearLocationRowHeightLocks() {
+    const tbody = document.getElementById('locations-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((r) => {
+        r.style.removeProperty('height');
+        r.style.removeProperty('min-height');
+        r.style.removeProperty('max-height');
+        delete r.dataset.heightLocked;
+        const ic = r.querySelector('td:nth-child(1)');
+        if (ic) {
+            ic.style.removeProperty('height');
+            ic.style.removeProperty('min-height');
+            ic.style.removeProperty('max-height');
+            delete ic.dataset.heightLocked;
+        }
+        const imgEl = r.querySelector('img');
+        if (imgEl) {
+            imgEl.style.removeProperty('max-height');
+            imgEl.style.removeProperty('object-fit');
+        }
+    });
+}
+
+function refreshLocationTableHeightLocks() {
+    if (isLayoutMobileForCardDisplay()) {
+        return;
+    }
+    clearLocationRowHeightLocks();
+    const tbody = document.getElementById('locations-tbody');
+    if (!tbody) {
+        return;
+    }
+    tbody.querySelectorAll('tr').forEach((row) => {
+        if (!row.querySelector('td:nth-child(1) img')) {
+            return;
+        }
+        applyCharacterImageRowHeightLock(row);
+    });
+}
+
 if (typeof window !== 'undefined') {
     window.addEventListener('layout-mode-change', function onCharacterDbvLayoutModeChange() {
         if (isLayoutMobileForCardDisplay()) {
             clearCharacterRowHeightLocks();
+            clearLocationRowHeightLocks();
         } else {
             refreshCharacterTableHeightLocks();
+            refreshLocationTableHeightLocks();
         }
     });
 }
@@ -827,6 +911,24 @@ function navigateCardImage(groupId, direction) {
                 capAbilityEl.textContent = '';
                 capAbilityEl.style.display = 'none';
             }
+        }
+    }
+
+    if (groupId.startsWith('loc-group-') && row) {
+        const nameStrong = row.querySelector('td:nth-child(3) strong');
+        const threatTd = row.querySelector('td:nth-child(4)');
+        const abilityTd = row.querySelector('td:nth-child(5)');
+        if (nameStrong) {
+            nameStrong.textContent = newImage.name != null ? String(newImage.name) : '';
+        }
+        if (threatTd) {
+            const tlRaw = newImage.threat_level != null ? Number(newImage.threat_level) : 0;
+            const tl = Number.isFinite(tlRaw) ? tlRaw : 0;
+            threatTd.textContent = String(tl);
+            threatTd.className = locationThreatCssClass(tl);
+        }
+        if (abilityTd) {
+            abilityTd.textContent = newImage.special_ability != null ? String(newImage.special_ability) : '';
         }
     }
 
@@ -1345,18 +1447,22 @@ function displayLocations(locations) {
         // Use the first location (original art) as the representative for stats
         const representative = group[0];
 
-        // Determine threat level class
-        let threatClass = 'threat-low';
-        if (representative.threat_level >= 3) threatClass = 'threat-high';
-        else if (representative.threat_level >= 1) threatClass = 'threat-medium';
+        const threatClass = locationThreatCssClass(representative.threat_level);
 
-        // Prepare image data for navigation (thumbnail for list display, full-res for modal/hover)
-        const imageData = group.map(loc => ({
-            id: loc.id,
-            imagePath: getCardImagePathForDisplay(loc, 'location', { useThumbnail: true }),
-            fullResPath: getCardImagePathForDisplay(loc, 'location'),
-            name: loc.name
-        }));
+        const imageData = group.map((loc) => {
+            const cap = locationMobileCaptionLines(loc);
+            return {
+                id: loc.id,
+                imagePath: getCardImagePathForDisplay(loc, 'location', { useThumbnail: true }),
+                fullResPath: getCardImagePathForDisplay(loc, 'location'),
+                name: loc.name,
+                threat_level: loc.threat_level,
+                special_ability: loc.special_ability != null ? String(loc.special_ability) : '',
+                mobileCaptionLine1: cap.line1,
+                mobileCaptionLine2: cap.line2,
+                mobileCaptionLine3: cap.line3
+            };
+        });
 
         const groupId = `loc-group-${representative.id}`;
         const hasMultipleImages = imageData.length > 1;
@@ -1369,12 +1475,18 @@ function displayLocations(locations) {
         const currentImagePath = currentImage.imagePath;
         const currentFullResPath = currentImage.fullResPath || currentImagePath;
         const currentImageName = currentImage.name;
+        const capLines = locationMobileCaptionLines(representative);
+        const capSetHtml = `<div class="characters-mobile-card-caption__set"${capLines.line2 ? '' : ' style="display:none;"'}">${capLines.line2 ? escapeHtmlText(capLines.line2) : ''}</div>`;
+        const capAbilityHtml = `<div class="characters-mobile-card-caption__ability"${capLines.line3 ? '' : ' style="display:none;"'}">${capLines.line3 ? escapeHtmlText(capLines.line3) : ''}</div>`;
+        const locationDbvImgStyle = isLayoutMobileForCardDisplay()
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
 
         const row = document.createElement('tr');
         row.dataset.id = representative.id;
         row.innerHTML = `
-            <td>
-                <div class="card-image-container">
+            <td data-label="Image">
+                <div class="card-image-container${hasMultipleImages ? ' card-image-container--with-nav' : ''}">
                     ${navArrows}
                     <img id="${groupId}-img"
                          src="${currentImagePath}"
@@ -1383,29 +1495,34 @@ function displayLocations(locations) {
                          alt="${currentImageName}"
                          loading="lazy"
                          decoding="async"
-                         style="width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0iblkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3R0eHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
+                         style="${locationDbvImgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=='; this.style.cursor='default'; this.onclick=null;"
                          onmouseenter="showCardHoverModal('${currentFullResPath.replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'location')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${escapeHtmlText(capLines.line1)}</div>
+                    ${capAbilityHtml}
+                    ${capSetHtml}
+                </div>
             </td>
-            <td>
+            <td data-label="Actions">
                 <button class="add-to-deck-btn" onclick="showDeckSelection('location', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
-                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;">
+                <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')">
                     +Collection
                 </button>
-                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="location" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">
+                <button class="remove-from-collection-btn" data-card-id="${currentImage.id}" data-card-type="location" data-image-path="${currentFullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${currentImage.id}', 'location', '${currentFullResPath.replace(/'/g, "\\'")}')" disabled title="Card not in collection">
                     -Collection
                 </button>
                 ` : ''}
             </td>
-            <td><strong>${representative.name}</strong></td>
-            <td class="${threatClass}">${representative.threat_level}</td>
-            <td>${representative.special_ability || ''}</td>
+            <td data-label="Name"><strong>${representative.name}</strong></td>
+            <td data-label="Threat Level" class="${threatClass}">${representative.threat_level}</td>
+            <td data-label="Special Ability">${representative.special_ability || ''}</td>
         `;
 
         row.querySelector('.card-image-container').setAttribute('data-image-data', JSON.stringify(imageData));
@@ -1416,33 +1533,15 @@ function displayLocations(locations) {
 
         const img = row.querySelector('img');
         if (img) {
-            const lockRowHeight = () => {
-                const imageCell = row.querySelector('td:nth-child(1)');
-                if (imageCell && !imageCell.dataset.heightLocked) {
-                    const cellHeight = imageCell.offsetHeight;
-                    const rowHeight = row.offsetHeight;
-                    if (cellHeight > 0) {
-                        const cellHeightStr = cellHeight + 'px';
-                        imageCell.style.setProperty('height', cellHeightStr, 'important');
-                        imageCell.style.setProperty('min-height', cellHeightStr, 'important');
-                        imageCell.style.setProperty('max-height', cellHeightStr, 'important');
-                        imageCell.dataset.heightLocked = 'true';
-                    }
-                    if (rowHeight > 0) {
-                        const rowHeightStr = rowHeight + 'px';
-                        row.style.setProperty('height', rowHeightStr, 'important');
-                        row.style.setProperty('min-height', rowHeightStr, 'important');
-                        row.style.setProperty('max-height', rowHeightStr, 'important');
-                        row.dataset.heightLocked = 'true';
-                    }
-                }
+            const syncOrientation = function () {
+                applyDbvHorizontalCardClass(img);
             };
-            if (img.complete) {
-                setTimeout(lockRowHeight, 100);
+            if (img.complete && img.naturalWidth) {
+                syncOrientation();
             } else {
-                img.addEventListener('load', lockRowHeight, { once: true });
-                setTimeout(lockRowHeight, 1000);
+                img.addEventListener('load', syncOrientation, { once: true });
             }
+            applyCharacterImageRowHeightLock(row);
         }
         if (typeof isGuestUser === 'function' && isGuestUser()) {
             const addToDeckBtn = row.querySelector('.add-to-deck-btn');

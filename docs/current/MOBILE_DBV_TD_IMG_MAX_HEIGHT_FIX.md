@@ -87,7 +87,7 @@ Replace `#TABLE-ID` with the table's actual ID (e.g. `#special-cards-table`, `#c
 | Special Cards | `#special-cards-table` | Yes | Mar 2026 |
 | Characters | `#characters-table` | Check needed | — |
 | Universe: Advanced | `#advanced-universe-table` | Pending | — |
-| Locations | `#locations-table` | Pending | — |
+| Locations | `#locations-table` | Yes | Mar 2026 |
 | Aspects | `#aspects-table` | Pending | — |
 | Missions | `#missions-table` | Pending | — |
 | Events | `#events-table` | Pending | — |

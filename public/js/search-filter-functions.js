@@ -125,12 +125,38 @@ function setupLocationSearch() {
 
                 if (data.success) {
                     const filteredLocations = data.data.filter(location =>
-                        location.special_ability.toLowerCase().includes(abilityTerm)
+                        (location.special_ability || '').toLowerCase().includes(abilityTerm)
                     );
                     displayLocations(filteredLocations);
                 }
             } catch (error) {
                 console.error('Error searching locations by special ability:', error);
+            }
+        });
+    }
+
+    const nameSearchInput = document.querySelector('#locations-table .header-filter[data-column="name"]');
+    if (nameSearchInput) {
+        nameSearchInput.addEventListener('input', async (e) => {
+            const nameTerm = e.target.value.toLowerCase();
+
+            if (nameTerm.length === 0) {
+                await loadLocations();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/locations');
+                const data = await response.json();
+
+                if (data.success) {
+                    const filteredLocations = data.data.filter((location) =>
+                        (location.name || '').toLowerCase().includes(nameTerm)
+                    );
+                    displayLocations(filteredLocations);
+                }
+            } catch (error) {
+                console.error('Error searching locations by name:', error);
             }
         });
     }

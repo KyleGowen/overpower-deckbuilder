@@ -434,29 +434,30 @@
                             <th>Threat Level</th>
                             <th>Special Ability</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
-                                <button class="clear-filters-btn" onclick="clearLocationFilters()">Clear All Filters</button>
+                        <tr class="filter-row locations-filter-row">
+                            <th class="locations-filter-clear-th">
+                                <button type="button" id="clear-location-filters-desktop" class="clear-filters-btn" onclick="clearLocationFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th></th>
-                            <th>
-                                <div class="column-filters">
-                                    <div class="range-inputs">
-                                        <input type="number" id="location-threat-min" placeholder="Min" min="0" max="3" class="filter-input">
-                                        <span>-</span>
-                                        <input type="number" id="location-threat-max" placeholder="Max" min="0" max="3" class="filter-input">
-                                    </div>
+                            <th class="locations-filter-spacer-th"></th>
+                            <th class="locations-filter-name-th">
+                                <input type="text" class="header-filter" placeholder="Search name…" data-column="name" aria-label="Filter locations by name">
+                            </th>
+                            <th class="locations-filter-threat-th">
+                                <div class="locations-threat-inputs-and-clear">
+                                    <input type="number" id="location-threat-min" placeholder="Min" min="0" max="3" class="filter-input" aria-label="Minimum threat">
+                                    <span class="locations-threat-range-sep" aria-hidden="true">-</span>
+                                    <input type="number" id="location-threat-max" placeholder="Max" min="0" max="3" class="filter-input" aria-label="Maximum threat">
+                                    <button type="button" id="clear-location-filters-mobile" class="clear-filters-btn clear-filters-btn--locations-mobile-inline" onclick="clearLocationFilters()">Clear</button>
                                 </div>
                             </th>
-                            <th>
-                                <input type="text" class="header-filter" placeholder="Search abilities..." data-column="special_ability">
+                            <th class="locations-filter-ability-th">
+                                <input type="text" class="header-filter" placeholder="Search abilities..." data-column="special_ability" aria-label="Filter locations by special ability">
                             </th>
                         </tr>
                     </thead>
                     <tbody id="locations-tbody">
                         <tr>
-                            <td colspan="4" class="loading">Loading locations...</td>
+                            <td colspan="5" class="loading">Loading locations...</td>
                         </tr>
                     </tbody>
                 </table>

@@ -48,6 +48,11 @@ function clearLocationFilters() {
     if (abilitySearchInput) {
         abilitySearchInput.value = '';
     }
+
+    const nameSearchInput = document.querySelector('#locations-table .header-filter[data-column="name"]');
+    if (nameSearchInput) {
+        nameSearchInput.value = '';
+    }
     
     // Reload all locations
     if (typeof loadLocations === 'function') {
