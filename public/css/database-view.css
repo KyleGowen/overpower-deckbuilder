@@ -845,6 +845,16 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     max-width: 300px;
 }
 
+/* Mobile-only mission-set dropdown row (shown under .layout-mobile in mobile-layout.css) */
+#missions-table .missions-mobile-set-row {
+    display: none;
+}
+
+/* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
+#missions-table .missions-filter-clear-th {
+    display: none !important;
+}
+
 /* Special Cards Table Column Widths */
 /* DEBUG: Special Cards Table Layout */
 #special-cards-table {

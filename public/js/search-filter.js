@@ -51,7 +51,10 @@ function clearAllFiltersGlobally() {
             checkbox.checked = false;
         }
     });
-    
+
+    const missionsMissionSetSelect = document.getElementById('missions-mission-set-filter');
+    if (missionsMissionSetSelect) missionsMissionSetSelect.value = '';
+
     isClearingFilters = false;
 }
 

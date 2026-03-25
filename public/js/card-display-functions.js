@@ -1,15 +1,36 @@
 // Card Display Functions
 // Extracted from index.html for better modularity
 
+function missionUseMobileListArt() {
+    if (typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay()) {
+        return true;
+    }
+    if (typeof window.isNarrowViewportDbvBand === 'function' && window.isNarrowViewportDbvBand()) {
+        return true;
+    }
+    return false;
+}
+
 // Display missions
 function displayMissions(missions) {
     const tbody = document.getElementById('missions-tbody');
-    
+
     if (missions.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4">No missions found</td></tr>';
         return;
     }
-    
+
+    const useMobileListArt = missionUseMobileListArt();
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
     // Sort missions by mission set first, then by card name alphabetically
     const sortedMissions = missions.sort((a, b) => {
         if (a.mission_set !== b.mission_set) {
@@ -17,47 +38,90 @@ function displayMissions(missions) {
         }
         return a.card_name.localeCompare(b.card_name);
     });
-    
-    tbody.innerHTML = sortedMissions.map(mission => {
-        let imagePath;
-        if (typeof window.getCardImagePath === 'function') {
-            imagePath = window.getCardImagePath({ ...mission, image_path: mission.image_path || mission.image }, 'mission');
-        } else {
-            const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
-            const raw = '/src/resources/cards/images/missions/' + mapImagePathToActualFile(mission.image || '');
-            imagePath = cdn ? cdn + raw : raw;
-        }
-        const imagePathEscaped = imagePath.replace(/'/g, "\\'");
-        const imagePathAttr = imagePath.replace(/"/g, '&quot;');
-        return `
-        <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${mission.card_name}" 
+
+    tbody.innerHTML = sortedMissions
+        .map((mission) => {
+            let imagePath;
+            if (typeof window.getCardImagePath === 'function') {
+                imagePath = window.getCardImagePath({ ...mission, image_path: mission.image_path || mission.image }, 'mission');
+            } else {
+                const cdn = (window.APP_CDN_BASE || '').replace(/\/$/, '');
+                const raw = '/src/resources/cards/images/missions/' + mapImagePathToActualFile(mission.image || '');
+                imagePath = cdn ? cdn + raw : raw;
+            }
+            const imagePathEscaped = imagePath.replace(/'/g, "\\'");
+            const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+            const nameEsc = mission.card_name.replace(/'/g, "\\'");
+            const idEsc = (mission.id || '').replace(/'/g, "\\'");
+
+            const imgStyle = useMobileListArt
+                ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+                : 'width: 120px !important; height: auto !important; max-height: 180px !important; cursor: pointer;';
+
+            const setLine =
+                typeof window.dbvSetCaptionLineFromCard === 'function'
+                    ? window.dbvSetCaptionLineFromCard(mission)
+                    : '';
+
+            const captionHtml = useMobileListArt
+                ? `
+                <div class="characters-mobile-card-caption">
+                    <div class="characters-mobile-card-caption__name">${esc(mission.card_name || '')}</div>
+                    <div class="characters-mobile-card-caption__mission-set">${esc(mission.mission_set || '')}</div>
+                    <div class="characters-mobile-card-caption__set-line">${esc(setLine)}</div>
+                </div>`
+                : '';
+
+            const imgCellInner = useMobileListArt
+                ? `
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${mission.card_name}"
+                         data-dbv-lightbox-context="mission"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'mission')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}`
+                : `
+                <img src="${imagePathAttr}"
+                     alt="${mission.card_name}"
                      loading="lazy"
                      decoding="async"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${mission.card_name.replace(/'/g, "\\'")}', '${(mission.id || '').replace(/'/g, "\\'")}', 'mission')"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'mission')"
                      onmouseleave="hideCardHoverModal()"
                      onclick="openModal(this)"
                      onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; cursor: pointer;">
+                     style="${imgStyle}">`;
+
+            return `
+        <tr>
+            <td${useMobileListArt ? ' data-label="Image"' : ''}>
+                ${imgCellInner}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('mission', '${mission.id}', '${mission.card_name.replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('mission', '${mission.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                ${typeof getCurrentUser === 'function' && getCurrentUser()
+                    ? `
                 <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${mission.id}', 'mission', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
                 <button class="remove-from-collection-btn" data-card-id="${mission.id}" data-card-type="mission" data-image-path="${imagePathAttr}" onclick="removeOneFromCollection('${mission.id}', 'mission', '${imagePathEscaped}')" style="margin-top: 4px; display: block;" disabled title="Card not in collection">-Collection</button>
-                ` : ''}
+                `
+                    : ''}
             </td>
             <td>${mission.mission_set}</td>
             <td>${mission.card_name}</td>
         </tr>
     `;
-    }).join('');
+        })
+        .join('');
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 

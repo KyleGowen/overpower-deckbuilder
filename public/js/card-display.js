@@ -1628,4 +1628,5 @@ window.renderSpecialFunctionIcons = renderSpecialFunctionIcons;
 window.isLayoutMobileForCardDisplay = isLayoutMobileForCardDisplay;
 window.isNarrowViewportDbvBand = isNarrowViewportDbvBand;
 window.specialCardEffectPlainForMobileCaption = specialCardEffectPlainForMobileCaption;
+window.dbvSetCaptionLineFromCard = dbvSetCaptionLineFromCard;
 

@@ -108,7 +108,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="missions-tab"');
             expect(templateContent).toContain('id="missions-table"');
             expect(templateContent).toContain('id="missions-tbody"');
-            expect(templateContent).toContain('onclick="clearMissionsFilters()"');
+            expect(templateContent).toContain('id="missions-mission-set-filter"');
         });
 
         it('should contain events table', () => {

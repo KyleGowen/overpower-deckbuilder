@@ -350,29 +350,35 @@
             <thead>
                 <tr>
                     <th>Image</th>
+                    <th></th>
                     <th>Mission Set</th>
                     <th>Card Name</th>
                 </tr>
-                <tr class="filter-row">
-                    <th>
-                        <button class="clear-filters-btn" onclick="clearMissionsFilters()">Clear All Filters</button>
-                    </th>
-                    <th>
-                        <div class="column-filters">
-                            <div class="checkbox-group">
+                <tr class="filter-row missions-filter-row">
+                    <th class="missions-filter-clear-th" aria-hidden="true"></th>
+                    <th class="missions-filter-spacer-th" aria-hidden="true"></th>
+                    <th class="missions-filter-sets-th">
+                        <div class="column-filters missions-column-filters">
+                            <div class="missions-mobile-set-row">
+                                <label class="missions-mobile-set-label" for="missions-mission-set-filter">Mission set</label>
+                                <select id="missions-mission-set-filter" class="missions-mission-set-filter" aria-label="Filter by mission set">
+                                    <option value="">All</option>
+                                </select>
+                            </div>
+                            <div class="checkbox-group missions-checkbox-group">
                                 <label><input type="checkbox" value="King of the Jungle" checked> King of the Jungle</label>
                                 <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
                                 <label><input type="checkbox" value="Time Wars: Rise of the Gods" checked> Time Wars: Rise of the Gods</label>
-                                <label><input type="checkbox" value="Warlord of Mars" checked> Warlord of Mars</label>
+                                <label><input type="checkbox" value="The Warlord of Mars" checked> The Warlord of Mars</label>
                             </div>
                         </div>
                     </th>
-                    <th></th>
+                    <th class="missions-filter-empty-th" aria-hidden="true"></th>
                 </tr>
             </thead>
             <tbody id="missions-tbody">
                 <tr>
-                    <td colspan="3" class="loading">Loading missions...</td>
+                    <td colspan="4" class="loading">Loading missions...</td>
                 </tr>
             </tbody>
         </table>

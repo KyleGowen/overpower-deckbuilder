@@ -18,17 +18,21 @@ async function loadMissions() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('missions');
     if (cached) {
         window.missionsData = cached;
-        displayMissions(cached);
+        if (typeof populateMissionsMissionSetSelect === 'function') populateMissionsMissionSetSelect();
+        if (typeof applyMissionFilters === 'function') applyMissionFilters();
+        else displayMissions(cached);
         return;
     }
     try {
         const response = await fetch('/api/missions');
         const data = await response.json();
-        
+
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('missions', data.data);
             window.missionsData = data.data;
-            displayMissions(data.data);
+            if (typeof populateMissionsMissionSetSelect === 'function') populateMissionsMissionSetSelect();
+            if (typeof applyMissionFilters === 'function') applyMissionFilters();
+            else displayMissions(data.data);
         }
     } catch (error) {
         console.error('Error loading missions:', error);

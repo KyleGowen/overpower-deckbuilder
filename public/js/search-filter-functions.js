@@ -628,57 +628,105 @@ window.getSelectedSpecialFunctionFilterFields = getSelectedSpecialFunctionFilter
 window.cardMatchesFunctionIconFilters = cardMatchesFunctionIconFilters;
 window.setupSpecialCardSearch = setupSpecialCardSearch;
 
+/** True when the mobile mission-set &lt;select&gt; is the active filter UI (matches mobile-layout.css). */
+function missionsFilterUsesMobileSelect() {
+    if (typeof document !== 'undefined' && document.documentElement.classList.contains('layout-mobile')) {
+        return true;
+    }
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 900px)').matches) {
+        return true;
+    }
+    return false;
+}
+
+function populateMissionsMissionSetSelect() {
+    const sel = document.getElementById('missions-mission-set-filter');
+    if (!sel) return;
+    const data = window.missionsData || [];
+    const prev = sel.value;
+    const sets = [...new Set(data.map((m) => m.mission_set).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    sel.innerHTML = '';
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = 'All';
+    sel.appendChild(allOpt);
+    sets.forEach((s) => {
+        const o = document.createElement('option');
+        o.value = s;
+        o.textContent = s;
+        sel.appendChild(o);
+    });
+    if (prev && sets.includes(prev)) {
+        sel.value = prev;
+    } else {
+        sel.value = '';
+    }
+}
+
+window.populateMissionsMissionSetSelect = populateMissionsMissionSetSelect;
+
 function setupMissionSearch() {
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', async (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        
-        if (searchTerm.length === 0) {
-            // Reload all missions
-            await loadMissions();
+    searchInput.addEventListener('input', async () => {
+        if (!window.missionsData || window.missionsData.length === 0) {
+            if (typeof loadMissions === 'function') {
+                await loadMissions();
+            }
             return;
         }
-
-        try {
-            const response = await fetch('/api/missions');
-            const data = await response.json();
-            
-            if (data.success) {
-                const filteredMissions = data.data.filter(mission => 
-                    mission.mission_set.toLowerCase().includes(searchTerm) ||
-                    mission.card_name.toLowerCase().includes(searchTerm)
-                );
-                displayMissions(filteredMissions);
-            }
-        } catch (error) {
-            console.error('Error searching missions:', error);
-        }
+        applyMissionFilters();
     });
 
-    // Set up checkbox event listeners for mission set filtering
-    document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach((checkbox) => {
         checkbox.addEventListener('change', applyMissionFilters);
     });
+
+    const missionSetSelect = document.getElementById('missions-mission-set-filter');
+    if (missionSetSelect && !missionSetSelect.dataset.missionFilterBound) {
+        missionSetSelect.addEventListener('change', applyMissionFilters);
+        missionSetSelect.dataset.missionFilterBound = 'true';
+    }
 }
 
 function applyMissionFilters() {
-    const selectedMissionSets = Array.from(document.querySelectorAll('#missions-tab input[type="checkbox"]:checked'))
-        .map(checkbox => checkbox.value);
-    
-    if (selectedMissionSets.length === 0) {
-        // If no mission sets selected, show none
-        document.getElementById('missions-tbody').innerHTML = '<tr><td colspan="3" class="no-results">No mission sets selected</td></tr>';
+    const tbody = document.getElementById('missions-tbody');
+    const missions = window.missionsData || [];
+    const searchInput = document.getElementById('search-input');
+    const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+    let pool = missions;
+    if (rawTerm) {
+        pool = missions.filter(
+            (mission) =>
+                (mission.mission_set && mission.mission_set.toLowerCase().includes(rawTerm)) ||
+                (mission.card_name && mission.card_name.toLowerCase().includes(rawTerm))
+        );
+    }
+
+    if (missionsFilterUsesMobileSelect()) {
+        const sel = document.getElementById('missions-mission-set-filter');
+        const v = sel && sel.value ? sel.value : '';
+        if (!v) {
+            displayMissions(pool);
+            return;
+        }
+        displayMissions(pool.filter((m) => m.mission_set === v));
         return;
     }
-    
-    // Filter missions based on selected mission sets
-    const missions = window.missionsData || [];
-    const filteredMissions = missions.filter(mission => 
-        selectedMissionSets.includes(mission.mission_set)
+
+    const selectedMissionSets = Array.from(document.querySelectorAll('#missions-tab input[type="checkbox"]:checked')).map(
+        (checkbox) => checkbox.value
     );
-    
-    displayMissions(filteredMissions);
+
+    if (selectedMissionSets.length === 0) {
+        tbody.innerHTML =
+            '<tr><td colspan="4" class="no-results">No mission sets selected</td></tr>';
+        return;
+    }
+
+    displayMissions(pool.filter((mission) => selectedMissionSets.includes(mission.mission_set)));
 }
+
+window.applyMissionFilters = applyMissionFilters;
 
 function setupEventSearch() {
     // Set up main search input functionality (if it exists)

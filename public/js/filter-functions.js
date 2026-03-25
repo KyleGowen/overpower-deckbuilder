@@ -153,9 +153,21 @@ function clearAspectsFilters() {
 
 
 function clearMissionsFilters() {
-    // Clear missions filters
-    // Add specific filter clearing logic here if needed
-    applyFilters();
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+
+    document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach((cb) => {
+        cb.checked = true;
+    });
+
+    const missionSetSelect = document.getElementById('missions-mission-set-filter');
+    if (missionSetSelect) missionSetSelect.value = '';
+
+    if (typeof loadMissions === 'function') {
+        loadMissions();
+    } else if (typeof applyMissionFilters === 'function') {
+        applyMissionFilters();
+    }
 }
 
 function clearEventsFilters() {
