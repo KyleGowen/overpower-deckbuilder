@@ -32,8 +32,14 @@
         // Adjust modal dimensions based on card orientation
         // Horizontal cards (locations, characters, events) are wider
         const isHorizontalCard = cardType === 'location' || cardType === 'character' || cardType === 'event';
-        const modalWidth = isHorizontalCard ? 503 : 365; // Wider for horizontal cards (483px image + 20px padding)
-        const modalHeight = isHorizontalCard ? 365 : 503; // Shorter for horizontal cards
+        const isLayoutMobile = typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+        const narrowDbv =
+            typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 900px)').matches;
+        const largeSpecialHoverPortrait = (isLayoutMobile || narrowDbv) && cardType === 'special';
+        const portraitBoxW = largeSpecialHoverPortrait ? 548 : 365;
+        const portraitBoxH = largeSpecialHoverPortrait ? 755 : 503;
+        const modalWidth = isHorizontalCard ? 503 : portraitBoxW;
+        const modalHeight = isHorizontalCard ? 365 : portraitBoxH;
         
         // Button Avoidance Logic:
         // Detects nearby interactive buttons and repositions modal to avoid overlap.
@@ -600,7 +606,8 @@
      * showCardHoverModal('characters/hercules.webp', 'Hercules', 'char-123', 'character');
      */
     window.showCardHoverModal = function(imagePath, cardName, cardId, cardType, isFoil) {
-        
+        if (document.documentElement.classList.contains('layout-mobile')) return;
+
         // Clear any existing hide timeout
         if (window.hoverHideTimeout) {
             clearTimeout(window.hoverHideTimeout);
