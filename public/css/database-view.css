@@ -878,6 +878,23 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Ally: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */
+#ally-universe-table thead tr.ally-filter-row > th.ally-filter-controls-th {
+    display: none;
+}
+
+#ally-universe-table thead tr.ally-filter-row > th.ally-filter-spacer-th {
+    display: none;
+}
+
+#ally-universe-table .ally-mobile-filter-shell {
+    display: none;
+}
+
+#ally-universe-table #clear-ally-filters-mobile-inline.clear-filters-btn--ally-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;

@@ -215,9 +215,20 @@ function clearTeamworkFilters() {
 }
 
 function clearAllyUniverseFilters() {
-    // Clear ally universe filters
-    // Add specific filter clearing logic here if needed
-    applyFilters();
+    document
+        .querySelectorAll('#ally-universe-table .ally-stat-type-to-use-toggles .power-type-filter-toggle')
+        .forEach((btn) => {
+            btn.classList.remove('is-active', 'is-disabled');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.disabled = false;
+        });
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (typeof loadAllyUniverse === 'function') {
+        loadAllyUniverse();
+    }
 }
 
 function clearTrainingFilters() {

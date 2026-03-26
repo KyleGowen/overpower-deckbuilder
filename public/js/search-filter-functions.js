@@ -986,32 +986,103 @@ function applyEventsFilters() {
 
 window.applyEventsFilters = applyEventsFilters;
 
-function setupAllyUniverseSearch() {
+function applyAllyUniverseFilters() {
+    const pool = window.allyUniverseData;
+    if (!pool || pool.length === 0) {
+        if (typeof loadAllyUniverse === 'function') {
+            loadAllyUniverse();
+        }
+        return;
+    }
+
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', async (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        if (searchTerm.length === 0) {
-            await loadAllyUniverse();
+    const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+
+    const toggles = document.querySelectorAll(
+        '#ally-universe-table .ally-stat-type-to-use-toggles .power-type-filter-toggle.is-active'
+    );
+    const selectedTypes = Array.from(toggles)
+        .map((b) => b.getAttribute('data-power-type'))
+        .filter(Boolean);
+
+    const safeLower = (v) => String(v ?? '').toLowerCase();
+
+    const filtered = pool.filter((card) => {
+        if (rawTerm) {
+            const match =
+                (card.card_name && safeLower(card.card_name).includes(rawTerm)) ||
+                (card.card_type && safeLower(card.card_type).includes(rawTerm)) ||
+                (card.stat_to_use && safeLower(card.stat_to_use).includes(rawTerm)) ||
+                (card.stat_type_to_use && safeLower(card.stat_type_to_use).includes(rawTerm)) ||
+                (card.attack_value != null && safeLower(String(card.attack_value)).includes(rawTerm)) ||
+                (card.attack_type && safeLower(card.attack_type).includes(rawTerm)) ||
+                (card.card_text && safeLower(card.card_text).includes(rawTerm));
+            if (!match) {
+                return false;
+            }
+        }
+
+        if (selectedTypes.length > 0) {
+            const t = String(card.stat_type_to_use || '').trim();
+            const ok = selectedTypes.some((sel) => {
+                if (sel === 'Multi-Power') {
+                    return t === 'Multi Power' || t === 'Multi-Power';
+                }
+                return t === sel;
+            });
+            if (!ok) {
+                return false;
+            }
+        }
+        return true;
+    });
+
+    if (typeof displayAllyUniverse === 'function') {
+        displayAllyUniverse(filtered);
+    }
+}
+
+function setupAllyUniverseTableFilters() {
+    const root = document.getElementById('ally-universe-table');
+    if (!root || root.dataset.allyUniverseFiltersBound === 'true') {
+        return;
+    }
+    root.dataset.allyUniverseFiltersBound = 'true';
+
+    root.querySelectorAll('.ally-stat-type-to-use-toggles .power-type-filter-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
+            applyAllyUniverseFilters();
+        });
+    });
+
+    window.addEventListener('layout-mode-change', () => {
+        const t = document.getElementById('ally-universe-tab');
+        if (t && t.style.display !== 'none' && window.allyUniverseData && window.allyUniverseData.length > 0) {
+            applyAllyUniverseFilters();
+        }
+    });
+}
+
+function setupAllyUniverseSearch() {
+    setupAllyUniverseTableFilters();
+
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput || searchInput.dataset.allyUniverseSearchBound === 'true') {
+        return;
+    }
+    searchInput.dataset.allyUniverseSearchBound = 'true';
+
+    searchInput.addEventListener('input', async () => {
+        if (!window.allyUniverseData || window.allyUniverseData.length === 0) {
+            if (typeof loadAllyUniverse === 'function') {
+                await loadAllyUniverse();
+            }
+            applyAllyUniverseFilters();
             return;
         }
-        try {
-            const response = await fetch('/api/ally-universe');
-            const data = await response.json();
-            if (data.success) {
-                const filtered = data.data.filter(card =>
-                    (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
-                    (card.card_type && card.card_type.toLowerCase().includes(searchTerm)) ||
-                    (card.stat_to_use && card.stat_to_use.toLowerCase().includes(searchTerm)) ||
-                    (card.stat_type_to_use && card.stat_type_to_use.toLowerCase().includes(searchTerm)) ||
-                    (card.attack_value && String(card.attack_value).toLowerCase().includes(searchTerm)) ||
-                    (card.attack_type && card.attack_type.toLowerCase().includes(searchTerm)) ||
-                    (card.card_text && card.card_text.toLowerCase().includes(searchTerm))
-                );
-                displayAllyUniverse(filtered);
-            }
-        } catch (error) {
-            console.error('Error searching ally universe:', error);
-        }
+        applyAllyUniverseFilters();
     });
 }
 
@@ -1081,4 +1152,5 @@ function setupPowerCardsSearch() {
 }
 
 window.applyTeamworkFilters = applyTeamworkFilters;
+window.applyAllyUniverseFilters = applyAllyUniverseFilters;
 window.clearTeamworkToUseValueFilters = clearTeamworkToUseValueFilters;

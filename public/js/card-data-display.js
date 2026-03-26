@@ -193,6 +193,47 @@ function buildTeamworkMobileCaptionHtml(card) {
                 </div>`;
 }
 
+/**
+ * Mobile caption under Ally DBV art: name, stat line (to use + type icon — Acts as attack + icon), card text, set line.
+ * Exposed for unit tests.
+ */
+function buildAllyMobileCaptionHtml(card) {
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
+    const left =
+        typeof renderTeamworkValueCell === 'function'
+            ? renderTeamworkValueCell(String(card.stat_to_use ?? ''), card.stat_type_to_use)
+            : '';
+    const right =
+        typeof renderTeamworkValueCell === 'function'
+            ? renderTeamworkValueCell(String(card.attack_value ?? ''), card.attack_type)
+            : '';
+    const setLine =
+        typeof window.dbvSetCaptionLineFromCard === 'function' ? window.dbvSetCaptionLineFromCard(card) : '';
+    const lineSet = setLine.trim()
+        ? `<div class="characters-mobile-card-caption__ally-set-line">${esc(setLine)}</div>`
+        : '';
+    const textRaw = card.card_text || '';
+    const textBlock = String(textRaw).trim()
+        ? `<div class="characters-mobile-card-caption__ally-text">${esc(textRaw)}</div>`
+        : '';
+    return `
+                <div class="characters-mobile-card-caption characters-mobile-card-caption--ally">
+                    <div class="characters-mobile-card-caption__ally-name">${esc(card.card_name || '')}</div>
+                    <div class="characters-mobile-card-caption__ally-stat-line">${left}<span class="characters-mobile-card-caption__ally-stat-sep"> - Acts as </span>${right}</div>
+                    ${textBlock}
+                    ${lineSet}
+                </div>`;
+}
+
 async function loadTeamwork() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('teamwork');
     if (cached) {
@@ -330,7 +371,12 @@ function displayTeamwork(teamwork) {
 async function loadAllyUniverse() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('ally-universe');
     if (cached) {
-        displayAllyUniverse(cached);
+        window.allyUniverseData = cached;
+        if (typeof applyAllyUniverseFilters === 'function') {
+            applyAllyUniverseFilters();
+        } else {
+            displayAllyUniverse(cached);
+        }
         return;
     }
     try {
@@ -338,7 +384,12 @@ async function loadAllyUniverse() {
         const data = await response.json();
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('ally-universe', data.data);
-            displayAllyUniverse(data.data);
+            window.allyUniverseData = data.data;
+            if (typeof applyAllyUniverseFilters === 'function') {
+                applyAllyUniverseFilters();
+            } else {
+                displayAllyUniverse(data.data);
+            }
         }
     } catch (error) {
         console.error('Error loading ally universe:', error);
@@ -347,52 +398,91 @@ async function loadAllyUniverse() {
 
 function displayAllyUniverse(allies) {
     const tbody = document.getElementById('ally-universe-tbody');
-    if (!allies || allies.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8">No allies found</td></tr>';
+    if (!tbody) {
         return;
     }
-    
-    // Sort ally cards by OverPower type order: Energy, Combat, Brute Force, Intelligence, Any-Power
+
+    const theadRow = document.querySelector('#ally-universe-table thead tr:first-child');
+    const colCount = theadRow && theadRow.querySelectorAll('th').length ? theadRow.querySelectorAll('th').length : 7;
+
+    if (!allies || allies.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colCount}">No allies found</td></tr>`;
+        return;
+    }
+
+    const useMobileListArt = teamworkUseMobileListArt();
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
     const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Any-Power'];
-    const sortedAllies = allies.sort((a, b) => {
+    const sortedAllies = [...allies].sort((a, b) => {
         const aType = a.stat_type_to_use || '';
         const bType = b.stat_type_to_use || '';
-        
+
         const aIndex = preferredOrder.indexOf(aType);
         const bIndex = preferredOrder.indexOf(bType);
-        
-        // If both are in preferred order, sort by their position
+
         if (aIndex !== -1 && bIndex !== -1) {
             return aIndex - bIndex;
         }
-        
-        // If only one is in preferred order, prioritize it
         if (aIndex !== -1) return -1;
         if (bIndex !== -1) return 1;
-        
-        // If neither is in preferred order, sort alphabetically
         return aType.localeCompare(bType);
     });
-    
-    tbody.innerHTML = sortedAllies.map(card => {
+
+    tbody.innerHTML = sortedAllies.map((card) => {
         const imagePath = getCardImageUrlForDisplay(card, 'ally-universe');
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
-        return `
-        <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${card.card_name}" 
+        const nameEsc = String(card.card_name || '').replace(/'/g, "\\'");
+        const idEsc = String(card.id || '').replace(/'/g, "\\'");
+
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+        const captionHtml = useMobileListArt ? buildAllyMobileCaptionHtml(card) : '';
+
+        const imgCellInner = useMobileListArt
+            ? `
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${esc(card.card_name || '')}"
+                         data-dbv-lightbox-context="ally-universe"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'ally-universe')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}`
+            : `
+                <img src="${imagePathAttr}"
+                     alt="${card.card_name}"
                      loading="lazy"
                      decoding="async"
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
+                     style="${imgStyle}"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'ally-universe')"
                      onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+                     onclick="openModal(this)">`;
+
+        return `
+        <tr>
+            <td${useMobileListArt ? ' data-label="Image"' : ''}>
+                ${imgCellInner}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('ally-universe', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('ally-universe', '${card.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
@@ -653,6 +743,7 @@ window.teamworkPowerTypeFromValue = teamworkPowerTypeFromValue;
 window.teamworkNumericFromToUse = teamworkNumericFromToUse;
 window.formatTeamworkBonusNormalized = formatTeamworkBonusNormalized;
 window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml;
+window.buildAllyMobileCaptionHtml = buildAllyMobileCaptionHtml;
 window.loadAllyUniverse = loadAllyUniverse;
 window.displayAllyUniverse = displayAllyUniverse;
 window.loadTraining = loadTraining;

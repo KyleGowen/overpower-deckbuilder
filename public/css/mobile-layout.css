@@ -2066,6 +2066,362 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/* Ally tab — mobile stat type filter + vertical card rows                      */
+/* Spec: MOBILE_DESIGN.md M2c; docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #ally-universe-table thead {
+    display: block;
+    width: 100%;
+}
+
+.layout-mobile #ally-universe-table thead tr:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.layout-mobile #ally-universe-table thead tr.ally-filter-row {
+    --ally-header-shell-bg: rgba(10, 28, 32, 0.96);
+    --ally-header-shell-border: rgba(78, 205, 196, 0.38);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 4px;
+    border: 1px solid var(--ally-header-shell-border);
+    border-radius: 12px;
+    background: var(--ally-header-shell-bg);
+    padding: 12px;
+    box-sizing: border-box;
+    gap: 0;
+}
+
+.layout-mobile #ally-universe-table thead tr.ally-filter-row > th {
+    display: block;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.layout-mobile #ally-universe-table thead tr.ally-filter-row > th.ally-filter-clear-th,
+.layout-mobile #ally-universe-table thead tr.ally-filter-row > th.ally-filter-spacer-th {
+    display: none !important;
+}
+
+.layout-mobile #ally-universe-table thead tr.ally-filter-row > th.ally-filter-controls-th {
+    display: block !important;
+    flex: 1 1 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+.layout-mobile #ally-universe-table .ally-mobile-filter-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table .ally-filter-icon-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table .ally-filter-icon-row .icon-filter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+}
+
+.layout-mobile #ally-universe-table .ally-stat-type-to-use-toggles {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle {
+    min-width: 50px;
+    min-height: 50px;
+    padding: 4px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-text {
+    font-size: 0.78rem;
+}
+
+.layout-mobile #ally-universe-table .ally-icon-mobile-trailing {
+    display: inline-flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-left: auto;
+    min-width: 0;
+}
+
+.layout-mobile #ally-universe-table #clear-ally-filters-mobile-inline.clear-filters-btn--ally-mobile-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: min(11.5rem, 46vw);
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: normal;
+    text-align: center;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+}
+
+.layout-mobile #ally-universe-table {
+    --dbv-mobile-ally-portrait-img: min(100%, 870px);
+    --dbv-mobile-ally-tile-img-max: 100%;
+    --dbv-mobile-ally-tile-img-landscape-max-h: min(84vw, 720px);
+    table-layout: auto !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.layout-mobile #ally-universe-table tbody tr {
+    display: block;
+    margin-bottom: 14px;
+    padding: 12px 12px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table tbody td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 0;
+    border: none;
+    text-align: right;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child::before {
+    display: none;
+}
+
+.layout-mobile #ally-universe-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4ecdc4;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: auto;
+    text-align: left;
+    flex: 0 0 auto;
+    padding-top: 3px;
+    max-width: 45%;
+}
+
+.layout-mobile #ally-universe-table tbody td:nth-child(2) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.layout-mobile #ally-universe-table tbody td:nth-child(2) .add-to-deck-btn {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    max-width: 100%;
+}
+
+.layout-mobile #ally-universe-table tbody td:nth-child(2) .remove-from-collection-btn {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:nth-child(2) .add-to-collection-btn {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100%;
+    margin-top: 0 !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:nth-child(n+3) {
+    display: none !important;
+}
+
+.layout-mobile #ally-universe-table tbody tr[data-height-locked='true'],
+.layout-mobile #ally-universe-table tbody td:nth-child(1)[data-height-locked='true'] {
+    overflow: visible !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .card-image-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+    flex: 0 0 auto !important;
+    width: var(--dbv-mobile-ally-portrait-img) !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .card-image-container img.horizontal-card {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: var(--dbv-mobile-ally-tile-img-max) !important;
+    height: auto !important;
+    max-height: var(--dbv-mobile-ally-tile-img-landscape-max-h) !important;
+    object-fit: contain !important;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption--ally {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    width: 100%;
+    max-width: min(666px, 100%);
+    margin: 10px auto 0;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-name {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #fff;
+    line-height: 1.25;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-stat-line {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: #fff;
+    max-width: 100%;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-stat-sep {
+    color: #fff;
+    flex: 0 0 auto;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-text {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.layout-mobile #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-set-line {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.35;
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Events tab — mobile filter shell (mission set + game effect) + card rows    */
 /* Spec: MOBILE_DESIGN.md M2c; docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md */
 /* -------------------------------------------------------------------------- */
@@ -4767,6 +5123,359 @@
     }
 
     #database-view #teamwork-table tbody td:first-child .characters-mobile-card-caption__teamwork-set-line {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.35;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* Ally — viewport mirror (narrow + layout-desktop) */
+    #database-view #ally-universe-table thead {
+        display: block;
+        width: 100%;
+    }
+
+    #database-view #ally-universe-table thead tr:first-child {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    #database-view #ally-universe-table thead tr.ally-filter-row {
+        --ally-header-shell-bg: rgba(10, 28, 32, 0.96);
+        --ally-header-shell-border: rgba(78, 205, 196, 0.38);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: stretch;
+        align-content: flex-start;
+        justify-content: center;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 4px;
+        border: 1px solid var(--ally-header-shell-border);
+        border-radius: 12px;
+        background: var(--ally-header-shell-bg);
+        padding: 12px;
+        box-sizing: border-box;
+        gap: 0;
+    }
+
+    #database-view #ally-universe-table thead tr.ally-filter-row > th {
+        display: block;
+        box-sizing: border-box;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    #database-view #ally-universe-table thead tr.ally-filter-row > th.ally-filter-clear-th,
+    #database-view #ally-universe-table thead tr.ally-filter-row > th.ally-filter-spacer-th {
+        display: none !important;
+    }
+
+    #database-view #ally-universe-table thead tr.ally-filter-row > th.ally-filter-controls-th {
+        display: block !important;
+        flex: 1 1 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #database-view #ally-universe-table .ally-mobile-filter-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table .ally-filter-icon-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        width: 100%;
+        max-width: 100%;
+        gap: 10px;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table .ally-filter-icon-row .icon-filter-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        max-width: none;
+    }
+
+    #database-view #ally-universe-table .ally-stat-type-to-use-toggles {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle {
+        min-width: 50px;
+        min-height: 50px;
+        padding: 4px;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle img {
+        width: 34px;
+        height: 34px;
+        object-fit: contain;
+    }
+
+    #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-text {
+        font-size: 0.78rem;
+    }
+
+    #database-view #ally-universe-table .ally-icon-mobile-trailing {
+        display: inline-flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        flex: 0 0 auto;
+        margin-left: auto;
+        min-width: 0;
+    }
+
+    #database-view #ally-universe-table #clear-ally-filters-mobile-inline.clear-filters-btn--ally-mobile-inline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: auto;
+        max-width: min(11.5rem, 46vw);
+        min-width: 0;
+        min-height: 44px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.15;
+        white-space: normal;
+        text-align: center;
+        box-sizing: border-box;
+        flex: 0 0 auto;
+    }
+
+    #database-view #ally-universe-table {
+        --dbv-mobile-ally-portrait-img: min(100%, 870px);
+        --dbv-mobile-ally-tile-img-max: 100%;
+        --dbv-mobile-ally-tile-img-landscape-max-h: min(84vw, 720px);
+        table-layout: auto !important;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    #database-view #ally-universe-table tbody tr {
+        display: block;
+        margin-bottom: 14px;
+        padding: 12px 12px 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table tbody td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 8px;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 8px 0;
+        border: none;
+        text-align: right;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 0;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child::before {
+        display: none;
+    }
+
+    #database-view #ally-universe-table tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #4ecdc4;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-right: auto;
+        text-align: left;
+        flex: 0 0 auto;
+        padding-top: 3px;
+        max-width: 45%;
+    }
+
+    #database-view #ally-universe-table tbody td:nth-child(2) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    #database-view #ally-universe-table tbody td:nth-child(2) .add-to-deck-btn {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #database-view #ally-universe-table tbody td:nth-child(2) .remove-from-collection-btn {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #ally-universe-table tbody td:nth-child(2) .add-to-collection-btn {
+        grid-column: 2;
+        grid-row: 2;
+        width: 100% !important;
+        max-width: 100%;
+        margin-top: 0 !important;
+    }
+
+    #database-view #ally-universe-table tbody td:nth-child(n + 3) {
+        display: none !important;
+    }
+
+    #database-view #ally-universe-table tbody tr[data-height-locked='true'],
+    #database-view #ally-universe-table tbody td:nth-child(1)[data-height-locked='true'] {
+        overflow: visible !important;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .card-image-container {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin-inline: auto;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
+        flex: 0 0 auto !important;
+        width: var(--dbv-mobile-ally-portrait-img) !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .card-image-container img.horizontal-card {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: var(--dbv-mobile-ally-tile-img-max) !important;
+        height: auto !important;
+        max-height: var(--dbv-mobile-ally-tile-img-landscape-max-h) !important;
+        object-fit: contain !important;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption--ally {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+        width: 100%;
+        max-width: min(666px, 100%);
+        margin: 10px auto 0;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-name {
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: #fff;
+        line-height: 1.25;
+        max-width: 100%;
+        word-break: break-word;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-stat-line {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 0.9375rem;
+        line-height: 1.35;
+        color: #fff;
+        max-width: 100%;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-stat-sep {
+        color: #fff;
+        flex: 0 0 auto;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-text {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    #database-view #ally-universe-table tbody td:first-child .characters-mobile-card-caption__ally-set-line {
         font-size: 0.875rem;
         color: rgba(255, 255, 255, 0.82);
         line-height: 1.35;
