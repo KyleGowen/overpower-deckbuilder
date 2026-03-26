@@ -128,7 +128,7 @@ Per-tab delivery for the Card Database (`#database-view`). **Status** values: `p
 | **Events**             | `events` / `events-tab`                       | done    |
 | **Universe: Teamwork** | `teamwork` / `teamwork-tab`                   | pending |
 | **Universe: Ally**     | `ally-universe` / `ally-universe-tab`         | pending |
-| **Universe: Training** | `training` / `training-tab`                   | pending |
+| **Universe: Training** | `training` / `training-tab`                   | done (see `docs/current/DBV_TRAINING_MOBILE.md`) |
 | **Universe: Basic**    | `basic-universe` / `basic-universe-tab`       | pending |
 | **Power Cards**        | `power-cards` / `power-cards-tab`             | pending |
 

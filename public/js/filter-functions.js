@@ -232,9 +232,20 @@ function clearAllyUniverseFilters() {
 }
 
 function clearTrainingFilters() {
-    // Clear training filters
-    // Add specific filter clearing logic here if needed
-    applyFilters();
+    document
+        .querySelectorAll('#training-table .training-stat-type-toggles .power-type-filter-toggle')
+        .forEach((btn) => {
+            btn.classList.remove('is-active', 'is-disabled');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.disabled = false;
+        });
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (typeof loadTraining === 'function') {
+        loadTraining();
+    }
 }
 
 function clearBasicUniverseFilters() {

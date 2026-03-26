@@ -793,21 +793,47 @@
                             <th>Value to Use</th>
                             <th>Bonus</th>
                         </tr>
-                        <tr class="filter-row">
-                            <th>
-                                <button class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
+                        <tr class="filter-row training-filter-row">
+                            <th class="training-filter-clear-th">
+                                <button type="button" class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
                             </th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <th class="training-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="training-filter-controls-th" colspan="5">
+                                <div class="training-mobile-filter-shell column-filters">
+                                    <div class="training-filter-icon-row">
+                                        <div class="icon-filter-container">
+                                            <div class="special-power-filter-toggles training-stat-type-toggles" role="group" aria-label="Filter training cards by stat type">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="training-icon-mobile-trailing">
+                                            <button type="button" id="clear-training-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--training-mobile-inline" onclick="clearTrainingFilters()">Clear filters</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="training-tbody">
                         <tr>
-                            <td colspan="6" class="loading">Loading training...</td>
+                            <td colspan="7" class="loading">Loading training...</td>
                         </tr>
                     </tbody>
                 </table>

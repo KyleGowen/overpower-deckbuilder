@@ -895,6 +895,23 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Training: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */
+#training-table thead tr.training-filter-row > th.training-filter-controls-th {
+    display: none;
+}
+
+#training-table thead tr.training-filter-row > th.training-filter-spacer-th {
+    display: none;
+}
+
+#training-table .training-mobile-filter-shell {
+    display: none;
+}
+
+#training-table #clear-training-filters-mobile-inline.clear-filters-btn--training-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;

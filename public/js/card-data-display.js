@@ -133,6 +133,55 @@ function teamworkUseMobileListArt() {
     return false;
 }
 
+function trainingUseMobileListArt() {
+    if (typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay()) {
+        return true;
+    }
+    if (typeof window.isNarrowViewportDbvBand === 'function' && window.isNarrowViewportDbvBand()) {
+        return true;
+    }
+    return false;
+}
+
+/** Mobile caption under Training card art: name, type lines (icon–value/bonus–icon), set line. */
+function buildTrainingMobileCaptionHtml(card) {
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+    const rawName = String(card.card_name || '');
+    const displayName = rawName.replace(/^Training \(/, '').replace(/\)$/, '');
+    const vu = String(card.value_to_use ?? '').trim();
+    const bon = String(card.bonus ?? '').trim();
+    let mid = '';
+    if (vu && bon) {
+        mid = `${esc(vu)} - ${esc(bon)}`;
+    } else if (vu) {
+        mid = esc(vu);
+    } else if (bon) {
+        mid = esc(bon);
+    }
+    const setLineRaw =
+        typeof window.dbvSetCaptionLineFromCard === 'function' ? window.dbvSetCaptionLineFromCard(card) : '';
+    const setLine = setLineRaw ? esc(String(setLineRaw).trim()) : '';
+    const icon = typeof renderAllyStatTypeIcon === 'function' ? renderAllyStatTypeIcon : () => '';
+    const icon1 = icon(card.type_1);
+    const icon2 = icon(card.type_2);
+    return `
+        <div class="characters-mobile-card-caption characters-mobile-card-caption--training">
+            <div class="characters-mobile-card-caption__training-name">${esc(displayName)}</div>
+            <div class="characters-mobile-card-caption__training-type-line">${icon1}<span class="characters-mobile-card-caption__training-value-bonus">${mid}</span>${icon1}</div>
+            <div class="characters-mobile-card-caption__training-type-line">${icon2}<span class="characters-mobile-card-caption__training-value-bonus">${mid}</span>${icon2}</div>
+            <div class="characters-mobile-card-caption__training-set-line">${setLine}</div>
+        </div>
+    `;
+}
+
 /** Trailing power-type token after a leading "N " prefix (To Use / Acts As). */
 function teamworkPowerTypeFromValue(value) {
     return String(value || '').trim().replace(/^\d+\s+/, '').trim();
@@ -509,7 +558,12 @@ function displayAllyUniverse(allies) {
 async function loadTraining() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('training');
     if (cached) {
-        displayTraining(cached);
+        window.trainingData = cached;
+        if (typeof applyTrainingFilters === 'function') {
+            applyTrainingFilters();
+        } else {
+            displayTraining(cached);
+        }
         return;
     }
     try {
@@ -517,34 +571,87 @@ async function loadTraining() {
         const data = await response.json();
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('training', data.data);
-            displayTraining(data.data);
+            window.trainingData = data.data;
+            if (typeof applyTrainingFilters === 'function') {
+                applyTrainingFilters();
+            } else {
+                displayTraining(data.data);
+            }
         }
     } catch (e) { console.error('Error loading training:', e); }
 }
 
 function displayTraining(cards) {
     const tbody = document.getElementById('training-tbody');
-    if (!cards || cards.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No training found</td></tr>';
+    const theadRow = document.querySelector('#training-table thead tr:first-child');
+    const colCount = theadRow && theadRow.querySelectorAll('th').length ? theadRow.querySelectorAll('th').length : 7;
+
+    if (!tbody) {
         return;
     }
-    tbody.innerHTML = cards.map(card => {
+
+    if (!cards || cards.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colCount}">No training found</td></tr>`;
+        return;
+    }
+
+    const useMobileListArt = trainingUseMobileListArt();
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
+    tbody.innerHTML = cards.map((card) => {
         const imagePath = getCardImageUrlForDisplay(card, 'training');
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        const nameEsc = String(card.card_name || '').replace(/'/g, "\\'");
+        const idEsc = String(card.id || '').replace(/'/g, "\\'");
+
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+        const captionHtml = useMobileListArt ? buildTrainingMobileCaptionHtml(card) : '';
+
+        const imgCellInner = useMobileListArt
+            ? `
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${esc(card.card_name || '')}"
+                         data-dbv-lightbox-context="training"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'training')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}`
+            : `
+                <img src="${imagePathAttr}"
+                     alt="${card.card_name}"
+                     loading="lazy"
+                     decoding="async"
+                     style="${imgStyle}"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}')"
+                     onmouseleave="hideCardHoverModal()"
+                     onclick="openModal(this)">`;
+
         return `
         <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${card.card_name}" 
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+            <td${useMobileListArt ? ' data-label="Image"' : ''}>
+                ${imgCellInner}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('training', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('training', '${card.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
                 ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
@@ -744,6 +851,8 @@ window.teamworkNumericFromToUse = teamworkNumericFromToUse;
 window.formatTeamworkBonusNormalized = formatTeamworkBonusNormalized;
 window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml;
 window.buildAllyMobileCaptionHtml = buildAllyMobileCaptionHtml;
+window.trainingUseMobileListArt = trainingUseMobileListArt;
+window.buildTrainingMobileCaptionHtml = buildTrainingMobileCaptionHtml;
 window.loadAllyUniverse = loadAllyUniverse;
 window.displayAllyUniverse = displayAllyUniverse;
 window.loadTraining = loadTraining;

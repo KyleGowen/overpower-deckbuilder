@@ -1086,25 +1086,110 @@ function setupAllyUniverseSearch() {
     });
 }
 
-function setupTrainingSearch() {
+function trainingTypeCellMatchesSel(sel, typeStr) {
+    const t = String(typeStr || '').trim();
+    if (sel === 'Multi-Power') {
+        return t === 'Multi Power' || t === 'Multi-Power';
+    }
+    return t === sel;
+}
+
+function trainingCardMatchesSelectedTypes(card, selectedTypes) {
+    if (selectedTypes.length === 0) {
+        return true;
+    }
+    return selectedTypes.some(
+        (sel) =>
+            trainingTypeCellMatchesSel(sel, card.type_1) || trainingTypeCellMatchesSel(sel, card.type_2)
+    );
+}
+
+function applyTrainingFilters() {
+    const pool = window.trainingData;
+    if (!pool || pool.length === 0) {
+        if (typeof loadTraining === 'function') {
+            loadTraining();
+        }
+        return;
+    }
+
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', async (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        if (searchTerm.length === 0) { await loadTraining(); return; }
-        try {
-            const resp = await fetch('/api/training');
-            const data = await resp.json();
-            if (data.success) {
-                        const filtered = data.data.filter(card =>
-                            (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
-                            (card.type_1 && card.type_1.toLowerCase().includes(searchTerm)) ||
-                            (card.type_2 && card.type_2.toLowerCase().includes(searchTerm)) ||
-                            (card.value_to_use && String(card.value_to_use).toLowerCase().includes(searchTerm)) ||
-                            (card.bonus && String(card.bonus).toLowerCase().includes(searchTerm))
-                        );
-                displayTraining(filtered);
+    const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+
+    const toggles = document.querySelectorAll(
+        '#training-table .training-stat-type-toggles .power-type-filter-toggle.is-active'
+    );
+    const selectedTypes = Array.from(toggles)
+        .map((b) => b.getAttribute('data-power-type'))
+        .filter(Boolean);
+
+    const safeLower = (v) => String(v ?? '').toLowerCase();
+
+    const filtered = pool.filter((card) => {
+        if (rawTerm) {
+            const match =
+                (card.card_name && safeLower(card.card_name).includes(rawTerm)) ||
+                (card.type_1 && safeLower(card.type_1).includes(rawTerm)) ||
+                (card.type_2 && safeLower(card.type_2).includes(rawTerm)) ||
+                (card.value_to_use != null && safeLower(String(card.value_to_use)).includes(rawTerm)) ||
+                (card.bonus != null && safeLower(String(card.bonus)).includes(rawTerm));
+            if (!match) {
+                return false;
             }
-        } catch (err) { console.error('Error searching training:', err); }
+        }
+
+        if (!trainingCardMatchesSelectedTypes(card, selectedTypes)) {
+            return false;
+        }
+        return true;
+    });
+
+    if (typeof displayTraining === 'function') {
+        displayTraining(filtered);
+    }
+}
+
+function setupTrainingTableFilters() {
+    const root = document.getElementById('training-table');
+    if (!root || root.dataset.trainingFiltersBound === 'true') {
+        return;
+    }
+    root.dataset.trainingFiltersBound = 'true';
+
+    root.querySelectorAll('.training-stat-type-toggles .power-type-filter-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
+            applyTrainingFilters();
+        });
+    });
+
+    window.addEventListener('layout-mode-change', () => {
+        const t = document.getElementById('training-tab');
+        if (t && t.style.display !== 'none' && window.trainingData && window.trainingData.length > 0) {
+            applyTrainingFilters();
+        }
+    });
+}
+
+function setupTrainingSearch() {
+    setupTrainingTableFilters();
+
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput || searchInput.dataset.trainingSearchBound === 'true') {
+        return;
+    }
+    searchInput.dataset.trainingSearchBound = 'true';
+
+    searchInput.addEventListener('input', async () => {
+        if (!window.trainingData || window.trainingData.length === 0) {
+            if (typeof loadTraining === 'function') {
+                await loadTraining();
+            }
+            applyTrainingFilters();
+            return;
+        }
+        applyTrainingFilters();
     });
 }
 
@@ -1153,4 +1238,5 @@ function setupPowerCardsSearch() {
 
 window.applyTeamworkFilters = applyTeamworkFilters;
 window.applyAllyUniverseFilters = applyAllyUniverseFilters;
+window.applyTrainingFilters = applyTrainingFilters;
 window.clearTeamworkToUseValueFilters = clearTeamworkToUseValueFilters;
