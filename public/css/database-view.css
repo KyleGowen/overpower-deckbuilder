@@ -1089,7 +1089,8 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: flex;
     flex-direction: column;
     gap: var(--basic-universe-dtv-numeric-stack-gap);
-    align-items: flex-start;
+    align-items: center;
+    width: 100%;
 }
 
 #basic-universe-table .basic-universe-desktop-numeric-stack-input {
