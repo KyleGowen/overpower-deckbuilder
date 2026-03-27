@@ -40,18 +40,19 @@ describe('Basic Universe Type Filter Behavior', () => {
                 <div id="basic-universe-tab">
                     <table>
                         <thead>
-                            <tr class="filter-row">
+                            <tr class="filter-row basic-universe-desktop-filter-row">
                                 <th>
                                     <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
                                 </th>
                                 <th></th>
+                                <th></th>
                                 <th>
                                     <div class="column-filters">
-                                        <div class="checkbox-group">
-                                            <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                            <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                        <div class="special-power-filter-toggles basic-universe-desktop-stat-type-toggles">
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Energy"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Combat"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence"></button>
                                         </div>
                                     </div>
                                 </th>
@@ -122,131 +123,115 @@ describe('Basic Universe Type Filter Behavior', () => {
             });
         });
 
-        it('should fetch data from API and display all cards when all types are selected', async () => {
-            // All checkboxes are checked by default
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
-            expect(selectedTypes).toEqual(['Energy', 'Combat', 'Brute Force', 'Intelligence']);
+        it('should show all cards when no type toggles are active', async () => {
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type'));
 
-            // Simulate the applyBasicUniverseFilters function
-            const filtered = mockBasicUniverseData.data.filter(card => selectedTypes.includes(card.type));
-            
+            expect(selectedTypes).toEqual([]);
+
+            const filtered =
+                selectedTypes.length > 0
+                    ? mockBasicUniverseData.data.filter((card) => selectedTypes.includes(card.type))
+                    : mockBasicUniverseData.data;
+
             expect(filtered).toHaveLength(12);
             expect(mockDisplayBasicUniverse).toBeDefined();
         });
 
-        it('should filter out cards when types are unchecked', async () => {
-            // Uncheck Energy checkbox
-            const energyCheckbox = document.querySelector('input[value="Energy"]') as HTMLInputElement;
-            energyCheckbox.checked = false;
+        it('should filter out Energy when only non-Energy toggles are active', async () => {
+            document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach((b) => {
+                b.classList.remove('is-active');
+            });
+            document
+                .querySelectorAll('#basic-universe-tab .power-type-filter-toggle[data-power-type="Combat"], #basic-universe-tab .power-type-filter-toggle[data-power-type="Brute Force"], #basic-universe-tab .power-type-filter-toggle[data-power-type="Intelligence"]')
+                .forEach((b) => b.classList.add('is-active'));
 
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
-            expect(selectedTypes).toEqual(['Combat', 'Brute Force', 'Intelligence']);
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type')) as string[];
 
-            // Simulate filtering
-            const filtered = mockBasicUniverseData.data.filter(card => selectedTypes.includes(card.type));
-            
+            const filtered = mockBasicUniverseData.data.filter((card) => selectedTypes.includes(card.type));
+
             expect(filtered).toHaveLength(9);
-            expect(filtered.every(card => card.type !== 'Energy')).toBe(true);
+            expect(filtered.every((card) => card.type !== 'Energy')).toBe(true);
         });
 
-        it('should show no cards when no types are selected', async () => {
-            // Uncheck all checkboxes
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
+        it('should show all cards when no toggles are active (OR semantics)', async () => {
+            document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach((b) => {
+                b.classList.remove('is-active');
             });
 
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type'));
+
             expect(selectedTypes).toEqual([]);
 
-            // Simulate filtering with no types selected
-            let filtered = mockBasicUniverseData.data;
-            if (selectedTypes.length === 0) {
-                filtered = [];
-            } else {
-                filtered = filtered.filter(card => selectedTypes.includes(card.type));
-            }
-            
-            expect(filtered).toHaveLength(0);
+            const filtered =
+                selectedTypes.length > 0
+                    ? mockBasicUniverseData.data.filter((card) => selectedTypes.includes(card.type))
+                    : mockBasicUniverseData.data;
+
+            expect(filtered).toHaveLength(12);
         });
 
         it('should handle single type selection', async () => {
-            // Uncheck all except Energy
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
+            document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach((b) => {
+                b.classList.remove('is-active');
             });
-            const energyCheckbox = document.querySelector('input[value="Energy"]') as HTMLInputElement;
-            energyCheckbox.checked = true;
+            document
+                .querySelector('#basic-universe-tab .power-type-filter-toggle[data-power-type="Energy"]')
+                ?.classList.add('is-active');
 
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
-            expect(selectedTypes).toEqual(['Energy']);
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type')) as string[];
 
-            // Simulate filtering
-            const filtered = mockBasicUniverseData.data.filter(card => selectedTypes.includes(card.type));
-            
+            const filtered = mockBasicUniverseData.data.filter((card) => selectedTypes.includes(card.type));
+
             expect(filtered).toHaveLength(3);
-            expect(filtered.every(card => card.type === 'Energy')).toBe(true);
+            expect(filtered.every((card) => card.type === 'Energy')).toBe(true);
         });
 
         it('should handle multiple type selection', async () => {
-            // Select only Energy and Combat
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
+            document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach((b) => {
+                b.classList.remove('is-active');
             });
-            const energyCheckbox = document.querySelector('input[value="Energy"]') as HTMLInputElement;
-            const combatCheckbox = document.querySelector('input[value="Combat"]') as HTMLInputElement;
-            energyCheckbox.checked = true;
-            combatCheckbox.checked = true;
+            document
+                .querySelector('#basic-universe-tab .power-type-filter-toggle[data-power-type="Energy"]')
+                ?.classList.add('is-active');
+            document
+                .querySelector('#basic-universe-tab .power-type-filter-toggle[data-power-type="Combat"]')
+                ?.classList.add('is-active');
 
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
-            expect(selectedTypes).toEqual(['Energy', 'Combat']);
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type')) as string[];
 
-            // Simulate filtering
-            const filtered = mockBasicUniverseData.data.filter(card => selectedTypes.includes(card.type));
-            
+            const filtered = mockBasicUniverseData.data.filter((card) => selectedTypes.includes(card.type));
+
             expect(filtered).toHaveLength(6);
-            expect(filtered.every(card => ['Energy', 'Combat'].includes(card.type))).toBe(true);
+            expect(filtered.every((card) => ['Energy', 'Combat'].includes(card.type))).toBe(true);
         });
     });
 
     describe('setupBasicUniverseSearch Function Behavior', () => {
-        it('should initialize all checkboxes to checked state', () => {
-            // Simulate setupBasicUniverseSearch function
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = true;
-            });
-
-            // Verify all are checked
-            checkboxes.forEach(checkbox => {
-                expect((checkbox as HTMLInputElement).checked).toBe(true);
-            });
+        it('should start with no is-active toggles', () => {
+            const active = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active');
+            expect(active).toHaveLength(0);
         });
 
-        it('should add event listeners to all checkboxes', () => {
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
+        it('should add event listeners to all type toggles', () => {
+            const toggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
             const addEventListenerSpy = jest.fn();
-            
-            // Mock addEventListener
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).addEventListener = addEventListenerSpy;
+
+            toggles.forEach((btn) => {
+                (btn as HTMLButtonElement).addEventListener = addEventListenerSpy;
             });
 
-            // Simulate adding event listeners
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).addEventListener('change', window.applyBasicUniverseFilters);
+            toggles.forEach((btn) => {
+                (btn as HTMLButtonElement).addEventListener('click', window.applyBasicUniverseFilters);
             });
 
             expect(addEventListenerSpy).toHaveBeenCalledTimes(4);

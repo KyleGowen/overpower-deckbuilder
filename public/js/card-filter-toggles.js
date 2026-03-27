@@ -129,80 +129,108 @@ async function applyLocationFilters() {
     }
 }
 
-// Basic Universe filtering
+// Basic Universe filtering (in-memory from window.basicUniverseData; search + type + value + bonus)
 async function applyBasicUniverseFilters() {
     try {
-        const resp = await fetch('/api/basic-universe');
-        const data = await resp.json();
-        if (!data.success) return;
-
-        let filtered = data.data;
-
-        // Filter by type — active toggle buttons
-        const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active'))
-            .map(btn => btn.dataset.powerType);
-
-        if (selectedTypes.length > 0) {
-            filtered = filtered.filter(card => selectedTypes.includes(card.type));
+        let pool = typeof window.basicUniverseData !== 'undefined' ? window.basicUniverseData : null;
+        if (!pool || pool.length === 0) {
+            const resp = await fetch('/api/basic-universe');
+            const data = await resp.json();
+            if (!data.success) {
+                return;
+            }
+            pool = data.data;
+            window.basicUniverseData = pool;
+            if (typeof setCachedCardData === 'function') {
+                setCachedCardData('basic-universe', pool);
+            }
         }
 
-        // Filter by value range
-        const equalsValue = document.querySelector('#basic-universe-tab input[data-column="value"].equals').value;
-        const minValue = document.getElementById('basic-value-min').value;
-        const maxValue = document.getElementById('basic-value-max').value;
-        
+        let filtered = pool.slice();
+
+        const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active'))
+            .map((btn) => btn.dataset.powerType)
+            .filter(Boolean);
+
+        if (selectedTypes.length > 0) {
+            filtered = filtered.filter((card) => selectedTypes.includes(card.type));
+        }
+
+        const valueEqualsEl = document.querySelector('#basic-universe-tab input[data-column="value"].equals');
+        const minValueEl = document.getElementById('basic-value-min');
+        const maxValueEl = document.getElementById('basic-value-max');
+        const equalsValue = valueEqualsEl && valueEqualsEl.value;
+        const minValue = minValueEl && minValueEl.value;
+        const maxValue = maxValueEl && maxValueEl.value;
+
         if (equalsValue && !isNaN(equalsValue)) {
-            const equalsNum = parseInt(equalsValue);
-            filtered = filtered.filter(card => {
-                const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+            const equalsNum = parseInt(equalsValue, 10);
+            filtered = filtered.filter((card) => {
+                const cardValue = parseInt(String(card.value_to_use || '').match(/(\d+)/)?.[1] || '0', 10);
                 return cardValue === equalsNum;
             });
         } else {
             if (minValue && !isNaN(minValue)) {
-                const minNum = parseInt(minValue);
-                filtered = filtered.filter(card => {
-                    const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+                const minNum = parseInt(minValue, 10);
+                filtered = filtered.filter((card) => {
+                    const cardValue = parseInt(String(card.value_to_use || '').match(/(\d+)/)?.[1] || '0', 10);
                     return cardValue >= minNum;
                 });
             }
             if (maxValue && !isNaN(maxValue)) {
-                const maxNum = parseInt(maxValue);
-                filtered = filtered.filter(card => {
-                    const cardValue = parseInt(card.value_to_use.match(/(\d+)/)?.[1] || '0');
+                const maxNum = parseInt(maxValue, 10);
+                filtered = filtered.filter((card) => {
+                    const cardValue = parseInt(String(card.value_to_use || '').match(/(\d+)/)?.[1] || '0', 10);
                     return cardValue <= maxNum;
                 });
             }
         }
 
-        // Filter by bonus range
-        const equalsBonus = document.querySelector('#basic-universe-tab input[data-column="bonus"].equals').value;
-        const minBonus = document.getElementById('basic-bonus-min').value;
-        const maxBonus = document.getElementById('basic-bonus-max').value;
-        
+        const bonusEqualsEl = document.querySelector('#basic-universe-tab input[data-column="bonus"].equals');
+        const minBonusEl = document.getElementById('basic-bonus-min');
+        const maxBonusEl = document.getElementById('basic-bonus-max');
+        const equalsBonus = bonusEqualsEl && bonusEqualsEl.value;
+        const minBonus = minBonusEl && minBonusEl.value;
+        const maxBonus = maxBonusEl && maxBonusEl.value;
+
         if (equalsBonus && !isNaN(equalsBonus)) {
-            const equalsBonusNum = parseInt(equalsBonus);
-            filtered = filtered.filter(card => {
-                const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+            const equalsBonusNum = parseInt(equalsBonus, 10);
+            filtered = filtered.filter((card) => {
+                const cardBonus = parseInt(String(card.bonus || '').match(/(\d+)/)?.[1] || '0', 10);
                 return cardBonus === equalsBonusNum;
             });
         } else {
             if (minBonus && !isNaN(minBonus)) {
-                const minBonusNum = parseInt(minBonus);
-                filtered = filtered.filter(card => {
-                    const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+                const minBonusNum = parseInt(minBonus, 10);
+                filtered = filtered.filter((card) => {
+                    const cardBonus = parseInt(String(card.bonus || '').match(/(\d+)/)?.[1] || '0', 10);
                     return cardBonus >= minBonusNum;
                 });
             }
             if (maxBonus && !isNaN(maxBonus)) {
-                const maxBonusNum = parseInt(maxBonus);
-                filtered = filtered.filter(card => {
-                    const cardBonus = parseInt(card.bonus.match(/(\d+)/)?.[1] || '0');
+                const maxBonusNum = parseInt(maxBonus, 10);
+                filtered = filtered.filter((card) => {
+                    const cardBonus = parseInt(String(card.bonus || '').match(/(\d+)/)?.[1] || '0', 10);
                     return cardBonus <= maxBonusNum;
                 });
             }
         }
 
-        displayBasicUniverse(filtered);
+        const searchInput = document.getElementById('search-input');
+        const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+        if (rawTerm) {
+            filtered = filtered.filter(
+                (card) =>
+                    (card.card_name && card.card_name.toLowerCase().includes(rawTerm)) ||
+                    (card.type && card.type.toLowerCase().includes(rawTerm)) ||
+                    (card.value_to_use && String(card.value_to_use).toLowerCase().includes(rawTerm)) ||
+                    (card.bonus && String(card.bonus).toLowerCase().includes(rawTerm))
+            );
+        }
+
+        if (typeof displayBasicUniverse === 'function') {
+            displayBasicUniverse(filtered);
+        }
     } catch (err) {
         console.error('Error applying basic universe filters:', err);
     }

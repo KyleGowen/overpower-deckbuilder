@@ -912,6 +912,23 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Basic Universe: mobile-only filter shell (see mobile-layout.css); desktop keeps two header rows with column filters. */
+#basic-universe-table thead tr.basic-universe-filter-row > th.basic-universe-filter-controls-th {
+    display: none;
+}
+
+#basic-universe-table thead tr.basic-universe-filter-row > th.basic-universe-filter-spacer-th {
+    display: none;
+}
+
+#basic-universe-table .basic-universe-mobile-filter-shell {
+    display: none;
+}
+
+#basic-universe-table #clear-basic-universe-filters-mobile-inline.clear-filters-btn--basic-universe-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;

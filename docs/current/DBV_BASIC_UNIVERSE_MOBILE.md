@@ -1,0 +1,32 @@
+# DBV — Universe: Basic (mobile)
+
+## Overview
+
+On `.layout-mobile` and in the narrow `#database-view` band (`max-width: 900px`), the Basic Universe tab uses the same patterns as **Training** (stat-type icon strip + inline Clear) and **Teamwork** (two numeric rows: equals / min / max / clear) for **Value to Use** and **Bonus**.
+
+Desktop keeps a separate filter row (`basic-universe-desktop-filter-row`) with column filters; the mobile shell row is hidden on desktop via `database-view.css`.
+
+## Files
+
+| Area | File |
+|------|------|
+| Markup | `public/index.html`, `public/deck-builder.html`, `public/templates/database-view-complete.html` |
+| Desktop hide | `public/css/database-view.css` |
+| Mobile layout | `public/css/mobile-layout.css` (`.layout-mobile` + `@media` `#database-view` mirror) |
+| Data + display | `public/js/card-data-display.js` — `window.basicUniverseData`, `displayBasicUniverse`, `buildBasicUniverseMobileCaptionHtml`, `setupBasicUniverseSearch` (sync mobile/desktop inputs, `layout-mode-change`) |
+| Filters | `public/js/card-filter-toggles.js` — `applyBasicUniverseFilters` (in-memory pool + search) |
+| Clear | `public/js/filter-functions.js` — `clearBasicUniverseFilters` |
+
+## Caption (under card art)
+
+1. **Name** — `.characters-mobile-card-caption__basic-universe-name` (bold, 1.35rem)
+2. **Type icon + value + bonus** — `.characters-mobile-card-caption__basic-universe-stat-line`
+3. **Set line** — `dbvSetCaptionLineFromCard(card)` → `.characters-mobile-card-caption__basic-universe-set-line`
+
+## Image sizing
+
+Use the checklist in [`MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md`](./MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md): portrait list art uses `max-height: none !important` under `#basic-universe-table`.
+
+## Tests
+
+[`tests/unit/dbv-basic-universe-mobile.test.ts`](../../tests/unit/dbv-basic-universe-mobile.test.ts)

@@ -6,41 +6,10 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-// Helper function to extract complete function body by counting braces
-function extractFunctionBody(content: string, functionName: string): string | null {
-    const functionRegex = new RegExp(`function\\s+${functionName}\\s*\\([^)]*\\)\\s*\\{`);
-    const match = content.match(functionRegex);
-    
-    if (!match) {
-        return null;
-    }
-    
-    const startIndex = match.index! + match[0].length - 1; // -1 to include the opening brace
-    let braceCount = 1;
-    let currentIndex = startIndex + 1;
-    
-    while (currentIndex < content.length && braceCount > 0) {
-        const char = content[currentIndex];
-        if (char === '{') {
-            braceCount++;
-        } else if (char === '}') {
-            braceCount--;
-        }
-        currentIndex++;
-    }
-    
-    if (braceCount === 0) {
-        return content.substring(match.index!, currentIndex);
-    }
-    
-    return null;
-}
-
 describe('Basic Universe Type Filter', () => {
     let indexHtmlContent: string;
     let cardDataDisplayContent: string;
     let cardFilterTogglesContent: string;
-    let allContent: string;
     let mockDocument: any;
     let mockFetch: jest.Mock;
     let mockConsole: any;
@@ -50,8 +19,7 @@ describe('Basic Universe Type Filter', () => {
         indexHtmlContent = readFileSync(join(__dirname, '../../public/index.html'), 'utf-8');
         cardDataDisplayContent = readFileSync(join(__dirname, '../../public/js/card-data-display.js'), 'utf-8');
         cardFilterTogglesContent = readFileSync(join(__dirname, '../../public/js/card-filter-toggles.js'), 'utf-8');
-        allContent = indexHtmlContent + cardDataDisplayContent + cardFilterTogglesContent;
-        
+
         // Mock document object
         mockDocument = {
             querySelectorAll: jest.fn(),
@@ -84,7 +52,7 @@ describe('Basic Universe Type Filter', () => {
 
     // Helper function to extract complete function body by counting braces
     function extractFunctionBody(content: string, functionName: string): string | null {
-        const functionRegex = new RegExp(`function\\s+${functionName}\\s*\\([^)]*\\)\\s*\\{`);
+        const functionRegex = new RegExp(`(?:async\\s+)?function\\s+${functionName}\\s*\\([^)]*\\)\\s*\\{`);
         const match = content.match(functionRegex);
         if (!match) return null;
 
@@ -119,31 +87,29 @@ describe('Basic Universe Type Filter', () => {
             expect(functionCode).toContain('addEventListener(\'click\'');
         });
 
-        it('should toggle is-active class on button click', () => {
+        it('should sync is-active across desktop and mobile type toggles', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            expect(functionCode).toContain('classList.toggle(\'is-active\')');
+            expect(functionCode).toContain('classList.toggle(\'is-active\', willBeActive)');
             expect(functionCode).toContain('applyBasicUniverseFilters()');
         });
 
-        it('should add event listeners to other filter inputs', () => {
+        it('should add event listeners to desktop and mobile filter inputs', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('if (valueEquals) valueEquals.addEventListener(\'input\', applyBasicUniverseFilters)');
-            expect(functionCode).toContain('if (valueMin) valueMin.addEventListener(\'input\', applyBasicUniverseFilters)');
-            expect(functionCode).toContain('if (valueMax) valueMax.addEventListener(\'input\', applyBasicUniverseFilters)');
-            expect(functionCode).toContain('if (bonusEquals) bonusEquals.addEventListener(\'input\', applyBasicUniverseFilters)');
-            expect(functionCode).toContain('if (bonusMin) bonusMin.addEventListener(\'input\', applyBasicUniverseFilters)');
-            expect(functionCode).toContain('if (bonusMax) bonusMax.addEventListener(\'input\', applyBasicUniverseFilters)');
+
+            expect(functionCode).toContain('basic-value-min');
+            expect(functionCode).toContain('debouncedApply');
+            expect(functionCode).toContain('basic-universe-mobile-to-use-equals');
+            expect(functionCode).toContain('syncBasicUniverseMobileNumericToDesktop');
         });
 
-        it('should setup search functionality', () => {
+        it('should setup search to use applyBasicUniverseFilters with in-memory data', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            
-            expect(functionCode).toContain('searchInput.addEventListener(\'input\', async (e) => {');
-            expect(functionCode).toContain('await applyBasicUniverseFilters()');
+
+            expect(functionCode).toContain('searchInput.addEventListener(\'input\', async () => {');
+            expect(functionCode).toContain('applyBasicUniverseFilters()');
         });
     });
 
@@ -162,7 +128,7 @@ describe('Basic Universe Type Filter', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
             expect(functionCode).toContain('power-type-filter-toggle.is-active');
-            expect(functionCode).toContain('filtered.filter(card => selectedTypes.includes(card.type))');
+            expect(functionCode).toContain('selectedTypes.includes(card.type)');
         });
 
         it('should show all cards when no toggles are active', () => {
@@ -191,6 +157,13 @@ describe('Basic Universe Type Filter', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
             expect(functionCode).toContain('displayBasicUniverse(filtered)');
+        });
+
+        it('should prefer window.basicUniverseData before refetching', () => {
+            const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
+            expect(functionCode).toBeTruthy();
+            expect(functionCode).toContain('basicUniverseData');
+            expect(functionCode).toContain('pool.slice()');
         });
 
         it('should handle errors gracefully', () => {
@@ -232,17 +205,17 @@ describe('Basic Universe Type Filter', () => {
         it('should filter cards by type when types are selected', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            
-            // Should filter by selected types
-            expect(functionCode).toContain('filtered.filter(card => selectedTypes.includes(card.type))');
+
+            expect(functionCode).toContain('selectedTypes.includes(card.type)');
         });
 
-        it('should maintain all filter types (Energy, Combat, Brute Force, Intelligence)', () => {
-            // Check that the HTML contains all four toggle buttons
+        it('should include Training-parity stat type toggles including Any-Power and Multi-Power', () => {
             expect(indexHtmlContent).toContain('data-power-type="Energy"');
             expect(indexHtmlContent).toContain('data-power-type="Combat"');
             expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
             expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
+            expect(indexHtmlContent).toContain('data-power-type="Any-Power"');
+            expect(indexHtmlContent).toContain('data-power-type="Multi-Power"');
         });
     });
 
@@ -250,19 +223,17 @@ describe('Basic Universe Type Filter', () => {
         it('should handle API fetch errors', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            expect(functionCode).toContain('if (!data.success) return');
+            expect(functionCode).toContain('if (!data.success)');
+            expect(functionCode).toContain('return');
         });
 
         it('should handle missing DOM elements gracefully', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
             expect(functionCode).toContain('if (valueEquals)');
-            expect(functionCode).toContain('if (valueMin)');
-            expect(functionCode).toContain('if (valueMax)');
             expect(functionCode).toContain('if (bonusEquals)');
-            expect(functionCode).toContain('if (bonusMin)');
-            expect(functionCode).toContain('if (bonusMax)');
-            expect(functionCode).toContain('if (searchInput)');
+            expect(functionCode).toContain('if (el)');
+            expect(functionCode).toContain('searchInput && searchInput.dataset.basicUniverseSearchBound');
         });
     });
 
@@ -273,12 +244,12 @@ describe('Basic Universe Type Filter', () => {
             expect(functionCode).toContain('#basic-universe-tab .power-type-filter-toggle.is-active');
         });
 
-        it('should avoid redundant API calls', () => {
+        it('should load data once when search runs with empty pool', () => {
             const functionCode = extractFunctionBody(cardDataDisplayContent, 'setupBasicUniverseSearch');
             expect(functionCode).toBeTruthy();
-            
-            // Should only fetch when search term is empty
-            expect(functionCode).toContain('if (searchTerm.length === 0)');
+
+            expect(functionCode).toContain('basicUniverseData');
+            expect(functionCode).toContain('loadBasicUniverse');
         });
     });
 });

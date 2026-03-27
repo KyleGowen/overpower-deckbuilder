@@ -143,6 +143,37 @@ function trainingUseMobileListArt() {
     return false;
 }
 
+function basicUniverseUseMobileListArt() {
+    return trainingUseMobileListArt();
+}
+
+/** Mobile caption under Basic Universe card art: name, type icon + value + bonus, set line. */
+function buildBasicUniverseMobileCaptionHtml(card) {
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+    const name = esc(String(card.card_name || ''));
+    const typeIcon = typeof renderAllyStatTypeIcon === 'function' ? renderAllyStatTypeIcon(card.type) : '';
+    const vu = esc(String(card.value_to_use ?? '').trim());
+    const bon = esc(String(card.bonus ?? '').trim());
+    const setLineRaw =
+        typeof window.dbvSetCaptionLineFromCard === 'function' ? window.dbvSetCaptionLineFromCard(card) : '';
+    const setLine = setLineRaw ? esc(String(setLineRaw).trim()) : '';
+    return `
+        <div class="characters-mobile-card-caption characters-mobile-card-caption--basic-universe">
+            <div class="characters-mobile-card-caption__basic-universe-name">${name}</div>
+            <div class="characters-mobile-card-caption__basic-universe-stat-line">${typeIcon}<span class="characters-mobile-card-caption__basic-universe-value-bonus"><span>${vu}</span> <span>${bon}</span></span></div>
+            <div class="characters-mobile-card-caption__basic-universe-set-line">${setLine}</div>
+        </div>
+    `;
+}
+
 /** Mobile caption under Training card art: name, type lines (icon–value/bonus–icon), set line. */
 function buildTrainingMobileCaptionHtml(card) {
     const esc =
@@ -678,6 +709,7 @@ function displayTraining(cards) {
 async function loadBasicUniverse() {
     const cached = typeof getCachedCardData === 'function' && getCachedCardData('basic-universe');
     if (cached) {
+        window.basicUniverseData = cached;
         displayBasicUniverse(cached);
         return;
     }
@@ -686,118 +718,288 @@ async function loadBasicUniverse() {
         const data = await resp.json();
         if (data.success) {
             if (typeof setCachedCardData === 'function') setCachedCardData('basic-universe', data.data);
+            window.basicUniverseData = data.data;
             displayBasicUniverse(data.data);
         }
     } catch (e) { console.error('Error loading basic universe:', e); }
 }
 
-function setupBasicUniverseSearch() {
-    // Wire type filter toggle buttons
-    const typeToggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
-    typeToggles.forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.classList.toggle('is-active');
-            btn.setAttribute('aria-pressed', String(btn.classList.contains('is-active')));
-            applyBasicUniverseFilters();
-        });
+function syncBasicUniverseDesktopNumericToMobile() {
+    const tab = document.getElementById('basic-universe-tab');
+    if (!tab) return;
+    const vEq = tab.querySelector('input[data-column="value"].equals');
+    const vMin = document.getElementById('basic-value-min');
+    const vMax = document.getElementById('basic-value-max');
+    const bEq = tab.querySelector('input[data-column="bonus"].equals');
+    const bMin = document.getElementById('basic-bonus-min');
+    const bMax = document.getElementById('basic-bonus-max');
+    tab.querySelectorAll('.basic-universe-mobile-to-use-equals').forEach((el) => {
+        el.value = vEq ? vEq.value : '';
     });
+    tab.querySelectorAll('.basic-universe-mobile-to-use-min').forEach((el) => {
+        el.value = vMin ? vMin.value : '';
+    });
+    tab.querySelectorAll('.basic-universe-mobile-to-use-max').forEach((el) => {
+        el.value = vMax ? vMax.value : '';
+    });
+    tab.querySelectorAll('.basic-universe-mobile-bonus-equals').forEach((el) => {
+        el.value = bEq ? bEq.value : '';
+    });
+    tab.querySelectorAll('.basic-universe-mobile-bonus-min').forEach((el) => {
+        el.value = bMin ? bMin.value : '';
+    });
+    tab.querySelectorAll('.basic-universe-mobile-bonus-max').forEach((el) => {
+        el.value = bMax ? bMax.value : '';
+    });
+}
 
-    // Add event listeners for other filter inputs
-    const valueEquals = document.querySelector('#basic-universe-tab input[data-column="value"].equals');
-    const valueMin = document.getElementById('basic-value-min');
-    const valueMax = document.getElementById('basic-value-max');
-    const bonusEquals = document.querySelector('#basic-universe-tab input[data-column="bonus"].equals');
-    const bonusMin = document.getElementById('basic-bonus-min');
-    const bonusMax = document.getElementById('basic-bonus-max');
+function syncBasicUniverseMobileNumericToDesktop() {
+    const tab = document.getElementById('basic-universe-tab');
+    if (!tab) return;
+    const mEq = tab.querySelector('.basic-universe-mobile-to-use-equals');
+    const mMin = tab.querySelector('.basic-universe-mobile-to-use-min');
+    const mMax = tab.querySelector('.basic-universe-mobile-to-use-max');
+    const vEq = tab.querySelector('input[data-column="value"].equals');
+    const vMin = document.getElementById('basic-value-min');
+    const vMax = document.getElementById('basic-value-max');
+    if (vEq && mEq) vEq.value = mEq.value;
+    if (vMin && mMin) vMin.value = mMin.value;
+    if (vMax && mMax) vMax.value = mMax.value;
+    const mbEq = tab.querySelector('.basic-universe-mobile-bonus-equals');
+    const mbMin = tab.querySelector('.basic-universe-mobile-bonus-min');
+    const mbMax = tab.querySelector('.basic-universe-mobile-bonus-max');
+    const bEq = tab.querySelector('input[data-column="bonus"].equals');
+    const bMin = document.getElementById('basic-bonus-min');
+    const bMax = document.getElementById('basic-bonus-max');
+    if (bEq && mbEq) bEq.value = mbEq.value;
+    if (bMin && mbMin) bMin.value = mbMin.value;
+    if (bMax && mbMax) bMax.value = mbMax.value;
+}
 
-    if (valueEquals) valueEquals.addEventListener('input', applyBasicUniverseFilters);
-    if (valueMin) valueMin.addEventListener('input', applyBasicUniverseFilters);
-    if (valueMax) valueMax.addEventListener('input', applyBasicUniverseFilters);
-    if (bonusEquals) bonusEquals.addEventListener('input', applyBasicUniverseFilters);
-    if (bonusMin) bonusMin.addEventListener('input', applyBasicUniverseFilters);
-    if (bonusMax) bonusMax.addEventListener('input', applyBasicUniverseFilters);
+function setupBasicUniverseSearch() {
+    const tab = document.getElementById('basic-universe-tab');
+    if (tab && tab.dataset.basicUniverseFiltersBound !== '1') {
+        tab.dataset.basicUniverseFiltersBound = '1';
+        tab.querySelectorAll('.power-type-filter-toggle').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const t = btn.getAttribute('data-power-type');
+                const willBeActive = !btn.classList.contains('is-active');
+                tab.querySelectorAll('.power-type-filter-toggle').forEach((b) => {
+                    if (b.getAttribute('data-power-type') === t) {
+                        b.classList.toggle('is-active', willBeActive);
+                        b.setAttribute('aria-pressed', String(willBeActive));
+                    }
+                });
+                applyBasicUniverseFilters();
+            });
+        });
 
-    // Setup search functionality
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', async (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            if (searchTerm.length === 0) { 
-                await applyBasicUniverseFilters(); 
-                return; 
+        let debounceNum = null;
+        const debouncedApply = () => {
+            clearTimeout(debounceNum);
+            debounceNum = setTimeout(() => applyBasicUniverseFilters(), 150);
+        };
+
+        const onMobileNum = () => {
+            syncBasicUniverseMobileNumericToDesktop();
+            debouncedApply();
+        };
+        tab
+            .querySelectorAll(
+                '.basic-universe-mobile-to-use-equals, .basic-universe-mobile-to-use-min, .basic-universe-mobile-to-use-max, .basic-universe-mobile-bonus-equals, .basic-universe-mobile-bonus-min, .basic-universe-mobile-bonus-max'
+            )
+            .forEach((el) => {
+                el.addEventListener('input', onMobileNum);
+            });
+
+        const valueEquals = tab.querySelector('input[data-column="value"].equals');
+        const bonusEquals = tab.querySelector('input[data-column="bonus"].equals');
+        ['basic-value-min', 'basic-value-max', 'basic-bonus-min', 'basic-bonus-max'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => {
+                    syncBasicUniverseDesktopNumericToMobile();
+                    debouncedApply();
+                });
             }
-            try {
-                const resp = await fetch('/api/basic-universe');
-                const data = await resp.json();
-                if (data.success) {
-                    const filtered = data.data.filter(card =>
-                        card.card_name.toLowerCase().includes(searchTerm) ||
-                        card.type.toLowerCase().includes(searchTerm) ||
-                        card.value_to_use.toLowerCase().includes(searchTerm) ||
-                        card.bonus.toLowerCase().includes(searchTerm)
-                    );
-                    displayBasicUniverse(filtered);
-                }
-            } catch (err) { 
-                console.error('Error searching basic universe:', err); 
+        });
+        if (valueEquals) {
+            valueEquals.addEventListener('input', () => {
+                syncBasicUniverseDesktopNumericToMobile();
+                debouncedApply();
+            });
+        }
+        if (bonusEquals) {
+            bonusEquals.addEventListener('input', () => {
+                syncBasicUniverseDesktopNumericToMobile();
+                debouncedApply();
+            });
+        }
+
+        const clearUse = document.getElementById('basic-universe-to-use-value-clear');
+        const clearBon = document.getElementById('basic-universe-bonus-value-clear');
+        if (clearUse) {
+            clearUse.addEventListener('click', () => {
+                tab
+                    .querySelectorAll(
+                        '.basic-universe-mobile-to-use-equals, .basic-universe-mobile-to-use-min, .basic-universe-mobile-to-use-max'
+                    )
+                    .forEach((el) => {
+                        el.value = '';
+                    });
+                if (valueEquals) valueEquals.value = '';
+                const vm = document.getElementById('basic-value-min');
+                const vx = document.getElementById('basic-value-max');
+                if (vm) vm.value = '';
+                if (vx) vx.value = '';
+                applyBasicUniverseFilters();
+            });
+        }
+        if (clearBon) {
+            clearBon.addEventListener('click', () => {
+                tab
+                    .querySelectorAll(
+                        '.basic-universe-mobile-bonus-equals, .basic-universe-mobile-bonus-min, .basic-universe-mobile-bonus-max'
+                    )
+                    .forEach((el) => {
+                        el.value = '';
+                    });
+                if (bonusEquals) bonusEquals.value = '';
+                const bm = document.getElementById('basic-bonus-min');
+                const bx = document.getElementById('basic-bonus-max');
+                if (bm) bm.value = '';
+                if (bx) bx.value = '';
+                applyBasicUniverseFilters();
+            });
+        }
+
+        window.addEventListener('layout-mode-change', () => {
+            syncBasicUniverseDesktopNumericToMobile();
+            const bt = document.getElementById('basic-universe-tab');
+            if (
+                bt &&
+                bt.style.display !== 'none' &&
+                window.basicUniverseData &&
+                window.basicUniverseData.length > 0
+            ) {
+                applyBasicUniverseFilters();
             }
         });
     }
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.dataset.basicUniverseSearchBound !== '1') {
+        searchInput.dataset.basicUniverseSearchBound = '1';
+        searchInput.addEventListener('input', async () => {
+            if (!window.basicUniverseData || window.basicUniverseData.length === 0) {
+                if (typeof loadBasicUniverse === 'function') {
+                    await loadBasicUniverse();
+                }
+            }
+            applyBasicUniverseFilters();
+        });
+    }
+
+    syncBasicUniverseDesktopNumericToMobile();
 }
 
 function displayBasicUniverse(cards) {
     const tbody = document.getElementById('basic-universe-tbody');
-    if (!cards || cards.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No basic universe cards found</td></tr>';
+    const theadRow = document.querySelector('#basic-universe-table thead tr:first-child');
+    const colCount =
+        theadRow && theadRow.querySelectorAll('th').length ? theadRow.querySelectorAll('th').length : 6;
+
+    if (!tbody) {
         return;
     }
-    
-    // Sort basic universe cards by type, then value_to_use, then bonus
+
+    if (!cards || cards.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colCount}">No basic universe cards found</td></tr>`;
+        return;
+    }
+
     const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Any-Power'];
-    const sortedCards = cards.sort((a, b) => {
-        // First sort by type using OverPower order
+    const sortedCards = cards.slice().sort((a, b) => {
         const aTypeIndex = preferredOrder.indexOf(a.type);
         const bTypeIndex = preferredOrder.indexOf(b.type);
-        
+
         if (aTypeIndex !== bTypeIndex) {
-            if (aTypeIndex === -1) return 1;  // Put unknown types at end
+            if (aTypeIndex === -1) return 1;
             if (bTypeIndex === -1) return -1;
             return aTypeIndex - bTypeIndex;
         }
-        
-        // Then sort by value_to_use (extract numeric value)
-        const aValue = parseInt(a.value_to_use) || 0;
-        const bValue = parseInt(b.value_to_use) || 0;
+
+        const aValue = parseInt(String(a.value_to_use), 10) || 0;
+        const bValue = parseInt(String(b.value_to_use), 10) || 0;
         if (aValue !== bValue) {
             return aValue - bValue;
         }
-        
-        // Finally sort by bonus (extract numeric value)
-        const aBonus = parseInt(a.bonus.replace('+', '')) || 0;
-        const bBonus = parseInt(b.bonus.replace('+', '')) || 0;
+
+        const aBonus = parseInt(String(a.bonus || '').replace('+', ''), 10) || 0;
+        const bBonus = parseInt(String(b.bonus || '').replace('+', ''), 10) || 0;
         return aBonus - bBonus;
     });
-    
-    tbody.innerHTML = sortedCards.map(card => {
+
+    const useMobileListArt = basicUniverseUseMobileListArt();
+    const esc =
+        typeof window.escapeHtmlText === 'function'
+            ? window.escapeHtmlText
+            : (s) =>
+                  String(s)
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+
+    tbody.innerHTML = sortedCards.map((card) => {
         const imagePath = getCardImageUrlForDisplay(card, 'basic-universe');
         const imagePathEscaped = imagePath.replace(/'/g, "\\'");
         const imagePathAttr = imagePath.replace(/"/g, '&quot;');
+        const nameEsc = String(card.card_name || '').replace(/'/g, "\\'");
+        const idEsc = String(card.id || '').replace(/'/g, "\\'");
+
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+
+        const captionHtml = useMobileListArt ? buildBasicUniverseMobileCaptionHtml(card) : '';
+
+        const imgCellInner = useMobileListArt
+            ? `
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${esc(card.card_name || '')}"
+                         data-dbv-lightbox-context="basic-universe"
+                         loading="lazy"
+                         decoding="async"
+                         style="${imgStyle}"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'basic-universe')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)">
+                </div>
+                ${captionHtml}`
+            : `
+                <img src="${imagePathAttr}"
+                     alt="${card.card_name}"
+                     loading="lazy"
+                     decoding="async"
+                     style="${imgStyle}"
+                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'basic-universe')"
+                     onmouseleave="hideCardHoverModal()"
+                     onclick="openModal(this)">`;
+
         return `
         <tr>
-            <td>
-                <img src="${imagePathAttr}" 
-                     alt="${card.card_name}" 
-                     style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${(card.card_name || '').replace(/'/g, "\\'")}')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)">
+            <td${useMobileListArt ? ' data-label="Image"' : ''}>
+                ${imgCellInner}
             </td>
             <td>
-                <button class="add-to-deck-btn" onclick="showDeckSelection('basic-universe', '${card.id}', '${(card.card_name || '').replace(/'/g, "\\'")}', this)">
+                <button class="add-to-deck-btn" onclick="showDeckSelection('basic-universe', '${card.id}', '${nameEsc}', this)">
                     +Deck
                 </button>
-                ${(typeof getCurrentUser === 'function' && getCurrentUser()) ? `
+                ${typeof getCurrentUser === 'function' && getCurrentUser() ? `
                 <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', 'basic-universe', '${imagePathEscaped}')" style="margin-top: 4px; display: block;">
                     +Collection
                 </button>
@@ -853,6 +1055,8 @@ window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml;
 window.buildAllyMobileCaptionHtml = buildAllyMobileCaptionHtml;
 window.trainingUseMobileListArt = trainingUseMobileListArt;
 window.buildTrainingMobileCaptionHtml = buildTrainingMobileCaptionHtml;
+window.basicUniverseUseMobileListArt = basicUniverseUseMobileListArt;
+window.buildBasicUniverseMobileCaptionHtml = buildBasicUniverseMobileCaptionHtml;
 window.loadAllyUniverse = loadAllyUniverse;
 window.displayAllyUniverse = displayAllyUniverse;
 window.loadTraining = loadTraining;

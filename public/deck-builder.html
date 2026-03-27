@@ -3934,43 +3934,126 @@
                     <thead>
                         <tr>
                             <th>Image</th>
+                            <th></th>
                             <th>Card Name</th>
                             <th>Type</th>
                             <th>Value to Use</th>
                             <th>Bonus</th>
                         </tr>
-                        <tr class="filter-row">
+                        <tr class="filter-row basic-universe-desktop-filter-row">
                             <th>
                                 <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
                             </th>
                             <th></th>
+                            <th></th>
                             <th>
                                 <div class="column-filters">
-                                    <div class="checkbox-group">
-                                        <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                        <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                        <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                        <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                    <div class="special-power-filter-toggles basic-universe-desktop-stat-type-toggles" role="group" aria-label="Filter basic universe cards by stat type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
                                     </div>
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="value" placeholder="=" min="6" max="7">
+                                    <input type="number" class="filter-input equals" data-column="value" placeholder="=" min="6" max="7" aria-label="Value to use equals">
                                     <div class="range-inputs">
-                                        <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input">
+                                        <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input" aria-label="Value to use minimum">
                                         <span>-</span>
-                                        <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input">
+                                        <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input" aria-label="Value to use maximum">
                                     </div>
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="bonus" placeholder="=" min="2" max="3">
+                                    <input type="number" class="filter-input equals" data-column="bonus" placeholder="=" min="2" max="3" aria-label="Bonus equals">
                                     <div class="range-inputs">
-                                        <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input">
+                                        <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input" aria-label="Bonus minimum">
                                         <span>-</span>
-                                        <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input">
+                                        <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input" aria-label="Bonus maximum">
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr class="filter-row basic-universe-filter-row">
+                            <th class="basic-universe-filter-clear-th">
+                                <button type="button" class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
+                            </th>
+                            <th class="basic-universe-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="basic-universe-filter-controls-th" colspan="4">
+                                <div class="basic-universe-mobile-filter-shell column-filters">
+                                    <div class="basic-universe-filter-icon-row">
+                                        <div class="icon-filter-container">
+                                            <div class="special-power-filter-toggles basic-universe-stat-type-toggles" role="group" aria-label="Filter basic universe cards by stat type">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="basic-universe-icon-mobile-trailing">
+                                            <button type="button" id="clear-basic-universe-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--basic-universe-mobile-inline" onclick="clearBasicUniverseFilters()">Clear filters</button>
+                                        </div>
+                                    </div>
+                                    <div class="basic-universe-filter-to-use-shell">
+                                        <div class="special-value-filters-inner">
+                                            <div class="column-filters basic-universe-to-use-filters-inner">
+                                                <input type="number" class="filter-input equals basic-universe-mobile-to-use-equals" placeholder="To Use" min="6" max="7" aria-label="To Use equals">
+                                                <input type="number" class="filter-input min basic-universe-mobile-to-use-min" placeholder="Min To Use" min="6" max="7" aria-label="Min To Use">
+                                                <input type="number" class="filter-input max basic-universe-mobile-to-use-max" placeholder="Max To Use" min="6" max="7" aria-label="Max To Use">
+                                                <button type="button" id="basic-universe-to-use-value-clear" class="basic-universe-to-use-value-clear-btn" title="Clear To Use value filters" aria-label="Clear To Use value filters">
+                                                    <svg class="basic-universe-to-use-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="basic-universe-filter-bonus-shell">
+                                        <div class="special-value-filters-inner">
+                                            <div class="column-filters basic-universe-bonus-filters-inner">
+                                                <input type="number" class="filter-input equals basic-universe-mobile-bonus-equals" placeholder="Bonus =" min="2" max="3" aria-label="Bonus equals">
+                                                <input type="number" class="filter-input min basic-universe-mobile-bonus-min" placeholder="Min Bonus" min="2" max="3" aria-label="Min Bonus">
+                                                <input type="number" class="filter-input max basic-universe-mobile-bonus-max" placeholder="Max Bonus" min="2" max="3" aria-label="Max Bonus">
+                                                <button type="button" id="basic-universe-bonus-value-clear" class="basic-universe-bonus-value-clear-btn" title="Clear Bonus value filters" aria-label="Clear Bonus value filters">
+                                                    <svg class="basic-universe-bonus-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </th>
@@ -3978,7 +4061,7 @@
                     </thead>
                     <tbody id="basic-universe-tbody">
                         <tr>
-                            <td colspan="5" class="loading">Loading basic universe...</td>
+                            <td colspan="6" class="loading">Loading basic universe...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -5560,97 +5643,224 @@
             try {
                 const resp = await fetch('/api/basic-universe');
                 const data = await resp.json();
-                if (data.success) displayBasicUniverse(data.data);
+                if (data.success) {
+                    window.basicUniverseData = data.data;
+                    displayBasicUniverse(data.data);
+                }
             } catch (e) { console.error('Error loading basic universe:', e); }
+        }
+
+        function deckBuilderBasicUniverseUseMobileListArt() {
+            if (typeof window.isLayoutMobileForCardDisplay === 'function' && window.isLayoutMobileForCardDisplay()) {
+                return true;
+            }
+            if (typeof window.isNarrowViewportDbvBand === 'function' && window.isNarrowViewportDbvBand()) {
+                return true;
+            }
+            if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+                return true;
+            }
+            return false;
         }
 
         function displayBasicUniverse(cards) {
             const tbody = document.getElementById('basic-universe-tbody');
             if (!cards || cards.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5">No basic universe cards found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6">No basic universe cards found</td></tr>';
                 return;
             }
-            tbody.innerHTML = cards.map(card => `
-                <tr>
+            const useMobile = deckBuilderBasicUniverseUseMobileListArt();
+            tbody.innerHTML = cards.map(card => {
+                const nameEsc = String(card.card_name || '').replace(/'/g, "\\'");
+                const imgPath = card.image ? `/src/resources/cards/images/${card.image}` : '';
+                const setLine = [card.set, card.set_number].filter(Boolean).join(' - ') || (card.set || '');
+                const caption = useMobile ? `
+                        <div class="characters-mobile-card-caption characters-mobile-card-caption--basic-universe">
+                            <div class="characters-mobile-card-caption__basic-universe-name">${String(card.card_name || '').replace(/</g, '&lt;')}</div>
+                            <div class="characters-mobile-card-caption__basic-universe-stat-line"><span class="characters-mobile-card-caption__basic-universe-type">${String(card.type || '').replace(/</g, '&lt;')}</span><span class="characters-mobile-card-caption__basic-universe-value-bonus">${String(card.value_to_use || '').replace(/</g, '&lt;')} ${String(card.bonus || '').replace(/</g, '&lt;')}</span></div>
+                            <div class="characters-mobile-card-caption__basic-universe-set-line">${String(setLine).replace(/</g, '&lt;')}</div>
+                        </div>` : '';
+                const imgCell = useMobile ? `
+                    <td data-label="Image">
+                        <div class="card-image-container">
+                            <img src="${imgPath}" alt="${String(card.card_name || '').replace(/"/g, '&quot;')}" loading="lazy" decoding="async"
+                                 style="border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; max-width: 100%; height: auto;"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
+                                 onclick="openModal(this)">
+                        </div>
+                        ${caption}
+                    </td>` : `
                     <td>
-                        <img src="/src/resources/cards/images/${card.image}" 
-                             alt="${card.card_name}" 
+                        <img src="${imgPath}" alt="${String(card.card_name || '').replace(/"/g, '&quot;')}"
                              style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
                              onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                              onclick="openModal(this)">
-                    </td>
+                    </td>`;
+                return `
+                <tr>
+                    ${imgCell}
+                    <td></td>
                     <td><strong>${card.card_name}</strong></td>
                     <td>${card.type}</td>
                     <td>${card.value_to_use}</td>
                     <td>${card.bonus}</td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
+        }
+
+        function syncBasicUniverseDesktopNumericToMobile() {
+            const tab = document.getElementById('basic-universe-tab');
+            if (!tab) return;
+            const vEq = tab.querySelector('input[data-column="value"].equals');
+            const vMin = document.getElementById('basic-value-min');
+            const vMax = document.getElementById('basic-value-max');
+            const bEq = tab.querySelector('input[data-column="bonus"].equals');
+            const bMin = document.getElementById('basic-bonus-min');
+            const bMax = document.getElementById('basic-bonus-max');
+            tab.querySelectorAll('.basic-universe-mobile-to-use-equals').forEach((el) => { el.value = vEq ? vEq.value : ''; });
+            tab.querySelectorAll('.basic-universe-mobile-to-use-min').forEach((el) => { el.value = vMin ? vMin.value : ''; });
+            tab.querySelectorAll('.basic-universe-mobile-to-use-max').forEach((el) => { el.value = vMax ? vMax.value : ''; });
+            tab.querySelectorAll('.basic-universe-mobile-bonus-equals').forEach((el) => { el.value = bEq ? bEq.value : ''; });
+            tab.querySelectorAll('.basic-universe-mobile-bonus-min').forEach((el) => { el.value = bMin ? bMin.value : ''; });
+            tab.querySelectorAll('.basic-universe-mobile-bonus-max').forEach((el) => { el.value = bMax ? bMax.value : ''; });
+        }
+
+        function syncBasicUniverseMobileNumericToDesktop() {
+            const tab = document.getElementById('basic-universe-tab');
+            if (!tab) return;
+            const mEq = tab.querySelector('.basic-universe-mobile-to-use-equals');
+            const mMin = tab.querySelector('.basic-universe-mobile-to-use-min');
+            const mMax = tab.querySelector('.basic-universe-mobile-to-use-max');
+            const vEq = tab.querySelector('input[data-column="value"].equals');
+            const vMin = document.getElementById('basic-value-min');
+            const vMax = document.getElementById('basic-value-max');
+            if (vEq && mEq) vEq.value = mEq.value;
+            if (vMin && mMin) vMin.value = mMin.value;
+            if (vMax && mMax) vMax.value = mMax.value;
+            const mbEq = tab.querySelector('.basic-universe-mobile-bonus-equals');
+            const mbMin = tab.querySelector('.basic-universe-mobile-bonus-min');
+            const mbMax = tab.querySelector('.basic-universe-mobile-bonus-max');
+            const bEq = tab.querySelector('input[data-column="bonus"].equals');
+            const bMin = document.getElementById('basic-bonus-min');
+            const bMax = document.getElementById('basic-bonus-max');
+            if (bEq && mbEq) bEq.value = mbEq.value;
+            if (bMin && mbMin) bMin.value = mbMin.value;
+            if (bMax && mbMax) bMax.value = mbMax.value;
         }
 
         function setupBasicUniverseSearch() {
+            const tab = document.getElementById('basic-universe-tab');
             const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', async (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                if (searchTerm.length === 0) { await applyBasicUniverseFilters(); return; }
-                try {
-                    const resp = await fetch('/api/basic-universe');
-                    const data = await resp.json();
-                    if (data.success) {
-                        const filtered = data.data.filter(card =>
-                            card.card_name.toLowerCase().includes(searchTerm) ||
-                            card.type.toLowerCase().includes(searchTerm) ||
-                            card.value_to_use.toLowerCase().includes(searchTerm) ||
-                            card.bonus.toLowerCase().includes(searchTerm)
-                        );
-                        displayBasicUniverse(filtered);
+            if (searchInput && !searchInput.dataset.basicUniverseSearchBound) {
+                searchInput.dataset.basicUniverseSearchBound = '1';
+                searchInput.addEventListener('input', async (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    if (searchTerm.length === 0) { await applyBasicUniverseFilters(); return; }
+                    const pool = window.basicUniverseData;
+                    if (!pool || pool.length === 0) {
+                        try {
+                            const resp = await fetch('/api/basic-universe');
+                            const data = await resp.json();
+                            if (data.success) window.basicUniverseData = data.data;
+                        } catch (err) { console.error('Error searching basic universe:', err); return; }
                     }
-                } catch (err) { console.error('Error searching basic universe:', err); }
-            });
+                    const src = window.basicUniverseData || [];
+                    const filtered = src.filter(card =>
+                        (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
+                        (card.type && card.type.toLowerCase().includes(searchTerm)) ||
+                        (card.value_to_use && String(card.value_to_use).toLowerCase().includes(searchTerm)) ||
+                        (card.bonus && String(card.bonus).toLowerCase().includes(searchTerm))
+                    );
+                    displayBasicUniverse(filtered);
+                });
+            }
 
-            // Add event listeners for filters
-            document.querySelectorAll('#basic-universe-tab input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', applyBasicUniverseFilters);
-            });
-
-            document.querySelector('#basic-universe-tab input[data-column="value"].equals').addEventListener('input', applyBasicUniverseFilters);
-            document.getElementById('basic-value-min').addEventListener('input', applyBasicUniverseFilters);
-            document.getElementById('basic-value-max').addEventListener('input', applyBasicUniverseFilters);
-            document.querySelector('#basic-universe-tab input[data-column="bonus"].equals').addEventListener('input', applyBasicUniverseFilters);
-            document.getElementById('basic-bonus-min').addEventListener('input', applyBasicUniverseFilters);
-            document.getElementById('basic-bonus-max').addEventListener('input', applyBasicUniverseFilters);
+            if (tab && !tab.dataset.basicUniverseFiltersBound) {
+                tab.dataset.basicUniverseFiltersBound = '1';
+                tab.querySelectorAll('.power-type-filter-toggle').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const t = btn.getAttribute('data-power-type');
+                        const willBeActive = !btn.classList.contains('is-active');
+                        tab.querySelectorAll('.power-type-filter-toggle').forEach((b) => {
+                            if (b.getAttribute('data-power-type') === t) {
+                                b.classList.toggle('is-active', willBeActive);
+                                b.setAttribute('aria-pressed', String(willBeActive));
+                            }
+                        });
+                        applyBasicUniverseFilters();
+                    });
+                });
+                const onNum = () => { syncBasicUniverseMobileNumericToDesktop(); applyBasicUniverseFilters(); };
+                tab.querySelectorAll('.basic-universe-mobile-to-use-equals, .basic-universe-mobile-to-use-min, .basic-universe-mobile-to-use-max, .basic-universe-mobile-bonus-equals, .basic-universe-mobile-bonus-min, .basic-universe-mobile-bonus-max').forEach((el) => {
+                    el.addEventListener('input', onNum);
+                });
+                const vEq = tab.querySelector('input[data-column="value"].equals');
+                const bEq = tab.querySelector('input[data-column="bonus"].equals');
+                ['basic-value-min', 'basic-value-max', 'basic-bonus-min', 'basic-bonus-max'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', () => { syncBasicUniverseDesktopNumericToMobile(); applyBasicUniverseFilters(); });
+                });
+                if (vEq) vEq.addEventListener('input', () => { syncBasicUniverseDesktopNumericToMobile(); applyBasicUniverseFilters(); });
+                if (bEq) bEq.addEventListener('input', () => { syncBasicUniverseDesktopNumericToMobile(); applyBasicUniverseFilters(); });
+                const clearUse = document.getElementById('basic-universe-to-use-value-clear');
+                const clearBon = document.getElementById('basic-universe-bonus-value-clear');
+                if (clearUse) {
+                    clearUse.addEventListener('click', () => {
+                        tab.querySelectorAll('.basic-universe-mobile-to-use-equals, .basic-universe-mobile-to-use-min, .basic-universe-mobile-to-use-max').forEach((el) => { el.value = ''; });
+                        if (vEq) vEq.value = '';
+                        if (document.getElementById('basic-value-min')) document.getElementById('basic-value-min').value = '';
+                        if (document.getElementById('basic-value-max')) document.getElementById('basic-value-max').value = '';
+                        applyBasicUniverseFilters();
+                    });
+                }
+                if (clearBon) {
+                    clearBon.addEventListener('click', () => {
+                        tab.querySelectorAll('.basic-universe-mobile-bonus-equals, .basic-universe-mobile-bonus-min, .basic-universe-mobile-bonus-max').forEach((el) => { el.value = ''; });
+                        if (bEq) bEq.value = '';
+                        if (document.getElementById('basic-bonus-min')) document.getElementById('basic-bonus-min').value = '';
+                        if (document.getElementById('basic-bonus-max')) document.getElementById('basic-bonus-max').value = '';
+                        applyBasicUniverseFilters();
+                    });
+                }
+                window.addEventListener('layout-mode-change', () => {
+                    syncBasicUniverseDesktopNumericToMobile();
+                    if (typeof applyBasicUniverseFilters === 'function') applyBasicUniverseFilters();
+                });
+            }
+            syncBasicUniverseDesktopNumericToMobile();
         }
 
         function clearBasicUniverseFilters() {
-            // Reset checkboxes
-            document.querySelectorAll('#basic-universe-tab input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = true;
-            });
-            
-            // Reset value inputs
-            document.querySelectorAll('#basic-universe-tab input[data-column="value"]').forEach(input => {
-                input.value = '';
-            });
-            
-            // Reset bonus inputs
-            document.querySelectorAll('#basic-universe-tab input[data-column="bonus"]').forEach(input => {
-                input.value = '';
-            });
-            
-            // Reload all cards
+            const tab = document.getElementById('basic-universe-tab');
+            if (tab) {
+                tab.querySelectorAll('.power-type-filter-toggle').forEach((btn) => {
+                    btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+                tab.querySelectorAll('input[type="number"]').forEach((input) => { input.value = ''; });
+            }
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = '';
             loadBasicUniverse();
         }
 
         async function applyBasicUniverseFilters() {
             try {
-                const resp = await fetch('/api/basic-universe');
-                const data = await resp.json();
-                if (!data.success) return;
+                let pool = window.basicUniverseData;
+                if (!pool || pool.length === 0) {
+                    const resp = await fetch('/api/basic-universe');
+                    const data = await resp.json();
+                    if (!data.success) return;
+                    pool = data.data;
+                    window.basicUniverseData = pool;
+                }
 
-                let filtered = data.data;
+                let filtered = pool.slice();
 
-                // Filter by type
-                const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
+                // Filter by type (power-type toggles)
+                const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active'))
+                    .map((b) => b.dataset.powerType);
                 if (selectedTypes.length > 0) {
                     filtered = filtered.filter(card => selectedTypes.includes(card.type));
                 }
@@ -5709,6 +5919,16 @@
                             return cardBonus <= maxBonusNum;
                         });
                     }
+                }
+
+                const searchTerm = (document.getElementById('search-input') && document.getElementById('search-input').value || '').toLowerCase().trim();
+                if (searchTerm) {
+                    filtered = filtered.filter(card =>
+                        (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
+                        (card.type && card.type.toLowerCase().includes(searchTerm)) ||
+                        (card.value_to_use && String(card.value_to_use).toLowerCase().includes(searchTerm)) ||
+                        (card.bonus && String(card.bonus).toLowerCase().includes(searchTerm))
+                    );
                 }
 
                 displayBasicUniverse(filtered);

@@ -1193,27 +1193,6 @@ function setupTrainingSearch() {
     });
 }
 
-function setupBasicUniverseSearch() {
-    const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', async (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        if (searchTerm.length === 0) { await applyBasicUniverseFilters(); return; }
-        try {
-            const resp = await fetch('/api/basic-universe');
-            const data = await resp.json();
-            if (data.success) {
-                const filtered = data.data.filter(card =>
-                    (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
-                    (card.type && card.type.toLowerCase().includes(searchTerm)) ||
-                    (card.value_to_use && String(card.value_to_use).toLowerCase().includes(searchTerm)) ||
-                    (card.bonus && String(card.bonus).toLowerCase().includes(searchTerm))
-                );
-                displayBasicUniverse(filtered);
-            }
-        } catch (err) { console.error('Error searching basic universe:', err); }
-    });
-}
-
 function setupPowerCardsSearch() {
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', async (e) => {

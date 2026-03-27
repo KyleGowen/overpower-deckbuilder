@@ -60,6 +60,12 @@ describe('Basic Universe Type Filter - Simple', () => {
             expect(indexHtmlContent).toContain('id="basic-bonus-min"');
             expect(indexHtmlContent).toContain('id="basic-bonus-max"');
         });
+
+        it('should have mobile To Use and Bonus filter shells', () => {
+            expect(indexHtmlContent).toContain('basic-universe-mobile-filter-shell');
+            expect(indexHtmlContent).toContain('placeholder="Min To Use"');
+            expect(indexHtmlContent).toContain('placeholder="Max Bonus"');
+        });
     });
 
     describe('API Integration', () => {
@@ -98,8 +104,8 @@ describe('Basic Universe Type Filter - Simple', () => {
     });
 
     describe('Toggle State Management', () => {
-        it('should toggle is-active class on buttons', () => {
-            expect(cardDataDisplayContent).toContain('classList.toggle(\'is-active\')');
+        it('should sync is-active class across paired type toggles', () => {
+            expect(cardDataDisplayContent).toContain('classList.toggle(\'is-active\', willBeActive)');
         });
     });
 
@@ -119,7 +125,7 @@ describe('Basic Universe Type Filter - Simple', () => {
 
     describe('Function Registration', () => {
         it('should define functions in extracted modules', () => {
-            expect(cardFilterTogglesContent).toContain('function applyBasicUniverseFilters()');
+            expect(cardFilterTogglesContent).toContain('async function applyBasicUniverseFilters()');
             expect(cardDataDisplayContent).toContain('function displayBasicUniverse(');
             expect(cardDataDisplayContent).toContain('function setupBasicUniverseSearch()');
         });

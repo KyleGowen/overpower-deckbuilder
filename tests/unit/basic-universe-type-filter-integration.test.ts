@@ -19,18 +19,19 @@ describe('Basic Universe Type Filter Integration', () => {
                 <div id="basic-universe-tab">
                     <table>
                         <thead>
-                            <tr class="filter-row">
+                            <tr class="filter-row basic-universe-desktop-filter-row">
                                 <th>
                                     <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
                                 </th>
                                 <th></th>
+                                <th></th>
                                 <th>
                                     <div class="column-filters">
-                                        <div class="checkbox-group">
-                                            <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                            <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
+                                        <div class="special-power-filter-toggles basic-universe-desktop-stat-type-toggles">
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Energy"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Combat"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force"></button>
+                                            <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence"></button>
                                         </div>
                                     </div>
                                 </th>
@@ -90,54 +91,36 @@ describe('Basic Universe Type Filter Integration', () => {
         dom.window.close();
     });
 
-    describe('Checkbox Initialization', () => {
-        it('should have all checkboxes checked by default', () => {
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            
-            expect(checkboxes).toHaveLength(4);
-            
-            checkboxes.forEach(checkbox => {
-                expect(checkbox).toHaveProperty('checked', true);
-            });
+    describe('Power type toggles', () => {
+        it('should have stat type toggle buttons with data-power-type', () => {
+            const toggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
+            expect(toggles.length).toBeGreaterThanOrEqual(4);
+            const types = Array.from(toggles).map((b) => b.getAttribute('data-power-type'));
+            expect(types).toContain('Energy');
+            expect(types).toContain('Combat');
         });
 
-        it('should have correct values for each checkbox', () => {
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            const values = Array.from(checkboxes).map(cb => cb.getAttribute('value'));
-            
-            expect(values).toEqual(['Energy', 'Combat', 'Brute Force', 'Intelligence']);
+        it('should start with no is-active toggles (show all when none selected)', () => {
+            const active = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active');
+            expect(active).toHaveLength(0);
         });
     });
 
     describe('setupBasicUniverseSearch Function', () => {
-        it('should initialize checkboxes to checked state', () => {
-            // Simulate the setupBasicUniverseSearch function
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = true;
-            });
-
-            checkboxes.forEach(checkbox => {
-                expect((checkbox as HTMLInputElement).checked).toBe(true);
-            });
-        });
-
-        it('should add event listeners to checkboxes', () => {
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
+        it('should add event listeners to type toggles', () => {
+            const toggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
             const addEventListenerSpy = jest.fn();
-            
-            // Mock addEventListener
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener = addEventListenerSpy;
+
+            toggles.forEach((btn) => {
+                btn.addEventListener = addEventListenerSpy;
             });
 
-            // Simulate adding event listeners
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', window.applyBasicUniverseFilters);
+            toggles.forEach((btn) => {
+                btn.addEventListener('click', window.applyBasicUniverseFilters);
             });
 
-            expect(addEventListenerSpy).toHaveBeenCalledTimes(4);
-            expect(addEventListenerSpy).toHaveBeenCalledWith('change', window.applyBasicUniverseFilters);
+            expect(addEventListenerSpy).toHaveBeenCalledTimes(toggles.length);
+            expect(addEventListenerSpy).toHaveBeenCalledWith('click', window.applyBasicUniverseFilters);
         });
 
         it('should add event listeners to filter inputs', () => {
@@ -170,23 +153,23 @@ describe('Basic Universe Type Filter Integration', () => {
     });
 
     describe('Type Filtering Logic', () => {
-        it('should get selected types from checked checkboxes', () => {
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked');
-            const selectedTypes = Array.from(checkboxes).map(cb => cb.getAttribute('value'));
-            
-            expect(selectedTypes).toEqual(['Energy', 'Combat', 'Brute Force', 'Intelligence']);
+        it('should get selected types from active toggles', () => {
+            const toggles = document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle');
+            (toggles[0] as HTMLButtonElement).classList.add('is-active');
+            (toggles[1] as HTMLButtonElement).classList.add('is-active');
+
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type'));
+
+            expect(selectedTypes).toEqual(['Energy', 'Combat']);
         });
 
-        it('should handle no selected types', () => {
-            // Uncheck all checkboxes
-            const checkboxes = document.querySelectorAll('#basic-universe-tab input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                (checkbox as HTMLInputElement).checked = false;
-            });
+        it('should handle no selected types as empty active set', () => {
+            const selectedTypes = Array.from(
+                document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle.is-active')
+            ).map((b) => b.getAttribute('data-power-type'));
 
-            const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
-                .map(cb => cb.getAttribute('value'));
-            
             expect(selectedTypes).toEqual([]);
         });
 
@@ -212,11 +195,12 @@ describe('Basic Universe Type Filter Integration', () => {
             expect(energyFiltered).toHaveLength(1);
             expect(energyFiltered[0].type).toBe('Energy');
 
-            // Test with no types selected
+            // Product rule: no active toggles => do not filter by type (show all)
             const noTypes: string[] = [];
-            const noTypesFiltered = mockCards.filter(card => noTypes.includes(card.type));
-            
-            expect(noTypesFiltered).toHaveLength(0);
+            const noTypesFiltered =
+                noTypes.length === 0 ? mockCards : mockCards.filter((card) => noTypes.includes(card.type));
+
+            expect(noTypesFiltered).toHaveLength(4);
         });
     });
 
@@ -278,14 +262,11 @@ describe('Basic Universe Type Filter Integration', () => {
         });
 
         it('should have correct filter row structure', () => {
-            const filterRow = document.querySelector('.filter-row');
+            const filterRow = document.querySelector('.basic-universe-desktop-filter-row');
             expect(filterRow).toBeTruthy();
 
-            const checkboxGroup = filterRow!.querySelector('.checkbox-group');
-            expect(checkboxGroup).toBeTruthy();
-
-            const checkboxes = checkboxGroup!.querySelectorAll('input[type="checkbox"]');
-            expect(checkboxes).toHaveLength(4);
+            const toggles = filterRow!.querySelectorAll('.power-type-filter-toggle');
+            expect(toggles.length).toBeGreaterThanOrEqual(4);
         });
 
         it('should have correct input IDs and classes', () => {
@@ -320,12 +301,11 @@ describe('Basic Universe Type Filter Integration', () => {
             }).not.toThrow();
         });
 
-        it('should handle empty checkbox collections', () => {
-            const emptyCheckboxes = document.querySelectorAll('.non-existent-checkboxes');
-            expect(emptyCheckboxes).toHaveLength(0);
+        it('should handle empty toggle collections', () => {
+            const emptyToggles = document.querySelectorAll('.non-existent-power-toggles');
+            expect(emptyToggles).toHaveLength(0);
 
-            // Should handle empty collections gracefully
-            const selectedTypes = Array.from(emptyCheckboxes).map(cb => cb.getAttribute('value'));
+            const selectedTypes = Array.from(emptyToggles).map((b) => b.getAttribute('data-power-type'));
             expect(selectedTypes).toEqual([]);
         });
     });

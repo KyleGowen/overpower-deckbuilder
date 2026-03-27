@@ -249,11 +249,20 @@ function clearTrainingFilters() {
 }
 
 function clearBasicUniverseFilters() {
-    document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach(btn => {
+    document.querySelectorAll('#basic-universe-tab .power-type-filter-toggle').forEach((btn) => {
         btn.classList.remove('is-active');
         btn.setAttribute('aria-pressed', 'false');
     });
-    applyBasicUniverseFilters();
+    document.querySelectorAll('#basic-universe-tab input[type="number"]').forEach((input) => {
+        input.value = '';
+    });
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (typeof loadBasicUniverse === 'function') {
+        loadBasicUniverse();
+    }
 }
 
 // Simple debounce utility
