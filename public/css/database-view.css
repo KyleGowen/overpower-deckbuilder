@@ -291,6 +291,12 @@ td:last-child {
     line-height: 1.4;
 }
 
+/* Locations: last column is long rules text; global 300px cap squashes layout vs frame */
+#locations-table td:last-child,
+#locations-table th:last-child {
+    max-width: none;
+}
+
 /* ========================================
  * FILTER SYSTEM
  * ======================================== */
@@ -1399,7 +1405,12 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #locations-table .locations-threat-inputs-and-clear .filter-input {
     width: auto;
-    min-width: 0;
+    min-width: 3.25rem;
+}
+
+/* Desktop: keep Min/Max threat inputs readable (narrow th otherwise clips placeholders) */
+#locations-table thead .locations-filter-threat-th {
+    min-width: 140px;
 }
 
 .special-no-value-toggle-label input[type="checkbox"] {

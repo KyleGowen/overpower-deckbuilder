@@ -31,11 +31,12 @@
 #advanced-universe-table th:nth-child(5), #advanced-universe-table td:nth-child(5) { width: 25% !important; } /* Card Effect - increased to 25% */
 #advanced-universe-table th:nth-child(6), #advanced-universe-table td:nth-child(6) { width: 7% !important; } /* One Per Deck */
 
-/* Locations Search Input Styling - Direct override */
+/* Locations Search Input Styling - fluid within th (desktop; .layout-mobile also sets 100% in mobile-layout.css) */
 #locations-table .header-filter[data-column="special_ability"],
 #locations-table .header-filter[data-column="name"] {
-    width: 480px !important;
-    max-width: 480px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
     margin: 0 auto;
     display: block;
     box-sizing: border-box;

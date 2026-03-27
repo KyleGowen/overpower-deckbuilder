@@ -364,7 +364,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Search Results**: Gold highlights for matching text
 - **Search Bar Styling**: 
   - **Advanced Universe Card Effect Search**: 480px width with centered alignment
-  - **Locations name and special ability header filters**: 480px width with centered alignment (`card-tables.css`: `data-column="name"` and `data-column="special_ability"`)
+  - **Locations name and special ability header filters**: `width`/`max-width: 100%` of the header cell (`min-width: 0` on the input) with centered alignment (`card-tables.css`: `data-column="name"` and `data-column="special_ability"`; `.layout-mobile` repeats `100%` in `mobile-layout.css`)
   - **Events Game Effect Search**: 320px width with centered alignment
   - **Aspects Search Bars**: 300px width with centered alignment (Name, Location, Card Effect)
   - **Aspects Table Layout**: Fixed table layout with percentage-based column widths

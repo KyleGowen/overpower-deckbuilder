@@ -13,8 +13,9 @@ describe('Locations Search Functionality', () => {
             <head>
                 <style>
                     #locations-table .header-filter[data-column="special_ability"] {
-                        width: 480px !important;
-                        max-width: 480px !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0;
                         margin: 0 auto;
                         display: block;
                         box-sizing: border-box;
@@ -177,13 +178,13 @@ describe('Locations Search Functionality', () => {
     });
 
     describe('Search Bar Width Styling', () => {
-        test('should apply 480px width to special ability search input', () => {
+        test('should apply fluid 100% width to special ability search input', () => {
             const abilityInput = document.querySelector('#locations-table .header-filter[data-column="special_ability"]') as HTMLInputElement;
             expect(abilityInput).toBeTruthy();
 
             const computedStyle = window.getComputedStyle(abilityInput);
-            expect(computedStyle.width).toBe('480px');
-            expect(computedStyle.maxWidth).toBe('480px');
+            expect(computedStyle.width).toBe('100%');
+            expect(computedStyle.maxWidth).toBe('100%');
         });
 
         test('should center the search input within its column', () => {
@@ -208,12 +209,12 @@ describe('Locations Search Functionality', () => {
             expect(threatMinInput).toBeTruthy();
             expect(threatMaxInput).toBeTruthy();
             
-            // These inputs should not have the 480px width constraint
+            // Threat range inputs are not the wide header-filter name/ability fields
             const minStyle = window.getComputedStyle(threatMinInput);
             const maxStyle = window.getComputedStyle(threatMaxInput);
             
-            expect(minStyle.width).not.toBe('480px');
-            expect(maxStyle.width).not.toBe('480px');
+            expect(minStyle.width).not.toBe('100%');
+            expect(maxStyle.width).not.toBe('100%');
         });
     });
 
@@ -396,8 +397,8 @@ describe('Locations Search Functionality', () => {
             const abilityInput = document.querySelector('#locations-table .header-filter[data-column="special_ability"]') as HTMLInputElement;
             const computedStyle = window.getComputedStyle(abilityInput);
             
-            // Should have the specific width override
-            expect(computedStyle.width).toBe('480px');
+            // Locations-specific fluid width from card-tables.css
+            expect(computedStyle.width).toBe('100%');
         });
 
         test('should not affect other tables or search inputs', () => {
