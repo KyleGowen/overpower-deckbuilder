@@ -197,14 +197,11 @@ describe('Database View Template', () => {
             expect(templateContent).not.toContain('missions-checkbox-group');
         });
 
-        it('should contain power type filter toggles (matches live DBV icon buttons)', () => {
-            expect(templateContent).toContain('power-type-filter-toggle');
-            expect(templateContent).toContain('data-power-type="Energy"');
-            expect(templateContent).toContain('data-power-type="Combat"');
-            expect(templateContent).toContain('data-power-type="Brute Force"');
-            expect(templateContent).toContain('data-power-type="Intelligence"');
-            expect(templateContent).toContain('data-power-type="Any-Power"');
-            expect(templateContent).toMatch(/data-power-type="Multi-Power"|data-power-type="Multi Power"/);
+        it('should contain DBV power-strip mount points (buttons filled by dbv-power-type-filter-strip.js)', () => {
+            expect(templateContent).toContain('data-dbv-power-strip');
+            expect(templateContent).toContain('data-dbv-power-strip="aspect-with-no-icon"');
+            expect(templateContent).toContain('data-dbv-power-strip="power-desktop"');
+            expect(templateContent).toContain('data-dbv-power-strip="ally-desktop-stat"');
         });
     });
 

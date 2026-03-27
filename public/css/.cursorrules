@@ -19,7 +19,7 @@
     - Cell grid: `.special-power-icons-cell` — `display: grid; grid-template-columns: repeat(2, 20px); gap: 4px; justify-content: center`.
     - Cell icon: `.special-power-type-icon` — fixed `20px × 20px`.
     - Text fallback: `.special-icon-text-fallback` — for icons without a PNG (e.g. Multi-Power).
-    - Filter toggle grid: `.special-power-filter-toggles` — `display: grid; grid-template-columns: repeat(2, 36px); gap: 6px`.
+    - Filter toggle grid: `.special-power-filter-toggles` — `display: grid; grid-template-columns: repeat(2, 36px); gap: 6px`. **DOM:** header buttons are created at runtime from `[data-dbv-power-strip]` presets; see [`js/DBV_POWER_TYPE_FILTER_STRIP.md`](../js/DBV_POWER_TYPE_FILTER_STRIP.md).
     - Toggle button: `.power-type-filter-toggle` — same `36px` square style as `.function-filter-toggle`; active: `.is-active`; disabled: `.is-disabled`.
     - "No Icon" (Special Cards): `.special-no-icon-toggle-label` + hidden `#special-no-icon-toggle` + `.special-no-icon-toggle-face` / `.special-no-icon-svg` (ban icon), same square toggle chrome as `.power-type-filter-toggle` (Aspects table still uses checkbox + text).
     - Outer wrapper: `.icon-filter-container` — `display: flex; flex-direction: column; align-items: center; gap: 6px`.

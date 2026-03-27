@@ -40,6 +40,8 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/components/DeckEditorSearch.js
 - /js/card-display-functions.js
 - /js/collection-view.js
+- /js/dbv-icon-filter-logic.js
+- /js/dbv-power-type-filter-strip.js
 - /js/search-filter-functions.js
 - /js/deck-management-functions.js
 - /js/ui-utility-functions.js

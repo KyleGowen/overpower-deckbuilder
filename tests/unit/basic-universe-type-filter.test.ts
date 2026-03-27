@@ -177,10 +177,9 @@ describe('Basic Universe Type Filter', () => {
     describe('Type Filter Integration', () => {
         it('should have proper HTML structure for toggle buttons', () => {
             expect(indexHtmlContent).toContain('id="basic-universe-tab"');
-            expect(indexHtmlContent).toContain('data-power-type="Energy"');
-            expect(indexHtmlContent).toContain('data-power-type="Combat"');
-            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
-            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
+            expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-desktop"');
+            expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-mobile"');
+            expect(indexHtmlContent).toContain('basic-universe-desktop-stat-type-toggles');
         });
 
         it('should have Clear All Filters button', () => {
@@ -210,12 +209,12 @@ describe('Basic Universe Type Filter', () => {
         });
 
         it('should include Training-parity stat type toggles including Any-Power and Multi-Power', () => {
-            expect(indexHtmlContent).toContain('data-power-type="Energy"');
-            expect(indexHtmlContent).toContain('data-power-type="Combat"');
-            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
-            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
-            expect(indexHtmlContent).toContain('data-power-type="Any-Power"');
-            expect(indexHtmlContent).toContain('data-power-type="Multi-Power"');
+            expect(indexHtmlContent).toContain('dbv-power-type-filter-strip.js');
+            const stripSrc = readFileSync(join(__dirname, '../../public/js/dbv-power-type-filter-strip.js'), 'utf-8');
+            expect(stripSrc).toContain("'basic-desktop'");
+            expect(stripSrc).toContain("'basic-mobile'");
+            expect(stripSrc).toContain("'Any-Power'");
+            expect(stripSrc).toContain("'Multi-Power'");
         });
     });
 

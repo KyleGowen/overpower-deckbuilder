@@ -69,6 +69,7 @@ describe('Special Cards function toggle integration', () => {
     });
     (globalThis as any).fetch = (window as any).fetch;
 
+    execFrontendScript('public/js/dbv-icon-filter-logic.js');
     execFrontendScript('public/js/search-filter-functions.js');
     execFrontendScript('public/js/filter-functions.js');
     (window as any).setupSpecialCardSearch();

@@ -141,6 +141,7 @@ describe('Special card function filters', () => {
     });
     (globalThis as any).fetch = (window as any).fetch;
 
+    execFrontendScript('public/js/dbv-icon-filter-logic.js');
     execFrontendScript('public/js/search-filter-functions.js');
     execFrontendScript('public/js/filter-functions.js');
   });

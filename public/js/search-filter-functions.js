@@ -1,6 +1,39 @@
 // Search and Filter Functions
 // Extracted from index.html as part of Phase 10C refactoring
 
+// When evaluated without dbv-icon-filter-logic.js (isolated unit tests), mirror that file's window helpers.
+(function ensureDbvFilterHelpers() {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    if (typeof window.setDbvPowerTypeToggleButtonsDisabled !== 'function') {
+        window.setDbvPowerTypeToggleButtonsDisabled = function (toggles, isDisabled) {
+            toggles.forEach((btn) => {
+                btn.disabled = isDisabled;
+                btn.classList.toggle('is-disabled', isDisabled);
+            });
+        };
+    }
+    if (typeof window.matchesIconsPowerTypeFilters !== 'function') {
+        window.matchesIconsPowerTypeFilters = function (icons, noIconOnly, selectedPowerTypes) {
+            if (noIconOnly) {
+                return !icons || icons.length === 0;
+            }
+            if (!selectedPowerTypes || selectedPowerTypes.length === 0) {
+                return true;
+            }
+            const multiPowerSelected = selectedPowerTypes.includes('Multi-Power');
+            const specificTypes = selectedPowerTypes.filter((t) => t !== 'Multi-Power');
+            const matchesMultiPower = multiPowerSelected && Array.isArray(icons) && icons.length >= 2;
+            const matchesSpecificType =
+                specificTypes.length > 0 &&
+                Array.isArray(icons) &&
+                icons.some((icon) => specificTypes.includes(icon));
+            return matchesMultiPower || matchesSpecificType;
+        };
+    }
+})();
+
 // Debounce function for search input
 function debounce(func, wait) {
     let timeout;
@@ -184,10 +217,7 @@ function setupAspectSearch() {
     }
 
     function setAspectPowerTypeTogglesDisabled(isDisabled) {
-        powerTypeFilterToggles.forEach(btn => {
-            btn.disabled = isDisabled;
-            btn.classList.toggle('is-disabled', isDisabled);
-        });
+        window.setDbvPowerTypeToggleButtonsDisabled(powerTypeFilterToggles, isDisabled);
     }
 
     function getSelectedAspectPowerTypes() {
@@ -243,16 +273,11 @@ function setupAspectSearch() {
                         if (maxValue !== null) valueMatch = valueMatch && hasNumericValue && aspect.value <= maxValue;
                     }
 
-                    let iconTypeMatch = true;
-                    if (noIconOnly) {
-                        iconTypeMatch = !aspect.icons || aspect.icons.length === 0;
-                    } else if (selectedPowerTypes.length > 0) {
-                        const multiPowerSelected = selectedPowerTypes.includes('Multi-Power');
-                        const specificTypes = selectedPowerTypes.filter(t => t !== 'Multi-Power');
-                        const matchesMultiPower = multiPowerSelected && Array.isArray(aspect.icons) && aspect.icons.length >= 2;
-                        const matchesSpecificType = specificTypes.length > 0 && Array.isArray(aspect.icons) && aspect.icons.some(icon => specificTypes.includes(icon));
-                        iconTypeMatch = matchesMultiPower || matchesSpecificType;
-                    }
+                    const iconTypeMatch = window.matchesIconsPowerTypeFilters(
+                        aspect.icons,
+                        noIconOnly,
+                        selectedPowerTypes
+                    );
 
                     return nameMatch && locationMatch && effectMatch && valueMatch && iconTypeMatch;
                 });
@@ -800,14 +825,7 @@ function setupSpecialCardSearch() {
     }
 
     function setPowerTypeTogglesDisabled(isDisabled) {
-        powerTypeFilterToggles.forEach(btn => {
-            btn.disabled = isDisabled;
-            if (isDisabled) {
-                btn.classList.add('is-disabled');
-            } else {
-                btn.classList.remove('is-disabled');
-            }
-        });
+        window.setDbvPowerTypeToggleButtonsDisabled(powerTypeFilterToggles, isDisabled);
     }
 
     function getSelectedPowerTypes() {
@@ -858,7 +876,6 @@ function setupSpecialCardSearch() {
                     const effectMatch = effectTerm.length === 0 || (card.card_effect || '').toLowerCase().includes(effectTerm);
                     const functionIconMatch = cardMatchesFunctionIconFilters(card, selectedIconFields);
                     let valueMatch = true;
-                    let iconTypeMatch = true;
 
                     if (noValueOnly) {
                         valueMatch = card.value == null;
@@ -875,15 +892,11 @@ function setupSpecialCardSearch() {
                         }
                     }
 
-                    if (noIconOnly) {
-                        iconTypeMatch = !card.icons || card.icons.length === 0;
-                    } else if (selectedPowerTypes.length > 0) {
-                        const multiPowerSelected = selectedPowerTypes.includes('Multi-Power');
-                        const specificTypes = selectedPowerTypes.filter(t => t !== 'Multi-Power');
-                        const matchesMultiPower = multiPowerSelected && Array.isArray(card.icons) && card.icons.length >= 2;
-                        const matchesSpecificType = specificTypes.length > 0 && Array.isArray(card.icons) && card.icons.some(icon => specificTypes.includes(icon));
-                        iconTypeMatch = matchesMultiPower || matchesSpecificType;
-                    }
+                    const iconTypeMatch = window.matchesIconsPowerTypeFilters(
+                        card.icons,
+                        noIconOnly,
+                        selectedPowerTypes
+                    );
                     
                     return nameMatch && characterMatch && effectMatch && valueMatch && functionIconMatch && iconTypeMatch;
                 });

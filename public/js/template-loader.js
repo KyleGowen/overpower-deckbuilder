@@ -58,6 +58,9 @@ class TemplateLoader {
 
         target.insertAdjacentHTML('beforeend', template);
         this.bindEvents(target);
+        if (typeof window.initDbvPowerTypeFilterStrips === 'function') {
+            window.initDbvPowerTypeFilterStrips({ force: true });
+        }
     }
 
     // Bind events for dynamically loaded content
@@ -130,6 +133,9 @@ class TemplateLoader {
 
         target.innerHTML = template;
         this.bindEvents(target);
+        if (typeof window.initDbvPowerTypeFilterStrips === 'function') {
+            window.initDbvPowerTypeFilterStrips({ force: true });
+        }
     }
 }
 

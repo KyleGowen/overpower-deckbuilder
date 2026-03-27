@@ -43,11 +43,11 @@ describe('Basic Universe Type Filter - Simple', () => {
             expect(indexHtmlContent).toContain('id="basic-universe-tab"');
         });
 
-        it('should have Type filter toggle buttons', () => {
-            expect(indexHtmlContent).toContain('data-power-type="Energy"');
-            expect(indexHtmlContent).toContain('data-power-type="Combat"');
-            expect(indexHtmlContent).toContain('data-power-type="Brute Force"');
-            expect(indexHtmlContent).toContain('data-power-type="Intelligence"');
+        it('should have Type filter strip mount points (buttons from dbv-power-type-filter-strip.js)', () => {
+            expect(indexHtmlContent).toContain('basic-universe-stat-type-toggles');
+            expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-desktop"');
+            expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-mobile"');
+            expect(indexHtmlContent).toContain('dbv-power-type-filter-strip.js');
         });
 
         it('should have Clear All Filters button', () => {
