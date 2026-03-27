@@ -837,6 +837,100 @@ html:not(.layout-mobile) #characters-table td:nth-child(2) .remove-from-collecti
     white-space: nowrap;
 }
 
+/* ========================================
+ * LOCATIONS TABLE (DTV — mirror Characters image/actions proportions)
+ * ======================================== */
+
+#locations-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#locations-table th,
+#locations-table td {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    vertical-align: top;
+    text-align: center;
+}
+
+#locations-table th:nth-child(1), /* Image */
+#locations-table td:nth-child(1) {
+    width: 24%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#locations-table tbody td:nth-child(1) {
+    min-height: 200px;
+}
+
+#locations-table td:nth-child(1) img {
+    width: auto !important;
+    max-width: min(520px, 100%) !important;
+    max-height: none !important;
+    height: auto;
+    object-fit: contain;
+}
+
+/* DTV Locations: same image-cell flex pattern as Characters */
+html:not(.layout-mobile) #locations-table td:nth-child(1) .card-image-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 3px;
+}
+
+html:not(.layout-mobile) #locations-table td:nth-child(1) .card-image-container.card-image-container--with-nav {
+    justify-content: flex-start;
+}
+
+html:not(.layout-mobile) #locations-table td:nth-child(1) .card-image-container:not(.card-image-container--with-nav) {
+    justify-content: center;
+}
+
+html:not(.layout-mobile) #locations-table td:nth-child(1) .card-image-container.card-image-container--with-nav img {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: min(520px, 100%);
+}
+
+html:not(.layout-mobile) #locations-table td:nth-child(1) .card-nav-arrow {
+    padding: 0 2px;
+    font-size: 16px;
+    flex: 0 0 auto;
+}
+
+#locations-table th:nth-child(2), /* Actions */
+#locations-table td:nth-child(2) {
+    width: 9%;
+}
+
+#locations-table th:nth-child(3), /* Name */
+#locations-table td:nth-child(3) {
+    width: 17%;
+}
+
+#locations-table th:nth-child(4), /* Threat Level */
+#locations-table td:nth-child(4) {
+    width: 6%;
+}
+
+#locations-table th:nth-child(5), /* Special Ability */
+#locations-table td:nth-child(5) {
+    width: 44%;
+}
+
+html:not(.layout-mobile) #locations-table td:nth-child(2) .add-to-deck-btn,
+html:not(.layout-mobile) #locations-table td:nth-child(2) .add-to-collection-btn,
+html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collection-btn {
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
 /* Events table column widths - percentage based */
 #events-table {
     table-layout: fixed;
@@ -1723,10 +1817,9 @@ html:not(.layout-mobile) #characters-table td:nth-child(2) .remove-from-collecti
 }
 
 /* Enable flexible column widths for all tables to accommodate text wrapping */
-/* #characters-table omitted: uses fixed layout + % columns so art/actions/inherent widths apply */
+/* #characters-table and #locations-table omitted: fixed layout + % columns (DTV parity) */
 #missions-table,
 #events-table,
-#locations-table,
 #aspects-table,
 #ally-universe-table,
 #training-table,

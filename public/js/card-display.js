@@ -946,7 +946,7 @@ function displayLocations(locations) {
         const capAbilityHtml = `<div class="characters-mobile-card-caption__ability"${capLines.line3 ? '' : ' style="display:none;"'}">${capLines.line3 ? escapeHtmlText(capLines.line3) : ''}</div>`;
         const locationDbvImgStyle = isLayoutMobileForCardDisplay()
             ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
-            : 'width: 80px; height: auto; max-height: 120px; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+            : 'width: auto; max-width: 520px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
 
         const row = document.createElement('tr');
         row.dataset.id = representative.id;

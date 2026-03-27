@@ -524,7 +524,44 @@
             width: 21%;
         }
 
+        /* Locations table — DTV column parity with Characters (image / actions / name / threat / special) */
+        #locations-table {
+            table-layout: fixed;
+            width: 100%;
+        }
 
+        #locations-table th:nth-child(1), /* Image */
+        #locations-table td:nth-child(1) {
+            width: 24%;
+            text-align: center;
+        }
+
+        #locations-table td:nth-child(1) img {
+            width: auto !important;
+            max-width: min(520px, 100%) !important;
+            max-height: none !important;
+            height: auto;
+        }
+
+        #locations-table th:nth-child(2), /* Actions */
+        #locations-table td:nth-child(2) {
+            width: 9%;
+        }
+
+        #locations-table th:nth-child(3), /* Name */
+        #locations-table td:nth-child(3) {
+            width: 17%;
+        }
+
+        #locations-table th:nth-child(4), /* Threat */
+        #locations-table td:nth-child(4) {
+            width: 6%;
+        }
+
+        #locations-table th:nth-child(5), /* Special Ability */
+        #locations-table td:nth-child(5) {
+            width: 44%;
+        }
 
         /* Missions table column widths (thead first row + tbody only — filter row has different th count) */
         #missions-table thead tr:first-child th:nth-child(3), /* Mission Set */
@@ -936,7 +973,6 @@
         /* Enable flexible column widths for all tables to accommodate text wrapping */
         #missions-table,
         #events-table,
-        #locations-table,
         #characters-table,
         #special-cards-table,
         #advanced-universe-table,

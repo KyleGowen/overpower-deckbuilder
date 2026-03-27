@@ -43,8 +43,8 @@
 }
 
 /*
- * Locations — DTV only: Name column ~20% wider than a typical auto-layout share (~20% → 24%);
- * remainder stays with Special Ability. Scoped off .layout-mobile (mobile-layout.css).
+ * Locations — DTV: column % parity with Characters DBV (image / actions / name / numeric / text).
+ * Image + actions widened for large art + single-line +Deck/+Collection; scoped off .layout-mobile.
  */
 html:not(.layout-mobile) #locations-table {
     table-layout: fixed !important;
@@ -53,27 +53,27 @@ html:not(.layout-mobile) #locations-table {
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(1),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(1) {
-    width: 10%;
+    width: 24%;
 } /* Image */
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(2),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(2) {
-    width: 10%;
-} /* Add to Deck */
+    width: 9%;
+} /* Actions */
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(3),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(3) {
-    width: 24%;
+    width: 17%;
 } /* Name */
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(4),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(4) {
-    width: 8%;
+    width: 6%;
 } /* Threat */
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(5),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(5) {
-    width: 48%;
+    width: 44%;
 } /* Special Ability */
 
 /* Aspects Table Column Width Control */
