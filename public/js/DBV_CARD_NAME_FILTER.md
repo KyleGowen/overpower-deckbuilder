@@ -55,7 +55,7 @@ For **Basic Universe desktop**, the host is the existing name column wrapper:
 | `training-desktop-name` | `#training-card-name-filter` |
 | `basic-desktop-name` | `#basic-universe-card-name-filter`, `filter-input` classes |
 
-Add or change a preset in **`dbv-card-name-filter.js`** only; keep [`public/index.html`](../index.html), [`templates/database-view-complete.html`](../templates/database-view-complete.html), and [`deck-builder.html`](../deck-builder.html) in sync where those pages include the same tables.
+Add or change a preset in **`dbv-card-name-filter.js`** only; keep [`public/index.html`](../index.html), [`templates/database-view-complete.html`](../templates/database-view-complete.html), and [`deck-builder.html`](../deck-builder.html) in sync where those pages include the same tables. The injected fragment (**`database-view-complete.html`**) must mirror **`index.html`** for card-name hosts (e.g. `specials-name`, `locations-name`) and Advanced Universe filter-row structure (six-column thead with character + card-effect `header-filter` inputs — no `#advanced-universe-name-filter`).
 
 **deck-builder.html** loads a subset of presets (characters, ally, training, basic) and includes [`dbv-card-name-filter.js`](../deck-builder.html) in `<head>` so hosts fill after parse. It does not duplicate the full index DBV markup (e.g. simplified Missions table without mobile name row).
 

@@ -159,7 +159,9 @@
                     <th>
                         <button class="clear-filters-btn" onclick="clearSpecialCardFilters()">Clear All Filters</button>
                     </th>
-                    <th></th>
+                    <th>
+                        <div data-dbv-name-filter="specials-name"></div>
+                    </th>
                     <th>
                         <div class="column-filters">
                             <select id="character-filter" class="filter-select" onchange="filterSpecialCardsByCharacter()">
@@ -172,7 +174,7 @@
             </thead>
             <tbody id="special-cards-tbody">
                 <tr>
-                    <td colspan="5" class="loading">Loading special cards...</td>
+                    <td colspan="4" class="loading">Loading special cards...</td>
                 </tr>
             </tbody>
         </table>
@@ -188,26 +190,30 @@
             <thead>
                 <tr>
                     <th>Image</th>
+                    <th></th>
                     <th>Name</th>
                     <th>Character</th>
                     <th>Card Effect</th>
                     <th class="one-per-deck-advanced-column">One Per Deck</th>
                 </tr>
-                <tr class="filter-row">
-                    <th>
+                <tr class="filter-row advanced-universe-filter-row">
+                    <th class="advanced-filter-clear-th">
                         <button class="clear-filters-btn" onclick="clearAdvancedUniverseFilters()">Clear All Filters</button>
                     </th>
-                    <th>
-                        <input type="text" id="advanced-universe-name-filter" placeholder="Search names..." onkeyup="filterAdvancedUniverse()">
+                    <th class="advanced-filter-spacer-th" aria-hidden="true"></th>
+                    <th class="advanced-filter-spacer-th" aria-hidden="true"></th>
+                    <th class="advanced-filter-character-th">
+                        <input type="text" class="header-filter" placeholder="Search characters..." data-column="character">
                     </th>
-                    <th></th>
-                    <th></th>
-                    <th class="one-per-deck-advanced-column"></th>
+                    <th class="advanced-filter-effect-th">
+                        <input type="text" class="header-filter" placeholder="Search card text..." data-column="card_effect">
+                    </th>
+                    <th class="one-per-deck-advanced-column advanced-filter-opd-th"></th>
                 </tr>
             </thead>
             <tbody id="advanced-universe-tbody">
                 <tr>
-                    <td colspan="5" class="loading">Loading advanced universe cards...</td>
+                    <td colspan="6" class="loading">Loading advanced universe cards...</td>
                 </tr>
             </tbody>
         </table>
@@ -222,11 +228,13 @@
                     <th title="Threat Level"><img src="/src/resources/images/icons/threat.png" alt="Threat Level" class="special-power-type-icon column-header-icon"></th>
                     <th>Special Ability</th>
                 </tr>
-                <tr class="filter-row">
+                <tr class="filter-row locations-filter-row">
                     <th>
                         <button class="clear-filters-btn" onclick="clearLocationFilters()">Clear All Filters</button>
                     </th>
-                    <th></th>
+                    <th class="locations-filter-name-th">
+                        <div data-dbv-name-filter="locations-name"></div>
+                    </th>
                     <th>
                         <div class="column-filters">
                             <div class="range-inputs">

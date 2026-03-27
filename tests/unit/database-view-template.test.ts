@@ -206,10 +206,22 @@ describe('Database View Template', () => {
 
         it('should contain DBV card-name filter mount points (inputs filled by dbv-card-name-filter.js)', () => {
             expect(templateContent).toContain('data-dbv-name-filter');
+            expect(templateContent).toContain('data-dbv-name-filter="characters-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="specials-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="locations-name"');
             expect(templateContent).toContain('data-dbv-name-filter="aspects-name"');
             expect(templateContent).toContain('data-dbv-name-filter="missions-mobile-name"');
             expect(templateContent).toContain('data-dbv-name-filter="ally-mobile-name"');
             expect(templateContent).toContain('data-dbv-name-filter="basic-desktop-name"');
+        });
+
+        it('should align advanced universe filter row with live DBV (no legacy thead name input)', () => {
+            expect(templateContent).not.toContain('advanced-universe-name-filter');
+            expect(templateContent).not.toContain('onkeyup="filterAdvancedUniverse()"');
+            expect(templateContent).toContain('advanced-universe-filter-row');
+            expect(templateContent).toContain('advanced-filter-character-th');
+            expect(templateContent).toContain('placeholder="Search card text..."');
+            expect(templateContent).toContain('colspan="6" class="loading">Loading advanced universe cards...');
         });
     });
 
