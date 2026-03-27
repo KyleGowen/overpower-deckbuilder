@@ -43,8 +43,8 @@
 }
 
 /*
- * Locations — DTV only: wider Name (~2× a typical auto share), narrower Special Ability.
- * Scoped off .layout-mobile so MV card-row tbody + flex thead stay unchanged (mobile-layout.css).
+ * Locations — DTV only: Name column ~20% wider than a typical auto-layout share (~20% → 24%);
+ * remainder stays with Special Ability. Scoped off .layout-mobile (mobile-layout.css).
  */
 html:not(.layout-mobile) #locations-table {
     table-layout: fixed !important;
@@ -63,7 +63,7 @@ html:not(.layout-mobile) #locations-table tbody td:nth-child(2) {
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(3),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(3) {
-    width: 40%;
+    width: 24%;
 } /* Name */
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(4),
@@ -73,7 +73,7 @@ html:not(.layout-mobile) #locations-table tbody td:nth-child(4) {
 
 html:not(.layout-mobile) #locations-table thead tr:first-child th:nth-child(5),
 html:not(.layout-mobile) #locations-table tbody td:nth-child(5) {
-    width: 32%;
+    width: 48%;
 } /* Special Ability */
 
 /* Aspects Table Column Width Control */
