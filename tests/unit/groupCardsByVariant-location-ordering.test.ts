@@ -17,6 +17,9 @@ function execFrontendScript(relPathFromRepoRoot: string) {
 
 describe('groupCardsByVariant location ordering', () => {
   beforeEach(() => {
+    execFrontendScript('public/js/alphabetization.js');
+    execFrontendScript('public/js/dbv/dbv-layout-context.js');
+    execFrontendScript('public/js/dbv/dbv-render-shared.js');
     execFrontendScript('public/js/card-display.js');
   });
 

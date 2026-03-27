@@ -2,6 +2,8 @@
 
 Scripts loaded by active HTML entry points (as of unused code cleanup).
 
+**DBV module map:** [`docs/current/DBV_ARCHITECTURE.md`](current/DBV_ARCHITECTURE.md) · **Agent rules:** [`public/js/dbv/.cursorrules`](../public/js/dbv/.cursorrules)
+
 ## public/index.html (main SPA - canonical)
 
 - /js/layout-mode.js (sync, before CSS — sets `layout-mobile` / `layout-desktop` on `<html>`)
@@ -15,6 +17,11 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/utilities.js
 - /js/layout-manager.js
 - /js/deck-management.js
+- /js/image-load-queue.js
+- /js/card-image-utils.js
+- /js/dbv/dbv-layout-context.js (DBV: `isLayoutMobileForCardDisplay`, `isNarrowViewportDbvBand` — after `layout-mode.js`)
+- /js/dbv/dbv-tab-data.js (DBV: `window.dbvTabData` + mirrored `missionsData` / `eventsData` / …)
+- /js/dbv/dbv-render-shared.js (DBV: grouping, captions, row locks, shared `window.*` helpers)
 - /js/card-display.js
 - /js/all-cards-display.js
 - /js/deck-editor-simple.js
@@ -46,7 +53,6 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/deck-editor-rendering.js
 - /js/deck-card-operations.js
 - /js/deck-validation.js
-- /js/card-image-utils.js
 - /js/deck-editor-layout.js
 - /js/screenshot-view.js
 - /js/ui-preferences.js
@@ -68,11 +74,13 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 
 ## Orphaned (never loaded by any HTML)
 
-- database-view.js
-- database-view-core.js
-- database-view-tabs.js
-- database-view-search.js
-- database-view-display.js
+Historical DBV filenames below are **not present** in `public/js/` (removed); listed here so agents do not hunt for them.
+
+- database-view.js (removed)
+- database-view-core.js (removed)
+- database-view-tabs.js (removed)
+- database-view-search.js (removed)
+- database-view-display.js (removed)
 - filter-utilities.js
 - filter-manager.js
 - data-loading-core.js

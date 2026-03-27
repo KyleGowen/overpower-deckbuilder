@@ -1,0 +1,28 @@
+# Card Database View (DBV) — `public/js/dbv/`
+
+This folder holds **DBV-specific** JavaScript loaded as plain `<script>` tags (no bundler). Shared utilities (`card-image-utils.js`, `modal-ui.js`, layout shell) stay outside unless a symbol is DBV-only.
+
+## Load order (canonical: `public/index.html`)
+
+1. **`layout-mode.js`** (sync, head) — sets `layout-mobile` / `layout-desktop`; defines `window.isLayoutMobile`.
+2. **`characters-stat-filter-tabs.js`** (sync) — Characters tab mobile stat panels; should use `window.isLayoutMobile()` when branching.
+3. **`dbv/dbv-layout-context.js`** (defer, before `card-display.js`) — `isLayoutMobileForCardDisplay`, `isNarrowViewportDbvBand`.
+4. **`dbv/dbv-tab-data.js`** (defer, before `card-display.js`) — `window.dbvTabData` mirrors legacy `window.missionsData`, `eventsData`, etc.
+5. **`dbv/dbv-render-shared.js`** (defer, after `alphabetization.js`, before `card-display.js`) — caption helpers, `getCardImagePathForDisplay`, row height locks, `groupCardsByVariant`; assigns helpers on **`window`** so `card-display.js` and jsdom `new Function` tests resolve globals.
+6. **`card-display.js`** — Characters / Special / Locations display, `navigateCardImage`, format helpers, assigns remaining `window.*` APIs.
+7. Later: `card-display-functions.js`, `search-filter-functions.js`, `card-data-display.js` — missions, universe tabs, loaders (see `docs/current/DBV_ARCHITECTURE.md`).
+
+**Deck builder** (`deck-builder.html`): only `layout-mode.js` + `characters-stat-filter-tabs.js` today; do not assume `dbv/*` runs there unless you add script tags.
+
+## Conventions
+
+- **Desktop vs mobile:** Prefer CSS under `html.layout-mobile` in [`mobile-layout.css`](../../css/mobile-layout.css). Use `window.isLayoutMobile()` / `isLayoutMobileForCardDisplay()` only when JS must reflow or swap structure.
+- **Stable globals:** Inline handlers and tests rely on `window.displayCharacters`, `window.loadMissions`, `window.missionsData`, etc. Do not rename without updating HTML, `event-binder`, and tests.
+- **Single owner:** Universe tab renderers owned by **`card-data-display.js`** (`displayTeamwork`, `displayAllyUniverse`, `displayTraining`, `displayBasicUniverse`). Do not reintroduce stub versions in `card-display-functions.js`.
+- **CDN images:** Use `getCardImagePath` / `getCardImagePathForDisplay` patterns from [`public/js/.cursorrules`](../.cursorrules) — never hardcode `/src/resources/cards/images/...` in DBV markup without CDN fallback.
+
+## Documentation
+
+- Architecture and global registry: [`docs/current/DBV_ARCHITECTURE.md`](../../../docs/current/DBV_ARCHITECTURE.md)
+- Full script list: [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../../../docs/FRONTEND_SCRIPT_MANIFEST.md)
+- Mobile product notes: [`MOBILE_DESIGN.md`](../../../MOBILE_DESIGN.md)

@@ -13,6 +13,9 @@
     }
 
     function isLayoutMobile() {
+        if (typeof window.isLayoutMobile === 'function') {
+            return window.isLayoutMobile();
+        }
         return document.documentElement.classList.contains('layout-mobile');
     }
 

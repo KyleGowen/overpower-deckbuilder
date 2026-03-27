@@ -2,6 +2,10 @@
  * Card database view (#database-view) — layout, tabs, stats, grids, and shared DB chrome.
  * Depends on index.css for shell/base. Table column overrides: card-tables.css.
  * Mobile overrides: mobile-layout.css under html.layout-mobile. Roadmap: MOBILE_DESIGN.md (M2a–M2c).
+ *
+ * Section index (search for banner text): CARD IMAGE NAVIGATION ARROWS; DATABASE VIEW TABS;
+ * CHARACTERS TABLE; SPECIAL CARDS; LOCATIONS; ASPECTS / MISSIONS / EVENTS (as labeled in file);
+ * foil/utility blocks near file end. Major tab-specific mobile rules live in mobile-layout.css.
  */
 
 /* ========================================

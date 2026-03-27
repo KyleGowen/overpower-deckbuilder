@@ -11,10 +11,13 @@ describe('public/index.html script includes', () => {
 
     // Ensure it loads before major consumers (card database / search sorting).
     const cardDisplayIdx = html.indexOf('/js/card-display.js');
+    const dbvLayoutIdx = html.indexOf('/js/dbv/dbv-layout-context.js');
     const allCardsIdx = html.indexOf('/js/all-cards-display.js');
     const searchServiceIdx = html.indexOf('/js/services/CardSearchService.js');
 
     expect(alphaIdx).toBeLessThan(cardDisplayIdx);
+    expect(dbvLayoutIdx).toBeGreaterThan(-1);
+    expect(dbvLayoutIdx).toBeLessThan(cardDisplayIdx);
     expect(alphaIdx).toBeLessThan(allCardsIdx);
     expect(alphaIdx).toBeLessThan(searchServiceIdx);
   });

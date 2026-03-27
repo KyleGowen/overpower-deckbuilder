@@ -25,6 +25,8 @@ describe('Special function icon rendering', () => {
     (globalThis as any).getCurrentUser = jest.fn(() => null);
     (globalThis as any).refreshDatabaseViewCollectionButtons = jest.fn();
 
+    execFrontendScript('public/js/dbv/dbv-layout-context.js');
+    execFrontendScript('public/js/dbv/dbv-render-shared.js');
     execFrontendScript('public/js/card-display.js');
   });
 

@@ -22,6 +22,11 @@ function ensureMinimalImageHelpers() {
   (globalThis as any).mapImagePathToActualFile = (p: string) => p;
 }
 
+function execDbvBeforeCardDisplay() {
+  execFrontendScript('public/js/dbv/dbv-layout-context.js');
+  execFrontendScript('public/js/dbv/dbv-render-shared.js');
+}
+
 describe('Card Database frontend sorting (All/Special/Locations)', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -127,6 +132,7 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     loadAlphabetization();
     ensureMinimalImageHelpers();
 
+    execDbvBeforeCardDisplay();
     execFrontendScript('public/js/card-display.js');
     expect(typeof (window as any).displaySpecialCards).toBe('function');
 
@@ -168,6 +174,7 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     loadAlphabetization();
     ensureMinimalImageHelpers();
 
+    execDbvBeforeCardDisplay();
     execFrontendScript('public/js/card-display.js');
     expect(typeof (window as any).displayLocations).toBe('function');
 
@@ -195,6 +202,7 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     loadAlphabetization();
     ensureMinimalImageHelpers();
 
+    execDbvBeforeCardDisplay();
     execFrontendScript('public/js/card-display.js');
     expect(typeof (window as any).displayCharacters).toBe('function');
 

@@ -195,8 +195,8 @@ describe('filter-functions.js (clearMissionsFilters)', () => {
     });
 });
 
-describe('card-display.js (DBV set caption helper)', () => {
-    const jsPath = path.join(__dirname, '../../public/js/card-display.js');
+describe('dbv-render-shared.js (DBV set caption helper)', () => {
+    const jsPath = path.join(__dirname, '../../public/js/dbv/dbv-render-shared.js');
     let source: string;
 
     beforeAll(() => {

@@ -49,6 +49,8 @@ describe('sortAllCardsData foil ordering', () => {
 
 describe('groupCardsByVariant foil exclusion', () => {
   beforeEach(() => {
+    execFrontendScript('public/js/dbv/dbv-layout-context.js');
+    execFrontendScript('public/js/dbv/dbv-render-shared.js');
     execFrontendScript('public/js/card-display.js');
   });
 

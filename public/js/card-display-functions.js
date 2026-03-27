@@ -471,16 +471,9 @@ function formatAdvancedUniverseCardEffect(effectText, cardData = null) {
     return decodedText;
 }
 
-/** Same mobile list-art gate as Special Cards (layout-mobile or narrow DBV viewport). */
+/** Same mobile list-art gate as Aspects / Power (layout-mobile or narrow DBV viewport). */
 function advancedUniverseUseMobileListArt() {
-    if (typeof window !== 'undefined' && typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
-        return true;
-    }
-    try {
-        return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
-    } catch {
-        return false;
-    }
+    return aspectUseMobileListArt();
 }
 
 // Display advanced universe cards
@@ -593,70 +586,7 @@ function displayAdvancedUniverse(advancedUniverse) {
     if (typeof refreshDatabaseViewCollectionButtons === 'function') refreshDatabaseViewCollectionButtons();
 }
 
-// Display teamwork cards
-function displayTeamwork(teamwork) {
-    const tbody = document.getElementById('teamwork-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = teamwork.map(card => `
-        <tr>
-            <td>${card.card_name}</td>
-            <td>${card.to_use}</td>
-            <td>${card.followup_attack_types}</td>
-            <td>${card.first_attack_bonus}</td>
-            <td>${card.second_attack_bonus}</td>
-        </tr>
-    `).join('');
-}
-
-// Display ally universe cards
-function displayAllyUniverse(allies) {
-    const tbody = document.getElementById('ally-universe-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = allies.map(card => `
-        <tr>
-            <td>${card.card_name}</td>
-            <td>${card.stat_to_use}</td>
-            <td>${card.stat_type_to_use}</td>
-            <td>${card.attack_value}</td>
-            <td>${card.attack_type}</td>
-            <td>${card.card_text}</td>
-        </tr>
-    `).join('');
-}
-
-// Display training cards
-function displayTraining(cards) {
-    const tbody = document.getElementById('training-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = cards.map(card => `
-        <tr>
-            <td>${card.card_name}</td>
-            <td>${card.type_1}</td>
-            <td>${card.type_2}</td>
-            <td>${card.value_to_use}</td>
-            <td>${card.bonus}</td>
-        </tr>
-    `).join('');
-}
-
-// Display basic universe cards
-function displayBasicUniverse(cards) {
-    const tbody = document.getElementById('basic-universe-tbody');
-    if (!tbody) return;
-    
-    tbody.innerHTML = cards.map(card => `
-        <tr>
-            <td>${card.card_name}</td>
-            <td>${card.type}</td>
-            <td>${card.value_to_use}</td>
-            <td>${card.bonus}</td>
-            <td>${card.card_text}</td>
-        </tr>
-    `).join('');
-}
+// displayTeamwork, displayAllyUniverse, displayTraining, displayBasicUniverse: owned by card-data-display.js
 
 // Display power cards
 function displayPowerCards(cards) {
@@ -920,13 +850,8 @@ function displayPowerCards(cards) {
 
 // Make functions globally available
 window.displayAdvancedUniverse = displayAdvancedUniverse;
-window.displayTeamwork = displayTeamwork;
-window.displayAllyUniverse = displayAllyUniverse;
-window.displayTraining = displayTraining;
-window.displayBasicUniverse = displayBasicUniverse;
 window.displayPowerCards = displayPowerCards;
 window.powerUseMobileListArt = powerUseMobileListArt;
 window.displayAspects = displayAspects;
 window.displayMissions = displayMissions;
 window.displayEvents = displayEvents;
-window.displayLocations = displayLocations;

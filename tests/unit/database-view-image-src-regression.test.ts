@@ -48,6 +48,8 @@ describe('Database view image src regression', () => {
       loadAlphabetization();
       ensureMinimalImageHelpers();
       execFrontendScript('public/js/card-image-utils.js');
+      execFrontendScript('public/js/dbv/dbv-layout-context.js');
+      execFrontendScript('public/js/dbv/dbv-render-shared.js');
       execFrontendScript('public/js/card-display.js');
 
       document.body.innerHTML = `
@@ -88,6 +90,8 @@ describe('Database view image src regression', () => {
       loadAlphabetization();
       ensureMinimalImageHelpers();
       execFrontendScript('public/js/card-image-utils.js');
+      execFrontendScript('public/js/dbv/dbv-layout-context.js');
+      execFrontendScript('public/js/dbv/dbv-render-shared.js');
       execFrontendScript('public/js/card-display.js');
 
       document.body.innerHTML = `
@@ -122,6 +126,8 @@ describe('Database view image src regression', () => {
       loadAlphabetization();
       ensureMinimalImageHelpers();
       execFrontendScript('public/js/card-image-utils.js');
+      execFrontendScript('public/js/dbv/dbv-layout-context.js');
+      execFrontendScript('public/js/dbv/dbv-render-shared.js');
       execFrontendScript('public/js/card-display.js');
 
       document.body.innerHTML = `

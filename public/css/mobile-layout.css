@@ -1,6 +1,11 @@
 /**
  * Mobile / narrow layout — scoped under .layout-mobile on <html>.
  * Desktop (.layout-desktop) is unchanged. See /MOBILE_DESIGN.md
+ *
+ * DBV section index: search for dashed section banners (lines starting with many hyphens in
+ * block comments). Card database M2c shell ~L56; per-tab blocks include Characters, Special,
+ * All grid, Aspects, Missions, Events, Teamwork, Ally, Training, Basic, Power, Locations.
+ * Deck editor mobile rules precede the first Card database banner.
  */
 :root {
     --layout-mobile-max: 900px;
@@ -4914,12 +4919,13 @@
     object-fit: contain !important;
 }
 
-/* Character / Special / Locations mobile caption (hidden on desktop via rule below). */
+/* Character / Special / Locations / Advanced Universe mobile caption (hidden on desktop via rule below). */
 #characters-table .characters-mobile-card-caption,
 #special-cards-table .characters-mobile-card-caption,
 #locations-table .characters-mobile-card-caption,
 #aspects-table .characters-mobile-card-caption,
-#events-table .characters-mobile-card-caption {
+#events-table .characters-mobile-card-caption,
+#advanced-universe-table .characters-mobile-card-caption {
     display: none;
 }
 
