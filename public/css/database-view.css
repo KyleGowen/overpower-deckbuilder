@@ -662,7 +662,7 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #characters-table th:nth-child(1), /* Image */
 #characters-table td:nth-child(1) {
-    width: 15%;
+    width: 25%;
     text-align: center;
     vertical-align: middle;
 }
@@ -675,7 +675,7 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 /* Once row is rendered, lock the image cell height to prevent changes */
 #characters-table tbody td:nth-child(1) {
-    min-height: 200px; /* Minimum height to accommodate images at 275px width */
+    min-height: 200px; /* Minimum height to accommodate portrait art up to max-width */
     /* Height will be set by JavaScript after initial render */
 }
 
@@ -754,14 +754,14 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 }
 
 #characters-table td:nth-child(1) img {
-    max-width: 316px; /* 15% increase from 275px */
+    max-width: 400px;
     height: auto;
     object-fit: contain; /* Ensure images scale properly */
 }
 
 #characters-table th:nth-child(2), /* Add to Deck */
 #characters-table td:nth-child(2) {
-    width: 10%;
+    width: 6%;
 }
 
 #characters-table th:nth-child(3), /* Name */
@@ -796,7 +796,16 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #characters-table th:nth-child(9), /* Inherent Abilities */
 #characters-table td:nth-child(9) {
-    width: 27%;
+    width: 21%;
+}
+
+/* DTV: narrower actions column — stack fills cell; drop default min-width/padding */
+html:not(.layout-mobile) #characters-table td:nth-child(2) .add-to-deck-btn,
+html:not(.layout-mobile) #characters-table td:nth-child(2) .add-to-collection-btn,
+html:not(.layout-mobile) #characters-table td:nth-child(2) .remove-from-collection-btn {
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 0.72rem;
 }
 
 /* Events table column widths - percentage based */
@@ -1685,10 +1694,10 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 }
 
 /* Enable flexible column widths for all tables to accommodate text wrapping */
+/* #characters-table omitted: uses fixed layout + % columns so art/actions/inherent widths apply */
 #missions-table,
 #events-table,
 #locations-table,
-#characters-table,
 #aspects-table,
 #ally-universe-table,
 #training-table,
