@@ -192,13 +192,14 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('value="The Warlord of Mars"');
         });
 
-        it('should contain power type checkboxes', () => {
-            expect(templateContent).toContain('value="Energy"');
-            expect(templateContent).toContain('value="Combat"');
-            expect(templateContent).toContain('value="Brute Force"');
-            expect(templateContent).toContain('value="Intelligence"');
-            expect(templateContent).toContain('value="Any-Power"');
-            expect(templateContent).toContain('value="Multi-Power"');
+        it('should contain power type filter toggles (matches live DBV icon buttons)', () => {
+            expect(templateContent).toContain('power-type-filter-toggle');
+            expect(templateContent).toContain('data-power-type="Energy"');
+            expect(templateContent).toContain('data-power-type="Combat"');
+            expect(templateContent).toContain('data-power-type="Brute Force"');
+            expect(templateContent).toContain('data-power-type="Intelligence"');
+            expect(templateContent).toContain('data-power-type="Any-Power"');
+            expect(templateContent).toMatch(/data-power-type="Multi-Power"|data-power-type="Multi Power"/);
         });
     });
 

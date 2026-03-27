@@ -740,35 +740,98 @@
             <thead>
                 <tr>
                     <th>Image</th>
+                    <th></th>
                     <th>Power Type</th>
                     <th>Value</th>
                 </tr>
-                <tr class="filter-row">
+                <tr class="filter-row power-cards-desktop-filter-row">
                     <th>
-                        <button class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                        <button type="button" class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
                     </th>
+                    <th></th>
                     <th>
                         <div class="column-filters">
-                            <div class="checkbox-group power-cards-checkbox-group">
-                                <div class="checkbox-column">
-                                    <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                    <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                    <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                </div>
-                                <div class="checkbox-column">
-                                    <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
-                                    <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
-                                    <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
-                                </div>
+                            <div class="special-power-filter-toggles power-cards-desktop-type-toggles" role="group" aria-label="Filter power cards by power type">
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" aria-pressed="false" title="Energy" aria-label="Toggle Energy filter">
+                                    <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                </button>
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" aria-pressed="false" title="Intelligence" aria-label="Toggle Intelligence filter">
+                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                </button>
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" aria-pressed="false" title="Combat" aria-label="Toggle Combat filter">
+                                    <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                </button>
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" aria-pressed="false" title="Any-Power" aria-label="Toggle Any-Power filter">
+                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                </button>
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" aria-pressed="false" title="Brute Force" aria-label="Toggle Brute Force filter">
+                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                </button>
+                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" aria-pressed="false" title="Multi Power" aria-label="Toggle Multi Power filter">
+                                    <span class="power-type-filter-text">MP</span>
+                                </button>
                             </div>
                         </div>
                     </th>
                     <th>
                         <div class="column-filters">
+                            <input type="number" id="power-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="1" max="8" aria-label="Value equals">
                             <div class="range-inputs">
-                                <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" class="filter-input">
+                                <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" class="filter-input" aria-label="Minimum value">
                                 <span>-</span>
-                                <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" class="filter-input">
+                                <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" class="filter-input" aria-label="Maximum value">
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+                <tr class="filter-row power-cards-filter-row">
+                    <th class="power-cards-filter-clear-th">
+                        <button type="button" class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                    </th>
+                    <th class="power-cards-filter-spacer-th" aria-hidden="true"></th>
+                    <th class="power-cards-filter-controls-th" colspan="2">
+                        <div class="power-cards-mobile-filter-shell column-filters">
+                            <div class="power-cards-filter-icon-row">
+                                <div class="icon-filter-container">
+                                    <div class="special-power-filter-toggles power-cards-type-toggles" role="group" aria-label="Filter power cards by power type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" aria-pressed="false" title="Energy" aria-label="Toggle Energy filter">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" aria-pressed="false" title="Intelligence" aria-label="Toggle Intelligence filter">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" aria-pressed="false" title="Combat" aria-label="Toggle Combat filter">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" aria-pressed="false" title="Any-Power" aria-label="Toggle Any-Power filter">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" aria-pressed="false" title="Brute Force" aria-label="Toggle Brute Force filter">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" aria-pressed="false" title="Multi Power" aria-label="Toggle Multi Power filter">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="power-icon-mobile-trailing">
+                                    <button type="button" id="clear-power-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--power-mobile-inline" onclick="clearPowerCardFilters()">Clear filters</button>
+                                </div>
+                            </div>
+                            <div class="power-cards-filter-value-shell">
+                                <div class="special-value-filters-inner">
+                                    <div class="column-filters power-cards-value-filters-inner">
+                                        <input type="number" id="power-value-equals-mobile" class="filter-input equals power-cards-mobile-value-input" placeholder="=" min="1" max="8" aria-label="Value equals">
+                                        <input type="number" id="power-value-min-mobile" class="filter-input min power-cards-mobile-value-input" placeholder="Min" min="1" max="8" aria-label="Minimum value">
+                                        <input type="number" id="power-value-max-mobile" class="filter-input max power-cards-mobile-value-input" placeholder="Max" min="1" max="8" aria-label="Maximum value">
+                                        <button type="button" id="power-value-clear" class="power-value-clear-btn" title="Clear value filters" aria-label="Clear value filters">
+                                            <svg class="power-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </th>
@@ -776,7 +839,7 @@
             </thead>
             <tbody id="power-cards-tbody">
                 <tr>
-                    <td colspan="3" class="loading">Loading power cards...</td>
+                    <td colspan="4" class="loading">Loading power cards...</td>
                 </tr>
             </tbody>
         </table>

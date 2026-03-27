@@ -4072,35 +4072,98 @@
                     <thead>
                         <tr>
                             <th>Image</th>
+                            <th></th>
                             <th>Power Type</th>
                             <th>Value</th>
                         </tr>
-                        <tr class="filter-row">
+                        <tr class="filter-row power-cards-desktop-filter-row">
                             <th>
-                                <button class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                                <button type="button" class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
                             </th>
+                            <th></th>
                             <th>
                                 <div class="column-filters">
-                                    <div class="checkbox-group power-cards-checkbox-group">
-                                        <div class="checkbox-column">
-                                            <label><input type="checkbox" value="Energy" checked> Energy</label>
-                                            <label><input type="checkbox" value="Combat" checked> Combat</label>
-                                            <label><input type="checkbox" value="Brute Force" checked> Brute Force</label>
-                                        </div>
-                                        <div class="checkbox-column">
-                                            <label><input type="checkbox" value="Intelligence" checked> Intelligence</label>
-                                            <label><input type="checkbox" value="Any-Power" checked> Any-Power</label>
-                                            <label><input type="checkbox" value="Multi-Power" checked> Multi-Power</label>
-                                        </div>
+                                    <div class="special-power-filter-toggles power-cards-desktop-type-toggles" role="group" aria-label="Filter power cards by power type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" aria-pressed="false" title="Energy" aria-label="Toggle Energy filter">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" aria-pressed="false" title="Intelligence" aria-label="Toggle Intelligence filter">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" aria-pressed="false" title="Combat" aria-label="Toggle Combat filter">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" aria-pressed="false" title="Any-Power" aria-label="Toggle Any-Power filter">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" aria-pressed="false" title="Brute Force" aria-label="Toggle Brute Force filter">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" aria-pressed="false" title="Multi Power" aria-label="Toggle Multi Power filter">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
                                     </div>
                                 </div>
                             </th>
                             <th>
                                 <div class="column-filters">
+                                    <input type="number" id="power-value-equals" class="filter-input equals" data-column="value" placeholder="=" min="1" max="8" aria-label="Value equals">
                                     <div class="range-inputs">
-                                        <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" class="filter-input">
+                                        <input type="number" id="power-value-min" placeholder="Min" min="1" max="8" class="filter-input" aria-label="Minimum value">
                                         <span>-</span>
-                                        <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" class="filter-input">
+                                        <input type="number" id="power-value-max" placeholder="Max" min="1" max="8" class="filter-input" aria-label="Maximum value">
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr class="filter-row power-cards-filter-row">
+                            <th class="power-cards-filter-clear-th">
+                                <button type="button" class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
+                            </th>
+                            <th class="power-cards-filter-spacer-th" aria-hidden="true"></th>
+                            <th class="power-cards-filter-controls-th" colspan="2">
+                                <div class="power-cards-mobile-filter-shell column-filters">
+                                    <div class="power-cards-filter-icon-row">
+                                        <div class="icon-filter-container">
+                                            <div class="special-power-filter-toggles power-cards-type-toggles" role="group" aria-label="Filter power cards by power type">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" aria-pressed="false" title="Energy" aria-label="Toggle Energy filter">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" aria-pressed="false" title="Intelligence" aria-label="Toggle Intelligence filter">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" aria-pressed="false" title="Combat" aria-label="Toggle Combat filter">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" aria-pressed="false" title="Any-Power" aria-label="Toggle Any-Power filter">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" aria-pressed="false" title="Brute Force" aria-label="Toggle Brute Force filter">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" aria-pressed="false" title="Multi Power" aria-label="Toggle Multi Power filter">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="power-icon-mobile-trailing">
+                                            <button type="button" id="clear-power-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--power-mobile-inline" onclick="clearPowerCardFilters()">Clear filters</button>
+                                        </div>
+                                    </div>
+                                    <div class="power-cards-filter-value-shell">
+                                        <div class="special-value-filters-inner">
+                                            <div class="column-filters power-cards-value-filters-inner">
+                                                <input type="number" id="power-value-equals-mobile" class="filter-input equals power-cards-mobile-value-input" placeholder="=" min="1" max="8" aria-label="Value equals">
+                                                <input type="number" id="power-value-min-mobile" class="filter-input min power-cards-mobile-value-input" placeholder="Min" min="1" max="8" aria-label="Minimum value">
+                                                <input type="number" id="power-value-max-mobile" class="filter-input max power-cards-mobile-value-input" placeholder="Max" min="1" max="8" aria-label="Maximum value">
+                                                <button type="button" id="power-value-clear" class="power-value-clear-btn" title="Clear value filters" aria-label="Clear value filters">
+                                                    <svg class="power-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>
+                                                        <line x1="6.75" y1="6.75" x2="17.25" y2="17.25" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </th>
@@ -4108,7 +4171,7 @@
                     </thead>
                     <tbody id="power-cards-tbody">
                         <tr>
-                            <td colspan="3" class="loading">Loading power cards...</td>
+                            <td colspan="4" class="loading">Loading power cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -5948,83 +6011,117 @@
 
         function displayPowerCards(cards) {
             const tbody = document.getElementById('power-cards-tbody');
+            if (!tbody) return;
             if (!cards || cards.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3">No power cards found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
                 return;
             }
-            tbody.innerHTML = cards.map(card => `
-                <tr>
-                    <td>
-                        <img src="/src/resources/cards/images/${card.image}" 
-                             alt="${card.power_type} ${card.value}" 
-                             style="width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;"
-                             onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiZmZmYiIHRleHQtYW5jaG9yPSJtZWRpYW4iIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
-                             onclick="openModal(this)">
-                    </td>
-                    <td>${card.power_type}</td>
-                    <td>${card.value}</td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = cards
+                .filter((c) => !c.is_foil)
+                .map((card) => {
+                    const rel = (card.image_path || card.image || '').replace(/^\/+/,'');
+                    const img = rel ? '/src/resources/cards/images/power/' + rel : '';
+                    return (
+                        '<tr>' +
+                        '<td data-label="Image">' +
+                        '<img src="' +
+                        img +
+                        '" alt="' +
+                        (card.power_type || '') +
+                        ' ' +
+                        (card.value ?? '') +
+                        '" style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;" onclick="openModal(this)">' +
+                        '</td><td></td><td>' +
+                        (card.power_type || '') +
+                        '</td><td>' +
+                        (card.value ?? '') +
+                        '</td></tr>'
+                    );
+                })
+                .join('');
         }
 
         function setupPowerCardsSearch() {
             const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', async (e) => {
-                const term = e.target.value.toLowerCase();
-                if (term.length === 0) { 
-                    await applyPowerCardFilters(); 
-                    return; 
-                }
-                try {
-                    const resp = await fetch('/api/power-cards');
-                    const data = await resp.json();
-                    if (data.success) {
-                        const filtered = data.data.filter(c =>
-                            c.power_type.toLowerCase().includes(term) ||
-                            String(c.value).includes(term)
-                        );
-                        displayPowerCards(filtered);
+            if (searchInput && !searchInput.dataset.deckPowerSearchBound) {
+                searchInput.dataset.deckPowerSearchBound = 'true';
+                searchInput.addEventListener('input', async (e) => {
+                    const term = e.target.value.toLowerCase();
+                    if (term.length === 0) {
+                        await applyPowerCardFilters();
+                        return;
                     }
-                } catch (err) { console.error('Error searching power cards:', err); }
+                    try {
+                        const resp = await fetch('/api/power-cards');
+                        const data = await resp.json();
+                        if (data.success) {
+                            const filtered = data.data.filter(
+                                (c) =>
+                                    (c.power_type && c.power_type.toLowerCase().includes(term)) ||
+                                    String(c.value).includes(term)
+                            );
+                            displayPowerCards(filtered);
+                        }
+                    } catch (err) {
+                        console.error('Error searching power cards:', err);
+                    }
+                });
+            }
+
+            const tab = document.getElementById('power-cards-tab');
+            if (!tab || tab.dataset.deckPowerFiltersBound === 'true') return;
+            tab.dataset.deckPowerFiltersBound = 'true';
+
+            let debounceT;
+            const debouncedApply = () => {
+                clearTimeout(debounceT);
+                debounceT = setTimeout(() => applyPowerCardFilters(), 300);
+            };
+
+            tab.querySelectorAll('.power-type-filter-toggle').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const typeKey = btn.dataset.powerType;
+                    const nextActive = !btn.classList.contains('is-active');
+                    tab.querySelectorAll('.power-type-filter-toggle').forEach((b) => {
+                        if (b.dataset.powerType !== typeKey) return;
+                        b.classList.toggle('is-active', nextActive);
+                        b.setAttribute('aria-pressed', String(nextActive));
+                    });
+                    applyPowerCardFilters();
+                });
             });
 
-            // Add event listeners for filters
-            document.querySelectorAll('#power-cards-tab input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', applyPowerCardFilters);
+            [
+                'power-value-equals',
+                'power-value-min',
+                'power-value-max',
+                'power-value-equals-mobile',
+                'power-value-min-mobile',
+                'power-value-max-mobile',
+            ].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', debouncedApply);
             });
 
-            // Add event listeners for value filter inputs with proper event handling
-            const minValueInput = document.getElementById('power-value-min');
-            const maxValueInput = document.getElementById('power-value-max');
-            
-            minValueInput.addEventListener('input', applyPowerCardFilters);
-            maxValueInput.addEventListener('input', applyPowerCardFilters);
-            
-            // Prevent form submission and unwanted navigation
-            minValueInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
+            const valueClear = document.getElementById('power-value-clear');
+            if (valueClear) {
+                valueClear.addEventListener('click', () => {
+                    [
+                        'power-value-equals',
+                        'power-value-min',
+                        'power-value-max',
+                        'power-value-equals-mobile',
+                        'power-value-min-mobile',
+                        'power-value-max-mobile',
+                    ].forEach((id) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
                     applyPowerCardFilters();
-                }
-            });
-            
-            maxValueInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    applyPowerCardFilters();
-                }
-            });
-            
-            // Prevent click events from bubbling up and causing navigation
-            minValueInput.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-            
-            maxValueInput.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
+                });
+            }
+
+            applyPowerCardFilters();
         }
         async function applyPowerCardFilters() {
             try {
@@ -6034,22 +6131,41 @@
 
                 let filtered = data.data;
 
-                // Filter by power type
-                const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
+                const selectedTypes = Array.from(
+                    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle.is-active')
+                )
+                    .map((btn) => btn.dataset.powerType)
+                    .filter(Boolean);
                 if (selectedTypes.length > 0) {
-                    filtered = filtered.filter(card => selectedTypes.includes(card.power_type));
+                    filtered = filtered.filter((card) => selectedTypes.includes(card.power_type));
                 }
 
-                // Filter by value range
-                const minValue = document.getElementById('power-value-min').value;
-                const maxValue = document.getElementById('power-value-max').value;
-                
-                if (minValue && !isNaN(minValue)) {
-                    filtered = filtered.filter(card => card.value >= parseInt(minValue));
+                function powerNumDeck(d, m) {
+                    const raw = (d && String(d.value || '').trim()) || (m && String(m.value || '').trim()) || '';
+                    if (raw === '' || Number.isNaN(Number(raw))) return null;
+                    return parseInt(raw, 10);
                 }
-                if (maxValue && !isNaN(maxValue)) {
-                    filtered = filtered.filter(card => card.value <= parseInt(maxValue));
+                const eqN = powerNumDeck(
+                    document.getElementById('power-value-equals'),
+                    document.getElementById('power-value-equals-mobile')
+                );
+                if (eqN !== null) {
+                    filtered = filtered.filter((card) => Number(card.value) === eqN);
+                } else {
+                    const minN = powerNumDeck(
+                        document.getElementById('power-value-min'),
+                        document.getElementById('power-value-min-mobile')
+                    );
+                    const maxN = powerNumDeck(
+                        document.getElementById('power-value-max'),
+                        document.getElementById('power-value-max-mobile')
+                    );
+                    if (minN !== null) {
+                        filtered = filtered.filter((card) => Number(card.value) >= minN);
+                    }
+                    if (maxN !== null) {
+                        filtered = filtered.filter((card) => Number(card.value) <= maxN);
+                    }
                 }
 
                 displayPowerCards(filtered);
@@ -6059,16 +6175,24 @@
         }
 
         function clearPowerCardFilters() {
-            // Reset checkboxes
-            document.querySelectorAll('#power-cards-tab input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = true;
+            const tab = document.getElementById('power-cards-tab');
+            if (tab) {
+                tab.querySelectorAll('.power-type-filter-toggle').forEach((btn) => {
+                    btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+            }
+            [
+                'power-value-equals',
+                'power-value-min',
+                'power-value-max',
+                'power-value-equals-mobile',
+                'power-value-min-mobile',
+                'power-value-max-mobile',
+            ].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
             });
-            
-            // Reset value inputs
-            document.getElementById('power-value-min').value = '';
-            document.getElementById('power-value-max').value = '';
-            
-            // Reload all cards
             loadPowerCards();
         }
 

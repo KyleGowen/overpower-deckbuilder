@@ -929,6 +929,27 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
+/* Power Cards: mobile-only filter shell (see mobile-layout.css); desktop keeps desktop filter row. */
+#power-cards-table thead tr.power-cards-filter-row > th.power-cards-filter-clear-th {
+    display: none;
+}
+
+#power-cards-table thead tr.power-cards-filter-row > th.power-cards-filter-controls-th {
+    display: none;
+}
+
+#power-cards-table thead tr.power-cards-filter-row > th.power-cards-filter-spacer-th {
+    display: none;
+}
+
+#power-cards-table .power-cards-mobile-filter-shell {
+    display: none;
+}
+
+#power-cards-table #clear-power-filters-mobile-inline.clear-filters-btn--power-mobile-inline {
+    display: none;
+}
+
 /* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
 #missions-table .missions-filter-clear-th {
     display: none !important;

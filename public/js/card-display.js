@@ -883,6 +883,25 @@ function navigateCardImage(groupId, direction) {
 
     if (row && newImage.mobileCaption && row.querySelector('.characters-mobile-card-caption__character')) {
         applySpecialMobileCaptionFromNav(row, newImage.mobileCaption);
+    } else if (groupId.startsWith('power-group-') && row) {
+        const capPower = row.querySelector('.characters-mobile-card-caption--power');
+        if (capPower) {
+            const tv = capPower.querySelector('.characters-mobile-card-caption__power-type-value-line');
+            const sl = capPower.querySelector('.characters-mobile-card-caption__power-set-line');
+            if (tv && newImage.powerMobileTypeValueHtml != null) {
+                tv.innerHTML = newImage.powerMobileTypeValueHtml;
+            }
+            if (sl) {
+                const t =
+                    newImage.powerMobileSetLine != null ? String(newImage.powerMobileSetLine).trim() : '';
+                sl.textContent = t;
+                if (t) {
+                    sl.style.removeProperty('display');
+                } else {
+                    sl.style.display = 'none';
+                }
+            }
+        }
     } else {
         const capNameEl = row ? row.querySelector('.characters-mobile-card-caption__name') : null;
         const capSetEl = row ? row.querySelector('.characters-mobile-card-caption__set') : null;

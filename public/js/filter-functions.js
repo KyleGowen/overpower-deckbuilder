@@ -278,6 +278,15 @@ function debounce(func, wait) {
     };
 }
 
+/** Prefer desktop filter input value, else mobile (same field). */
+function powerFilterNumericOrNull(desktopEl, mobileEl) {
+    const d = desktopEl && String(desktopEl.value || '').trim();
+    const m = mobileEl && String(mobileEl.value || '').trim();
+    const raw = d || m;
+    if (raw === '' || Number.isNaN(Number(raw))) return null;
+    return parseInt(raw, 10);
+}
+
 // Power Cards filtering functions
 window.applyPowerCardFilters = async function applyPowerCardFilters() {
     try {
@@ -289,38 +298,36 @@ window.applyPowerCardFilters = async function applyPowerCardFilters() {
 
         // Filter by power type — active toggle buttons
         const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab .power-type-filter-toggle.is-active'))
-            .map(btn => btn.dataset.powerType);
+            .map((btn) => btn.dataset.powerType)
+            .filter(Boolean);
 
         if (selectedTypes.length > 0) {
-            filtered = filtered.filter(card => selectedTypes.includes(card.power_type));
+            filtered = filtered.filter((card) => selectedTypes.includes(card.power_type));
         }
 
-        // Filter by set
-        const selectedSets = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="set"]:checked'))
-            .map(cb => cb.value);
+        const eqEl = document.getElementById('power-value-equals');
+        const eqMobile = document.getElementById('power-value-equals-mobile');
+        const equalsNum = powerFilterNumericOrNull(eqEl, eqMobile);
 
-        // If no sets are selected, show no cards
-        if (selectedSets.length === 0) {
-            filtered = [];
+        if (equalsNum !== null) {
+            filtered = filtered.filter((card) => Number(card.value) === equalsNum);
         } else {
-            filtered = filtered.filter(card => {
-                const cardSet = card.set || 'ERB';
-                return selectedSets.includes(cardSet);
-            });
+            const minNum = powerFilterNumericOrNull(
+                document.getElementById('power-value-min'),
+                document.getElementById('power-value-min-mobile')
+            );
+            const maxNum = powerFilterNumericOrNull(
+                document.getElementById('power-value-max'),
+                document.getElementById('power-value-max-mobile')
+            );
+            if (minNum !== null) {
+                filtered = filtered.filter((card) => Number(card.value) >= minNum);
+            }
+            if (maxNum !== null) {
+                filtered = filtered.filter((card) => Number(card.value) <= maxNum);
+            }
         }
 
-        // Filter by value range
-        const minValue = document.getElementById('power-value-min');
-        const maxValue = document.getElementById('power-value-max');
-        
-        if (minValue && minValue.value && !isNaN(minValue.value)) {
-            filtered = filtered.filter(card => card.value >= parseInt(minValue.value));
-        }
-        if (maxValue && maxValue.value && !isNaN(maxValue.value)) {
-            filtered = filtered.filter(card => card.value <= parseInt(maxValue.value));
-        }
-
-        // Display results
         if (window.displayPowerCards) {
             window.displayPowerCards(filtered);
         } else {
@@ -332,53 +339,76 @@ window.applyPowerCardFilters = async function applyPowerCardFilters() {
 }
 
 window.setupPowerCardsSearch = function setupPowerCardsSearch() {
-    // Wire power-type toggle buttons
-    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach(btn => {
+    const tab = document.getElementById('power-cards-tab');
+    if (!tab || tab.dataset.powerFiltersBound === 'true') {
+        return;
+    }
+    tab.dataset.powerFiltersBound = 'true';
+
+    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach((btn) => {
         btn.addEventListener('click', () => {
-            btn.classList.toggle('is-active');
-            btn.setAttribute('aria-pressed', String(btn.classList.contains('is-active')));
+            const typeKey = btn.dataset.powerType;
+            const nextActive = !btn.classList.contains('is-active');
+            document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach((b) => {
+                if (b.dataset.powerType !== typeKey) return;
+                b.classList.toggle('is-active', nextActive);
+                b.setAttribute('aria-pressed', String(nextActive));
+            });
             applyPowerCardFilters();
         });
     });
 
-    // Keep set checkboxes wired
-    document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="set"]').forEach(checkbox => {
-        checkbox.checked = true;
-        checkbox.addEventListener('change', applyPowerCardFilters);
+    const debouncedApply = debounce(applyPowerCardFilters, 300);
+    [
+        'power-value-equals',
+        'power-value-min',
+        'power-value-max',
+        'power-value-equals-mobile',
+        'power-value-min-mobile',
+        'power-value-max-mobile',
+    ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', debouncedApply);
     });
 
-    // Add event listeners for value range inputs
-    const minValue = document.getElementById('power-value-min');
-    const maxValue = document.getElementById('power-value-max');
-    
-    if (minValue) {
-        minValue.addEventListener('input', debounce(applyPowerCardFilters, 300));
-    }
-    if (maxValue) {
-        maxValue.addEventListener('input', debounce(applyPowerCardFilters, 300));
+    const valueClear = document.getElementById('power-value-clear');
+    if (valueClear) {
+        valueClear.addEventListener('click', () => {
+            [
+                'power-value-equals',
+                'power-value-min',
+                'power-value-max',
+                'power-value-equals-mobile',
+                'power-value-min-mobile',
+                'power-value-max-mobile',
+            ].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            applyPowerCardFilters();
+        });
     }
 
-    // Initial filter application
     applyPowerCardFilters();
 }
 
 window.clearPowerCardFilters = function clearPowerCardFilters() {
-    // Reset power-type toggle buttons
-    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach(btn => {
+    document.querySelectorAll('#power-cards-tab .power-type-filter-toggle').forEach((btn) => {
         btn.classList.remove('is-active');
         btn.setAttribute('aria-pressed', 'false');
     });
 
-    // Reset set checkboxes to checked
-    document.querySelectorAll('#power-cards-tab input[type="checkbox"][data-filter-type="set"]').forEach(checkbox => {
-        checkbox.checked = true;
+    [
+        'power-value-equals',
+        'power-value-min',
+        'power-value-max',
+        'power-value-equals-mobile',
+        'power-value-min-mobile',
+        'power-value-max-mobile',
+    ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
     });
-
-    // Clear value range inputs
-    const minValue = document.getElementById('power-value-min');
-    const maxValue = document.getElementById('power-value-max');
-    if (minValue) minValue.value = '';
-    if (maxValue) maxValue.value = '';
 
     applyPowerCardFilters();
 }

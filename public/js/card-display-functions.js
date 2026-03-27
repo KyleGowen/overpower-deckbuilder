@@ -280,6 +280,10 @@ function aspectUseMobileListArt() {
     return false;
 }
 
+function powerUseMobileListArt() {
+    return aspectUseMobileListArt();
+}
+
 function aspectMobileCaptionOptionalLine(className, text) {
     const esc =
         typeof window.escapeHtmlText === 'function'
@@ -661,8 +665,15 @@ function displayPowerCards(cards) {
         console.error('❌ power-cards-tbody element not found!');
         return;
     }
-    
+
     tbody.innerHTML = '';
+
+    if (!cards || cards.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
+        return;
+    }
+
+    const useMobileListArt = powerUseMobileListArt();
     
     // Group power cards by power_type and value only (not set) — includes alternates across sets
     // e.g. 5 Multi Power: Tarzan (ERB) and Cthulhu (ERBP) are alternate arts of the same card
@@ -725,19 +736,50 @@ function displayPowerCards(cards) {
         if (typeCompare !== 0) return typeCompare;
         return (repA.value || 0) - (repB.value || 0);
     });
-    
+
+    if (sortedGroups.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
+        return;
+    }
+
     // Process each group
     sortedGroups.forEach(([key, group]) => {
         if (group.length === 0) return;
         
         // Use the first card (original art) as the representative
         const representative = group[0];
-        
-        // Prepare image data for navigation
-        const imageData = group.map(card => ({
+
+        const esc =
+            typeof window.escapeHtmlText === 'function'
+                ? window.escapeHtmlText
+                : (s) =>
+                      String(s)
+                          .replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;');
+
+        function powerMobileCaptionLinesForCard(card) {
+            const typeIconHtmlCard = renderAllyStatTypeIcon(card.power_type || card.type || '');
+            const setNameRawC = (card.set_name || 'Edgar Rice Burroughs and the World Legends').trim();
+            const setNumRawC =
+                card.set_number != null && String(card.set_number).trim() !== ''
+                    ? String(card.set_number).trim()
+                    : '';
+            const setLinePlainC = setNumRawC ? `${setNameRawC} - ${setNumRawC}` : setNameRawC;
+            return {
+                powerMobileTypeValueHtml: `<span class="special-power-icons-cell">${typeIconHtmlCard}</span><span class="characters-mobile-card-caption__power-value-num">${esc(String(card.value ?? ''))}</span>`,
+                powerMobileSetLine: setLinePlainC,
+            };
+        }
+
+        // Prepare image data for navigation (include per-art caption fields for mobile)
+        const imageData = group.map((card) => ({
             id: card.id,
             imagePath: getCardImagePathForDisplay(card, 'power'),
-            name: card.name || `${card.value} - ${card.power_type}`
+            name: card.name || `${card.value} - ${card.power_type}`,
+            isFoil: !!card.is_foil,
+            ...powerMobileCaptionLinesForCard(card),
         }));
         
         // Create unique identifier for this card group
@@ -754,21 +796,47 @@ function displayPowerCards(cards) {
         const currentImage = imageData[0];
         const currentImagePath = currentImage.imagePath;
         const currentImageName = currentImage.name;
-        
+
+        const imgStyle = useMobileListArt
+            ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
+            : 'width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;';
+
+        const navClass = hasMultipleImages ? ' card-image-container--with-nav' : '';
+
+        const typeIconHtml = renderAllyStatTypeIcon(representative.power_type || representative.type || '');
+        const setNameRaw = (representative.set_name || 'Edgar Rice Burroughs and the World Legends').trim();
+        const setNumRaw =
+            representative.set_number != null && String(representative.set_number).trim() !== ''
+                ? String(representative.set_number).trim()
+                : '';
+        const setLinePlain = setNumRaw ? `${setNameRaw} - ${setNumRaw}` : setNameRaw;
+
+        const captionHtml = useMobileListArt
+            ? `
+                <div class="characters-mobile-card-caption characters-mobile-card-caption--power">
+                    <div class="characters-mobile-card-caption__power-type-value-line">
+                        <span class="special-power-icons-cell">${typeIconHtml}</span>
+                        <span class="characters-mobile-card-caption__power-value-num">${esc(String(representative.value ?? ''))}</span>
+                    </div>
+                    <div class="characters-mobile-card-caption__power-set-line">${esc(setLinePlain)}</div>
+                </div>`
+            : '';
+
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>
-                <div class="card-image-container">
+            <td data-label="Image">
+                <div class="card-image-container${navClass}">
                     ${navArrows}
                     <img id="${groupId}-img"
                          src="${currentImagePath}" 
                          alt="${currentImageName}" 
-                         style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;"
+                         style="${imgStyle}"
                          onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiMzMzMiLz4KPHRleHQgeD0iNjAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'; this.style.cursor='default'; this.onclick=null;"
                          onmouseenter="showCardHoverModal('${(currentImagePath || '').replace(/'/g, "\\'")}', '${currentImageName.replace(/'/g, "\\'")}', '${(currentImage.id || '').replace(/'/g, "\\'")}', 'power')"
                          onmouseleave="hideCardHoverModal()"
                          onclick="openModal(this)">
                 </div>
+                ${captionHtml}
             </td>
             <td>
                 <button class="add-to-deck-btn" onclick="showDeckSelection('power', '${currentImage.id}', '${currentImageName.replace(/'/g, "\\'")}', this)">
@@ -783,7 +851,6 @@ function displayPowerCards(cards) {
             </td>
             <td>${renderAllyStatTypeIcon(representative.power_type || representative.type || '')}</td>
             <td>${representative.value || ''}</td>
-            <td>${representative.set_name || 'Edgar Rice Burroughs and the World Legends'}</td>
         `;
         
         // Store image data in data attribute for navigation
@@ -796,6 +863,11 @@ function displayPowerCards(cards) {
         const img = row.querySelector('img');
         if (img) {
             const lockRowHeight = () => {
+                // Mobile list layout: fixed td/row heights clip the caption under the image when
+                // alternate-art nav is present (flex + max-height). Desktop DBV still locks.
+                if (typeof powerUseMobileListArt === 'function' && powerUseMobileListArt()) {
+                    return;
+                }
                 const imageCell = row.querySelector('td:nth-child(1)');
                 if (imageCell && !imageCell.dataset.heightLocked) {
                     // Lock both the cell and the row height
@@ -853,6 +925,7 @@ window.displayAllyUniverse = displayAllyUniverse;
 window.displayTraining = displayTraining;
 window.displayBasicUniverse = displayBasicUniverse;
 window.displayPowerCards = displayPowerCards;
+window.powerUseMobileListArt = powerUseMobileListArt;
 window.displayAspects = displayAspects;
 window.displayMissions = displayMissions;
 window.displayEvents = displayEvents;
