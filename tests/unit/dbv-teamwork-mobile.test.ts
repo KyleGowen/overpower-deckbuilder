@@ -72,13 +72,16 @@ describe('database-view.css (DBV Teamwork — desktop)', () => {
 
     it('hides mobile-only teamwork filter shell on desktop without !important (mobile-layout overrides)', () => {
         expect(css).toMatch(
+            /#teamwork-table\s+thead\s+tr\.teamwork-filter-row\s*>\s*th\.teamwork-filter-clear-th\s*\{\s*display:\s*none;\s*\}/
+        );
+        expect(css).toMatch(
             /#teamwork-table\s+thead\s+tr\.teamwork-filter-row\s*>\s*th\.teamwork-filter-controls-th\s*\{\s*display:\s*none;\s*\}/
         );
         expect(css).toMatch(
             /#teamwork-table\s+\.teamwork-mobile-filter-shell\s*\{\s*display:\s*none;\s*\}/
         );
         const teamworkDesktopHide = css.match(
-            /\/\* Teamwork: mobile-only To Use filter shell[\s\S]*?\/\* Missions:/
+            /\/\* Teamwork: mobile-only filter row shell[\s\S]*?\/\* Missions:/
         );
         expect(teamworkDesktopHide).toBeTruthy();
         expect(teamworkDesktopHide![0]).not.toMatch(
@@ -86,12 +89,21 @@ describe('database-view.css (DBV Teamwork — desktop)', () => {
         );
     });
 
-    it('styles DTV teamwork desktop filter row (vertical-align, To Use column spacing)', () => {
+    it('styles DTV teamwork desktop filter row (vertical-align, To Use icon+numeric rows)', () => {
         expect(css).toMatch(
             /#teamwork-table\s+thead\s+tr\.teamwork-desktop-filter-row\s+th\s*\{\s*vertical-align:\s*top;\s*\}/
         );
         expect(css).toMatch(
-            /#teamwork-table\s+\.teamwork-desktop-to-use-column-filters\s+\.special-power-filter-toggles\s*\{\s*margin-bottom:\s*8px;\s*\}/
+            /#teamwork-table\s+\.teamwork-desktop-to-use-split\s*\{[\s\S]*?display:\s*flex/
+        );
+        expect(css).toMatch(
+            /#teamwork-table\s+\.teamwork-desktop-to-use-icons-column\s*\{[\s\S]*?gap:\s*var\(\s*--teamwork-dtv-numeric-stack-gap\s*\)/
+        );
+        expect(css).toMatch(
+            /#teamwork-table\s+\.teamwork-desktop-bonus-stack\s*\{[\s\S]*?gap:\s*var\(\s*--teamwork-dtv-numeric-stack-gap\s*\)/
+        );
+        expect(css).toMatch(
+            /#teamwork-table\s+\.teamwork-desktop-bonus-stack\s*\{[\s\S]*?flex-direction:\s*column/
         );
     });
 });
@@ -109,9 +121,12 @@ describe('DBV Teamwork markup (index.html + template)', () => {
         expect(html).toContain('teamwork-to-use-power-toggles');
         expect(html).toContain('teamwork-mobile-to-use-equals');
         expect(html).toContain('teamwork-desktop-filter-row');
+        expect(html).toContain('teamwork-desktop-to-use-split');
+        expect(html).toContain('teamwork-desktop-to-use-icons-column');
         expect(html).toContain('teamwork-desktop-acts-as-toggles');
         expect(html).toContain('teamwork-desktop-followup-toggles');
         expect(html).toContain('teamwork-first-bonus-equals');
+        expect(html).toContain('teamwork-desktop-bonus-stack');
         expect(html).toContain('clearTeamworkFilters()');
     });
 
@@ -120,6 +135,8 @@ describe('DBV Teamwork markup (index.html + template)', () => {
         expect(html).toContain('teamwork-filter-row');
         expect(html).toContain('id="teamwork-to-use-equals"');
         expect(html).toContain('teamwork-desktop-filter-row');
+        expect(html).toContain('teamwork-desktop-to-use-split');
+        expect(html).toContain('teamwork-desktop-to-use-icons-column');
         expect(html).toContain('teamwork-mobile-to-use-equals');
     });
 });

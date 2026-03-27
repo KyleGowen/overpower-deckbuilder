@@ -840,25 +840,65 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 }
 
 /* Missions table column widths */
+#missions-table thead tr:first-child th {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ecdc4;
+    font-weight: 600;
+}
+
 #missions-table th,
 #missions-table td {
     text-align: center;
 }
 
-#missions-table th:nth-child(2), /* Mission Set */
-#missions-table td:nth-child(2) {
+#missions-table thead tr:first-child th:nth-child(3), /* Mission Set — not missions-filter-row th:nth-child(3) (that is Card Name filter) */
+#missions-table tbody td:nth-child(3) {
     min-width: 220px;
 }
 
-#missions-table th:nth-child(4), /* Game Effect */
-#missions-table td:nth-child(4) {
+#missions-table thead tr:first-child th:nth-child(4), /* Card Name */
+#missions-table tbody td:nth-child(4) {
     max-width: 300px;
 }
 
-/* Mobile-only mission-set dropdown row (shown under .layout-mobile in mobile-layout.css) */
-#missions-table .missions-mobile-set-row,
+/* DTV: mission-set <select> in Mission Set column (MV-style label + teal chrome); card-name row is MV-only */
+#missions-table .missions-mobile-set-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 #missions-table .missions-mobile-card-name-row {
     display: none;
+}
+
+#missions-table .missions-mobile-set-label {
+    color: #4ecdc4;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+}
+
+#missions-table .missions-mission-set-filter {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid rgba(78, 205, 196, 0.35);
+    background: rgba(18, 44, 50, 0.95);
+    color: #fff;
 }
 
 /* Events: mobile mission-set row + inline clear (see mobile-layout.css) */
@@ -870,9 +910,15 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
-/* Teamwork: mobile-only To Use filter shell (see mobile-layout.css); desktop keeps Clear All column only.
-   Do not use !important here — mobile-layout.css uses higher-specificity selectors to show these on
+/* Teamwork: mobile-only filter row shell (see mobile-layout.css). On DTV hide the whole mobile row
+   except we only need to hide each th — desktop filter row already has Clear All + column filters.
+   teamwork-filter-clear-th was left visible by mistake and duplicated the desktop Clear button.
+   Do not use !important here — mobile-layout.css uses higher-specificity selectors on
    .layout-mobile and in @media (max-width: 900px) #database-view; !important would block those overrides. */
+#teamwork-table thead tr.teamwork-filter-row > th.teamwork-filter-clear-th {
+    display: none;
+}
+
 #teamwork-table thead tr.teamwork-filter-row > th.teamwork-filter-controls-th {
     display: none;
 }
@@ -890,40 +936,60 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 }
 
 /* Teamwork DTV: per-column filter row (Power-style toggles + Basic-style numeric). Hidden on mobile in mobile-layout.css. */
+#teamwork-table {
+    /* Shared by .teamwork-desktop-bonus-stack (1st/2nd bonus + To Use value column) */
+    --teamwork-dtv-numeric-stack-gap: 10px;
+}
+
 #teamwork-table thead tr.teamwork-desktop-filter-row th {
     vertical-align: top;
 }
 
-/* To Use DTV: three rows — [2 type icons] [one numeric field] per row (=, Max, Min). */
-#teamwork-table .teamwork-desktop-to-use-rows {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+/* To Use DTV: icon column + same flex stack as bonus columns for = / Max / Min */
+#teamwork-table .teamwork-desktop-to-use-column-filters.column-filters {
     align-items: flex-start;
 }
 
-#teamwork-table .teamwork-desktop-to-use-line {
+#teamwork-table .teamwork-desktop-to-use-split {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
 }
 
-#teamwork-table .teamwork-desktop-to-use-line .special-power-filter-toggles {
-    margin-bottom: 0;
+#teamwork-table .teamwork-desktop-to-use-icons-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--teamwork-dtv-numeric-stack-gap);
     flex-shrink: 0;
 }
 
-#teamwork-table .teamwork-desktop-to-use-line-input {
+#teamwork-table .teamwork-desktop-to-use-icons-column .special-power-filter-toggles {
+    margin-bottom: 0;
+}
+
+/* Nested .teamwork-desktop-bonus-stack under To Use uses same #teamwork-table .teamwork-desktop-bonus-stack rules as 1st/2nd bonus th */
+#teamwork-table .teamwork-desktop-to-use-split .teamwork-desktop-bonus-stack {
+    flex-shrink: 0;
+}
+
+/* 1st / 2nd Attack Bonus DTV: vertical stack (=, Max, Min); same gap as To Use numerics */
+#teamwork-table .teamwork-desktop-bonus-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--teamwork-dtv-numeric-stack-gap);
+    align-items: flex-start;
+}
+
+#teamwork-table .teamwork-desktop-bonus-stack-input {
     width: 3.25rem;
     min-width: 3rem;
     max-width: 4rem;
     box-sizing: border-box;
-    flex-shrink: 0;
 }
 
-/* Ally: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */
+/* Ally: mobile-only filter shell (see mobile-layout.css); DTV uses ally-desktop-filter-row per-column filters. */
 #ally-universe-table thead tr.ally-filter-row > th.ally-filter-controls-th {
     display: none;
 }
@@ -938,6 +1004,15 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #ally-universe-table #clear-ally-filters-mobile-inline.clear-filters-btn--ally-mobile-inline {
     display: none;
+}
+
+/* Ally DTV: per-column filter row (Power-style type toggles + Basic-style bonus numerics). Hidden on mobile in mobile-layout.css. */
+#ally-universe-table thead tr.ally-desktop-filter-row th {
+    vertical-align: top;
+}
+
+#ally-universe-table thead tr.ally-desktop-filter-row .special-power-filter-toggles {
+    margin-bottom: 0;
 }
 
 /* Training: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */
@@ -995,9 +1070,10 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
-/* Missions: no tab-level Clear control — use All / checkboxes + global clear if needed */
-#missions-table .missions-filter-clear-th {
-    display: none !important;
+/* Missions: leading th spans Image + actions columns (do not use display:none — it breaks column alignment). */
+#missions-table .missions-filter-leading-th {
+    padding: 0;
+    border-bottom: 2px solid rgba(78, 205, 196, 0.3);
 }
 
 /* Special Cards Table Column Widths */

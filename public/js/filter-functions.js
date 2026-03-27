@@ -156,15 +156,14 @@ function clearMissionsFilters() {
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
 
-    document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach((cb) => {
-        cb.checked = true;
-    });
-
     const missionSetSelect = document.getElementById('missions-mission-set-filter');
     if (missionSetSelect) missionSetSelect.value = '';
 
     const missionCardNameFilter = document.getElementById('missions-mobile-card-name-filter');
     if (missionCardNameFilter) missionCardNameFilter.value = '';
+
+    const missionHeaderCardNameFilter = document.getElementById('missions-header-card-name-filter');
+    if (missionHeaderCardNameFilter) missionHeaderCardNameFilter.value = '';
 
     if (typeof loadMissions === 'function') {
         loadMissions();
@@ -233,13 +232,16 @@ function clearTeamworkFilters() {
 }
 
 function clearAllyUniverseFilters() {
-    document
-        .querySelectorAll('#ally-universe-table .ally-stat-type-to-use-toggles .power-type-filter-toggle')
-        .forEach((btn) => {
-            btn.classList.remove('is-active', 'is-disabled');
-            btn.setAttribute('aria-pressed', 'false');
-            btn.disabled = false;
-        });
+    document.querySelectorAll('#ally-universe-table thead .power-type-filter-toggle').forEach((btn) => {
+        btn.classList.remove('is-active', 'is-disabled');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.disabled = false;
+    });
+    const nameF = document.getElementById('ally-card-name-filter');
+    if (nameF) nameF.value = '';
+    document.querySelectorAll('#ally-universe-tab .ally-universe-mobile-card-name-filter').forEach((el) => {
+        el.value = '';
+    });
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.value = '';

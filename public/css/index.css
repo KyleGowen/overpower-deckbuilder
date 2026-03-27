@@ -527,14 +527,14 @@
 
 
 
-        /* Missions table column widths */
-        #missions-table th:nth-child(2), /* Mission Set */
-        #missions-table td:nth-child(2) {
+        /* Missions table column widths (thead first row + tbody only — filter row has different th count) */
+        #missions-table thead tr:first-child th:nth-child(3), /* Mission Set */
+        #missions-table tbody td:nth-child(3) {
             min-width: 220px;
         }
 
-        #missions-table th:nth-child(4), /* Game Effect */
-        #missions-table td:nth-child(4) {
+        #missions-table thead tr:first-child th:nth-child(4), /* Card Name */
+        #missions-table tbody td:nth-child(4) {
             max-width: 300px;
         }
 

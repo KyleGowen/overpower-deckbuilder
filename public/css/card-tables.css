@@ -81,35 +81,25 @@
     box-sizing: border-box;
 }
 
-/* Missions Table Two-Column Checkbox Layout */
-#missions-table .column-filters {
-    min-width: 400px !important;
-    width: 100% !important;
-    display: flex !important;
-    justify-content: center !important;
-}
-
-#missions-table .checkbox-group {
-    display: grid !important;
-    grid-template-columns: calc(50% + 40px) calc(50% + 40px) !important;
-    gap: 8px 0px !important;
-    align-items: start !important;
-    text-align: left !important;
-    width: auto !important;
-}
-
-#missions-table .checkbox-group label {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 0.85rem !important;
-    font-weight: normal !important;
-    white-space: nowrap !important;
-    text-align: left !important;
+/* Missions Table Two-Column Checkbox Layout — scope min-width to mission-set cell only;
+   Card Name header uses .column-filters without .missions-column-filters; 400px there overflows column 3. */
+/* Mission Set column: stacked label + select (checkbox grid removed) */
+#missions-table .missions-column-filters {
     min-width: 0 !important;
-    overflow: hidden !important;
+    width: 100% !important;
+    max-width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    box-sizing: border-box;
+}
+
+#missions-table .missions-filter-card-name-th .column-filters {
+    min-width: 0 !important;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Fix Card Name column width to prevent resizing when content changes */
@@ -118,10 +108,11 @@
     width: 100% !important;
 }
 
-#missions-table th:nth-child(1), #missions-table td:nth-child(1) { width: 15%; } /* Image */
-#missions-table th:nth-child(2), #missions-table td:nth-child(2) { width: 15%; } /* Add to Deck - Wider */
-#missions-table th:nth-child(3), #missions-table td:nth-child(3) { width: 25%; } /* Mission Set */
-#missions-table th:nth-child(4), #missions-table td:nth-child(4) { width: 45%; } /* Card Name - Adjusted for wider Add to Deck column */
+/* Use thead tr:first-child for th — missions-filter-row has only 3 th (colspan + set + name); nth-child(2–4) there would mis-apply column widths and overlap filters. */
+#missions-table thead tr:first-child th:nth-child(1), #missions-table td:nth-child(1) { width: 15%; } /* Image */
+#missions-table thead tr:first-child th:nth-child(2), #missions-table td:nth-child(2) { width: 15%; } /* Add to Deck - Wider */
+#missions-table thead tr:first-child th:nth-child(3), #missions-table td:nth-child(3) { width: 25%; } /* Mission Set */
+#missions-table thead tr:first-child th:nth-child(4), #missions-table td:nth-child(4) { width: 45%; } /* Card Name */
 
 /* Special Cards Table Column Width Control */
 #special-cards-table {

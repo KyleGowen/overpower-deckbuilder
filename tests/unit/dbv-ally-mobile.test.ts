@@ -15,6 +15,9 @@ describe('mobile-layout.css (DBV Ally tab)', () => {
     it('documents Ally mobile filter shell and tbody card rows', () => {
         expect(css).toContain('Ally tab — mobile');
         expect(css).toMatch(
+            /\.layout-mobile\s+#ally-universe-table\s+thead\s+tr\.ally-desktop-filter-row\s*\{\s*display:\s*none\s*!important;/
+        );
+        expect(css).toMatch(
             /\.layout-mobile\s+#ally-universe-table\s+thead\s+tr\.ally-filter-row[\s\S]*?display:\s*flex[\s\S]*?border-radius:\s*12px/
         );
         expect(css).toMatch(
@@ -69,6 +72,12 @@ describe('database-view.css (DBV Ally — desktop)', () => {
             /#ally-universe-table\s+\.ally-mobile-filter-shell\s*\{\s*display:\s*none;\s*\}/
         );
     });
+
+    it('defines Ally DTV desktop filter row vertical alignment', () => {
+        expect(css).toMatch(
+            /#ally-universe-table\s+thead\s+tr\.ally-desktop-filter-row\s+th\s*\{\s*vertical-align:\s*top;/
+        );
+    });
 });
 
 describe('DBV Ally markup (index.html)', () => {
@@ -77,7 +86,12 @@ describe('DBV Ally markup (index.html)', () => {
     it('includes ally mobile filter hooks and stat type toggles', () => {
         const html = readFileSync(indexPath, 'utf8');
         expect(html).toContain('ally-filter-row');
+        expect(html).toContain('ally-desktop-filter-row');
         expect(html).toContain('ally-stat-type-to-use-toggles');
+        expect(html).toContain('ally-stat-type-filter-toggles');
+        expect(html).toContain('ally-attack-type-filter-toggles');
+        expect(html).toContain('id="ally-card-name-filter"');
+        expect(html).toContain('colspan="7"');
         expect(html).toContain('clear-ally-filters-mobile-inline');
         expect(html).toContain('clearAllyUniverseFilters()');
     });
@@ -120,6 +134,8 @@ describe('search-filter-functions.js Ally DBV filters', () => {
         expect(source).toContain('function applyAllyUniverseFilters');
         expect(source).toContain('function setupAllyUniverseTableFilters');
         expect(source).toContain('window.applyAllyUniverseFilters = applyAllyUniverseFilters');
-        expect(source).toContain('#ally-universe-table .ally-stat-type-to-use-toggles');
+        expect(source).toContain('ally-stat-type-filter-toggles');
+        expect(source).toContain('ally-attack-type-filter-toggles');
+        expect(source).toContain('allyCardNameColumnTerm');
     });
 });

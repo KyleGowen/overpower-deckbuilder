@@ -574,8 +574,7 @@
                             <th>Card Name</th>
                         </tr>
                         <tr class="filter-row missions-filter-row">
-                            <th class="missions-filter-clear-th" aria-hidden="true"></th>
-                            <th class="missions-filter-spacer-th" aria-hidden="true"></th>
+                            <th colspan="2" class="missions-filter-leading-th" aria-hidden="true"></th>
                             <th class="missions-filter-sets-th">
                                 <div class="column-filters missions-column-filters">
                                     <div class="missions-mobile-set-row">
@@ -596,15 +595,21 @@
                                             enterkeyhint="search"
                                         />
                                     </div>
-                                    <div class="checkbox-group missions-checkbox-group">
-                                        <label><input type="checkbox" value="King of the Jungle" checked> King of the Jungle</label>
-                                        <label><input type="checkbox" value="The Call of Cthulhu" checked> The Call of Cthulhu</label>
-                                        <label><input type="checkbox" value="Time Wars: Rise of the Gods" checked> Time Wars: Rise of the Gods</label>
-                                        <label><input type="checkbox" value="The Warlord of Mars" checked> The Warlord of Mars</label>
-                                    </div>
                                 </div>
                             </th>
-                            <th class="missions-filter-empty-th" aria-hidden="true"></th>
+                            <th class="missions-filter-card-name-th">
+                                <div class="column-filters">
+                                    <input
+                                        type="search"
+                                        id="missions-header-card-name-filter"
+                                        class="header-filter"
+                                        data-column="card_name"
+                                        placeholder="Filter by name"
+                                        aria-label="Filter missions by card name"
+                                        autocomplete="off"
+                                    />
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="missions-tbody">
@@ -684,8 +689,8 @@
                             <th></th>
                             <th>
                                 <div class="column-filters teamwork-desktop-to-use-column-filters">
-                                    <div class="teamwork-desktop-to-use-rows" role="group" aria-label="Filter teamwork by To Use power type and value">
-                                        <div class="teamwork-desktop-to-use-line">
+                                    <div class="teamwork-desktop-to-use-split" role="group" aria-label="Filter teamwork by To Use power type and value">
+                                        <div class="teamwork-desktop-to-use-icons-column">
                                             <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
                                                 <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
                                                     <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
@@ -694,9 +699,6 @@
                                                     <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
                                                 </button>
                                             </div>
-                                            <input type="number" id="teamwork-to-use-equals" class="filter-input equals teamwork-desktop-to-use-line-input" data-column="to-use" placeholder="=" min="0" max="99" aria-label="To Use equals">
-                                        </div>
-                                        <div class="teamwork-desktop-to-use-line">
                                             <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
                                                 <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
                                                     <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
@@ -705,9 +707,6 @@
                                                     <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
                                                 </button>
                                             </div>
-                                            <input type="number" id="teamwork-to-use-max" class="filter-input teamwork-desktop-to-use-line-input" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
-                                        </div>
-                                        <div class="teamwork-desktop-to-use-line">
                                             <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
                                                 <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
                                                     <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
@@ -716,7 +715,11 @@
                                                     <span class="power-type-filter-text">MP</span>
                                                 </button>
                                             </div>
-                                            <input type="number" id="teamwork-to-use-min" class="filter-input teamwork-desktop-to-use-line-input" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
+                                        </div>
+                                        <div class="teamwork-desktop-bonus-stack">
+                                            <input type="number" id="teamwork-to-use-equals" class="filter-input equals teamwork-desktop-bonus-stack-input" data-column="to-use" placeholder="=" min="0" max="99" aria-label="To Use equals">
+                                            <input type="number" id="teamwork-to-use-max" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
+                                            <input type="number" id="teamwork-to-use-min" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
                                         </div>
                                     </div>
                                 </div>
@@ -770,23 +773,17 @@
                                 </div>
                             </th>
                             <th>
-                                <div class="column-filters">
-                                    <input type="number" id="teamwork-first-bonus-equals" class="filter-input equals" data-column="teamwork-first-bonus" placeholder="=" min="0" max="99" aria-label="First attack bonus equals">
-                                    <div class="range-inputs">
-                                        <input type="number" id="teamwork-first-bonus-min" placeholder="Min" min="0" max="99" class="filter-input" aria-label="First attack bonus minimum">
-                                        <span>-</span>
-                                        <input type="number" id="teamwork-first-bonus-max" placeholder="Max" min="0" max="99" class="filter-input" aria-label="First attack bonus maximum">
-                                    </div>
+                                <div class="column-filters teamwork-desktop-bonus-stack">
+                                    <input type="number" id="teamwork-first-bonus-equals" class="filter-input equals teamwork-desktop-bonus-stack-input" data-column="teamwork-first-bonus" placeholder="=" min="0" max="99" aria-label="First attack bonus equals">
+                                    <input type="number" id="teamwork-first-bonus-max" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Max" min="0" max="99" aria-label="First attack bonus maximum">
+                                    <input type="number" id="teamwork-first-bonus-min" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Min" min="0" max="99" aria-label="First attack bonus minimum">
                                 </div>
                             </th>
                             <th>
-                                <div class="column-filters">
-                                    <input type="number" id="teamwork-second-bonus-equals" class="filter-input equals" data-column="teamwork-second-bonus" placeholder="=" min="0" max="99" aria-label="Second attack bonus equals">
-                                    <div class="range-inputs">
-                                        <input type="number" id="teamwork-second-bonus-min" placeholder="Min" min="0" max="99" class="filter-input" aria-label="Second attack bonus minimum">
-                                        <span>-</span>
-                                        <input type="number" id="teamwork-second-bonus-max" placeholder="Max" min="0" max="99" class="filter-input" aria-label="Second attack bonus maximum">
-                                    </div>
+                                <div class="column-filters teamwork-desktop-bonus-stack">
+                                    <input type="number" id="teamwork-second-bonus-equals" class="filter-input equals teamwork-desktop-bonus-stack-input" data-column="teamwork-second-bonus" placeholder="=" min="0" max="99" aria-label="Second attack bonus equals">
+                                    <input type="number" id="teamwork-second-bonus-max" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Max" min="0" max="99" aria-label="Second attack bonus maximum">
+                                    <input type="number" id="teamwork-second-bonus-min" class="filter-input teamwork-desktop-bonus-stack-input" placeholder="Min" min="0" max="99" aria-label="Second attack bonus minimum">
                                 </div>
                             </th>
                         </tr>
@@ -863,6 +860,65 @@
                             <th>Attack</th>
                             <th>Card Text</th>
                         </tr>
+                        <tr class="filter-row ally-desktop-filter-row">
+                            <th>
+                                <button type="button" class="clear-filters-btn" onclick="clearAllyUniverseFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th>
+                                <input type="text" id="ally-card-name-filter" class="header-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                            </th>
+                            <th></th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles ally-stat-type-filter-toggles" data-ally-filter-role="stat" role="group" aria-label="Filter allies by stat type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy stat type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence stat type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat stat type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power stat type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force stat type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" title="Multi Power" aria-label="Toggle Multi Power stat type filter" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles ally-attack-type-filter-toggles" data-ally-filter-role="attack" role="group" aria-label="Filter allies by attack type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy attack type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence attack type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat attack type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power attack type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force attack type filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" title="Multi Power" aria-label="Toggle Multi Power attack type filter" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th></th>
+                        </tr>
                         <tr class="filter-row ally-filter-row">
                             <th class="ally-filter-clear-th">
                                 <button type="button" class="clear-filters-btn" onclick="clearAllyUniverseFilters()">Clear All Filters</button>
@@ -870,9 +926,12 @@
                             <th class="ally-filter-spacer-th" aria-hidden="true"></th>
                             <th class="ally-filter-controls-th" colspan="5">
                                 <div class="ally-mobile-filter-shell column-filters">
+                                    <div class="ally-mobile-name-row">
+                                        <input type="text" class="header-filter ally-universe-mobile-card-name-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                                    </div>
                                     <div class="ally-filter-icon-row">
                                         <div class="icon-filter-container">
-                                            <div class="special-power-filter-toggles ally-stat-type-to-use-toggles" role="group" aria-label="Filter allies by stat type to use">
+                                            <div class="special-power-filter-toggles ally-stat-type-to-use-toggles ally-stat-type-filter-toggles" data-ally-filter-role="stat" role="group" aria-label="Filter allies by stat type to use">
                                                 <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
                                                     <img src="/src/resources/images/icons/energy.png" alt="Energy">
                                                 </button>
@@ -888,13 +947,37 @@
                                                 <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
                                                     <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
                                                 </button>
-                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" title="Multi Power" aria-label="Toggle Multi Power filter" aria-pressed="false">
                                                     <span class="power-type-filter-text">MP</span>
                                                 </button>
                                             </div>
                                         </div>
                                         <div class="ally-icon-mobile-trailing">
                                             <button type="button" id="clear-ally-filters-mobile-inline" class="clear-filters-btn clear-filters-btn--ally-mobile-inline" onclick="clearAllyUniverseFilters()">Clear filters</button>
+                                        </div>
+                                    </div>
+                                    <div class="ally-filter-icon-row ally-filter-attack-icon-row">
+                                        <div class="icon-filter-container">
+                                            <div class="special-power-filter-toggles ally-attack-type-filter-toggles" data-ally-filter-role="attack" role="group" aria-label="Filter allies by attack type">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy attack filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence attack filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat attack filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power attack filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force attack filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi Power" title="Multi Power" aria-label="Toggle Multi Power attack filter" aria-pressed="false">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -969,7 +969,7 @@ window.getSelectedSpecialFunctionFilterFields = getSelectedSpecialFunctionFilter
 window.cardMatchesFunctionIconFilters = cardMatchesFunctionIconFilters;
 window.setupSpecialCardSearch = setupSpecialCardSearch;
 
-/** True when the mobile mission-set &lt;select&gt; is the active filter UI (matches mobile-layout.css). */
+/** True in mobile layout — use mobile card-name field; mission set always uses `#missions-mission-set-filter` (DTV + MV). */
 function missionsFilterUsesMobileSelect() {
     if (typeof document !== 'undefined' && document.documentElement.classList.contains('layout-mobile')) {
         return true;
@@ -1061,10 +1061,6 @@ function setupMissionSearch() {
         applyMissionFilters();
     });
 
-    document.querySelectorAll('#missions-tab input[type="checkbox"]').forEach((checkbox) => {
-        checkbox.addEventListener('change', applyMissionFilters);
-    });
-
     const missionSetSelect = document.getElementById('missions-mission-set-filter');
     if (missionSetSelect && !missionSetSelect.dataset.missionFilterBound) {
         missionSetSelect.addEventListener('change', applyMissionFilters);
@@ -1081,10 +1077,20 @@ function setupMissionSearch() {
             applyMissionFilters();
         });
     }
+
+    const missionHeaderCardNameInput = document.getElementById('missions-header-card-name-filter');
+    if (missionHeaderCardNameInput && !missionHeaderCardNameInput.dataset.missionHeaderNameFilterBound) {
+        missionHeaderCardNameInput.dataset.missionHeaderNameFilterBound = 'true';
+        missionHeaderCardNameInput.addEventListener('input', () => {
+            if (!window.missionsData || window.missionsData.length === 0) {
+                return;
+            }
+            applyMissionFilters();
+        });
+    }
 }
 
 function applyMissionFilters() {
-    const tbody = document.getElementById('missions-tbody');
     const missions = window.missionsData || [];
     const searchInput = document.getElementById('search-input');
     const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
@@ -1105,28 +1111,23 @@ function applyMissionFilters() {
                 (mission) => mission.card_name && mission.card_name.toLowerCase().includes(nameTerm)
             );
         }
-
-        const sel = document.getElementById('missions-mission-set-filter');
-        const v = sel && sel.value ? sel.value : '';
-        if (!v) {
-            displayMissions(pool);
-            return;
+    } else {
+        const headerNameEl = document.getElementById('missions-header-card-name-filter');
+        const headerNameTerm = headerNameEl && headerNameEl.value ? headerNameEl.value.trim().toLowerCase() : '';
+        if (headerNameTerm) {
+            pool = pool.filter(
+                (mission) => mission.card_name && mission.card_name.toLowerCase().includes(headerNameTerm)
+            );
         }
-        displayMissions(pool.filter((m) => m.mission_set === v));
-        return;
     }
 
-    const selectedMissionSets = Array.from(document.querySelectorAll('#missions-tab input[type="checkbox"]:checked')).map(
-        (checkbox) => checkbox.value
-    );
-
-    if (selectedMissionSets.length === 0) {
-        tbody.innerHTML =
-            '<tr><td colspan="4" class="no-results">No mission sets selected</td></tr>';
+    const sel = document.getElementById('missions-mission-set-filter');
+    const v = sel && sel.value ? sel.value : '';
+    if (!v) {
+        displayMissions(pool);
         return;
     }
-
-    displayMissions(pool.filter((mission) => selectedMissionSets.includes(mission.mission_set)));
+    displayMissions(pool.filter((m) => m.mission_set === v));
 }
 
 window.applyMissionFilters = applyMissionFilters;
@@ -1232,6 +1233,49 @@ function applyEventsFilters() {
 
 window.applyEventsFilters = applyEventsFilters;
 
+function allyPowerTypeMatchesSel(sel, typeStr) {
+    const t = String(typeStr || '').trim();
+    if (sel === 'Multi Power' || sel === 'Multi-Power') {
+        return t === 'Multi Power' || t === 'Multi-Power';
+    }
+    return t === sel;
+}
+
+function allyUniqueActivePowerTypes(buttonSelector) {
+    const set = new Set();
+    document.querySelectorAll(buttonSelector).forEach((btn) => {
+        if (btn.classList.contains('is-active')) {
+            const t = btn.getAttribute('data-power-type');
+            if (t) set.add(t);
+        }
+    });
+    return Array.from(set);
+}
+
+function allyCardNameColumnTerm() {
+    const tab = document.getElementById('ally-universe-tab');
+    const d = document.getElementById('ally-card-name-filter');
+    const m = tab && tab.querySelector('.ally-universe-mobile-card-name-filter');
+    const raw = (d && d.value) || (m && m.value) || '';
+    return String(raw).trim().toLowerCase();
+}
+
+function syncAllyUniverseDesktopFiltersToMobile() {
+    const tab = document.getElementById('ally-universe-tab');
+    if (!tab) return;
+    const dName = document.getElementById('ally-card-name-filter');
+    const mName = tab.querySelector('.ally-universe-mobile-card-name-filter');
+    if (dName && mName) mName.value = dName.value;
+}
+
+function syncAllyUniverseMobileFiltersToDesktop() {
+    const tab = document.getElementById('ally-universe-tab');
+    if (!tab) return;
+    const dName = document.getElementById('ally-card-name-filter');
+    const mName = tab.querySelector('.ally-universe-mobile-card-name-filter');
+    if (dName && mName) dName.value = mName.value;
+}
+
 function applyAllyUniverseFilters() {
     const pool = window.allyUniverseData;
     if (!pool || pool.length === 0) {
@@ -1243,17 +1287,25 @@ function applyAllyUniverseFilters() {
 
     const searchInput = document.getElementById('search-input');
     const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+    const nameColTerm = allyCardNameColumnTerm();
 
-    const toggles = document.querySelectorAll(
-        '#ally-universe-table .ally-stat-type-to-use-toggles .power-type-filter-toggle.is-active'
+    const selectedStatTypes = allyUniqueActivePowerTypes(
+        '#ally-universe-table .ally-stat-type-filter-toggles .power-type-filter-toggle'
     );
-    const selectedTypes = Array.from(toggles)
-        .map((b) => b.getAttribute('data-power-type'))
-        .filter(Boolean);
+    const selectedAttackTypes = allyUniqueActivePowerTypes(
+        '#ally-universe-table .ally-attack-type-filter-toggles .power-type-filter-toggle'
+    );
 
     const safeLower = (v) => String(v ?? '').toLowerCase();
 
     const filtered = pool.filter((card) => {
+        if (nameColTerm) {
+            const nm = card.card_name && safeLower(card.card_name);
+            if (!nm || !nm.includes(nameColTerm)) {
+                return false;
+            }
+        }
+
         if (rawTerm) {
             const match =
                 (card.card_name && safeLower(card.card_name).includes(rawTerm)) ||
@@ -1268,18 +1320,22 @@ function applyAllyUniverseFilters() {
             }
         }
 
-        if (selectedTypes.length > 0) {
+        if (selectedStatTypes.length > 0) {
             const t = String(card.stat_type_to_use || '').trim();
-            const ok = selectedTypes.some((sel) => {
-                if (sel === 'Multi-Power') {
-                    return t === 'Multi Power' || t === 'Multi-Power';
-                }
-                return t === sel;
-            });
+            const ok = selectedStatTypes.some((sel) => allyPowerTypeMatchesSel(sel, t));
             if (!ok) {
                 return false;
             }
         }
+
+        if (selectedAttackTypes.length > 0) {
+            const t = String(card.attack_type || '').trim();
+            const ok = selectedAttackTypes.some((sel) => allyPowerTypeMatchesSel(sel, t));
+            if (!ok) {
+                return false;
+            }
+        }
+
         return true;
     });
 
@@ -1295,20 +1351,57 @@ function setupAllyUniverseTableFilters() {
     }
     root.dataset.allyUniverseFiltersBound = 'true';
 
-    root.querySelectorAll('.ally-stat-type-to-use-toggles .power-type-filter-toggle').forEach((btn) => {
+    root.querySelectorAll('[data-ally-filter-role] .power-type-filter-toggle').forEach((btn) => {
         btn.addEventListener('click', () => {
-            btn.classList.toggle('is-active');
-            btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
+            const roleHost = btn.closest('[data-ally-filter-role]');
+            const role = roleHost && roleHost.getAttribute('data-ally-filter-role');
+            if (!role) return;
+            const type = btn.getAttribute('data-power-type');
+            const willBeActive = !btn.classList.contains('is-active');
+            document
+                .querySelectorAll(`#ally-universe-tab [data-ally-filter-role="${role}"] .power-type-filter-toggle`)
+                .forEach((b) => {
+                    if (b.getAttribute('data-power-type') === type) {
+                        b.classList.toggle('is-active', willBeActive);
+                        b.setAttribute('aria-pressed', String(willBeActive));
+                    }
+                });
             applyAllyUniverseFilters();
         });
     });
 
+    let debounceAlly = null;
+    const debouncedApplyAlly = () => {
+        clearTimeout(debounceAlly);
+        debounceAlly = setTimeout(() => applyAllyUniverseFilters(), 180);
+    };
+
+    const tab = document.getElementById('ally-universe-tab');
+    const nameDesktop = document.getElementById('ally-card-name-filter');
+    if (nameDesktop) {
+        nameDesktop.addEventListener('input', () => {
+            syncAllyUniverseDesktopFiltersToMobile();
+            debouncedApplyAlly();
+        });
+    }
+    if (tab) {
+        tab.querySelectorAll('.ally-universe-mobile-card-name-filter').forEach((el) => {
+            el.addEventListener('input', () => {
+                syncAllyUniverseMobileFiltersToDesktop();
+                debouncedApplyAlly();
+            });
+        });
+    }
+
     window.addEventListener('layout-mode-change', () => {
+        syncAllyUniverseDesktopFiltersToMobile();
         const t = document.getElementById('ally-universe-tab');
         if (t && t.style.display !== 'none' && window.allyUniverseData && window.allyUniverseData.length > 0) {
             applyAllyUniverseFilters();
         }
     });
+
+    syncAllyUniverseDesktopFiltersToMobile();
 }
 
 function setupAllyUniverseSearch() {

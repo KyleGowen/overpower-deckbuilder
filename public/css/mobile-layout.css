@@ -277,10 +277,10 @@
 }
 
 /* Missions: relax desktop min-widths on mobile (tbody card layout uses full width) */
-.layout-mobile #missions-table th:nth-child(2),
-.layout-mobile #missions-table td:nth-child(2),
-.layout-mobile #missions-table th:nth-child(4),
-.layout-mobile #missions-table td:nth-child(4) {
+.layout-mobile #missions-table thead tr:first-child th:nth-child(2),
+.layout-mobile #missions-table tbody td:nth-child(2),
+.layout-mobile #missions-table thead tr:first-child th:nth-child(4),
+.layout-mobile #missions-table tbody td:nth-child(4) {
     min-width: 0 !important;
 }
 
@@ -1396,9 +1396,8 @@
     border-radius: 0;
 }
 
-.layout-mobile #missions-table thead tr.missions-filter-row > th.missions-filter-clear-th,
-.layout-mobile #missions-table thead tr.missions-filter-row > th.missions-filter-spacer-th,
-.layout-mobile #missions-table thead tr.missions-filter-row > th.missions-filter-empty-th {
+.layout-mobile #missions-table thead tr.missions-filter-row > th.missions-filter-leading-th,
+.layout-mobile #missions-table thead tr.missions-filter-row > th.missions-filter-card-name-th {
     display: none !important;
 }
 
@@ -1414,10 +1413,6 @@
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
-}
-
-.layout-mobile #missions-table .missions-checkbox-group {
-    display: none !important;
 }
 
 .layout-mobile #missions-table .missions-mobile-set-row,
@@ -2106,6 +2101,10 @@
     border: 0;
 }
 
+.layout-mobile #ally-universe-table thead tr.ally-desktop-filter-row {
+    display: none !important;
+}
+
 .layout-mobile #ally-universe-table thead tr.ally-filter-row {
     --ally-header-shell-bg: rgba(10, 28, 32, 0.96);
     --ally-header-shell-border: rgba(78, 205, 196, 0.38);
@@ -2153,6 +2152,15 @@
     gap: 12px;
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
+}
+
+.layout-mobile #ally-universe-table .ally-mobile-name-row {
+    width: 100%;
+}
+
+.layout-mobile #ally-universe-table .ally-mobile-name-row .header-filter {
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -5722,9 +5730,8 @@
         border-radius: 0;
     }
 
-    #database-view #missions-table thead tr.missions-filter-row > th.missions-filter-clear-th,
-    #database-view #missions-table thead tr.missions-filter-row > th.missions-filter-spacer-th,
-    #database-view #missions-table thead tr.missions-filter-row > th.missions-filter-empty-th {
+    #database-view #missions-table thead tr.missions-filter-row > th.missions-filter-leading-th,
+    #database-view #missions-table thead tr.missions-filter-row > th.missions-filter-card-name-th {
         display: none !important;
     }
 
@@ -5740,10 +5747,6 @@
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
-    }
-
-    #database-view #missions-table .missions-checkbox-group {
-        display: none !important;
     }
 
     #database-view #missions-table .missions-mobile-set-row,
@@ -6421,6 +6424,10 @@
         border: 0;
     }
 
+    #database-view #ally-universe-table thead tr.ally-desktop-filter-row {
+        display: none !important;
+    }
+
     #database-view #ally-universe-table thead tr.ally-filter-row {
         --ally-header-shell-bg: rgba(10, 28, 32, 0.96);
         --ally-header-shell-border: rgba(78, 205, 196, 0.38);
@@ -6468,6 +6475,15 @@
         gap: 12px;
         width: 100%;
         max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #database-view #ally-universe-table .ally-mobile-name-row {
+        width: 100%;
+    }
+
+    #database-view #ally-universe-table .ally-mobile-name-row .header-filter {
+        width: 100%;
         box-sizing: border-box;
     }
 

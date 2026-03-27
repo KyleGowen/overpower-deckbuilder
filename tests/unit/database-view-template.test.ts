@@ -110,6 +110,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="missions-tbody"');
             expect(templateContent).toContain('id="missions-mission-set-filter"');
             expect(templateContent).toContain('id="missions-mobile-card-name-filter"');
+            expect(templateContent).toContain('id="missions-header-card-name-filter"');
         });
 
         it('should contain events table', () => {
@@ -134,6 +135,10 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="ally-universe-table"');
             expect(templateContent).toContain('id="ally-universe-tbody"');
             expect(templateContent).toContain('onclick="clearAllyUniverseFilters()"');
+            expect(templateContent).toContain('ally-desktop-filter-row');
+            expect(templateContent).toContain('<th>Attack</th>');
+            expect(templateContent).toContain('id="ally-card-name-filter"');
+            expect(templateContent).toContain('colspan="7"');
         });
 
         it('should contain training table', () => {
@@ -186,11 +191,10 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="power-value-max"');
         });
 
-        it('should contain mission set checkboxes', () => {
-            expect(templateContent).toContain('value="King of the Jungle"');
-            expect(templateContent).toContain('value="The Call of Cthulhu"');
-            expect(templateContent).toContain('value="Time Wars: Rise of the Gods"');
-            expect(templateContent).toContain('value="The Warlord of Mars"');
+        it('should contain mission set select (options populated by JS)', () => {
+            expect(templateContent).toContain('id="missions-mission-set-filter"');
+            expect(templateContent).toContain('option value="">All</option>');
+            expect(templateContent).not.toContain('missions-checkbox-group');
         });
 
         it('should contain power type filter toggles (matches live DBV icon buttons)', () => {

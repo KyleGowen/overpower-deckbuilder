@@ -400,7 +400,18 @@ describe('Search Functionality Integration Tests', () => {
 
     it('should return cards with all required fields', async () => {
       const endpoints = [
-        { url: 'http://localhost:3000/api/ally-universe', requiredFields: ['id', 'card_name', 'stat_to_use', 'stat_type_to_use', 'attack_value', 'attack_type', 'card_text'] },
+        {
+          url: 'http://localhost:3000/api/ally-universe',
+          requiredFields: [
+            'id',
+            'card_name',
+            'stat_to_use',
+            'stat_type_to_use',
+            'attack_value',
+            'attack_type',
+            'card_text',
+          ],
+        },
         { url: 'http://localhost:3000/api/training', requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
         { url: 'http://localhost:3000/api/basic-universe', requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
       ];

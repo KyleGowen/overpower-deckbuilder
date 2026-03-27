@@ -18,12 +18,14 @@ describe('mobile-layout.css (DBV Missions tab)', () => {
             /\.layout-mobile\s+#missions-table\s+thead\s+tr\.missions-filter-row[\s\S]*?display:\s*flex[\s\S]*?border-radius:\s*12px/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#missions-table\s+thead\s+tr\.missions-filter-row\s*>\s*th\.missions-filter-clear-th[\s\S]*?display:\s*none\s*!important/
+            /\.layout-mobile\s+#missions-table\s+thead\s+tr\.missions-filter-row\s*>\s*th\.missions-filter-leading-th[\s\S]*?display:\s*none\s*!important/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#missions-table\s+thead\s+tr\.missions-filter-row\s*>\s*th\.missions-filter-card-name-th[\s\S]*?display:\s*none\s*!important/
         );
     });
 
-    it('hides checkbox group and shows mission-set select on mobile', () => {
-        expect(css).toMatch(/\.layout-mobile\s+#missions-table\s+\.missions-checkbox-group[\s\S]*?display:\s*none\s*!important/);
+    it('shows mission-set select shell on mobile', () => {
         expect(css).toMatch(/\.layout-mobile\s+#missions-table\s+\.missions-mobile-set-row[\s\S]*?display:\s*flex/);
         expect(css).toMatch(
             /\.layout-mobile\s+#missions-table\s+\.missions-mobile-set-row\s*,\s*\.layout-mobile\s+#missions-table\s+\.missions-mobile-card-name-row\s*\{[\s\S]*?display:\s*flex/
@@ -64,9 +66,6 @@ describe('mobile-layout.css (DBV Missions tab)', () => {
         expect(css).toMatch(
             /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#missions-table[\s\S]*?--dbv-mobile-missions-portrait-img:\s*min\(\s*100%\s*,\s*870px\s*\)/
         );
-        expect(css).toMatch(
-            /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#missions-table\s+\.missions-checkbox-group[\s\S]*?display:\s*none\s*!important/
-        );
     });
 
     it('uses teal #4ecdc4 for mission-set dropdown label (matches DBV data-label accent)', () => {
@@ -87,14 +86,16 @@ describe('database-view.css (DBV Missions — desktop)', () => {
         css = readFileSync(cssPath, 'utf8');
     });
 
-    it('hides mobile-only mission set and card-name filter rows on desktop', () => {
-        expect(css).toMatch(
-            /#missions-table\s+\.missions-mobile-set-row\s*,\s*\n#missions-table\s+\.missions-mobile-card-name-row\s*\{[\s\S]*?display:\s*none/
-        );
+    it('shows mission-set row on desktop; hides mobile-only card-name row', () => {
+        expect(css).toMatch(/#missions-table\s+\.missions-mobile-set-row\s*\{[\s\S]*?display:\s*flex/);
+        expect(css).toMatch(/#missions-table\s+\.missions-mobile-card-name-row\s*\{[\s\S]*?display:\s*none/);
     });
 
-    it('hides missions filter-row placeholder th (no Clear button column)', () => {
-        expect(css).toMatch(/#missions-table\s+\.missions-filter-clear-th\s*\{[\s\S]*?display:\s*none\s*!important/);
+    it('keeps filter-row column alignment via colspan leading th (not display:none on a cell)', () => {
+        expect(css).toMatch(/#missions-table\s+\.missions-filter-leading-th\s*\{[\s\S]*?padding:\s*0/);
+        expect(css).not.toMatch(
+            /#missions-table\s+\.missions-filter-clear-th\s*\{[\s\S]*?display:\s*none\s*!important/
+        );
     });
 });
 
@@ -105,11 +106,16 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
     it('index.html includes Missions mobile filter hooks (no tab-level Clear control)', () => {
         const html = readFileSync(indexPath, 'utf8');
         expect(html).toContain('missions-filter-row');
+        expect(html).toContain('colspan="2"');
+        expect(html).toContain('missions-filter-leading-th');
+        expect(html).not.toContain('missions-filter-clear-th');
         expect(html).toContain('id="missions-mission-set-filter"');
         expect(html).toContain('missions-mission-set-filter');
         expect(html).toContain('id="missions-mobile-card-name-filter"');
         expect(html).toContain('missions-mobile-card-name-row');
-        expect(html).toContain('missions-checkbox-group');
+        expect(html).toContain('id="missions-header-card-name-filter"');
+        expect(html).toContain('missions-filter-card-name-th');
+        expect(html).not.toContain('missions-checkbox-group');
         expect(html).not.toContain('clear-missions-filters-mobile');
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
     });
@@ -117,8 +123,11 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
     it('template mirrors index Missions structure (4-column table)', () => {
         const html = readFileSync(templatePath, 'utf8');
         expect(html).toContain('missions-filter-row');
+        expect(html).toContain('colspan="2"');
+        expect(html).toContain('missions-filter-leading-th');
         expect(html).toContain('id="missions-mission-set-filter"');
         expect(html).toContain('id="missions-mobile-card-name-filter"');
+        expect(html).toContain('id="missions-header-card-name-filter"');
         expect(html).toContain('colspan="4" class="loading">Loading missions');
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
     });
@@ -156,12 +165,14 @@ describe('search-filter-functions.js (Missions filters)', () => {
         expect(source).toContain('window.applyMissionFilters = applyMissionFilters');
         expect(source).toContain("getElementById('missions-mission-set-filter')");
         expect(source).toContain("getElementById('missions-mobile-card-name-filter')");
+        expect(source).toContain("getElementById('missions-header-card-name-filter')");
     });
 
-    it('applyMissionFilters intersects search text with mission set selection', () => {
+    it('applyMissionFilters intersects search text with mission set select', () => {
         expect(source).toContain('const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase()');
         expect(source).toContain('let pool = missions');
         expect(source).toContain('missionsFilterUsesMobileSelect()');
+        expect(source).toContain('m.mission_set === v');
     });
 
     it('re-runs applyMissionFilters on layout-mode-change when Missions tab is visible (caption vs hidden columns)', () => {
@@ -203,12 +214,14 @@ describe('filter-functions.js (clearMissionsFilters)', () => {
         source = readFileSync(jsPath, 'utf8');
     });
 
-    it('clears search, resets checkboxes and select, reloads missions', () => {
+    it('clears search, resets mission-set select and card-name inputs, reloads missions', () => {
         expect(source).toContain('function clearMissionsFilters()');
         expect(source).toContain("getElementById('missions-mission-set-filter')");
         expect(source).toContain("getElementById('missions-mobile-card-name-filter')");
+        expect(source).toContain("getElementById('missions-header-card-name-filter')");
         expect(source).toContain('loadMissions()');
         expect(source).toContain("searchInput.value = ''");
+        expect(source).not.toContain("querySelectorAll('#missions-tab input[type=\"checkbox\"]')");
         expect(source).not.toMatch(/function clearMissionsFilters\(\)\s*\{\s*applyFilters\(\)/);
     });
 });
