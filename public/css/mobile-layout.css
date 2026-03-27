@@ -6525,8 +6525,17 @@
         box-sizing: border-box;
     }
 
+    #database-view #ally-universe-table .ally-mobile-filter-shell > .ally-filter-icon-row:not(.ally-filter-attack-icon-row) {
+        order: 1;
+    }
+
     #database-view #ally-universe-table .ally-mobile-name-row {
+        order: 2;
         width: 100%;
+    }
+
+    #database-view #ally-universe-table .ally-mobile-filter-shell > .ally-filter-attack-icon-row {
+        order: 3;
     }
 
     #database-view #ally-universe-table .ally-mobile-name-row .header-filter {
@@ -8877,4 +8886,17 @@
 /* Ally MV: second power-type strip was attack-type (same six icons, wrapped grid) — hide; DTV keeps both columns */
 .layout-mobile #database-view #ally-universe-table .ally-filter-icon-row.ally-filter-attack-icon-row {
     display: none !important;
+}
+
+/* Ally MV: icon strip above name search (flex order; DOM order unchanged for DTV / a11y baseline) */
+.layout-mobile #database-view #ally-universe-table .ally-mobile-filter-shell > .ally-filter-icon-row:not(.ally-filter-attack-icon-row) {
+    order: 1;
+}
+
+.layout-mobile #database-view #ally-universe-table .ally-mobile-filter-shell > .ally-mobile-name-row {
+    order: 2;
+}
+
+.layout-mobile #database-view #ally-universe-table .ally-mobile-filter-shell > .ally-filter-attack-icon-row {
+    order: 3;
 }

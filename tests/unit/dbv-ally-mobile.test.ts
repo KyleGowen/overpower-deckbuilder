@@ -60,6 +60,15 @@ describe('mobile-layout.css (DBV Ally tab)', () => {
             /\.layout-mobile\s+#database-view\s+#ally-universe-table\s+\.ally-filter-icon-row\.ally-filter-attack-icon-row[\s\S]*?display:\s*none\s*!important/
         );
     });
+
+    it('places stat icon strip above name search in ally-mobile-filter-shell (flex order)', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#ally-universe-table\s+\.ally-mobile-filter-shell\s*>\s*\.ally-filter-icon-row:not\(\.ally-filter-attack-icon-row\)[\s\S]*?order:\s*1/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#ally-universe-table\s+\.ally-mobile-filter-shell\s*>\s*\.ally-mobile-name-row[\s\S]*?order:\s*2/
+        );
+    });
 });
 
 describe('database-view.css (DBV Ally — desktop)', () => {
