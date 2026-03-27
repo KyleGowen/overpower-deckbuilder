@@ -24,10 +24,12 @@ describe('Global Navigation Component', () => {
             <div id="database-view" class="view-removed"></div>
             <div id="deck-builder" class="view-active"></div>
             <div id="collection-view" class="view-removed"></div>
+            <div class="header-nav-cluster">
             <div class="header-app-actions">
             <button id="databaseViewBtn"></button>
             <button id="deckBuilderBtn"></button>
             <button id="collectionViewBtn"></button>
+            </div>
             </div>
             <div id="database-stats" style="display: none;"></div>
             <div id="deck-stats" style="display: none;"></div>

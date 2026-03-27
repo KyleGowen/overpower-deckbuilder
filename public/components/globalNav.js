@@ -292,19 +292,19 @@ function switchToCollectionView() {
 /** Mobile header grid: when Collection is hidden (logged out), .collection-tab-hidden spans Card Database across row 1. */
 function syncHeaderCollectionLayout() {
     const collectionBtn = document.getElementById('collectionViewBtn');
-    const actions = document.querySelector('.header-app-actions');
-    if (!actions) return;
+    const navCluster = document.querySelector('.header-nav-cluster');
+    if (!navCluster) return;
     const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
     if (!collectionBtn) {
-        actions.classList.add('collection-tab-hidden');
+        navCluster.classList.add('collection-tab-hidden');
         return;
     }
     if (currentUser) {
         collectionBtn.removeAttribute('style');
-        actions.classList.remove('collection-tab-hidden');
+        navCluster.classList.remove('collection-tab-hidden');
     } else {
         collectionBtn.style.display = 'none';
-        actions.classList.add('collection-tab-hidden');
+        navCluster.classList.add('collection-tab-hidden');
     }
 }
 

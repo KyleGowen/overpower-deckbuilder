@@ -208,10 +208,10 @@ describe('mobile-layout.css (M1 shell)', () => {
         expect(css).toContain('.layout-mobile .header-center');
         expect(css).toContain('position: static');
         expect(css).toMatch(
-            /\.layout-mobile\s+\.header-app-actions[\s\S]*?grid-template-columns:\s*1fr\s+1fr/
+            /\.layout-mobile\s+\.header-nav-cluster[\s\S]*?grid-template-columns:\s*1fr\s+1fr/
         );
         expect(css).toContain('.layout-mobile .header-nav-cluster');
-        expect(css).toContain('.layout-mobile .header-app-actions .app-tab-button');
+        expect(css).toContain('.layout-mobile .header-nav-cluster .app-tab-button');
         expect(css).toContain('min-height: 44px');
         expect(css).toContain('.layout-mobile #newDeckBtn');
         expect(css).toMatch(

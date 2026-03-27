@@ -100,6 +100,8 @@
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
+    /* Breathing room below thead “Card Name” label (DTV; MV hides this th) */
+    padding-top: 6px;
 }
 
 /* Fix Card Name column width to prevent resizing when content changes */

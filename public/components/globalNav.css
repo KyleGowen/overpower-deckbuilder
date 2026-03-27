@@ -41,7 +41,7 @@
     align-items: center;
 }
 
-/* App tabs + +Deck in one horizontal group (centered bar on desktop; single row on .layout-mobile) */
+/* View tabs only (centered on desktop). + Deck lives in .header-right next to the welcome menu. */
 .header-app-actions {
     display: flex;
     flex-direction: row;

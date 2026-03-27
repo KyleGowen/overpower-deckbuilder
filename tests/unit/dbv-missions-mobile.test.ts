@@ -91,6 +91,12 @@ describe('database-view.css (DBV Missions — desktop)', () => {
         expect(css).toMatch(/#missions-table\s+\.missions-mobile-card-name-row\s*\{[\s\S]*?display:\s*none/);
     });
 
+    it('hides redundant mission-set inline label on DTV (thead already says Mission Set)', () => {
+        expect(css).toMatch(
+            /#missions-table\s+\.missions-mobile-set-row\s*>\s*\.missions-mobile-set-label\s*\{[\s\S]*?display:\s*none/
+        );
+    });
+
     it('keeps filter-row column alignment via colspan leading th (not display:none on a cell)', () => {
         expect(css).toMatch(/#missions-table\s+\.missions-filter-leading-th\s*\{[\s\S]*?padding:\s*0/);
         expect(css).not.toMatch(

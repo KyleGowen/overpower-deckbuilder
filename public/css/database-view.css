@@ -876,14 +876,9 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: none;
 }
 
-#missions-table .missions-mobile-set-label {
-    color: #4ecdc4;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    text-align: center;
-    margin: 0;
+/* Redundant with thead "Mission Set" on DTV; MV shows label in mobile-layout.css */
+#missions-table .missions-mobile-set-row > .missions-mobile-set-label {
+    display: none;
 }
 
 #missions-table .missions-mission-set-filter {

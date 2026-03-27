@@ -1442,6 +1442,10 @@
     margin: 0;
 }
 
+.layout-mobile #missions-table .missions-mobile-set-row > .missions-mobile-set-label {
+    display: block;
+}
+
 .layout-mobile #missions-table .missions-mission-set-filter,
 .layout-mobile #missions-table .missions-mobile-card-name-filter {
     flex: 1 1 100%;
@@ -5074,13 +5078,18 @@
     margin-bottom: 12px;
 }
 
+/* 2×2 app buttons + full-width welcome row: grid on cluster; wrappers use display:contents so #newDeckBtn (in .header-right) shares the grid with tabs */
 .layout-mobile .header-nav-cluster {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(44px, 1fr) minmax(44px, 1fr) auto;
     flex: 1 1 0;
     min-width: 0;
-    align-items: stretch;
     gap: 8px;
+    width: 100%;
+    max-width: 510px;
+    margin-left: auto;
+    box-sizing: border-box;
 }
 
 .layout-mobile .header-left {
@@ -5096,20 +5105,11 @@
     position: static;
     left: auto;
     transform: none;
-    display: block;
-    width: 100%;
-    min-width: 0;
-    flex: none;
+    display: contents;
 }
 
 .layout-mobile .header-right {
-    flex: none;
-    width: 100%;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: stretch;
-    gap: 8px;
+    display: contents;
 }
 
 .layout-mobile .header-logo {
@@ -5119,20 +5119,11 @@
     height: auto;
 }
 
-/* Row1: Card Database | Collection — Row2: Deck Builder | + Deck (DOM order differs; grid placement fixes it) */
 .layout-mobile .header-app-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: minmax(44px, 1fr) minmax(44px, 1fr);
-    gap: 8px;
-    width: 100%;
-    max-width: 510px;
-    margin-left: auto;
-    min-width: 0;
-    box-sizing: border-box;
+    display: contents;
 }
 
-.layout-mobile .header-app-actions .app-tabs {
+.layout-mobile .header-nav-cluster .app-tabs {
     display: contents;
 }
 
@@ -5157,23 +5148,28 @@
 }
 
 /* Logged-out: Collection hidden — span Card Database across top row */
-.layout-mobile .header-app-actions.collection-tab-hidden #databaseViewBtn {
+.layout-mobile .header-nav-cluster.collection-tab-hidden #databaseViewBtn {
     grid-column: 1 / -1;
     grid-row: 1;
 }
 
-.layout-mobile .header-app-actions.collection-tab-hidden #deckBuilderBtn {
+.layout-mobile .header-nav-cluster.collection-tab-hidden #deckBuilderBtn {
     grid-column: 1;
     grid-row: 2;
 }
 
-.layout-mobile .header-app-actions.collection-tab-hidden #newDeckBtn {
+.layout-mobile .header-nav-cluster.collection-tab-hidden #newDeckBtn {
     grid-column: 2;
     grid-row: 2;
 }
 
-.layout-mobile .header-app-actions .app-tab-button,
-.layout-mobile .header-app-actions .new-deck-btn {
+.layout-mobile #userMenu {
+    grid-column: 1 / -1;
+    grid-row: 3;
+}
+
+.layout-mobile .header-nav-cluster .app-tab-button,
+.layout-mobile .header-nav-cluster .new-deck-btn {
     width: 100%;
     min-height: 44px;
     min-width: 0;
@@ -5773,6 +5769,10 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
         margin: 0;
+    }
+
+    #database-view #missions-table .missions-mobile-set-row > .missions-mobile-set-label {
+        display: block;
     }
 
     #database-view #missions-table .missions-mission-set-filter,

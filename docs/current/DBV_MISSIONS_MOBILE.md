@@ -26,7 +26,7 @@ Under **`.layout-mobile #missions-table`** in [`mobile-layout.css`](../../public
 - **`thead`** **`display: block`**, first label row **visually hidden**.
 - **`tr.missions-filter-row`**: flex + wrap, **12px** radius, **`--missions-header-shell-*`** (teal border / dark shell).
 - **Hidden on mobile:** **`.missions-filter-leading-th`** (**`colspan="2"`** placeholder over Image + actions — must stay in the layout; hidden on MV with **`display: none`** only there), **`.missions-filter-card-name-th`** (desktop-only **`.header-filter`**; mobile uses **`#missions-mobile-card-name-filter`**).
-- **`.missions-mobile-set-row`:** uppercase label **`.missions-mobile-set-label`** (**`color: #4ecdc4`**, matches DBV **`data-label`** headings) + **`#missions-mission-set-filter`** full width (**≥44px** height, teal border).
+- **`.missions-mobile-set-row`:** **`#missions-mission-set-filter`** full width (**≥44px** height on MV, teal border). **MV** also shows uppercase **`.missions-mobile-set-label`** (**`#4ecdc4`**) — **DTV** hides that label (thead **Mission Set** is enough).
 - **`.missions-mobile-card-name-row`:** same label style + **`#missions-mobile-card-name-filter`** (substring match on **`card_name`**, combined with set dropdown and **`#search-input`**).
 - **`@media (max-width: 900px)`**: **`#database-view #missions-table`** repeats the same filter + tbody rules for **`preferDesktopLayout`** on narrow viewports.
 

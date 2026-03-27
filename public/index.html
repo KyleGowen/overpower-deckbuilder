@@ -1004,6 +1004,65 @@
                             <th>Value to Use</th>
                             <th>Bonus</th>
                         </tr>
+                        <tr class="filter-row training-desktop-filter-row">
+                            <th>
+                                <button type="button" class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th>
+                                <input type="text" id="training-card-name-filter" class="header-filter" placeholder="Filter name…" aria-label="Filter training cards by card name">
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles training-type-1-filter-toggles" data-training-filter-role="type1" role="group" aria-label="Filter training cards by Type 1">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy Type 1 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence Type 1 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat Type 1 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power Type 1 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force Type 1 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power Type 1 filter" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles training-type-2-filter-toggles" data-training-filter-role="type2" role="group" aria-label="Filter training cards by Type 2">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy Type 2 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence Type 2 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat Type 2 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power Type 2 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force Type 2 filter" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power Type 2 filter" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th></th>
+                            <th></th>
+                        </tr>
                         <tr class="filter-row training-filter-row">
                             <th class="training-filter-clear-th">
                                 <button type="button" class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
@@ -1066,7 +1125,11 @@
                                 <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
                             </th>
                             <th></th>
-                            <th></th>
+                            <th>
+                                <div class="column-filters basic-universe-desktop-card-name-filters">
+                                    <input type="text" id="basic-universe-card-name-filter" class="filter-input basic-universe-desktop-card-name-input" placeholder="Name" autocomplete="off" aria-label="Filter by card name">
+                                </div>
+                            </th>
                             <th>
                                 <div class="column-filters">
                                     <div class="special-power-filter-toggles basic-universe-desktop-stat-type-toggles" role="group" aria-label="Filter basic universe cards by stat type">
@@ -1092,23 +1155,17 @@
                                 </div>
                             </th>
                             <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="value" placeholder="=" min="6" max="7" aria-label="Value to use equals">
-                                    <div class="range-inputs">
-                                        <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input" aria-label="Value to use minimum">
-                                        <span>-</span>
-                                        <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input" aria-label="Value to use maximum">
-                                    </div>
+                                <div class="column-filters basic-universe-desktop-numeric-stack">
+                                    <input type="number" class="filter-input equals basic-universe-desktop-numeric-stack-input" data-column="value" placeholder="=" min="6" max="7" aria-label="Value to use equals">
+                                    <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input basic-universe-desktop-numeric-stack-input" aria-label="Value to use maximum">
+                                    <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input basic-universe-desktop-numeric-stack-input" aria-label="Value to use minimum">
                                 </div>
                             </th>
                             <th>
-                                <div class="column-filters">
-                                    <input type="number" class="filter-input equals" data-column="bonus" placeholder="=" min="2" max="3" aria-label="Bonus equals">
-                                    <div class="range-inputs">
-                                        <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input" aria-label="Bonus minimum">
-                                        <span>-</span>
-                                        <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input" aria-label="Bonus maximum">
-                                    </div>
+                                <div class="column-filters basic-universe-desktop-numeric-stack">
+                                    <input type="number" class="filter-input equals basic-universe-desktop-numeric-stack-input" data-column="bonus" placeholder="=" min="2" max="3" aria-label="Bonus equals">
+                                    <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input basic-universe-desktop-numeric-stack-input" aria-label="Bonus maximum">
+                                    <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input basic-universe-desktop-numeric-stack-input" aria-label="Bonus minimum">
                                 </div>
                             </th>
                         </tr>
