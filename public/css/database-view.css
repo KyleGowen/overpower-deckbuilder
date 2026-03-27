@@ -1041,7 +1041,12 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     margin-bottom: 0;
 }
 
-/* Basic Universe: mobile-only filter shell (see mobile-layout.css); desktop keeps two header rows with column filters. */
+/* Basic Universe: mobile-only filter shell (see mobile-layout.css); desktop keeps two header rows with column filters.
+   Hide mobile row Clear th on DTV — same pattern as #teamwork-table .teamwork-filter-clear-th (avoids duplicate Clear All). */
+#basic-universe-table thead tr.basic-universe-filter-row > th.basic-universe-filter-clear-th {
+    display: none;
+}
+
 #basic-universe-table thead tr.basic-universe-filter-row > th.basic-universe-filter-controls-th {
     display: none;
 }
@@ -1067,12 +1072,14 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     vertical-align: top;
 }
 
+/* Fill the th so align-items: center actually centers the field under the header + tbody name column */
 #basic-universe-table .basic-universe-desktop-card-name-filters.column-filters {
-    align-items: stretch;
+    width: 100%;
+    align-items: center;
 }
 
 #basic-universe-table .basic-universe-desktop-card-name-input {
-    width: 100%;
+    width: min(100%, 14rem);
     min-width: 5.5rem;
     max-width: 14rem;
     box-sizing: border-box;
@@ -1105,7 +1112,7 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: flex;
     flex-direction: column;
     gap: var(--power-dtv-value-stack-gap);
-    align-items: flex-start;
+    align-items: center;
 }
 
 #power-cards-table .power-cards-desktop-value-stack-input {
