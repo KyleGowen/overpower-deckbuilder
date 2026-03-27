@@ -8,6 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <!-- Layout mode before CSS: sets layout-mobile | layout-desktop on <html> (see /MOBILE_DESIGN.md) -->
     <script src="/js/layout-mode.js"></script>
+    <script src="/js/dbv/location-threat-placeholders.js" defer></script>
     <script src="/js/characters-stat-filter-tabs.js"></script>
     <script src="/js/viewport-positioning.js"></script>
     <link rel="icon" href="/public/resources/images/icons/threat.png" type="image/png">
@@ -434,7 +435,7 @@
                             <th>Image</th>
                             <th></th>
                             <th>Name</th>
-                            <th>Threat Level</th>
+                            <th title="Threat Level"><img src="/src/resources/images/icons/threat.png" alt="Threat Level" class="special-power-type-icon column-header-icon"></th>
                             <th>Special Ability</th>
                         </tr>
                         <tr class="filter-row locations-filter-row">
@@ -448,7 +449,6 @@
                             <th class="locations-filter-threat-th">
                                 <div class="locations-threat-inputs-and-clear">
                                     <input type="number" id="location-threat-min" placeholder="Min" min="0" max="3" class="filter-input" aria-label="Minimum threat">
-                                    <span class="locations-threat-range-sep" aria-hidden="true">-</span>
                                     <input type="number" id="location-threat-max" placeholder="Max" min="0" max="3" class="filter-input" aria-label="Maximum threat">
                                     <button type="button" id="clear-location-filters-mobile" class="clear-filters-btn clear-filters-btn--locations-mobile-inline" onclick="clearLocationFilters()">Clear</button>
                                 </div>

@@ -7,6 +7,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 ## public/index.html (main SPA - canonical)
 
 - /js/layout-mode.js (sync, before CSS — sets `layout-mobile` / `layout-desktop` on `<html>`)
+- /js/dbv/location-threat-placeholders.js (defer, after layout-mode — Locations threat filter placeholders: desktop Min/Max vs mobile “Min Threat Value” / “Max Threat Value”)
 - /js/characters-stat-filter-tabs.js (sync, after layout-mode — DBV `#characters-table` mobile stat tab UI)
 - /js/viewport-positioning.js (sync — `clampRectToViewport` for floating UI)
 - /js/auth-service.js

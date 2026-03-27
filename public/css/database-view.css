@@ -1399,7 +1399,10 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+    align-content: center;
+    justify-content: center;
     gap: 6px;
+    width: 100%;
     box-sizing: border-box;
 }
 

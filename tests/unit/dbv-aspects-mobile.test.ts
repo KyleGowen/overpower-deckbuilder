@@ -203,6 +203,23 @@ describe('card-display-functions.js displayAspects (mobile row contract)', () =>
     });
 });
 
+describe('search-filter-functions.js setupAspectSearch (layout-mode refresh)', () => {
+    const jsPath = path.join(__dirname, '../../public/js/search-filter-functions.js');
+    let source: string;
+
+    beforeAll(() => {
+        source = readFileSync(jsPath, 'utf8');
+    });
+
+    it('re-runs aspects search on layout-mode-change when tab is visible', () => {
+        const fnBlock = source.slice(source.indexOf('function setupAspectSearch()'));
+        expect(fnBlock).toContain("addEventListener('layout-mode-change'");
+        expect(fnBlock).toContain("getElementById('aspects-tab')");
+        expect(fnBlock).toContain('void performAspectSearch()');
+        expect(fnBlock).toContain('aspectLayoutModeBound');
+    });
+});
+
 /** Globals normally split across card-display.js + card-display-functions.js; stubs for isolated eval */
 const CARD_DISPLAY_FUNCTIONS_ASPECTS_PREAMBLE = `
 function getCurrentUser() { return null; }

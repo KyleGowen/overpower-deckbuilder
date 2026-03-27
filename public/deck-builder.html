@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/layout-mode.js"></script>
+    <script src="/js/dbv/location-threat-placeholders.js" defer></script>
     <title>Excelsior Deckbuilder - Characters Database</title>
     <style>
         body {
@@ -3628,7 +3629,7 @@
                         <tr>
                             <th>Image</th>
                             <th>Name</th>
-                            <th>Threat Level</th>
+                            <th title="Threat Level"><img src="/src/resources/images/icons/threat.png" alt="Threat Level" class="special-power-type-icon column-header-icon"></th>
                             <th>Special Ability</th>
                         </tr>
                         <tr class="filter-row">
@@ -3640,7 +3641,6 @@
                                 <div class="column-filters">
                                     <div class="range-inputs">
                                         <input type="number" id="location-threat-min" placeholder="Min" min="0" max="3" class="filter-input">
-                                        <span>-</span>
                                         <input type="number" id="location-threat-max" placeholder="Max" min="0" max="3" class="filter-input">
                                     </div>
                                 </div>

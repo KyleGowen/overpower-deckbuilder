@@ -160,6 +160,10 @@ function setupLocationSearch() {
             }
         });
     }
+
+    if (typeof window.syncLocationThreatFilterPlaceholders === 'function') {
+        window.syncLocationThreatFilterPlaceholders();
+    }
 }
 
 function setupAspectSearch() {
@@ -260,6 +264,17 @@ function setupAspectSearch() {
     }
 
     const debouncedAspectSearch = debounce(performAspectSearch, 300);
+
+    const aspectsTableRoot = document.getElementById('aspects-table');
+    if (aspectsTableRoot && aspectsTableRoot.dataset.aspectLayoutModeBound !== '1') {
+        aspectsTableRoot.dataset.aspectLayoutModeBound = '1';
+        window.addEventListener('layout-mode-change', () => {
+            const aspectsTab = document.getElementById('aspects-tab');
+            if (aspectsTab && aspectsTab.style.display !== 'none') {
+                void performAspectSearch();
+            }
+        });
+    }
 
     [nameSearchInput, locationSearchInput, effectSearchInput].forEach(input => {
         if (input && !input.dataset.aspectSearchBound) {

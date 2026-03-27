@@ -4144,10 +4144,6 @@
     box-sizing: border-box;
 }
 
-.layout-mobile #locations-table .locations-threat-range-sep {
-    display: none;
-}
-
 .layout-mobile #locations-table .locations-threat-inputs-and-clear #location-threat-min {
     flex: 4 1 0;
     min-width: 0;

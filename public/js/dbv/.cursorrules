@@ -5,14 +5,15 @@ This folder holds **DBV-specific** JavaScript loaded as plain `<script>` tags (n
 ## Load order (canonical: `public/index.html`)
 
 1. **`layout-mode.js`** (sync, head) — sets `layout-mobile` / `layout-desktop`; defines `window.isLayoutMobile`.
-2. **`characters-stat-filter-tabs.js`** (sync) — Characters tab mobile stat panels; should use `window.isLayoutMobile()` when branching.
-3. **`dbv/dbv-layout-context.js`** (defer, before `card-display.js`) — `isLayoutMobileForCardDisplay`, `isNarrowViewportDbvBand`.
-4. **`dbv/dbv-tab-data.js`** (defer, before `card-display.js`) — `window.dbvTabData` mirrors legacy `window.missionsData`, `eventsData`, etc.
-5. **`dbv/dbv-render-shared.js`** (defer, after `alphabetization.js`, before `card-display.js`) — caption helpers, `getCardImagePathForDisplay`, row height locks, `groupCardsByVariant`; assigns helpers on **`window`** so `card-display.js` and jsdom `new Function` tests resolve globals.
-6. **`card-display.js`** — Characters / Special / Locations display, `navigateCardImage`, format helpers, assigns remaining `window.*` APIs.
-7. Later: `card-display-functions.js`, `search-filter-functions.js`, `card-data-display.js` — missions, universe tabs, loaders (see `docs/current/DBV_ARCHITECTURE.md`).
+2. **`dbv/location-threat-placeholders.js`** (defer, right after `layout-mode.js` in `index.html` / `deck-builder.html`) — `window.syncLocationThreatFilterPlaceholders`; **Min**/**Max** placeholders on desktop, **Min Threat Value**/**Max Threat Value** on `layout-mobile`; listens for **`layout-mode-change`**.
+3. **`characters-stat-filter-tabs.js`** (sync) — Characters tab mobile stat panels; should use `window.isLayoutMobile()` when branching.
+4. **`dbv/dbv-layout-context.js`** (defer, before `card-display.js`) — `isLayoutMobileForCardDisplay`, `isNarrowViewportDbvBand`.
+5. **`dbv/dbv-tab-data.js`** (defer, before `card-display.js`) — `window.dbvTabData` mirrors legacy `window.missionsData`, `eventsData`, etc.
+6. **`dbv/dbv-render-shared.js`** (defer, after `alphabetization.js`, before `card-display.js`) — caption helpers, `getCardImagePathForDisplay`, row height locks, `groupCardsByVariant`; assigns helpers on **`window`** so `card-display.js` and jsdom `new Function` tests resolve globals.
+7. **`card-display.js`** — Characters / Special / Locations display, `navigateCardImage`, format helpers, assigns remaining `window.*` APIs.
+8. Later: `card-display-functions.js`, `search-filter-functions.js`, `card-data-display.js` — missions, universe tabs, loaders (see `docs/current/DBV_ARCHITECTURE.md`).
 
-**Deck builder** (`deck-builder.html`): only `layout-mode.js` + `characters-stat-filter-tabs.js` today; do not assume `dbv/*` runs there unless you add script tags.
+**Deck builder** (`deck-builder.html`): `layout-mode.js`, **`dbv/location-threat-placeholders.js`** (defer), `characters-stat-filter-tabs.js`, and other DBV scripts as linked in the page head; do not assume other `dbv/*` runs there unless you add script tags.
 
 ## Conventions
 
