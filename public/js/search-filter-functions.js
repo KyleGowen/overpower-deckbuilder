@@ -1443,6 +1443,15 @@ function trainingCardMatchesSelectedTypes(card, selectedTypes) {
     );
 }
 
+function trainingCardNameColumnTerm() {
+    if (typeof document !== 'undefined' && document.documentElement.classList.contains('layout-mobile')) {
+        return '';
+    }
+    const d = document.getElementById('training-card-name-filter');
+    const raw = d && d.value ? d.value : '';
+    return String(raw).trim().toLowerCase();
+}
+
 function applyTrainingFilters() {
     const pool = window.trainingData;
     if (!pool || pool.length === 0) {
@@ -1452,19 +1461,37 @@ function applyTrainingFilters() {
         return;
     }
 
+    const isMobile =
+        typeof document !== 'undefined' && document.documentElement.classList.contains('layout-mobile');
+
     const searchInput = document.getElementById('search-input');
     const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
 
     const toggles = document.querySelectorAll(
         '#training-table .training-stat-type-toggles .power-type-filter-toggle.is-active'
     );
-    const selectedTypes = Array.from(toggles)
+    const selectedTypesMobile = Array.from(toggles)
         .map((b) => b.getAttribute('data-power-type'))
         .filter(Boolean);
+
+    const nameColTerm = trainingCardNameColumnTerm();
+    const selectedType1 = isMobile
+        ? []
+        : allyUniqueActivePowerTypes('#training-table .training-type-1-filter-toggles .power-type-filter-toggle');
+    const selectedType2 = isMobile
+        ? []
+        : allyUniqueActivePowerTypes('#training-table .training-type-2-filter-toggles .power-type-filter-toggle');
 
     const safeLower = (v) => String(v ?? '').toLowerCase();
 
     const filtered = pool.filter((card) => {
+        if (!isMobile && nameColTerm) {
+            const nm = card.card_name && safeLower(card.card_name);
+            if (!nm || !nm.includes(nameColTerm)) {
+                return false;
+            }
+        }
+
         if (rawTerm) {
             const match =
                 (card.card_name && safeLower(card.card_name).includes(rawTerm)) ||
@@ -1477,8 +1504,23 @@ function applyTrainingFilters() {
             }
         }
 
-        if (!trainingCardMatchesSelectedTypes(card, selectedTypes)) {
-            return false;
+        if (isMobile) {
+            if (!trainingCardMatchesSelectedTypes(card, selectedTypesMobile)) {
+                return false;
+            }
+        } else {
+            if (selectedType1.length > 0) {
+                const ok = selectedType1.some((sel) => trainingTypeCellMatchesSel(sel, card.type_1));
+                if (!ok) {
+                    return false;
+                }
+            }
+            if (selectedType2.length > 0) {
+                const ok = selectedType2.some((sel) => trainingTypeCellMatchesSel(sel, card.type_2));
+                if (!ok) {
+                    return false;
+                }
+            }
         }
         return true;
     });
@@ -1495,13 +1537,31 @@ function setupTrainingTableFilters() {
     }
     root.dataset.trainingFiltersBound = 'true';
 
-    root.querySelectorAll('.training-stat-type-toggles .power-type-filter-toggle').forEach((btn) => {
+    const bindToggle = (btn) => {
         btn.addEventListener('click', () => {
             btn.classList.toggle('is-active');
             btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
             applyTrainingFilters();
         });
-    });
+    };
+
+    root.querySelectorAll('.training-stat-type-toggles .power-type-filter-toggle').forEach(bindToggle);
+
+    root
+        .querySelectorAll(
+            '.training-type-1-filter-toggles .power-type-filter-toggle, .training-type-2-filter-toggles .power-type-filter-toggle'
+        )
+        .forEach(bindToggle);
+
+    let debounceTrainingName = null;
+    const debouncedApplyTraining = () => {
+        clearTimeout(debounceTrainingName);
+        debounceTrainingName = setTimeout(() => applyTrainingFilters(), 180);
+    };
+    const nameDesktop = document.getElementById('training-card-name-filter');
+    if (nameDesktop) {
+        nameDesktop.addEventListener('input', debouncedApplyTraining);
+    }
 
     window.addEventListener('layout-mode-change', () => {
         const t = document.getElementById('training-tab');

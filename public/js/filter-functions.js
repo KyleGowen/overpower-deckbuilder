@@ -252,13 +252,15 @@ function clearAllyUniverseFilters() {
 }
 
 function clearTrainingFilters() {
-    document
-        .querySelectorAll('#training-table .training-stat-type-toggles .power-type-filter-toggle')
-        .forEach((btn) => {
-            btn.classList.remove('is-active', 'is-disabled');
-            btn.setAttribute('aria-pressed', 'false');
-            btn.disabled = false;
-        });
+    document.querySelectorAll('#training-table .power-type-filter-toggle').forEach((btn) => {
+        btn.classList.remove('is-active', 'is-disabled');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.disabled = false;
+    });
+    const nameF = document.getElementById('training-card-name-filter');
+    if (nameF) {
+        nameF.value = '';
+    }
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.value = '';
@@ -276,6 +278,10 @@ function clearBasicUniverseFilters() {
     document.querySelectorAll('#basic-universe-tab input[type="number"]').forEach((input) => {
         input.value = '';
     });
+    const basicNameFilter = document.getElementById('basic-universe-card-name-filter');
+    if (basicNameFilter) {
+        basicNameFilter.value = '';
+    }
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.value = '';

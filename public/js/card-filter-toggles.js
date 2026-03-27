@@ -216,6 +216,17 @@ async function applyBasicUniverseFilters() {
             }
         }
 
+        const nameColumnEl = document.getElementById('basic-universe-card-name-filter');
+        const nameColumnTerm =
+            nameColumnEl && String(nameColumnEl.value || '').trim()
+                ? String(nameColumnEl.value).trim().toLowerCase()
+                : '';
+        if (nameColumnTerm) {
+            filtered = filtered.filter(
+                (card) => card.card_name && card.card_name.toLowerCase().includes(nameColumnTerm)
+            );
+        }
+
         const searchInput = document.getElementById('search-input');
         const rawTerm = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
         if (rawTerm) {

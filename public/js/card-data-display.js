@@ -917,6 +917,11 @@ function setupBasicUniverseSearch() {
             });
         }
 
+        const cardNameFilter = document.getElementById('basic-universe-card-name-filter');
+        if (cardNameFilter) {
+            cardNameFilter.addEventListener('input', debouncedApply);
+        }
+
         const clearUse = document.getElementById('basic-universe-to-use-value-clear');
         const clearBon = document.getElementById('basic-universe-bonus-value-clear');
         if (clearUse) {

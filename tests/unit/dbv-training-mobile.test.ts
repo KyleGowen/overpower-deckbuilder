@@ -12,10 +12,16 @@ describe('mobile-layout.css (DBV Training tab)', () => {
         css = readFileSync(cssPath, 'utf8');
     });
 
+    it('hides training-desktop-filter-row on layout-mobile', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#training-table\s+thead\s+tr\.training-desktop-filter-row\s*\{\s*display:\s*none\s*!important;\s*\}/
+        );
+    });
+
     it('documents Training mobile filter shell and tbody card rows', () => {
         expect(css).toContain('Training tab — mobile');
         expect(css).toMatch(
-            /\.layout-mobile\s+#training-table\s+thead\s+tr\.training-filter-row[\s\S]*?display:\s*flex[\s\S]*?border-radius:\s*12px/
+            /\.layout-mobile\s+#training-table\s+thead\s+tr\.training-filter-row[\s\S]*?display:\s*flex\s*!important[\s\S]*?border-radius:\s*12px/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#training-table\s+tbody\s+td:nth-child\(n\+3\)[\s\S]*?display:\s*none\s*!important/
@@ -50,6 +56,9 @@ describe('mobile-layout.css (DBV Training tab)', () => {
         expect(css).toMatch(
             /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#training-table\s+tbody\s+td:nth-child\(n\s*\+\s*3\)[\s\S]*?display:\s*none\s*!important/
         );
+        expect(css).toMatch(
+            /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#training-table\s+thead\s+tr\.training-desktop-filter-row\s*\{\s*display:\s*none\s*!important;\s*\}/
+        );
     });
 });
 
@@ -61,9 +70,12 @@ describe('database-view.css (DBV Training — desktop)', () => {
         css = readFileSync(cssPath, 'utf8');
     });
 
-    it('hides mobile-only training filter shell on desktop without !important', () => {
+    it('hides mobile training-filter-row on DTV and styles training-desktop-filter-row', () => {
         expect(css).toMatch(
-            /#training-table\s+thead\s+tr\.training-filter-row\s*>\s*th\.training-filter-controls-th\s*\{\s*display:\s*none;\s*\}/
+            /#training-table\s+thead\s+tr\.training-filter-row\s*\{\s*display:\s*none;\s*\}/
+        );
+        expect(css).toMatch(
+            /#training-table\s+thead\s+tr\.training-desktop-filter-row\s+th\s*\{\s*vertical-align:\s*top;\s*\}/
         );
         expect(css).toMatch(
             /#training-table\s+\.training-mobile-filter-shell\s*\{\s*display:\s*none;\s*\}/
@@ -74,8 +86,12 @@ describe('database-view.css (DBV Training — desktop)', () => {
 describe('DBV Training markup (index.html)', () => {
     const indexPath = path.join(__dirname, '../../public/index.html');
 
-    it('includes training mobile filter hooks and stat type toggles', () => {
+    it('includes training DTV filter row, mobile filter hooks, and stat type toggles', () => {
         const html = readFileSync(indexPath, 'utf8');
+        expect(html).toContain('training-desktop-filter-row');
+        expect(html).toContain('training-card-name-filter');
+        expect(html).toContain('training-type-1-filter-toggles');
+        expect(html).toContain('training-type-2-filter-toggles');
         expect(html).toContain('training-filter-row');
         expect(html).toContain('training-stat-type-toggles');
         expect(html).toContain('clear-training-filters-mobile-inline');
@@ -117,7 +133,10 @@ describe('search-filter-functions.js Training DBV filters', () => {
     it('defines apply and table filter setup for training', () => {
         expect(source).toContain('function applyTrainingFilters');
         expect(source).toContain('function setupTrainingTableFilters');
+        expect(source).toContain('function trainingCardNameColumnTerm');
         expect(source).toContain('window.applyTrainingFilters = applyTrainingFilters');
         expect(source).toContain('#training-table .training-stat-type-toggles');
+        expect(source).toContain('.training-type-1-filter-toggles');
+        expect(source).toContain('.training-type-2-filter-toggles');
     });
 });

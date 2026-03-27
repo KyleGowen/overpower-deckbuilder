@@ -45,7 +45,11 @@ describe('Basic Universe Type Filter Behavior', () => {
                                     <button class="clear-filters-btn" onclick="clearBasicUniverseFilters()">Clear All Filters</button>
                                 </th>
                                 <th></th>
-                                <th></th>
+                                <th>
+                                    <div class="column-filters basic-universe-desktop-card-name-filters">
+                                        <input type="text" id="basic-universe-card-name-filter" class="filter-input basic-universe-desktop-card-name-input" placeholder="Name" autocomplete="off" aria-label="Filter by card name">
+                                    </div>
+                                </th>
                                 <th>
                                     <div class="column-filters">
                                         <div class="special-power-filter-toggles basic-universe-desktop-stat-type-toggles">
@@ -57,23 +61,17 @@ describe('Basic Universe Type Filter Behavior', () => {
                                     </div>
                                 </th>
                                 <th>
-                                    <div class="column-filters">
-                                        <input type="number" class="filter-input equals" data-column="value" placeholder="=" min="6" max="7">
-                                        <div class="range-inputs">
-                                            <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input">
-                                            <span>-</span>
-                                            <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input">
-                                        </div>
+                                    <div class="column-filters basic-universe-desktop-numeric-stack">
+                                        <input type="number" class="filter-input equals basic-universe-desktop-numeric-stack-input" data-column="value" placeholder="=" min="6" max="7">
+                                        <input type="number" id="basic-value-max" placeholder="Max" min="6" max="7" class="filter-input basic-universe-desktop-numeric-stack-input">
+                                        <input type="number" id="basic-value-min" placeholder="Min" min="6" max="7" class="filter-input basic-universe-desktop-numeric-stack-input">
                                     </div>
                                 </th>
                                 <th>
-                                    <div class="column-filters">
-                                        <input type="number" class="filter-input equals" data-column="bonus" placeholder="=" min="2" max="3">
-                                        <div class="range-inputs">
-                                            <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input">
-                                            <span>-</span>
-                                            <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input">
-                                        </div>
+                                    <div class="column-filters basic-universe-desktop-numeric-stack">
+                                        <input type="number" class="filter-input equals basic-universe-desktop-numeric-stack-input" data-column="bonus" placeholder="=" min="2" max="3">
+                                        <input type="number" id="basic-bonus-max" placeholder="Max" min="2" max="3" class="filter-input basic-universe-desktop-numeric-stack-input">
+                                        <input type="number" id="basic-bonus-min" placeholder="Min" min="2" max="3" class="filter-input basic-universe-desktop-numeric-stack-input">
                                     </div>
                                 </th>
                             </tr>

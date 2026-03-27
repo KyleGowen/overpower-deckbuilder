@@ -2474,10 +2474,14 @@
     border: 0;
 }
 
+.layout-mobile #training-table thead tr.training-desktop-filter-row {
+    display: none !important;
+}
+
 .layout-mobile #training-table thead tr.training-filter-row {
     --training-header-shell-bg: rgba(10, 28, 32, 0.96);
     --training-header-shell-border: rgba(78, 205, 196, 0.38);
-    display: flex;
+    display: flex !important;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: stretch;
@@ -6790,10 +6794,14 @@
         border: 0;
     }
 
+    #database-view #training-table thead tr.training-desktop-filter-row {
+        display: none !important;
+    }
+
     #database-view #training-table thead tr.training-filter-row {
         --training-header-shell-bg: rgba(10, 28, 32, 0.96);
         --training-header-shell-border: rgba(78, 205, 196, 0.38);
-        display: flex;
+        display: flex !important;
         flex-direction: row;
         flex-wrap: wrap;
         align-items: stretch;

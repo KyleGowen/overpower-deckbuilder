@@ -1010,7 +1010,12 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     margin-bottom: 0;
 }
 
-/* Training: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */
+/* Training: DTV uses training-desktop-filter-row (name + Type1/Type2); entire training-filter-row hidden on DTV (see mobile-layout.css). */
+#training-table thead tr.training-filter-row {
+    display: none;
+}
+
+/* Legacy: mobile row cells (only relevant when row is shown on MV). */
 #training-table thead tr.training-filter-row > th.training-filter-controls-th {
     display: none;
 }
@@ -1025,6 +1030,15 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #training-table #clear-training-filters-mobile-inline.clear-filters-btn--training-mobile-inline {
     display: none;
+}
+
+/* Training DTV: per-column filter row (mirrors Ally desktop). */
+#training-table thead tr.training-desktop-filter-row th {
+    vertical-align: top;
+}
+
+#training-table thead tr.training-desktop-filter-row .special-power-filter-toggles {
+    margin-bottom: 0;
 }
 
 /* Basic Universe: mobile-only filter shell (see mobile-layout.css); desktop keeps two header rows with column filters. */
@@ -1042,6 +1056,63 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #basic-universe-table #clear-basic-universe-filters-mobile-inline.clear-filters-btn--basic-universe-mobile-inline {
     display: none;
+}
+
+/* Basic Universe DTV: Card Name + Value/Bonus = / Max / Min vertical stack (aligned with Teamwork DTV numerics). */
+#basic-universe-table {
+    --basic-universe-dtv-numeric-stack-gap: 10px;
+}
+
+#basic-universe-table thead tr.basic-universe-desktop-filter-row th {
+    vertical-align: top;
+}
+
+#basic-universe-table .basic-universe-desktop-card-name-filters.column-filters {
+    align-items: stretch;
+}
+
+#basic-universe-table .basic-universe-desktop-card-name-input {
+    width: 100%;
+    min-width: 5.5rem;
+    max-width: 14rem;
+    box-sizing: border-box;
+}
+
+#basic-universe-table .basic-universe-desktop-numeric-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--basic-universe-dtv-numeric-stack-gap);
+    align-items: flex-start;
+}
+
+#basic-universe-table .basic-universe-desktop-numeric-stack-input {
+    width: 3.25rem;
+    min-width: 3rem;
+    max-width: 4rem;
+    box-sizing: border-box;
+}
+
+/* Power Cards DTV: Value column vertical stack (=, Max, Min), same pattern as Teamwork `.teamwork-desktop-bonus-stack` */
+#power-cards-table {
+    --power-dtv-value-stack-gap: 10px;
+}
+
+#power-cards-table thead tr.power-cards-desktop-filter-row th {
+    vertical-align: top;
+}
+
+#power-cards-table .column-filters.power-cards-desktop-value-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--power-dtv-value-stack-gap);
+    align-items: flex-start;
+}
+
+#power-cards-table .power-cards-desktop-value-stack-input {
+    width: 3.25rem;
+    min-width: 3rem;
+    max-width: 4rem;
+    box-sizing: border-box;
 }
 
 /* Power Cards: mobile-only filter shell (see mobile-layout.css); desktop keeps desktop filter row. */
