@@ -54,6 +54,12 @@ describe('mobile-layout.css (DBV Ally tab)', () => {
             /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#ally-universe-table\s+tbody\s+td:nth-child\(n\s*\+\s*3\)[\s\S]*?display:\s*none\s*!important/
         );
     });
+
+    it('hides duplicate attack-type icon row on MV (#database-view only)', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#database-view\s+#ally-universe-table\s+\.ally-filter-icon-row\.ally-filter-attack-icon-row[\s\S]*?display:\s*none\s*!important/
+        );
+    });
 });
 
 describe('database-view.css (DBV Ally — desktop)', () => {

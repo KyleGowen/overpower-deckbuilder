@@ -8873,3 +8873,8 @@
 .layout-mobile #database-view #locations-table .locations-threat-inputs-and-clear #location-threat-max {
     flex: 1 1 0;
 }
+
+/* Ally MV: second power-type strip was attack-type (same six icons, wrapped grid) — hide; DTV keeps both columns */
+.layout-mobile #database-view #ally-universe-table .ally-filter-icon-row.ally-filter-attack-icon-row {
+    display: none !important;
+}
