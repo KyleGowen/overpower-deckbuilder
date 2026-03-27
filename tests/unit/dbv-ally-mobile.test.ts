@@ -105,7 +105,7 @@ describe('DBV Ally markup (index.html)', () => {
         expect(html).toContain('ally-stat-type-to-use-toggles');
         expect(html).toContain('ally-stat-type-filter-toggles');
         expect(html).toContain('ally-attack-type-filter-toggles');
-        expect(html).toContain('id="ally-card-name-filter"');
+        expect(html).toContain('data-dbv-name-filter="ally-desktop-name"');
         expect(html).toContain('colspan="7"');
         expect(html).toContain('clear-ally-filters-mobile-inline');
         expect(html).toContain('clearAllyUniverseFilters()');

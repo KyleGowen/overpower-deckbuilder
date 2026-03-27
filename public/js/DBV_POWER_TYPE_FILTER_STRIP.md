@@ -60,14 +60,15 @@ In [`public/index.html`](../index.html) (and any page that includes the DBV tabl
 
 1. `dbv-icon-filter-logic.js`
 2. `dbv-power-type-filter-strip.js` (auto-runs `initDbvPowerTypeFilterStrips` when the script executes)
-3. `search-filter-functions.js`
+3. `dbv-card-name-filter.js` (auto-runs `initDbvCardNameFilters` when the script executes; see [`DBV_CARD_NAME_FILTER.md`](DBV_CARD_NAME_FILTER.md))
+4. `search-filter-functions.js`
 
 Also listed in [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../../docs/FRONTEND_SCRIPT_MANIFEST.md).
 
 ## Integration points
 
 - **[`search-filter-functions.js`](search-filter-functions.js)** — `setupAspectSearch` / `setupSpecialCardSearch` use `matchesIconsPowerTypeFilters` and `setDbvPowerTypeToggleButtonsDisabled`. Top-of-file `ensureDbvFilterHelpers` mirrors those globals when the file is evaluated alone in unit tests.
-- **[`template-loader.js`](template-loader.js)** — After inserting or replacing DBV HTML, calls `initDbvPowerTypeFilterStrips({ force: true })` so new `[data-dbv-power-strip]` nodes get buttons.
+- **[`template-loader.js`](template-loader.js)** — After inserting or replacing DBV HTML, calls `initDbvPowerTypeFilterStrips({ force: true })` and `initDbvCardNameFilters({ force: true })` so new mount points get controls.
 - **[`filter-functions.js`](filter-functions.js)** — `clearSpecialCardFilters` / aspect clears still target the same ids and `.power-type-filter-toggle` classes after init.
 
 ## Out of scope (by design)

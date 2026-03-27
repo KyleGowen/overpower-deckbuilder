@@ -48,6 +48,8 @@ describe('Basic Universe Type Filter - Simple', () => {
             expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-desktop"');
             expect(indexHtmlContent).toContain('data-dbv-power-strip="basic-mobile"');
             expect(indexHtmlContent).toContain('dbv-power-type-filter-strip.js');
+            expect(indexHtmlContent).toContain('dbv-card-name-filter.js');
+            expect(indexHtmlContent).toContain('data-dbv-name-filter="basic-desktop-name"');
         });
 
         it('should have Clear All Filters button', () => {

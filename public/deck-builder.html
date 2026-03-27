@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/layout-mode.js"></script>
     <script src="/js/dbv/location-threat-placeholders.js" defer></script>
+    <script src="/js/dbv-card-name-filter.js" defer></script>
     <title>Excelsior Deckbuilder - Characters Database</title>
     <style>
         body {
@@ -3479,7 +3480,7 @@
                                 <button id="clear-filters" class="clear-filters-btn">Clear All Filters</button>
                             </th>
                             <th class="characters-filter-name-th">
-                                <input type="text" class="header-filter" placeholder="Search names...">
+                                <div data-dbv-name-filter="characters-name"></div>
                             </th>
                             <th colspan="5" class="characters-stat-filters-th">
                                 <div class="characters-stat-filters">
@@ -3960,7 +3961,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <input type="text" id="ally-card-name-filter" class="header-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                                <div data-dbv-name-filter="ally-desktop-name"></div>
                             </th>
                             <th></th>
                             <th>
@@ -4021,7 +4022,7 @@
                             <th class="ally-filter-controls-th" colspan="5">
                                 <div class="ally-mobile-filter-shell column-filters">
                                     <div class="ally-mobile-name-row">
-                                        <input type="text" class="header-filter ally-universe-mobile-card-name-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                                        <div data-dbv-name-filter="ally-mobile-name"></div>
                                     </div>
                                     <div class="ally-filter-icon-row">
                                         <div class="icon-filter-container">
@@ -4104,7 +4105,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <input type="text" id="training-card-name-filter" class="header-filter" placeholder="Filter name…" aria-label="Filter training cards by card name">
+                                <div data-dbv-name-filter="training-desktop-name"></div>
                             </th>
                             <th>
                                 <div class="column-filters">
@@ -4220,9 +4221,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <div class="column-filters basic-universe-desktop-card-name-filters">
-                                    <input type="text" id="basic-universe-card-name-filter" class="filter-input basic-universe-desktop-card-name-input" placeholder="Name" autocomplete="off" aria-label="Filter by card name">
-                                </div>
+                                <div class="column-filters basic-universe-desktop-card-name-filters" data-dbv-name-filter="basic-desktop-name"></div>
                             </th>
                             <th>
                                 <div class="column-filters">

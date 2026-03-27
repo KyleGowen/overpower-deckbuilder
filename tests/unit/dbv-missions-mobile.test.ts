@@ -117,10 +117,11 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).not.toContain('missions-filter-clear-th');
         expect(html).toContain('id="missions-mission-set-filter"');
         expect(html).toContain('missions-mission-set-filter');
-        expect(html).toContain('id="missions-mobile-card-name-filter"');
+        expect(html).toContain('data-dbv-name-filter="missions-mobile-name"');
         expect(html).toContain('missions-mobile-card-name-row');
-        expect(html).toContain('id="missions-header-card-name-filter"');
+        expect(html).toContain('data-dbv-name-filter="missions-header-name"');
         expect(html).toContain('missions-filter-card-name-th');
+        expect(html).toContain('dbv-card-name-filter.js');
         expect(html).not.toContain('missions-checkbox-group');
         expect(html).not.toContain('clear-missions-filters-mobile');
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
@@ -132,8 +133,8 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).toContain('colspan="2"');
         expect(html).toContain('missions-filter-leading-th');
         expect(html).toContain('id="missions-mission-set-filter"');
-        expect(html).toContain('id="missions-mobile-card-name-filter"');
-        expect(html).toContain('id="missions-header-card-name-filter"');
+        expect(html).toContain('data-dbv-name-filter="missions-mobile-name"');
+        expect(html).toContain('data-dbv-name-filter="missions-header-name"');
         expect(html).toContain('colspan="4" class="loading">Loading missions');
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
     });

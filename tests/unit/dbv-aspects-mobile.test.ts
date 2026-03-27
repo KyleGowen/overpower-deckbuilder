@@ -166,7 +166,7 @@ describe('DBV Aspects mobile markup (index.html + template)', () => {
         expect(html).toContain('aspects-value-inputs-and-clear');
         expect(html).toContain('id="aspect-no-value-toggle"');
         expect(html).toContain('placeholder="Search location');
-        expect(html).toContain('placeholder="Search card name');
+        expect(html).toContain('data-dbv-name-filter="aspects-name"');
         expect(html).toContain('placeholder="Search card text');
     });
 

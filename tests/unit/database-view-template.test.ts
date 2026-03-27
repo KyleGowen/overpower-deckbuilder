@@ -109,8 +109,8 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="missions-table"');
             expect(templateContent).toContain('id="missions-tbody"');
             expect(templateContent).toContain('id="missions-mission-set-filter"');
-            expect(templateContent).toContain('id="missions-mobile-card-name-filter"');
-            expect(templateContent).toContain('id="missions-header-card-name-filter"');
+            expect(templateContent).toContain('data-dbv-name-filter="missions-mobile-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="missions-header-name"');
         });
 
         it('should contain events table', () => {
@@ -137,7 +137,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('onclick="clearAllyUniverseFilters()"');
             expect(templateContent).toContain('ally-desktop-filter-row');
             expect(templateContent).toContain('<th>Attack</th>');
-            expect(templateContent).toContain('id="ally-card-name-filter"');
+            expect(templateContent).toContain('data-dbv-name-filter="ally-desktop-name"');
             expect(templateContent).toContain('colspan="7"');
         });
 
@@ -202,6 +202,14 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('data-dbv-power-strip="aspect-with-no-icon"');
             expect(templateContent).toContain('data-dbv-power-strip="power-desktop"');
             expect(templateContent).toContain('data-dbv-power-strip="ally-desktop-stat"');
+        });
+
+        it('should contain DBV card-name filter mount points (inputs filled by dbv-card-name-filter.js)', () => {
+            expect(templateContent).toContain('data-dbv-name-filter');
+            expect(templateContent).toContain('data-dbv-name-filter="aspects-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="missions-mobile-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="ally-mobile-name"');
+            expect(templateContent).toContain('data-dbv-name-filter="basic-desktop-name"');
         });
     });
 

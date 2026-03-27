@@ -89,7 +89,7 @@ describe('DBV Training markup (index.html)', () => {
     it('includes training DTV filter row, mobile filter hooks, and stat type toggles', () => {
         const html = readFileSync(indexPath, 'utf8');
         expect(html).toContain('training-desktop-filter-row');
-        expect(html).toContain('training-card-name-filter');
+        expect(html).toContain('data-dbv-name-filter="training-desktop-name"');
         expect(html).toContain('training-type-1-filter-toggles');
         expect(html).toContain('training-type-2-filter-toggles');
         expect(html).toContain('training-filter-row');

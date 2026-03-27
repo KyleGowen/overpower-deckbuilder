@@ -61,6 +61,9 @@ class TemplateLoader {
         if (typeof window.initDbvPowerTypeFilterStrips === 'function') {
             window.initDbvPowerTypeFilterStrips({ force: true });
         }
+        if (typeof window.initDbvCardNameFilters === 'function') {
+            window.initDbvCardNameFilters({ force: true });
+        }
     }
 
     // Bind events for dynamically loaded content
@@ -135,6 +138,9 @@ class TemplateLoader {
         this.bindEvents(target);
         if (typeof window.initDbvPowerTypeFilterStrips === 'function') {
             window.initDbvPowerTypeFilterStrips({ force: true });
+        }
+        if (typeof window.initDbvCardNameFilters === 'function') {
+            window.initDbvCardNameFilters({ force: true });
         }
     }
 }

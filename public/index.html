@@ -73,6 +73,7 @@
     <script src="/js/collection-view.js" defer></script>
     <script src="/js/dbv-icon-filter-logic.js" defer></script>
     <script src="/js/dbv-power-type-filter-strip.js" defer></script>
+    <script src="/js/dbv-card-name-filter.js" defer></script>
     <script src="/js/search-filter-functions.js" defer></script>
     <script src="/js/deck-management-functions.js" defer></script>
     <script src="/js/ui-utility-functions.js" defer></script>
@@ -197,7 +198,7 @@
                             </th>
                             <th class="characters-filter-spacer-th" aria-hidden="true"></th>
                             <th class="characters-filter-name-th">
-                                <input type="text" class="header-filter" placeholder="Search names...">
+                                <div data-dbv-name-filter="characters-name"></div>
                             </th>
                             <th colspan="5" class="characters-stat-filters-th">
                                 <div class="characters-stat-filters">
@@ -299,7 +300,7 @@
                             </th>
                             <th class="special-filter-spacer-th" aria-hidden="true"></th>
                             <th class="special-filter-name-th">
-                                <input type="text" class="header-filter" placeholder="Search card name..." data-column="name">
+                                <div data-dbv-name-filter="specials-name"></div>
                             </th>
                             <th class="special-filter-character-th">
                                 <input type="text" class="header-filter" placeholder="Search character..." data-column="character">
@@ -414,7 +415,7 @@
                             </th>
                             <th class="locations-filter-spacer-th"></th>
                             <th class="locations-filter-name-th">
-                                <input type="text" class="header-filter" placeholder="Search name…" data-column="name" aria-label="Filter locations by name">
+                                <div data-dbv-name-filter="locations-name"></div>
                             </th>
                             <th class="locations-filter-threat-th">
                                 <div class="locations-threat-inputs-and-clear">
@@ -456,7 +457,7 @@
                             </th>
                             <th class="aspect-filter-spacer-th" aria-hidden="true"></th>
                             <th class="aspect-filter-name-th">
-                                <input type="text" class="header-filter" placeholder="Search card name..." data-column="card_name">
+                                <div data-dbv-name-filter="aspects-name"></div>
                             </th>
                             <th class="aspect-filter-location-th">
                                 <input type="text" class="header-filter" placeholder="Search location..." data-column="location">
@@ -525,32 +526,11 @@
                                             <option value="">All</option>
                                         </select>
                                     </div>
-                                    <div class="missions-mobile-card-name-row">
-                                        <label class="missions-mobile-set-label" for="missions-mobile-card-name-filter">Card name</label>
-                                        <input
-                                            type="search"
-                                            id="missions-mobile-card-name-filter"
-                                            class="missions-mobile-card-name-filter"
-                                            aria-label="Filter missions by card name"
-                                            placeholder="Filter by card name"
-                                            autocomplete="off"
-                                            enterkeyhint="search"
-                                        />
-                                    </div>
+                                    <div class="missions-mobile-card-name-row" data-dbv-name-filter="missions-mobile-name"></div>
                                 </div>
                             </th>
                             <th class="missions-filter-card-name-th">
-                                <div class="column-filters">
-                                    <input
-                                        type="search"
-                                        id="missions-header-card-name-filter"
-                                        class="header-filter"
-                                        data-column="card_name"
-                                        placeholder="Filter by name"
-                                        aria-label="Filter missions by card name"
-                                        autocomplete="off"
-                                    />
-                                </div>
+                                <div class="column-filters" data-dbv-name-filter="missions-header-name"></div>
                             </th>
                         </tr>
                     </thead>
@@ -724,7 +704,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <input type="text" id="ally-card-name-filter" class="header-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                                <div data-dbv-name-filter="ally-desktop-name"></div>
                             </th>
                             <th></th>
                             <th>
@@ -747,7 +727,7 @@
                             <th class="ally-filter-controls-th" colspan="5">
                                 <div class="ally-mobile-filter-shell column-filters">
                                     <div class="ally-mobile-name-row">
-                                        <input type="text" class="header-filter ally-universe-mobile-card-name-filter" placeholder="Search name..." data-column="card_name" aria-label="Filter allies by card name">
+                                        <div data-dbv-name-filter="ally-mobile-name"></div>
                                     </div>
                                     <div class="ally-filter-icon-row">
                                         <div class="icon-filter-container">
@@ -792,7 +772,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <input type="text" id="training-card-name-filter" class="header-filter" placeholder="Filter name…" aria-label="Filter training cards by card name">
+                                <div data-dbv-name-filter="training-desktop-name"></div>
                             </th>
                             <th>
                                 <div class="column-filters">
@@ -851,9 +831,7 @@
                             </th>
                             <th></th>
                             <th>
-                                <div class="column-filters basic-universe-desktop-card-name-filters">
-                                    <input type="text" id="basic-universe-card-name-filter" class="filter-input basic-universe-desktop-card-name-input" placeholder="Name" autocomplete="off" aria-label="Filter by card name">
-                                </div>
+                                <div class="column-filters basic-universe-desktop-card-name-filters" data-dbv-name-filter="basic-desktop-name"></div>
                             </th>
                             <th>
                                 <div class="column-filters">
