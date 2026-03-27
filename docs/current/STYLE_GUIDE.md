@@ -288,7 +288,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 ### Card Database — Power Cards (desktop value filters)
 
 - **Where**: Card Database **Power Cards**, desktop layout (`#power-cards-table`), Value column in `tr.power-cards-desktop-filter-row`.
-- **Layout**: Matches Teamwork numeric stacks: `.column-filters.power-cards-desktop-value-stack` — vertical flex, **`gap: var(--power-dtv-value-stack-gap)`** (10px on `#power-cards-table`), **`align-items: flex-start`**. Three inputs use `.power-cards-desktop-value-stack-input` (same widths as `.teamwork-desktop-bonus-stack-input`). Field order **=**, **Max**, **Min** (ids: `power-value-equals`, `power-value-max`, `power-value-min`). Mobile Power value row is unchanged (grid shell in `mobile-layout.css`).
+- **Layout**: Matches Teamwork numeric stacks: `.column-filters.power-cards-desktop-value-stack` — vertical flex, **`gap: var(--power-dtv-value-stack-gap)`** (10px on `#power-cards-table`), **`align-items: center`** so the stack matches the centered Value header and data column. Three inputs use `.power-cards-desktop-value-stack-input` (same widths as `.teamwork-desktop-bonus-stack-input`). Field order **=**, **Max**, **Min** (ids: `power-value-equals`, `power-value-max`, `power-value-min`). Mobile Power value row is unchanged (grid shell in `mobile-layout.css`).
 
 ### Main Dashboard (index.html)
 - **Background**: `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`
