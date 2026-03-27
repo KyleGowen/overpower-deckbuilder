@@ -2,7 +2,7 @@
 
 Scripts loaded by active HTML entry points (as of unused code cleanup).
 
-**DBV module map:** [`docs/current/DBV_ARCHITECTURE.md`](current/DBV_ARCHITECTURE.md) · **Agent rules:** [`public/js/dbv/.cursorrules`](../public/js/dbv/.cursorrules)
+**DBV module map:** [`docs/current/DBV_ARCHITECTURE.md`](current/DBV_ARCHITECTURE.md) · **Agent rules:** [`public/js/dbv/.cursorrules`](../public/js/dbv/.cursorrules) · **Reusable filter UI:** [`public/js/DBV_POWER_TYPE_FILTER_STRIP.md`](../public/js/DBV_POWER_TYPE_FILTER_STRIP.md) (icon toggles, `[data-dbv-power-strip]`) · [`public/js/DBV_CARD_NAME_FILTER.md`](../public/js/DBV_CARD_NAME_FILTER.md) (name inputs, `[data-dbv-name-filter]`)
 
 ## public/index.html (main SPA - canonical)
 

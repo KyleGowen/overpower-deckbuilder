@@ -20,6 +20,8 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
 ├── 📄 docs/current/DBV_ASPECTS_MOBILE.md  # Aspects DBV mobile: filter shell, caption, actions, files, unit tests
 ├── 📄 docs/current/DBV_MISSIONS_MOBILE.md  # Missions DBV mobile: select filter, card rows, caption, files, unit tests
+├── 📄 public/js/DBV_POWER_TYPE_FILTER_STRIP.md  # DBV reusable power-type icon strip (`data-dbv-power-strip`, presets, tests)
+├── 📄 public/js/DBV_CARD_NAME_FILTER.md  # DBV reusable card/name text filters (`data-dbv-name-filter`, presets, tests)
 ├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
 ├── 📁 docs/checklist-source/       # Markdown exports of each OverPower Check List tab (regenerate via scripts/export-overpower-checklist-markdown.py)
 ├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration

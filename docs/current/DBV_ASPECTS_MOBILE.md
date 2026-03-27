@@ -1,6 +1,6 @@
 # DBV Aspects tab — mobile view (how it looks)
 
-This document explains **how the Aspects tab** of the Card Database (`#aspects-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §10.5 and the **Aspects** bullets in [`STYLE_GUIDE.md`](STYLE_GUIDE.md).
+This document explains **how the Aspects tab** of the Card Database (`#aspects-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §10.5 and the **Aspects** bullets in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Reusable filter DOM:** power-type toggles — [`DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md); card-name **`header-filter`** — [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md).
 
 ## Goals
 

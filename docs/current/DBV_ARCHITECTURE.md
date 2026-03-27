@@ -61,3 +61,4 @@ The following were listed as orphaned in older manifests and are **not** in the 
 - [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) — milestones, global nav, All tab
 - [`docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md`](MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md) — mobile row image sizing
 - Per-tab mobile specs: `DBV_*_MOBILE.md` in this folder
+- **Reusable DBV filter DOM (before `search-filter-functions.js` in the main SPA):** [`public/js/DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md) — `[data-dbv-power-strip]` icon toggles + [`public/js/dbv-icon-filter-logic.js`](../../public/js/dbv-icon-filter-logic.js). [`public/js/DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) — `[data-dbv-name-filter]` name inputs ([`public/js/dbv-card-name-filter.js`](../../public/js/dbv-card-name-filter.js)). Full order: [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../FRONTEND_SCRIPT_MANIFEST.md).

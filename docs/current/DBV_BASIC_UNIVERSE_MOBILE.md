@@ -4,7 +4,7 @@
 
 On `.layout-mobile` and in the narrow `#database-view` band (`max-width: 900px`), the Basic Universe tab uses the same patterns as **Training** (stat-type icon strip + inline Clear) and **Teamwork** (two numeric rows: equals / min / max / clear) for **Value to Use** and **Bonus**.
 
-Desktop keeps a separate filter row (`basic-universe-desktop-filter-row`) with column filters; the mobile shell row is hidden on desktop via `database-view.css`.
+Desktop keeps a separate filter row (`basic-universe-desktop-filter-row`) with column filters; the mobile shell row is hidden on desktop via `database-view.css`. **DTV name field** (`#basic-universe-card-name-filter`) comes from [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md); stat-type toggles from [`DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md).
 
 ## Files
 

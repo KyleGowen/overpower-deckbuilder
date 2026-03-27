@@ -2,7 +2,7 @@
 
 ## Summary
 
-The Training tab uses the same mobile DBV pattern as Ally: stat-type icon toggles in a teal header shell, vertical card rows (image + actions + caption), and client-side filtering on `window.trainingData`.
+The Training tab uses the same mobile DBV pattern as Ally: stat-type icon toggles in a teal header shell, vertical card rows (image + actions + caption), and client-side filtering on `window.trainingData`. **DTV card-name field** (`#training-card-name-filter`) is built by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) (`data-dbv-name-filter="training-desktop-name"`); icon strips use [`DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md).
 
 ## Behavior
 

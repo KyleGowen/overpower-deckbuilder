@@ -2,6 +2,12 @@
 
 Vanilla JS component for the Card Database View (DBV): **card / name** text inputs in table headers and Missions mobile row. **Filter logic and event listeners** stay in `search-filter-functions.js`, `filter-functions.js`, and `card-filter-toggles.js`; this module only standardizes **DOM shape** and keeps stable **`id`**, **`class`**, and **`data-column`** values.
 
+## See also
+
+- **Power-type icon toggles (sibling component):** [`DBV_POWER_TYPE_FILTER_STRIP.md`](DBV_POWER_TYPE_FILTER_STRIP.md) — `[data-dbv-power-strip]` presets, [`dbv-power-type-filter-strip.js`](dbv-power-type-filter-strip.js), [`dbv-icon-filter-logic.js`](dbv-icon-filter-logic.js).
+- **Architecture map:** [`docs/current/DBV_ARCHITECTURE.md`](../../docs/current/DBV_ARCHITECTURE.md) — script ownership and load order.
+- **Mobile DBV:** [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.4** — tests/docs map including these specs.
+
 ## Source files
 
 | File | Role |

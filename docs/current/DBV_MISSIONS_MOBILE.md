@@ -1,6 +1,6 @@
 # DBV Missions tab — mobile view (how it looks)
 
-This document explains **how the Missions tab** of the Card Database (`#missions-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.6** and the **Missions** bullet in [`STYLE_GUIDE.md`](STYLE_GUIDE.md).
+This document explains **how the Missions tab** of the Card Database (`#missions-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.6** and the **Missions** bullet in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Card-name filter markup** (`#missions-mobile-card-name-filter`, `#missions-header-card-name-filter`) is created by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) from `[data-dbv-name-filter]` hosts in [`index.html`](../../public/index.html) / [`database-view-complete.html`](../../public/templates/database-view-complete.html).
 
 ## Goals
 

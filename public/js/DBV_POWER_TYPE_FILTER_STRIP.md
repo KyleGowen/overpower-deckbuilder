@@ -76,6 +76,10 @@ Also listed in [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../../docs/FRONTEND_SCRIPT_M
 - **Characters** tab — different filter UI; do not mount these strips there.
 - **Special Cards function column** — `.function-filter-toggle` row remains separate markup and logic in `search-filter-functions.js`.
 
+## See also
+
+- **Card / name text filters (sibling component):** [`DBV_CARD_NAME_FILTER.md`](DBV_CARD_NAME_FILTER.md) — `[data-dbv-name-filter]` presets, [`dbv-card-name-filter.js`](dbv-card-name-filter.js), loaded immediately after this script in [`public/index.html`](../index.html).
+
 ## CSS
 
 Visuals are unchanged: `.power-type-filter-toggle`, `.special-power-filter-toggles`, `.special-no-icon-*`, `.icon-filter-container`, and per-table `layout-mobile` rules in [`mobile-layout.css`](../css/mobile-layout.css) / [`database-view.css`](../css/database-view.css).

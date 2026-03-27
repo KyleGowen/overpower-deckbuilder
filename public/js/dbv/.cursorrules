@@ -28,3 +28,4 @@ This folder holds **DBV-specific** JavaScript loaded as plain `<script>` tags (n
 - Full script list: [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../../../docs/FRONTEND_SCRIPT_MANIFEST.md)
 - Mobile product notes: [`MOBILE_DESIGN.md`](../../../MOBILE_DESIGN.md)
 - **DBV power-type icon filter strip** (mount points, presets, `window` APIs): [`../DBV_POWER_TYPE_FILTER_STRIP.md`](../DBV_POWER_TYPE_FILTER_STRIP.md) — lives next to [`dbv-power-type-filter-strip.js`](../dbv-power-type-filter-strip.js) / [`dbv-icon-filter-logic.js`](../dbv-icon-filter-logic.js) in `public/js/`.
+- **DBV card-name filter** (`[data-dbv-name-filter]`, `initDbvCardNameFilters`): [`../DBV_CARD_NAME_FILTER.md`](../DBV_CARD_NAME_FILTER.md) — [`../dbv-card-name-filter.js`](../dbv-card-name-filter.js); paired with the power strip in load order and [`template-loader.js`](../template-loader.js).
