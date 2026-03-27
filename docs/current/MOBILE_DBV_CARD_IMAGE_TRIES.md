@@ -43,7 +43,7 @@ Fixes for one surface do not fix the other. Screenshots and reports should name 
 
 ### Why it might still look “unchanged”
 
-- **`layout-mobile` not active:** Breakpoint / `preferDesktopLayout` / devtools device mode without the class on `<html>` → desktop table rules (e.g. fixed column %, `max-width: 316px` inline from JS) still apply.  
+- **`layout-mobile` not active:** Breakpoint / `preferDesktopLayout` / devtools device mode without the class on `<html>` → desktop table rules (e.g. fixed column %, full-width image cell flex, `max-width: 520px` inline from JS for Characters) still apply.  
 - **Caching:** Stale `mobile-layout.css` or `index.css` without hard refresh.  
 - **Asset dimensions:** If the served file is genuinely small, upscaling is blurry; users may perceive “same size” if the cap is still below expectations.  
 - **Conflicting rules:** `database-view.css` row locks, `card-tables.css` / `index.css` media blocks, or inline styles from `public/js/card-display.js` can still win in edge cases (verify computed styles in DevTools).  

@@ -475,54 +475,53 @@
 
         #characters-table th:nth-child(1), /* Image */
         #characters-table td:nth-child(1) {
-            width: 15%;
+            width: 24%;
             text-align: center;
         }
 
         #characters-table td:nth-child(1) img {
-            max-width: 120px;
+            max-width: min(520px, 100%);
             height: auto;
-            max-height: 180px;
         }
 
         #characters-table th:nth-child(2), /* Add to Deck */
         #characters-table td:nth-child(2) {
-            width: 10%;
+            width: 9%;
         }
 
         #characters-table th:nth-child(3), /* Name */
         #characters-table td:nth-child(3) {
-            width: 18%;
+            width: 17%;
         }
 
         #characters-table th:nth-child(4), /* Energy */
         #characters-table td:nth-child(4) {
-            width: 6%;
+            width: 5.8%;
         }
 
         #characters-table th:nth-child(5), /* Combat */
         #characters-table td:nth-child(5) {
-            width: 6%;
+            width: 5.8%;
         }
 
         #characters-table th:nth-child(6), /* Brute Force */
         #characters-table td:nth-child(6) {
-            width: 6%;
+            width: 5.8%;
         }
 
         #characters-table th:nth-child(7), /* Intelligence */
         #characters-table td:nth-child(7) {
-            width: 6%;
+            width: 5.8%;
         }
 
         #characters-table th:nth-child(8), /* Threat Level */
         #characters-table td:nth-child(8) {
-            width: 6%;
+            width: 5.8%;
         }
 
         #characters-table th:nth-child(9), /* Inherent Abilities */
         #characters-table td:nth-child(9) {
-            width: 27%;
+            width: 21%;
         }
 
 

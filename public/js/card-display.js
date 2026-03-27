@@ -88,7 +88,7 @@ function displayCharacters(characters) {
         const capAbilityHtml = `<div class="characters-mobile-card-caption__ability"${capLines.line3 ? '' : ' style="display:none;"'}">${capLines.line3 ? escapeHtmlText(capLines.line3) : ''}</div>`;
         const characterDbvImgStyle = isLayoutMobileForCardDisplay()
             ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
-            : 'width: auto; max-width: 316px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+            : 'width: auto; max-width: 520px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
 
         const row = document.createElement('tr');
         row.innerHTML = `
