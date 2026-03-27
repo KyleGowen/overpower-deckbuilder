@@ -3761,10 +3761,6 @@
     box-sizing: border-box;
 }
 
-.layout-mobile #events-table .events-checkbox-group {
-    display: none !important;
-}
-
 .layout-mobile #events-table .events-mobile-set-row {
     display: flex;
     flex-direction: row;
@@ -8074,10 +8070,6 @@
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
-    }
-
-    #database-view #events-table .events-checkbox-group {
-        display: none !important;
     }
 
     #database-view #events-table .events-mobile-set-row {

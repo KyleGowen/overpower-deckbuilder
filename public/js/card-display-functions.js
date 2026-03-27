@@ -56,7 +56,7 @@ function displayMissions(missions) {
 
             const imgStyle = useMobileListArt
                 ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
-                : 'width: 120px !important; height: auto !important; max-height: 180px !important; cursor: pointer;';
+                : 'width: auto; max-width: 520px; height: auto; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
 
             const setLine =
                 typeof window.dbvSetCaptionLineFromCard === 'function'
@@ -88,15 +88,18 @@ function displayMissions(missions) {
                 </div>
                 ${captionHtml}`
                 : `
-                <img src="${imagePathAttr}"
-                     alt="${mission.card_name}"
-                     loading="lazy"
-                     decoding="async"
-                     onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'mission')"
-                     onmouseleave="hideCardHoverModal()"
-                     onclick="openModal(this)"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
-                     style="${imgStyle}">`;
+                <div class="card-image-container">
+                    <img src="${imagePathAttr}"
+                         alt="${mission.card_name}"
+                         data-dbv-lightbox-context="mission"
+                         loading="lazy"
+                         decoding="async"
+                         onmouseenter="showCardHoverModal('${imagePathEscaped}', '${nameEsc}', '${idEsc}', 'mission')"
+                         onmouseleave="hideCardHoverModal()"
+                         onclick="openModal(this)"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
+                         style="${imgStyle}">
+                </div>`;
 
             return `
         <tr>
@@ -192,7 +195,7 @@ function displayEvents(events) {
 
         const eventDbvImgStyle = useMobileList
             ? 'border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;'
-            : 'width: 120px !important; height: auto !important; max-height: 180px !important; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
+            : 'width: auto; max-width: 520px; height: auto; object-fit: contain; border-radius: 5px; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer;';
 
         const capSet = `<div class="characters-mobile-card-caption__set"${missionSetPlain ? '' : ' style="display:none;"'}>${missionSetPlain ? esc(missionSetPlain) : ''}</div>`;
         const capEffect = `<div class="characters-mobile-card-caption__game-effect"${gameEffectPlain.trim() ? '' : ' style="display:none;"'}>${gameEffectPlain.trim() ? esc(gameEffectPlain) : ''}</div>`;

@@ -22,8 +22,7 @@ describe('mobile-layout.css (DBV Events tab)', () => {
         );
     });
 
-    it('hides checkbox group and shows mission-set select on mobile', () => {
-        expect(css).toMatch(/\.layout-mobile\s+#events-table\s+\.events-checkbox-group[\s\S]*?display:\s*none\s*!important/);
+    it('shows mission-set select row on mobile (grid select + clear)', () => {
         expect(css).toMatch(/\.layout-mobile\s+#events-table\s+\.events-mobile-set-row[\s\S]*?display:\s*flex/);
         expect(css).toMatch(
             /\.layout-mobile\s+#events-table\s+\.events-mobile-set-select-clear-row[\s\S]*?grid-template-columns:\s*8fr\s+2fr/
@@ -75,7 +74,7 @@ describe('mobile-layout.css (DBV Events tab)', () => {
             /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#events-table[\s\S]*?tbody\s+tr[\s\S]*?display:\s*block/
         );
         expect(css).toMatch(
-            /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#events-table\s+\.events-checkbox-group[\s\S]*?display:\s*none\s*!important/
+            /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#events-table\s+\.events-mobile-set-row[\s\S]*?display:\s*flex/
         );
     });
 
@@ -94,8 +93,8 @@ describe('database-view.css (DBV Events — desktop)', () => {
         css = readFileSync(cssPath, 'utf8');
     });
 
-    it('hides mobile-only events mission set row on desktop', () => {
-        expect(css).toMatch(/#events-table\s+\.events-mobile-set-row\s*\{[\s\S]*?display:\s*none/);
+    it('shows events mission-set select row on desktop (same shell as Missions)', () => {
+        expect(css).toMatch(/#events-table\s+\.events-mobile-set-row\s*\{[\s\S]*?display:\s*flex/);
     });
 
     it('hides mobile inline clear on desktop', () => {
@@ -115,7 +114,6 @@ describe('DBV Events mobile markup (index.html + template)', () => {
         expect(html).toContain('id="events-mission-set-filter"');
         expect(html).toContain('events-mission-set-filter');
         expect(html).toContain('events-mobile-set-select-clear-row');
-        expect(html).toContain('events-checkbox-group');
         expect(html).toContain('clear-events-filters-mobile');
         expect(html).toContain('onclick="clearEventsFilters()"');
     });
@@ -158,12 +156,12 @@ describe('search-filter-functions.js (Events filters)', () => {
         source = readFileSync(jsPath, 'utf8');
     });
 
-    it('defines populateEventsMissionSetSelect and unified applyEventsFilters', () => {
+    it('defines populateEventsMissionSetSelect and applyEventsFilters using mission-set select', () => {
         expect(source).toContain('function populateEventsMissionSetSelect()');
         expect(source).toContain('window.populateEventsMissionSetSelect = populateEventsMissionSetSelect');
         expect(source).toContain('window.applyEventsFilters = applyEventsFilters');
         expect(source).toContain("getElementById('events-mission-set-filter')");
-        expect(source).toContain('missionsFilterUsesMobileSelect()');
+        expect(source).not.toMatch(/#events-tab input\[type="checkbox"\]/);
     });
 });
 
@@ -189,7 +187,7 @@ describe('filter-functions.js (clearEventsFilters)', () => {
         source = readFileSync(jsPath, 'utf8');
     });
 
-    it('clears search, game effect, resets checkboxes and select, reloads events', () => {
+    it('clears search, game effect, resets mission-set select, reloads events', () => {
         expect(source).toContain('function clearEventsFilters()');
         expect(source).toContain("getElementById('events-mission-set-filter')");
         expect(source).toContain('loadEvents()');

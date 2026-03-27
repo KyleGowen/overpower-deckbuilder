@@ -179,10 +179,6 @@ function clearEventsFilters() {
     const gameEffectSearchInput = document.querySelector('#events-table .header-filter[data-column="game_effect"]');
     if (gameEffectSearchInput) gameEffectSearchInput.value = '';
 
-    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((cb) => {
-        cb.checked = true;
-    });
-
     const missionSetSelect = document.getElementById('events-mission-set-filter');
     if (missionSetSelect) missionSetSelect.value = '';
 

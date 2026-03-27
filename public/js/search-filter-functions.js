@@ -1164,14 +1164,6 @@ function setupEventSearch() {
         });
     }
 
-    document.querySelectorAll('#events-tab input[type="checkbox"]').forEach((checkbox) => {
-        if (checkbox.dataset.eventsFilterBound) {
-            return;
-        }
-        checkbox.dataset.eventsFilterBound = 'true';
-        checkbox.addEventListener('change', applyEventsFilters);
-    });
-
     const missionSetSelect = document.getElementById('events-mission-set-filter');
     if (missionSetSelect && !missionSetSelect.dataset.eventsMissionFilterBound) {
         missionSetSelect.dataset.eventsMissionFilterBound = 'true';
@@ -1180,8 +1172,7 @@ function setupEventSearch() {
 }
 
 function applyEventsFilters() {
-    const tbody = document.getElementById('events-tbody');
-    if (!tbody) {
+    if (!document.getElementById('events-tbody')) {
         return;
     }
 
@@ -1208,27 +1199,13 @@ function applyEventsFilters() {
         });
     }
 
-    if (missionsFilterUsesMobileSelect()) {
-        const sel = document.getElementById('events-mission-set-filter');
-        const v = sel && sel.value ? sel.value : '';
-        if (!v) {
-            displayEvents(pool);
-            return;
-        }
-        displayEvents(pool.filter((e) => e.mission_set === v));
+    const sel = document.getElementById('events-mission-set-filter');
+    const v = sel && sel.value ? sel.value : '';
+    if (!v) {
+        displayEvents(pool);
         return;
     }
-
-    const selectedMissionSets = Array.from(
-        document.querySelectorAll('#events-tab input[type="checkbox"]:checked')
-    ).map((checkbox) => checkbox.value);
-
-    if (selectedMissionSets.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="no-results">No mission sets selected</td></tr>';
-        return;
-    }
-
-    displayEvents(pool.filter((event) => selectedMissionSets.includes(event.mission_set)));
+    displayEvents(pool.filter((e) => e.mission_set === v));
 }
 
 window.applyEventsFilters = applyEventsFilters;

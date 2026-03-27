@@ -119,7 +119,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="events-tbody"');
             expect(templateContent).toContain('id="events-mission-set-filter"');
             expect(templateContent).toContain('events-filter-row');
-            expect(templateContent).toContain('events-checkbox-group');
+            expect(templateContent).toContain('events-mobile-set-row');
             expect(templateContent).toContain('onclick="clearEventsFilters()"');
         });
 

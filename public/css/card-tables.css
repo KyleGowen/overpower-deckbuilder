@@ -145,9 +145,10 @@ html:not(.layout-mobile) #locations-table tbody td:nth-child(5) {
 }
 
 /* Use thead tr:first-child for th — missions-filter-row has only 3 th (colspan + set + name); nth-child(2–4) there would mis-apply column widths and overlap filters. */
-#missions-table thead tr:first-child th:nth-child(1), #missions-table td:nth-child(1) { width: 15%; } /* Image */
-#missions-table thead tr:first-child th:nth-child(2), #missions-table td:nth-child(2) { width: 15%; } /* Add to Deck - Wider */
-#missions-table thead tr:first-child th:nth-child(3), #missions-table td:nth-child(3) { width: 25%; } /* Mission Set */
+/* DTV parity with Characters/Locations DBV (card-tables loads after database-view.css) */
+#missions-table thead tr:first-child th:nth-child(1), #missions-table td:nth-child(1) { width: 24%; } /* Image */
+#missions-table thead tr:first-child th:nth-child(2), #missions-table td:nth-child(2) { width: 9%; } /* Actions */
+#missions-table thead tr:first-child th:nth-child(3), #missions-table td:nth-child(3) { width: 22%; } /* Mission Set */
 #missions-table thead tr:first-child th:nth-child(4), #missions-table td:nth-child(4) { width: 45%; } /* Card Name */
 
 /* Special Cards Table Column Width Control */

@@ -931,34 +931,63 @@ html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collectio
     white-space: nowrap;
 }
 
-/* Events table column widths - percentage based */
+/* Events table column widths — DTV parity with Characters/Locations image + actions */
 #events-table {
     table-layout: fixed;
+    width: 100%;
 }
 
 #events-table th,
 #events-table td {
     text-align: center;
+    vertical-align: top;
 }
 
 #events-table th:nth-child(1), /* Image */
 #events-table td:nth-child(1) {
-    width: 15%;
+    width: 24%;
+    vertical-align: middle;
+}
+
+#events-table tbody td:nth-child(1) {
+    min-height: 200px;
+}
+
+#events-table td:nth-child(1) img {
+    width: auto !important;
+    max-width: min(520px, 100%) !important;
+    max-height: none !important;
+    height: auto;
+    object-fit: contain;
+}
+
+html:not(.layout-mobile) #events-table td:nth-child(1) .card-image-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 3px;
+    justify-content: center;
+}
+
+html:not(.layout-mobile) #events-table td:nth-child(1) .card-nav-arrow {
+    padding: 0 2px;
+    font-size: 16px;
+    flex: 0 0 auto;
 }
 
 #events-table th:nth-child(2), /* Add To Deck */
 #events-table td:nth-child(2) {
-    width: 8%;
+    width: 9%;
 }
 
 #events-table th:nth-child(3), /* Name */
 #events-table td:nth-child(3) {
-    width: 8%;
+    width: 10%;
 }
 
 #events-table th:nth-child(4), /* Mission Set */
 #events-table td:nth-child(4) {
-    width: 20%;
+    width: 14%;
 }
 
 #events-table th:nth-child(5), /* Game Effect */
@@ -968,10 +997,24 @@ html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collectio
 
 #events-table th:nth-child(6), /* Flavor Text */
 #events-table td:nth-child(6) {
-    width: 25%;
+    width: 19%;
 }
 
-/* Missions table column widths */
+html:not(.layout-mobile) #events-table td:nth-child(2) .add-to-deck-btn,
+html:not(.layout-mobile) #events-table td:nth-child(2) .add-to-collection-btn,
+html:not(.layout-mobile) #events-table td:nth-child(2) .remove-from-collection-btn {
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+/* Missions table — DTV same image/actions pattern as Locations */
+#missions-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
 #missions-table thead tr:first-child th {
     background: rgba(78, 205, 196, 0.2);
     color: #4ecdc4;
@@ -981,16 +1024,65 @@ html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collectio
 #missions-table th,
 #missions-table td {
     text-align: center;
+    vertical-align: top;
 }
 
-#missions-table thead tr:first-child th:nth-child(3), /* Mission Set — not missions-filter-row th:nth-child(3) (that is Card Name filter) */
+#missions-table thead tr:first-child th:nth-child(1), /* Image */
+#missions-table tbody td:nth-child(1) {
+    width: 24%;
+    vertical-align: middle;
+}
+
+#missions-table tbody td:nth-child(1) {
+    min-height: 200px;
+}
+
+#missions-table td:nth-child(1) img {
+    width: auto !important;
+    max-width: min(520px, 100%) !important;
+    max-height: none !important;
+    height: auto;
+    object-fit: contain;
+}
+
+html:not(.layout-mobile) #missions-table td:nth-child(1) .card-image-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 3px;
+    justify-content: center;
+}
+
+html:not(.layout-mobile) #missions-table td:nth-child(1) .card-nav-arrow {
+    padding: 0 2px;
+    font-size: 16px;
+    flex: 0 0 auto;
+}
+
+#missions-table thead tr:first-child th:nth-child(2), /* Actions */
+#missions-table tbody td:nth-child(2) {
+    width: 9%;
+}
+
+#missions-table thead tr:first-child th:nth-child(3), /* Mission Set */
 #missions-table tbody td:nth-child(3) {
-    min-width: 220px;
+    width: 22%;
+    min-width: 0;
 }
 
 #missions-table thead tr:first-child th:nth-child(4), /* Card Name */
 #missions-table tbody td:nth-child(4) {
-    max-width: 300px;
+    width: 45%;
+    max-width: none;
+}
+
+html:not(.layout-mobile) #missions-table td:nth-child(2) .add-to-deck-btn,
+html:not(.layout-mobile) #missions-table td:nth-child(2) .add-to-collection-btn,
+html:not(.layout-mobile) #missions-table td:nth-child(2) .remove-from-collection-btn {
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
 }
 
 /* DTV: mission-set <select> in Mission Set column (MV-style label + teal chrome); card-name row is MV-only */
@@ -1028,9 +1120,45 @@ html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collectio
     color: #fff;
 }
 
-/* Events: mobile mission-set row + inline clear (see mobile-layout.css) */
+/* Events: mission-set <select> same pattern as Missions (DTV); label redundant with column header */
 #events-table .events-mobile-set-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#events-table .events-mobile-set-row > .events-mobile-set-label {
     display: none;
+}
+
+#events-table .events-mobile-set-select-clear-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+#events-table .events-mission-set-filter {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    border-radius: 8px;
+    border: 1px solid rgba(78, 205, 196, 0.35);
+    background: rgba(18, 44, 50, 0.95);
+    color: #fff;
 }
 
 #events-table #clear-events-filters-mobile.clear-filters-btn--events-mobile-inline {
@@ -1817,9 +1945,7 @@ html:not(.layout-mobile) #locations-table td:nth-child(2) .remove-from-collectio
 }
 
 /* Enable flexible column widths for all tables to accommodate text wrapping */
-/* #characters-table and #locations-table omitted: fixed layout + % columns (DTV parity) */
-#missions-table,
-#events-table,
+/* #characters-table, #locations-table, #missions-table, #events-table omitted: fixed layout + DTV parity */
 #aspects-table,
 #ally-universe-table,
 #training-table,
