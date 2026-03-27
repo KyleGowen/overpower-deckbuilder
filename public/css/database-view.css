@@ -1814,11 +1814,6 @@ html:not(.layout-mobile) #missions-table td:nth-child(2) .remove-from-collection
     border: 0;
 }
 
-/* Mobile clear + pipe live in function column (see mobile-layout.css); hidden on desktop */
-#special-cards-table .special-function-mobile-trailing {
-    display: none;
-}
-
 /* Locations: inline clear in threat strip on mobile only (see mobile-layout.css) */
 #locations-table #clear-location-filters-mobile.clear-filters-btn--locations-mobile-inline {
     display: none;

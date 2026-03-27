@@ -22,10 +22,10 @@ describe('mobile-layout.css (DBV Events tab)', () => {
         );
     });
 
-    it('shows mission-set select row on mobile (grid select + clear)', () => {
+    it('shows mission-set select row on mobile (MV: full-width select; DTV base + @media: select + clear)', () => {
         expect(css).toMatch(/\.layout-mobile\s+#events-table\s+\.events-mobile-set-row[\s\S]*?display:\s*flex/);
         expect(css).toMatch(
-            /\.layout-mobile\s+#events-table\s+\.events-mobile-set-select-clear-row[\s\S]*?grid-template-columns:\s*8fr\s+2fr/
+            /\.layout-mobile\s+#database-view\s+#events-table\s+\.events-mobile-set-select-clear-row[\s\S]*?grid-template-columns:\s*1fr/
         );
         expect(css).toMatch(
             /#database-view\s+#events-table\s+\.events-mobile-set-select-clear-row[\s\S]*?grid-template-columns:\s*8fr\s+2fr/

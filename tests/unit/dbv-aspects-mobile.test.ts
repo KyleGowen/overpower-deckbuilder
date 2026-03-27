@@ -34,7 +34,9 @@ describe('mobile-layout.css (DBV Aspects tab)', () => {
     });
 
     it('orders mobile filters: icon row → value → location → name → effect', () => {
-        expect(css).toContain('Mobile order: power icons row + Clear (right); value; location; name; effect');
+        expect(css).toContain(
+            'Mobile order: power icons row; value; location; name; effect (full-tab clear hidden on MV — end-of-file DBV block)'
+        );
         expect(css).toMatch(/aspect-filter-icon-th[\s\S]*?order:\s*1/);
         expect(css).toMatch(/aspect-filter-value-th[\s\S]*?order:\s*2/);
         expect(css).toMatch(/aspect-filter-location-th[\s\S]*?order:\s*3/);
@@ -42,12 +44,12 @@ describe('mobile-layout.css (DBV Aspects tab)', () => {
         expect(css).toMatch(/aspect-filter-effect-th[\s\S]*?order:\s*5/);
     });
 
-    it('places Clear filters on the icon row, right-aligned', () => {
+    it('hides full-tab clear on MV under #database-view (icon trailing collapsed)', () => {
         expect(css).toMatch(
-            /\.layout-mobile\s+#aspects-table\s+thead\s+tr\.aspects-filter-row\s+\.aspect-icon-mobile-trailing[\s\S]*?display:\s*inline-flex\s*!important[\s\S]*?margin-left:\s*auto/
+            /\.layout-mobile\s+#database-view\s+#clear-aspects-filters-mobile[\s\S]*?display:\s*none\s*!important/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#aspects-table\s+#clear-aspects-filters-mobile\.clear-filters-btn--aspects-mobile-inline[\s\S]*?min-height:\s*44px/
+            /\.layout-mobile\s+#database-view\s+\.aspect-icon-mobile-trailing[\s\S]*?display:\s*none\s*!important/
         );
     });
 

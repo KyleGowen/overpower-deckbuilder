@@ -369,7 +369,7 @@
     min-width: 0 !important;
 }
 
-/* Mobile visual order: function row (toggles | Clear); power type + No Icon; value; then character, name, effect */
+/* Mobile visual order: function row (toggles); power type + No Icon; value; then character, name, effect */
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row > th.special-filter-function-th {
     order: 1;
     flex: 1 1 100%;
@@ -450,17 +450,21 @@
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-power-filter-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -469,35 +473,51 @@
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-no-icon-toggle-label {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    aspect-ratio: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     min-height: 0;
-}
-
-.layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-no-icon-toggle-label .special-no-icon-toggle-face {
-    min-width: 50px;
-    min-height: 50px;
-    width: auto;
-    height: auto;
-    padding: 4px;
     box-sizing: border-box;
 }
 
+.layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-no-icon-toggle-label .special-no-icon-toggle-face {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 50px;
+    max-height: 50px;
+    margin: 0 auto;
+    padding: 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-no-icon-toggle-label .special-no-icon-svg {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* Value filters sheet: no horizontal padding so row edges match .header-filter below */
@@ -581,56 +601,25 @@
     height: 24px;
 }
 
-/* Function row: toggles | compact Clear (desktop hides .special-function-mobile-trailing) */
-.layout-mobile #special-cards-table .special-function-mobile-trailing {
-    display: inline-flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 10px;
-    flex: 0 0 auto;
-    min-width: 0;
-}
-
-.layout-mobile #special-cards-table .special-function-filter-separator {
-    flex: 0 0 auto;
-    font-weight: 300;
-    font-size: 1.05rem;
-    line-height: 1;
-    color: rgba(78, 205, 196, 0.82);
-    user-select: none;
-    pointer-events: none;
-}
-
-.layout-mobile #special-cards-table #clear-special-filters-mobile.clear-filters-btn--special-mobile-inline {
-    width: auto;
-    max-width: min(11.5rem, 46vw);
-    min-width: 0;
-    min-height: 44px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1.15;
-    white-space: normal;
-    text-align: center;
-    box-sizing: border-box;
-}
-
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .special-function-filter-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    width: auto;
+    gap: clamp(4px, 1.5vw, 10px);
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
     flex: 0 1 auto;
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .function-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -639,8 +628,10 @@
 }
 
 .layout-mobile #special-cards-table thead tr.special-cards-filter-row .function-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
@@ -925,7 +916,7 @@
     min-width: 0 !important;
 }
 
-/* Mobile order: power icons row + Clear (right); value; location; name; effect */
+/* Mobile order: power icons row; value; location; name; effect (full-tab clear hidden on MV — end-of-file DBV block) */
 .layout-mobile #aspects-table thead tr.aspects-filter-row > th.aspect-filter-icon-th {
     order: 1;
     flex: 1 1 100%;
@@ -1003,17 +994,21 @@
 .layout-mobile #aspects-table thead tr.aspects-filter-row .aspect-filter-icon-row .special-power-filter-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #aspects-table thead tr.aspects-filter-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -1022,35 +1017,51 @@
 }
 
 .layout-mobile #aspects-table thead tr.aspects-filter-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #aspects-table thead tr.aspects-filter-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #aspects-table thead tr.aspects-filter-row .special-no-icon-toggle-label {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    aspect-ratio: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     min-height: 0;
-}
-
-.layout-mobile #aspects-table thead tr.aspects-filter-row .special-no-icon-toggle-label .special-no-icon-toggle-face {
-    min-width: 50px;
-    min-height: 50px;
-    width: auto;
-    height: auto;
-    padding: 4px;
     box-sizing: border-box;
 }
 
+.layout-mobile #aspects-table thead tr.aspects-filter-row .special-no-icon-toggle-label .special-no-icon-toggle-face {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 50px;
+    max-height: 50px;
+    margin: 0 auto;
+    padding: 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .layout-mobile #aspects-table thead tr.aspects-filter-row .special-no-icon-toggle-label .special-no-icon-svg {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .layout-mobile #aspects-table .aspects-value-inputs-and-clear.special-value-inputs-and-clear {
@@ -1749,17 +1760,21 @@
 .layout-mobile #teamwork-table .teamwork-to-use-power-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #teamwork-table .teamwork-filter-icon-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -1768,13 +1783,15 @@
 }
 
 .layout-mobile #teamwork-table .teamwork-filter-icon-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #teamwork-table .teamwork-filter-icon-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #teamwork-table .teamwork-icon-mobile-trailing {
@@ -2193,17 +2210,21 @@
 .layout-mobile #ally-universe-table .ally-stat-type-to-use-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -2212,13 +2233,15 @@
 }
 
 .layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #ally-universe-table .ally-filter-icon-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #ally-universe-table .ally-icon-mobile-trailing {
@@ -2553,17 +2576,21 @@
 .layout-mobile #training-table .training-stat-type-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #training-table .training-filter-icon-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -2572,13 +2599,15 @@
 }
 
 .layout-mobile #training-table .training-filter-icon-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #training-table .training-filter-icon-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #training-table .training-icon-mobile-trailing {
@@ -2916,17 +2945,21 @@
 .layout-mobile #basic-universe-table .basic-universe-stat-type-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -2935,13 +2968,15 @@
 }
 
 .layout-mobile #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #basic-universe-table .basic-universe-icon-mobile-trailing {
@@ -3369,17 +3404,21 @@
 .layout-mobile #power-cards-table .power-cards-type-toggles {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: clamp(4px, 1.5vw, 10px);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile #power-cards-table .power-cards-filter-icon-row .power-type-filter-toggle {
-    min-width: 50px;
-    min-height: 50px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 50px;
+    max-height: 50px;
+    aspect-ratio: 1;
     padding: 4px;
     box-sizing: border-box;
     display: inline-flex;
@@ -3388,13 +3427,15 @@
 }
 
 .layout-mobile #power-cards-table .power-cards-filter-icon-row .power-type-filter-toggle img {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 .layout-mobile #power-cards-table .power-cards-filter-icon-row .power-type-filter-text {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2.2vw, 0.78rem);
 }
 
 .layout-mobile #power-cards-table .power-icon-mobile-trailing {
@@ -4463,7 +4504,7 @@
     padding-bottom: 14px;
 }
 
-/* Desktop clear lives in first th; mobile uses #clear-filters-mobile in stat row */
+/* Desktop clear lives in first th; DOM keeps #clear-filters-mobile in stat row (hidden on MV — end-of-file DBV block) */
 .layout-mobile #characters-table thead tr.characters-filter-row > th.characters-filter-clear-th {
     display: none !important;
 }
@@ -6075,17 +6116,21 @@
     #database-view #teamwork-table .teamwork-to-use-power-toggles {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: clamp(4px, 1.5vw, 10px);
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 
     #database-view #teamwork-table .teamwork-filter-icon-row .power-type-filter-toggle {
-        min-width: 50px;
-        min-height: 50px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50px;
+        max-height: 50px;
+        aspect-ratio: 1;
         padding: 4px;
         box-sizing: border-box;
         display: inline-flex;
@@ -6094,13 +6139,15 @@
     }
 
     #database-view #teamwork-table .teamwork-filter-icon-row .power-type-filter-toggle img {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
     }
 
     #database-view #teamwork-table .teamwork-filter-icon-row .power-type-filter-text {
-        font-size: 0.78rem;
+        font-size: clamp(0.58rem, 2.2vw, 0.78rem);
     }
 
     #database-view #teamwork-table .teamwork-icon-mobile-trailing {
@@ -6512,17 +6559,21 @@
     #database-view #ally-universe-table .ally-stat-type-to-use-toggles {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: clamp(4px, 1.5vw, 10px);
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 
     #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle {
-        min-width: 50px;
-        min-height: 50px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50px;
+        max-height: 50px;
+        aspect-ratio: 1;
         padding: 4px;
         box-sizing: border-box;
         display: inline-flex;
@@ -6531,13 +6582,15 @@
     }
 
     #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-toggle img {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
     }
 
     #database-view #ally-universe-table .ally-filter-icon-row .power-type-filter-text {
-        font-size: 0.78rem;
+        font-size: clamp(0.58rem, 2.2vw, 0.78rem);
     }
 
     #database-view #ally-universe-table .ally-icon-mobile-trailing {
@@ -6869,17 +6922,21 @@
     #database-view #training-table .training-stat-type-toggles {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: clamp(4px, 1.5vw, 10px);
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 
     #database-view #training-table .training-filter-icon-row .power-type-filter-toggle {
-        min-width: 50px;
-        min-height: 50px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50px;
+        max-height: 50px;
+        aspect-ratio: 1;
         padding: 4px;
         box-sizing: border-box;
         display: inline-flex;
@@ -6888,13 +6945,15 @@
     }
 
     #database-view #training-table .training-filter-icon-row .power-type-filter-toggle img {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
     }
 
     #database-view #training-table .training-filter-icon-row .power-type-filter-text {
-        font-size: 0.78rem;
+        font-size: clamp(0.58rem, 2.2vw, 0.78rem);
     }
 
     #database-view #training-table .training-icon-mobile-trailing {
@@ -7232,17 +7291,21 @@
     #database-view #basic-universe-table .basic-universe-stat-type-toggles {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: clamp(4px, 1.5vw, 10px);
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
     
     #database-view #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-toggle {
-        min-width: 50px;
-        min-height: 50px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50px;
+        max-height: 50px;
+        aspect-ratio: 1;
         padding: 4px;
         box-sizing: border-box;
         display: inline-flex;
@@ -7251,13 +7314,15 @@
     }
     
     #database-view #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-toggle img {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
     }
     
     #database-view #basic-universe-table .basic-universe-filter-icon-row .power-type-filter-text {
-        font-size: 0.78rem;
+        font-size: clamp(0.58rem, 2.2vw, 0.78rem);
     }
     
     #database-view #basic-universe-table .basic-universe-icon-mobile-trailing {
@@ -7682,17 +7747,21 @@
     #database-view #power-cards-table .power-cards-type-toggles {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: center;
-        gap: 10px;
+        gap: clamp(4px, 1.5vw, 10px);
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 
     #database-view #power-cards-table .power-cards-filter-icon-row .power-type-filter-toggle {
-        min-width: 50px;
-        min-height: 50px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50px;
+        max-height: 50px;
+        aspect-ratio: 1;
         padding: 4px;
         box-sizing: border-box;
         display: inline-flex;
@@ -7701,13 +7770,15 @@
     }
 
     #database-view #power-cards-table .power-cards-filter-icon-row .power-type-filter-toggle img {
-        width: 34px;
-        height: 34px;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
     }
 
     #database-view #power-cards-table .power-cards-filter-icon-row .power-type-filter-text {
-        font-size: 0.78rem;
+        font-size: clamp(0.58rem, 2.2vw, 0.78rem);
     }
 
     #database-view #power-cards-table .power-icon-mobile-trailing {
@@ -8759,4 +8830,46 @@
     #imageModal[data-open-context='special'] #modalCaption {
         max-width: min(600px, calc(100vw - 32px)) !important;
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/* DBV MV: hide full-tab "Clear filters" controls (DTV + @media mirror unchanged) */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #database-view #clear-filters-mobile,
+.layout-mobile #database-view #clear-aspects-filters-mobile,
+.layout-mobile #database-view #clear-events-filters-mobile,
+.layout-mobile #database-view #clear-location-filters-mobile,
+.layout-mobile #database-view #clear-teamwork-filters-mobile-inline,
+.layout-mobile #database-view #clear-ally-filters-mobile-inline,
+.layout-mobile #database-view #clear-training-filters-mobile-inline,
+.layout-mobile #database-view #clear-basic-universe-filters-mobile-inline,
+.layout-mobile #database-view #clear-power-filters-mobile-inline {
+    display: none !important;
+}
+
+/* Icon-row trailing slot held only the full-tab clear — collapse on MV */
+.layout-mobile #database-view .aspect-icon-mobile-trailing,
+.layout-mobile #database-view .teamwork-icon-mobile-trailing,
+.layout-mobile #database-view .ally-icon-mobile-trailing,
+.layout-mobile #database-view .training-icon-mobile-trailing,
+.layout-mobile #database-view .basic-universe-icon-mobile-trailing,
+.layout-mobile #database-view .power-icon-mobile-trailing {
+    display: none !important;
+}
+
+.layout-mobile #database-view #characters-table .characters-filter-clear-inline {
+    display: none !important;
+}
+
+.layout-mobile #database-view #characters-table .characters-stat-panels {
+    flex: 1 1 0;
+}
+
+.layout-mobile #database-view #events-table .events-mobile-set-select-clear-row {
+    grid-template-columns: 1fr;
+}
+
+.layout-mobile #database-view #locations-table .locations-threat-inputs-and-clear #location-threat-min,
+.layout-mobile #database-view #locations-table .locations-threat-inputs-and-clear #location-threat-max {
+    flex: 1 1 0;
 }

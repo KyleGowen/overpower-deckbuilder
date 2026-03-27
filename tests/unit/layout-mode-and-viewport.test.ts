@@ -338,7 +338,7 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
             /\.layout-mobile\s+#locations-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?max-height:\s*none\s*!important/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#locations-table\s+#clear-location-filters-mobile\.clear-filters-btn--locations-mobile-inline[\s\S]*?display:\s*inline-flex/
+            /\.layout-mobile\s+#database-view\s+#clear-location-filters-mobile[\s\S]*?display:\s*none\s*!important/
         );
         expect(css).toMatch(
             /#database-view\s+#locations-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?max-height:\s*none\s*!important/
@@ -377,7 +377,7 @@ describe('mobile-layout.css (DBV Special Cards tab)', () => {
         expect(css).toMatch(
             /\.layout-mobile\s+#special-cards-table\s+thead\s+tr\.special-cards-filter-row\s*>\s*th\.special-filter-clear-th[\s\S]*?display:\s*none\s*!important/
         );
-        expect(css).toContain('Mobile visual order: function row (toggles | Clear)');
+        expect(css).toContain('Mobile visual order: function row (toggles);');
         expect(css).toMatch(
             /\.layout-mobile\s+#special-cards-table\s+thead\s+tr\.special-cards-filter-row\s+\.special-function-filter-toggles[\s\S]*?justify-content:\s*center/
         );
@@ -390,15 +390,12 @@ describe('mobile-layout.css (DBV Special Cards tab)', () => {
         expect(css).toMatch(/special-filter-effect-th[\s\S]*?order:\s*6/);
     });
 
-    it('stacks value filters in a column sheet; mobile Clear is compact on function row (44px min height)', () => {
+    it('stacks value filters in a column sheet; function row centers icon toggles', () => {
         expect(css).toMatch(
             /\.layout-mobile\s+#special-cards-table\s+\.special-value-inputs-and-clear[\s\S]*?display:\s*flex[\s\S]*?flex-direction:\s*column/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#special-cards-table\s+#clear-special-filters-mobile\.clear-filters-btn--special-mobile-inline[\s\S]*?min-height:\s*44px/
-        );
-        expect(css).toMatch(
-            /\.layout-mobile\s+#special-cards-table\s+\.special-function-mobile-trailing[\s\S]*?display:\s*inline-flex/
+            /\.layout-mobile\s+#special-cards-table\s+thead\s+tr\.special-cards-filter-row\s+\.special-function-filter-toggles[\s\S]*?justify-content:\s*center/
         );
     });
 
@@ -492,9 +489,7 @@ describe('public/index.html mobile layout wiring', () => {
         expect(html).toContain('<div id="all-cards-grid-container">');
         expect(html).not.toMatch(/id="all-cards-grid-container"[^>]*repeat\(5/);
         expect(html).toContain('special-cards-filter-row');
-        expect(html).toContain('id="clear-special-filters-mobile"');
-        expect(html).toContain('special-function-mobile-trailing');
-        expect(html).toContain('clear-filters-btn--special-mobile-inline');
+        expect(html).toContain('id="clear-special-filters-desktop"');
         expect(html).toContain('aspects-filter-row');
         expect(html).toContain('id="clear-aspects-filters-mobile"');
         expect(html).toContain('clear-filters-btn--aspects-mobile-inline');
