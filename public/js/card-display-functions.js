@@ -197,6 +197,9 @@ function displayEvents(events) {
         const capSet = `<div class="characters-mobile-card-caption__set"${missionSetPlain ? '' : ' style="display:none;"'}>${missionSetPlain ? esc(missionSetPlain) : ''}</div>`;
         const capEffect = `<div class="characters-mobile-card-caption__game-effect"${gameEffectPlain.trim() ? '' : ' style="display:none;"'}>${gameEffectPlain.trim() ? esc(gameEffectPlain) : ''}</div>`;
         const capFlavor = `<div class="characters-mobile-card-caption__flavor"${flavorStripped.trim() ? '' : ' style="display:none;"'}>${flavorStripped.trim() ? esc(flavorStripped.trim()) : ''}</div>`;
+        const eventSetLine =
+            typeof window.dbvSetCaptionLineFromCard === 'function' ? window.dbvSetCaptionLineFromCard(event) : '';
+        const capSetLine = `<div class="characters-mobile-card-caption__set-line"${eventSetLine.trim() ? '' : ' style="display:none;"'}>${eventSetLine.trim() ? esc(eventSetLine.trim()) : ''}</div>`;
 
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -218,6 +221,7 @@ function displayEvents(events) {
                     ${capSet}
                     ${capEffect}
                     ${capFlavor}
+                    ${capSetLine}
                 </div>
             </td>
             <td>

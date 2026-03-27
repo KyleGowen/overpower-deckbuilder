@@ -60,7 +60,13 @@ describe('mobile-layout.css (DBV Events tab)', () => {
             /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__flavor::before[\s\S]*?width:\s*20%[\s\S]*?margin:\s*0\s+auto\s+10px[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/
         );
         expect(css).toMatch(
+            /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line::before[\s\S]*?width:\s*20%[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/
+        );
+        expect(css).toMatch(
             /#database-view\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__game-effect[\s\S]*?font-size:\s*1rem[\s\S]*?margin-top:\s*calc\(0\.5\s*\*\s*1\.35em\)/
+        );
+        expect(css).toMatch(
+            /#database-view\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line::before[\s\S]*?width:\s*20%[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/
         );
     });
 
@@ -137,6 +143,8 @@ describe('card-display-functions.js displayEvents (mobile row contract)', () => 
         expect(source).toContain('class="card-image-container"');
         expect(source).toContain('characters-mobile-card-caption__game-effect');
         expect(source).toContain('characters-mobile-card-caption__flavor');
+        expect(source).toContain('characters-mobile-card-caption__set-line');
+        expect(source).toContain('dbvSetCaptionLineFromCard');
         expect(source).toContain('applyDbvHorizontalCardClass');
         expect(source).toContain('data-full-res=');
     });

@@ -152,6 +152,12 @@ describe('search-filter-functions.js (Missions filters)', () => {
         expect(source).toContain('let pool = missions');
         expect(source).toContain('missionsFilterUsesMobileSelect()');
     });
+
+    it('re-runs applyMissionFilters on layout-mode-change when Missions tab is visible (caption vs hidden columns)', () => {
+        expect(source).toContain('dataset.missionLayoutModeBound');
+        expect(source).toContain("'layout-mode-change'");
+        expect(source).toMatch(/layout-mode-change[\s\S]{0,400}applyMissionFilters\(\)/);
+    });
 });
 
 describe('card-data-display.js (loadMissions)', () => {

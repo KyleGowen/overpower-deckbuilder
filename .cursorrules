@@ -203,6 +203,9 @@
 - **Document new categorization patterns** in commit messages when adding them
 
 ## Acronyms and Terminology
+- **DBV** = **Database View** — when the user says "DBV", they mean the Card Database view (the database browsing UI), not a generic "database."
+- **MV** = **mobile view** / **mobile display layout** — narrow viewport and `layout-mobile` (or equivalent mobile presentation), not "model view" or other meanings of MV.
+- **DTV** = **desktop view** / **desktop layout** — wide viewport and default desktop presentation of the same screens.
 - **OPD** = "One Per Deck" - Cards that can only appear once in a deck (marked with `one_per_deck=TRUE` in database)
 - **UA** = "Universe: Advanced" - Advanced Universe card category
 - **UB** = "Universe: Basic" - Basic Universe card category  

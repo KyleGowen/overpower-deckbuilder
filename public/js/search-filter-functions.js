@@ -838,6 +838,23 @@ function populateEventsMissionSetSelect() {
 window.populateEventsMissionSetSelect = populateEventsMissionSetSelect;
 
 function setupMissionSearch() {
+    const missionsTableRoot = document.getElementById('missions-table');
+    if (missionsTableRoot && missionsTableRoot.dataset.missionLayoutModeBound !== '1') {
+        missionsTableRoot.dataset.missionLayoutModeBound = '1';
+        window.addEventListener('layout-mode-change', () => {
+            const tab = document.getElementById('missions-tab');
+            if (
+                tab &&
+                tab.style.display !== 'none' &&
+                window.missionsData &&
+                window.missionsData.length > 0 &&
+                typeof applyMissionFilters === 'function'
+            ) {
+                applyMissionFilters();
+            }
+        });
+    }
+
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', async () => {
         if (!window.missionsData || window.missionsData.length === 0) {
