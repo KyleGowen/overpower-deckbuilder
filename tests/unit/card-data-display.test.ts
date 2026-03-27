@@ -45,6 +45,12 @@ declare global {
         displayPowerCards?: (data: any[]) => void;
         applyBasicUniverseFilters?: () => Promise<void>;
         addCardToCollectionFromDatabase?: (id: string, type: string) => void;
+        parseTeamworkFollowupTokens?: (value: string | null | undefined) => string[];
+        teamworkActsAsPowerTypeForFilter?: (card: {
+            acts_as?: string;
+            to_use?: string;
+        }) => string | null;
+        teamworkBonusNumericFromField?: (raw: unknown) => number | null;
     }
 }
 
@@ -125,6 +131,43 @@ describe('Card Data Display', () => {
             const rows = tbody.querySelectorAll('tr');
             expect(rows[0].innerHTML).toContain('5 Energy');
             expect(rows[1].innerHTML).toContain('5 Intelligence');
+        });
+    });
+
+    describe('teamwork DTV filter helpers', () => {
+        it('exports parseTeamworkFollowupTokens, teamworkActsAsPowerTypeForFilter, teamworkBonusNumericFromField', () => {
+            expect(typeof window.parseTeamworkFollowupTokens).toBe('function');
+            expect(typeof window.teamworkActsAsPowerTypeForFilter).toBe('function');
+            expect(typeof window.teamworkBonusNumericFromField).toBe('function');
+        });
+
+        it('parseTeamworkFollowupTokens splits and dedupes like the followup cell', () => {
+            expect(window.parseTeamworkFollowupTokens!('Energy + Intelligence')).toEqual(['Energy', 'Intelligence']);
+            expect(window.parseTeamworkFollowupTokens!('Brute Force / Brute Force')).toEqual(['Brute Force']);
+        });
+
+        it('teamworkActsAsPowerTypeForFilter uses To Use power type for "N Attack"', () => {
+            expect(
+                window.teamworkActsAsPowerTypeForFilter!({
+                    acts_as: '4 Attack',
+                    to_use: '7 Energy',
+                })
+            ).toBe('Energy');
+        });
+
+        it('teamworkActsAsPowerTypeForFilter uses acts_as tail when not Attack', () => {
+            expect(
+                window.teamworkActsAsPowerTypeForFilter!({
+                    acts_as: '5 Intelligence',
+                    to_use: '7 Energy',
+                })
+            ).toBe('Intelligence');
+        });
+
+        it('teamworkBonusNumericFromField parses first integer from bonus strings', () => {
+            expect(window.teamworkBonusNumericFromField!('+2')).toBe(2);
+            expect(window.teamworkBonusNumericFromField!('0')).toBe(0);
+            expect(window.teamworkBonusNumericFromField!('')).toBeNull();
         });
     });
 

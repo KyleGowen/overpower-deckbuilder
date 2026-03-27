@@ -856,7 +856,8 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 }
 
 /* Mobile-only mission-set dropdown row (shown under .layout-mobile in mobile-layout.css) */
-#missions-table .missions-mobile-set-row {
+#missions-table .missions-mobile-set-row,
+#missions-table .missions-mobile-card-name-row {
     display: none;
 }
 
@@ -886,6 +887,40 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
 
 #teamwork-table #clear-teamwork-filters-mobile-inline.clear-filters-btn--teamwork-mobile-inline {
     display: none;
+}
+
+/* Teamwork DTV: per-column filter row (Power-style toggles + Basic-style numeric). Hidden on mobile in mobile-layout.css. */
+#teamwork-table thead tr.teamwork-desktop-filter-row th {
+    vertical-align: top;
+}
+
+/* To Use DTV: three rows — [2 type icons] [one numeric field] per row (=, Max, Min). */
+#teamwork-table .teamwork-desktop-to-use-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+#teamwork-table .teamwork-desktop-to-use-line {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+}
+
+#teamwork-table .teamwork-desktop-to-use-line .special-power-filter-toggles {
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+#teamwork-table .teamwork-desktop-to-use-line-input {
+    width: 3.25rem;
+    min-width: 3rem;
+    max-width: 4rem;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 /* Ally: mobile-only stat type filter shell (see mobile-layout.css); desktop keeps Clear All column only. */

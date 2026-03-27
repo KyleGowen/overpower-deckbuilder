@@ -51,6 +51,15 @@ describe('mobile-layout.css (DBV Teamwork tab)', () => {
             /@media\s*\(\s*max-width:\s*900px\s*\)[\s\S]*?#database-view\s+#teamwork-table\s+tbody\s+td:nth-child\(n\s*\+\s*3\)[\s\S]*?display:\s*none\s*!important/
         );
     });
+
+    it('hides DTV teamwork desktop filter row on mobile layout and narrow #database-view', () => {
+        expect(css).toMatch(
+            /\.layout-mobile\s+#teamwork-table\s+thead\s+tr\.teamwork-desktop-filter-row\s*\{\s*display:\s*none\s*!important;\s*\}/
+        );
+        expect(css).toMatch(
+            /#database-view\s+#teamwork-table\s+thead\s+tr\.teamwork-desktop-filter-row\s*\{\s*display:\s*none\s*!important;\s*\}/
+        );
+    });
 });
 
 describe('database-view.css (DBV Teamwork — desktop)', () => {
@@ -76,6 +85,15 @@ describe('database-view.css (DBV Teamwork — desktop)', () => {
             /\.teamwork-mobile-filter-shell\s*\{[^}]*display:\s*none\s*!important/
         );
     });
+
+    it('styles DTV teamwork desktop filter row (vertical-align, To Use column spacing)', () => {
+        expect(css).toMatch(
+            /#teamwork-table\s+thead\s+tr\.teamwork-desktop-filter-row\s+th\s*\{\s*vertical-align:\s*top;\s*\}/
+        );
+        expect(css).toMatch(
+            /#teamwork-table\s+\.teamwork-desktop-to-use-column-filters\s+\.special-power-filter-toggles\s*\{\s*margin-bottom:\s*8px;\s*\}/
+        );
+    });
 });
 
 describe('DBV Teamwork markup (index.html + template)', () => {
@@ -85,10 +103,15 @@ describe('DBV Teamwork markup (index.html + template)', () => {
     it('index.html includes teamwork mobile filter hooks and value inputs', () => {
         const html = readFileSync(indexPath, 'utf8');
         expect(html).toContain('teamwork-filter-row');
-        expect(html).toContain('teamwork-to-use-equals');
+        expect(html).toContain('id="teamwork-to-use-equals"');
         expect(html).toContain('teamwork-to-use-min');
         expect(html).toContain('teamwork-to-use-max');
         expect(html).toContain('teamwork-to-use-power-toggles');
+        expect(html).toContain('teamwork-mobile-to-use-equals');
+        expect(html).toContain('teamwork-desktop-filter-row');
+        expect(html).toContain('teamwork-desktop-acts-as-toggles');
+        expect(html).toContain('teamwork-desktop-followup-toggles');
+        expect(html).toContain('teamwork-first-bonus-equals');
         expect(html).toContain('clearTeamworkFilters()');
     });
 
@@ -96,6 +119,8 @@ describe('DBV Teamwork markup (index.html + template)', () => {
         const html = readFileSync(templatePath, 'utf8');
         expect(html).toContain('teamwork-filter-row');
         expect(html).toContain('id="teamwork-to-use-equals"');
+        expect(html).toContain('teamwork-desktop-filter-row');
+        expect(html).toContain('teamwork-mobile-to-use-equals');
     });
 });
 
@@ -130,6 +155,10 @@ describe('card-data-display.js buildTeamworkMobileCaptionHtml', () => {
         expect(source).toContain('function formatTeamworkBonusNormalized');
         expect(source).toContain('window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml');
         expect(source).toContain('renderTeamworkActsAsCell');
+        expect(source).toContain('function parseTeamworkFollowupTokens');
+        expect(source).toContain('function teamworkActsAsPowerTypeForFilter');
+        expect(source).toContain('function teamworkBonusNumericFromField');
+        expect(source).toContain('window.parseTeamworkFollowupTokens = parseTeamworkFollowupTokens');
     });
 
     it('emits teamwork caption class names in returned HTML string', () => {

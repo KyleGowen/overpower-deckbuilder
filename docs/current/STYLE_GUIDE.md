@@ -30,6 +30,7 @@
 27. [Foil Card Shimmer Effect](#foil-card-shimmer-effect)
 28. [Reserve Button Styling](#reserve-button-styling)
 29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
+30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
 
 ## Overview
 
@@ -269,6 +270,20 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - <span style="display: inline-block; width: 20px; height: 20px; background-color: #ffffff; border: 1px solid #ccc; vertical-align: middle;"></span> (90% opacity)
 
 ## Screen-Specific Styling
+
+### Card Database — Universe: Teamwork (desktop filters)
+
+- **Where**: Card Database tab **Universe: Teamwork**, desktop layout (`#teamwork-table`). A second header row (`tr.teamwork-desktop-filter-row`) sits below the column titles and aligns filters under each data column.
+- **Mobile / narrow DBV**: The desktop row is hidden with `display: none !important` under `.layout-mobile #teamwork-table` and under `@media (max-width: 900px) #database-view #teamwork-table` in `public/css/mobile-layout.css`. The existing mobile shell row (`tr.teamwork-filter-row` + `.teamwork-mobile-filter-shell`) remains the MV filter UI.
+- **Power-type toggles** (same visual language as Power Cards: `.special-power-filter-toggles`, `.power-type-filter-toggle`, 2×3 icon grid, `.is-active`):
+  - **To Use**: `.teamwork-desktop-to-use-toggles` — kept in sync with mobile `.teamwork-to-use-power-toggles` on click (same `data-power-type` in both groups).
+  - **Acts As**: `.teamwork-desktop-acts-as-toggles`
+  - **Followup Attack Types**: `.teamwork-desktop-followup-toggles`
+- **To Use numeric** (Universe: Basic / Power Cards value pattern): `id="teamwork-to-use-equals"`, `id="teamwork-to-use-min"`, `id="teamwork-to-use-max"` on the desktop row; mobile uses class-only fields `.teamwork-mobile-to-use-equals|min|max` synced from desktop on input (`syncTeamworkDesktopNumericToMobile` / `syncTeamworkMobileNumericToDesktop` in `public/js/card-data-display.js`).
+- **Attack bonuses** (Basic Universe bonus pattern: equals on first line, `Min` / `Max` with hyphen in `.range-inputs`):
+  - **1st Attack Bonus**: `id="teamwork-first-bonus-equals"`, `id="teamwork-first-bonus-min"`, `id="teamwork-first-bonus-max"`
+  - **2nd Attack Bonus**: `id="teamwork-second-bonus-equals"`, `id="teamwork-second-bonus-min"`, `id="teamwork-second-bonus-max"`
+- **DTV spacing**: `public/css/database-view.css` — `#teamwork-table thead tr.teamwork-desktop-filter-row th { vertical-align: top; }` and `.teamwork-desktop-to-use-column-filters .special-power-filter-toggles { margin-bottom: 8px; }` so stacked toggles and numeric inputs read as one column.
 
 ### Main Dashboard (index.html)
 - **Background**: `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`

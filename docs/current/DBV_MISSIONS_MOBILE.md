@@ -4,7 +4,7 @@ This document explains **how the Missions tab** of the Card Database (`#missions
 
 ## Goals
 
-- **Simpler than Aspects:** Mission cards only need **mission set** (story set, 7 cards) and **card name** in the data model; mobile UI uses a **single mission-set dropdown** (plus shared DBV search) instead of many header filters.
+- **Simpler than Aspects:** Mission cards only need **mission set** (story set, 7 cards) and **card name** in the data model; mobile UI uses a **mission-set dropdown** plus a **card-name** text field (and shared DBV `#search-input`) instead of many header filters.
 - **Match Special / Aspects** for **tbody**: vertical **card rows**, large list art, **`max-height: none !important`** on portrait `img` (see [`MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md`](MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md)).
 - **No tab-level Clear button** — reset via **All** in the dropdown, desktop checkboxes, global clear, or `clearMissionsFilters()` if invoked programmatically.
 
@@ -27,6 +27,7 @@ Under **`.layout-mobile #missions-table`** in [`mobile-layout.css`](../../public
 - **`tr.missions-filter-row`**: flex + wrap, **12px** radius, **`--missions-header-shell-*`** (teal border / dark shell).
 - **Hidden on mobile:** **`.missions-filter-clear-th`** (placeholder column — no Clear control), spacer / empty **`th`**, **`.missions-checkbox-group`**.
 - **`.missions-mobile-set-row`:** uppercase label **`.missions-mobile-set-label`** (**`color: #4ecdc4`**, matches DBV **`data-label`** headings) + **`#missions-mission-set-filter`** full width (**≥44px** height, teal border).
+- **`.missions-mobile-card-name-row`:** same label style + **`#missions-mobile-card-name-filter`** (substring match on **`card_name`**, combined with set dropdown and **`#search-input`**).
 - **`@media (max-width: 900px)`**: **`#database-view #missions-table`** repeats the same filter + tbody rules for **`preferDesktopLayout`** on narrow viewports.
 
 **Desktop:** **`.missions-mobile-set-row`** is **`display: none`** in [`database-view.css`](../../public/css/database-view.css); **`.missions-filter-clear-th`** is **`display: none !important`** (table column kept for structure). Mission-set **checkboxes** remain in **`.missions-checkbox-group`**.
@@ -37,8 +38,8 @@ Under **`.layout-mobile #missions-table`** in [`mobile-layout.css`](../../public
 
 - **`missionsFilterUsesMobileSelect()`** — true when **`layout-mobile`** or **`(max-width: 900px)`** (must match CSS that shows the `<select>`).
 - **`populateMissionsMissionSetSelect()`** — **All** + sorted distinct **`mission_set`** from **`window.missionsData`**; preserves selection when options refresh.
-- **`applyMissionFilters()`** — applies shared **search** text on **`card_name` / `mission_set`**, then either **mobile** (one set or All) or **desktop** (checkbox OR). Exported on **`window`**.
-- **`setupMissionSearch()`** — wires search input, checkboxes, **`#missions-mission-set-filter`** **`change`**.
+- **`applyMissionFilters()`** — applies shared **search** text on **`card_name` / `mission_set`**, then on mobile **substring filter** on **`card_name`** from **`#missions-mobile-card-name-filter`**, then either **mobile** (one set or All) or **desktop** (checkbox OR). Exported on **`window`**.
+- **`setupMissionSearch()`** — wires search input, checkboxes, **`#missions-mission-set-filter`** **`change`**, **`#missions-mobile-card-name-filter`** **`input`**.
 
 [`loadMissions`](../../public/js/card-data-display.js) sets **`window.missionsData`**, then **`populateMissionsMissionSetSelect()`** + **`applyMissionFilters()`** so the list respects the current UI.
 

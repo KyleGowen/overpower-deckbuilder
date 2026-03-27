@@ -163,6 +163,9 @@ function clearMissionsFilters() {
     const missionSetSelect = document.getElementById('missions-mission-set-filter');
     if (missionSetSelect) missionSetSelect.value = '';
 
+    const missionCardNameFilter = document.getElementById('missions-mobile-card-name-filter');
+    if (missionCardNameFilter) missionCardNameFilter.value = '';
+
     if (typeof loadMissions === 'function') {
         loadMissions();
     } else if (typeof applyMissionFilters === 'function') {
@@ -192,19 +195,34 @@ function clearEventsFilters() {
 }
 
 function clearTeamworkFilters() {
-    document
-        .querySelectorAll('#teamwork-table .teamwork-to-use-power-toggles .power-type-filter-toggle')
-        .forEach((btn) => {
-            btn.classList.remove('is-active', 'is-disabled');
-            btn.setAttribute('aria-pressed', 'false');
-            btn.disabled = false;
-        });
-    ['teamwork-to-use-equals', 'teamwork-to-use-min', 'teamwork-to-use-max'].forEach((id) => {
+    document.querySelectorAll('#teamwork-table thead .power-type-filter-toggle').forEach((btn) => {
+        btn.classList.remove('is-active', 'is-disabled');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.disabled = false;
+    });
+    [
+        'teamwork-to-use-equals',
+        'teamwork-to-use-min',
+        'teamwork-to-use-max',
+        'teamwork-first-bonus-equals',
+        'teamwork-first-bonus-min',
+        'teamwork-first-bonus-max',
+        'teamwork-second-bonus-equals',
+        'teamwork-second-bonus-min',
+        'teamwork-second-bonus-max'
+    ].forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
             el.value = '';
         }
     });
+    document
+        .querySelectorAll(
+            '#teamwork-tab .teamwork-mobile-to-use-equals, #teamwork-tab .teamwork-mobile-to-use-min, #teamwork-tab .teamwork-mobile-to-use-max'
+        )
+        .forEach((el) => {
+            el.value = '';
+        });
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
         searchInput.value = '';

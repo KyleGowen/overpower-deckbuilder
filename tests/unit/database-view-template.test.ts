@@ -109,6 +109,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="missions-table"');
             expect(templateContent).toContain('id="missions-tbody"');
             expect(templateContent).toContain('id="missions-mission-set-filter"');
+            expect(templateContent).toContain('id="missions-mobile-card-name-filter"');
         });
 
         it('should contain events table', () => {

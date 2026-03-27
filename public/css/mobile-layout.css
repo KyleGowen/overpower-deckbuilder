@@ -1420,7 +1420,8 @@
     display: none !important;
 }
 
-.layout-mobile #missions-table .missions-mobile-set-row {
+.layout-mobile #missions-table .missions-mobile-set-row,
+.layout-mobile #missions-table .missions-mobile-card-name-row {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -1429,6 +1430,11 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+}
+
+/* Half a line below mission-set control (matches select line-height 1.2 @ 1rem) */
+.layout-mobile #missions-table .missions-mobile-card-name-row {
+    margin-top: calc(0.5 * 1.2 * 1rem);
 }
 
 .layout-mobile #missions-table .missions-mobile-set-label {
@@ -1441,7 +1447,8 @@
     margin: 0;
 }
 
-.layout-mobile #missions-table .missions-mission-set-filter {
+.layout-mobile #missions-table .missions-mission-set-filter,
+.layout-mobile #missions-table .missions-mobile-card-name-filter {
     flex: 1 1 100%;
     width: 100%;
     min-width: 0;
@@ -1454,6 +1461,10 @@
     background: rgba(18, 44, 50, 0.98);
     color: #fff;
     box-sizing: border-box;
+}
+
+.layout-mobile #missions-table .missions-mobile-card-name-filter::placeholder {
+    color: rgba(255, 255, 255, 0.45);
 }
 
 .layout-mobile #missions-table {
@@ -1658,6 +1669,10 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+.layout-mobile #teamwork-table thead tr.teamwork-desktop-filter-row {
+    display: none !important;
 }
 
 .layout-mobile #teamwork-table thead tr.teamwork-filter-row {
@@ -5731,7 +5746,8 @@
         display: none !important;
     }
 
-    #database-view #missions-table .missions-mobile-set-row {
+    #database-view #missions-table .missions-mobile-set-row,
+    #database-view #missions-table .missions-mobile-card-name-row {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -5740,6 +5756,10 @@
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
+    }
+
+    #database-view #missions-table .missions-mobile-card-name-row {
+        margin-top: calc(0.5 * 1.2 * 1rem);
     }
 
     #database-view #missions-table .missions-mobile-set-label {
@@ -5752,7 +5772,8 @@
         margin: 0;
     }
 
-    #database-view #missions-table .missions-mission-set-filter {
+    #database-view #missions-table .missions-mission-set-filter,
+    #database-view #missions-table .missions-mobile-card-name-filter {
         flex: 1 1 100%;
         width: 100%;
         min-width: 0;
@@ -5765,6 +5786,10 @@
         background: rgba(18, 44, 50, 0.98);
         color: #fff;
         box-sizing: border-box;
+    }
+
+    #database-view #missions-table .missions-mobile-card-name-filter::placeholder {
+        color: rgba(255, 255, 255, 0.45);
     }
 
     #database-view #missions-table {
@@ -5966,6 +5991,10 @@
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border: 0;
+    }
+
+    #database-view #teamwork-table thead tr.teamwork-desktop-filter-row {
+        display: none !important;
     }
 
     #database-view #teamwork-table thead tr.teamwork-filter-row {

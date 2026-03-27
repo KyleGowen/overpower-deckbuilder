@@ -406,6 +406,61 @@ function setupAdvancedUniverseSearch() {
     }
 }
 
+function teamworkFilterPowerTypeMatches(actual, selected) {
+    if (!actual || !selected) {
+        return false;
+    }
+    if (selected === 'Multi-Power') {
+        return actual === 'Multi Power' || actual === 'Multi-Power';
+    }
+    return actual === selected;
+}
+
+function teamworkBonusColumnPasses(bonusNum, equalsVal, minVal, maxVal) {
+    if (equalsVal !== null && !Number.isNaN(equalsVal)) {
+        return bonusNum !== null && bonusNum === equalsVal;
+    }
+    if (minVal !== null && !Number.isNaN(minVal)) {
+        if (bonusNum === null || bonusNum < minVal) {
+            return false;
+        }
+    }
+    if (maxVal !== null && !Number.isNaN(maxVal)) {
+        if (bonusNum === null || bonusNum > maxVal) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function teamworkHasAnyBonusFilterInput(equalsVal, minVal, maxVal) {
+    return (
+        (equalsVal !== null && !Number.isNaN(equalsVal)) ||
+        (minVal !== null && !Number.isNaN(minVal)) ||
+        (maxVal !== null && !Number.isNaN(maxVal))
+    );
+}
+
+function syncTeamworkToUseToggleState(clickedBtn) {
+    const tbl = document.getElementById('teamwork-table');
+    if (!tbl) {
+        return;
+    }
+    const t = clickedBtn.getAttribute('data-power-type');
+    if (!t) {
+        return;
+    }
+    const willBeActive = !clickedBtn.classList.contains('is-active');
+    tbl.querySelectorAll(
+        '.teamwork-desktop-to-use-toggles .power-type-filter-toggle, .teamwork-to-use-power-toggles .power-type-filter-toggle'
+    ).forEach((b) => {
+        if (b.getAttribute('data-power-type') === t) {
+            b.classList.toggle('is-active', willBeActive);
+            b.setAttribute('aria-pressed', willBeActive ? 'true' : 'false');
+        }
+    });
+}
+
 function applyTeamworkFilters() {
     const pool = window.teamworkData;
     if (!pool || pool.length === 0) {
@@ -437,12 +492,56 @@ function applyTeamworkFilters() {
     const minVal = minEl && minEl.value !== '' ? parseInt(minEl.value, 10) : null;
     const maxVal = maxEl && maxEl.value !== '' ? parseInt(maxEl.value, 10) : null;
 
-    const toggles = document.querySelectorAll(
-        '#teamwork-table .teamwork-to-use-power-toggles .power-type-filter-toggle.is-active'
-    );
-    const selectedPowerTypes = Array.from(toggles)
+    const toUseTypeSet = new Set();
+    document
+        .querySelectorAll(
+            '#teamwork-table .teamwork-desktop-to-use-toggles .power-type-filter-toggle.is-active, #teamwork-table .teamwork-to-use-power-toggles .power-type-filter-toggle.is-active'
+        )
+        .forEach((b) => {
+            const pt = b.getAttribute('data-power-type');
+            if (pt) {
+                toUseTypeSet.add(pt);
+            }
+        });
+    const selectedToUseTypes = [...toUseTypeSet];
+
+    const selectedActsAsTypes = Array.from(
+        document.querySelectorAll('#teamwork-table .teamwork-desktop-acts-as-toggles .power-type-filter-toggle.is-active')
+    )
         .map((b) => b.getAttribute('data-power-type'))
         .filter(Boolean);
+
+    const selectedFollowupTypes = Array.from(
+        document.querySelectorAll('#teamwork-table .teamwork-desktop-followup-toggles .power-type-filter-toggle.is-active')
+    )
+        .map((b) => b.getAttribute('data-power-type'))
+        .filter(Boolean);
+
+    const firstEqEl = document.getElementById('teamwork-first-bonus-equals');
+    const firstMinEl = document.getElementById('teamwork-first-bonus-min');
+    const firstMaxEl = document.getElementById('teamwork-first-bonus-max');
+    const firstEqualsVal = firstEqEl && firstEqEl.value !== '' ? parseInt(firstEqEl.value, 10) : null;
+    const firstMinVal = firstMinEl && firstMinEl.value !== '' ? parseInt(firstMinEl.value, 10) : null;
+    const firstMaxVal = firstMaxEl && firstMaxEl.value !== '' ? parseInt(firstMaxEl.value, 10) : null;
+
+    const secondEqEl = document.getElementById('teamwork-second-bonus-equals');
+    const secondMinEl = document.getElementById('teamwork-second-bonus-min');
+    const secondMaxEl = document.getElementById('teamwork-second-bonus-max');
+    const secondEqualsVal = secondEqEl && secondEqEl.value !== '' ? parseInt(secondEqEl.value, 10) : null;
+    const secondMinVal = secondMinEl && secondMinEl.value !== '' ? parseInt(secondMinEl.value, 10) : null;
+    const secondMaxVal = secondMaxEl && secondMaxEl.value !== '' ? parseInt(secondMaxEl.value, 10) : null;
+
+    const bonusNumFn =
+        typeof window.teamworkBonusNumericFromField === 'function'
+            ? window.teamworkBonusNumericFromField
+            : (raw) => {
+                  const m = String(raw ?? '').trim().match(/(\d+)/);
+                  return m ? parseInt(m[1], 10) : null;
+              };
+    const parseFollowup =
+        typeof window.parseTeamworkFollowupTokens === 'function'
+            ? window.parseTeamworkFollowupTokens
+            : () => [];
 
     const safeLower = (v) => String(v ?? '').toLowerCase();
 
@@ -460,14 +559,9 @@ function applyTeamworkFilters() {
             }
         }
 
-        if (selectedPowerTypes.length > 0) {
+        if (selectedToUseTypes.length > 0) {
             const p = powerFrom(card.to_use);
-            const ok = selectedPowerTypes.some((sel) => {
-                if (sel === 'Multi-Power') {
-                    return p === 'Multi Power' || p === 'Multi-Power';
-                }
-                return p === sel;
-            });
+            const ok = selectedToUseTypes.some((sel) => teamworkFilterPowerTypeMatches(p, sel));
             if (!ok) {
                 return false;
             }
@@ -489,6 +583,41 @@ function applyTeamworkFilters() {
                 return false;
             }
         }
+
+        if (selectedActsAsTypes.length > 0) {
+            const actsType =
+                typeof window.teamworkActsAsPowerTypeForFilter === 'function'
+                    ? window.teamworkActsAsPowerTypeForFilter(card)
+                    : null;
+            if (!actsType || !selectedActsAsTypes.some((sel) => teamworkFilterPowerTypeMatches(actsType, sel))) {
+                return false;
+            }
+        }
+
+        if (selectedFollowupTypes.length > 0) {
+            const rawFu = card.followup_attack_types || card.follow_up_attack_types;
+            const tokens = parseFollowup(rawFu);
+            const ok = tokens.some((tok) =>
+                selectedFollowupTypes.some((sel) => teamworkFilterPowerTypeMatches(tok, sel))
+            );
+            if (!ok) {
+                return false;
+            }
+        }
+
+        if (teamworkHasAnyBonusFilterInput(firstEqualsVal, firstMinVal, firstMaxVal)) {
+            const b1 = bonusNumFn(card.first_attack_bonus);
+            if (!teamworkBonusColumnPasses(b1, firstEqualsVal, firstMinVal, firstMaxVal)) {
+                return false;
+            }
+        }
+        if (teamworkHasAnyBonusFilterInput(secondEqualsVal, secondMinVal, secondMaxVal)) {
+            const b2 = bonusNumFn(card.second_attack_bonus);
+            if (!teamworkBonusColumnPasses(b2, secondEqualsVal, secondMinVal, secondMaxVal)) {
+                return false;
+            }
+        }
+
         return true;
     });
 
@@ -504,6 +633,13 @@ function clearTeamworkToUseValueFilters() {
             el.value = '';
         }
     });
+    document
+        .querySelectorAll(
+            '#teamwork-tab .teamwork-mobile-to-use-equals, #teamwork-tab .teamwork-mobile-to-use-min, #teamwork-tab .teamwork-mobile-to-use-max'
+        )
+        .forEach((el) => {
+            el.value = '';
+        });
     applyTeamworkFilters();
 }
 
@@ -520,7 +656,18 @@ function setupTeamworkTableFilters() {
         debounceT = setTimeout(() => applyTeamworkFilters(), 150);
     };
 
-    root.querySelectorAll('.teamwork-to-use-power-toggles .power-type-filter-toggle').forEach((btn) => {
+    root
+        .querySelectorAll(
+            '.teamwork-desktop-to-use-toggles .power-type-filter-toggle, .teamwork-to-use-power-toggles .power-type-filter-toggle'
+        )
+        .forEach((btn) => {
+            btn.addEventListener('click', () => {
+                syncTeamworkToUseToggleState(btn);
+                applyTeamworkFilters();
+            });
+        });
+
+    root.querySelectorAll('.teamwork-desktop-acts-as-toggles .power-type-filter-toggle').forEach((btn) => {
         btn.addEventListener('click', () => {
             btn.classList.toggle('is-active');
             btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
@@ -528,7 +675,52 @@ function setupTeamworkTableFilters() {
         });
     });
 
+    root.querySelectorAll('.teamwork-desktop-followup-toggles .power-type-filter-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('is-active');
+            btn.setAttribute('aria-pressed', btn.classList.contains('is-active') ? 'true' : 'false');
+            applyTeamworkFilters();
+        });
+    });
+
+    const onDesktopToUseNum = () => {
+        if (typeof window.syncTeamworkDesktopNumericToMobile === 'function') {
+            window.syncTeamworkDesktopNumericToMobile();
+        }
+        debouncedApply();
+    };
+    const onMobileToUseNum = () => {
+        if (typeof window.syncTeamworkMobileNumericToDesktop === 'function') {
+            window.syncTeamworkMobileNumericToDesktop();
+        }
+        debouncedApply();
+    };
+
     ['teamwork-to-use-equals', 'teamwork-to-use-min', 'teamwork-to-use-max'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', onDesktopToUseNum);
+        }
+    });
+
+    const teamworkTab = document.getElementById('teamwork-tab');
+    if (teamworkTab) {
+        teamworkTab
+            .querySelectorAll('.teamwork-mobile-to-use-equals, .teamwork-mobile-to-use-min, .teamwork-mobile-to-use-max')
+            .forEach((el) => {
+                el.addEventListener('input', onMobileToUseNum);
+            });
+    }
+
+    const bonusIds = [
+        'teamwork-first-bonus-equals',
+        'teamwork-first-bonus-min',
+        'teamwork-first-bonus-max',
+        'teamwork-second-bonus-equals',
+        'teamwork-second-bonus-min',
+        'teamwork-second-bonus-max'
+    ];
+    bonusIds.forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('input', debouncedApply);
@@ -541,6 +733,9 @@ function setupTeamworkTableFilters() {
     }
 
     window.addEventListener('layout-mode-change', () => {
+        if (typeof window.syncTeamworkDesktopNumericToMobile === 'function') {
+            window.syncTeamworkDesktopNumericToMobile();
+        }
         const t = document.getElementById('teamwork-tab');
         if (t && t.style.display !== 'none' && window.teamworkData && window.teamworkData.length > 0) {
             applyTeamworkFilters();
@@ -875,6 +1070,17 @@ function setupMissionSearch() {
         missionSetSelect.addEventListener('change', applyMissionFilters);
         missionSetSelect.dataset.missionFilterBound = 'true';
     }
+
+    const missionCardNameInput = document.getElementById('missions-mobile-card-name-filter');
+    if (missionCardNameInput && !missionCardNameInput.dataset.missionNameFilterBound) {
+        missionCardNameInput.dataset.missionNameFilterBound = 'true';
+        missionCardNameInput.addEventListener('input', () => {
+            if (!window.missionsData || window.missionsData.length === 0) {
+                return;
+            }
+            applyMissionFilters();
+        });
+    }
 }
 
 function applyMissionFilters() {
@@ -892,6 +1098,14 @@ function applyMissionFilters() {
     }
 
     if (missionsFilterUsesMobileSelect()) {
+        const nameEl = document.getElementById('missions-mobile-card-name-filter');
+        const nameTerm = nameEl && nameEl.value ? nameEl.value.trim().toLowerCase() : '';
+        if (nameTerm) {
+            pool = pool.filter(
+                (mission) => mission.card_name && mission.card_name.toLowerCase().includes(nameTerm)
+            );
+        }
+
         const sel = document.getElementById('missions-mission-set-filter');
         const v = sel && sel.value ? sel.value : '';
         if (!v) {

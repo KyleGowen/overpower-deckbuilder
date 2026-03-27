@@ -3776,6 +3776,119 @@
                             <th>1st Attack Bonus</th>
                             <th>2nd Attack Bonus</th>
                         </tr>
+                        <tr class="filter-row teamwork-desktop-filter-row">
+                            <th>
+                                <button type="button" class="clear-filters-btn" onclick="clearTeamworkFilters()">Clear All Filters</button>
+                            </th>
+                            <th></th>
+                            <th>
+                                <div class="column-filters teamwork-desktop-to-use-column-filters">
+                                    <div class="teamwork-desktop-to-use-rows" role="group" aria-label="Filter teamwork by To Use power type and value">
+                                        <div class="teamwork-desktop-to-use-line">
+                                            <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                                </button>
+                                            </div>
+                                            <input type="number" id="teamwork-to-use-equals" class="filter-input equals teamwork-desktop-to-use-line-input" data-column="to-use" placeholder="=" min="0" max="99" aria-label="To Use equals">
+                                        </div>
+                                        <div class="teamwork-desktop-to-use-line">
+                                            <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                                </button>
+                                            </div>
+                                            <input type="number" id="teamwork-to-use-max" class="filter-input teamwork-desktop-to-use-line-input" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
+                                        </div>
+                                        <div class="teamwork-desktop-to-use-line">
+                                            <div class="special-power-filter-toggles teamwork-desktop-to-use-toggles">
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter" aria-pressed="false">
+                                                    <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                                </button>
+                                                <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter" aria-pressed="false">
+                                                    <span class="power-type-filter-text">MP</span>
+                                                </button>
+                                            </div>
+                                            <input type="number" id="teamwork-to-use-min" class="filter-input teamwork-desktop-to-use-line-input" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles teamwork-desktop-acts-as-toggles" role="group" aria-label="Filter teamwork by Acts As power type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter for Acts As" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter for Acts As" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter for Acts As" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter for Acts As" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter for Acts As" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter for Acts As" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <div class="special-power-filter-toggles teamwork-desktop-followup-toggles" role="group" aria-label="Filter teamwork by followup attack type">
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Energy" title="Energy" aria-label="Toggle Energy filter for followup" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/energy.png" alt="Energy" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Intelligence" title="Intelligence" aria-label="Toggle Intelligence filter for followup" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/intelligence.png" alt="Intelligence" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Combat" title="Combat" aria-label="Toggle Combat filter for followup" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/combat.png" alt="Combat" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Any-Power" title="Any-Power" aria-label="Toggle Any-Power filter for followup" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/any-power.png" alt="Any-Power" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Brute Force" title="Brute Force" aria-label="Toggle Brute Force filter for followup" aria-pressed="false">
+                                            <img src="/src/resources/images/icons/brute_force.png" alt="Brute Force" loading="lazy">
+                                        </button>
+                                        <button type="button" class="power-type-filter-toggle" data-power-type="Multi-Power" title="Multi-Power" aria-label="Toggle Multi-Power filter for followup" aria-pressed="false">
+                                            <span class="power-type-filter-text">MP</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <input type="number" id="teamwork-first-bonus-equals" class="filter-input equals" data-column="teamwork-first-bonus" placeholder="=" min="0" max="99" aria-label="First attack bonus equals">
+                                    <div class="range-inputs">
+                                        <input type="number" id="teamwork-first-bonus-min" placeholder="Min" min="0" max="99" class="filter-input" aria-label="First attack bonus minimum">
+                                        <span>-</span>
+                                        <input type="number" id="teamwork-first-bonus-max" placeholder="Max" min="0" max="99" class="filter-input" aria-label="First attack bonus maximum">
+                                    </div>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="column-filters">
+                                    <input type="number" id="teamwork-second-bonus-equals" class="filter-input equals" data-column="teamwork-second-bonus" placeholder="=" min="0" max="99" aria-label="Second attack bonus equals">
+                                    <div class="range-inputs">
+                                        <input type="number" id="teamwork-second-bonus-min" placeholder="Min" min="0" max="99" class="filter-input" aria-label="Second attack bonus minimum">
+                                        <span>-</span>
+                                        <input type="number" id="teamwork-second-bonus-max" placeholder="Max" min="0" max="99" class="filter-input" aria-label="Second attack bonus maximum">
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
                         <tr class="filter-row teamwork-filter-row">
                             <th class="teamwork-filter-clear-th">
                                 <button type="button" class="clear-filters-btn" onclick="clearTeamworkFilters()">Clear All Filters</button>
@@ -3813,9 +3926,9 @@
                                     <div class="teamwork-filter-value-shell">
                                         <div class="special-value-filters-inner">
                                             <div class="column-filters teamwork-value-filters-inner">
-                                                <input type="number" id="teamwork-to-use-equals" class="filter-input equals teamwork-to-use-value-input" placeholder="=" min="0" max="99" aria-label="To Use equals">
-                                                <input type="number" id="teamwork-to-use-min" class="filter-input min teamwork-to-use-value-input" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
-                                                <input type="number" id="teamwork-to-use-max" class="filter-input max teamwork-to-use-value-input" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
+                                                <input type="number" class="filter-input equals teamwork-to-use-value-input teamwork-mobile-to-use-equals" placeholder="=" min="0" max="99" aria-label="To Use equals">
+                                                <input type="number" class="filter-input min teamwork-to-use-value-input teamwork-mobile-to-use-min" placeholder="Min" min="0" max="99" aria-label="To Use minimum">
+                                                <input type="number" class="filter-input max teamwork-to-use-value-input teamwork-mobile-to-use-max" placeholder="Max" min="0" max="99" aria-label="To Use maximum">
                                                 <button type="button" id="teamwork-to-use-value-clear" class="teamwork-to-use-value-clear-btn" title="Clear To Use value filters" aria-label="Clear To Use value filters">
                                                     <svg class="teamwork-to-use-value-clear-svg" viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                                         <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.25"/>

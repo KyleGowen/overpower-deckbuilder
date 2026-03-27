@@ -224,6 +224,87 @@ function teamworkNumericFromToUse(toUse) {
     return m ? parseInt(m[1], 10) : null;
 }
 
+/** Followup field tokens; matches renderFollowupAttackTypes split/dedupe. */
+function parseTeamworkFollowupTokens(value) {
+    if (!value || typeof value !== 'string') {
+        return [];
+    }
+    const separator = value.includes(' + ') ? ' + ' : ' / ';
+    const parts = value.split(separator).map((p) => p.trim());
+    const unique = parts[0] === parts[1] ? [parts[0]] : parts;
+    return unique.filter(Boolean);
+}
+
+/**
+ * Power type used for Acts As column filter (matches renderTeamworkActsAsCell icon).
+ */
+function teamworkActsAsPowerTypeForFilter(card) {
+    const actsAs = String(card?.acts_as || '').trim();
+    if (!actsAs) {
+        return null;
+    }
+    const m = actsAs.match(/^(\d+)\s+(.+)$/);
+    if (!m) {
+        const fallback = actsAs.replace(/^\d+\s+/, '').trim();
+        return fallback || null;
+    }
+    const rest = m[2].trim();
+    if (rest.toLowerCase() === 'attack') {
+        const t = String(card?.to_use || '')
+            .trim()
+            .replace(/^\d+\s+/, '')
+            .trim();
+        return t || 'Combat';
+    }
+    return rest;
+}
+
+function teamworkBonusNumericFromField(raw) {
+    const m = String(raw ?? '').trim().match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+function syncTeamworkDesktopNumericToMobile() {
+    const tab = document.getElementById('teamwork-tab');
+    if (!tab) {
+        return;
+    }
+    const eq = document.getElementById('teamwork-to-use-equals');
+    const mn = document.getElementById('teamwork-to-use-min');
+    const mx = document.getElementById('teamwork-to-use-max');
+    tab.querySelectorAll('.teamwork-mobile-to-use-equals').forEach((el) => {
+        el.value = eq ? eq.value : '';
+    });
+    tab.querySelectorAll('.teamwork-mobile-to-use-min').forEach((el) => {
+        el.value = mn ? mn.value : '';
+    });
+    tab.querySelectorAll('.teamwork-mobile-to-use-max').forEach((el) => {
+        el.value = mx ? mx.value : '';
+    });
+}
+
+function syncTeamworkMobileNumericToDesktop() {
+    const tab = document.getElementById('teamwork-tab');
+    if (!tab) {
+        return;
+    }
+    const mEq = tab.querySelector('.teamwork-mobile-to-use-equals');
+    const mMin = tab.querySelector('.teamwork-mobile-to-use-min');
+    const mMax = tab.querySelector('.teamwork-mobile-to-use-max');
+    const eq = document.getElementById('teamwork-to-use-equals');
+    const mn = document.getElementById('teamwork-to-use-min');
+    const mx = document.getElementById('teamwork-to-use-max');
+    if (eq && mEq) {
+        eq.value = mEq.value;
+    }
+    if (mn && mMin) {
+        mn.value = mMin.value;
+    }
+    if (mx && mMax) {
+        mx.value = mMax.value;
+    }
+}
+
 function formatTeamworkBonusNormalized(raw) {
     const t = String(raw ?? '').trim().replace(/^\+/, '');
     return `+${t === '' ? '0' : t}`;
@@ -1050,6 +1131,11 @@ window.displayTeamwork = displayTeamwork;
 window.teamworkUseMobileListArt = teamworkUseMobileListArt;
 window.teamworkPowerTypeFromValue = teamworkPowerTypeFromValue;
 window.teamworkNumericFromToUse = teamworkNumericFromToUse;
+window.parseTeamworkFollowupTokens = parseTeamworkFollowupTokens;
+window.teamworkActsAsPowerTypeForFilter = teamworkActsAsPowerTypeForFilter;
+window.teamworkBonusNumericFromField = teamworkBonusNumericFromField;
+window.syncTeamworkDesktopNumericToMobile = syncTeamworkDesktopNumericToMobile;
+window.syncTeamworkMobileNumericToDesktop = syncTeamworkMobileNumericToDesktop;
 window.formatTeamworkBonusNormalized = formatTeamworkBonusNormalized;
 window.buildTeamworkMobileCaptionHtml = buildTeamworkMobileCaptionHtml;
 window.buildAllyMobileCaptionHtml = buildAllyMobileCaptionHtml;
