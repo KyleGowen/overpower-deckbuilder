@@ -347,7 +347,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
       - **Character preview strips**: Each `.deck-character-card-display` uses **`border-radius: 10px`** (was square on MV). **`transition: none`**, **`cursor: default`**, **`-webkit-tap-highlight-color: transparent`**. Desktop character-row hover (lift, scale, sibling recede) is **neutralized** on MV via explicit `:hover` / `.deck-character-cards-row:hover …` overrides so previews stay static.
       - **Row inset (balance)**: `.deck-character-cards-row` uses **`padding-left` / `padding-right: 14px`** and **`box-sizing: border-box`** so MV is not stuck with desktop’s **`padding-left: 26px`** (no right padding), which made the strip look shifted right.
       - **Header inset (MV)**: **`.deck-tile-header`** uses extra **`padding-right: 120px`** so long titles do not run under the badge + ⋯ cluster.
-      - **Below ⋯ cluster (MV)**: **`.deck-tile-previews`** uses **`padding-top: 8px`** so character art sits slightly lower than the legality + menu row.
+      - **Previews inset (MV)**: **`.deck-tile-previews`** uses **`padding: 8px 0 10px`** — space below the legality + ⋯ row and **`10px`** below the character strip before the tile edge.
       - **Tap behavior**: **`handleDeckTileClick`** → **`editDeck(deckId)`** on MV and DTV. **View** / **Delete** (and **Edit**) live in the ⋯ dropdown on all breakpoints.
 
 #### Create Your First Deck Tile and Sample Decks

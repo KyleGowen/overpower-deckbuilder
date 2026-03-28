@@ -5155,8 +5155,8 @@
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-previews {
     display: block; /* block so .deck-tile-characters takes full width naturally */
     width: 100%;
-    /* Air below the absolute legality + ⋯ cluster (they sit over the hero top) */
-    padding: 8px 0 0;
+    /* Air below the absolute legality + ⋯ cluster; air above the tile bottom border */
+    padding: 8px 0 10px;
 }
 
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-characters {
