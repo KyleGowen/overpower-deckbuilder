@@ -64,8 +64,7 @@ function loadModule() {
             saveGuestCollectionToStorage,
             showGuestSandboxBanner,
             addCardToCollection,
-            sortMergedCollectionCards,
-            mergedCollectionCardMatchesMobileListFilter
+            sortMergedCollectionCards
         })
     `);
 }
@@ -453,34 +452,13 @@ describe('displayCollectionCards() mobile layout', () => {
         expect(document.querySelector('.collection-mobile-row')).not.toBeNull();
     });
 
-    it('includes mobile list filter input, not sort select', () => {
+    it('renders mobile list without in-panel filter or sort select', () => {
         const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
         fns.displayCollectionCards(merged);
 
-        const inp = document.querySelector('#collectionMobileListFilter') as HTMLInputElement;
-        expect(inp).not.toBeNull();
-        expect(inp.getAttribute('type')).toBe('search');
+        expect(document.querySelector('#collection-mobile-list')).not.toBeNull();
+        expect(document.querySelector('#collectionMobileListFilter')).toBeNull();
         expect(document.querySelector('#collectionMobileSort')).toBeNull();
-    });
-
-    it('filters mobile rows by filter input', () => {
-        const all = [
-            makeAllCard('a', 'character', '001'),
-            makeAllCard('b', 'character', '002'),
-        ];
-        all[0].name = 'Zebra Alpha';
-        all[1].name = 'Apple Beta';
-        const merged = fns.mergeCollectionWithAllCards([], all);
-        fns.displayCollectionCards(merged);
-
-        const inp = document.querySelector('#collectionMobileListFilter') as HTMLInputElement;
-        expect(inp).not.toBeNull();
-        inp.value = 'Apple';
-        inp.dispatchEvent(new Event('input', { bubbles: true }));
-
-        const rows = document.querySelectorAll('.collection-mobile-row');
-        expect(rows.length).toBe(1);
-        expect(rows[0].querySelector('.collection-mobile-row-title')?.textContent).toContain('Apple');
     });
 
     it('opens and closes mobile detail panel', () => {
@@ -496,47 +474,6 @@ describe('displayCollectionCards() mobile layout', () => {
 
         (window as any).closeCollectionMobileDetail();
         expect(root?.classList.contains('is-open')).toBe(false);
-    });
-});
-
-// ─── mergedCollectionCardMatchesMobileListFilter() ───────────────────────────
-
-describe('mergedCollectionCardMatchesMobileListFilter()', () => {
-    beforeAll(() => loadModule());
-
-    it('empty or whitespace query matches any card', () => {
-        const card = makeOwned('x', 'character');
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, '')).toBe(true);
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, '   ')).toBe(true);
-    });
-
-    it('matches display name substring', () => {
-        const card = Object.assign(makeOwned('id', 'character'), {
-            card_data: { set_number: '001', name: 'UniqueDragon' },
-        });
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'dragon')).toBe(true);
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'nomatch')).toBe(false);
-    });
-
-    it('special cards match character_name as well as card name', () => {
-        const card = Object.assign(makeOwned('s', 'special'), {
-            card_data: {
-                set_number: '010',
-                name: 'Decapitate',
-                character_name: 'Headless Horseman',
-            },
-        });
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'headless')).toBe(true);
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'decap')).toBe(true);
-    });
-
-    it('matches type label and set code in haystack', () => {
-        const card = Object.assign(makeOwned('id', 'mission'), {
-            set: 'SKY',
-            card_data: { set_number: '5', card_name: 'Foo Mission', name: 'Foo Mission' },
-        });
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'mission')).toBe(true);
-        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'sky')).toBe(true);
     });
 });
 

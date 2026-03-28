@@ -14,6 +14,45 @@
                 : `/src/resources/cards/images/${img}`;
         }
 
+        /** Linked character / universe line (API uses `character`; some caches use `character_name`). */
+        _linkedCharacterRaw(card) {
+            if (!card) return '';
+            const a = card.character;
+            if (a != null && String(a).trim() !== '') return String(a).trim();
+            const b = card.character_name;
+            if (b != null && String(b).trim() !== '') return String(b).trim();
+            return '';
+        }
+
+        /**
+         * Sort key: name match first; then character-linked match for special / advanced / teamwork
+         * (so add-to-collection search surfaces e.g. Lancelot specials when typing "lance");
+         * then other character matches; then type-only etc.
+         */
+        _searchResultTier(termLower, r) {
+            const t = termLower;
+            const n = (r.name || '').toLowerCase();
+            if (n.includes(t)) return 0;
+            const ch = (r.character || '').toLowerCase();
+            if (ch.includes(t) && (r.type === 'special' || r.type === 'advanced-universe' || r.type === 'teamwork')) {
+                return 0;
+            }
+            if (ch.includes(t)) return 1;
+            return 2;
+        }
+
+        _finalizeSearchResults(termLower, rawResults) {
+            return rawResults
+                .filter(r => r.name && r.name.trim())
+                .sort((a, b) => {
+                    const pa = this._searchResultTier(termLower, a);
+                    const pb = this._searchResultTier(termLower, b);
+                    if (pa !== pb) return pa - pb;
+                    return (a.name || '').localeCompare(b.name || '');
+                })
+                .slice(0, this.maxResults);
+        }
+
         _searchInMap(searchTerm) {
             const map = typeof window !== 'undefined' ? window.availableCardsMap : null;
             if (!map || map.size === 0) return null;
@@ -26,7 +65,7 @@
             for (const card of byId.values()) {
                 const type = card.cardType || card.type;
                 const name = (card.name || card.card_name || card.power_type || card.to_use || '').toLowerCase();
-                const charName = (card.character || '').toLowerCase();
+                const charName = this._linkedCharacterRaw(card).toLowerCase();
                 let match = false;
                 if (type === 'character' && name && name.includes(term)) match = true;
                 else if (type === 'special' && (name.includes(term) || charName.includes(term) || charName === term || term === 'special')) match = true;
@@ -43,12 +82,13 @@
                 if (match) {
                     const displayName = type === 'teamwork' ? (card.to_use || card.name) : (type === 'power' ? card.power_type : (card.card_name || card.name || card.power_type));
                     if (displayName) {
+                        const linked = this._linkedCharacterRaw(card);
                         results.push({
                             id: card.id,
                             name: displayName,
                             type: type === 'advanced-universe' ? type : (type === 'ally-universe' ? type : (type === 'basic-universe' ? type : type)),
                             image: this._getImagePath(card, type),
-                            character: card.character || null,
+                            character: linked || null,
                             imagePath: card.image
                         });
                     }
@@ -67,10 +107,7 @@
                 // Prefer in-memory search when availableCardsMap is populated (avoids 12 API calls per search)
                 const mapResults = this._searchInMap(searchTerm);
                 if (mapResults !== null) {
-                    return mapResults
-                        .filter(r => r.name && r.name.trim())
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .slice(0, this.maxResults);
+                    return this._finalizeSearchResults(searchTerm, mapResults);
                 }
 
                 // Fallback: fetch all endpoints in parallel when map is empty
@@ -108,9 +145,10 @@
 
                 if (specials.success) {
                     specials.data.forEach(card => {
+                        const linkedChar = (card.character || card.character_name || '');
                         const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                        const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                        const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm;
+                        const characterMatch = linkedChar && linkedChar.toLowerCase().includes(searchTerm);
+                        const exactCharacterMatch = linkedChar && linkedChar.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'special';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
                             // After migration, alternate cards are separate cards, so we just add the special card
@@ -119,7 +157,7 @@
                                 name: card.name,
                                 type: 'special',
                                 image: `/src/resources/cards/images/${card.image}`,
-                                character: card.character,
+                                character: linkedChar || null,
                                 imagePath: card.image
                             });
                         }
@@ -176,9 +214,10 @@
 
                 if (advanced.success) {
                     advanced.data.forEach(card => {
+                        const linked = (card.character || card.character_name || '');
                         const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
-                        const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                        const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm;
+                        const characterMatch = linked && linked.toLowerCase().includes(searchTerm);
+                        const exactCharacterMatch = linked && linked.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'advanced';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
                             results.push({
@@ -186,7 +225,7 @@
                                 name: card.name,
                                 type: 'advanced-universe',
                                 image: `/src/resources/cards/images/${card.image}`,
-                                character: card.character
+                                character: linked || null
                             });
                         }
                     });
@@ -194,9 +233,10 @@
 
                 if (teamwork.success) {
                     teamwork.data.forEach(card => {
+                        const linked = (card.character || card.character_name || '');
                         const nameMatch = (card.name || card.to_use) && (card.name || card.to_use).toLowerCase().includes(searchTerm);
-                        const characterMatch = card.character && card.character.toLowerCase().includes(searchTerm);
-                        const exactCharacterMatch = card.character && card.character.toLowerCase() === searchTerm;
+                        const characterMatch = linked && linked.toLowerCase().includes(searchTerm);
+                        const exactCharacterMatch = linked && linked.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'teamwork';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
                             results.push({
@@ -204,7 +244,7 @@
                                 name: card.to_use || card.name,
                                 type: 'teamwork',
                                 image: `/src/resources/cards/images/${card.image}`,
-                                character: card.character
+                                character: linked || null
                             });
                         }
                     });
@@ -292,11 +332,7 @@
                 console.error('CardSearchService error:', err);
             }
 
-            const finalResults = results
-                .filter(r => r.name && r.name.trim())
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .slice(0, this.maxResults);
-            return finalResults;
+            return this._finalizeSearchResults(searchTerm, results);
         }
     }
 

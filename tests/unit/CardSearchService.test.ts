@@ -204,6 +204,46 @@ describe('CardSearchService', () => {
             expect(results[0].character).toBe('Test Character');
         });
 
+        it('should search special cards by character_name when character is absent', async () => {
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        { id: 'snake-1', name: 'Knight Charge', character_name: 'Lancelot', image: 'sp.webp' }
+                    ]
+                })
+            });
+            for (let i = 0; i < 10; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            const results = await service.search('lance');
+
+            expect(results.some((r: any) => r.type === 'special' && r.id === 'snake-1')).toBe(true);
+            expect(results.find((r: any) => r.id === 'snake-1')?.character).toBe('Lancelot');
+        });
+
+        it('should match special by character_name in availableCardsMap without fetch', async () => {
+            (window as any).availableCardsMap = new Map();
+            (window as any).availableCardsMap.set('s1', {
+                id: 's1',
+                cardType: 'special',
+                name: 'Ambush Tactics',
+                character_name: 'Lancelot',
+                image: 'a.webp'
+            });
+            service = new CardSearchService({ maxResults: 20 });
+            const results = await service.search('lance');
+            expect(results.some((r: any) => r.type === 'special' && r.id === 's1')).toBe(true);
+            delete (window as any).availableCardsMap;
+            expect(mockFetch).not.toHaveBeenCalled();
+        });
+
         it('should search missions by name', async () => {
             // Mock first two endpoints
             mockFetch.mockResolvedValueOnce({

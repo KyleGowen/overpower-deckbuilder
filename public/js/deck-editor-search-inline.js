@@ -90,7 +90,12 @@ async function searchAllCards(searchTerm) {
             results.push({ id: card.id, name, type, image: img, character: char ?? null });
         };
         if (characters.success) characters.data.forEach(c => c.name?.toLowerCase().includes(st) && add(c, 'character', c.name, null));
-        if (specials.success) specials.data.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'special') add(c, 'special', c.name, c.character); });
+        if (specials.success) specials.data.forEach(c => {
+            const nm = c.name?.toLowerCase();
+            const linked = (c.character || c.character_name || '');
+            const ch = linked.toLowerCase();
+            if (nm?.includes(st) || ch.includes(st) || ch === st || st === 'special') add(c, 'special', c.name, linked || null);
+        });
         if (missions.success) missions.data.forEach(m => { const cn = m.card_name?.toLowerCase(); const ms = m.mission_set?.toLowerCase(); if (cn?.includes(st) || ms?.includes(st) || st === 'mission' || st === 'missions') add(m, 'mission', m.card_name, m.mission_set); });
         if (events.success) events.data.forEach(e => { const nm = e.name?.toLowerCase(); const ms = e.mission_set?.toLowerCase(); if (nm?.includes(st) || ms?.includes(st) || st === 'event' || st === 'events') add(e, 'event', e.name, e.mission_set); });
         if (aspects.success) aspects.data.forEach(a => a.card_name?.toLowerCase().includes(st) && add(a, 'aspect', a.card_name, null));

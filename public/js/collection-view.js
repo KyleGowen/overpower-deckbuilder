@@ -10,9 +10,6 @@ let showUnownedCards = true;
 let collectionSortField = 'set_number';
 let collectionSortDir = 'asc';
 
-/** Mobile list text filter (subset of visible rows); not used on desktop. */
-let collectionMobileListFilterQuery = '';
-
 /** @type {HTMLElement | null} */
 let collectionMobileDetailTriggerEl = null;
 
@@ -671,61 +668,6 @@ function sortMergedCollectionCards(cards, sortField, direction) {
     return out;
 }
 
-/**
- * Lowercase haystack for mobile list text filter: display name, special character_name,
- * type/set labels, set #, and raw set code.
- * @param {Record<string, unknown>} card
- */
-function buildCollectionMobileListFilterHaystack(card) {
-    const parts = [];
-    const display = getCardDisplayName(card, card.card_type);
-    if (display) parts.push(String(display));
-    const ct = String(card.card_type || '').replace(/-/g, '_');
-    const cd = card.card_data;
-    if (ct === 'special' && cd && cd.character_name) {
-        parts.push(String(cd.character_name));
-    }
-    if (cd && cd.set_number != null && String(cd.set_number).trim() !== '') {
-        parts.push(String(cd.set_number).trim());
-    }
-    parts.push(formatCardType(card.card_type));
-    parts.push(translateSet(card.set));
-    parts.push(collectionSortSetCodeForCard(card));
-    return parts.join(' ').toLowerCase();
-}
-
-/**
- * @param {Record<string, unknown>} card
- * @param {string} query
- */
-function mergedCollectionCardMatchesMobileListFilter(card, query) {
-    const q = (query == null ? '' : String(query)).trim().toLowerCase();
-    if (!q) return true;
-    return buildCollectionMobileListFilterHaystack(card).includes(q);
-}
-
-function onCollectionMobileListFilterInput(e) {
-    const el = e.target;
-    if (!el || el.id !== 'collectionMobileListFilter') return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    collectionMobileListFilterQuery = el.value;
-    displayCollectionCards(mergedCollectionData);
-    requestAnimationFrame(() => {
-        const inp = document.getElementById('collectionMobileListFilter');
-        if (!inp) return;
-        inp.focus();
-        if (typeof start === 'number' && typeof end === 'number') {
-            try {
-                const len = inp.value.length;
-                inp.setSelectionRange(Math.min(start, len), Math.min(end, len));
-            } catch (_err) {
-                // ignore
-            }
-        }
-    });
-}
-
 function onCollectionLayoutModeChange() {
     closeCollectionMobileDetail();
     syncGuestSandboxBannerOpenState();
@@ -938,35 +880,8 @@ function displayCollectionCards(cards) {
     }
 
     if (collectionIsLayoutMobile()) {
-        const filteredForMobile = visibleCards.filter(c =>
-            mergedCollectionCardMatchesMobileListFilter(c, collectionMobileListFilterQuery)
-        );
-        const sorted = sortMergedCollectionCards(filteredForMobile, 'set_number', 'asc');
-        const filterValAttr = escapeHtmlCollection(collectionMobileListFilterQuery);
-        let listHtml = `
-            <div class="collection-mobile-toolbar">
-                <input type="search" id="collectionMobileListFilter" class="collection-mobile-list-filter-input"
-                    autocomplete="off" placeholder="Filter by name, type, set, or card #…"
-                    aria-label="Filter cards in your collection"
-                    value="${filterValAttr}" />
-            </div>
-        `;
-
-        if (filteredForMobile.length === 0 && visibleCards.length > 0) {
-            listHtml += `
-                <div class="collection-mobile-filter-empty" role="status">
-                    <div class="collection-mobile-filter-empty-message">No cards match your filter</div>
-                </div>
-            `;
-            listContainer.innerHTML = listHtml;
-            const inp = listContainer.querySelector('#collectionMobileListFilter');
-            if (inp) {
-                inp.addEventListener('input', onCollectionMobileListFilterInput);
-            }
-            return;
-        }
-
-        listHtml += `<ul id="collection-mobile-list" class="collection-mobile-list" role="list">`;
+        const sorted = sortMergedCollectionCards(visibleCards, 'set_number', 'asc');
+        let listHtml = `<ul id="collection-mobile-list" class="collection-mobile-list" role="list">`;
 
         sorted.forEach(card => {
             const cardType = card.card_type;
@@ -1074,10 +989,6 @@ function displayCollectionCards(cards) {
 
         listHtml += '</ul>';
         listContainer.innerHTML = listHtml;
-        const inp = listContainer.querySelector('#collectionMobileListFilter');
-        if (inp) {
-            inp.addEventListener('input', onCollectionMobileListFilterInput);
-        }
         return;
     }
 
@@ -1257,6 +1168,7 @@ function initializeCollectionSearch() {
         window.collectionSearchComponent = new window.DeckEditorSearch({
             input: searchInput,
             results: searchResults,
+            searchService: new window.CardSearchService({ maxResults: 72 }),
             onSelect: ({ id, type, imagePath }) => {
                 addCardToCollection(id, type, imagePath || null);
             }
