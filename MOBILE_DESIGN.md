@@ -170,7 +170,7 @@ Small, desktop-neutral PRs; check off below as completed.
 | `index.html` head order regression (`layout-mode-and-viewport.test.ts`)                                                                 | M6          | done                                              |
 | Global nav mobile: **2×2** app grid, `**header-nav-cluster`**, `**syncHeaderCollectionLayout**` / `**collection-tab-hidden**`           | M1          | done                                              |
 | Global nav mobile: logo column **30.4%** / **134px** cap, `**padding-top: 0`** bar, `**align-items: flex-start**` on `**.header-left**` | M1          | done                                              |
-| Global nav mobile: welcome `**justify-content: flex-end**`; account dropdown **50%** width, `**right: 0`**                              | M1          | done                                              |
+| Global nav mobile: welcome `**justify-content: flex-end**`; account dropdown **`max-content`** + viewport-capped width, `**right: 0**`, single-line menu items                              | M1          | done                                              |
 | DBV **All** tab: remove inline **5-col** grid on `**#all-cards-grid-container`**; single column ≤900px + `**.layout-mobile**`           | M2c         | done                                              |
 | DBV **All** tab cells: **+Deck** row then **-Collection | +Collection** (`mobile-layout.css` grid on `**.card-content-bottom`**)        | M2c         | done                                              |
 | DBV Characters: **tabbed stat filters** (merged `colspan=5` header cell, `characters-stat-filter-tabs.js`)                              | M2c         | done                                              |
@@ -238,7 +238,7 @@ Use this section as **agent context** for what shipped after the base M1/M2c mil
 - **Logged out / no `getCurrentUser`:** `**[syncHeaderCollectionLayout()](public/components/globalNav.js)`** hides Collection and adds `**.collection-tab-hidden**` on `**.header-nav-cluster**` so **Card Database** is column **1** and **Deck Builder** spans columns **2–3** on row **2**. Called from `**updateUserWelcome()`** after greeting/menu updates.
 - **Logo:** `**.header-left**` `**max-width: 134px**` on row **2**, left-aligned. `**.unified-header**` uses `**padding: 8px 10px 8px**`; `**text-align: start**` overrides `**globalNav.css**` narrow `**text-align: center**`.
 - **User row:** `**.user-menu-toggle`** `**justify-content: flex-end**`, `**width: auto**`.
-- **Account dropdown:** `**.user-menu-dropdown`** `**width` / `max-width: 50%**`, `**left: auto**`, `**right: 0**`, `**min-width: 0**` (overrides component `**min-width: 260px**` for narrow half-width panel).
+- **Account dropdown:** Default **`display: none`**; **`show`** class toggles open. Under **`.layout-mobile`**, sizing lives on **`.user-menu-dropdown`** without **`display`** (avoids overriding **`none`**); **`.layout-mobile .user-menu-dropdown.show`** uses **`display: grid`**, **`grid-template-columns: max-content`**, **`width: max-content`**, **`max-width: min(260px, calc(100vw - 16px))**`, `**right: 0**`; `**.user-menu-item**` **`width: auto`**, **`white-space: nowrap**`, compact padding.
 
 ### 10.2 Card Database — “All” tab (`.layout-mobile` and narrow viewport)
 

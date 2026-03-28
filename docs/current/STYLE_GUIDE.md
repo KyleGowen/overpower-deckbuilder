@@ -794,7 +794,7 @@ Consider implementing CSS custom properties for easier theme management:
 - **Tab bar**: `.header-center` is **`position: static`** (overrides desktop absolute centering). **`.header-nav-cluster`** and inner wrappers use **`display: contents`** so tabs participate in the header grid.
 - **Primary controls**: `.app-tab-button`, `.new-deck-btn`, and `.user-menu-toggle` use **`min-height: 44px`** with slightly increased padding; **`.user-menu-toggle`** is **`justify-content: flex-end`**, **`width: auto`**.
 - **+ Deck (`#newDeckBtn`)**: Hidden in mobile layout mode (**`display: none`** under **`.layout-mobile`**). Use **+ Create Deck** in the user menu dropdown for the same action.
-- **User menu dropdown**: **`width` / `max-width: 50%`**, **`left: auto; right: 0`** (right-aligned under the toggle, half the **`.user-menu`** width; overrides desktop **`min-width: 260px`** via **`min-width: 0`**).
+- **User menu dropdown**: Hidden by default (**`display: none`** from **`globalNav.css`**). Under **`.layout-mobile`**, do **not** set **`display`** on **`.user-menu-dropdown`** alone (that would override **`none`** and keep the panel open). When **`.show`**: **`display: grid`**, **`grid-template-columns: max-content`**, plus **`width: max-content`**, **`max-width: min(260px, calc(100vw - 16px))`**, **`right: 0`**; **`.user-menu-item`** **`white-space: nowrap`**, **`width: auto`**, compact padding / **`font-size: 14px`**.
 - **Logo**: **`.header-left`** caps at **`max-width: 134px`** on **row 1**, left-aligned; **`.header-logo`** uses **`width: 100%`** / **`max-width: 100%`** (**`margin-top: 0`**).
 
 ### Colors

@@ -5229,12 +5229,33 @@
     box-sizing: border-box;
 }
 
+/* Do not set display here — `.layout-mobile` beats `.user-menu-dropdown` specificity and would
+   override `display: none`, leaving the panel always visible. Grid only when `.show`. */
 .layout-mobile .user-menu-dropdown {
     left: auto;
     right: 0;
-    width: 50%;
+    width: max-content;
     min-width: 0;
-    max-width: 50%;
+    max-width: min(260px, calc(100vw - 16px));
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+.layout-mobile .user-menu-dropdown.show {
+    display: grid;
+    grid-template-columns: max-content;
+    justify-items: stretch;
+}
+
+/* Single-line labels; column width = longest item (no 100% stretch past text) */
+.layout-mobile .user-menu-dropdown .user-menu-item {
+    white-space: nowrap;
+    width: auto;
+    padding: 7px 12px;
+    margin: 5px 0;
+    font-size: 14px;
+    line-height: 1.2;
+    min-height: 0;
     box-sizing: border-box;
 }
 
