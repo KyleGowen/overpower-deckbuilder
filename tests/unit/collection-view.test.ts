@@ -63,7 +63,9 @@ function loadModule() {
             loadGuestCollectionFromStorage,
             saveGuestCollectionToStorage,
             showGuestSandboxBanner,
-            addCardToCollection
+            addCardToCollection,
+            sortMergedCollectionCards,
+            mergedCollectionCardMatchesMobileListFilter
         })
     `);
 }
@@ -420,6 +422,157 @@ describe('displayCollectionCards()', () => {
             const nameCell = document.querySelector('.collection-card-name');
             expect(nameCell?.textContent).not.toContain('(Alternate Art)');
         }
+    });
+});
+
+// ─── displayCollectionCards() mobile layout ──────────────────────────────────
+
+describe('displayCollectionCards() mobile layout', () => {
+    beforeEach(() => {
+        (window as any).isLayoutMobile = () => true;
+        loadModule();
+        document.body.innerHTML = `
+            <div id="collection-view">
+                <div id="collectionCardsList"></div>
+                <input type="checkbox" id="showUnownedToggle" checked>
+            </div>
+        `;
+        (localStorageMock.getItem as jest.Mock).mockReturnValue(null);
+    });
+
+    afterEach(() => {
+        delete (window as any).isLayoutMobile;
+    });
+
+    it('renders mobile list instead of table', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+
+        expect(document.querySelector('#collection-mobile-list')).not.toBeNull();
+        expect(document.querySelector('#collection-table')).toBeNull();
+        expect(document.querySelector('.collection-mobile-row')).not.toBeNull();
+    });
+
+    it('includes mobile list filter input, not sort select', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+
+        const inp = document.querySelector('#collectionMobileListFilter') as HTMLInputElement;
+        expect(inp).not.toBeNull();
+        expect(inp.getAttribute('type')).toBe('search');
+        expect(document.querySelector('#collectionMobileSort')).toBeNull();
+    });
+
+    it('filters mobile rows by filter input', () => {
+        const all = [
+            makeAllCard('a', 'character', '001'),
+            makeAllCard('b', 'character', '002'),
+        ];
+        all[0].name = 'Zebra Alpha';
+        all[1].name = 'Apple Beta';
+        const merged = fns.mergeCollectionWithAllCards([], all);
+        fns.displayCollectionCards(merged);
+
+        const inp = document.querySelector('#collectionMobileListFilter') as HTMLInputElement;
+        expect(inp).not.toBeNull();
+        inp.value = 'Apple';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+
+        const rows = document.querySelectorAll('.collection-mobile-row');
+        expect(rows.length).toBe(1);
+        expect(rows[0].querySelector('.collection-mobile-row-title')?.textContent).toContain('Apple');
+    });
+
+    it('opens and closes mobile detail panel', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        expect(row).not.toBeNull();
+
+        (window as any).openCollectionMobileDetail(row);
+        const root = document.getElementById('collectionMobileDetail');
+        expect(root?.classList.contains('is-open')).toBe(true);
+
+        (window as any).closeCollectionMobileDetail();
+        expect(root?.classList.contains('is-open')).toBe(false);
+    });
+});
+
+// ─── mergedCollectionCardMatchesMobileListFilter() ───────────────────────────
+
+describe('mergedCollectionCardMatchesMobileListFilter()', () => {
+    beforeAll(() => loadModule());
+
+    it('empty or whitespace query matches any card', () => {
+        const card = makeOwned('x', 'character');
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, '')).toBe(true);
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, '   ')).toBe(true);
+    });
+
+    it('matches display name substring', () => {
+        const card = Object.assign(makeOwned('id', 'character'), {
+            card_data: { set_number: '001', name: 'UniqueDragon' },
+        });
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'dragon')).toBe(true);
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'nomatch')).toBe(false);
+    });
+
+    it('special cards match character_name as well as card name', () => {
+        const card = Object.assign(makeOwned('s', 'special'), {
+            card_data: {
+                set_number: '010',
+                name: 'Decapitate',
+                character_name: 'Headless Horseman',
+            },
+        });
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'headless')).toBe(true);
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'decap')).toBe(true);
+    });
+
+    it('matches type label and set code in haystack', () => {
+        const card = Object.assign(makeOwned('id', 'mission'), {
+            set: 'SKY',
+            card_data: { set_number: '5', card_name: 'Foo Mission', name: 'Foo Mission' },
+        });
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'mission')).toBe(true);
+        expect(fns.mergedCollectionCardMatchesMobileListFilter(card, 'sky')).toBe(true);
+    });
+});
+
+// ─── sortMergedCollectionCards() ─────────────────────────────────────────────
+
+describe('sortMergedCollectionCards()', () => {
+    beforeAll(() => loadModule());
+
+    it('sorts by name ascending', () => {
+        const a = Object.assign(makeOwned('id-a', 'character'), {
+            inCollection: true,
+            card_data: { set_number: '001', name: 'Zebra' },
+        });
+        const b = Object.assign(makeOwned('id-b', 'character'), {
+            inCollection: true,
+            card_data: { set_number: '002', name: 'Apple' },
+        });
+        const sorted = fns.sortMergedCollectionCards([a, b], 'name', 'asc');
+        expect(sorted[0].card_id).toBe('id-b');
+        expect(sorted[1].card_id).toBe('id-a');
+    });
+
+    it('matches set_number ordering within same set code', () => {
+        const high = Object.assign(makeOwned('h', 'character'), {
+            inCollection: true,
+            set: 'ERB',
+            card_data: { set_number: '050', name: 'H' },
+        });
+        const low = Object.assign(makeOwned('l', 'character'), {
+            inCollection: true,
+            set: 'ERB',
+            card_data: { set_number: '005', name: 'L' },
+        });
+        const sorted = fns.sortMergedCollectionCards([high, low], 'set_number', 'asc');
+        expect(sorted[0].card_id).toBe('l');
+        expect(sorted[1].card_id).toBe('h');
     });
 });
 
@@ -956,12 +1109,30 @@ describe('showGuestSandboxBanner()', () => {
         setupDOM();
     });
 
+    afterEach(() => {
+        delete (window as any).isLayoutMobile;
+    });
+
     it('inserts banner before collectionCardsList', () => {
         fns.showGuestSandboxBanner();
         
         const banner = document.getElementById('guestSandboxBanner');
         expect(banner).not.toBeNull();
         expect(banner!.className).toBe('guest-sandbox-banner');
+        expect(banner!.tagName).toBe('DETAILS');
+    });
+
+    it('keeps details open on desktop layout so the full message shows', () => {
+        fns.showGuestSandboxBanner();
+        const banner = document.getElementById('guestSandboxBanner') as HTMLDetailsElement;
+        expect(banner.hasAttribute('open')).toBe(true);
+    });
+
+    it('starts collapsed on mobile layout', () => {
+        (window as any).isLayoutMobile = () => true;
+        fns.showGuestSandboxBanner();
+        const banner = document.getElementById('guestSandboxBanner') as HTMLDetailsElement;
+        expect(banner.hasAttribute('open')).toBe(false);
     });
 
     it('does not duplicate banner if already exists', () => {

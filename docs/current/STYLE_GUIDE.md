@@ -31,6 +31,7 @@
 28. [Reserve Button Styling](#reserve-button-styling)
 29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
+31. [Collection view — mobile (`layout-mobile`)](#collection-view--mobile-layout-mobile)
 
 ## Overview
 
@@ -270,6 +271,17 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - <span style="display: inline-block; width: 20px; height: 20px; background-color: #ffffff; border: 1px solid #ccc; vertical-align: middle;"></span> (90% opacity)
 
 ## Screen-Specific Styling
+
+### Collection view — mobile (`layout-mobile`)
+
+- **When it applies:** Only when `html` has class **`layout-mobile`** and `[public/js/collection-view.js](public/js/collection-view.js)` renders the Collection tab. Desktop keeps the existing wide **Qty / # / Name / Type / Set / Actions** table.
+- **Search:** **`html.layout-mobile #collection-view .collection-search-container`** — **`margin-left` / `margin-right: 20px`**, **`width: auto`**, **`max-width: 100%`** so the pill input lines up with the inner column of **`.collection-cards-container`** (same **20px** inset as that panel’s padding), not the full viewport width.
+- **GUEST sandbox banner:** **`details.guest-sandbox-banner`** — **DTV:** `flex` row, **`open`** forced, summary click does not toggle (full **Sandbox Mode** text visible). **MV:** **`padding: 4px 14px`** on the details box, summary **`padding: 0`** / no min-height floor; **`<summary>`** one line (**Sandbox · Saved only on this device — tap for details**) with chevron **`::after`**; expanded panel has top border and smaller body text + signup link. **Icon:** inline SVG warning triangle (stroke + dot), **`.guest-sandbox-warning-icon`** uses muted **`rgba(162, 155, 254, 0.68)`** — not emoji, not high-contrast yellow.
+- **List:** **`#collection-mobile-list`** — **`li.collection-mobile-row`** uses CSS **grid** `56px | minmax(0,1fr) | auto`; leading **`img.collection-mobile-row-thumb`** (**56×56**, **`object-fit: cover`**, **`border-radius: 6px`**). Primary line **`.collection-mobile-row-title`**; secondary **`.collection-mobile-row-subtitle`** (muted, **2-line** clamp) shows **type · card # · set**.
+- **Quantity buttons (list row):** **`−` / `+`** (and unowned **`+`**) are **29×29px** (`.collection-mobile-row .collection-quantity-btn`, ~⅔ of a 44px control for a denser row). Search dropdown rows keep **min-height 48px** under **`html.layout-mobile`**.
+- **List filter (in panel):** **`.collection-mobile-toolbar`** holds **`#collectionMobileListFilter`** ( **`type="search"`**, **`.collection-mobile-list-filter-input`** ) — pill styling aligned with **`.collection-search-input`** (full width inside the glass panel padding). Placeholder: filter by name, type, set, or card **#**. Matching is case-insensitive substring over **`getCardDisplayName`**, **`character_name`** for **special** cards, plus type label (**`formatCardType`**), translated set, raw set code, and **`set_number`**. Empty filter shows all visible rows (respects unowned toggle). If nothing matches: **`.collection-mobile-filter-empty`** (**“No cards match your filter”**) below the input. **MV list order** is always **set # low → high** (**`sortMergedCollectionCards(..., 'set_number', 'asc')`**); desktop column sort does not change mobile order and **`collectionSortField` / `collectionSortDir`** are unchanged when rendering MV.
+- **Detail sheet:** **`#collectionMobileDetail`** — **`position: fixed`**, full-viewport scrim, **`z-index: 10000`**; **`.collection-mobile-detail-panel`** is a bottom sheet (**`max-height: min(92vh, 100%)`**, rounded top **16px**, teal border). **`.collection-mobile-detail-back`** min height **44px**; detail steppers **32×32px** (~⅔ of 48px). Full card image **`.collection-mobile-detail-image`**: **`max-height: 42vh`**, **`object-fit: contain`**, centered.
+- **Spec file:** `[public/css/collection-view.css](public/css/collection-view.css)` (all rules scoped under **`html.layout-mobile`** for these components).
 
 ### Card Database — Universe: Teamwork (desktop filters)
 

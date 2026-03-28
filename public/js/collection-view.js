@@ -6,6 +6,25 @@ let collectionSearchTimeout = null;
 let mergedCollectionData = [];
 let showUnownedCards = true;
 
+/** Mirrors desktop table sort (column headers on desktop only). */
+let collectionSortField = 'set_number';
+let collectionSortDir = 'asc';
+
+/** Mobile list text filter (subset of visible rows); not used on desktop. */
+let collectionMobileListFilterQuery = '';
+
+/** @type {HTMLElement | null} */
+let collectionMobileDetailTriggerEl = null;
+
+/** @type {boolean} */
+let collectionMobileDetailOpen = false;
+
+let collectionLayoutModeListenerBound = false;
+
+function collectionIsLayoutMobile() {
+    return typeof window !== 'undefined' && typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+}
+
 // GUEST sandbox localStorage key
 const GUEST_COLLECTION_KEY = 'guestCollection';
 
@@ -137,6 +156,19 @@ function saveGuestCollectionToStorage(cards) {
 }
 
 /**
+ * GUEST sandbox banner: desktop = always-open single block; mobile = compact one-line summary, expand for full text + signup.
+ */
+function syncGuestSandboxBannerOpenState() {
+    const el = document.getElementById('guestSandboxBanner');
+    if (!el || el.tagName !== 'DETAILS') return;
+    if (collectionIsLayoutMobile()) {
+        el.removeAttribute('open');
+    } else {
+        el.setAttribute('open', '');
+    }
+}
+
+/**
  * Show sandbox banner for GUEST users
  */
 function showGuestSandboxBanner() {
@@ -146,14 +178,35 @@ function showGuestSandboxBanner() {
     const existingBanner = document.getElementById('guestSandboxBanner');
     if (existingBanner) return;
     
-    const banner = document.createElement('div');
+    const banner = document.createElement('details');
     banner.id = 'guestSandboxBanner';
     banner.className = 'guest-sandbox-banner';
+    banner.setAttribute('open', '');
     banner.innerHTML = `
-        <span class="sandbox-icon">&#x1F9EA;</span>
-        <span class="sandbox-text">Sandbox Mode: Your collection is stored locally in this browser and will not be saved to your account.
-        <a href="#" class="guest-signup-link">Create an account</a> to save your collection permanently.</span>
+        <summary class="guest-sandbox-summary">
+            <span class="sandbox-icon guest-sandbox-warning-icon" aria-hidden="true">
+                <svg class="guest-sandbox-warning-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" aria-hidden="true" focusable="false">
+                    <path fill="none" stroke="currentColor" stroke-width="1.15" stroke-linejoin="round" d="M12 5.2L19.8 19H4.2L12 5.2z"/>
+                    <path stroke="currentColor" stroke-width="1.35" stroke-linecap="round" d="M12 10v4"/>
+                    <circle cx="12" cy="17.25" r="1" fill="currentColor"/>
+                </svg>
+            </span>
+            <span class="guest-sandbox-mobile-one-line">Sandbox · Saved only on this device — tap for details</span>
+        </summary>
+        <div class="guest-sandbox-expanded">
+            <span class="sandbox-text">Sandbox Mode: Your collection is stored locally in this browser and will not be saved to your account.
+            <a href="#" class="guest-signup-link">Create an account</a> to save your collection permanently.</span>
+        </div>
     `;
+
+    const summary = banner.querySelector('.guest-sandbox-summary');
+    if (summary) {
+        summary.addEventListener('click', (e) => {
+            if (!collectionIsLayoutMobile()) {
+                e.preventDefault();
+            }
+        });
+    }
     
     // Attach click handler to open login modal (where user can sign up)
     const signupLink = banner.querySelector('.guest-signup-link');
@@ -169,6 +222,7 @@ function showGuestSandboxBanner() {
     }
     
     container.parentNode.insertBefore(banner, container);
+    syncGuestSandboxBannerOpenState();
 }
 
 /**
@@ -566,12 +620,296 @@ async function loadCollection() {
 }
 
 /**
+ * Sort merged collection records (same semantics as sortCollectionTable on DOM rows).
+ * @param {Array<Record<string, unknown>>} cards
+ * @param {string} sortField
+ * @param {string} direction 'asc' | 'desc'
+ */
+function sortMergedCollectionCards(cards, sortField, direction) {
+    const out = cards.slice();
+    out.sort((a, b) => {
+        if (sortField === 'set_number') {
+            const aCode = collectionSortSetCodeForCard(a).toUpperCase();
+            const bCode = collectionSortSetCodeForCard(b).toUpperCase();
+            if (aCode !== bCode) {
+                const c = aCode < bCode ? -1 : aCode > bCode ? 1 : 0;
+                return direction === 'asc' ? c : -c;
+            }
+            const aFoil = !!a.is_foil;
+            const bFoil = !!b.is_foil;
+            if (aFoil !== bFoil) return aFoil ? 1 : -1;
+            const av = collectionSetNumberSortNumeric(a);
+            const bv = collectionSetNumberSortNumeric(b);
+            const n = av - bv;
+            return direction === 'asc' ? n : -n;
+        }
+        if (sortField === 'quantity') {
+            const av = a.inCollection === false ? -1 : (parseInt(String(a.quantity || 0), 10) || 0);
+            const bv = b.inCollection === false ? -1 : (parseInt(String(b.quantity || 0), 10) || 0);
+            const n = av - bv;
+            return direction === 'asc' ? n : -n;
+        }
+        let av = '';
+        let bv = '';
+        if (sortField === 'name') {
+            av = (getCardDisplayName(a, a.card_type) || '').toLowerCase();
+            bv = (getCardDisplayName(b, b.card_type) || '').toLowerCase();
+        } else if (sortField === 'type') {
+            av = (formatCardType(a.card_type) || '').toLowerCase();
+            bv = (formatCardType(b.card_type) || '').toLowerCase();
+        } else if (sortField === 'set') {
+            av = collectionSortSetCodeForCard(a).toLowerCase();
+            bv = collectionSortSetCodeForCard(b).toLowerCase();
+        } else {
+            return 0;
+        }
+        let c = 0;
+        if (av < bv) c = -1;
+        else if (av > bv) c = 1;
+        return direction === 'asc' ? c : -c;
+    });
+    return out;
+}
+
+/**
+ * Lowercase haystack for mobile list text filter: display name, special character_name,
+ * type/set labels, set #, and raw set code.
+ * @param {Record<string, unknown>} card
+ */
+function buildCollectionMobileListFilterHaystack(card) {
+    const parts = [];
+    const display = getCardDisplayName(card, card.card_type);
+    if (display) parts.push(String(display));
+    const ct = String(card.card_type || '').replace(/-/g, '_');
+    const cd = card.card_data;
+    if (ct === 'special' && cd && cd.character_name) {
+        parts.push(String(cd.character_name));
+    }
+    if (cd && cd.set_number != null && String(cd.set_number).trim() !== '') {
+        parts.push(String(cd.set_number).trim());
+    }
+    parts.push(formatCardType(card.card_type));
+    parts.push(translateSet(card.set));
+    parts.push(collectionSortSetCodeForCard(card));
+    return parts.join(' ').toLowerCase();
+}
+
+/**
+ * @param {Record<string, unknown>} card
+ * @param {string} query
+ */
+function mergedCollectionCardMatchesMobileListFilter(card, query) {
+    const q = (query == null ? '' : String(query)).trim().toLowerCase();
+    if (!q) return true;
+    return buildCollectionMobileListFilterHaystack(card).includes(q);
+}
+
+function onCollectionMobileListFilterInput(e) {
+    const el = e.target;
+    if (!el || el.id !== 'collectionMobileListFilter') return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    collectionMobileListFilterQuery = el.value;
+    displayCollectionCards(mergedCollectionData);
+    requestAnimationFrame(() => {
+        const inp = document.getElementById('collectionMobileListFilter');
+        if (!inp) return;
+        inp.focus();
+        if (typeof start === 'number' && typeof end === 'number') {
+            try {
+                const len = inp.value.length;
+                inp.setSelectionRange(Math.min(start, len), Math.min(end, len));
+            } catch (_err) {
+                // ignore
+            }
+        }
+    });
+}
+
+function onCollectionLayoutModeChange() {
+    closeCollectionMobileDetail();
+    syncGuestSandboxBannerOpenState();
+    const cv = document.getElementById('collection-view');
+    if (!cv || cv.classList.contains('view-removed')) return;
+    displayCollectionCards(mergedCollectionData);
+}
+
+function onCollectionMobileDetailKeydown(e) {
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCollectionMobileDetail();
+    }
+}
+
+function ensureCollectionMobileDetailPanel() {
+    let root = document.getElementById('collectionMobileDetail');
+    if (root) return root;
+    const host = document.getElementById('collection-view');
+    if (!host) return null;
+    root = document.createElement('div');
+    root.id = 'collectionMobileDetail';
+    root.className = 'collection-mobile-detail';
+    root.innerHTML = `
+        <div class="collection-mobile-detail-scrim" aria-hidden="true"></div>
+        <div id="collectionMobileDetailPanel" class="collection-mobile-detail-panel" role="dialog" aria-modal="true" aria-labelledby="collectionMobileDetailTitle">
+            <div class="collection-mobile-detail-header">
+                <button type="button" class="collection-mobile-detail-back">Back</button>
+            </div>
+            <div class="collection-mobile-detail-body">
+                <img class="collection-mobile-detail-image" src="" alt="" />
+                <h2 id="collectionMobileDetailTitle" class="collection-mobile-detail-heading"></h2>
+                <div class="collection-mobile-detail-lines" aria-live="polite"></div>
+                <div class="collection-mobile-detail-actions"></div>
+            </div>
+        </div>
+    `;
+    host.appendChild(root);
+    const panelEl = root.querySelector('#collectionMobileDetailPanel');
+    if (panelEl) panelEl.setAttribute('aria-hidden', 'true');
+    const scrim = root.querySelector('.collection-mobile-detail-scrim');
+    const back = root.querySelector('.collection-mobile-detail-back');
+    if (scrim) scrim.addEventListener('click', closeCollectionMobileDetail);
+    if (back) back.addEventListener('click', closeCollectionMobileDetail);
+    return root;
+}
+
+function closeCollectionMobileDetail() {
+    const root = document.getElementById('collectionMobileDetail');
+    const panel = document.getElementById('collectionMobileDetailPanel');
+    if (!root || !panel) {
+        collectionMobileDetailOpen = false;
+        return;
+    }
+    root.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onCollectionMobileDetailKeydown, true);
+    collectionMobileDetailOpen = false;
+    if (collectionMobileDetailTriggerEl && typeof collectionMobileDetailTriggerEl.focus === 'function') {
+        collectionMobileDetailTriggerEl.focus();
+    }
+    collectionMobileDetailTriggerEl = null;
+}
+
+/**
+ * @param {HTMLElement} rowEl - li.collection-mobile-row
+ */
+function openCollectionMobileDetail(rowEl) {
+    if (!collectionIsLayoutMobile()) return;
+    ensureCollectionMobileDetailPanel();
+    const root = document.getElementById('collectionMobileDetail');
+    const panel = document.getElementById('collectionMobileDetailPanel');
+    if (!root || !panel) return;
+
+    collectionMobileDetailTriggerEl = rowEl;
+    const cardId = rowEl.getAttribute('data-card-id') || '';
+    const cardType = rowEl.getAttribute('data-card-type') || '';
+    const imagePath = rowEl.getAttribute('data-image-path') || '';
+    const titlePlain = rowEl.getAttribute('data-card-title-plain') || rowEl.getAttribute('data-card-name') || '';
+    const qtyStr = rowEl.getAttribute('data-quantity') || '0';
+    const qty = parseInt(qtyStr, 10);
+    const owned = rowEl.getAttribute('data-in-collection') !== 'false';
+    const setNumber = rowEl.getAttribute('data-set-number-display') || '';
+    const cardSet = rowEl.getAttribute('data-card-set') || '';
+    const typeLabel = rowEl.getAttribute('data-card-type-label') || formatCardType(cardType);
+
+    panel.dataset.cardId = cardId;
+    panel.dataset.cardType = cardType;
+    panel.dataset.imagePath = imagePath;
+
+    const img = panel.querySelector('.collection-mobile-detail-image');
+    const h2 = panel.querySelector('#collectionMobileDetailTitle');
+    const lines = panel.querySelector('.collection-mobile-detail-lines');
+    const actions = panel.querySelector('.collection-mobile-detail-actions');
+
+    if (img) {
+        img.src = imagePath || '';
+        img.alt = titlePlain || 'Card';
+    }
+    if (h2) h2.textContent = titlePlain;
+    if (lines) {
+        lines.innerHTML = `
+            <p class="collection-mobile-detail-line"><span class="collection-mobile-detail-k">Type</span> ${escapeHtmlCollection(typeLabel)}</p>
+            <p class="collection-mobile-detail-line"><span class="collection-mobile-detail-k">Set #</span> ${escapeHtmlCollection(setNumber || '—')}</p>
+            <p class="collection-mobile-detail-line"><span class="collection-mobile-detail-k">Set</span> ${escapeHtmlCollection(cardSet)}</p>
+        `;
+    }
+
+    const escapedId = cardId.replace(/'/g, "\\'");
+    const escapedType = cardType.replace(/'/g, "\\'");
+    const escapedImg = imagePath.replace(/'/g, "\\'");
+
+    if (actions) {
+        if (!owned || Number.isNaN(qty) || qty < 0) {
+            actions.innerHTML = `
+                <div class="collection-quantity-control collection-mobile-detail-stepper">
+                    <button type="button" class="collection-quantity-btn collection-add-btn"
+                        onclick="event.stopPropagation(); addCardToCollection('${escapedId}', '${escapedType}', '${escapedImg}')">+</button>
+                </div>
+            `;
+        } else {
+            actions.innerHTML = `
+                <div class="collection-quantity-control collection-mobile-detail-stepper">
+                    <button type="button" class="collection-quantity-btn"
+                        onclick="event.stopPropagation(); handleCollectionMobileDetailQuantityClick(${qty - 1})"
+                        ${qty <= 0 ? 'disabled' : ''}>-</button>
+                    <span class="collection-mobile-detail-qty-num">${qty}</span>
+                    <button type="button" class="collection-quantity-btn"
+                        onclick="event.stopPropagation(); handleCollectionMobileDetailQuantityClick(${qty + 1})">+</button>
+                </div>
+            `;
+        }
+    }
+
+    root.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    collectionMobileDetailOpen = true;
+    document.addEventListener('keydown', onCollectionMobileDetailKeydown, true);
+    const backBtn = panel.querySelector('.collection-mobile-detail-back');
+    if (backBtn && typeof backBtn.focus === 'function') {
+        backBtn.focus();
+    }
+}
+
+function escapeHtmlCollection(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function handleCollectionMobileDetailQuantityClick(newQuantity) {
+    const panel = document.getElementById('collectionMobileDetailPanel');
+    if (!panel) return;
+    const cardId = panel.dataset.cardId;
+    const cardType = panel.dataset.cardType;
+    const imagePath = panel.dataset.imagePath;
+    if (!cardId || !cardType || !imagePath) return;
+    updateCollectionQuantity(cardId, cardType, newQuantity, imagePath);
+}
+
+function onCollectionViewMobileActivate(e) {
+    if (!collectionIsLayoutMobile()) return;
+    const row = e.target.closest('.collection-mobile-row.collection-card-item');
+    if (!row || !document.getElementById('collection-view')?.contains(row)) return;
+    if (e.target.closest('.collection-quantity-control')) return;
+    if (e.target.closest('button')) return;
+    openCollectionMobileDetail(row);
+}
+
+/**
  * Display collection cards in a single table.
  * Accepts merged array (from mergeCollectionWithAllCards) or plain collection array.
  */
 function displayCollectionCards(cards) {
+    mergedCollectionData = cards;
     const listContainer = document.getElementById('collectionCardsList');
     if (!listContainer) return;
+
+    if (collectionIsLayoutMobile()) {
+        closeCollectionMobileDetail();
+    }
 
     // Apply unowned filter
     const visibleCards = showUnownedCards
@@ -596,6 +934,150 @@ function displayCollectionCards(cards) {
                 <div class="collection-empty-message">No cards to display</div>
             </div>
         `;
+        return;
+    }
+
+    if (collectionIsLayoutMobile()) {
+        const filteredForMobile = visibleCards.filter(c =>
+            mergedCollectionCardMatchesMobileListFilter(c, collectionMobileListFilterQuery)
+        );
+        const sorted = sortMergedCollectionCards(filteredForMobile, 'set_number', 'asc');
+        const filterValAttr = escapeHtmlCollection(collectionMobileListFilterQuery);
+        let listHtml = `
+            <div class="collection-mobile-toolbar">
+                <input type="search" id="collectionMobileListFilter" class="collection-mobile-list-filter-input"
+                    autocomplete="off" placeholder="Filter by name, type, set, or card #…"
+                    aria-label="Filter cards in your collection"
+                    value="${filterValAttr}" />
+            </div>
+        `;
+
+        if (filteredForMobile.length === 0 && visibleCards.length > 0) {
+            listHtml += `
+                <div class="collection-mobile-filter-empty" role="status">
+                    <div class="collection-mobile-filter-empty-message">No cards match your filter</div>
+                </div>
+            `;
+            listContainer.innerHTML = listHtml;
+            const inp = listContainer.querySelector('#collectionMobileListFilter');
+            if (inp) {
+                inp.addEventListener('input', onCollectionMobileListFilterInput);
+            }
+            return;
+        }
+
+        listHtml += `<ul id="collection-mobile-list" class="collection-mobile-list" role="list">`;
+
+        sorted.forEach(card => {
+            const cardType = card.card_type;
+            const cardName = getCardDisplayName(card, cardType);
+            const cardImageFull = getCardImagePath(card, cardType);
+            const cardImageThumb = getCardImagePath(card, cardType, { useThumbnail: true });
+            const escapedImagePath = cardImageFull.replace(/'/g, "\\'");
+            const cardSet = translateSet(card.set);
+            const sortSetCode = collectionSortSetCodeForCard(card);
+            const setNumber = card.card_data?.set_number != null ? String(card.card_data.set_number).trim() : '';
+            const setNumberValue = collectionSetNumberSortNumeric(card);
+            const isAlternateArt = card.image_path && card.image_path.includes('/alternate/');
+            const showAlternateArtLabel = isAlternateArt && isMainErbSetCode(card.set);
+            const isFoil = !!(card.is_foil);
+            let displayName = showAlternateArtLabel ? `${cardName} (Alternate Art)` : cardName;
+            if (isFoil) {
+                displayName = `${cardName} <span class="collection-foil-badge">✦ FOIL</span>`;
+            }
+            const titlePlain = isFoil ? `${cardName} ✦ FOIL` : (showAlternateArtLabel ? `${cardName} (Alternate Art)` : cardName);
+            const escapedImagePathAttr = cardImageFull.replace(/"/g, '&quot;');
+            const escapedImageForAdd = cardImageFull.replace(/'/g, "\\'");
+            const thumbAttr = cardImageThumb.replace(/"/g, '&quot;');
+            const escapedCardIdHover = String(card.card_id || '').replace(/'/g, "\\'");
+            const escapedCardTypeHover = String(cardType || '').replace(/'/g, "\\'");
+            const escapedDisplayNameSingle = (isFoil ? `${cardName} ✦ FOIL` : cardName).replace(/'/g, "\\'");
+            const foilRowClass = isFoil ? ' collection-card-foil' : '';
+            const typeLabel = formatCardType(cardType);
+            const subtitleText = `${typeLabel} · #${setNumber || '—'} · ${cardSet}`;
+            const titlePlainAttr = titlePlain.replace(/"/g, '&quot;');
+            const subtitleAttr = subtitleText.replace(/"/g, '&quot;');
+            const typeLabelAttr = typeLabel.replace(/"/g, '&quot;');
+            const cardSetAttr = cardSet.replace(/"/g, '&quot;');
+
+            if (card.inCollection === false) {
+                const escapedCardId = String(card.card_id).replace(/"/g, '&quot;');
+                const escapedCardType = String(card.card_type).replace(/"/g, '&quot;');
+                listHtml += `
+                    <li class="collection-card-item collection-card-unowned collection-mobile-row${foilRowClass}" tabindex="0"
+                        data-card-id="${escapedCardId}"
+                        data-card-type="${escapedCardType}"
+                        data-image-path="${escapedImagePathAttr}"
+                        data-quantity="-1"
+                        data-set-number="${setNumberValue}"
+                        data-set-number-display="${setNumber.replace(/"/g, '&quot;')}"
+                        data-card-set-code="${sortSetCode.replace(/"/g, '&quot;')}"
+                        data-is-foil="${isFoil}"
+                        data-card-name="${titlePlainAttr}"
+                        data-card-title-plain="${titlePlainAttr}"
+                        data-card-type-label="${typeLabelAttr}"
+                        data-card-set="${cardSetAttr}"
+                        data-in-collection="false"
+                        onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
+                        onmouseleave="hideCardHoverModal()">
+                        <img class="collection-mobile-row-thumb" src="${thumbAttr}" alt="" width="56" height="56" loading="lazy" />
+                        <div class="collection-mobile-row-main">
+                            <div class="collection-mobile-row-title">${displayName}</div>
+                            <div class="collection-mobile-row-subtitle">${escapeHtmlCollection(subtitleText)}</div>
+                        </div>
+                        <div class="collection-mobile-row-actions">
+                            <div class="collection-quantity-control">
+                                <button type="button" class="collection-quantity-btn collection-add-btn"
+                                    onclick="event.stopPropagation(); addCardToCollection('${String(card.card_id).replace(/'/g, "\\'")}', '${String(card.card_type).replace(/'/g, "\\'")}', '${escapedImageForAdd}')">+</button>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            } else {
+                const q = card.quantity;
+                listHtml += `
+                    <li class="collection-card-item collection-mobile-row${foilRowClass}" tabindex="0"
+                        data-card-id="${card.card_id}"
+                        data-card-type="${card.card_type}"
+                        data-image-path="${escapedImagePathAttr}"
+                        data-quantity="${q}"
+                        data-set-number="${setNumberValue}"
+                        data-set-number-display="${setNumber.replace(/"/g, '&quot;')}"
+                        data-card-set-code="${sortSetCode.replace(/"/g, '&quot;')}"
+                        data-is-foil="${isFoil}"
+                        data-card-name="${titlePlainAttr}"
+                        data-card-title-plain="${titlePlainAttr}"
+                        data-card-type-label="${typeLabelAttr}"
+                        data-card-set="${cardSetAttr}"
+                        data-in-collection="true"
+                        onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
+                        onmouseleave="hideCardHoverModal()">
+                        <img class="collection-mobile-row-thumb" src="${thumbAttr}" alt="" width="56" height="56" loading="lazy" />
+                        <div class="collection-mobile-row-main">
+                            <div class="collection-mobile-row-title">${displayName}</div>
+                            <div class="collection-mobile-row-subtitle">${escapeHtmlCollection(subtitleText)}</div>
+                        </div>
+                        <div class="collection-mobile-row-actions">
+                            <div class="collection-quantity-control">
+                                <button type="button" class="collection-quantity-btn"
+                                    onclick="event.stopPropagation(); handleCollectionQuantityClick(this, ${q - 1})"
+                                    ${q <= 0 ? 'disabled' : ''}>-</button>
+                                <span class="collection-mobile-row-qty" aria-label="Quantity">${q}</span>
+                                <button type="button" class="collection-quantity-btn"
+                                    onclick="event.stopPropagation(); handleCollectionQuantityClick(this, ${q + 1})">+</button>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }
+        });
+
+        listHtml += '</ul>';
+        listContainer.innerHTML = listHtml;
+        const inp = listContainer.querySelector('#collectionMobileListFilter');
+        if (inp) {
+            inp.addEventListener('input', onCollectionMobileListFilterInput);
+        }
         return;
     }
 
@@ -1317,7 +1799,9 @@ function initializeCollectionSorting() {
             // Update table attributes
             table.setAttribute('data-sort', sortField);
             table.setAttribute('data-sort-dir', newDir);
-            
+            collectionSortField = sortField;
+            collectionSortDir = newDir;
+
             // Update sort indicators
             table.querySelectorAll('.sort-indicator').forEach(indicator => {
                 indicator.textContent = '';
@@ -1592,6 +2076,16 @@ function toggleUnownedCards() {
  */
 function initializeCollectionView() {
     initializeCollectionSearch();
+    const cv = document.getElementById('collection-view');
+    if (cv && !cv.dataset.collectionMobileDelegateBound) {
+        cv.dataset.collectionMobileDelegateBound = '1';
+        cv.addEventListener('click', onCollectionViewMobileActivate);
+    }
+    if (!collectionLayoutModeListenerBound) {
+        collectionLayoutModeListenerBound = true;
+        window.addEventListener('layout-mode-change', onCollectionLayoutModeChange);
+    }
+    ensureCollectionMobileDetailPanel();
     loadCollection();
 }
 
@@ -1614,4 +2108,8 @@ window.initializeCollectionView = initializeCollectionView;
 window.addCardToCollectionFromDatabase = addCardToCollectionFromDatabase;
 window.handleCollectionSearchResultClick = handleCollectionSearchResultClick;
 window.toggleUnownedCards = toggleUnownedCards;
+window.handleCollectionMobileDetailQuantityClick = handleCollectionMobileDetailQuantityClick;
+window.sortMergedCollectionCards = sortMergedCollectionCards;
+window.closeCollectionMobileDetail = closeCollectionMobileDetail;
+window.openCollectionMobileDetail = openCollectionMobileDetail;
 
