@@ -91,7 +91,7 @@ flowchart TB
 | **M2a**           | DB-scoped CSS/JS hygiene                                            | M1         | DBV files cleaned; no desktop regressions         | done        |
 | **M2b**           | `.cursorrules` + agent context for DBV + mobile                     | M2a        | Rules committed                                   | done        |
 | **M2c**           | Touch-first DBV browse/filter                                       | M2b        | Every DBV tab usable on phone (see tab checklist) | in progress |
-| **M3**            | Deck list / selection mobile                                        | M2c        | Deck tiles/menus usable                           | pending     |
+| **M3**            | Deck list / selection mobile                                        | M2c        | Deck tiles/menus usable                           | done        |
 | **M4**            | Collection mobile                                                   | M3         | Collection usable                                 | pending     |
 | **M5** (umbrella) | Deck editor mobile                                                  | M4         | M5a + M5b met                                     | pending     |
 | **M5a**           | Read-only deck viewing                                              | M4         | Non-owner / readonly routes readable              | pending     |
@@ -100,6 +100,19 @@ flowchart TB
 
 
 Roadmap **Status** values are `**pending`**, `**in progress`**, or `**done**`. They track delivery of each milestone row above. The **Refactor completion log** in §7 tracks smaller incremental items and may show status per line independently.
+
+### M3 — Deck list / selection mobile — **done**
+
+**Pattern:** Hero-banner + full-width character strip + legality/⋯ in the upper-right corner.
+
+- **Layout:** `.layout-mobile .deck-card.deck-tile.deck-tile--compact` switches from `grid-template-columns: 1fr 220px` to `display: flex; flex-direction: column`. **`.deck-tile-main`** fills the tile; **`.deck-tile-side`** is **`position: absolute`** (top-right) and only exposes **`.deck-tile-top-actions`** (badge + menu).
+- **Gradient overlay:** The `::after` uniform dark overlay is replaced on mobile with `linear-gradient(to bottom, rgba(0,0,0,0.08) → rgba(0,0,0,0.80))` for text readability without obscuring the art.
+- **Character strip:** Four portrait slots, left-cropped art, rounded corners, balanced horizontal padding (see `STYLE_GUIDE.md`).
+- **Stats on MV:** **`.deck-tile-side-meta`** (Threat, Cards, dates) is **hidden** on MV. Date rows still carry `deck-tile-stat-date` in the DOM for DTV. Location/Mission previews are hidden on MV.
+- **Ellipsis menu:** On MV, **`.deck-tile-menu`** is **visible** again: it sits in **`.deck-tile-top-actions`** with the legality badge to its **left** (far upper-right cluster). **`.deck-tile-side-meta`** (stats) stays hidden on MV. **View** / **Delete** / **Edit** are only in the dropdown (`stopPropagation` on `.deck-tile-side` keeps menu taps off the tile’s `editDeck` handler).
+- **Tile tap:** `handleDeckTileClick` → **`editDeck(deckId)`** (same as DTV). No bottom action bar — tile height stays tight.
+- **Files:** `public/css/mobile-layout.css`, `public/css/deck-selection.css`, `public/js/deck-selection/deckTilesRenderer.js`, `public/js/deck-selection/deckTileMobileInteraction.js`, `public/index.html` (script include).
+- **Tests:** `tests/unit/deck-selection/deck-selection-modules.test.ts` — 9 tests, all pass.
 
 ### M2 sub-milestones
 
@@ -234,7 +247,7 @@ Use this section as **agent context** for what shipped after the base M1/M2c mil
 ### 10.1 Global header under `.layout-mobile`
 
 - **Structure:** `**[header-nav-cluster](public/components/globalNav.html)`** wraps `**.header-center**` (view tabs only) and `**.header-right**` (`**#newDeckBtn**` + user menu + legacy dropdown hooks). On **desktop**, `**[.header-nav-cluster](public/components/globalNav.css)`** uses `**display: contents**` so the bar is logo | centered tabs | `**.header-right**` (**+ Deck** left of welcome).
-- **Two-row header grid:** Under `**.layout-mobile**`, `**mobile-layout.css**` sets `**display: grid**` on `**.unified-header**` (`**repeat(3, minmax(0, 1fr))**`, two rows). `**.header-nav-cluster**`, `**.header-center**`, `**.header-app-actions**`, `**.app-tabs**`, and `**.header-right**` use `**display: contents**`. **Row 1:** `**.header-left**` (logo) column **1**, `**#userMenu**` columns **2–3** with `**justify-self: end**`. **Row 2:** **Card Database** | **Collection** | **Deck Builder** (equal columns). `**#newDeckBtn**` is `**display: none**` (use user menu **+ Create Deck**).
+- **Two-row header grid:** Under `**.layout-mobile**`, `**mobile-layout.css**` sets `**display: grid**` on `**.unified-header**` (`**repeat(3, minmax(0, 1fr))**`, two rows). `**.header-nav-cluster**`, `**.header-center**`, `**.header-app-actions**`, `**.app-tabs**`, and `**.header-right**` use `**display: contents**`. **Row 1:** `**.header-left**` (logo) column **1**, `**#userMenu**` columns **2–3** with `**justify-self: end**`. **Row 2:** **Card Database** | **Deck Builder** | **Collection** (equal columns). `**#newDeckBtn**` is `**display: none**` (use user menu **+ Create Deck**).
 - **Logged out / no `getCurrentUser`:** `**[syncHeaderCollectionLayout()](public/components/globalNav.js)`** hides Collection and adds `**.collection-tab-hidden**` on `**.header-nav-cluster**` so **Card Database** is column **1** and **Deck Builder** spans columns **2–3** on row **2**. Called from `**updateUserWelcome()`** after greeting/menu updates.
 - **Logo:** `**.header-left**` `**max-width: 134px**` on row **2**, left-aligned. `**.unified-header**` uses `**padding: 8px 10px 8px**`; `**text-align: start**` overrides `**globalNav.css**` narrow `**text-align: center**`.
 - **User row:** `**.user-menu-toggle`** `**justify-content: flex-end**`, `**width: auto**`.

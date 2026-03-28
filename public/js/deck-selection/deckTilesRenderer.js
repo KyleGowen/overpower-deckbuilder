@@ -110,7 +110,7 @@
                 window.DeckSelection.getDeckTileBackgroundInfo(deck?.metadata?.background_image_path);
 
             return `
-                    <div class="deck-card deck-tile deck-tile--compact${deckTileBackgroundClass}"${deckTileBackgroundStyle} onclick="editDeck('${deck.metadata.id}')">
+                    <div class="deck-card deck-tile deck-tile--compact${deckTileBackgroundClass}"${deckTileBackgroundStyle} onclick="handleDeckTileClick(event, '${deck.metadata.id}')">
                         <div class="deck-tile-main">
                             <div class="deck-tile-header">
                                 <h4 class="deck-tile-title">${deck.metadata.name}</h4>
@@ -130,28 +130,30 @@
                         </div>
 
                         <div class="deck-tile-side" onclick="event.stopPropagation()">
-                            <div class="deck-tile-menu">
-                                <button class="deck-tile-menu-button" type="button" aria-haspopup="true" aria-expanded="false"
-                                        onclick="toggleDeckTileMenu(event, '${deck.metadata.id}')"
-                                        title="Actions">
-                                    ⋯
-                                </button>
-                                <div class="deck-tile-menu-dropdown" id="deckTileMenu-${deck.metadata.id}" role="menu">
-                                    <button class="deck-tile-menu-item" type="button" role="menuitem"
-                                            onclick="editDeck('${deck.metadata.id}')">Edit</button>
-                                    <button class="deck-tile-menu-item" type="button" role="menuitem"
-                                            onclick="viewDeck('${deck.metadata.id}')">View</button>
-                                    ${isGuest
-                                        ? '<button class="deck-tile-menu-item deck-tile-menu-item--danger" type="button" role="menuitem" disabled title="Guests may not delete decks">Delete</button>'
-                                        : `<button class="deck-tile-menu-item deck-tile-menu-item--danger" type="button" role="menuitem" onclick="deleteDeck('${deck.metadata.id}')">Delete</button>`
-                                    }
+                            <div class="deck-tile-top-actions">
+                                <div class="deck-tile-side-legality" aria-label="Legality">
+                                    ${validationStatus}
+                                </div>
+                                <div class="deck-tile-menu">
+                                    <button class="deck-tile-menu-button" type="button" aria-haspopup="true" aria-expanded="false"
+                                            onclick="toggleDeckTileMenu(event, '${deck.metadata.id}')"
+                                            title="Actions">
+                                        ⋯
+                                    </button>
+                                    <div class="deck-tile-menu-dropdown" id="deckTileMenu-${deck.metadata.id}" role="menu">
+                                        <button class="deck-tile-menu-item" type="button" role="menuitem"
+                                                onclick="editDeck('${deck.metadata.id}')">Edit</button>
+                                        <button class="deck-tile-menu-item" type="button" role="menuitem"
+                                                onclick="viewDeck('${deck.metadata.id}')">View</button>
+                                        ${isGuest
+                                            ? '<button class="deck-tile-menu-item deck-tile-menu-item--danger" type="button" role="menuitem" disabled title="Guests may not delete decks">Delete</button>'
+                                            : `<button class="deck-tile-menu-item deck-tile-menu-item--danger" type="button" role="menuitem" onclick="deleteDeck('${deck.metadata.id}')">Delete</button>`
+                                        }
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="deck-tile-side-meta" aria-label="Deck stats">
-                                <div class="deck-tile-side-legality" aria-label="Legality">
-                                    ${validationStatus}
-                                </div>
                                 <div class="deck-tile-side-item">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
@@ -170,7 +172,7 @@
                                     </span>
                                     <span class="deck-tile-side-value">${deck.metadata.cardCount || 0}</span>
                                 </div>
-                                <div class="deck-tile-side-item">
+                                <div class="deck-tile-side-item deck-tile-stat-date">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
                                             <img src="/public/resources/images/icons/updated.svg" alt="" class="deck-tile-side-icon-img" width="16" height="16">
@@ -179,7 +181,7 @@
                                     </span>
                                     <span class="deck-tile-side-value">${updatedDate}</span>
                                 </div>
-                                <div class="deck-tile-side-item">
+                                <div class="deck-tile-side-item deck-tile-stat-date">
                                     <span class="deck-tile-side-left">
                                         <span class="deck-tile-side-icon" aria-hidden="true">
                                             <img src="/public/resources/images/icons/created.svg" alt="" class="deck-tile-side-icon-img" width="16" height="16">

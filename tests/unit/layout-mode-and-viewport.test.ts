@@ -219,7 +219,10 @@ describe('mobile-layout.css (M1 shell)', () => {
             /\.layout-mobile\s+#newDeckBtn[\s\S]*?display:\s*none\s*!important/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#deckBuilderBtn[\s\S]*?grid-column:\s*3/
+            /\.layout-mobile\s+#deckBuilderBtn[\s\S]*?grid-column:\s*2/
+        );
+        expect(css).toMatch(
+            /\.layout-mobile\s+#collectionViewBtn[\s\S]*?grid-column:\s*3/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+\.user-menu-toggle[\s\S]*?justify-content:\s*flex-end/

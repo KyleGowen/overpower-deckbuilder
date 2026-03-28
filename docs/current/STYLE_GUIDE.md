@@ -300,7 +300,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
   - **Tile layout (compact modern)**: `.deck-card.deck-tile.deck-tile--compact`
     - **Structure**:
       - Left column: `.deck-tile-main` containing header + unified preview accordion
-      - Right column: `.deck-tile-side` containing ellipsis + stats block
+      - Right column: `.deck-tile-side` containing `.deck-tile-top-actions` (legality + ⋯) and `.deck-tile-side-meta` (stats)
       - Header: `.deck-tile-header` with `.deck-tile-title`
       - Preview strip: `.deck-tile-previews` (characters stack + location + first mission)
     - **Deck tile background (selected background)**:
@@ -321,8 +321,9 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
         - **Implementation note**: Location/Mission placeholders render as empty divs; the “Empty” label is provided via `::after` on `.deck-tile-preview-card--empty`
     - **Preview alignment**:
       - Compact tiles add `padding-left: 26px` on `.deck-card.deck-tile--compact .deck-character-cards-row` to keep the character accordion from overlapping the tile border
-    - **Right-side stats**:
-      - Container: `.deck-tile-side-meta` (subtle glass panel, `background: rgba(0, 0, 0, 0.44)`)
+    - **Right column (DTV)**:
+      - **Top row**: `.deck-tile-top-actions` — `.deck-tile-side-legality` (`.deck-validation-badge`) **left of** `.deck-tile-menu` (⋯).
+      - **Stats panel**: `.deck-tile-side-meta` (subtle glass panel, `background: rgba(0, 0, 0, 0.44)`)
       - Rows: `.deck-tile-side-item` with `.deck-tile-side-label` and `.deck-tile-side-value` (value uses `#4ecdc4`)
       - Icons:
         - Threat uses `public/resources/images/icons/threat.png` via `.deck-tile-side-icon-img`
@@ -330,9 +331,8 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
         - Updated uses `public/resources/images/icons/updated.svg`
         - Created uses `public/resources/images/icons/created.svg`
       - Timestamps: if Created/Updated is today (local), show time (`h:mm`); otherwise show date (`M/D/YYYY`)
-      - Legality banner: `.deck-tile-side-legality` (contains `.deck-validation-badge`)
     - **Actions menu**:
-      - **Trigger**: `.deck-tile-menu-button` (ellipsis)
+      - **Trigger**: `.deck-tile-menu-button` (ellipsis), inside `.deck-tile-top-actions`
       - **Dropdown**: `.deck-tile-menu-dropdown` with `z-index: 9999` to ensure it layers above tile content
       - **Items**: `.deck-tile-menu-item` (danger variant: `.deck-tile-menu-item--danger`)
     - **Preview hover behavior (location + mission)**:
@@ -342,6 +342,13 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
         - Characters: teal glow (character stack hover)
         - Location: yellow glow (`.deck-tile-location-preview:hover`)
         - Mission: green glow (`.deck-tile-mission-preview:hover`)
+    - **Mobile layout** (`html.layout-mobile`, `public/css/mobile-layout.css`):
+      - **Legality + menu (MV)**: `.deck-tile-side-meta` is hidden on MV. **`.deck-tile-top-actions`** holds **`.deck-tile-side-legality`** (badge) and **`.deck-tile-menu`** (⋯); the pair is **`position: absolute`** on the tile (`top: 6px`, `right: 8px`, `z-index: 6`). On DTV the same row sits in the right grid column above the stats panel.
+      - **Character preview strips**: Each `.deck-character-card-display` uses **`border-radius: 10px`** (was square on MV). **`transition: none`**, **`cursor: default`**, **`-webkit-tap-highlight-color: transparent`**. Desktop character-row hover (lift, scale, sibling recede) is **neutralized** on MV via explicit `:hover` / `.deck-character-cards-row:hover …` overrides so previews stay static.
+      - **Row inset (balance)**: `.deck-character-cards-row` uses **`padding-left` / `padding-right: 14px`** and **`box-sizing: border-box`** so MV is not stuck with desktop’s **`padding-left: 26px`** (no right padding), which made the strip look shifted right.
+      - **Header inset (MV)**: **`.deck-tile-header`** uses extra **`padding-right: 120px`** so long titles do not run under the badge + ⋯ cluster.
+      - **Below ⋯ cluster (MV)**: **`.deck-tile-previews`** uses **`padding-top: 8px`** so character art sits slightly lower than the legality + menu row.
+      - **Tap behavior**: **`handleDeckTileClick`** → **`editDeck(deckId)`** on MV and DTV. **View** / **Delete** (and **Edit**) live in the ⋯ dropdown on all breakpoints.
 
 #### Create Your First Deck Tile and Sample Decks
   - **"Create your first deck" tile (empty state)**:
@@ -700,7 +707,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 ### Mobile Adaptations (current direction)
 
 - **Deck editor:** Under `.layout-mobile`, deck panes **stack vertically**; resizable divider hidden; list view **stacks** the two deck columns (single-column reading flow). Full parity with STYLE_GUIDE “single column deck builder” is **incremental** — see `MOBILE_DESIGN.md` milestones.
-- **Stacked Navigation (M1):** Under `.layout-mobile`, **[`.unified-header`](/public/components/globalNav.html)** is a **CSS grid** (**`repeat(3, minmax(0, 1fr))`** × two rows). **`.header-nav-cluster`**, **`.header-center`**, **`.header-app-actions`**, **`.app-tabs`**, and **`.header-right`** use **`display: contents`**. **Row 1:** **`.header-left`** (logo, **`max-width: 134px`**, left) and **`#userMenu`** (**`grid-column: 2 / 4`**, **`justify-self: end`**). **Row 2:** **Card Database** | **Collection** | **Deck Builder** (equal columns; **`#newDeckBtn`** / **+ Deck** is **`display: none`** — use the user menu **+ Create Deck**). **`.user-menu-toggle`** uses **`justify-content: flex-end`** and **`width: auto`**. Logged-out: [`syncHeaderCollectionLayout`](/public/components/globalNav.js) adds **`.collection-tab-hidden`** so **Card Database** is column **1** and **Deck Builder** spans columns **2–3** on row **2**. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). **Desktop (`layout-desktop`):** **`.header-nav-cluster`** is **`display: contents`** in [`public/components/globalNav.css`](/public/components/globalNav.css) so the bar is **logo \| centered view tabs \| `.header-right`**, with **+ Deck** immediately left of the welcome menu in **`.header-right`**. Legacy **`@media (max-width: 900px)`** in `globalNav.css` still applies when **`layout-desktop`** is active at narrow widths.
+- **Stacked Navigation (M1):** Under `.layout-mobile`, **[`.unified-header`](/public/components/globalNav.html)** is a **CSS grid** (**`repeat(3, minmax(0, 1fr))`** × two rows). **`.header-nav-cluster`**, **`.header-center`**, **`.header-app-actions`**, **`.app-tabs`**, and **`.header-right`** use **`display: contents`**. **Row 1:** **`.header-left`** (logo, **`max-width: 134px`**, left) and **`#userMenu`** (**`grid-column: 2 / 4`**, **`justify-self: end`**). **Row 2:** **Card Database** | **Deck Builder** | **Collection** (equal columns; **`#newDeckBtn`** / **+ Deck** is **`display: none`** — use the user menu **+ Create Deck**). **`.user-menu-toggle`** uses **`justify-content: flex-end`** and **`width: auto`**. Logged-out: [`syncHeaderCollectionLayout`](/public/components/globalNav.js) adds **`.collection-tab-hidden`** so **Card Database** is column **1** and **Deck Builder** spans columns **2–3** on row **2**. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). **Desktop (`layout-desktop`):** **`.header-nav-cluster`** is **`display: contents`** in [`public/components/globalNav.css`](/public/components/globalNav.css) so the bar is **logo \| centered view tabs \| `.header-right`**, with **+ Deck** immediately left of the welcome menu in **`.header-right`**. Legacy **`@media (max-width: 900px)`** in `globalNav.css` still applies when **`layout-desktop`** is active at narrow widths.
 - **Touch Targets:** Minimum **44px** for interactive controls; utility **`.touch-target-min`** in `mobile-layout.css` (apply where controls are still small).
 - **Card database (M2c, `.layout-mobile`):** Rules live in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) under the **Card database**, **Special Cards tab**, **Aspects tab**, **Universe: Advanced tab**, **Locations** filter shell, **Events** tab, **Missions** tab, **Universe: Teamwork** tab, **Universe: Ally** tab, **Universe: Training** tab, **Universe: Basic** tab, and **Characters tab — card rows** sections.
   - **Shell:** `#database-view.database-section` uses tighter horizontal padding; **`.stats`** is a two-column grid; **`.tab-container`** is **`max-width: 732px`** centered (`margin: auto`) so database tab buttons do not grow wider between **769–900px** than they would at a **768px** viewport (same inner width after shell padding). Under `.layout-mobile`, **`.tab-container`** uses **`align-items: stretch`** (overriding desktop **`center`**) so both **`.tab-row`** bands share the same full width—otherwise each row shrink-wraps and paired buttons misalign between rows. **`.tab-row`** is **`width: 100%`** with **`justify-content: flex-start`**. **`.tab-button`** is at least **44px** tall, `flex: 1 1 calc(50% - 4px)` for a two-up wrap inside that cap. The **All** tab (**`[data-tab="all-cards"]`**) uses **`flex: 0 0 100%`** so it spans the full row; other tabs stay two per row.
@@ -790,7 +797,7 @@ Consider implementing CSS custom properties for easier theme management:
 
 ### Mobile layout mode (`.layout-mobile`, max-width 900px)
 - **Location**: [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) — selectors prefixed with `.layout-mobile .unified-header`, `.header-center`, `.app-tabs`, `.user-menu`, etc.
-- **Header**: **`unified-header`** is a **two-row grid** (**`repeat(3, minmax(0, 1fr))`**): **row 1** = logo (**`.header-left`**, left) and **`#userMenu`** (right, **`justify-self: end`**, **`align-self: start`** so the welcome sits in the **upper right**); **row 2** = **Card Database** | **Collection** | **Deck Builder** (equal width). **`height: auto`**; **`text-align: start`** overrides narrow **`globalNav.css`** centering.
+- **Header**: **`unified-header`** is a **two-row grid** (**`repeat(3, minmax(0, 1fr))`**): **row 1** = logo (**`.header-left`**, left) and **`#userMenu`** (right, **`justify-self: end`**, **`align-self: start`** so the welcome sits in the **upper right**); **row 2** = **Card Database** | **Deck Builder** | **Collection** (equal width). **`height: auto`**; **`text-align: start`** overrides narrow **`globalNav.css`** centering.
 - **Tab bar**: `.header-center` is **`position: static`** (overrides desktop absolute centering). **`.header-nav-cluster`** and inner wrappers use **`display: contents`** so tabs participate in the header grid.
 - **Primary controls**: `.app-tab-button`, `.new-deck-btn`, and `.user-menu-toggle` use **`min-height: 44px`** with slightly increased padding; **`.user-menu-toggle`** is **`justify-content: flex-end`**, **`width: auto`**.
 - **+ Deck (`#newDeckBtn`)**: Hidden in mobile layout mode (**`display: none`** under **`.layout-mobile`**). Use **+ Create Deck** in the user menu dropdown for the same action.

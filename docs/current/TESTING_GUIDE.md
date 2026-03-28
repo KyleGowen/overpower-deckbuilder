@@ -156,7 +156,7 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
   - `mobile-layout.css` **DBV Characters tab** (describe `mobile-layout.css (DBV Characters tab)`): **`--dbv-mobile-tile-img-max`** / **`--dbv-mobile-tile-img-landscape-max-h`** on **`#database-view`**; **All tab** **`#all-cards-grid-container`** tile **`img`** (including **`horizontal-card`**: **`width: 100%`**, **`max-height: none`** for width parity with portrait tiles); **`#characters-table`** card **`tbody tr`**, hidden **`td:nth-child(n+3)`**, actions **`td:nth-child(2)`** grid (**+Deck** full width, collection row); Character **`.card-image-container`** + **`img`** / **`img.horizontal-card`** (**landscape** still uses **`--dbv-mobile-tile-img-landscape-max-h`**); **`.characters-mobile-card-caption`** (desktop hidden) with **`__name`** / **`__ability`** / **`__set`** font sizes; **44px** **`.card-nav-arrow`** targets.
 - **Manual:** Viewport **≤900px** (`layout-mobile` on `<html>`). Confirm:
   - **Row 1:** **Logo** is **left-aligned**; **Welcome** and ▶ are **right-aligned** on the same row.
-  - **Row 2:** **Card Database**, **Collection**, and **Deck Builder** are **equal width** across the full header; **+ Deck** is not shown (use user menu **+ Create Deck** when logged in).
+  - **Row 2:** **Card Database** (left), **Deck Builder** (center), **Collection** (right) — **equal width**; **+ Deck** is not shown (use user menu **+ Create Deck** when logged in).
   - Open account menu: dropdown is **wider** (**`max-content`**, capped by viewport), **right-aligned**; **+ Create Deck** and **Log Out** stay **one line**; actions still tappable.
   - Optional **`preferDesktopLayout`** override restores desktop chrome — see [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §5–§8.
 

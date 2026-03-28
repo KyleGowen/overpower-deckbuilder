@@ -204,13 +204,24 @@
     box-shadow: 0 18px 36px rgba(46, 204, 113, 0.16);
 }
 
-/* Right-side stats under ellipsis */
+/* Right-side stats; legality + ⋯ share one top row (.deck-tile-top-actions) */
 .deck-tile-side {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 12px;
+}
+
+/* Legality badge (left) + overflow menu (right) — DTV: right column; MV: absolute corner */
+.deck-tile-top-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+    flex: 0 0 auto;
 }
 
 .deck-tile-side-meta {
@@ -222,17 +233,16 @@
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.44);
     border: 1px solid rgba(255, 255, 255, 0.10);
-    /* Make room for the absolute-positioned ellipsis button */
-    margin-top: 56px;
 }
 
 .deck-tile-side-legality {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding-bottom: 8px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
 .deck-tile-side-legality .deck-validation-badge {
@@ -285,14 +295,13 @@
     white-space: nowrap;
 }
 
-/* Ellipsis action menu (deck tiles) */
+/* Ellipsis action menu (deck tiles) — dropdown anchored to button */
 .deck-tile-menu {
-    position: absolute;
-    top: 0;
-    right: 0;
+    position: relative;
     display: inline-flex;
     justify-content: flex-end;
     align-items: flex-start;
+    flex: 0 0 auto;
     height: fit-content;
 }
 
@@ -412,7 +421,7 @@
     border-radius: 16px;
     border: 3px solid rgba(78, 205, 196, 0.4);
     background-size: cover;
-    background-position: center;
+    background-position: left center;
     background-repeat: no-repeat;
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -33,6 +33,7 @@ describe('deck selection modules (public/js/deck-selection/*)', () => {
     (window as any).editDeck = jest.fn();
     (window as any).viewDeck = jest.fn();
     (window as any).deleteDeck = jest.fn();
+    (window as any).handleDeckTileClick = jest.fn();
     (window as any).isGuestUser = jest.fn(() => false);
 
     // Ensure a clean module namespace between tests
@@ -106,12 +107,16 @@ describe('deck selection modules (public/js/deck-selection/*)', () => {
     expect(tile.className).toContain('deck-tile--has-bg');
     expect(tile.getAttribute('style')).toContain("--deck-tile-bg: url('/public/resources/images/backgrounds/bg%27s.webp')");
 
-    // Legality is inside the stats panel
+    // Tile routes through handleDeckTileClick → editDeck (MV and DTV)
+    expect(tile.getAttribute('onclick')).toContain('handleDeckTileClick');
+    expect(tile.getAttribute('onclick')).not.toContain('editDeck');
+
+    // Legality badge in top row next to ⋯ (same on MV and DTV)
     const legality = tile.querySelector('.deck-tile-side-legality') as HTMLElement;
     expect(legality).toBeTruthy();
     expect(legality.innerHTML).toContain('✅ Legal');
 
-    // Guest delete disabled
+    // Guest delete disabled in the ellipsis menu
     const menu = document.getElementById('deckTileMenu-deck-123') as HTMLElement;
     expect(menu).toBeTruthy();
     const dangerButton = menu.querySelector('.deck-tile-menu-item--danger') as HTMLButtonElement;
@@ -119,6 +124,44 @@ describe('deck selection modules (public/js/deck-selection/*)', () => {
     expect(dangerButton.disabled).toBe(true);
     expect(dangerButton.getAttribute('title')).toBe('Guests may not delete decks');
     expect(dangerButton.getAttribute('onclick')).toBe(null);
+  });
+
+  test('displayDecks: tile HTML includes top-actions row, menu, and stat-date classes', async () => {
+    const decks = [
+      {
+        metadata: {
+          id: 'deck-mobile',
+          name: 'Mobile Layout Deck',
+          is_limited: true,
+          is_valid: true,
+          threat: 42,
+          cardCount: 48,
+          created: '2026-01-20T00:00:00.000Z',
+          lastModified: '2026-01-22T00:00:00.000Z',
+          background_image_path: null,
+        },
+        cards: [],
+      },
+    ];
+
+    await (window as any).DeckSelection.displayDecks(decks);
+
+    const tile = document.querySelector('.deck-card.deck-tile.deck-tile--compact') as HTMLElement;
+    expect(tile).toBeTruthy();
+
+    expect(tile.querySelector('.deck-tile-top-actions')).toBeTruthy();
+
+    const menuDropdown = tile.querySelector('.deck-tile-menu-dropdown') as HTMLElement;
+    expect(menuDropdown).toBeTruthy();
+    const menuItems = menuDropdown.querySelectorAll('.deck-tile-menu-item');
+    const menuTexts = Array.from(menuItems).map(b => b.textContent?.trim());
+    expect(menuTexts).toContain('Edit');
+    expect(menuTexts).toContain('View');
+    expect(menuTexts).toContain('Delete');
+
+    // Updated and Created stat items carry deck-tile-stat-date class (for CSS hide on mobile)
+    const dateItems = tile.querySelectorAll('.deck-tile-stat-date');
+    expect(dateItems.length).toBe(2);
   });
 
   test('displayDecks: character image paths use thumbnails for faster load', async () => {

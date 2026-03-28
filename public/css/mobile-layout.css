@@ -5105,6 +5105,158 @@
     max-width: 100%;
 }
 
+/* ── Deck tile MV: hero-banner + avatar row + stats strip ─────────────────── */
+/* Override the 2-column desktop grid with a stacked flex layout               */
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact {
+    display: flex !important;
+    flex-direction: column;
+    padding: 0;
+    min-height: auto;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Hero section: title at top, character cards fill below */
+.layout-mobile .deck-tile-main {
+    min-height: 160px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Top-heavy gradient: title sits at top, card art below should be unobscured */
+.layout-mobile .deck-card.deck-tile.deck-tile--compact.deck-tile--has-bg::after {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.72) 0%,
+        rgba(0, 0, 0, 0.15) 35%,
+        rgba(0, 0, 0, 0.05) 100%
+    );
+}
+
+/* Title: reserve space for legality + ⋯ (absolute top-right on MV) */
+.layout-mobile .deck-tile-header {
+    padding: 10px 120px 6px 14px;
+}
+
+/* Title: at top of hero, strong shadow for readability against bright art */
+.layout-mobile .deck-tile-title {
+    font-size: 1.35rem;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 0, 0, 0.8);
+    margin-bottom: 2px;
+}
+
+/* Character cards: full-width fill using flex */
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-previews {
+    display: block; /* block so .deck-tile-characters takes full width naturally */
+    width: 100%;
+    /* Air below the absolute legality + ⋯ cluster (they sit over the hero top) */
+    padding: 8px 0 0;
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-characters {
+    width: 100%;
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-display {
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    padding: 0; /* override base padding: 0 0 0 5px */
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-cards-row {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    align-items: flex-end;
+    justify-content: flex-start;
+    perspective: none;
+    /* Cancel desktop-only padding-left: 26px; match .deck-tile-header horizontal inset */
+    padding-left: 14px;
+    padding-right: 14px;
+    box-sizing: border-box;
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto !important;
+    height: 180px;
+    margin-left: -4px;
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(78, 205, 196, 0.2);
+    transition: none;
+    cursor: default;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove all 3D rotations — flat fill on mobile */
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:nth-child(1),
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:nth-child(2),
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:nth-child(3),
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:nth-child(4) {
+    transform: none;
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:first-child {
+    margin-left: 0;
+}
+
+/* MV: no hover / touch “lift” — desktop row hover rules must not apply */
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:hover,
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-cards-row:hover .deck-character-card-display,
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-cards-row:hover .deck-character-card-display:not(:hover) {
+    transform: none;
+    z-index: 1;
+    opacity: 1;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    border-color: rgba(78, 205, 196, 0.2);
+}
+
+/* Hide location and mission preview images — not enough room on mobile */
+.layout-mobile .deck-tile-location,
+.layout-mobile .deck-tile-mission {
+    display: none;
+}
+
+/* MV: hide stats panel; float legality + ⋯ above the hero (sibling of .deck-tile-main) */
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-side {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-end;
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    left: auto;
+    width: auto;
+    max-width: min(280px, calc(100% - 24px));
+    z-index: 6;
+    gap: 0;
+    pointer-events: auto;
+}
+
+.layout-mobile .deck-tile-side-meta {
+    display: none !important;
+}
+
+.layout-mobile .deck-tile-top-actions {
+    width: auto;
+    gap: 6px;
+}
+
+/* Compact ⋯ target still meets ~44px touch area */
+.layout-mobile .deck-tile-menu-button {
+    width: 44px;
+    height: 44px;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Global nav MV: row 1 = logo | user menu; row 2 = three equal view tabs      */
 /* (+ Deck hidden — use user menu “+ Create Deck”)                             */
@@ -5164,12 +5316,12 @@
     grid-row: 2;
 }
 
-.layout-mobile #collectionViewBtn {
+.layout-mobile #deckBuilderBtn {
     grid-column: 2;
     grid-row: 2;
 }
 
-.layout-mobile #deckBuilderBtn {
+.layout-mobile #collectionViewBtn {
     grid-column: 3;
     grid-row: 2;
 }
@@ -5178,7 +5330,7 @@
     display: none !important;
 }
 
-/* Logged-out: Collection hidden — Card Database | Deck Builder on row 2 */
+/* Logged-out: Collection hidden — row 2: Database (1) | Deck Builder spans 2–3 */
 .layout-mobile .header-nav-cluster.collection-tab-hidden #databaseViewBtn {
     grid-column: 1;
     grid-row: 2;
