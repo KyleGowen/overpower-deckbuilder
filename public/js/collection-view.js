@@ -18,6 +18,10 @@ let collectionMobileDetailOpen = false;
 
 let collectionLayoutModeListenerBound = false;
 
+/** Mobile list always uses this sort (no column headers on MV). */
+const COLLECTION_MOBILE_LIST_SORT_FIELD = 'set_number';
+const COLLECTION_MOBILE_LIST_SORT_DIR = 'asc';
+
 function collectionIsLayoutMobile() {
     return typeof window !== 'undefined' && typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
 }
@@ -880,7 +884,11 @@ function displayCollectionCards(cards) {
     }
 
     if (collectionIsLayoutMobile()) {
-        const sorted = sortMergedCollectionCards(visibleCards, 'set_number', 'asc');
+        const sorted = sortMergedCollectionCards(
+            visibleCards,
+            COLLECTION_MOBILE_LIST_SORT_FIELD,
+            COLLECTION_MOBILE_LIST_SORT_DIR
+        );
         let listHtml = `<ul id="collection-mobile-list" class="collection-mobile-list" role="list">`;
 
         sorted.forEach(card => {

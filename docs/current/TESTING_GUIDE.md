@@ -102,6 +102,7 @@ Unit and integration tests use separate Jest configs in `tests/config/`. Integra
 - Config: `tests/config/jest.unit.config.js`
 - Match: `**/tests/unit/**/*.test.ts` (and `*.spec.ts`)
 - Run: `npm run test:unit`
+- **Collection view (`collection-view.test.ts`):** Exercises merge/sort, desktop table, and **`layout-mobile`** list + detail behavior for [`public/js/collection-view.js`](../../public/js/collection-view.js). The suite loads that file via **`eval`** with selective exports; default unit **`collectCoverageFrom`** is TypeScript under **`src/`** only, so **line coverage is not reported for `collection-view.js`** even though MV cases are asserted. See [`docs/current/COLLECTION_VIEW_MOBILE.md`](COLLECTION_VIEW_MOBILE.md) and the header comment in the test file.
 
 **Integration tests (all)**
 
@@ -169,7 +170,13 @@ npx jest -c tests/config/jest.integration.deck-security-save.config.js
   - **Special Cards tab:** Filter card is **full width** (not a thin left column): **function** icons, teal **`|`**, compact **Clear filters** on the same row; then **type** icons + **No Icon**; then **value** row (**`= / Min / Max`** + **No value** ban — **grid** **1%** gutters, **~21/31/31/11%** controls, no full-width clear in that block); then **character** / **card name** / **card text** fields. **Card rows** match **Characters** (art, caption, **+Deck** / collection); **‹ ›** updates caption and buttons.
   - **Another tab** (e.g. Missions or Advanced Universe, if not yet mobile-card style): Filters wrap; tables scroll horizontally where columns remain wide; header filter inputs are tappable (≥44px height where styled).
   - **Layout toggle:** Resize across **900px** (layout-mode threshold) or use `preferDesktopLayout` — Characters table returns to desktop row layout with height locks; no stale inline locks on mobile.
-- **Reference:** [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) milestone M2c and **§10.2–10.6** (All, Characters, Special Cards, Aspects, **Missions**); styles in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css); `data-label` + caption + height locks in [`public/js/card-display.js`](../../public/js/card-display.js); All-tab markup from [`public/js/all-cards-display.js`](../../public/js/all-cards-display.js); Special Cards thead in [`public/index.html`](../../public/index.html); Missions mobile spec [`docs/current/DBV_MISSIONS_MOBILE.md`](DBV_MISSIONS_MOBILE.md).
+  - **Reference:** [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) milestone M2c and **§10.2–10.6** (All, Characters, Special Cards, Aspects, **Missions**); styles in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css); `data-label` + caption + height locks in [`public/js/card-display.js`](../../public/js/card-display.js); All-tab markup from [`public/js/all-cards-display.js`](../../public/js/all-cards-display.js); Special Cards thead in [`public/index.html`](../../public/index.html); Missions mobile spec [`docs/current/DBV_MISSIONS_MOBILE.md`](DBV_MISSIONS_MOBILE.md).
+
+### Mobile milestone M4 (Collection tab)
+
+- **Automated:** [`tests/unit/collection-view.test.ts`](../../tests/unit/collection-view.test.ts) — merge/sort, DTV table, MV list vs **`#collection-table`**, detail sheet, **set #** order, owned/unowned controls, **Escape**, row delegate vs quantity buttons, detail quantity API wiring. **`eval`** load: see **Unit tests** note above and [`docs/current/COLLECTION_VIEW_MOBILE.md`](COLLECTION_VIEW_MOBILE.md).
+- **Manual:** Log in, open **Collection** at **≤900px** (`layout-mobile`). Confirm list rows (thumb, title, subtitle), **−**/**+** or unowned **+**, tap row opens bottom sheet (not when tapping qty buttons), **Back**/**Escape**/scrim closes sheet, top search still adds cards, resizing across **900px** swaps table/list without a stuck open detail.
+- **Reference:** [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.7**; [`docs/current/COLLECTION_VIEW_MOBILE.md`](COLLECTION_VIEW_MOBILE.md); [`public/css/collection-view.css`](../../public/css/collection-view.css).
 
 ### Character Stacks Coverage
 

@@ -1,6 +1,11 @@
 /**
  * Unit tests for public/js/collection-view.js
  * Tests merge logic, display rendering, toggle behaviour, and quantity controls
+ *
+ * Note: This file loads `collection-view.js` via `eval` + selective exports, so
+ * Istanbul does not attribute line coverage to `public/js/collection-view.js` in
+ * the default unit `collectCoverageFrom` (TypeScript under src/ only). MV behaviour is covered
+ * by the tests in `displayCollectionCards() mobile layout` and related suites.
  * @jest-environment jsdom
  */
 
@@ -64,7 +69,10 @@ function loadModule() {
             saveGuestCollectionToStorage,
             showGuestSandboxBanner,
             addCardToCollection,
-            sortMergedCollectionCards
+            sortMergedCollectionCards,
+            handleCollectionMobileDetailQuantityClick,
+            onCollectionViewMobileActivate,
+            onCollectionMobileDetailKeydown
         })
     `);
 }
@@ -474,6 +482,129 @@ describe('displayCollectionCards() mobile layout', () => {
 
         (window as any).closeCollectionMobileDetail();
         expect(root?.classList.contains('is-open')).toBe(false);
+    });
+
+    it('sorts mobile rows by set # ascending within same set', () => {
+        const highOwned = Object.assign(makeOwned('hi', 'character'), {
+            inCollection: true,
+            set: 'ERB',
+            card_data: { set_number: '050', name: 'Later #' },
+        });
+        const lowOwned = Object.assign(makeOwned('lo', 'character'), {
+            inCollection: true,
+            set: 'ERB',
+            card_data: { set_number: '005', name: 'Earlier #' },
+        });
+        const all = [makeAllCard('hi', 'character', '050'), makeAllCard('lo', 'character', '005')];
+        const merged = fns.mergeCollectionWithAllCards([highOwned, lowOwned], all);
+        fns.displayCollectionCards(merged);
+
+        const setNums = Array.from(document.querySelectorAll('.collection-mobile-row')).map(r =>
+            r.getAttribute('data-set-number-display')
+        );
+        expect(setNums).toEqual(['005', '050']);
+    });
+
+    it('mobile owned row has − / qty / +; unowned row has single +', () => {
+        const owned = [makeOwned('o', 'character')];
+        const all = [makeAllCard('o', 'character', '001'), makeAllCard('u', 'special', '002')];
+        const merged = fns.mergeCollectionWithAllCards(owned, all);
+        fns.displayCollectionCards(merged);
+
+        const rows = document.querySelectorAll('.collection-mobile-row');
+        expect(rows.length).toBe(2);
+        expect(rows[0].querySelectorAll('.collection-quantity-btn').length).toBe(2);
+        expect(rows[1].classList.contains('collection-card-unowned')).toBe(true);
+        expect(rows[1].querySelectorAll('.collection-add-btn').length).toBe(1);
+    });
+
+    it('openCollectionMobileDetail fills title, lines, and owned stepper', () => {
+        const merged = fns.mergeCollectionWithAllCards(
+            [makeOwned('c1', 'character')],
+            [makeAllCard('c1', 'character', '042')]
+        );
+        fns.displayCollectionCards(merged);
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        (window as any).openCollectionMobileDetail(row);
+
+        expect(document.getElementById('collectionMobileDetailTitle')?.textContent).toContain('Card c1');
+        const lines = document.querySelector('.collection-mobile-detail-lines')?.textContent || '';
+        expect(lines).toMatch(/Type/i);
+        expect(lines).toMatch(/Set #/i);
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-quantity-btn').length).toBe(2);
+    });
+
+    it('openCollectionMobileDetail for unowned row shows add-only control', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('u1', 'mission', '099')]);
+        fns.displayCollectionCards(merged);
+        const row = document.querySelector('.collection-mobile-row.collection-card-unowned') as HTMLElement;
+        expect(row).not.toBeNull();
+        (window as any).openCollectionMobileDetail(row);
+
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-add-btn').length).toBe(1);
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-quantity-btn').length).toBe(1);
+    });
+
+    it('Escape closes mobile detail when keydown fires on document', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        (window as any).openCollectionMobileDetail(row);
+
+        fns.onCollectionMobileDetailKeydown({ key: 'Escape', preventDefault: jest.fn() } as unknown as KeyboardEvent);
+        expect(document.getElementById('collectionMobileDetail')?.classList.contains('is-open')).toBe(false);
+    });
+
+    it('onCollectionViewMobileActivate opens detail on row click but not on quantity button', () => {
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+        const cv = document.getElementById('collection-view')!;
+        cv.addEventListener('click', fns.onCollectionViewMobileActivate);
+
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        const main = row.querySelector('.collection-mobile-row-main') as HTMLElement;
+        main.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(document.getElementById('collectionMobileDetail')?.classList.contains('is-open')).toBe(true);
+        (window as any).closeCollectionMobileDetail();
+
+        const minus = row.querySelector('.collection-quantity-btn') as HTMLElement;
+        minus.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(document.getElementById('collectionMobileDetail')?.classList.contains('is-open')).toBe(false);
+
+        cv.removeEventListener('click', fns.onCollectionViewMobileActivate);
+    });
+
+    it('handleCollectionMobileDetailQuantityClick triggers collection PUT', async () => {
+        (global.fetch as jest.Mock).mockReset();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ success: true, data: {} })
+        });
+        mockFetchSetsOkOnce();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ success: true, data: [] })
+        });
+
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        (window as any).openCollectionMobileDetail(row);
+
+        fns.handleCollectionMobileDetailQuantityClick(3);
+        await new Promise<void>(resolve => {
+            setTimeout(resolve, 30);
+        });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            '/api/collections/me/cards/card-1',
+            expect.objectContaining({
+                method: 'PUT',
+                body: expect.stringContaining('"quantity":3')
+            })
+        );
     });
 });
 

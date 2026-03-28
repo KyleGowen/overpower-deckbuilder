@@ -23,6 +23,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 public/js/DBV_POWER_TYPE_FILTER_STRIP.md  # DBV reusable power-type icon strip (`data-dbv-power-strip`, presets, tests)
 ├── 📄 public/js/DBV_CARD_NAME_FILTER.md  # DBV reusable card/name text filters (`data-dbv-name-filter`, presets, tests)
 ├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
+├── 📄 docs/current/COLLECTION_VIEW_MOBILE.md  # Collection tab mobile: list, detail sheet, fixed sort, layout-mode-change, unit tests
 ├── 📁 docs/checklist-source/       # Markdown exports of each OverPower Check List tab (regenerate via scripts/export-overpower-checklist-markdown.py)
 ├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration
 ├── 📄 package.json                 # Node.js dependencies and scripts
@@ -390,7 +391,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 **Areas that would benefit from a future `.context.md`** (high complexity or many touchpoints):
 
 - Deck editor flow: `public/js/deck-editor-*.js`, `deck-card-operations.js`, `deck-validation.js`, and related components
-- Collection service and UI: `src/services/collectionService.ts`, `src/database/collectionsRepository.ts`, `public/js/collection-view.js`
+- Collection service and UI: `src/services/collectionService.ts`, `src/database/collectionsRepository.ts`, `public/js/collection-view.js` — mobile UX map: [`docs/current/COLLECTION_VIEW_MOBILE.md`](COLLECTION_VIEW_MOBILE.md)
 - Auth flow: `src/services/AuthenticationService.ts`, `src/middleware/authorizationHelpers.ts`, `public/js/auth-service.js`, Firebase config
 
 ## 🔄 **12-Phase Refactoring History**

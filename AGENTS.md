@@ -22,3 +22,4 @@ Key docs:
 - [docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md](docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md) — mobile DBV row art + `#imageModal` sizing attempts and troubleshooting (what shipped vs what still looked wrong).
 - [docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md](docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md) — **repeatable fix** for mobile DBV image sizing (`max-height: none !important` override); checklist and template selectors for every DBV tab.
 - [docs/current/COLLECTION_CHECKLIST_SOURCE.md](docs/current/COLLECTION_CHECKLIST_SOURCE.md) — Source of truth for collection card names and numbers (OverPower Check List); use when correcting or populating card data.
+- [docs/current/COLLECTION_VIEW_MOBILE.md](docs/current/COLLECTION_VIEW_MOBILE.md) — Collection tab mobile (`layout-mobile`): list vs detail sheet, fixed sort, delegate activation, `layout-mode-change`, unit tests and coverage limits.
