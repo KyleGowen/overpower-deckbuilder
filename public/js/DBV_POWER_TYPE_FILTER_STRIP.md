@@ -79,6 +79,7 @@ Also listed in [`docs/FRONTEND_SCRIPT_MANIFEST.md`](../../docs/FRONTEND_SCRIPT_M
 ## See also
 
 - **Card / name text filters (sibling component):** [`DBV_CARD_NAME_FILTER.md`](DBV_CARD_NAME_FILTER.md) — `[data-dbv-name-filter]` presets, [`dbv-card-name-filter.js`](dbv-card-name-filter.js), loaded immediately after this script in [`public/index.html`](../index.html).
+- **Mission set `<select>` (Missions + Events):** [`DBV_MISSION_SET_FILTER.md`](DBV_MISSION_SET_FILTER.md) — `[data-dbv-mission-set-filter]` presets, [`dbv-mission-set-filter.js`](dbv-mission-set-filter.js), loads after [`search-filter-functions.js`](search-filter-functions.js).
 
 ## CSS
 

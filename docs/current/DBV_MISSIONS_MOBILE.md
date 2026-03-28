@@ -1,6 +1,6 @@
 # DBV Missions tab — mobile view (how it looks)
 
-This document explains **how the Missions tab** of the Card Database (`#missions-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.6** and the **Missions** bullet in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Card-name filter markup** (`#missions-mobile-card-name-filter`, `#missions-header-card-name-filter`) is created by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) from `[data-dbv-name-filter]` hosts in [`index.html`](../../public/index.html) / [`database-view-complete.html`](../../public/templates/database-view-complete.html).
+This document explains **how the Missions tab** of the Card Database (`#missions-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.6** and the **Missions** bullet in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Card-name filter markup** (`#missions-mobile-card-name-filter`, `#missions-header-card-name-filter`) is created by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) from `[data-dbv-name-filter]` hosts in [`index.html`](../../public/index.html) / [`database-view-complete.html`](../../public/templates/database-view-complete.html). **Mission set `<select>`** (`#missions-mission-set-filter`) is built by [`dbv-mission-set-filter.js`](../../public/js/dbv-mission-set-filter.js) into **`[data-dbv-mission-set-filter="missions"]`** — see [`DBV_MISSION_SET_FILTER.md`](../../public/js/DBV_MISSION_SET_FILTER.md).
 
 ## Goals
 
@@ -37,9 +37,9 @@ Under **`.layout-mobile #missions-table`** in [`mobile-layout.css`](../../public
 [`search-filter-functions.js`](../../public/js/search-filter-functions.js):
 
 - **`missionsFilterUsesMobileSelect()`** — true when **`layout-mobile`** or **`(max-width: 900px)`** (gates which **card-name** field is used; mission set always uses **`#missions-mission-set-filter`**).
-- **`populateMissionsMissionSetSelect()`** — **All** + sorted distinct **`mission_set`** from **`window.missionsData`**; preserves selection when options refresh.
-- **`applyMissionFilters()`** — applies shared **search** text on **`card_name` / `mission_set`**, then **substring** on **`card_name`** from **`#missions-mobile-card-name-filter`** (MV) or **`#missions-header-card-name-filter`** (DTV), then **mission set** from **`#missions-mission-set-filter`** (**All** = show all sets). Exported on **`window`**.
-- **`setupMissionSearch()`** — wires search input, **`#missions-mission-set-filter`** **`change`**, **`#missions-mobile-card-name-filter`** **`input`**, **`#missions-header-card-name-filter`** **`input`**.
+- **`populateMissionsMissionSetSelect()`** — defined in **`dbv-mission-set-filter.js`** (**All** + sorted distinct **`mission_set`** from **`window.missionsData`**; preserves selection when options refresh).
+- **`applyMissionFilters()`** — in **`search-filter-functions.js`**: applies shared **search** text on **`card_name` / `mission_set`**, then **substring** on **`card_name`** from **`#missions-mobile-card-name-filter`** (MV) or **`#missions-header-card-name-filter`** (DTV), then **mission set** from **`#missions-mission-set-filter`** (**All** = show all sets). Exported on **`window`**.
+- **`setupMissionSearch()`** — wires search input, **`#missions-mobile-card-name-filter`** **`input`**, **`#missions-header-card-name-filter`** **`input`**. **`#missions-mission-set-filter`** **`change`** is bound in **`dbv-mission-set-filter.js`** (**`initDbvMissionSetFilters`**).
 
 [`loadMissions`](../../public/js/card-data-display.js) sets **`window.missionsData`**, then **`populateMissionsMissionSetSelect()`** + **`applyMissionFilters()`** so the list respects the current UI.
 

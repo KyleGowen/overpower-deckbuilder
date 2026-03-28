@@ -64,6 +64,9 @@ class TemplateLoader {
         if (typeof window.initDbvCardNameFilters === 'function') {
             window.initDbvCardNameFilters({ force: true });
         }
+        if (typeof window.initDbvMissionSetFilters === 'function') {
+            window.initDbvMissionSetFilters({ force: true });
+        }
     }
 
     // Bind events for dynamically loaded content
@@ -141,6 +144,9 @@ class TemplateLoader {
         }
         if (typeof window.initDbvCardNameFilters === 'function') {
             window.initDbvCardNameFilters({ force: true });
+        }
+        if (typeof window.initDbvMissionSetFilters === 'function') {
+            window.initDbvMissionSetFilters({ force: true });
         }
     }
 }

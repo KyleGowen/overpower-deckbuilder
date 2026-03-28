@@ -110,19 +110,21 @@ describe('DBV Events mobile markup (index.html + template)', () => {
 
     it('index.html includes Events mobile filter hooks', () => {
         const html = readFileSync(indexPath, 'utf8');
+        const missionJs = readFileSync(
+            path.join(__dirname, '../../public/js/dbv-mission-set-filter.js'),
+            'utf8'
+        );
         expect(html).toContain('events-filter-row');
-        expect(html).toContain('id="events-mission-set-filter"');
-        expect(html).toContain('events-mission-set-filter');
-        expect(html).toContain('events-mobile-set-select-clear-row');
-        expect(html).toContain('clear-events-filters-mobile');
-        expect(html).toContain('onclick="clearEventsFilters()"');
+        expect(html).toContain('data-dbv-mission-set-filter="events"');
+        expect(html).toContain('dbv-mission-set-filter.js');
+        expect(missionJs).toContain('clear-events-filters-mobile');
+        expect(missionJs).toContain('window.clearEventsFilters');
     });
 
     it('template mirrors index Events structure (6-column table)', () => {
         const html = readFileSync(templatePath, 'utf8');
         expect(html).toContain('events-filter-row');
-        expect(html).toContain('id="events-mission-set-filter"');
-        expect(html).toContain('events-mobile-set-select-clear-row');
+        expect(html).toContain('data-dbv-mission-set-filter="events"');
         expect(html).toContain('colspan="6" class="loading">Loading events');
     });
 });
@@ -156,12 +158,29 @@ describe('search-filter-functions.js (Events filters)', () => {
         source = readFileSync(jsPath, 'utf8');
     });
 
-    it('defines populateEventsMissionSetSelect and applyEventsFilters using mission-set select', () => {
-        expect(source).toContain('function populateEventsMissionSetSelect()');
-        expect(source).toContain('window.populateEventsMissionSetSelect = populateEventsMissionSetSelect');
+    it('defines applyEventsFilters using mission-set select', () => {
         expect(source).toContain('window.applyEventsFilters = applyEventsFilters');
         expect(source).toContain("getElementById('events-mission-set-filter')");
         expect(source).not.toMatch(/#events-tab input\[type="checkbox"\]/);
+    });
+});
+
+describe('dbv-mission-set-filter.js (Events populate)', () => {
+    const jsPath = path.join(__dirname, '../../public/js/dbv-mission-set-filter.js');
+    let source: string;
+
+    beforeAll(() => {
+        source = readFileSync(jsPath, 'utf8');
+    });
+
+    it('exports populateEventsMissionSetSelect and events preset DOM', () => {
+        expect(source).toContain('function populateEventsMissionSetSelect()');
+        expect(source).toContain('window.populateEventsMissionSetSelect = populateEventsMissionSetSelect');
+        expect(source).toContain("populateMissionSetSelect('events-mission-set-filter'");
+        expect(source).toContain('events-mobile-set-select-clear-row');
+        expect(source).toMatch(/events\s*\(container\)/);
+        expect(source).toContain("addEventListener('click'");
+        expect(source).not.toContain('setAttribute(\'onclick\'');
     });
 });
 

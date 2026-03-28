@@ -115,8 +115,9 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).toContain('colspan="2"');
         expect(html).toContain('missions-filter-leading-th');
         expect(html).not.toContain('missions-filter-clear-th');
-        expect(html).toContain('id="missions-mission-set-filter"');
-        expect(html).toContain('missions-mission-set-filter');
+        expect(html).toContain('data-dbv-mission-set-filter="missions"');
+        expect(html).toContain('dbv-mission-set-filter.js');
+        expect(html).toContain('missions-mobile-set-row');
         expect(html).toContain('data-dbv-name-filter="missions-mobile-name"');
         expect(html).toContain('missions-mobile-card-name-row');
         expect(html).toContain('data-dbv-name-filter="missions-header-name"');
@@ -132,7 +133,8 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).toContain('missions-filter-row');
         expect(html).toContain('colspan="2"');
         expect(html).toContain('missions-filter-leading-th');
-        expect(html).toContain('id="missions-mission-set-filter"');
+        expect(html).toContain('data-dbv-mission-set-filter="missions"');
+        expect(html).toContain('missions-mobile-set-row');
         expect(html).toContain('data-dbv-name-filter="missions-mobile-name"');
         expect(html).toContain('data-dbv-name-filter="missions-header-name"');
         expect(html).toContain('colspan="4" class="loading">Loading missions');
@@ -165,10 +167,8 @@ describe('search-filter-functions.js (Missions filters)', () => {
         source = readFileSync(jsPath, 'utf8');
     });
 
-    it('defines populate select, mobile/desktop filter routing, and window exports', () => {
+    it('defines mobile/desktop filter routing, applyMissionFilters, and window export', () => {
         expect(source).toContain('function missionsFilterUsesMobileSelect()');
-        expect(source).toContain('function populateMissionsMissionSetSelect()');
-        expect(source).toContain('window.populateMissionsMissionSetSelect = populateMissionsMissionSetSelect');
         expect(source).toContain('window.applyMissionFilters = applyMissionFilters');
         expect(source).toContain("getElementById('missions-mission-set-filter')");
         expect(source).toContain("getElementById('missions-mobile-card-name-filter')");
@@ -186,6 +186,24 @@ describe('search-filter-functions.js (Missions filters)', () => {
         expect(source).toContain('dataset.missionLayoutModeBound');
         expect(source).toContain("'layout-mode-change'");
         expect(source).toMatch(/layout-mode-change[\s\S]{0,400}applyMissionFilters\(\)/);
+    });
+});
+
+describe('dbv-mission-set-filter.js (Missions mount + populate)', () => {
+    const jsPath = path.join(__dirname, '../../public/js/dbv-mission-set-filter.js');
+    let source: string;
+
+    beforeAll(() => {
+        source = readFileSync(jsPath, 'utf8');
+    });
+
+    it('exposes init, populate, and missions preset key', () => {
+        expect(source).toContain('function initDbvMissionSetFilters(');
+        expect(source).toContain('window.initDbvMissionSetFilters = initDbvMissionSetFilters');
+        expect(source).toContain('function populateMissionsMissionSetSelect()');
+        expect(source).toContain('window.populateMissionsMissionSetSelect = populateMissionsMissionSetSelect');
+        expect(source).toContain("populateMissionSetSelect('missions-mission-set-filter'");
+        expect(source).toMatch(/data-dbv-mission-set-filter|dbvMissionSetInitialized/);
     });
 });
 

@@ -5106,51 +5106,50 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* Global nav — logo left; 2×2 app grid; welcome row (M1 mobile shell)         */
+/* Global nav MV: row 1 = logo | user menu; row 2 = three equal view tabs      */
+/* (+ Deck hidden — use user menu “+ Create Deck”)                             */
 /* -------------------------------------------------------------------------- */
 .layout-mobile .unified-header {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto minmax(44px, auto);
     align-items: stretch;
-    flex-wrap: nowrap;
+    column-gap: 8px;
+    row-gap: 10px;
     height: auto;
     min-height: 0;
-    gap: 10px;
     padding: 8px 10px 8px;
     margin-bottom: 12px;
+    box-sizing: border-box;
+    /* Override globalNav.css @media (max-width: 900px) text-align: center */
+    text-align: start;
 }
 
-/* 2×2 app buttons + full-width welcome row: grid on cluster; wrappers use display:contents so #newDeckBtn (in .header-right) shares the grid with tabs */
-.layout-mobile .header-nav-cluster {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: minmax(44px, 1fr) minmax(44px, 1fr) auto;
-    flex: 1 1 0;
-    min-width: 0;
-    gap: 8px;
-    width: 100%;
-    max-width: 510px;
-    margin-left: auto;
-    box-sizing: border-box;
+/* Hoist tab buttons + user menu into .unified-header grid (DOM: cluster wraps center + right) */
+.layout-mobile .header-nav-cluster,
+.layout-mobile .header-center,
+.layout-mobile .header-app-actions,
+.layout-mobile .header-nav-cluster .app-tabs,
+.layout-mobile .header-right {
+    display: contents;
 }
 
 .layout-mobile .header-left {
-    flex: 0 0 30.4%;
-    max-width: 134px; /* ~20% smaller than 168px cap */
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: start;
+    max-width: 134px;
     width: auto;
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .layout-mobile .header-center {
     position: static;
     left: auto;
     transform: none;
-    display: contents;
-}
-
-.layout-mobile .header-right {
-    display: contents;
 }
 
 .layout-mobile .header-logo {
@@ -5160,53 +5159,44 @@
     height: auto;
 }
 
-.layout-mobile .header-app-actions {
-    display: contents;
-}
-
-.layout-mobile .header-nav-cluster .app-tabs {
-    display: contents;
-}
-
 .layout-mobile #databaseViewBtn {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 2;
 }
 
 .layout-mobile #collectionViewBtn {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
 }
 
 .layout-mobile #deckBuilderBtn {
-    grid-column: 1;
+    grid-column: 3;
     grid-row: 2;
 }
 
 .layout-mobile #newDeckBtn {
-    grid-column: 2;
-    grid-row: 2;
+    display: none !important;
 }
 
-/* Logged-out: Collection hidden — span Card Database across top row */
+/* Logged-out: Collection hidden — Card Database | Deck Builder on row 2 */
 .layout-mobile .header-nav-cluster.collection-tab-hidden #databaseViewBtn {
-    grid-column: 1 / -1;
-    grid-row: 1;
-}
-
-.layout-mobile .header-nav-cluster.collection-tab-hidden #deckBuilderBtn {
     grid-column: 1;
     grid-row: 2;
 }
 
-.layout-mobile .header-nav-cluster.collection-tab-hidden #newDeckBtn {
-    grid-column: 2;
+.layout-mobile .header-nav-cluster.collection-tab-hidden #deckBuilderBtn {
+    grid-column: 2 / 4;
     grid-row: 2;
 }
 
 .layout-mobile #userMenu {
-    grid-column: 1 / -1;
-    grid-row: 3;
+    grid-column: 2 / 4;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .layout-mobile .header-nav-cluster .app-tab-button,
@@ -5225,15 +5215,17 @@
 }
 
 .layout-mobile .user-menu {
-    width: 100%;
+    width: auto;
     max-width: 100%;
 }
 
 .layout-mobile .user-menu-toggle {
     min-height: 44px;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     justify-content: flex-end;
-    padding: 10px 12px;
+    align-items: flex-start;
+    padding: 2px 12px 10px;
     box-sizing: border-box;
 }
 

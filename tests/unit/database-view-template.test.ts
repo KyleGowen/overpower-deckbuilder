@@ -108,7 +108,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="missions-tab"');
             expect(templateContent).toContain('id="missions-table"');
             expect(templateContent).toContain('id="missions-tbody"');
-            expect(templateContent).toContain('id="missions-mission-set-filter"');
+            expect(templateContent).toContain('data-dbv-mission-set-filter="missions"');
             expect(templateContent).toContain('data-dbv-name-filter="missions-mobile-name"');
             expect(templateContent).toContain('data-dbv-name-filter="missions-header-name"');
         });
@@ -117,7 +117,7 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="events-tab"');
             expect(templateContent).toContain('id="events-table"');
             expect(templateContent).toContain('id="events-tbody"');
-            expect(templateContent).toContain('id="events-mission-set-filter"');
+            expect(templateContent).toContain('data-dbv-mission-set-filter="events"');
             expect(templateContent).toContain('events-filter-row');
             expect(templateContent).toContain('events-mobile-set-row');
             expect(templateContent).toContain('onclick="clearEventsFilters()"');
@@ -191,9 +191,8 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="power-value-max"');
         });
 
-        it('should contain mission set select (options populated by JS)', () => {
-            expect(templateContent).toContain('id="missions-mission-set-filter"');
-            expect(templateContent).toContain('option value="">All</option>');
+        it('should contain mission set mount point (select filled by dbv-mission-set-filter.js)', () => {
+            expect(templateContent).toContain('data-dbv-mission-set-filter="missions"');
             expect(templateContent).not.toContain('missions-checkbox-group');
         });
 
@@ -202,6 +201,12 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('data-dbv-power-strip="aspect-with-no-icon"');
             expect(templateContent).toContain('data-dbv-power-strip="power-desktop"');
             expect(templateContent).toContain('data-dbv-power-strip="ally-desktop-stat"');
+        });
+
+        it('should contain DBV mission-set filter mount points (filled by dbv-mission-set-filter.js)', () => {
+            expect(templateContent).toContain('data-dbv-mission-set-filter');
+            expect(templateContent).toContain('data-dbv-mission-set-filter="missions"');
+            expect(templateContent).toContain('data-dbv-mission-set-filter="events"');
         });
 
         it('should contain DBV card-name filter mount points (inputs filled by dbv-card-name-filter.js)', () => {

@@ -75,6 +75,7 @@
     <script src="/js/dbv-power-type-filter-strip.js" defer></script>
     <script src="/js/dbv-card-name-filter.js" defer></script>
     <script src="/js/search-filter-functions.js" defer></script>
+    <script src="/js/dbv-mission-set-filter.js" defer></script>
     <script src="/js/deck-management-functions.js" defer></script>
     <script src="/js/ui-utility-functions.js" defer></script>
     <script src="/js/layout-drag-drop-functions.js" defer></script>
@@ -520,12 +521,7 @@
                             <th colspan="2" class="missions-filter-leading-th" aria-hidden="true"></th>
                             <th class="missions-filter-sets-th">
                                 <div class="column-filters missions-column-filters">
-                                    <div class="missions-mobile-set-row">
-                                        <label class="missions-mobile-set-label" for="missions-mission-set-filter">Mission set</label>
-                                        <select id="missions-mission-set-filter" class="missions-mission-set-filter" aria-label="Filter by mission set">
-                                            <option value="">All</option>
-                                        </select>
-                                    </div>
+                                    <div class="missions-mobile-set-row" data-dbv-mission-set-filter="missions"></div>
                                     <div class="missions-mobile-card-name-row" data-dbv-name-filter="missions-mobile-name"></div>
                                 </div>
                             </th>
@@ -561,15 +557,7 @@
                             <th class="events-filter-name-th" aria-hidden="true"></th>
                             <th class="events-filter-sets-th">
                                 <div class="column-filters events-column-filters">
-                                    <div class="events-mobile-set-row">
-                                        <label class="events-mobile-set-label" for="events-mission-set-filter">Mission set</label>
-                                        <div class="events-mobile-set-select-clear-row">
-                                            <select id="events-mission-set-filter" class="events-mission-set-filter" aria-label="Filter events by mission set">
-                                                <option value="">All</option>
-                                            </select>
-                                            <button type="button" id="clear-events-filters-mobile" class="clear-filters-btn clear-filters-btn--events-mobile-inline" onclick="clearEventsFilters()">Clear filters</button>
-                                        </div>
-                                    </div>
+                                    <div class="events-mobile-set-row" data-dbv-mission-set-filter="events"></div>
                                 </div>
                             </th>
                             <th class="events-filter-effect-th">

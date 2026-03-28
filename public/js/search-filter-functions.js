@@ -993,58 +993,6 @@ function missionsFilterUsesMobileSelect() {
     return false;
 }
 
-function populateMissionsMissionSetSelect() {
-    const sel = document.getElementById('missions-mission-set-filter');
-    if (!sel) return;
-    const data = window.missionsData || [];
-    const prev = sel.value;
-    const sets = [...new Set(data.map((m) => m.mission_set).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    sel.innerHTML = '';
-    const allOpt = document.createElement('option');
-    allOpt.value = '';
-    allOpt.textContent = 'All';
-    sel.appendChild(allOpt);
-    sets.forEach((s) => {
-        const o = document.createElement('option');
-        o.value = s;
-        o.textContent = s;
-        sel.appendChild(o);
-    });
-    if (prev && sets.includes(prev)) {
-        sel.value = prev;
-    } else {
-        sel.value = '';
-    }
-}
-
-window.populateMissionsMissionSetSelect = populateMissionsMissionSetSelect;
-
-function populateEventsMissionSetSelect() {
-    const sel = document.getElementById('events-mission-set-filter');
-    if (!sel) return;
-    const data = window.eventsData || [];
-    const prev = sel.value;
-    const sets = [...new Set(data.map((e) => e.mission_set).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    sel.innerHTML = '';
-    const allOpt = document.createElement('option');
-    allOpt.value = '';
-    allOpt.textContent = 'All';
-    sel.appendChild(allOpt);
-    sets.forEach((s) => {
-        const o = document.createElement('option');
-        o.value = s;
-        o.textContent = s;
-        sel.appendChild(o);
-    });
-    if (prev && sets.includes(prev)) {
-        sel.value = prev;
-    } else {
-        sel.value = '';
-    }
-}
-
-window.populateEventsMissionSetSelect = populateEventsMissionSetSelect;
-
 function setupMissionSearch() {
     const missionsTableRoot = document.getElementById('missions-table');
     if (missionsTableRoot && missionsTableRoot.dataset.missionLayoutModeBound !== '1') {
@@ -1073,12 +1021,6 @@ function setupMissionSearch() {
         }
         applyMissionFilters();
     });
-
-    const missionSetSelect = document.getElementById('missions-mission-set-filter');
-    if (missionSetSelect && !missionSetSelect.dataset.missionFilterBound) {
-        missionSetSelect.addEventListener('change', applyMissionFilters);
-        missionSetSelect.dataset.missionFilterBound = 'true';
-    }
 
     const missionCardNameInput = document.getElementById('missions-mobile-card-name-filter');
     if (missionCardNameInput && !missionCardNameInput.dataset.missionNameFilterBound) {
@@ -1177,11 +1119,6 @@ function setupEventSearch() {
         });
     }
 
-    const missionSetSelect = document.getElementById('events-mission-set-filter');
-    if (missionSetSelect && !missionSetSelect.dataset.eventsMissionFilterBound) {
-        missionSetSelect.dataset.eventsMissionFilterBound = 'true';
-        missionSetSelect.addEventListener('change', applyEventsFilters);
-    }
 }
 
 function applyEventsFilters() {

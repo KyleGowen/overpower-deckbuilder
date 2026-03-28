@@ -44,6 +44,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/dbv-power-type-filter-strip.js
 - /js/dbv-card-name-filter.js
 - /js/search-filter-functions.js
+- /js/dbv-mission-set-filter.js
 - /js/deck-management-functions.js
 - /js/ui-utility-functions.js
 - /js/layout-drag-drop-functions.js
