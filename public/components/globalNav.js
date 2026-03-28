@@ -289,7 +289,7 @@ function switchToCollectionView() {
     }
 }
 
-/** Mobile header: when Collection is hidden (logged out), .collection-tab-hidden — Card Database col 1, Deck Builder spans cols 2–3 on row 2 (tabs row). */
+/** Mobile header: when Collection is hidden (logged out), .collection-tab-hidden — Database flex 1, Deck Builder flex 2 (single-row flex tabs). */
 function syncHeaderCollectionLayout() {
     const collectionBtn = document.getElementById('collectionViewBtn');
     const navCluster = document.querySelector('.header-nav-cluster');

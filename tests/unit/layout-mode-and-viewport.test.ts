@@ -202,9 +202,9 @@ describe('mobile-layout.css (M1 shell)', () => {
             /\.layout-mobile\s+#database-view\s+#all-cards-grid-container[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/
         );
         expect(css).toContain('All tab cell actions: row 1 = +Deck full width');
-        expect(css).toContain('Global nav MV: row 1 = logo | user menu');
+        expect(css).toMatch(/Global nav MV: grid \(logo \| 1fr tabs \| user\)/);
         expect(css).toMatch(
-            /\.layout-mobile\s+\.unified-header[\s\S]*?display:\s*grid[\s\S]*?grid-template-columns:\s*repeat\(\s*3/
+            /\.layout-mobile\s+\.unified-header[\s\S]*?display:\s*grid[\s\S]*?grid-template-columns:\s*auto\s+1fr\s+auto/
         );
         expect(css).toContain('.layout-mobile .unified-header');
         expect(css).toContain('.layout-mobile .header-center');
@@ -219,10 +219,10 @@ describe('mobile-layout.css (M1 shell)', () => {
             /\.layout-mobile\s+#newDeckBtn[\s\S]*?display:\s*none\s*!important/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#deckBuilderBtn[\s\S]*?grid-column:\s*2/
+            /\.layout-mobile\s+\.header-nav-cluster\.collection-tab-hidden\s+#deckBuilderBtn[\s\S]*?flex:\s*2\s+1\s+0/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#collectionViewBtn[\s\S]*?grid-column:\s*3/
+            /\.layout-mobile\s+\.header-nav-cluster\s+\.app-tab-button[\s\S]*?flex:\s*1\s+1\s+0/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+\.user-menu-toggle[\s\S]*?justify-content:\s*flex-end/

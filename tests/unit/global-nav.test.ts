@@ -747,7 +747,7 @@ describe('Global Navigation Component', () => {
       };
 
       mockCurrentUserGreeting = {
-        textContent: 'Welcome, testuser!'
+        textContent: 'Welcome, testuser!▶'
       };
 
       // Update getElementById mock to include new elements
@@ -799,7 +799,7 @@ describe('Global Navigation Component', () => {
 
       test('should display correct welcome text content', () => {
         const currentUserGreeting = mockDocument.getElementById('currentUserGreeting');
-        expect(currentUserGreeting.textContent).toBe('Welcome, testuser!');
+        expect(currentUserGreeting.textContent).toBe('Welcome, testuser!▶');
       });
 
       test('should update welcome text when user changes', () => {

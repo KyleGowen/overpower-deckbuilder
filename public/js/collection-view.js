@@ -403,6 +403,42 @@ function mapImagePathToActualFile(imagePath) {
     return filename;
 }
 
+var COLLECTION_IMAGE_ASSET_PREFIX = '/src/resources/cards/images/';
+
+/**
+ * Collection add flow may persist absolute CDN URLs as image_path; getCardImagePath expects a
+ * site path starting with /src/resources/cards/images/. Strip origin / CDN base when present.
+ */
+function normalizeCollectionImagePathForResolve(raw) {
+    if (raw == null || typeof raw !== 'string') {
+        return raw;
+    }
+    var s = raw.trim();
+    if (s === '') {
+        return s;
+    }
+    var prefix = COLLECTION_IMAGE_ASSET_PREFIX;
+    if (s.startsWith(prefix)) {
+        return s;
+    }
+    var cdnBase = (typeof window !== 'undefined' && window.APP_CDN_BASE || '').replace(/\/$/, '');
+    if (cdnBase && s.startsWith(cdnBase + prefix)) {
+        return s.slice(cdnBase.length);
+    }
+    if (/^https?:\/\//i.test(s)) {
+        try {
+            var u = new URL(s);
+            var pathPart = u.pathname + (u.search || '') + (u.hash || '');
+            if (pathPart.startsWith(prefix)) {
+                return pathPart;
+            }
+        } catch (e) {
+            // ignore invalid URL
+        }
+    }
+    return s;
+}
+
 /**
  * Get card image path - uses image_path from collection card, constructing full path if needed
  * options: { useThumbnail: boolean } - when true, return thumbnail path for character images
@@ -422,7 +458,10 @@ function getCardImagePath(cardData, cardType, options) {
         return cdnBase + '/src/resources/cards/images/placeholder.webp';
     }
 
-    const imagePath = cardData.image_path.trim();
+    const imagePath = normalizeCollectionImagePathForResolve(cardData.image_path.trim());
+    if (!imagePath) {
+        return cdnBase + '/src/resources/cards/images/placeholder.webp';
+    }
 
     // If it's already a full path, use it directly (fix location alternate paths missing locations/)
     if (imagePath.startsWith('/src/resources/cards/images/')) {

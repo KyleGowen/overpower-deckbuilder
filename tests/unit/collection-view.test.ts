@@ -63,6 +63,7 @@ function loadModule() {
             translateSet,
             isMainErbSetCode,
             getCardDisplayName,
+            getCardImagePath,
             sortCollectionTable,
             isGuestUser,
             loadGuestCollectionFromStorage,
@@ -729,6 +730,50 @@ describe('formatCardType()', () => {
 
     it('returns the raw type for unknown values', () => {
         expect(fns.formatCardType('unknown_type')).toBe('unknown_type');
+    });
+});
+
+// ─── getCardImagePath() — CDN / persisted absolute URLs ───────────────────────
+
+describe('getCardImagePath() — production CDN image_path', () => {
+    const cdn = 'https://cdn.example.com';
+    const charPath = '/src/resources/cards/images/characters/x.webp';
+    const specialPath = '/src/resources/cards/images/specials/y.webp';
+
+    beforeAll(() => loadModule());
+
+    beforeEach(() => {
+        (window as any).APP_CDN_BASE = cdn;
+    });
+
+    afterEach(() => {
+        delete (window as any).APP_CDN_BASE;
+    });
+
+    it('matches canonical /src/... path when image_path is absolute HTTPS (character, thumbnail)', () => {
+        const canonical = fns.getCardImagePath(
+            { image_path: charPath },
+            'character',
+            { useThumbnail: true }
+        );
+        const absolute = fns.getCardImagePath(
+            { image_path: `${cdn}${charPath}` },
+            'character',
+            { useThumbnail: true }
+        );
+        expect(absolute).toBe(canonical);
+    });
+
+    it('matches canonical /src/... path when image_path is absolute HTTPS (special)', () => {
+        const canonical = fns.getCardImagePath({ image_path: specialPath }, 'special');
+        const absolute = fns.getCardImagePath({ image_path: `${cdn}${specialPath}` }, 'special');
+        expect(absolute).toBe(canonical);
+    });
+
+    it('strips APP_CDN_BASE prefix when URL is omitted but string is cdnBase + path', () => {
+        const canonical = fns.getCardImagePath({ image_path: charPath }, 'character');
+        const prefixed = fns.getCardImagePath({ image_path: `${cdn}${charPath}` }, 'character');
+        expect(prefixed).toBe(canonical);
     });
 });
 

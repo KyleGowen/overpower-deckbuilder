@@ -5258,112 +5258,132 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* Global nav MV: row 1 = logo | user menu; row 2 = three equal view tabs      */
+/* Global nav MV: grid (logo | 1fr tabs | user); tabs centered in middle column */
 /* (+ Deck hidden — use user menu “+ Create Deck”)                             */
+/* Overrides globalNav.css @media (max-width: 900px/600px) column rules         */
 /* -------------------------------------------------------------------------- */
+/* Three-column grid: logo | centered tabs | user — cluster uses display:contents so .header-center / .header-right are grid items */
 .layout-mobile .unified-header {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: auto minmax(44px, auto);
-    align-items: stretch;
-    column-gap: 8px;
-    row-gap: 10px;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 6px;
+    min-height: 56px;
     height: auto;
-    min-height: 0;
-    padding: 8px 10px 8px;
+    padding: 6px 8px;
     margin-bottom: 12px;
     box-sizing: border-box;
-    /* Override globalNav.css @media (max-width: 900px) text-align: center */
     text-align: start;
 }
 
-/* Hoist tab buttons + user menu into .unified-header grid (DOM: cluster wraps center + right) */
-.layout-mobile .header-nav-cluster,
-.layout-mobile .header-center,
-.layout-mobile .header-app-actions,
-.layout-mobile .header-nav-cluster .app-tabs,
-.layout-mobile .header-right {
+.layout-mobile .header-nav-cluster {
     display: contents;
+}
+
+.layout-mobile .header-center {
+    grid-column: 2;
+    min-width: 0;
+    position: static;
+    left: auto;
+    transform: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.layout-mobile .header-app-actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.layout-mobile .header-nav-cluster .app-tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 3px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    /* Tab row uses 90% of center column: 5% inset each side */
+    padding-left: 5%;
+    padding-right: 5%;
+    box-sizing: border-box;
+}
+
+.layout-mobile .header-right {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
 }
 
 .layout-mobile .header-left {
     grid-column: 1;
-    grid-row: 1;
     justify-self: start;
-    align-self: start;
-    max-width: 134px;
+    flex-shrink: 0;
+    max-width: 105px;
     width: auto;
     display: flex;
     align-items: center;
     justify-content: flex-start;
 }
 
-.layout-mobile .header-center {
-    position: static;
-    left: auto;
-    transform: none;
-}
-
 .layout-mobile .header-logo {
     margin-top: 0;
+    max-height: 52px;
     max-width: 100%;
-    width: 100%;
+    width: auto;
     height: auto;
-}
-
-.layout-mobile #databaseViewBtn {
-    grid-column: 1;
-    grid-row: 2;
-}
-
-.layout-mobile #deckBuilderBtn {
-    grid-column: 2;
-    grid-row: 2;
-}
-
-.layout-mobile #collectionViewBtn {
-    grid-column: 3;
-    grid-row: 2;
+    object-fit: contain;
+    display: block;
 }
 
 .layout-mobile #newDeckBtn {
     display: none !important;
 }
 
-/* Logged-out: Collection hidden — row 2: Database (1) | Deck Builder spans 2–3 */
+/* Logged-in: three equal flex tabs (label 12px; min-height/padding unchanged) */
+.layout-mobile .header-nav-cluster .app-tab-button,
+.layout-mobile .header-nav-cluster .new-deck-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    min-height: 35px;
+    margin: 0;
+    padding: 5px 3px;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 1.15;
+    font-weight: 600;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Logged-out: Collection hidden — Database | Deck Builder (wider) */
 .layout-mobile .header-nav-cluster.collection-tab-hidden #databaseViewBtn {
-    grid-column: 1;
-    grid-row: 2;
+    flex: 1 1 0;
 }
 
 .layout-mobile .header-nav-cluster.collection-tab-hidden #deckBuilderBtn {
-    grid-column: 2 / 4;
-    grid-row: 2;
+    flex: 2 1 0;
 }
 
 .layout-mobile #userMenu {
-    grid-column: 2 / 4;
-    grid-row: 1;
-    justify-self: end;
-    align-self: start;
-    width: auto;
-    max-width: 100%;
+    flex-shrink: 0;
     min-width: 0;
-}
-
-.layout-mobile .header-nav-cluster .app-tab-button,
-.layout-mobile .header-nav-cluster .new-deck-btn {
-    width: 100%;
-    min-height: 44px;
-    min-width: 0;
-    margin: 0;
-    padding: 10px 6px;
-    box-sizing: border-box;
-    font-size: 11px;
-    line-height: 1.15;
-    font-weight: 600;
-    align-self: stretch;
-    justify-self: stretch;
+    max-width: min(160px, 42vw);
 }
 
 .layout-mobile .user-menu {
@@ -5372,13 +5392,74 @@
 }
 
 .layout-mobile .user-menu-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
     min-height: 44px;
-    width: auto;
+    min-width: 0;
     max-width: 100%;
     justify-content: flex-end;
-    align-items: flex-start;
-    padding: 2px 12px 10px;
+    padding: 4px 2px 4px 6px;
     box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Stacked right-aligned copy + larger ▶ centered to the right of both lines */
+.layout-mobile .user-menu-toggle .user-greeting {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    line-height: 1.15;
+}
+
+.layout-mobile .user-menu-toggle .user-greeting-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.layout-mobile .user-menu-toggle #currentUserGreeting {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.layout-mobile .user-greeting-line1 {
+    display: block;
+    width: 100%;
+    text-align: right;
+}
+
+/* Row aligns name + ! to the copy’s right edge; username shrinks for ellipsis */
+.layout-mobile .user-greeting-line2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.layout-mobile #currentUsername {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.layout-mobile .user-menu-toggle .triangle-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1;
+    align-self: center;
 }
 
 /* Do not set display here — `.layout-mobile` beats `.user-menu-dropdown` specificity and would
