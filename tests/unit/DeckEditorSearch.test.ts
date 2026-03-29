@@ -132,7 +132,6 @@ describe('DeckEditorSearch Component', () => {
             component.mount();
 
             expect(addEventListenerSpy).toHaveBeenCalledWith('input', expect.any(Function));
-            expect(addEventListenerSpy).toHaveBeenCalledWith('focus', expect.any(Function));
             expect(addEventListenerSpy).toHaveBeenCalledWith('blur', expect.any(Function));
             expect(docAddEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
             expect(component._bound).toBe(true);
@@ -212,7 +211,6 @@ describe('DeckEditorSearch Component', () => {
             component.unmount();
 
             expect(removeEventListenerSpy).toHaveBeenCalledWith('input', expect.any(Function));
-            expect(removeEventListenerSpy).toHaveBeenCalledWith('focus', expect.any(Function));
             expect(removeEventListenerSpy).toHaveBeenCalledWith('blur', expect.any(Function));
             expect(docRemoveEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
             expect(component._bound).toBe(false);
@@ -833,7 +831,7 @@ describe('DeckEditorSearch Component', () => {
             expect(mockOnSelect).toHaveBeenCalled();
         });
 
-        it('should handle focus event', () => {
+        it('should not show empty results panel on focus', () => {
             component = new DeckEditorSearch({
                 input: mockInput,
                 results: mockResults,
@@ -845,7 +843,7 @@ describe('DeckEditorSearch Component', () => {
 
             mockInput.dispatchEvent(new Event('focus'));
 
-            expect(mockResults.style.display).toBe('block');
+            expect(mockResults.style.display).toBe('none');
         });
     });
 });

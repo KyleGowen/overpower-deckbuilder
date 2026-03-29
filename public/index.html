@@ -1131,6 +1131,7 @@
             <div class="modal-header">
                 <!-- Single row with title/description on left, centered stats, and action buttons on right -->
                 <div class="deck-editor-top-row">
+                    <div id="devMobileDeckHeaderExpandableRegion" class="dev-mobile-deck-header-expandable">
                     <!-- Left side: Deck Title and Description -->
                     <div class="deck-editor-title-section">
                         <div class="deck-title-with-validation">
@@ -1200,6 +1201,7 @@
                             </div>
                         </div>
                     </div>
+                    </div>
                     
                     <!-- Right side: hamburger menu (utility + file actions share one panel) -->
                     <div class="deck-editor-right-controls" aria-label="Deck editor controls">
@@ -1258,6 +1260,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="dev-mobile-deck-mv-search-row">
+                <div id="devMobileDeckChrome" class="dev-mobile-deck-chrome">
+                    <div class="dev-mobile-deck-search-container deck-editor-search-container">
+                        <input type="text" id="devMobileDeckSearchInput" class="dev-mobile-deck-search-input" placeholder="Search by card name, character, or type..." autocomplete="off">
+                        <div id="devMobileDeckSearchResults" class="dev-mobile-deck-search-results deck-editor-search-results" style="display: none;"></div>
+                    </div>
+                </div>
+                <button type="button"
+                    class="dev-mobile-deck-header-collapse-toggle"
+                    id="devMobileDeckHeaderCollapseToggle"
+                    aria-expanded="true"
+                    aria-controls="devMobileDeckHeaderExpandableRegion devMobileDeckHeaderStats"
+                    title="Collapse deck header">
+                    <span class="dev-mobile-deck-header-collapse-icon" aria-hidden="true"></span>
+                </button>
+                </div>
             </div>
             
             <!-- Draw Hand Section -->
@@ -1280,12 +1298,6 @@
             </div>
             
             <div class="modal-body">
-                <div id="devMobileDeckChrome" class="dev-mobile-deck-chrome">
-                    <div class="dev-mobile-deck-search-container deck-editor-search-container">
-                        <input type="text" id="devMobileDeckSearchInput" class="dev-mobile-deck-search-input" placeholder="Search by card name, character, or type..." autocomplete="off">
-                        <div id="devMobileDeckSearchResults" class="dev-mobile-deck-search-results deck-editor-search-results" style="display: none;"></div>
-                    </div>
-                </div>
                 <div class="deck-editor-layout">
                                            <!-- Left Pane: Deck List View -->
                        <div class="deck-pane">

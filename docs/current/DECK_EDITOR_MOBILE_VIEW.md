@@ -42,15 +42,16 @@ The mobile DEV shell is **not** the Card Database (DBV). It only edits **`window
 
 ## DOM overview (inside `#deckEditorModal`)
 
+**Vertical rhythm (MV):** [`deck-editor-mobile.css`](../../public/css/deck-editor-mobile.css) reduces top dead space vs DTV: **`.modal-content.deck-editor-modal`** **`margin: 8px auto`**, **`body.deck-editor-active`** **`padding: 4px`**, **`.modal-header`** **`padding: 8px 12px 4px 12px`**, title block **`padding: 4px 0 6px 2px`**, **`.deck-title-with-validation`** **`gap: 6px`**, stats inner **`4px 4px 6px`**, collapsed header **`6px`** vertical padding.
+
 ### Header (MV-only blocks)
 
+- **`#devMobileDeckHeaderExpandableRegion`** (`.dev-mobile-deck-header-expandable`) — wraps **`.deck-editor-title-section`** + **`.deck-summary-section`** (summary hidden on MV) so title/meta can be hidden when the header is collapsed.
 - **`.dev-mobile-deck-header-stats`** (`#devMobileDeckHeaderStats`) — MAX/TOTAL energy–intelligence grid; same numeric IDs as desktop summary helpers (`#deckMobileMaxEnergy`, …).
-- **`.deck-editor-right-controls`** — hamburger **`.deck-editor-controls-menu`** (Draw Hand, Background, Preview, Export/Import, Save, Cancel). Styling lives in [`public/css/index.css`](../../public/css/index.css) (z-index ~10049–10051).
-
-### Body — mobile chrome
-
-- **`#devMobileDeckChrome`** — pill search **`.dev-mobile-deck-search-container`** with **`#devMobileDeckSearchInput`** and **`#devMobileDeckSearchResults`**.
-- **`DeckEditorSearch`** must treat this container as “inside” the search root via **`clickInsideRootSelectors`** (see [`public/js/components/DeckEditorSearch.js`](../../public/js/components/DeckEditorSearch.js)).
+- **`#devMobileDeckChrome`** — pill search **`.dev-mobile-deck-search-container`** with **`#devMobileDeckSearchInput`** and **`#devMobileDeckSearchResults`**, wrapped with **`#devMobileDeckHeaderCollapseToggle`** in **`.dev-mobile-deck-mv-search-row`** (flex row: search **`flex: 1`**, chevron at the right). When collapsed, the row uses **`display: contents`** so **search / hamburger / toggle** still form the parent header grid.
+- **`#devMobileDeckHeaderCollapseToggle`** — small subtle chevron (**`deck-editor-mobile.css`**: ~**26×26px**, muted slate triangle, light border) to the **right of the search pill** in **`.dev-mobile-deck-mv-search-row`** when expanded; **`modal-header.dev-mobile-deck-header-collapsed`** hides the expandable region + stats and keeps **search + hamburger + toggle** on a single compact row. Preference: **`localStorage`** key **`devMobileDeckHeaderCollapsed`** (`'1'` = collapsed). **`window.applyDevMobileDeckHeaderCollapsed`**, **`window.syncDevMobileDeckHeaderCollapsedState`** in [`deck-editor-mobile-view.js`](../../public/js/deck-editor-mobile-view.js).
+- **`.deck-editor-right-controls`** — hamburger **`.deck-editor-controls-menu`** (Draw Hand, Background, Preview, Export/Import, Save, Cancel). Styling lives in [`public/css/index.css`](../../public/css/index.css) (z-index ~10049–10051). **Expanded MV:** **`align-self: start`** on the header grid so the menu sits **top-right** with the deck title line; **collapsed** banner uses **`align-self: center`** so it lines up with the search row ([`deck-editor-mobile.css`](../../public/css/deck-editor-mobile.css)). **`#deckEditorControlsMenuPanel`** when open on MV (and narrow **≤480px** DTV): **`position: fixed`**, viewport-centered, **`width: min(280px, calc(100vw - 32px))`**; **`top`** via **`positionDeckEditorControlsMenuPanel()`** in [`deck-editor-core.js`](../../public/js/deck-editor-core.js) (below the toggle). **`absolute` + `left: 50%`** was relative to the small menu shell and skewed the panel off-screen.
+- **`DeckEditorSearch`** — **`clickInsideRootSelectors`** still includes **`.dev-mobile-deck-search-container`** ([`DeckEditorSearch.js`](../../public/js/components/DeckEditorSearch.js)).
 
 ### Body — deck list
 

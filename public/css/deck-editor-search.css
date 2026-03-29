@@ -7,7 +7,7 @@
     display: none; /* default hidden, shown by component */
     background: rgba(20, 20, 20, 0.98);
     color: #fff;
-    border: 1px solid rgba(78, 205, 196, 0.5); /* debug visual */
+    border: 1px solid rgba(78, 205, 196, 0.35);
     border-radius: 8px;
     max-height: 320px;
     overflow-y: auto;

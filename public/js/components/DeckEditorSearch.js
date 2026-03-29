@@ -76,7 +76,6 @@
             this._bound = true;
 
             this.input.addEventListener('input', this._handleInput);
-            this.input.addEventListener('focus', this.showResults);
             this.input.addEventListener('blur', this._handleBlur);
             document.addEventListener('click', this._handleDocClick);
         }
@@ -85,7 +84,6 @@
             if (!this._bound) return;
             this._bound = false;
             this.input.removeEventListener('input', this._handleInput);
-            this.input.removeEventListener('focus', this.showResults);
             this.input.removeEventListener('blur', this._handleBlur);
             document.removeEventListener('click', this._handleDocClick);
         }

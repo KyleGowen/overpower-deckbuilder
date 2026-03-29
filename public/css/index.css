@@ -2218,6 +2218,15 @@
             height: auto;
         }
 
+        /* Title + desktop summary cluster (hamburger stays a sibling for MV collapse banner) */
+        #deckEditorModal .dev-mobile-deck-header-expandable {
+            display: flex;
+            flex: 1 1 auto;
+            min-width: 0;
+            gap: 20px;
+            align-items: stretch;
+        }
+
         .modal-header .deck-editor-title-section {
             flex: 0 1 auto;
             margin-right: 20px;
@@ -2449,11 +2458,18 @@
         }
 
         @media (max-width: 480px) {
-            .deck-editor-controls-menu-panel {
-                right: auto;
-                left: 50%;
-                transform: translateX(-50%);
-                width: calc(100vw - 24px);
+            /* Fixed + viewport center: absolute + left 50% was relative to the narrow menu shell (wrong).
+               Top set in deck-editor-core.js when menu opens. Exclude card-row ⋯ flyout. */
+            #deckEditorModal .deck-editor-controls-menu.deck-editor-controls-menu-open > .deck-editor-controls-menu-panel:not(.dev-mobile-deck-row-menu-panel) {
+                position: fixed !important;
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(-50%) !important;
+                width: min(280px, calc(100vw - 32px)) !important;
+                max-width: calc(100vw - 32px) !important;
+                min-width: 0 !important;
+                box-sizing: border-box;
+                z-index: 10051;
             }
         }
 

@@ -460,6 +460,77 @@
 
     global.renderDeckEditorMobileView = renderDeckEditorMobileView;
 
+    var DEV_MOBILE_HEADER_COLLAPSE_LS = 'devMobileDeckHeaderCollapsed';
+
+    function getDeckEditorModalHeader() {
+        var m = document.getElementById('deckEditorModal');
+        return m ? m.querySelector('.modal-header') : null;
+    }
+
+    function readDevMobileDeckHeaderCollapsedPreference() {
+        try {
+            return localStorage.getItem(DEV_MOBILE_HEADER_COLLAPSE_LS) === '1';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * MV only: collapse hides title + MAX/TOTAL stats; search, hamburger, and toggle stay in one row.
+     */
+    global.applyDevMobileDeckHeaderCollapsed = function (collapsed) {
+        var header = getDeckEditorModalHeader();
+        var btn = document.getElementById('devMobileDeckHeaderCollapseToggle');
+        var region = document.getElementById('devMobileDeckHeaderExpandableRegion');
+        var stats = document.getElementById('devMobileDeckHeaderStats');
+        if (!header || !btn) return;
+
+        var mobile = typeof global.isLayoutMobile === 'function' && global.isLayoutMobile();
+        if (!mobile) {
+            header.classList.remove('dev-mobile-deck-header-collapsed');
+            if (region) region.removeAttribute('aria-hidden');
+            if (stats) stats.removeAttribute('aria-hidden');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.setAttribute('aria-label', 'Collapse deck header');
+            btn.title = 'Collapse deck header';
+            return;
+        }
+
+        if (collapsed) {
+            header.classList.add('dev-mobile-deck-header-collapsed');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-label', 'Expand deck header');
+            btn.title = 'Expand deck header';
+        } else {
+            header.classList.remove('dev-mobile-deck-header-collapsed');
+            btn.setAttribute('aria-expanded', 'true');
+            btn.setAttribute('aria-label', 'Collapse deck header');
+            btn.title = 'Collapse deck header';
+        }
+        if (region) region.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+        if (stats) stats.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+    };
+
+    global.syncDevMobileDeckHeaderCollapsedState = function () {
+        global.applyDevMobileDeckHeaderCollapsed(readDevMobileDeckHeaderCollapsedPreference());
+    };
+
+    function initDevMobileDeckHeaderCollapse() {
+        var btn = document.getElementById('devMobileDeckHeaderCollapseToggle');
+        if (!btn || btn.dataset.devMobileHeaderCollapseInit === '1') return;
+        btn.dataset.devMobileHeaderCollapseInit = '1';
+        btn.addEventListener('click', function () {
+            var header = getDeckEditorModalHeader();
+            if (!header) return;
+            var next = !header.classList.contains('dev-mobile-deck-header-collapsed');
+            global.applyDevMobileDeckHeaderCollapsed(next);
+            try {
+                localStorage.setItem(DEV_MOBILE_HEADER_COLLAPSE_LS, next ? '1' : '0');
+            } catch (e) { /* ignore */ }
+        });
+        global.syncDevMobileDeckHeaderCollapsedState();
+    }
+
     global.refreshDeckEditorLayoutMode = function () {
         var modal = document.getElementById('deckEditorModal');
         if (!modal) return;
@@ -474,7 +545,13 @@
 
         if (typeof global.isLayoutMobile === 'function' && global.isLayoutMobile()) {
             renderDeckEditorMobileView();
+            if (typeof global.syncDevMobileDeckHeaderCollapsedState === 'function') {
+                global.syncDevMobileDeckHeaderCollapsedState();
+            }
         } else {
+            if (typeof global.applyDevMobileDeckHeaderCollapsed === 'function') {
+                global.applyDevMobileDeckHeaderCollapsed(false);
+            }
             global.closeDevMobileDeckActionsSheet();
             var ed = document.getElementById('deckCardsEditor');
             if (ed && ed.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
@@ -514,4 +591,6 @@
             }
         });
     })();
+
+    initDevMobileDeckHeaderCollapse();
 })(window);

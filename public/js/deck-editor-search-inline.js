@@ -40,7 +40,6 @@ function initializeDeckEditorSearch() {
 
     // Fallback to legacy wiring if component is unavailable
     searchInput.addEventListener('input', handleDeckEditorSearch);
-    searchInput.addEventListener('focus', showDeckEditorSearchResults);
     searchInput.addEventListener('blur', () => { setTimeout(() => { hideDeckEditorSearchResults(); }, 200); });
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.deck-editor-search-container') && !e.target.closest('.dev-mobile-deck-search-container')) {

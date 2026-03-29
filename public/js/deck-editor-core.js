@@ -1,6 +1,23 @@
 // Deck Editor Core Functions
 // Extracted from index.html for better modularity
 
+function positionDeckEditorControlsMenuPanel() {
+    const toggle = document.getElementById('deckEditorControlsMenuToggle');
+    const panel = document.getElementById('deckEditorControlsMenuPanel');
+    if (!toggle || !panel) return;
+    const useFixedPlacement =
+        (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) ||
+        (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 480px)').matches);
+    if (!useFixedPlacement) {
+        panel.style.removeProperty('top');
+        return;
+    }
+    requestAnimationFrame(() => {
+        const r = toggle.getBoundingClientRect();
+        panel.style.top = `${Math.round(r.bottom + 8)}px`;
+    });
+}
+
 function setDeckEditorControlsMenuOpen(open) {
     if (typeof document === 'undefined' || typeof document.querySelector !== 'function') return;
     const root = document.querySelector('[data-deck-editor-controls-menu]');
@@ -16,7 +33,9 @@ function setDeckEditorControlsMenuOpen(open) {
     if (panel) {
         if (open) {
             panel.removeAttribute('hidden');
+            positionDeckEditorControlsMenuPanel();
         } else {
+            panel.style.removeProperty('top');
             panel.setAttribute('hidden', '');
         }
     }
