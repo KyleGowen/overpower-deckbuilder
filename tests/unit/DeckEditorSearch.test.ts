@@ -479,6 +479,28 @@ describe('DeckEditorSearch Component', () => {
 
             expect(mockResults.style.display).toBe('block');
         });
+
+        it('should not hide results when clicking inside custom clickInsideRootSelectors', () => {
+            const container = document.createElement('div');
+            container.className = 'collection-search-container';
+            container.appendChild(mockInput);
+            container.appendChild(mockResults);
+            document.body.appendChild(container);
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clickInsideRootSelectors: ['.collection-search-container']
+            });
+
+            component.mount();
+            mockResults.style.display = 'block';
+
+            mockInput.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+            expect(mockResults.style.display).toBe('block');
+        });
     });
 
     describe('render()', () => {

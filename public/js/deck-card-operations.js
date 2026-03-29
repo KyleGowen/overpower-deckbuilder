@@ -173,7 +173,9 @@ async function removeCardFromEditor(index) {
     window.deckEditorCards.splice(index, 1);
     
     // Preserve current view when removing cards
-    if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        window.renderDeckEditorMobileView();
+    } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
         // Card View: re-render Card View
         renderDeckCardsCardView();
     } else if (deckCardsEditor && deckCardsEditor.classList.contains('list-view')) {
@@ -272,7 +274,9 @@ async function removeOneCardFromEditor(index) {
         }
         
         // Re-render the current view instead of always using Tile View
-        if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
+        if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+            window.renderDeckEditorMobileView();
+        } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
             // Card View is active - re-render Card View
             await renderDeckCardsCardView();
         } else if (deckCardsEditor && deckCardsEditor.classList.contains('list-view')) {
@@ -375,7 +379,9 @@ async function addOneCardToEditor(index) {
         window.deckEditorCards[index].quantity += 1;
         
         // Re-render the current view instead of always using Tile View
-        if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
+        if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+            window.renderDeckEditorMobileView();
+        } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
             // Card View is active - re-render Card View
             await renderDeckCardsCardView();
         } else if (deckCardsEditor && deckCardsEditor.classList.contains('list-view')) {
@@ -1857,7 +1863,9 @@ async function addCardToEditor(cardType, cardId, cardName) {
     
     // Re-render the current view instead of always using Tile View
     const deckCardsEditor = document.querySelector('.deck-cards-editor');
-    if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        window.renderDeckEditorMobileView();
+    } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
         // Card View is active - re-render Card View
         await renderDeckCardsCardView();
     } else if (deckCardsEditor && deckCardsEditor.classList.contains('list-view')) {

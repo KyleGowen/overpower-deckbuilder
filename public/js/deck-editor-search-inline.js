@@ -4,15 +4,30 @@
 // ===== initializeDeckEditorSearch through addCardToDeckFromSearch =====
 
 function initializeDeckEditorSearch() {
-    const searchInput = document.getElementById('deckEditorSearchInput');
-    const searchResults = document.getElementById('deckEditorSearchResults');
-    if (!searchInput || !searchResults) { console.error('🔍 Deck editor search elements not found!'); return; }
+    if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.unmount === 'function') {
+        try {
+            window.deckEditorSearchComponent.unmount();
+        } catch (e) { /* ignore */ }
+        window.deckEditorSearchComponent = null;
+    }
+
+    const useMobile = typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+    const searchInput = document.getElementById(useMobile ? 'devMobileDeckSearchInput' : 'deckEditorSearchInput');
+    const searchResults = document.getElementById(useMobile ? 'devMobileDeckSearchResults' : 'deckEditorSearchResults');
+    if (!searchInput || !searchResults) {
+        return;
+    }
 
     if (window.DeckEditorSearch && window.CardSearchService) {
-        // Prefer refactored component
+        const clickRoots = useMobile
+            ? ['.dev-mobile-deck-search-container', '.deck-editor-search-container']
+            : ['.deck-editor-search-container'];
         window.deckEditorSearchComponent = new window.DeckEditorSearch({
             input: searchInput,
             results: searchResults,
+            maxResults: 72,
+            clickInsideRootSelectors: clickRoots,
+            searchService: new window.CardSearchService({ maxResults: 72 }),
             onSelect: ({ id, type, name }) => {
                 if (typeof addCardToDeckFromSearch === 'function') {
                     addCardToDeckFromSearch(id, type, name);
@@ -27,7 +42,11 @@ function initializeDeckEditorSearch() {
     searchInput.addEventListener('input', handleDeckEditorSearch);
     searchInput.addEventListener('focus', showDeckEditorSearchResults);
     searchInput.addEventListener('blur', () => { setTimeout(() => { hideDeckEditorSearchResults(); }, 200); });
-    document.addEventListener('click', (e) => { if (!e.target.closest('.deck-editor-search-container')) { hideDeckEditorSearchResults(); } });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.deck-editor-search-container') && !e.target.closest('.dev-mobile-deck-search-container')) {
+            hideDeckEditorSearchResults();
+        }
+    });
 }
 // Handle search input
 async function handleDeckEditorSearch(e) {
@@ -204,13 +223,16 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
             return;
         }
         
-        // Clear search and hide results
-        const searchInput = document.getElementById('deckEditorSearchInput');
-        if (searchInput) {
-            searchInput.value = '';
+        if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.clear === 'function') {
+            window.deckEditorSearchComponent.clear();
+        } else {
+            const searchInput = document.getElementById('deckEditorSearchInput');
+            const mIn = document.getElementById('devMobileDeckSearchInput');
+            if (searchInput) searchInput.value = '';
+            if (mIn) mIn.value = '';
+            hideDeckEditorSearchResults();
         }
-        hideDeckEditorSearchResults();
-        
+
         // Show success message
         showToast('Card added to deck!', 'success');
         return;
@@ -232,13 +254,16 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         });
 
         if (response.ok) {
-            // Clear search and hide results
-            const searchInput = document.getElementById('deckEditorSearchInput');
-            if (searchInput) {
-                searchInput.value = '';
+            if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.clear === 'function') {
+                window.deckEditorSearchComponent.clear();
+            } else {
+                const searchInput = document.getElementById('deckEditorSearchInput');
+                const mIn = document.getElementById('devMobileDeckSearchInput');
+                if (searchInput) searchInput.value = '';
+                if (mIn) mIn.value = '';
+                hideDeckEditorSearchResults();
             }
-            hideDeckEditorSearchResults();
-            
+
             // Reload deck cards
             await loadDeckForEditing(currentDeckId);
             

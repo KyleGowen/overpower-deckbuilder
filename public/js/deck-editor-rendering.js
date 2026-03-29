@@ -82,6 +82,10 @@ function renderDeckCardsListView() {
     const deckCardsEditor = document.getElementById('deckCardsEditor');
     if (!deckCardsEditor) return;
 
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        window.renderDeckEditorMobileView();
+        return;
+    }
 
     // Group cards by type
     const cardsByType = {};
@@ -846,6 +850,11 @@ function renderDeckCardsCardView() {
     const deckCardsEditor = document.getElementById('deckCardsEditor');
     if (!deckCardsEditor) return;
 
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        window.renderDeckEditorMobileView();
+        return;
+    }
+
     // FORCE flex-direction to column for Card View
     deckCardsEditor.style.display = 'flex';
     deckCardsEditor.style.flexDirection = 'column';
@@ -1506,6 +1515,12 @@ function toggleMissionSetGroup(headerElement) {
 
 async function displayDeckCardsForEditing() {
     const deckCardsEditor = document.getElementById('deckCardsEditor');
+
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        await showDeckValidation(window.deckEditorCards);
+        window.renderDeckEditorMobileView();
+        return;
+    }
     
     if (window.deckEditorCards.length === 0) {
         deckCardsEditor.innerHTML = `

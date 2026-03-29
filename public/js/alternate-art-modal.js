@@ -518,7 +518,9 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
             
             // Re-render deck cards based on current view
             const deckCardsEditor = document.querySelector('.deck-cards-editor');
-            if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
+            if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+                window.renderDeckEditorMobileView();
+            } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
                 // Card View - use renderDeckCardsCardView
                 if (typeof renderDeckCardsCardView === 'function') {
                     renderDeckCardsCardView();

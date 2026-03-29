@@ -45,6 +45,7 @@ API
   - `debounceMs` (number, default 300): debounce delay
   - `maxResults` (number, default 20): maximum results shown
   - `searchService` (object, optional): must expose `search(term:string): Promise<Result[]>`
+  - `clickInsideRootSelectors` (string[], optional): CSS selectors for click-outside detection; clicks inside any match keep the dropdown open. Default `['.deck-editor-search-container']`. Use `['.collection-search-container']` on the Collection tab and `['.dev-mobile-deck-search-container']` for DEV in MV (that class should wrap the MV search input + results).
 
 - Methods
   - `mount()`: attach listeners (idempotent)

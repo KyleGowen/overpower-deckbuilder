@@ -118,15 +118,19 @@ async function updateDeckSummary(deckCards) {
     const hasEvents = eventCards.length > 0;
     const minSize = hasEvents ? DECK_RULES.MIN_DECK_SIZE_WITH_EVENTS : DECK_RULES.MIN_DECK_SIZE;
     
-    let totalCardsDisplay;
-    if (totalCards < minSize) {
-        totalCardsDisplay = `${totalCards}/${minSize}`;
-    } else {
-        totalCardsDisplay = totalCards.toString();
+    const deckTotalCardsEl = document.getElementById('deckTotalCards');
+    if (deckTotalCardsEl) deckTotalCardsEl.textContent = String(totalCards);
+    const deckHeaderCardMinPart = document.getElementById('deckHeaderCardMinPart');
+    if (deckHeaderCardMinPart) {
+        if (totalCards < minSize) {
+            deckHeaderCardMinPart.textContent = ' / ' + minSize;
+            deckHeaderCardMinPart.removeAttribute('hidden');
+        } else {
+            deckHeaderCardMinPart.textContent = '';
+            deckHeaderCardMinPart.setAttribute('hidden', '');
+        }
     }
-    
-    document.getElementById('deckTotalCards').textContent = totalCardsDisplay;
-    
+
     // Enable/disable Draw Hand button based on playable cards
     // Use Draw Hand module if available, otherwise use original implementation
     if (window.DrawHand && window.DrawHand.updateButtonState) {
@@ -177,11 +181,24 @@ async function updateDeckSummary(deckCards) {
     // Use the shared calculateTotalThreat function for consistent threat calculation
     const totalThreat = calculateTotalThreat(deckCards);
     
-    document.getElementById('deckMaxEnergy').textContent = maxEnergy;
-    document.getElementById('deckMaxCombat').textContent = maxCombat;
-    document.getElementById('deckMaxBruteForce').textContent = maxBruteForce;
-    document.getElementById('deckMaxIntelligence').textContent = maxIntelligence;
-    
+    const deckMaxEnergyEl = document.getElementById('deckMaxEnergy');
+    if (deckMaxEnergyEl) deckMaxEnergyEl.textContent = String(maxEnergy);
+    const deckMaxCombatEl = document.getElementById('deckMaxCombat');
+    if (deckMaxCombatEl) deckMaxCombatEl.textContent = String(maxCombat);
+    const deckMaxBruteEl = document.getElementById('deckMaxBruteForce');
+    if (deckMaxBruteEl) deckMaxBruteEl.textContent = String(maxBruteForce);
+    const deckMaxIntEl = document.getElementById('deckMaxIntelligence');
+    if (deckMaxIntEl) deckMaxIntEl.textContent = String(maxIntelligence);
+
+    const deckMobileMaxEnergy = document.getElementById('deckMobileMaxEnergy');
+    if (deckMobileMaxEnergy) deckMobileMaxEnergy.textContent = String(maxEnergy);
+    const deckMobileMaxCombat = document.getElementById('deckMobileMaxCombat');
+    if (deckMobileMaxCombat) deckMobileMaxCombat.textContent = String(maxCombat);
+    const deckMobileMaxBrute = document.getElementById('deckMobileMaxBruteForce');
+    if (deckMobileMaxBrute) deckMobileMaxBrute.textContent = String(maxBruteForce);
+    const deckMobileMaxInt = document.getElementById('deckMobileMaxIntelligence');
+    if (deckMobileMaxInt) deckMobileMaxInt.textContent = String(maxIntelligence);
+
     // Display total threat with denominator if it exceeds maximum
     let totalThreatDisplay;
     if (totalThreat > DECK_RULES.MAX_TOTAL_THREAT) {
@@ -189,14 +206,32 @@ async function updateDeckSummary(deckCards) {
     } else {
         totalThreatDisplay = totalThreat.toString();
     }
-    document.getElementById('deckTotalThreat').textContent = totalThreatDisplay;
-    
+    const deckTotalThreatEl = document.getElementById('deckTotalThreat');
+    if (deckTotalThreatEl) deckTotalThreatEl.textContent = totalThreatDisplay;
+
     // Calculate total icon counts
     const iconTotals = calculateIconTotals(deckCards);
-    document.getElementById('deckTotalEnergy').textContent = iconTotals.Energy || 0;
-    document.getElementById('deckTotalCombat').textContent = iconTotals.Combat || 0;
-    document.getElementById('deckTotalBruteForce').textContent = iconTotals['Brute Force'] || 0;
-    document.getElementById('deckTotalIntelligence').textContent = iconTotals.Intelligence || 0;
+    const te = iconTotals.Energy || 0;
+    const tc = iconTotals.Combat || 0;
+    const tbf = iconTotals['Brute Force'] || 0;
+    const ti = iconTotals.Intelligence || 0;
+    const deckTotalEnergyEl = document.getElementById('deckTotalEnergy');
+    if (deckTotalEnergyEl) deckTotalEnergyEl.textContent = String(te);
+    const deckTotalCombatEl = document.getElementById('deckTotalCombat');
+    if (deckTotalCombatEl) deckTotalCombatEl.textContent = String(tc);
+    const deckTotalBruteForceEl = document.getElementById('deckTotalBruteForce');
+    if (deckTotalBruteForceEl) deckTotalBruteForceEl.textContent = String(tbf);
+    const deckTotalIntelligenceEl = document.getElementById('deckTotalIntelligence');
+    if (deckTotalIntelligenceEl) deckTotalIntelligenceEl.textContent = String(ti);
+
+    const deckMobileTotalEnergy = document.getElementById('deckMobileTotalEnergy');
+    if (deckMobileTotalEnergy) deckMobileTotalEnergy.textContent = String(te);
+    const deckMobileTotalCombat = document.getElementById('deckMobileTotalCombat');
+    if (deckMobileTotalCombat) deckMobileTotalCombat.textContent = String(tc);
+    const deckMobileTotalBrute = document.getElementById('deckMobileTotalBruteForce');
+    if (deckMobileTotalBrute) deckMobileTotalBrute.textContent = String(tbf);
+    const deckMobileTotalInt = document.getElementById('deckMobileTotalIntelligence');
+    if (deckMobileTotalInt) deckMobileTotalInt.textContent = String(ti);
     
     // Update validation in summary
     // Validation errors are now shown in tooltips on the deck title badge
@@ -219,7 +254,12 @@ async function showDeckValidation(deckCards) {
     const saveButton = document.querySelector('.deck-editor-actions .save-btn');
     if (saveButton) {
         saveButton.disabled = false;
-        saveButton.textContent = 'Save';
+        const saveLabel = saveButton.querySelector('.deck-editor-menu-item-label');
+        if (saveLabel) {
+            saveLabel.textContent = 'Save';
+        } else {
+            saveButton.textContent = 'Save';
+        }
     }
 }
 

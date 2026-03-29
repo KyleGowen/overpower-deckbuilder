@@ -554,32 +554,35 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 ### Three-Section Layout
 #### Left Section - Deck Title & Description
 - **Container**: `.deck-editor-title-section`
-- **Flex Properties**: `flex: 0 0 auto` (fixed width, no growing)
-- **Margin Right**: `20px`
-- **Min Width**: `200px` (ensures adequate space for title)
-- **Content**: Deck title with validation badges, description text
+- **Flex Properties**: `flex: 0 1 auto`, `max-width: min(520px, 46vw)`, `min-width: 200px`, vertical padding `12px`. The top row uses `align-items: stretch` for the title column height; **`.modal-header .deck-editor-right-controls`** uses **`align-items: center`** so the hamburger stays a **square** control.
+- **Margin Right**: `20px` (via parent gap)
+- **Content**:
+  - **Deck name** (line 1): `#deckEditorTitle.deck-editor-deck-name` — single line, `white-space: nowrap` with ellipsis; **font-size `1.6rem`** (twice the **meta row / badge** size of `0.8rem`).
+  - **Meta row** (line 2): `.deck-editor-title-meta-row` — `font-size: 0.8rem`, single horizontal flex row (`flex-wrap: nowrap`) so **threat** stays to the right of the card count on the same line; `overflow-x: auto` if the row is wider than the title area. Order: **legality badges** (`.deck-title-badges`), **card count** (`.deck-editor-header-cards-group`): **`layout-mobile`** shows **`/public/resources/images/icons/cards.svg`** (`.deck-editor-header-cards-icon`, CSS `filter` in `deck-editor-mobile.css`) instead of the **Cards** word; **DTV** shows **`.deck-editor-header-cards-label-text`** (“Cards”) and hides the icon (`index.css`). Then `#deckTotalCards` + `#deckHeaderCardMinPart` (under-minimum ` / {min}` on DTV only; **`layout-mobile`** hides `#deckHeaderCardMinPart` in `deck-editor-mobile.css`), then **threat** icon + `#deckTotalThreat`. The title column uses **`min-width: 0`** through `.deck-editor-title-section` / `.deck-title-with-validation` so flex layout does not clip the threat value under `.deck-editor-modal`’s `overflow: hidden`; on **`layout-mobile`**, `.deck-editor-title-section` also uses **`flex: 1 1 auto`** and **`max-width: none`** (center summary hidden) so the row can use space beside the hamburger.
+- **Description**: `#deckEditorDescription` (hidden on `layout-mobile` via `deck-editor-mobile.css`)
 
 #### Center Section - Summary Statistics
 - **Container**: `.deck-summary-section`
-- **Positioning**: `position: absolute`, `left: 50%`, `transform: translateX(-50%)`
-- **Purpose**: Perfect centering in window width regardless of left/right content
-- **Content**: Deck statistics (centered)
-- **Layout**: `.deck-summary-content` with `display: flex`, `justify-content: center`, `gap: 30px`
+- **Positioning**: In `#deckEditorModal .deck-editor-top-row`, flex child with `flex: 1`, centered content (no absolute positioning in current header)
+- **Content**: Remaining deck statistics only — **Total Cards** and **Total Threat** moved to the title meta row (`#deckTotalCards`, `#deckTotalThreat` in `.deck-editor-title-meta-row`). Center strip shows max stats, divider, then icon totals (Energy/Combat/Brute Force/Intelligence).
+- **Layout**: `.deck-summary-content` wraps on narrow widths; `.deck-editor-top-row .deck-summary-stats` uses `flex-wrap: wrap` and auto height
 
-#### Right Section - Action Buttons
-- **Container**: `.deck-editor-right-controls` containing:
-  - Utility buttons: `.deck-editor-utility-actions` (`#drawHandBtn`, `#listViewBtn`, `#previewBtn`, `#screenshotViewBtn`, and admin-only `#backgroundBtn`)
-  - Divider: `.deck-editor-controls-divider` (vertical separator)
-  - Actions grid: `.deck-editor-actions` (Export/Import/Save/Cancel)
-- **Flex Properties**: `flex: 0 0 auto`, `margin-left: auto` (pushes to right)
+#### Right Section - Deck editor menu (hamburger)
+- **Container**: `.deck-editor-right-controls` holds a single **menu shell** `.deck-editor-controls-menu` (`[data-deck-editor-controls-menu]`).
+- **Toggle**: `#deckEditorControlsMenuToggle` (`.deck-editor-menu-toggle`) — teal-outline **square** **`48px × 48px`** (`width` / `height` / `min-height` / `max-height`), **`flex-shrink: 0`**, centered in the row via **`.deck-editor-controls-menu`** **`align-self: center`** and **`.modal-header .deck-editor-right-controls`** **`align-items: center`**. Three-bar icon (`.deck-editor-menu-toggle-bars` via layered `linear-gradient` lines). `aria-expanded` / `aria-controls` / `aria-label` update with open state.
+- **Backdrop**: `.deck-editor-menu-backdrop` — `position: fixed; inset: 0`, `z-index: 10049`, `background: rgba(0, 0, 0, 0.5)` when open. Dismisses menu on click.
+- **Panel**: `#deckEditorControlsMenuPanel` (`.deck-editor-controls-menu-panel`) — `position: absolute`, `top: calc(100% + 8px)`, `right: 0`, `z-index: 10051`, scrollable (`max-height: min(70vh, 520px)`), dark gradient fill, teal border `rgba(78, 205, 196, 0.4)`, radius `10px`, elevated shadow. On narrow viewports (`max-width: 480px`) the panel is centered with `translateX(-50%)` and nearly full width.
+- **Panel contents** (same IDs and `data-click-handler` as before; stacked **column** inside the menu only):
+  - **Row layout**: Each item is **`.deck-editor-menu-panel-btn`** with **`.deck-editor-menu-item-label`** (left, grows) and **`.deck-editor-menu-item-icon`** (fixed **22×22** SVG, right-aligned in the row via flex). Rules are scoped in **`public/css/index.css`** under **`#deckEditorModal .deck-editor-controls-menu-panel`** so they win over global **`.modal-header .deck-editor-actions .action-btn.cancel-btn { display: block !important }`**. Inside the panel, **`.deck-editor-actions`** sets **`max-width: none`**, **`width: 100%`**, and **`align-self: stretch`** so Export/Import/Save/Cancel match the full width of **`.deck-editor-utility-actions`** (the header still uses **`max-width: 200px`** on **`.deck-editor-actions`** elsewhere). Optional rows (**`#exportBtn`**, **`#importBtn`**, **`#screenshotViewBtn`**) use the **`hidden`** attribute; **`[hidden]`** is **`display: none !important`** in that panel. **`revealDeckEditorExportImportButtons()`** / **`hideDeckEditorExportImportButtons()`** in **`deck-editor-core.js`** show or hide export/import when the editor opens or closes (including **new deck** and **load existing deck** paths).
+  - **Utility**: `.deck-editor-utility-actions` — `#drawHandBtn`, `#backgroundBtn`, `#listViewBtn`, `#screenshotViewBtn`, `#previewBtn` (each full width in the panel).
+  - **Divider**: `.deck-editor-controls-menu-divider` — horizontal rule (gradient left–right), replacing the old vertical bar inside the dropdown.
+  - **File / session actions**: `.deck-editor-actions` — `#exportBtn`, `#importBtn`, `#saveDeckButton`, Save/Cancel styling unchanged.
+- **Open state**: root gets `.deck-editor-controls-menu-open` (raises stacking: `z-index: 10050`). Menu closes on backdrop click, outside `mousedown`, `Escape`, after any panel control with `data-click-handler` is activated, and when the deck editor modal closes.
+- **Flex Properties**: `.deck-editor-right-controls` remains `flex: 0 0 auto`, `margin-left: auto`.
 
-- **Utility button grid placement**:
-  - Upper-left: `#backgroundBtn`
-  - Upper-right: `#previewBtn`
-  - Lower-left: `#drawHandBtn`
-  - Lower-right: `#listViewBtn`
-  - (Optional) `#screenshotViewBtn` appears on a third row spanning both columns when enabled.
-- **Layout**: `display: flex`, `align-items: center`, with a vertical separator between utility and actions
+- **Legacy grid reference** (how controls were ordered before the menu; order in the dropdown follows this list top-to-bottom):
+  - `#backgroundBtn`, `#previewBtn`, `#drawHandBtn`, `#listViewBtn`, then optional `#screenshotViewBtn` when shown.
+  - Actions: Export, Import, Save, Cancel.
 
 - **Preview mode**:
   - Button: `#previewBtn` (`Preview` ↔ `Edit`)
@@ -718,7 +721,8 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 
 ### Mobile Adaptations (current direction)
 
-- **Deck editor:** Under `.layout-mobile`, deck panes **stack vertically**; resizable divider hidden; list view **stacks** the two deck columns (single-column reading flow). Full parity with STYLE_GUIDE “single column deck builder” is **incremental** — see `MOBILE_DESIGN.md` milestones.
+- **Deck editor (DEV in MV):** Under `html.layout-mobile #deckEditorModal`, the editor uses a **single mobile Deck Editor View**: compact **cards / threat** metrics next to the title ([`public/index.html`](/public/index.html) **`.dev-mobile-deck-header-metrics`**); a **collapsible stats** block (**`<details id="devMobileDeckStatsDetails">`**) mirroring DTV max/total icon stats (**`#deckMobileMaxEnergy`** … **`#deckMobileTotalIntelligence`**); a **pill search** field (**`#devMobileDeckSearchInput`**) wired via [`DeckEditorSearch`](/public/js/components/DeckEditorSearch.js) + [`CardSearchService`](/public/js/services/CardSearchService.js) with **`clickInsideRootSelectors`** including **`.dev-mobile-deck-search-container`**; **`.card-selector-pane`** and **List View** toggle are **hidden**. Card list: **`.dev-mobile-deck-type-section`** headers + **`.dev-mobile-deck-row`** (thumb, name, **−**/**+** without a quantity digit, **⋯** actions sheet **`.dev-mobile-deck-actions-sheet`**). Styles: [`public/css/deck-editor-mobile.css`](/public/css/deck-editor-mobile.css). Logic: [`public/js/deck-editor-mobile-view.js`](/public/js/deck-editor-mobile-view.js), **`layout-mode-change`** → **`refreshDeckEditorLayoutMode`**. Desktop (**DTV**) deck editor layout is unchanged.
+- **Deck editor (legacy MV stacking):** Resizable divider hidden; list view **stacks** columns when not using the DEV MV shell above. See `MOBILE_DESIGN.md` milestones.
 - **Stacked Navigation (M1):** Under `.layout-mobile`, **[`.unified-header`](/public/components/globalNav.html)** is **`display: grid`**, **`grid-template-columns: auto 1fr auto`**, **`column-gap: 6px`**, **`min-height: 56px`**, **`padding: 6px 8px`**. **`.header-nav-cluster`** uses **`display: contents`** so **`.header-left`**, **`.header-center`**, and **`.header-right`** sit in the three columns (tabs centered in the **1fr** column via **`.header-center`** **`justify-content: center`**). **`.app-tabs`** is a horizontal **flex** row (**`gap: 3px`**, **`padding-inline: 5%`**). **`.app-tab-button`** uses **`flex: 1 1 0`**, **`min-height: 35px`**, **`padding: 5px 3px`** (chip size unchanged), **`font-size: 12px`**, **`display: inline-flex`**, **`align-items: center`**, **`justify-content: center`**. Visible tab labels **Database** / **Decks** / **Collection**; full names in **`title`** / **`aria-label`**. **`.header-left`** logo **`max-width: 105px`**, **`.header-logo`** **`max-height: 52px`**. **`#newDeckBtn`** / **+ Deck** is **`display: none`** — use the user menu **+ Create Deck**. **`#userMenu`** **`max-width: min(160px, 42vw)`**; **`.user-menu-toggle`** **`justify-content: flex-end`**, **`font-size: 14px`**; **`.user-greeting`** on MV is a **row** (**`.user-greeting-copy`** stacks **Welcome,** / **`name`!** with **`text-align: right`** / full-width lines so endings align; **`.triangle-icon`** **`16px`**, centered beside the copy); desktop stays one row via [`globalNav.css`](/public/components/globalNav.css) (**`.user-greeting-copy`** inline). Logged-out: [`syncHeaderCollectionLayout`](/public/components/globalNav.js) adds **`.collection-tab-hidden`** so **Database** stays **`flex: 1 1 0`** and **Deck Builder** uses **`flex: 2 1 0`**. Implemented in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). **Desktop (`layout-desktop`):** **`.header-nav-cluster`** is **`display: contents`** in [`public/components/globalNav.css`](/public/components/globalNav.css) so the bar is **logo \| centered view tabs \| `.header-right`**, with **+ Deck** immediately left of the welcome menu in **`.header-right`**. Legacy **`@media (max-width: 900px)`** in `globalNav.css` still applies when **`layout-desktop`** is active at narrow widths; **`.layout-mobile`** rules override column stacking for the shell.
 - **Touch Targets:** Minimum **44px** for interactive controls; utility **`.touch-target-min`** in `mobile-layout.css` (apply where controls are still small).
 - **Card database (M2c, `.layout-mobile`):** Rules live in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) under the **Card database**, **Special Cards tab**, **Aspects tab**, **Universe: Advanced tab**, **Locations** filter shell, **Events** tab, **Missions** tab, **Universe: Teamwork** tab, **Universe: Ally** tab, **Universe: Training** tab, **Universe: Basic** tab, and **Characters tab — card rows** sections.

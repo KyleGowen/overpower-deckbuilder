@@ -25,6 +25,10 @@
      *   - debounceMs: delay before querying (default: 300)
      *   - maxResults: maximum number of results to display (default: 20)
      *   - searchService: optional custom service with search(term) -> normalized array
+     *   - clickInsideRootSelectors: string[] — for document click-outside handling; clicks inside
+     *     any of these selectors (via element.closest) keep the dropdown open. Defaults to
+     *     ['.deck-editor-search-container']. Pass e.g. ['.collection-search-container'] for
+     *     Collection View, or ['.dev-mobile-deck-search-container'] for DEV in MV.
      *
      * Rendering contract:
      *   - The component writes item markup into `results` and toggles its display.
@@ -49,8 +53,21 @@
             this.minChars = options.minChars || 2;
             this.debounceMs = options.debounceMs || 300;
             this.searchService = options.searchService || new global.CardSearchService({ maxResults: options.maxResults || 20 });
+            const roots = options.clickInsideRootSelectors;
+            this._clickInsideSelectors = Array.isArray(roots) && roots.length > 0
+                ? roots
+                : ['.deck-editor-search-container'];
             this._timeout = null;
             this._bound = false;
+        }
+
+        _isClickInsideSearchUi(target) {
+            if (!target || typeof target.closest !== 'function') return false;
+            for (let i = 0; i < this._clickInsideSelectors.length; i++) {
+                const sel = this._clickInsideSelectors[i];
+                if (sel && target.closest(sel)) return true;
+            }
+            return false;
         }
 
         mount() {
@@ -94,7 +111,7 @@
         };
 
         _handleDocClick = (e) => {
-            if (!e.target.closest('.deck-editor-search-container')) {
+            if (!this._isClickInsideSearchUi(e.target)) {
                 this.hideResults();
             }
         };

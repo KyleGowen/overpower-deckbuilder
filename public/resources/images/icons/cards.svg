@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
   <defs>
-    <!-- Metallic body gradient (similar shine vibe to threat.png) -->
-    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f1f3f5"/>
-      <stop offset="0.35" stop-color="#cfd4da"/>
-      <stop offset="0.6" stop-color="#aeb6bf"/>
-      <stop offset="1" stop-color="#e6eaee"/>
+    <!-- Neutral grays aligned with threat.png (matte silver gear) -->
+    <linearGradient id="cardFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8dde3"/>
+      <stop offset="0.55" stop-color="#b8c0ca"/>
+      <stop offset="1" stop-color="#9aa3ae"/>
     </linearGradient>
-    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="rgba(255,255,255,0.9)"/>
-      <stop offset="1" stop-color="rgba(0,0,0,0.25)"/>
+    <linearGradient id="cardFaceMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cfd4db"/>
+      <stop offset="1" stop-color="#a8b0ba"/>
     </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="rgba(0,0,0,0.35)"/>
+    <linearGradient id="cardFaceFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2e6eb"/>
+      <stop offset="0.45" stop-color="#c5ccd4"/>
+      <stop offset="1" stop-color="#a9b2bc"/>
+    </linearGradient>
+    <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="1.2" stdDeviation="1" flood-color="rgba(0,0,0,0.22)"/>
     </filter>
   </defs>
 
-  <!-- Back card -->
-  <g filter="url(#shadow)">
-    <rect x="6" y="5" width="12" height="15" rx="3.2" fill="url(#metal)"/>
-    <rect x="6.7" y="5.7" width="10.6" height="13.6" rx="2.6" fill="none" stroke="url(#edge)" stroke-width="1"/>
+  <!-- Back (up-left) -->
+  <g filter="url(#softShadow)">
+    <rect x="9" y="3.5" width="8.5" height="11.5" rx="2.2" fill="url(#cardFace)"/>
   </g>
-
-  <!-- Front card -->
-  <g filter="url(#shadow)">
-    <rect x="4" y="7" width="12.5" height="15" rx="3.2" fill="url(#metal)"/>
-    <rect x="4.7" y="7.7" width="11.1" height="13.6" rx="2.6" fill="none" stroke="url(#edge)" stroke-width="1"/>
-    <!-- Subtle inner panel -->
-    <rect x="6.2" y="9.6" width="8.2" height="8.8" rx="2" fill="rgba(0,0,0,0.06)"/>
-    <path d="M6.3 10.2c2.2-1.2 6.2-1.2 8.1 0" stroke="rgba(255,255,255,0.55)" stroke-width="1" stroke-linecap="round"/>
+  <!-- Middle -->
+  <g filter="url(#softShadow)">
+    <rect x="6.5" y="5.5" width="8.5" height="11.5" rx="2.2" fill="url(#cardFaceMid)"/>
+  </g>
+  <!-- Front — blank face, small top slot only (no suit / symbol) -->
+  <g filter="url(#softShadow)">
+    <rect x="4" y="7.5" width="9" height="11.5" rx="2.2" fill="url(#cardFaceFront)"/>
+    <rect x="7.1" y="8.35" width="2.8" height="1.1" rx="0.45" fill="rgba(60,68,78,0.35)"/>
   </g>
 </svg>

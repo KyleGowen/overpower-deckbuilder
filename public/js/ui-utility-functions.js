@@ -53,7 +53,12 @@ function toggleScreenshotView() {
     if (screenshotViewSection.style.display === 'none') {
         // Show screenshot view
         screenshotViewSection.style.display = 'flex';
-        screenshotViewBtn.textContent = 'Exit Screenshot';
+        const exitLabel = screenshotViewBtn.querySelector('.deck-editor-menu-item-label');
+        if (exitLabel) {
+            exitLabel.textContent = 'Exit Screenshot';
+        } else {
+            screenshotViewBtn.textContent = 'Exit Screenshot';
+        }
         
         // Hide original panes
         if (deckPane) deckPane.style.display = 'none';
@@ -74,7 +79,12 @@ function closeScreenshotView() {
     const availablePane = document.querySelector('.available-pane');
     
     screenshotViewSection.style.display = 'none';
-    screenshotViewBtn.textContent = 'Screenshot View';
+    const shotLabel = screenshotViewBtn.querySelector('.deck-editor-menu-item-label');
+    if (shotLabel) {
+        shotLabel.textContent = 'Screenshot View';
+    } else {
+        screenshotViewBtn.textContent = 'Screenshot View';
+    }
     
     // Show original panes
     if (deckPane) deckPane.style.display = 'flex';

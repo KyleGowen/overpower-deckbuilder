@@ -56,6 +56,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/card-filter-toggles.js
 - /js/card-data-display.js
 - /js/deck-editor-rendering.js
+- /js/deck-editor-mobile-view.js
 - /js/deck-card-operations.js
 - /js/deck-validation.js
 - /js/deck-editor-layout.js

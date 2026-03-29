@@ -1,6 +1,101 @@
 // Deck Editor Core Functions
 // Extracted from index.html for better modularity
 
+function setDeckEditorControlsMenuOpen(open) {
+    if (typeof document === 'undefined' || typeof document.querySelector !== 'function') return;
+    const root = document.querySelector('[data-deck-editor-controls-menu]');
+    if (!root) return;
+    const toggle = document.getElementById('deckEditorControlsMenuToggle');
+    const panel = document.getElementById('deckEditorControlsMenuPanel');
+    const backdrop = root.querySelector('.deck-editor-menu-backdrop');
+    root.classList.toggle('deck-editor-controls-menu-open', !!open);
+    if (toggle) {
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        toggle.setAttribute('aria-label', open ? 'Close deck editor menu' : 'Open deck editor menu');
+    }
+    if (panel) {
+        if (open) {
+            panel.removeAttribute('hidden');
+        } else {
+            panel.setAttribute('hidden', '');
+        }
+    }
+    if (backdrop) {
+        if (open) {
+            backdrop.removeAttribute('hidden');
+        } else {
+            backdrop.setAttribute('hidden', '');
+        }
+    }
+}
+
+function closeDeckEditorControlsMenu() {
+    setDeckEditorControlsMenuOpen(false);
+}
+window.closeDeckEditorControlsMenu = closeDeckEditorControlsMenu;
+
+function initDeckEditorControlsMenu() {
+    if (typeof document === 'undefined' || typeof document.querySelector !== 'function') return;
+    const root = document.querySelector('[data-deck-editor-controls-menu]');
+    if (!root || root.dataset.deckEditorMenuInit === '1') return;
+    root.dataset.deckEditorMenuInit = '1';
+    const toggle = document.getElementById('deckEditorControlsMenuToggle');
+    const panel = document.getElementById('deckEditorControlsMenuPanel');
+    const backdrop = root.querySelector('.deck-editor-menu-backdrop');
+    if (!toggle || !panel || !backdrop) return;
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const willOpen = panel.hasAttribute('hidden');
+        setDeckEditorControlsMenuOpen(willOpen);
+    });
+
+    backdrop.addEventListener('click', () => {
+        setDeckEditorControlsMenuOpen(false);
+    });
+
+    panel.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-click-handler]');
+        if (btn) {
+            requestAnimationFrame(() => setDeckEditorControlsMenuOpen(false));
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (panel.hasAttribute('hidden')) return;
+        setDeckEditorControlsMenuOpen(false);
+    });
+
+    document.addEventListener('mousedown', (e) => {
+        if (panel.hasAttribute('hidden')) return;
+        if (root.contains(e.target)) return;
+        setDeckEditorControlsMenuOpen(false);
+    });
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDeckEditorControlsMenu);
+    } else {
+        initDeckEditorControlsMenu();
+    }
+}
+
+function revealDeckEditorExportImportButtons() {
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    if (exportBtn) exportBtn.hidden = false;
+    if (importBtn) importBtn.hidden = false;
+}
+
+function hideDeckEditorExportImportButtons() {
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    if (exportBtn) exportBtn.hidden = true;
+    if (importBtn) importBtn.hidden = true;
+}
+
 // Show deck editor modal
 function showDeckEditor() {
     const mc = document.getElementById('mainContainer');
@@ -11,6 +106,7 @@ function showDeckEditor() {
             console.error('deckEditorModal not found');
             return;
         }
+        closeDeckEditorControlsMenu();
         modal.style.display = 'flex';
         modal.classList.add('modal-opening');
         requestAnimationFrame(() => {
@@ -22,15 +118,7 @@ function showDeckEditor() {
         document.body.classList.add('deck-editor-active');
         
         // Show Export and Import buttons for all users (GUEST, USER, ADMIN)
-        const exportBtn = document.getElementById('exportBtn');
-        if (exportBtn) {
-            exportBtn.style.display = 'inline-block';
-        }
-        
-        const importBtn = document.getElementById('importBtn');
-        if (importBtn) {
-            importBtn.style.display = 'inline-block';
-        }
+        revealDeckEditorExportImportButtons();
         
         // Apply layout after paint (requestAnimationFrame avoids fixed delays)
         requestAnimationFrame(() => {
@@ -161,12 +249,14 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
         
         // Show the deck editor modal (use same fade-in as showDeckEditor)
         const newDeckModal = document.getElementById('deckEditorModal');
+        closeDeckEditorControlsMenu();
         newDeckModal.style.display = 'flex';
         newDeckModal.classList.add('modal-opening');
         requestAnimationFrame(() => {
             newDeckModal.classList.remove('modal-opening');
             newDeckModal.classList.add('modal-visible');
         });
+        revealDeckEditorExportImportButtons();
             
             // Ensure search component is initialized for new deck flow as well
             if (typeof initializeDeckEditorSearch === 'function') {
@@ -632,6 +722,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             
             // Update card count
             updateDeckEditorCardCount();
+            revealDeckEditorExportImportButtons();
             
             // Auto-activate special cards character filter if deck has characters
             const hasCharacters = window.deckEditorCards.some(card => card.type === 'character');
@@ -1056,6 +1147,11 @@ async function saveDeckChanges() {
 
 // Close deck editor modal
 async function closeDeckEditor() {
+    closeDeckEditorControlsMenu();
+    hideDeckEditorExportImportButtons();
+    if (typeof closeDevMobileDeckActionsSheet === 'function') {
+        closeDevMobileDeckActionsSheet();
+    }
     // Close draw hand pane first to clear any drawn cards
     closeDrawHand();
     
@@ -1122,8 +1218,13 @@ function updatePreviewButtonState() {
         return;
     }
     
-    previewBtn.style.display = 'inline-block';
-    previewBtn.textContent = preview ? 'Edit' : 'Preview';
+    previewBtn.style.display = 'flex';
+    const previewLabel = previewBtn.querySelector('.deck-editor-menu-item-label');
+    if (previewLabel) {
+        previewLabel.textContent = preview ? 'Edit' : 'Preview';
+    } else {
+        previewBtn.textContent = preview ? 'Edit' : 'Preview';
+    }
     previewBtn.title = preview ? 'Exit preview (edit mode)' : 'Preview deck (read-only)';
     previewBtn.classList.toggle('preview-active', preview);
 }
@@ -1188,7 +1289,9 @@ async function togglePreviewMode() {
     if (!deckCardsEditor) return;
     
     try {
-        if (deckCardsEditor.classList.contains('card-view')) {
+        if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+            window.renderDeckEditorMobileView();
+        } else if (deckCardsEditor.classList.contains('card-view')) {
             if (typeof renderDeckCardsCardView === 'function') {
                 renderDeckCardsCardView();
             }
@@ -1273,7 +1376,9 @@ window.toggleFoilForCard = function toggleFoilForCard(cardId, index, instanceInd
     const deckCardsEditor = document.getElementById('deckCardsEditor');
     if (!deckCardsEditor) return;
 
-    if (deckCardsEditor.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
+        window.renderDeckEditorMobileView();
+    } else if (deckCardsEditor.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
         renderDeckCardsCardView();
     } else if (deckCardsEditor.classList.contains('list-view') && typeof renderDeckCardsListView === 'function') {
         renderDeckCardsListView();

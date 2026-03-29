@@ -1,0 +1,424 @@
+/**
+ * Deck Editor View (DEV) — mobile-only (html.layout-mobile #deckEditorModal).
+ * Complements public/css/mobile-layout.css and STYLE_GUIDE.md tokens.
+ */
+
+.layout-desktop #deckEditorModal .dev-mobile-deck-chrome {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-chrome {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+
+.layout-mobile #deckEditorModal #deckEditorDescription {
+    display: none !important;
+}
+
+/* Summary hidden on MV: let title use remaining width so meta row is not clipped by .deck-editor-modal overflow */
+.layout-mobile #deckEditorModal .modal-header .deck-editor-title-section,
+.layout-mobile #deckEditorModal .deck-editor-title-section {
+    max-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 10px;
+}
+
+/* MV: hide " / {min}" after card count — legality badge still shows deck status; saves header space */
+.layout-mobile #deckEditorModal #deckHeaderCardMinPart {
+    display: none !important;
+}
+
+/* MV: deck-stack icon instead of "Cards" label (group keeps aria-label="Deck card count") */
+.layout-mobile #deckEditorModal .deck-editor-header-cards-label-text {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-header-cards-icon {
+    display: inline-block !important;
+    vertical-align: middle;
+}
+
+.layout-mobile #deckEditorModal .deck-summary-section {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-utility-actions #listViewBtn {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal .card-selector-pane {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal #resizableDivider {
+    display: none !important;
+}
+
+/* Stats disclosure */
+.dev-mobile-deck-stats-details {
+    margin-bottom: 14px;
+    border: 1px solid rgba(168, 85, 247, 0.55);
+    border-radius: 10px;
+    background: rgba(22, 22, 38, 0.95);
+    overflow: hidden;
+}
+
+.dev-mobile-deck-stats-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: rgba(88, 28, 135, 0.35);
+}
+
+.dev-mobile-deck-stats-summary::-webkit-details-marker {
+    display: none;
+}
+
+.dev-mobile-deck-stats-summary-label {
+    letter-spacing: 0.02em;
+}
+
+.dev-mobile-deck-stats-chevron {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.dev-mobile-deck-stats-details[open] .dev-mobile-deck-stats-chevron {
+    transform: rotate(-180deg);
+    display: inline-block;
+}
+
+.dev-mobile-deck-stats-inner {
+    padding: 12px 10px 14px;
+    background: rgba(15, 15, 28, 0.9);
+}
+
+.dev-mobile-deck-stats-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.dev-mobile-deck-stats-block {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px 8px;
+}
+
+.dev-mobile-summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 72px;
+    text-align: center;
+}
+
+.dev-mobile-stat-label {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    line-height: 1.2;
+}
+
+.dev-mobile-stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #4ecdc4;
+    margin-top: 4px;
+}
+
+.dev-mobile-deck-stats-vrule {
+    width: 1px;
+    align-self: stretch;
+    min-height: 48px;
+    background: rgba(78, 205, 196, 0.45);
+    flex-shrink: 0;
+}
+
+/* Search: pill input + dropdown (DeckEditorSearch markup) */
+.dev-mobile-deck-search-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 14px;
+    overflow: visible !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 14px;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-input:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.25);
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-results.deck-editor-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 8px;
+    z-index: 10050;
+    max-height: min(360px, 50vh);
+    overflow-y: auto;
+}
+
+/* Card list */
+.layout-mobile #deckEditorModal .deck-pane {
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    border-radius: 12px;
+    background: rgba(26, 26, 42, 0.6);
+    padding: 8px 10px 12px;
+    overflow-x: hidden;
+}
+
+.dev-mobile-deck-list-root {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.dev-mobile-deck-type-section {
+    margin-bottom: 10px;
+}
+
+.dev-mobile-deck-type-header {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(88, 28, 135, 0.4);
+    color: #f1f5f9;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dev-mobile-deck-type-name {
+    flex: 1;
+}
+
+.dev-mobile-deck-type-count {
+    font-size: 0.8rem;
+    color: #4ecdc4;
+    font-weight: 700;
+}
+
+.dev-mobile-deck-type-toggle {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+}
+
+.dev-mobile-deck-type-body {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+.dev-mobile-deck-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dev-mobile-deck-row:last-child {
+    border-bottom: none;
+}
+
+.dev-mobile-deck-row-thumb {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.dev-mobile-deck-row-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dev-mobile-deck-row-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f8fafc;
+    line-height: 1.35;
+}
+
+.dev-mobile-deck-row-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.dev-mobile-deck-qty-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid rgba(78, 205, 196, 0.65);
+    background: rgba(15, 45, 50, 0.85);
+    color: #e0fffb;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.dev-mobile-deck-overflow-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: rgba(30, 41, 59, 0.9);
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.dev-mobile-deck-row.ko-dimmed,
+.dev-mobile-deck-row .ko-dimmed {
+    opacity: 0.55;
+}
+
+/* Actions sheet */
+#devMobileDeckActionsSheet {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+#devMobileDeckActionsSheet.is-open {
+    pointer-events: auto;
+    visibility: visible;
+}
+
+#devMobileDeckActionsSheet[hidden]:not(.is-open) {
+    display: none !important;
+}
+
+.dev-mobile-deck-actions-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.dev-mobile-deck-actions-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #1e1b2e;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+}
+
+.dev-mobile-deck-actions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dev-mobile-deck-actions-title {
+    margin: 0;
+    font-size: 1rem;
+    color: #f1f5f9;
+}
+
+.dev-mobile-deck-actions-close {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.dev-mobile-deck-actions-body {
+    padding: 12px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dev-mobile-deck-action-btn {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(78, 205, 196, 0.45);
+    background: rgba(15, 45, 50, 0.75);
+    color: #ecfeff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+}
+
+.dev-mobile-deck-action-html .ko-btn,
+.dev-mobile-deck-action-html .reserve-character-btn,
+.dev-mobile-deck-action-html button {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.dev-mobile-deck-action-empty {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0;
+    text-align: center;
+}
+
+.dev-mobile-empty-deck {
+    text-align: center;
+    padding: 24px 12px;
+    color: #cbd5e1;
+}

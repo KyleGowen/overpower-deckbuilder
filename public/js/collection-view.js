@@ -1216,6 +1216,7 @@ function initializeCollectionSearch() {
             input: searchInput,
             results: searchResults,
             searchService: new window.CardSearchService({ maxResults: 72 }),
+            clickInsideRootSelectors: ['.collection-search-container'],
             onSelect: ({ id, type, imagePath }) => {
                 addCardToCollection(id, type, imagePath || null);
             }

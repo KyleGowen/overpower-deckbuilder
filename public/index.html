@@ -66,6 +66,7 @@
     <script src="/js/components/deck-export.js" defer></script>
     <script src="/js/components/deck-import.js" defer></script>
     <link rel="stylesheet" href="/css/deck-editor-search.css">
+    <link rel="stylesheet" href="/css/deck-editor-mobile.css">
     <link rel="stylesheet" href="/css/deck-background.css">
     <script src="/js/services/CardSearchService.js" defer></script>
     <script src="/js/components/DeckEditorSearch.js" defer></script>
@@ -87,6 +88,7 @@
     <script src="/js/card-filter-toggles.js" defer></script>
     <script src="/js/card-data-display.js" defer></script>
     <script src="/js/deck-editor-rendering.js" defer></script>
+    <script src="/js/deck-editor-mobile-view.js" defer></script>
     <script src="/js/deck-card-operations.js" defer></script>
     <script src="/js/deck-validation.js" defer></script>
     <script src="/js/deck-editor-layout.js" defer></script>
@@ -1132,14 +1134,25 @@
                     <!-- Left side: Deck Title and Description -->
                     <div class="deck-editor-title-section">
                         <div class="deck-title-with-validation">
-                            <h3 id="deckEditorTitle" class="editable-title" data-edit-handler="startEditingTitle">Edit Deck</h3>
-                            <div class="deck-title-badges" aria-label="Deck badges">
-                                <span id="deckTitleValidationBadge" class="deck-validation-badge"></span>
-                                <span id="readOnlyBadge" class="deck-validation-badge read-only" style="display: none;">Read-Only</span>
+                            <h3 id="deckEditorTitle" class="editable-title deck-editor-deck-name" data-edit-handler="startEditingTitle">Edit Deck</h3>
+                            <div class="deck-editor-title-meta-row" aria-label="Deck legality, card count, and threat">
+                                <div class="deck-title-badges" aria-label="Deck badges">
+                                    <span id="deckTitleValidationBadge" class="deck-validation-badge"></span>
+                                    <span id="readOnlyBadge" class="deck-validation-badge read-only" style="display: none;">Read-Only</span>
+                                </div>
+                                <span class="deck-editor-header-cards-group" aria-label="Deck card count">
+                                    <img src="/public/resources/images/icons/cards.svg" alt="" class="deck-editor-header-cards-icon" width="27" height="27" aria-hidden="true">
+                                    <span class="deck-editor-header-cards-label-text">Cards</span>
+                                    <span id="deckTotalCards" class="deck-editor-header-cards-value">0</span><span id="deckHeaderCardMinPart" class="deck-editor-header-cards-min" hidden></span>
+                                </span>
+                                <span class="deck-editor-header-threat-group" aria-label="Deck total threat">
+                                    <img src="/src/resources/images/icons/threat.png" alt="" class="deck-editor-header-threat-icon" width="18" height="18">
+                                    <span id="deckTotalThreat" class="deck-editor-header-threat-value">0</span>
+                                </span>
                             </div>
                         </div>
                         <p id="deckEditorDescription" class="deck-description editable-description" data-edit-handler="startEditingDescription"></p>
-                        <div id="readOnlyIndicator" class="read-only-indicator" style="display: none;">
+                            <div id="readOnlyIndicator" class="read-only-indicator" style="display: none;">
                             <span class="read-only-text">📖 Read Only Mode</span>
                         </div>
                     </div>
@@ -1148,15 +1161,6 @@
                     <div class="deck-summary-section">
                         <div class="deck-summary-content">
                             <div class="deck-summary-stats">
-                                <div class="summary-stat">
-                                    <span class="stat-label">Total Cards:</span>
-                                    <span class="stat-value" id="deckTotalCards">0</span>
-                                </div>
-                                <div class="deck-stats-divider"></div>
-                                <div class="summary-stat">
-                                    <span class="stat-label">Total Threat:</span>
-                                    <span class="stat-value" id="deckTotalThreat">0</span>
-                                </div>
                                 <div class="summary-stat">
                                     <span class="stat-label">Max Energy:</span>
                                     <span class="stat-value" id="deckMaxEnergy">0</span>
@@ -1197,22 +1201,41 @@
                         </div>
                     </div>
                     
-                    <!-- Right side: Utility buttons + Action Buttons -->
+                    <!-- Right side: hamburger menu (utility + file actions share one panel) -->
                     <div class="deck-editor-right-controls" aria-label="Deck editor controls">
-                        <div class="deck-editor-utility-actions" aria-label="Deck editor utility buttons">
-                            <button class="remove-all-btn" id="drawHandBtn" data-click-handler="toggleDrawHand" disabled title="Deck must contain at least 8 playable cards.">Draw Hand</button>
-                            <!-- Keep Background button in DOM to prevent header reflow; shown/enabled by DeckBackgroundManager when available -->
-                            <button class="remove-all-btn" id="backgroundBtn" data-click-handler="showBackgroundModal" style="visibility: hidden; pointer-events: none;" aria-hidden="true" title="Backgrounds loading...">Background</button>
-                            <button class="remove-all-btn" id="listViewBtn" data-click-handler="toggleListView">List View</button>
-                            <button class="remove-all-btn" id="screenshotViewBtn" data-click-handler="toggleScreenshotView" style="display: none;">Screenshot View</button>
-                            <button class="remove-all-btn" id="previewBtn" data-click-handler="togglePreviewMode" title="Preview deck (read-only)">Preview</button>
-                        </div>
-                        <div class="deck-editor-controls-divider" role="separator" aria-hidden="true"></div>
-                        <div class="deck-editor-actions" aria-label="Deck editor actions">
-                            <button class="export-import-btn" id="exportBtn" data-click-handler="exportDeckAsJson" style="display: none;" title="Export deck as JSON">Export</button>
-                            <button class="export-import-btn" id="importBtn" data-click-handler="importDeckFromJson" style="display: none;" title="Import deck from JSON">Import</button>
-                            <button id="saveDeckButton" class="action-btn save-btn" data-click-handler="saveDeckChanges">Save</button>
-                            <button class="action-btn cancel-btn" data-click-handler="closeDeckEditor">Cancel</button>
+                        <div class="deck-editor-controls-menu" data-deck-editor-controls-menu>
+                            <div class="deck-editor-menu-backdrop" hidden aria-hidden="true"></div>
+                            <button type="button"
+                                class="deck-editor-menu-toggle"
+                                id="deckEditorControlsMenuToggle"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="deckEditorControlsMenuPanel"
+                                aria-label="Open deck editor menu"
+                                title="Menu">
+                                <span class="deck-editor-menu-toggle-bars" aria-hidden="true"></span>
+                            </button>
+                            <div id="deckEditorControlsMenuPanel"
+                                class="deck-editor-controls-menu-panel"
+                                role="group"
+                                aria-label="Deck editor menu"
+                                hidden>
+                                <div class="deck-editor-utility-actions" aria-label="Deck editor utility buttons">
+                                    <button type="button" class="remove-all-btn deck-editor-menu-panel-btn" id="drawHandBtn" data-click-handler="toggleDrawHand" disabled title="Deck must contain at least 8 playable cards."><span class="deck-editor-menu-item-label">Draw Hand</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="9" height="12" rx="1.5"/><rect x="9" y="7" width="9" height="12" rx="1.5"/></svg></span></button>
+                                    <!-- Keep Background button in DOM to prevent header reflow; shown/enabled by DeckBackgroundManager when available -->
+                                    <button type="button" class="remove-all-btn deck-editor-menu-panel-btn" id="backgroundBtn" data-click-handler="showBackgroundModal" style="visibility: hidden; pointer-events: none;" aria-hidden="true" title="Backgrounds loading..."><span class="deck-editor-menu-item-label">Background</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M3 17l4-4 3 3 5-6 5 7"/></svg></span></button>
+                                    <button type="button" class="remove-all-btn deck-editor-menu-panel-btn" id="listViewBtn" data-click-handler="toggleListView"><span class="deck-editor-menu-item-label">List View</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg></span></button>
+                                    <button type="button" class="remove-all-btn deck-editor-menu-panel-btn" id="screenshotViewBtn" data-click-handler="toggleScreenshotView" hidden><span class="deck-editor-menu-item-label">Screenshot View</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v10H4z"/><circle cx="12" cy="13" r="3"/></svg></span></button>
+                                    <button type="button" class="remove-all-btn deck-editor-menu-panel-btn" id="previewBtn" data-click-handler="togglePreviewMode" title="Preview deck (read-only)"><span class="deck-editor-menu-item-label">Preview</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
+                                </div>
+                                <div class="deck-editor-controls-divider deck-editor-controls-menu-divider" role="separator" aria-hidden="true"></div>
+                                <div class="deck-editor-actions" aria-label="Deck editor actions">
+                                    <button type="button" class="export-import-btn deck-editor-menu-panel-btn" id="exportBtn" data-click-handler="exportDeckAsJson" hidden title="Export deck as JSON"><span class="deck-editor-menu-item-label">Export</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"/><path d="M8 7l4-4 4 4"/><rect x="5" y="15" width="14" height="6" rx="1"/></svg></span></button>
+                                    <button type="button" class="export-import-btn deck-editor-menu-panel-btn" id="importBtn" data-click-handler="importDeckFromJson" hidden title="Import deck from JSON"><span class="deck-editor-menu-item-label">Import</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v4H5z"/><path d="M12 21V9"/><path d="M8 13l4 4 4-4"/></svg></span></button>
+                                    <button type="button" id="saveDeckButton" class="action-btn save-btn deck-editor-menu-panel-btn" data-click-handler="saveDeckChanges"><span class="deck-editor-menu-item-label">Save</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h9l3 3v13H6z"/><path d="M8 4v6h8V4"/><rect x="8" y="14" width="8" height="6" rx="1"/></svg></span></button>
+                                    <button type="button" class="action-btn cancel-btn deck-editor-menu-panel-btn" data-click-handler="closeDeckEditor"><span class="deck-editor-menu-item-label">Cancel</span><span class="deck-editor-menu-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1238,6 +1261,35 @@
             </div>
             
             <div class="modal-body">
+                <div id="devMobileDeckChrome" class="dev-mobile-deck-chrome">
+                    <details id="devMobileDeckStatsDetails" class="dev-mobile-deck-stats-details">
+                        <summary class="dev-mobile-deck-stats-summary">
+                            <span class="dev-mobile-deck-stats-summary-label">Deck stats</span>
+                            <span class="dev-mobile-deck-stats-chevron" aria-hidden="true">▼</span>
+                        </summary>
+                        <div class="dev-mobile-deck-stats-inner">
+                            <div class="dev-mobile-deck-stats-row">
+                                <div class="dev-mobile-deck-stats-block">
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX ENERGY</span><span id="deckMobileMaxEnergy" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX COMBAT</span><span id="deckMobileMaxCombat" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX BRUTE FORCE</span><span id="deckMobileMaxBruteForce" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX INTELLIGENCE</span><span id="deckMobileMaxIntelligence" class="dev-mobile-stat-value">0</span></div>
+                                </div>
+                                <div class="dev-mobile-deck-stats-vrule" aria-hidden="true"></div>
+                                <div class="dev-mobile-deck-stats-block">
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL ENERGY</span><span id="deckMobileTotalEnergy" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL COMBAT</span><span id="deckMobileTotalCombat" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL BRUTE FORCE</span><span id="deckMobileTotalBruteForce" class="dev-mobile-stat-value">0</span></div>
+                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL INTELLIGENCE</span><span id="deckMobileTotalIntelligence" class="dev-mobile-stat-value">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="dev-mobile-deck-search-container deck-editor-search-container">
+                        <input type="text" id="devMobileDeckSearchInput" class="dev-mobile-deck-search-input" placeholder="Search by card name, character, or type..." autocomplete="off">
+                        <div id="devMobileDeckSearchResults" class="dev-mobile-deck-search-results deck-editor-search-results" style="display: none;"></div>
+                    </div>
+                </div>
                 <div class="deck-editor-layout">
                                            <!-- Left Pane: Deck List View -->
                        <div class="deck-pane">
@@ -1262,6 +1314,16 @@
                             <!-- Card categories will be loaded here -->
                         </div>
                     </div>
+                </div>
+            </div>
+            <div id="devMobileDeckActionsSheet" class="dev-mobile-deck-actions-sheet" aria-hidden="true" hidden>
+                <div class="dev-mobile-deck-actions-backdrop" data-click-handler="closeDevMobileDeckActionsSheet"></div>
+                <div class="dev-mobile-deck-actions-panel" role="dialog" aria-modal="true" aria-labelledby="devMobileDeckActionsTitle">
+                    <div class="dev-mobile-deck-actions-header">
+                        <h4 id="devMobileDeckActionsTitle" class="dev-mobile-deck-actions-title">Card actions</h4>
+                        <button type="button" class="dev-mobile-deck-actions-close" data-click-handler="closeDevMobileDeckActionsSheet" aria-label="Close">×</button>
+                    </div>
+                    <div id="devMobileDeckActionsBody" class="dev-mobile-deck-actions-body"></div>
                 </div>
             </div>
         </div>
@@ -2476,6 +2538,14 @@
 
             async switchToTileView() {
                 this.currentView = 'tile';
+
+                if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+                    if (this.deckCardsEditor) {
+                        this.deckCardsEditor.classList.remove('list-view', 'card-view', 'two-column');
+                    }
+                    await displayDeckCardsForEditing();
+                    return;
+                }
                 
                 // Disconnect layout observer when switching to tile view
                 if (layoutObserver) {
@@ -2609,6 +2679,16 @@
 
             async switchToListView() {
                 this.currentView = 'list';
+
+                if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+                    if (this.deckCardsEditor) {
+                        this.deckCardsEditor.classList.remove('list-view', 'card-view', 'two-column');
+                    }
+                    if (typeof renderDeckEditorMobileView === 'function') {
+                        renderDeckEditorMobileView();
+                    }
+                    return;
+                }
                 
                 if (this.deckCardsEditor) {
                     this.deckCardsEditor.classList.add('list-view');
@@ -2664,6 +2744,16 @@
 
             async switchToCardView() {
                 this.currentView = 'card';
+
+                if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+                    if (this.deckCardsEditor) {
+                        this.deckCardsEditor.classList.remove('list-view', 'card-view', 'two-column');
+                    }
+                    if (typeof renderDeckEditorMobileView === 'function') {
+                        renderDeckEditorMobileView();
+                    }
+                    return;
+                }
                 
                 // Disconnect layout observer when switching to card view
                 if (layoutObserver) {

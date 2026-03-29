@@ -13,6 +13,7 @@ Key docs:
 - [docs/current/TESTING_GUIDE.md](docs/current/TESTING_GUIDE.md) — how to run unit/integration tests and which Jest configs to use.
 - [docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md](docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md) — Deck editor Card View layout (landscape vs portrait, no frame, bevelled corners); **read before changing card-view CSS** to avoid regressions.
 - [MOBILE_DESIGN.md](MOBILE_DESIGN.md) — mobile/dual layout-mode strategy, milestones, refactor log, and **§10** (recent global-nav + DBV All-tab implementation notes for agents).
+- **DEV** (Deck Editor View) in **MV**: mobile deck modal list + stats disclosure + search — [`public/js/deck-editor-mobile-view.js`](public/js/deck-editor-mobile-view.js), [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css); documented in [docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md) under mobile adaptations.
 - [docs/current/DBV_ASPECTS_MOBILE.md](docs/current/DBV_ASPECTS_MOBILE.md) — Aspects DBV mobile: how filters/caption/actions look; links to unit tests.
 - [docs/current/DBV_MISSIONS_MOBILE.md](docs/current/DBV_MISSIONS_MOBILE.md) — Missions DBV mobile: mission-set dropdown, card rows, caption, filters/load; links to unit tests.
 - [docs/current/DBV_TRAINING_MOBILE.md](docs/current/DBV_TRAINING_MOBILE.md) — Training DBV mobile: Ally-style type toggles (`type_1`/`type_2`), card rows, caption; links to unit tests.
