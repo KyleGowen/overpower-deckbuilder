@@ -154,6 +154,7 @@ Per-tab delivery for the Card Database (`#database-view`). **Status** values: `p
 | **M5a** | Read-only / preview / non-owner deck views on narrow screens |
 | **M5b** | Owner edit: stacked panes, single-column list, save          |
 
+**Implementation reference (DEV in `layout-mobile`):** [`docs/current/DECK_EDITOR_MOBILE_VIEW.md`](docs/current/DECK_EDITOR_MOBILE_VIEW.md) — single-column categorized list, **−**/**+**/⋯ row actions, hamburger-style card menu flyout, `deckEditorCardHasAlternateArts` parity, `refreshDeckEditorLayoutMode` / `layout-mode-change`, and file map.
 
 ---
 

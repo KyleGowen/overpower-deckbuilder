@@ -1,6 +1,6 @@
 /**
  * Deck Editor View (DEV) — mobile layout-only list (layout-mobile).
- * Renders categorized collapsible sections and Collection-style rows with − / + and an actions sheet.
+ * Renders categorized collapsible sections and Collection-style rows with − / + and a hamburger-style actions dropdown.
  */
 (function (global) {
     var TYPE_ORDER = [
@@ -62,6 +62,23 @@
         return d.innerHTML;
     }
 
+    /* Match deck hamburger menu icons (stroke SVGs), scaled in CSS via .dev-mobile-deck-row-menu-panel */
+    var ICON_MENU_CHANGE_ART =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M3 17l4-4 3 3 5-6 5 7"/></svg>';
+    var ICON_MENU_FOIL =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>';
+    var ICON_MENU_KO =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>';
+    var ICON_MENU_HAND =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="9" height="12" rx="1.5"/><rect x="9" y="7" width="9" height="12" rx="1.5"/></svg>';
+    function devMobileRowMenuItemButton(label, onclickAttr, iconSvg) {
+        return (
+            '<button type="button" class="deck-editor-menu-panel-btn touch-target-min" onclick="' + onclickAttr + '">' +
+            '<span class="deck-editor-menu-item-label">' + escapeHtml(label) + '</span>' +
+            '<span class="deck-editor-menu-item-icon" aria-hidden="true">' + iconSvg + '</span></button>'
+        );
+    }
+
     function devMobileDisplayName(card, availableCard) {
         if (!availableCard) return 'Card';
         var nt = normalizeDeckType(card.type);
@@ -120,11 +137,149 @@
         return null;
     }
 
+    /**
+     * HTML chunks for the mobile row actions sheet; same conditions as whether we show the ⋯ control.
+     */
+    function collectDevMobileDeckRowSheetParts(card, deckIndex, instanceIndex) {
+        var parts = [];
+        if (!card) return parts;
+
+        var cid = String(card.cardId).replace(/'/g, "\\'");
+        var safeIndex = deckIndex;
+        var safeInst = instanceIndex;
+
+        var instId = resolveInstanceCardId(card, instanceIndex);
+        var acForAlt = lookupAvailableCard(instId, card.type) || lookupAvailableCard(card.cardId, card.type);
+
+        if ((card.type === 'character' || card.type === 'special' || card.type === 'power' || card.type === 'location') &&
+            typeof global.deckEditorCardHasAlternateArts === 'function' &&
+            acForAlt &&
+            global.deckEditorCardHasAlternateArts(acForAlt, card.type)) {
+            parts.push(devMobileRowMenuItemButton(
+                'Change art',
+                'showAlternateArtSelectionForExistingCard(\'' + cid + '\',' + safeIndex + ',' + safeInst + ')',
+                ICON_MENU_CHANGE_ART
+            ));
+        }
+
+        if (global.foilCardMap && global.foilCardMap[instId] !== undefined) {
+            parts.push(devMobileRowMenuItemButton(
+                'Foil',
+                'toggleFoilForCard(\'' + cid + '\',' + safeIndex + ',' + safeInst + ')',
+                ICON_MENU_FOIL
+            ));
+        }
+
+        if (card.type === 'character' && global.currentUser) {
+            var kod = global.SimulateKO && global.SimulateKO.isKOd(card.cardId);
+            parts.push(devMobileRowMenuItemButton(
+                kod ? 'Un-KO character' : 'KO character',
+                'toggleKOCharacter(\'' + cid + '\',' + safeIndex + ')',
+                ICON_MENU_KO
+            ));
+        }
+
+        if (card.type === 'character' && typeof getReserveCharacterButton === 'function') {
+            var rbtn = getReserveCharacterButton(card.cardId, deckIndex);
+            if (rbtn) {
+                parts.push('<div class="dev-mobile-deck-row-menu-custom">' + rbtn + '</div>');
+            }
+        }
+
+        if (card.type === 'training' && typeof hasSpartanTrainingGround === 'function' && hasSpartanTrainingGround()) {
+            var excl = card.exclude_from_draw === true;
+            parts.push(devMobileRowMenuItemButton(
+                excl ? 'Include in draw' : 'Pre-placed',
+                'drawTrainingCard(\'' + cid + '\',' + safeIndex + ')',
+                ICON_MENU_HAND
+            ));
+        } else if (card.type === 'basic-universe' && typeof hasDraculasArmory === 'function' && hasDraculasArmory()) {
+            var exclB = card.exclude_from_draw === true;
+            parts.push(devMobileRowMenuItemButton(
+                exclB ? 'Include in draw' : 'Pre-placed',
+                'drawBasicUniverseCard(\'' + cid + '\',' + safeIndex + ')',
+                ICON_MENU_HAND
+            ));
+        } else if (card.type === 'special' && typeof hasLancelot === 'function' && hasLancelot()) {
+            var cdata = lookupAvailableCard(card.cardId, card.type);
+            var cname = cdata ? (cdata.name || cdata.card_name || '') : '';
+            var cidStr = String(card.cardId);
+            if (cname === 'Sword and Shield' || cidStr.indexOf('sword_and_shield') !== -1 || cidStr.indexOf('sword-and-shield') !== -1) {
+                var exclS = card.exclude_from_draw === true;
+                parts.push(devMobileRowMenuItemButton(
+                    exclS ? 'Include in draw' : 'Pre-placed',
+                    'drawSwordAndShield(\'' + cid + '\',' + safeIndex + ')',
+                    ICON_MENU_HAND
+                ));
+            }
+        }
+
+        if (card.type === 'mission' && typeof getDisplayMissionButton === 'function') {
+            var mhtml = getDisplayMissionButton(card.cardId, deckIndex);
+            if (mhtml) {
+                parts.push('<div class="dev-mobile-deck-row-menu-custom">' + mhtml + '</div>');
+            }
+        }
+
+        return parts;
+    }
+
+    function positionDevMobileRowMenuPanel(anchorEl) {
+        var panel = document.getElementById('devMobileDeckActionsPanel');
+        if (!panel || !anchorEl || typeof anchorEl.getBoundingClientRect !== 'function') return;
+        panel.style.visibility = 'hidden';
+        panel.style.left = '0px';
+        panel.style.top = '0px';
+        panel.hidden = false;
+        var pw = panel.offsetWidth;
+        var ph = panel.offsetHeight;
+        var r = anchorEl.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var gap = 8;
+        var margin = 12;
+        var left = r.right - pw;
+        if (left < margin) {
+            left = margin;
+        }
+        if (left + pw > vw - margin) {
+            left = Math.max(margin, vw - pw - margin);
+        }
+        var top = r.bottom + gap;
+        if (top + ph > vh - margin) {
+            top = r.top - gap - ph;
+        }
+        if (top < margin) {
+            top = margin;
+        }
+        if (top + ph > vh - margin) {
+            top = Math.max(margin, vh - ph - margin);
+        }
+        panel.style.left = left + 'px';
+        panel.style.top = top + 'px';
+        panel.style.visibility = 'visible';
+    }
+
+    function devMobileRowMenuOutsideDown(e) {
+        var sheet = document.getElementById('devMobileDeckActionsSheet');
+        if (!sheet || !sheet.classList.contains('is-open')) return;
+        var panel = document.getElementById('devMobileDeckActionsPanel');
+        var anchor = global._devMobileDeckRowMenuAnchor;
+        var t = e.target;
+        if (panel && panel.contains(t)) return;
+        if (anchor && (t === anchor || (typeof anchor.contains === 'function' && anchor.contains(t)))) return;
+        global.closeDevMobileDeckActionsSheet();
+    }
+
     function renderDeckEditorMobileView() {
         var deckCardsEditor = document.getElementById('deckCardsEditor');
         var chrome = document.getElementById('devMobileDeckChrome');
         if (!deckCardsEditor) return;
         if (typeof global.isLayoutMobile !== 'function' || !global.isLayoutMobile()) return;
+
+        if (typeof global.closeDevMobileDeckActionsSheet === 'function') {
+            global.closeDevMobileDeckActionsSheet();
+        }
 
         /* DTV uses setProperty(..., 'important') on #deckCardsEditor — clear so MV CSS can apply */
         deckCardsEditor.removeAttribute('style');
@@ -197,6 +352,7 @@
                         : fullRes;
                     var name = devMobileDisplayName(card, instanceAvailable);
                     var canStack = card.type !== 'character' && card.type !== 'location' && card.type !== 'mission';
+                    var rowSheetParts = collectDevMobileDeckRowSheetParts(card, index, i);
 
                     var actions = '';
                     if (!readOnly) {
@@ -206,7 +362,9 @@
                         } else {
                             actions += '<button type="button" class="dev-mobile-deck-qty-btn touch-target-min" aria-label="Remove card" onclick="removeCardFromEditor(' + index + ')">−</button>';
                         }
-                        actions += '<button type="button" class="dev-mobile-deck-overflow-btn touch-target-min" aria-label="More actions" onclick="openDevMobileDeckRowSheet(' + index + ',' + i + ')">⋯</button>';
+                        if (rowSheetParts.length > 0) {
+                            actions += '<button type="button" class="dev-mobile-deck-overflow-btn touch-target-min" aria-label="More actions" onclick="openDevMobileDeckRowSheet(' + index + ',' + i + ',this)">⋯</button>';
+                        }
                     }
 
                     html += '<div class="dev-mobile-deck-row" data-deck-index="' + index + '" data-instance="' + i + '">';
@@ -238,104 +396,66 @@
 
     global.closeDevMobileDeckActionsSheet = function () {
         var sheet = document.getElementById('devMobileDeckActionsSheet');
-        if (!sheet) return;
-        sheet.classList.remove('is-open');
-        sheet.setAttribute('aria-hidden', 'true');
-        sheet.hidden = true;
+        var panel = document.getElementById('devMobileDeckActionsPanel');
+        if (panel) {
+            panel.hidden = true;
+            panel.style.top = '';
+            panel.style.left = '';
+            panel.style.visibility = '';
+        }
+        if (sheet) {
+            sheet.classList.remove('is-open');
+            sheet.setAttribute('aria-hidden', 'true');
+            sheet.hidden = true;
+        }
+        global._devMobileDeckRowMenuAnchor = null;
+        if (global._devMobileRowMenuDocDown) {
+            document.removeEventListener('mousedown', global._devMobileRowMenuDocDown);
+            global._devMobileRowMenuDocDown = null;
+        }
     };
 
-    global.openDevMobileDeckRowSheet = function (deckIndex, instanceIndex) {
+    global.openDevMobileDeckRowSheet = function (deckIndex, instanceIndex, anchorEl) {
         if (isDeckEditorReadOnlyUi()) return;
 
         var sheet = document.getElementById('devMobileDeckActionsSheet');
         var body = document.getElementById('devMobileDeckActionsBody');
-        if (!sheet || !body) return;
+        var panel = document.getElementById('devMobileDeckActionsPanel');
+        if (!sheet || !body || !panel) return;
 
         var card = global.deckEditorCards[deckIndex];
         if (!card) return;
 
-        var parts = [];
-        var cid = String(card.cardId).replace(/'/g, "\\'");
-        var safeIndex = deckIndex;
-        var safeInst = instanceIndex;
-
-        if (card.type === 'character' || card.type === 'special' || card.type === 'power' || card.type === 'location') {
-            parts.push(
-                '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="showAlternateArtSelectionForExistingCard(\'' +
-                cid + '\',' + safeIndex + ',' + safeInst + ')">Change art</button>'
+        var trigger = anchorEl;
+        if (!trigger || typeof trigger.getBoundingClientRect !== 'function') {
+            trigger = document.querySelector(
+                '.dev-mobile-deck-row[data-deck-index="' + deckIndex + '"][data-instance="' + instanceIndex + '"] .dev-mobile-deck-overflow-btn'
             );
         }
+        if (!trigger) return;
 
-        var instId = resolveInstanceCardId(card, instanceIndex);
-        if (global.foilCardMap && global.foilCardMap[instId] !== undefined) {
-            parts.push(
-                '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="toggleFoilForCard(\'' +
-                cid + '\',' + safeIndex + ',' + safeInst + ')">Foil</button>'
-            );
-        }
+        var parts = collectDevMobileDeckRowSheetParts(card, deckIndex, instanceIndex);
 
-        if (card.type === 'character' && global.currentUser) {
-            var kod = global.SimulateKO && global.SimulateKO.isKOd(card.cardId);
-            parts.push(
-                '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="toggleKOCharacter(\'' +
-                cid + '\',' + safeIndex + ')">' + (kod ? 'Un-KO character' : 'KO character') + '</button>'
-            );
-        }
-
-        if (card.type === 'character' && typeof getReserveCharacterButton === 'function') {
-            var rbtn = getReserveCharacterButton(card.cardId, deckIndex);
-            if (rbtn) {
-                parts.push('<div class="dev-mobile-deck-action-html">' + rbtn + '</div>');
-            }
-        }
-
-        if (card.type === 'training' && typeof hasSpartanTrainingGround === 'function' && hasSpartanTrainingGround()) {
-            var excl = card.exclude_from_draw === true;
-            parts.push(
-                '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="drawTrainingCard(\'' +
-                cid + '\',' + safeIndex + ')">' + (excl ? 'Include in draw' : 'Pre-placed') + '</button>'
-            );
-        } else if (card.type === 'basic-universe' && typeof hasDraculasArmory === 'function' && hasDraculasArmory()) {
-            var exclB = card.exclude_from_draw === true;
-            parts.push(
-                '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="drawBasicUniverseCard(\'' +
-                cid + '\',' + safeIndex + ')">' + (exclB ? 'Include in draw' : 'Pre-placed') + '</button>'
-            );
-        } else if (card.type === 'special' && typeof hasLancelot === 'function' && hasLancelot()) {
-            var cdata = lookupAvailableCard(card.cardId, card.type);
-            var cname = cdata ? (cdata.name || cdata.card_name || '') : '';
-            var cidStr = String(card.cardId);
-            if (cname === 'Sword and Shield' || cidStr.indexOf('sword_and_shield') !== -1 || cidStr.indexOf('sword-and-shield') !== -1) {
-                var exclS = card.exclude_from_draw === true;
-                parts.push(
-                    '<button type="button" class="dev-mobile-deck-action-btn touch-target-min" onclick="drawSwordAndShield(\'' +
-                    cid + '\',' + safeIndex + ')">' + (exclS ? 'Include in draw' : 'Pre-placed') + '</button>'
-                );
-            }
-        }
-
-        if (card.type === 'mission' && typeof getDisplayMissionButton === 'function') {
-            var mhtml = getDisplayMissionButton(card.cardId, deckIndex);
-            if (mhtml) {
-                parts.push('<div class="dev-mobile-deck-action-html">' + mhtml + '</div>');
-            }
-        }
-
-        body.innerHTML = parts.length ? parts.join('') : '<p class="dev-mobile-deck-action-empty">No extra actions for this card.</p>';
-
-        body.addEventListener(
-            'click',
-            function () {
-                setTimeout(function () {
-                    global.closeDevMobileDeckActionsSheet();
-                }, 0);
-            },
-            { once: true }
-        );
+        body.innerHTML = parts.length
+            ? parts.join('')
+            : '<p class="dev-mobile-deck-row-menu-empty">No extra actions for this card.</p>';
 
         sheet.hidden = false;
+        panel.hidden = false;
         sheet.classList.add('is-open');
         sheet.setAttribute('aria-hidden', 'false');
+        global._devMobileDeckRowMenuAnchor = trigger;
+
+        if (!global._devMobileRowMenuDocDown) {
+            global._devMobileRowMenuDocDown = devMobileRowMenuOutsideDown;
+            document.addEventListener('mousedown', global._devMobileRowMenuDocDown);
+        }
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                positionDevMobileRowMenuPanel(trigger);
+            });
+        });
     };
 
     global.renderDeckEditorMobileView = renderDeckEditorMobileView;
@@ -372,4 +492,26 @@
             global.refreshDeckEditorLayoutMode();
         }
     });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var sheet = document.getElementById('devMobileDeckActionsSheet');
+        if (!sheet || !sheet.classList.contains('is-open')) return;
+        global.closeDevMobileDeckActionsSheet();
+    });
+
+    (function initDevMobileRowMenuPanelCloseOnAction() {
+        var panel = document.getElementById('devMobileDeckActionsPanel');
+        if (!panel || panel.dataset.devMobileMenuInit === '1') return;
+        panel.dataset.devMobileMenuInit = '1';
+        panel.addEventListener('click', function (e) {
+            var sheet = document.getElementById('devMobileDeckActionsSheet');
+            if (!sheet || !sheet.classList.contains('is-open')) return;
+            if (e.target.closest('button')) {
+                requestAnimationFrame(function () {
+                    global.closeDevMobileDeckActionsSheet();
+                });
+            }
+        });
+    })();
 })(window);

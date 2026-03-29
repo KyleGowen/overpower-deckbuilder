@@ -2686,6 +2686,69 @@ function ensureCollapsedHeaderIsVisible(header) {
     }
 }
 
+/**
+ * Whether "Change art" should be offered for this row (same rules as card / preview tile rendering).
+ * @param {object|null} availableCard Resolved entry from availableCardsMap for the instance/base card.
+ * @param {string} cardType Deck card.type (e.g. character, special, power, location).
+ */
+function deckEditorCardHasAlternateArts(availableCard, cardType) {
+    if (!availableCard || !window.availableCardsMap) return false;
+    if (cardType === 'character') {
+        const name = (availableCard.name || '').trim();
+        const set = (availableCard.set || 'ERB').trim() || 'ERB';
+        let count = 0;
+        window.availableCardsMap.forEach((c, id) => {
+            const ct = c.cardType || c.type || '';
+            if ((ct === 'character' || id.startsWith('char_')) &&
+                (c.name || '').trim() === name &&
+                (c.set || 'ERB').trim() === set) {
+                count++;
+            }
+        });
+        return count > 1;
+    }
+    if (cardType === 'special') {
+        const characterName = (availableCard.character || '').trim();
+        const cardName = (availableCard.name || availableCard.card_name || '').trim();
+        const uniqueImagePaths = new Set();
+        window.availableCardsMap.forEach((c, id) => {
+            const ct = c.cardType || c.type || '';
+            if ((ct === 'special' || id.startsWith('special_')) &&
+                (c.character || '').trim() === characterName &&
+                (c.name || c.card_name || '').trim() === cardName) {
+                uniqueImagePaths.add(getCardImagePath(c, 'special'));
+            }
+        });
+        return uniqueImagePaths.size > 1;
+    }
+    if (cardType === 'power') {
+        const value = String(availableCard.value || '').trim();
+        const powerType = (availableCard.power_type || '').trim();
+        const uniqueImagePaths = new Set();
+        window.availableCardsMap.forEach((c, id) => {
+            const ct = c.cardType || c.type || '';
+            if ((ct === 'power' || id.startsWith('power_')) &&
+                String(c.value || '').trim() === value &&
+                (c.power_type || '').trim() === powerType) {
+                uniqueImagePaths.add(getCardImagePath(c, 'power'));
+            }
+        });
+        return uniqueImagePaths.size > 1;
+    }
+    if (cardType === 'location') {
+        const locName = (availableCard.name || '').trim();
+        const uniqueLocationIds = new Set();
+        window.availableCardsMap.forEach((c, id) => {
+            const iterCardType = c.cardType || c.type || '';
+            if ((iterCardType === 'location' || id.startsWith('location_')) &&
+                (c.name || '').trim() === locName) {
+                uniqueLocationIds.add(c.id || id);
+            }
+        });
+        return uniqueLocationIds.size > 1;
+    }
+    return false;
+}
 
 // Export all functions to window for backward compatibility
 window.toggleListView = toggleListView;
@@ -2704,3 +2767,4 @@ window.toggleDeckTypeSection = toggleDeckTypeSection;
 window.toggleDeckListSection = toggleDeckListSection;
 window.ensureScrollContainerCanShowAllContent = ensureScrollContainerCanShowAllContent;
 window.ensureCollapsedHeaderIsVisible = ensureCollapsedHeaderIsVisible;
+window.deckEditorCardHasAlternateArts = deckEditorCardHasAlternateArts;

@@ -1312,14 +1312,10 @@
                     </div>
                 </div>
             </div>
-            <div id="devMobileDeckActionsSheet" class="dev-mobile-deck-actions-sheet" aria-hidden="true" hidden>
-                <div class="dev-mobile-deck-actions-backdrop" data-click-handler="closeDevMobileDeckActionsSheet"></div>
-                <div class="dev-mobile-deck-actions-panel" role="dialog" aria-modal="true" aria-labelledby="devMobileDeckActionsTitle">
-                    <div class="dev-mobile-deck-actions-header">
-                        <h4 id="devMobileDeckActionsTitle" class="dev-mobile-deck-actions-title">Card actions</h4>
-                        <button type="button" class="dev-mobile-deck-actions-close" data-click-handler="closeDevMobileDeckActionsSheet" aria-label="Close">×</button>
-                    </div>
-                    <div id="devMobileDeckActionsBody" class="dev-mobile-deck-actions-body"></div>
+            <div id="devMobileDeckActionsSheet" class="dev-mobile-deck-row-menu" aria-hidden="true" hidden>
+                <div class="dev-mobile-deck-row-menu-backdrop" onclick="closeDevMobileDeckActionsSheet()" aria-hidden="true"></div>
+                <div id="devMobileDeckActionsPanel" class="deck-editor-controls-menu-panel dev-mobile-deck-row-menu-panel" role="menu" aria-label="Card actions" hidden>
+                    <div id="devMobileDeckActionsBody" class="dev-mobile-deck-row-menu-items"></div>
                 </div>
             </div>
         </div>

@@ -14,6 +14,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ├── 📄 docs/current/SERVER_STARTUP.md       # Server startup and configuration guide
 ├── 📄 docs/current/STYLE_GUIDE.md          # Code style and formatting guidelines
 ├── 📄 docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md  # Deck editor Card View layout pattern (landscape/portrait, do not regress)
+├── 📄 docs/current/DECK_EDITOR_MOBILE_VIEW.md  # Deck editor mobile list (DEV in MV): rows, ⋯ menu, integration, file map
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
 ├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
 ├── 📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV row art + image modal sizing attempts; troubleshooting

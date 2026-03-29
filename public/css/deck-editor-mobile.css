@@ -354,11 +354,11 @@
     opacity: 0.55;
 }
 
-/* Actions sheet */
+/* Row card-actions menu: same visual language as .deck-editor-controls-menu-panel, fixed under ⋯ */
 #devMobileDeckActionsSheet {
     position: fixed;
     inset: 0;
-    z-index: 11000;
+    z-index: 10052;
     pointer-events: none;
     visibility: hidden;
 }
@@ -372,82 +372,100 @@
     display: none !important;
 }
 
-.dev-mobile-deck-actions-backdrop {
-    position: absolute;
+.dev-mobile-deck-row-menu-backdrop {
+    position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-}
-
-.dev-mobile-deck-actions-panel {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    max-height: 70vh;
-    overflow-y: auto;
-    background: #1e1b2e;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    border: 1px solid rgba(78, 205, 196, 0.35);
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
-    padding-bottom: env(safe-area-inset-bottom, 12px);
-}
-
-.dev-mobile-deck-actions-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.dev-mobile-deck-actions-title {
-    margin: 0;
-    font-size: 1rem;
-    color: #f1f5f9;
-}
-
-.dev-mobile-deck-actions-close {
+    z-index: 10052;
+    background: rgba(0, 0, 0, 0.5);
     border: none;
-    background: transparent;
-    color: #94a3b8;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 4px 8px;
+    padding: 0;
+    margin: 0;
 }
 
-.dev-mobile-deck-actions-body {
-    padding: 12px 16px 20px;
+/* [hidden] must win over display:flex from shared panel rule */
+#deckEditorModal .dev-mobile-deck-row-menu-panel[hidden] {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel.deck-editor-controls-menu-panel {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: auto;
+    transform: none !important;
+    z-index: 10053;
+    display: flex !important;
+    flex-direction: column;
+    gap: 6px;
+    min-width: min(168px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    max-height: min(52vh, 400px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-items {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-}
-
-.dev-mobile-deck-action-btn {
+    gap: 6px;
     width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(78, 205, 196, 0.45);
-    background: rgba(15, 45, 50, 0.75);
-    color: #ecfeff;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
+    min-width: 0;
 }
 
-.dev-mobile-deck-action-html .ko-btn,
-.dev-mobile-deck-action-html .reserve-character-btn,
-.dev-mobile-deck-action-html button {
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-panel-btn {
+    min-height: 36px !important;
+    height: auto !important;
+    padding: 6px 10px !important;
+    gap: 8px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    color: #4ecdc4 !important;
+    border: 1px solid rgba(78, 205, 196, 0.45) !important;
+    border-radius: 8px !important;
+    background: rgba(78, 205, 196, 0.12) !important;
+    box-shadow: none;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-panel-btn:hover {
+    background: rgba(78, 205, 196, 0.2) !important;
+    border-color: rgba(78, 205, 196, 0.65) !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-item-label {
+    color: #4ecdc4;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-item-icon {
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #4ecdc4;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-item-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.dev-mobile-deck-row-menu-custom {
+    width: 100%;
+    min-width: 0;
+}
+
+.dev-mobile-deck-row-menu-custom .ko-btn,
+.dev-mobile-deck-row-menu-custom .reserve-character-btn,
+.dev-mobile-deck-row-menu-custom button {
     width: 100%;
     margin-top: 4px;
 }
 
-.dev-mobile-deck-action-empty {
+.dev-mobile-deck-row-menu-empty {
     color: #94a3b8;
-    font-size: 0.9rem;
+    font-size: 0.8125rem;
     margin: 0;
+    padding: 6px 4px;
     text-align: center;
 }
 
