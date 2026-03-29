@@ -85,7 +85,7 @@ Each logical line in the deck is a **`.dev-mobile-deck-row`** with:
 | **`data-deck-index`** | Index into **`window.deckEditorCards`**. |
 | **`data-instance`** | 0-based instance when **`quantity > 1`** (separate row per copy for stackable types). |
 | **`.dev-mobile-deck-row-thumb`** | Square thumb; **`getCardImagePath`** + **`getDeckEditorCardViewInitialImagePath`** (thumb-first for character/location/mission where applicable). |
-| **`.dev-mobile-deck-row-name`** | **`devMobileDisplayName(card, instanceAvailable)`** — type-specific label (power value/type, teamwork line, etc.). |
+| **`.dev-mobile-deck-row-name`** | **`devMobileDisplayName(card, instanceAvailable)`** — type-specific label (power value/type, teamwork line, etc.). Typography: **`font-weight: 400`**, **`font-size: 0.9rem`**, **`color: #f8fafc`** ([`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)). |
 | **`.dev-mobile-deck-row-actions`** | Quantity controls + optional **⋯**. |
 
 ### Quantity controls (`canStack`)
