@@ -393,6 +393,11 @@ function manageDeckLayout(action, options = {}) {
 function createTwoColumnLayout() {
     const deckCardsEditor = document.querySelector('.deck-cards-editor');
     if (!deckCardsEditor) return;
+
+    /* DEV MV uses a flat #deckCardsEditor — wrapping in .deck-column + flex row shrink-wraps rows */
+    if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+        return;
+    }
     
     // Don't apply two-column layout to Card View
     if (deckCardsEditor.classList.contains('card-view')) {

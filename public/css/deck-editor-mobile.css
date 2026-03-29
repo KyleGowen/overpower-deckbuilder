@@ -58,48 +58,34 @@
     display: none !important;
 }
 
-/* Stats disclosure */
-.dev-mobile-deck-stats-details {
-    margin-bottom: 14px;
-    border: 1px solid rgba(168, 85, 247, 0.55);
-    border-radius: 10px;
-    background: rgba(22, 22, 38, 0.95);
-    overflow: hidden;
-}
-
-.dev-mobile-deck-stats-summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 600;
-    color: #e2e8f0;
-    background: rgba(88, 28, 135, 0.35);
-}
-
-.dev-mobile-deck-stats-summary::-webkit-details-marker {
+/* MAX / TOTAL stats: in modal header on mobile (desktop keeps hidden) */
+.dev-mobile-deck-header-stats {
     display: none;
 }
 
-.dev-mobile-deck-stats-summary-label {
-    letter-spacing: 0.02em;
+.layout-mobile #deckEditorModal .dev-mobile-deck-header-stats {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0;
+    margin-bottom: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
 }
 
-.dev-mobile-deck-stats-chevron {
-    color: #94a3b8;
-    font-size: 0.75rem;
+.layout-mobile #deckEditorModal .modal-header {
+    gap: 10px;
 }
 
-.dev-mobile-deck-stats-details[open] .dev-mobile-deck-stats-chevron {
-    transform: rotate(-180deg);
-    display: inline-block;
+.layout-mobile #deckEditorModal .deck-editor-top-row {
+    margin-bottom: 0;
 }
 
-.dev-mobile-deck-stats-inner {
-    padding: 12px 10px 14px;
-    background: rgba(15, 15, 28, 0.9);
+.layout-mobile #deckEditorModal .dev-mobile-deck-header-stats .dev-mobile-deck-stats-inner {
+    padding: 6px 4px 8px;
+    background: transparent;
 }
 
 .dev-mobile-deck-stats-row {
@@ -107,55 +93,66 @@
     flex-direction: row;
     align-items: stretch;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
 }
 
+/* Fixed 2×2 per column — avoids uneven wrap on longer TOTAL labels */
 .dev-mobile-deck-stats-block {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: 10px 8px;
+    flex: 1 1 0;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 6px 8px;
+    align-items: start;
+    justify-items: center;
 }
 
 .dev-mobile-summary-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 72px;
+    justify-content: flex-start;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     text-align: center;
 }
 
 .dev-mobile-stat-label {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     color: #94a3b8;
-    line-height: 1.2;
+    line-height: 1.15;
 }
 
 .dev-mobile-stat-value {
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 400;
     color: #4ecdc4;
-    margin-top: 4px;
+    margin-top: 2px;
+    line-height: 1.1;
 }
 
 .dev-mobile-deck-stats-vrule {
     width: 1px;
     align-self: stretch;
-    min-height: 48px;
-    background: rgba(78, 205, 196, 0.45);
+    min-height: 0;
+    background: rgba(78, 205, 196, 0.35);
     flex-shrink: 0;
 }
 
-/* Search: pill input + dropdown (DeckEditorSearch markup) */
-.dev-mobile-deck-search-container {
+/* Search: pill input + dropdown (DeckEditorSearch markup) — 80% width, centered */
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-container {
     position: relative;
-    width: 100%;
+    width: 80%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 14px;
     overflow: visible !important;
+    box-sizing: border-box;
 }
 
 .layout-mobile #deckEditorModal .dev-mobile-deck-search-input {
@@ -186,25 +183,41 @@
     overflow-y: auto;
 }
 
-/* Card list */
+/* Card list — same outer chrome as DTV .deck-type-section */
 .layout-mobile #deckEditorModal .deck-pane {
-    border: 1px solid rgba(168, 85, 247, 0.5);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     background: rgba(26, 26, 42, 0.6);
     padding: 8px 10px 12px;
     overflow-x: hidden;
+}
+
+/* Full-width MV list: beat DTV two-column inline flex + .deck-cards-editor.two-column */
+.layout-mobile #deckEditorModal #deckCardsEditor.deck-cards-editor {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
 }
 
 .dev-mobile-deck-list-root {
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .dev-mobile-deck-type-section {
     margin-bottom: 10px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
+/* Align with DTV .deck-type-header (index.css) */
 .dev-mobile-deck-type-header {
     width: 100%;
     display: flex;
@@ -213,13 +226,19 @@
     gap: 10px;
     padding: 10px 12px;
     border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    background: rgba(88, 28, 135, 0.4);
-    color: #f1f5f9;
+    background: rgba(78, 205, 196, 0.1);
+    color: #4ecdc4;
     font-size: 0.95rem;
     font-weight: 600;
     text-align: left;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-type-header:hover {
+    background: rgba(78, 205, 196, 0.2);
 }
 
 .dev-mobile-deck-type-name {
@@ -228,19 +247,23 @@
 
 .dev-mobile-deck-type-count {
     font-size: 0.8rem;
-    color: #4ecdc4;
-    font-weight: 700;
+    color: #bdc3c7;
+    font-weight: 500;
 }
 
 .dev-mobile-deck-type-toggle {
-    color: #cbd5e1;
+    color: #4ecdc4;
     font-size: 0.75rem;
+    font-weight: bold;
 }
 
 .dev-mobile-deck-type-body {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     margin-top: 4px;
     padding-top: 4px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .dev-mobile-deck-row {
@@ -250,6 +273,9 @@
     gap: 12px;
     padding: 10px 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .dev-mobile-deck-row:last-child {
@@ -285,32 +311,40 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* 30×30 = 75% of prior 40×40; override .touch-target-min (44px) from mobile-layout.css */
+.layout-mobile #deckEditorModal .dev-mobile-deck-qty-btn.touch-target-min,
+.layout-mobile #deckEditorModal .dev-mobile-deck-overflow-btn.touch-target-min {
+    min-width: 30px;
+    min-height: 30px;
 }
 
 .dev-mobile-deck-qty-btn {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid rgba(78, 205, 196, 0.65);
     background: rgba(15, 45, 50, 0.85);
     color: #e0fffb;
-    font-size: 1.25rem;
+    font-size: 0.94rem;
     line-height: 1;
     cursor: pointer;
 }
 
 .dev-mobile-deck-overflow-btn {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid rgba(148, 163, 184, 0.45);
     background: rgba(30, 41, 59, 0.9);
     color: #e2e8f0;
-    font-size: 1.1rem;
+    font-size: 0.83rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -354,7 +388,7 @@
     background: #1e1b2e;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    border: 1px solid rgba(168, 85, 247, 0.45);
+    border: 1px solid rgba(78, 205, 196, 0.35);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
     padding-bottom: env(safe-area-inset-bottom, 12px);
 }

@@ -1239,6 +1239,25 @@
                         </div>
                     </div>
                 </div>
+                <div class="dev-mobile-deck-header-stats" id="devMobileDeckHeaderStats" aria-label="Deck stats">
+                    <div class="dev-mobile-deck-stats-inner">
+                        <div class="dev-mobile-deck-stats-row">
+                            <div class="dev-mobile-deck-stats-block">
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX ENERGY</span><span id="deckMobileMaxEnergy" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX COMBAT</span><span id="deckMobileMaxCombat" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX BRUTE FORCE</span><span id="deckMobileMaxBruteForce" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX INTELLIGENCE</span><span id="deckMobileMaxIntelligence" class="dev-mobile-stat-value">0</span></div>
+                            </div>
+                            <div class="dev-mobile-deck-stats-vrule" aria-hidden="true"></div>
+                            <div class="dev-mobile-deck-stats-block">
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL ENERGY</span><span id="deckMobileTotalEnergy" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL COMBAT</span><span id="deckMobileTotalCombat" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL BRUTE FORCE</span><span id="deckMobileTotalBruteForce" class="dev-mobile-stat-value">0</span></div>
+                                <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL INTELLIGENCE</span><span id="deckMobileTotalIntelligence" class="dev-mobile-stat-value">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Draw Hand Section -->
@@ -1262,29 +1281,6 @@
             
             <div class="modal-body">
                 <div id="devMobileDeckChrome" class="dev-mobile-deck-chrome">
-                    <details id="devMobileDeckStatsDetails" class="dev-mobile-deck-stats-details">
-                        <summary class="dev-mobile-deck-stats-summary">
-                            <span class="dev-mobile-deck-stats-summary-label">Deck stats</span>
-                            <span class="dev-mobile-deck-stats-chevron" aria-hidden="true">▼</span>
-                        </summary>
-                        <div class="dev-mobile-deck-stats-inner">
-                            <div class="dev-mobile-deck-stats-row">
-                                <div class="dev-mobile-deck-stats-block">
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX ENERGY</span><span id="deckMobileMaxEnergy" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX COMBAT</span><span id="deckMobileMaxCombat" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX BRUTE FORCE</span><span id="deckMobileMaxBruteForce" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">MAX INTELLIGENCE</span><span id="deckMobileMaxIntelligence" class="dev-mobile-stat-value">0</span></div>
-                                </div>
-                                <div class="dev-mobile-deck-stats-vrule" aria-hidden="true"></div>
-                                <div class="dev-mobile-deck-stats-block">
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL ENERGY</span><span id="deckMobileTotalEnergy" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL COMBAT</span><span id="deckMobileTotalCombat" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL BRUTE FORCE</span><span id="deckMobileTotalBruteForce" class="dev-mobile-stat-value">0</span></div>
-                                    <div class="dev-mobile-summary-stat"><span class="dev-mobile-stat-label">TOTAL INTELLIGENCE</span><span id="deckMobileTotalIntelligence" class="dev-mobile-stat-value">0</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </details>
                     <div class="dev-mobile-deck-search-container deck-editor-search-container">
                         <input type="text" id="devMobileDeckSearchInput" class="dev-mobile-deck-search-input" placeholder="Search by card name, character, or type..." autocomplete="off">
                         <div id="devMobileDeckSearchResults" class="dev-mobile-deck-search-results deck-editor-search-results" style="display: none;"></div>

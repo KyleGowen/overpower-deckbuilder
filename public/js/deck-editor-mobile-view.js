@@ -126,6 +126,9 @@
         if (!deckCardsEditor) return;
         if (typeof global.isLayoutMobile !== 'function' || !global.isLayoutMobile()) return;
 
+        /* DTV uses setProperty(..., 'important') on #deckCardsEditor — clear so MV CSS can apply */
+        deckCardsEditor.removeAttribute('style');
+
         if (chrome) chrome.style.display = '';
 
         var cards = global.deckEditorCards || [];

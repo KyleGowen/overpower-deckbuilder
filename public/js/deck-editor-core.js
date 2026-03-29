@@ -129,7 +129,9 @@ function showDeckEditor() {
                     const layoutWidth = layout.offsetWidth;
                     const deckWidth = deckPane.offsetWidth;
                     const deckPercentage = (deckWidth / layoutWidth) * 100;
-                    if (deckPercentage >= 33) {
+                    const onMobile =
+                        typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+                    if (!onMobile && deckPercentage >= 33) {
                         const deckCardsEditor = document.querySelector('.deck-cards-editor');
                         if (deckCardsEditor && !manageDeckLayout('hasClass', { className: 'list-view' })) {
                             manageDeckLayout('addClass', { className: 'two-column' });
@@ -155,8 +157,11 @@ function showDeckEditor() {
         const defaultPercentage = 71;
         const percentage = uiPrefs && uiPrefs.dividerPosition ? uiPrefs.dividerPosition : defaultPercentage;
         
-        // Defer to after paint so layout is measurable
+        // Defer to after paint so layout is measurable (skip on MV — flex-basis px shrinks the pane)
         requestAnimationFrame(() => {
+            if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) {
+                return;
+            }
             const layout = document.querySelector('.deck-editor-layout');
             const deckPane = document.querySelector('.deck-pane');
             if (layout && deckPane) {

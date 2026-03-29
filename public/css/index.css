@@ -2346,7 +2346,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            min-width: min(280px, calc(100vw - 48px));
+            min-width: min(198px, calc(100vw - 48px));
             max-width: calc(100vw - 24px);
             max-height: min(70vh, 520px);
             overflow-y: auto;
@@ -2393,7 +2393,7 @@
             grid-row: auto !important;
         }
 
-        /* Row layout: label left, uniform 22px icons right (beats .cancel-btn display:block !important) */
+        /* Row layout: label left, uniform 22px icons flush right (beats .cancel-btn display:block !important) */
         #deckEditorModal .deck-editor-controls-menu-panel .deck-editor-menu-panel-btn[hidden] {
             display: none !important;
         }

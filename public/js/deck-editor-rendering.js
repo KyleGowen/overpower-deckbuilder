@@ -2426,10 +2426,12 @@ async function displayDeckCardsForEditing() {
         return; // Skip the rest of the function since we're in list view
     }
     
-    // Check if we should maintain two-column layout
+    // Check if we should maintain two-column layout (DTV only — MV uses flat DEV list)
     const layout = document.querySelector('.deck-editor-layout');
     const deckPane = document.querySelector('.deck-pane');
-    if (layout && deckPane) {
+    const skipTwoCol =
+        typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+    if (!skipTwoCol && layout && deckPane) {
         const layoutWidth = layout.offsetWidth;
         const deckWidth = deckPane.offsetWidth;
         const deckPercentage = (deckWidth / layoutWidth) * 100;
