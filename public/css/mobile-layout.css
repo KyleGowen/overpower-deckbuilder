@@ -280,7 +280,9 @@
 .layout-mobile #missions-table thead tr:first-child th:nth-child(2),
 .layout-mobile #missions-table tbody td:nth-child(2),
 .layout-mobile #missions-table thead tr:first-child th:nth-child(4),
-.layout-mobile #missions-table tbody td:nth-child(4) {
+.layout-mobile #missions-table tbody td:nth-child(4),
+.layout-mobile #missions-table thead tr:first-child th:nth-child(5),
+.layout-mobile #missions-table tbody td:nth-child(5) {
     min-width: 0 !important;
 }
 

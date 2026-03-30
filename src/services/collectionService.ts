@@ -14,10 +14,14 @@ export class CollectionService {
     switch (setCode.toUpperCase()) {
       case 'ERB':
         return 'Edgar Rice Burroughs and the World Legends';
+      case 'ERBP':
+        return 'Edgar Rice Burroughs and the World Legends - Promos';
       case 'SKY':
         return 'Skybound';
       case 'SKYP':
         return 'Skybound - Promos';
+      case 'TFCP':
+        return 'The Few and the Cursed - Promos';
       default:
         return setCode;
     }

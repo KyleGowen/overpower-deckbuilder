@@ -111,6 +111,9 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('data-dbv-mission-set-filter="missions"');
             expect(templateContent).toContain('data-dbv-name-filter="missions-mobile-name"');
             expect(templateContent).toContain('data-dbv-name-filter="missions-header-name"');
+            expect(templateContent).toMatch(
+                /id="missions-table"[\s\S]*?<th>Card Name<\/th>\s*<th>Set<\/th>/
+            );
         });
 
         it('should contain events table', () => {
@@ -146,6 +149,8 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="training-table"');
             expect(templateContent).toContain('id="training-tbody"');
             expect(templateContent).toContain('onclick="clearTrainingFilters()"');
+            expect(templateContent).toContain('<th>Set</th>');
+            expect(templateContent).toContain('training-filter-controls-th" colspan="6"');
         });
 
         it('should contain basic universe table', () => {
@@ -160,6 +165,10 @@ describe('Database View Template', () => {
             expect(templateContent).toContain('id="power-cards-table"');
             expect(templateContent).toContain('id="power-cards-tbody"');
             expect(templateContent).toContain('onclick="clearPowerCardFilters()"');
+            expect(templateContent).toMatch(
+                /id="power-cards-table"[\s\S]*?<th>Value<\/th>\s*<th>Set<\/th>/
+            );
+            expect(templateContent).toContain('power-cards-filter-controls-th" colspan="3"');
         });
     });
 

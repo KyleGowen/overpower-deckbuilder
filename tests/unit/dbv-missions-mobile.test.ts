@@ -128,7 +128,7 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
     });
 
-    it('template mirrors index Missions structure (4-column table)', () => {
+    it('template mirrors index Missions structure (5-column table)', () => {
         const html = readFileSync(templatePath, 'utf8');
         expect(html).toContain('missions-filter-row');
         expect(html).toContain('colspan="2"');
@@ -137,7 +137,10 @@ describe('DBV Missions mobile markup (index.html + template)', () => {
         expect(html).toContain('missions-mobile-set-row');
         expect(html).toContain('data-dbv-name-filter="missions-mobile-name"');
         expect(html).toContain('data-dbv-name-filter="missions-header-name"');
-        expect(html).toContain('colspan="4" class="loading">Loading missions');
+        expect(html).toMatch(
+            /id="missions-table"[\s\S]*?<th>Card Name<\/th>\s*<th>Set<\/th>/
+        );
+        expect(html).toContain('colspan="5" class="loading">Loading missions');
         expect(html).not.toContain('onclick="clearMissionsFilters()"');
     });
 });
@@ -156,6 +159,11 @@ describe('card-display-functions.js displayMissions (mobile row contract)', () =
         expect(source).toContain('characters-mobile-card-caption__mission-set');
         expect(source).toContain('characters-mobile-card-caption__set-line');
         expect(source).toContain('window.dbvSetCaptionLineFromCard');
+    });
+
+    it('DTV tbody includes product Set column after Card Name (colspan 5 empty state)', () => {
+        expect(source).toContain('colspan="5">No missions found');
+        expect(source).toContain("${esc(String(setLine || '').trim())}");
     });
 });
 
@@ -262,5 +270,10 @@ describe('dbv-render-shared.js (DBV set caption helper)', () => {
     it('exports dbvSetCaptionLineFromCard for missions caption', () => {
         expect(source).toContain('function dbvSetCaptionLineFromCard(card)');
         expect(source).toContain('window.dbvSetCaptionLineFromCard = dbvSetCaptionLineFromCard');
+    });
+
+    it('appends foil suffix to set caption when is_foil is true', () => {
+        expect(source).toContain('is_foil');
+        expect(source).toContain(' · Foil');
     });
 });

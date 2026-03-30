@@ -84,6 +84,21 @@ describe('DBV Power Cards markup (index.html)', () => {
         expect(html).toContain('power-value-clear');
         expect(html).toContain('clearPowerCardFilters()');
         expect(html).toContain('id="power-value-equals"');
+        expect(html).toMatch(
+            /id="power-cards-table"[\s\S]*?<th>Value<\/th>\s*<th>Set<\/th>/
+        );
+        expect(html).toContain('power-cards-filter-controls-th" colspan="3"');
+        expect(html).toContain('colspan="5" class="loading">Loading power cards');
+    });
+});
+
+describe('card-display.js Power alternate-art + DTV Set cell', () => {
+    const jsPath = path.join(__dirname, '../../public/js/card-display.js');
+
+    it('updates power-cards-dbv-set-cell when cycling power-group art', () => {
+        const source = readFileSync(jsPath, 'utf8');
+        expect(source).toContain('td.power-cards-dbv-set-cell');
+        expect(source).toContain('powerDesktopSetLine');
     });
 });
 
@@ -121,5 +136,11 @@ describe('card-display-functions.js Power mobile caption', () => {
         expect(source).toContain('powerMobileTypeValueHtml');
         expect(source).toContain('powerMobileCaptionLinesForCard');
         expect(source).toMatch(/powerUseMobileListArt[\s\S]*lockRowHeight/);
+    });
+
+    it('adds DTV Set column and navigate payload for alternate art', () => {
+        expect(source).toContain('function powerCardDbvSetLineText');
+        expect(source).toContain('power-cards-dbv-set-cell');
+        expect(source).toContain('powerDesktopSetLine');
     });
 });

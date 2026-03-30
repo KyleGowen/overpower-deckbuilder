@@ -571,7 +571,7 @@
 
         #missions-table thead tr:first-child th:nth-child(1),
         #missions-table tbody td:nth-child(1) {
-            width: 24%;
+            width: 22%;
         }
 
         #missions-table td:nth-child(1) img {
@@ -583,17 +583,22 @@
 
         #missions-table thead tr:first-child th:nth-child(2),
         #missions-table tbody td:nth-child(2) {
-            width: 9%;
+            width: 8%;
         }
 
         #missions-table thead tr:first-child th:nth-child(3),
         #missions-table tbody td:nth-child(3) {
-            width: 22%;
+            width: 20%;
         }
 
         #missions-table thead tr:first-child th:nth-child(4),
         #missions-table tbody td:nth-child(4) {
-            width: 45%;
+            width: 33%;
+        }
+
+        #missions-table thead tr:first-child th:nth-child(5),
+        #missions-table tbody td:nth-child(5) {
+            width: 17%;
         }
 
         /* Events — DTV column parity with Missions/Characters image + actions */

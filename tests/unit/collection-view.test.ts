@@ -804,6 +804,16 @@ describe('translateSet()', () => {
         expect(fns.translateSet('sky')).toBe('Skybound');
     });
 
+    it('maps ERBP to ERB promos set name (matches sets table / DBV before /api/sets loads)', () => {
+        expect(fns.translateSet('ERBP')).toBe('Edgar Rice Burroughs and the World Legends - Promos');
+        expect(fns.translateSet('erbp')).toBe('Edgar Rice Burroughs and the World Legends - Promos');
+    });
+
+    it('maps TFCP to Few and the Cursed promos set name (matches V202 sets table)', () => {
+        expect(fns.translateSet('TFCP')).toBe('The Few and the Cursed - Promos');
+        expect(fns.translateSet('tfcp')).toBe('The Few and the Cursed - Promos');
+    });
+
     it('returns unknown codes unchanged', () => {
         expect(fns.translateSet('XYZ')).toBe('XYZ');
     });

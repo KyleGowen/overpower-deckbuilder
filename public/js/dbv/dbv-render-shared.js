@@ -222,7 +222,12 @@ function dbvSetCaptionLineFromCard(card) {
     } else {
         setLine = setLabel;
     }
-    return setLine.trim();
+    const base = setLine.trim();
+    const foil =
+        card && (card.is_foil === true || card.is_foil === 'true' || card.is_foil === 1)
+            ? ' · Foil'
+            : '';
+    return (base + foil).trim();
 }
 
 /**

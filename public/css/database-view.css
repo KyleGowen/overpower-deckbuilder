@@ -1029,7 +1029,7 @@ html:not(.layout-mobile) #events-table td:nth-child(2) .remove-from-collection-b
 
 #missions-table thead tr:first-child th:nth-child(1), /* Image */
 #missions-table tbody td:nth-child(1) {
-    width: 24%;
+    width: 22%;
     vertical-align: middle;
 }
 
@@ -1061,19 +1061,25 @@ html:not(.layout-mobile) #missions-table td:nth-child(1) .card-nav-arrow {
 
 #missions-table thead tr:first-child th:nth-child(2), /* Actions */
 #missions-table tbody td:nth-child(2) {
-    width: 9%;
+    width: 8%;
 }
 
 #missions-table thead tr:first-child th:nth-child(3), /* Mission Set */
 #missions-table tbody td:nth-child(3) {
-    width: 22%;
+    width: 20%;
     min-width: 0;
 }
 
 #missions-table thead tr:first-child th:nth-child(4), /* Card Name */
 #missions-table tbody td:nth-child(4) {
-    width: 45%;
+    width: 33%;
     max-width: none;
+}
+
+#missions-table thead tr:first-child th:nth-child(5), /* Product set */
+#missions-table tbody td:nth-child(5) {
+    width: 17%;
+    min-width: 0;
 }
 
 html:not(.layout-mobile) #missions-table td:nth-child(2) .add-to-deck-btn,

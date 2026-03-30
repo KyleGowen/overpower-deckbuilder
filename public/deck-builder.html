@@ -4098,6 +4098,7 @@
                             <th>Type 2</th>
                             <th>Value to Use</th>
                             <th>Bonus</th>
+                            <th>Set</th>
                         </tr>
                         <tr class="filter-row training-desktop-filter-row">
                             <th>
@@ -4157,13 +4158,14 @@
                             </th>
                             <th></th>
                             <th></th>
+                            <th></th>
                         </tr>
                         <tr class="filter-row training-filter-row">
                             <th class="training-filter-clear-th">
                                 <button type="button" class="clear-filters-btn" onclick="clearTrainingFilters()">Clear All Filters</button>
                             </th>
                             <th class="training-filter-spacer-th" aria-hidden="true"></th>
-                            <th class="training-filter-controls-th" colspan="5">
+                            <th class="training-filter-controls-th" colspan="6">
                                 <div class="training-mobile-filter-shell column-filters">
                                     <div class="training-filter-icon-row">
                                         <div class="icon-filter-container">
@@ -4198,7 +4200,7 @@
                     </thead>
                     <tbody id="training-tbody">
                         <tr>
-                            <td colspan="7" class="loading">Loading training...</td>
+                            <td colspan="8" class="loading">Loading training...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -4352,6 +4354,7 @@
                             <th></th>
                             <th>Power Type</th>
                             <th>Value</th>
+                            <th>Set</th>
                         </tr>
                         <tr class="filter-row power-cards-desktop-filter-row">
                             <th>
@@ -4389,13 +4392,14 @@
                                     <input type="number" id="power-value-min" class="filter-input power-cards-desktop-value-stack-input" placeholder="Min" min="1" max="8" aria-label="Minimum value">
                                 </div>
                             </th>
+                            <th></th>
                         </tr>
                         <tr class="filter-row power-cards-filter-row">
                             <th class="power-cards-filter-clear-th">
                                 <button type="button" class="clear-filters-btn" onclick="clearPowerCardFilters()">Clear All Filters</button>
                             </th>
                             <th class="power-cards-filter-spacer-th" aria-hidden="true"></th>
-                            <th class="power-cards-filter-controls-th" colspan="2">
+                            <th class="power-cards-filter-controls-th" colspan="3">
                                 <div class="power-cards-mobile-filter-shell column-filters">
                                     <div class="power-cards-filter-icon-row">
                                         <div class="icon-filter-container">
@@ -4445,7 +4449,7 @@
                     </thead>
                     <tbody id="power-cards-tbody">
                         <tr>
-                            <td colspan="4" class="loading">Loading power cards...</td>
+                            <td colspan="5" class="loading">Loading power cards...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -6308,28 +6312,47 @@
             const tbody = document.getElementById('power-cards-tbody');
             if (!tbody) return;
             if (!cards || cards.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5">No power cards found</td></tr>';
                 return;
+            }
+            function escDeckAttr(s) {
+                return String(s)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+            function powerCardSetLineDeck(card) {
+                if (typeof window.dbvSetCaptionLineFromCard === 'function') {
+                    return String(window.dbvSetCaptionLineFromCard(card) || '').trim();
+                }
+                const setNameRaw = (card.set_name || '').trim();
+                const setNumRaw =
+                    card.set_number != null && String(card.set_number).trim() !== ''
+                        ? String(card.set_number).trim()
+                        : '';
+                return setNumRaw ? `${setNameRaw} - ${setNumRaw}` : setNameRaw;
             }
             tbody.innerHTML = cards
                 .filter((c) => !c.is_foil)
                 .map((card) => {
                     const rel = (card.image_path || card.image || '').replace(/^\/+/,'');
                     const img = rel ? '/src/resources/cards/images/power/' + rel : '';
+                    const setText = escDeckAttr(powerCardSetLineDeck(card));
                     return (
                         '<tr>' +
                         '<td data-label="Image">' +
                         '<img src="' +
                         img +
                         '" alt="' +
-                        (card.power_type || '') +
-                        ' ' +
-                        (card.value ?? '') +
+                        escDeckAttr((card.power_type || '') + ' ' + (card.value ?? '')) +
                         '" style="width: 120px; height: auto; max-height: 180px; object-fit: contain; border-radius: 5px; cursor: pointer;" onclick="openModal(this)">' +
                         '</td><td></td><td>' +
                         (card.power_type || '') +
                         '</td><td>' +
                         (card.value ?? '') +
+                        '</td><td>' +
+                        setText +
                         '</td></tr>'
                     );
                 })

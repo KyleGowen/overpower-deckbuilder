@@ -32,8 +32,10 @@ const GUEST_COLLECTION_KEY = 'guestCollection';
 /** Uppercase set code → display name; seeded for offline / before GET /api/sets */
 const DEFAULT_COLLECTION_SET_NAMES = new Map([
     ['ERB', 'Edgar Rice Burroughs and the World Legends'],
+    ['ERBP', 'Edgar Rice Burroughs and the World Legends - Promos'],
     ['SKY', 'Skybound'],
     ['SKYP', 'Skybound - Promos'],
+    ['TFCP', 'The Few and the Cursed - Promos'],
 ]);
 let collectionSetNamesByCode = new Map(DEFAULT_COLLECTION_SET_NAMES);
 let collectionSetNamesFetched = false;

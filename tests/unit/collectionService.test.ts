@@ -217,6 +217,20 @@ describe('CollectionService', () => {
       expect(result).toBe('Skybound - Promos');
     });
 
+    it('should translate ERBP to ERB promos set name', () => {
+      expect(collectionService.translateSet('ERBP')).toBe(
+        'Edgar Rice Burroughs and the World Legends - Promos'
+      );
+      expect(collectionService.translateSet('erbp')).toBe(
+        'Edgar Rice Burroughs and the World Legends - Promos'
+      );
+    });
+
+    it('should translate TFCP to Few and the Cursed promos set name', () => {
+      expect(collectionService.translateSet('TFCP')).toBe('The Few and the Cursed - Promos');
+      expect(collectionService.translateSet('tfcp')).toBe('The Few and the Cursed - Promos');
+    });
+
     it('should return original code for unknown set codes', () => {
       const result = collectionService.translateSet('UNKNOWN');
       expect(result).toBe('UNKNOWN');

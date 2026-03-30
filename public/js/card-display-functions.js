@@ -16,7 +16,7 @@ function displayMissions(missions) {
     const tbody = document.getElementById('missions-tbody');
 
     if (missions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No missions found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">No missions found</td></tr>';
         return;
     }
 
@@ -121,6 +121,7 @@ function displayMissions(missions) {
             </td>
             <td>${mission.mission_set}</td>
             <td>${mission.card_name}</td>
+            <td>${esc(String(setLine || '').trim())}</td>
         </tr>
     `;
         })
@@ -595,6 +596,19 @@ function displayAdvancedUniverse(advancedUniverse) {
 
 // displayTeamwork, displayAllyUniverse, displayTraining, displayBasicUniverse: owned by card-data-display.js
 
+/** Product set line for Power DBV (friendly name + number + foil); matches Training `dbvSetCaptionLineFromCard` when available. */
+function powerCardDbvSetLineText(card) {
+    if (typeof window.dbvSetCaptionLineFromCard === 'function') {
+        return String(window.dbvSetCaptionLineFromCard(card) || '').trim();
+    }
+    const setNameRaw = (card.set_name || 'Edgar Rice Burroughs and the World Legends').trim();
+    const setNumRaw =
+        card.set_number != null && String(card.set_number).trim() !== ''
+            ? String(card.set_number).trim()
+            : '';
+    return setNumRaw ? `${setNameRaw} - ${setNumRaw}` : setNameRaw;
+}
+
 // Display power cards
 function displayPowerCards(cards) {
     const tbody = document.getElementById('power-cards-tbody');
@@ -606,7 +620,7 @@ function displayPowerCards(cards) {
     tbody.innerHTML = '';
 
     if (!cards || cards.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">No power cards found</td></tr>';
         return;
     }
 
@@ -675,7 +689,7 @@ function displayPowerCards(cards) {
     });
 
     if (sortedGroups.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No power cards found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">No power cards found</td></tr>';
         return;
     }
 
@@ -698,15 +712,9 @@ function displayPowerCards(cards) {
 
         function powerMobileCaptionLinesForCard(card) {
             const typeIconHtmlCard = renderAllyStatTypeIcon(card.power_type || card.type || '');
-            const setNameRawC = (card.set_name || 'Edgar Rice Burroughs and the World Legends').trim();
-            const setNumRawC =
-                card.set_number != null && String(card.set_number).trim() !== ''
-                    ? String(card.set_number).trim()
-                    : '';
-            const setLinePlainC = setNumRawC ? `${setNameRawC} - ${setNumRawC}` : setNameRawC;
             return {
                 powerMobileTypeValueHtml: `<span class="special-power-icons-cell">${typeIconHtmlCard}</span><span class="characters-mobile-card-caption__power-value-num">${esc(String(card.value ?? ''))}</span>`,
-                powerMobileSetLine: setLinePlainC,
+                powerMobileSetLine: powerCardDbvSetLineText(card),
             };
         }
 
@@ -716,6 +724,7 @@ function displayPowerCards(cards) {
             imagePath: getCardImagePathForDisplay(card, 'power'),
             name: card.name || `${card.value} - ${card.power_type}`,
             isFoil: !!card.is_foil,
+            powerDesktopSetLine: powerCardDbvSetLineText(card),
             ...powerMobileCaptionLinesForCard(card),
         }));
         
@@ -741,12 +750,7 @@ function displayPowerCards(cards) {
         const navClass = hasMultipleImages ? ' card-image-container--with-nav' : '';
 
         const typeIconHtml = renderAllyStatTypeIcon(representative.power_type || representative.type || '');
-        const setNameRaw = (representative.set_name || 'Edgar Rice Burroughs and the World Legends').trim();
-        const setNumRaw =
-            representative.set_number != null && String(representative.set_number).trim() !== ''
-                ? String(representative.set_number).trim()
-                : '';
-        const setLinePlain = setNumRaw ? `${setNameRaw} - ${setNumRaw}` : setNameRaw;
+        const repSetLinePlain = powerCardDbvSetLineText(representative);
 
         const captionHtml = useMobileListArt
             ? `
@@ -755,7 +759,7 @@ function displayPowerCards(cards) {
                         <span class="special-power-icons-cell">${typeIconHtml}</span>
                         <span class="characters-mobile-card-caption__power-value-num">${esc(String(representative.value ?? ''))}</span>
                     </div>
-                    <div class="characters-mobile-card-caption__power-set-line">${esc(setLinePlain)}</div>
+                    <div class="characters-mobile-card-caption__power-set-line">${esc(repSetLinePlain)}</div>
                 </div>`
             : '';
 
@@ -788,6 +792,7 @@ function displayPowerCards(cards) {
             </td>
             <td>${renderAllyStatTypeIcon(representative.power_type || representative.type || '')}</td>
             <td>${representative.value || ''}</td>
+            <td class="power-cards-dbv-set-cell">${esc(repSetLinePlain)}</td>
         `;
         
         // Store image data in data attribute for navigation

@@ -778,6 +778,11 @@ function displayTraining(cards) {
             <td>${renderAllyStatTypeIcon(card.type_2)}</td>
             <td>${card.value_to_use}</td>
             <td>${card.bonus}</td>
+            <td>${
+                typeof window.dbvSetCaptionLineFromCard === 'function'
+                    ? esc(String(window.dbvSetCaptionLineFromCard(card) || '').trim())
+                    : esc(String((card.set != null ? card.set : card.universe) || 'ERB').trim())
+            }</td>
         </tr>
     `;
     }).join('');

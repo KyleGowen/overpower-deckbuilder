@@ -319,6 +319,10 @@ function navigateCardImage(groupId, direction) {
                 }
             }
         }
+        const powerSetTd = row.querySelector('td.power-cards-dbv-set-cell');
+        if (powerSetTd && newImage.powerDesktopSetLine != null) {
+            powerSetTd.textContent = String(newImage.powerDesktopSetLine).trim();
+        }
     } else {
         const capNameEl = row ? row.querySelector('.characters-mobile-card-caption__name') : null;
         const capSetEl = row ? row.querySelector('.characters-mobile-card-caption__set') : null;
