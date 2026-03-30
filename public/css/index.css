@@ -2594,13 +2594,12 @@
         }
 
         @media (max-width: 480px) {
-            /* Fixed + viewport center: absolute + left 50% was relative to the narrow menu shell (wrong).
-               Top set in deck-editor-core.js when menu opens. Exclude card-row ⋯ flyout. */
+            /* Fixed placement: absolute + % left was relative to the narrow menu shell (wrong).
+               `left` / `top` set in deck-editor-core.js when menu opens. Exclude card-row ⋯ flyout. */
             #deckEditorModal .deck-editor-controls-menu.deck-editor-controls-menu-open > .deck-editor-controls-menu-panel:not(.dev-mobile-deck-row-menu-panel) {
                 position: fixed !important;
-                left: 50% !important;
                 right: auto !important;
-                transform: translateX(-50%) !important;
+                transform: none !important;
                 width: min(280px, calc(100vw - 32px)) !important;
                 max-width: calc(100vw - 32px) !important;
                 min-width: 0 !important;

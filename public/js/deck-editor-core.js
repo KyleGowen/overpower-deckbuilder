@@ -1,20 +1,52 @@
 // Deck Editor Core Functions
 // Extracted from index.html for better modularity
 
+function deckEditorControlsMenuUsesFixedPanelPlacement() {
+    return (
+        (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) ||
+        (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 480px)').matches)
+    );
+}
+
 function positionDeckEditorControlsMenuPanel() {
     const toggle = document.getElementById('deckEditorControlsMenuToggle');
     const panel = document.getElementById('deckEditorControlsMenuPanel');
     if (!toggle || !panel) return;
-    const useFixedPlacement =
-        (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile()) ||
-        (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 480px)').matches);
+    const useFixedPlacement = deckEditorControlsMenuUsesFixedPanelPlacement();
     if (!useFixedPlacement) {
         panel.style.removeProperty('top');
+        panel.style.removeProperty('left');
+        panel.style.removeProperty('visibility');
         return;
     }
     requestAnimationFrame(() => {
         const r = toggle.getBoundingClientRect();
-        panel.style.top = `${Math.round(r.bottom + 8)}px`;
+        const pw = panel.offsetWidth;
+        const ph = panel.offsetHeight;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const gap = 8;
+        const margin = 12;
+        let left = r.right - pw;
+        if (left < margin) {
+            left = margin;
+        }
+        if (left + pw > vw - margin) {
+            left = Math.max(margin, vw - pw - margin);
+        }
+        panel.style.left = `${Math.round(left)}px`;
+        let top = r.bottom + gap;
+        if (top + ph > vh - margin) {
+            top = r.top - gap - ph;
+        }
+        if (top < margin) {
+            top = margin;
+        }
+        if (top + ph > vh - margin) {
+            top = Math.max(margin, vh - ph - margin);
+        }
+        panel.style.top = `${Math.round(top)}px`;
+        panel.style.removeProperty('visibility');
     });
 }
 
@@ -32,10 +64,15 @@ function setDeckEditorControlsMenuOpen(open) {
     }
     if (panel) {
         if (open) {
+            if (deckEditorControlsMenuUsesFixedPanelPlacement()) {
+                panel.style.visibility = 'hidden';
+            }
             panel.removeAttribute('hidden');
             positionDeckEditorControlsMenuPanel();
         } else {
             panel.style.removeProperty('top');
+            panel.style.removeProperty('left');
+            panel.style.removeProperty('visibility');
             panel.setAttribute('hidden', '');
         }
     }

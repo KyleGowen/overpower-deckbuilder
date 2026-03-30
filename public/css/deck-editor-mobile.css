@@ -185,15 +185,14 @@
 }
 
 /*
- * Header hamburger: `left: 50%` on `position: absolute` is relative to ~48px .deck-editor-controls-menu,
- * so “centered” panels sat on the right and clipped. When open, use fixed + viewport centering; `top`
- * is set in deck-editor-core.js (getBoundingClientRect below toggle).
+ * Header hamburger: `position: absolute` + percentage `left` is relative to the narrow ~48px menu shell,
+ * so the panel clipped. When open, use `position: fixed`; horizontal + vertical placement is set in
+ * deck-editor-core.js `positionDeckEditorControlsMenuPanel` (align to toggle, clamp to viewport).
  */
 .layout-mobile #deckEditorModal .deck-editor-controls-menu.deck-editor-controls-menu-open > .deck-editor-controls-menu-panel:not(.dev-mobile-deck-row-menu-panel) {
     position: fixed !important;
-    left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    transform: none !important;
     width: min(280px, calc(100vw - 32px)) !important;
     max-width: calc(100vw - 32px) !important;
     min-width: 0 !important;
