@@ -93,6 +93,10 @@ function switchToDeckBuilder() {
         if (usernameElement) {
             usernameElement.textContent = displayName;
         }
+        const usernameHidden = document.getElementById('currentUsernameHidden');
+        if (usernameHidden) {
+            usernameHidden.textContent = displayName;
+        }
     }
     
     // Load deck data when switching to deck builder (unless creating new deck)
@@ -357,6 +361,8 @@ function updateUserWelcome() {
         const displayName = (currentUser.role === 'GUEST') ? 'Guest' : (currentUser.username || currentUser.name || 'User');
         const usernameElement = document.getElementById('currentUsername');
         if (usernameElement) usernameElement.textContent = displayName;
+        const usernameHidden = document.getElementById('currentUsernameHidden');
+        if (usernameHidden) usernameHidden.textContent = displayName;
         buildUserMenuOptions(currentUser);
     }
     syncHeaderCollectionLayout();
@@ -379,6 +385,7 @@ function toggleUserMenu(event) {
     if (!toggle || !dropdown) return;
     const isOpen = dropdown.classList.toggle('show');
     toggle.classList.toggle('open', isOpen);
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     if (isOpen) {
         document.addEventListener('click', closeUserMenuOnOutsideClick);
     } else {
@@ -392,21 +399,26 @@ function closeUserMenuOnOutsideClick(e) {
     const toggle = document.getElementById('userMenuToggle');
     if (menu && !menu.contains(e.target)) {
         dropdown.classList.remove('show');
-        if (toggle) toggle.classList.remove('open');
+        if (toggle) {
+            toggle.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
         document.removeEventListener('click', closeUserMenuOnOutsideClick);
     }
 }
 
 function buildUserMenuOptions(user) {
+    const itemsEl = document.getElementById('userMenuDropdownItems');
     const dropdown = document.getElementById('userMenuDropdown');
-    if (!dropdown) return;
-    dropdown.innerHTML = '';
+    const target = itemsEl || dropdown;
+    if (!target) return;
+    target.innerHTML = '';
 
     // + Create Deck - available to all roles (GUEST uses session-scoped guest decks)
-    dropdown.appendChild(createUserMenuItem('+ Create Deck', () => { closeUserMenu(); createNewDeck(); }, 'user-menu-item--primary'));
+    target.appendChild(createUserMenuItem('+ Create Deck', () => { closeUserMenu(); createNewDeck(); }, 'user-menu-item--primary'));
     // + Create User - ADMIN only
     if (user.role === 'ADMIN') {
-        dropdown.appendChild(createUserMenuItem('+ Create User', () => {
+        target.appendChild(createUserMenuItem('+ Create User', () => {
             // Defer opening the create-user dropdown until after the menu fully closes
             closeUserMenu();
             setTimeout(() => toggleCreateUserDropdown(), 0);
@@ -414,10 +426,10 @@ function buildUserMenuOptions(user) {
     }
     // Change Password - USER and ADMIN (placeholder handler)
     if (user.role !== 'GUEST') {
-        dropdown.appendChild(createUserMenuItem('Change Password', () => { closeUserMenu(); setTimeout(() => toggleChangePasswordDropdown(), 0); }));
+        target.appendChild(createUserMenuItem('Change Password', () => { closeUserMenu(); setTimeout(() => toggleChangePasswordDropdown(), 0); }));
     }
     // Log Out - everyone
-    dropdown.appendChild(createUserMenuItem('Log Out', () => { closeUserMenu(); const btn = document.getElementById('logoutBtn'); if (btn) btn.click(); }, 'user-menu-item--danger'));
+    target.appendChild(createUserMenuItem('Log Out', () => { closeUserMenu(); const btn = document.getElementById('logoutBtn'); if (btn) btn.click(); }, 'user-menu-item--danger'));
 }
 
 function createUserMenuItem(label, onClick, extraClass) {
@@ -432,7 +444,10 @@ function closeUserMenu() {
     const dropdown = document.getElementById('userMenuDropdown');
     const toggle = document.getElementById('userMenuToggle');
     if (dropdown) dropdown.classList.remove('show');
-    if (toggle) toggle.classList.remove('open');
+    if (toggle) {
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
     document.removeEventListener('click', closeUserMenuOnOutsideClick);
 }
 

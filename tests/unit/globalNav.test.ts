@@ -38,7 +38,9 @@ describe('Global Navigation Component', () => {
             <div id="total-decks">-</div>
             <div id="currentUsername"></div>
             <div id="userMenuToggle"></div>
-            <div id="userMenuDropdown"></div>
+            <div id="userMenuDropdown">
+                <div id="userMenuDropdownItems"></div>
+            </div>
             <div id="userMenu"></div>
             <button id="logoutBtn"></button>
             <div id="createUserDropdown"></div>
@@ -568,6 +570,7 @@ describe('Global Navigation Component', () => {
 
                 expect(dropdown!.classList.contains('show')).toBe(true);
                 expect(toggle!.classList.contains('open')).toBe(true);
+                expect(toggle!.getAttribute('aria-expanded')).toBe('true');
             });
 
             it('should add document click listener when opened', () => {
@@ -607,6 +610,7 @@ describe('Global Navigation Component', () => {
 
                 expect(dropdown!.classList.contains('show')).toBe(false);
                 expect(toggle!.classList.contains('open')).toBe(false);
+                expect(toggle!.getAttribute('aria-expanded')).toBe('false');
                 expect(removeListenerSpy).toHaveBeenCalled();
             });
         });

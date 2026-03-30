@@ -225,13 +225,13 @@ describe('mobile-layout.css (M1 shell)', () => {
             /\.layout-mobile\s+\.header-nav-cluster\s+\.app-tab-button[\s\S]*?flex:\s*1\s+1\s+0/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+\.user-menu-toggle[\s\S]*?justify-content:\s*flex-end/
+            /\.layout-mobile\s+\.user-menu-toggle[\s\S]*?justify-content:\s*center/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+\.user-menu-dropdown[\s\S]*?width:\s*max-content/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+\.user-menu-dropdown\.show[\s\S]*?display:\s*grid/
+            /\.layout-mobile\s+\.user-menu-dropdown\.show[\s\S]*?display:\s*flex/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+\.user-menu-dropdown\s+\.user-menu-item[\s\S]*?white-space:\s*nowrap/

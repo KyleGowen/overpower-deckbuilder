@@ -731,7 +731,7 @@ describe('Global Navigation Component', () => {
   describe('Global Navigation UI Changes', () => {
     let mockNewDeckBtn: any;
     let mockUserMenuToggle: any;
-    let mockCurrentUserGreeting: any;
+    let mockUserMenuDropdownItems: any;
 
     beforeEach(() => {
       // Mock the new elements we added
@@ -742,12 +742,15 @@ describe('Global Navigation Component', () => {
       };
 
       mockUserMenuToggle = {
-        style: { fontWeight: '400' },
-        classList: { add: jest.fn(), remove: jest.fn() }
+        style: {},
+        classList: { add: jest.fn(), remove: jest.fn() },
+        setAttribute: jest.fn(),
+        getAttribute: jest.fn()
       };
 
-      mockCurrentUserGreeting = {
-        textContent: 'Welcome, testuser!▶'
+      mockUserMenuDropdownItems = {
+        innerHTML: '',
+        appendChild: jest.fn()
       };
 
       // Update getElementById mock to include new elements
@@ -766,7 +769,7 @@ describe('Global Navigation Component', () => {
           case 'total-decks': return mockTotalDecks;
           case 'newDeckBtn': return mockNewDeckBtn;
           case 'userMenuToggle': return mockUserMenuToggle;
-          case 'currentUserGreeting': return mockCurrentUserGreeting;
+          case 'userMenuDropdownItems': return mockUserMenuDropdownItems;
           default: return null;
         }
       });
@@ -792,17 +795,13 @@ describe('Global Navigation Component', () => {
     });
 
     describe('User Menu Welcome Text Styling', () => {
-      test('should have non-bold welcome text styling', () => {
+      test('should use icon-only account toggle in the bar (welcome lives in dropdown)', () => {
         const userMenuToggle = mockDocument.getElementById('userMenuToggle');
-        expect(userMenuToggle.style.fontWeight).toBe('400');
+        expect(userMenuToggle).toBeDefined();
+        expect(userMenuToggle.classList).toBeDefined();
       });
 
-      test('should display correct welcome text content', () => {
-        const currentUserGreeting = mockDocument.getElementById('currentUserGreeting');
-        expect(currentUserGreeting.textContent).toBe('Welcome, testuser!▶');
-      });
-
-      test('should update welcome text when user changes', () => {
+      test('should update welcome username when user changes', () => {
         mockGetCurrentUser.mockReturnValue({ 
           id: 'user123', 
           username: 'newuser', 
@@ -940,7 +939,7 @@ describe('Global Navigation Component', () => {
             case 'total-characters': return mockTotalCharacters;
             case 'total-decks': return mockTotalDecks;
             case 'userMenuToggle': return mockUserMenuToggle;
-            case 'currentUserGreeting': return mockCurrentUserGreeting;
+            case 'userMenuDropdownItems': return mockUserMenuDropdownItems;
             default: return null;
           }
         });
@@ -953,7 +952,7 @@ describe('Global Navigation Component', () => {
         mockDocument.getElementById.mockImplementation((id: string) => {
           switch (id) {
             case 'userMenuToggle':
-            case 'currentUserGreeting': return null;
+            case 'userMenuDropdownItems': return null;
             case 'databaseViewBtn': return mockDatabaseViewBtn;
             case 'deckBuilderBtn': return mockDeckBuilderBtn;
             case 'database-view': return mockDatabaseView;

@@ -5305,13 +5305,13 @@
     flex-wrap: nowrap;
     align-items: stretch;
     justify-content: stretch;
-    gap: 3px;
+    gap: 6px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    /* Tab row uses 90% of center column: 5% inset each side */
-    padding-left: 5%;
-    padding-right: 5%;
+    /* Slight inset; account icon-only on the right frees width for tabs */
+    padding-left: 2%;
+    padding-right: 2%;
     box-sizing: border-box;
 }
 
@@ -5359,7 +5359,7 @@
     width: auto;
     min-height: 35px;
     margin: 0;
-    padding: 5px 3px;
+    padding: 6px 8px;
     box-sizing: border-box;
     font-size: 12px;
     line-height: 1.15;
@@ -5383,7 +5383,7 @@
 .layout-mobile #userMenu {
     flex-shrink: 0;
     min-width: 0;
-    max-width: min(160px, 42vw);
+    max-width: none;
 }
 
 .layout-mobile .user-menu {
@@ -5391,75 +5391,31 @@
     max-width: 100%;
 }
 
+/* Icon-only account control — frees center column for Database / Decks / Collection */
 .layout-mobile .user-menu-toggle {
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    min-width: 44px;
     min-height: 44px;
-    min-width: 0;
-    max-width: 100%;
-    justify-content: flex-end;
-    padding: 4px 2px 4px 6px;
+    max-width: none;
+    padding: 0;
     box-sizing: border-box;
+}
+
+.layout-mobile .user-menu-dropdown-header .user-greeting-copy {
     font-size: 14px;
-}
-
-/* Stacked right-aligned copy + larger ▶ centered to the right of both lines */
-.layout-mobile .user-menu-toggle .user-greeting {
-    flex-direction: row;
-    align-items: center;
     justify-content: flex-end;
-    gap: 6px;
-    line-height: 1.15;
-}
-
-.layout-mobile .user-menu-toggle .user-greeting-copy {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    min-width: 0;
-    flex: 1 1 auto;
-}
-
-.layout-mobile .user-menu-toggle #currentUserGreeting {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: 100%;
-}
-
-.layout-mobile .user-greeting-line1 {
-    display: block;
-    width: 100%;
     text-align: right;
 }
 
-/* Row aligns name + ! to the copy’s right edge; username shrinks for ellipsis */
-.layout-mobile .user-greeting-line2 {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0;
-    min-width: 0;
-    width: 100%;
-    overflow: hidden;
-}
-
-.layout-mobile #currentUsername {
+.layout-mobile .user-menu-dropdown-header #currentUsername {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
     max-width: 100%;
-}
-
-.layout-mobile .user-menu-toggle .triangle-icon {
-    flex-shrink: 0;
-    font-size: 16px;
-    line-height: 1;
-    align-self: center;
 }
 
 /* Do not set display here — `.layout-mobile` beats `.user-menu-dropdown` specificity and would
@@ -5472,24 +5428,34 @@
     max-width: min(260px, calc(100vw - 16px));
     box-sizing: border-box;
     padding: 8px;
+    align-items: stretch;
 }
 
 .layout-mobile .user-menu-dropdown.show {
-    display: grid;
-    grid-template-columns: max-content;
-    justify-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
-/* Single-line labels; column width = longest item (no 100% stretch past text) */
+/* Same width for every action (grid column = widest label) */
 .layout-mobile .user-menu-dropdown .user-menu-item {
+    display: block;
     white-space: nowrap;
-    width: auto;
+    width: 100%;
+    max-width: 100%;
     padding: 7px 12px;
     margin: 5px 0;
     font-size: 14px;
     line-height: 1.2;
     min-height: 0;
     box-sizing: border-box;
+}
+.layout-mobile .user-menu-dropdown-items {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    min-width: 0;
+    justify-items: stretch;
 }
 
 /* -------------------------------------------------------------------------- */
