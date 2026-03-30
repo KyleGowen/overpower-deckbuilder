@@ -2223,6 +2223,44 @@
             height: auto;
         }
 
+        /* DTV: tighter deck editor header vertical rhythm (other modals keep global .modal-header) */
+        #deckEditorModal .modal-header {
+            padding: 8px 16px 2px 16px;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+
+        /* Do not stretch title column to stats height (avoids dead space above/below title+meta) */
+        #deckEditorModal .deck-editor-top-row {
+            align-items: center;
+            margin-bottom: 2px;
+            min-height: 0;
+        }
+
+        #deckEditorModal .deck-editor-title-section {
+            padding: 4px 0 4px 5px;
+            justify-content: flex-start;
+        }
+
+        #deckEditorModal .deck-title-with-validation {
+            gap: 4px;
+        }
+
+        #deckEditorModal .deck-stats-divider {
+            height: 28px;
+            min-height: 28px;
+        }
+
+        #deckEditorModal .deck-editor-top-row .deck-summary-stats {
+            gap: 6px 10px;
+        }
+
+        #deckEditorModal .deck-editor-top-row .deck-summary-stats > .summary-stat {
+            min-height: 0;
+            gap: 2px;
+            justify-content: center;
+        }
+
         /* Title + desktop summary cluster (hamburger stays a sibling for MV collapse banner) */
         #deckEditorModal .dev-mobile-deck-header-expandable {
             display: flex;
@@ -2230,6 +2268,99 @@
             min-width: 0;
             gap: 20px;
             align-items: stretch;
+        }
+
+        /* DTV: shrink header — no stretch-to-stats, title+meta one band; stats stay label-over-value with larger type */
+        html.layout-desktop #deckEditorModal .modal-header {
+            padding: 2px 12px 0 12px;
+            gap: 0;
+            margin-bottom: 0;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-top-row {
+            margin-bottom: 0;
+            gap: 12px;
+        }
+
+        html.layout-desktop #deckEditorModal .dev-mobile-deck-header-expandable {
+            align-items: center;
+            gap: 8px;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-title-section {
+            padding: 0 0 0 5px;
+            gap: 2px;
+            margin-right: 0;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-title-with-validation {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-title-with-validation .deck-editor-deck-name.editable-title {
+            flex: 1 1 auto;
+            min-width: min(160px, 32vw);
+            padding: 2px 6px;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-title-meta-row {
+            flex-shrink: 0;
+        }
+
+        html.layout-desktop #deckEditorModal #deckEditorDescription.deck-description {
+            margin: 0;
+            padding: 0;
+            line-height: 1.35;
+            width: 100%;
+            flex-basis: 100%;
+        }
+
+        html.layout-desktop #deckEditorModal #deckEditorDescription.deck-description:empty {
+            display: none;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-top-row .deck-summary-stats > .summary-stat {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            min-height: 48px;
+            height: auto;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-summary-stats {
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* Stats hug the title: drop flex-grow so the strip isn’t a wide column with numbers stuck at its left edge */
+        html.layout-desktop #deckEditorModal .deck-editor-top-row .deck-summary-section {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 0;
+            justify-content: flex-start;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-top-row .deck-summary-content {
+            justify-content: flex-start;
+            gap: 12px;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-stats-divider {
+            height: 40px;
+            min-height: 40px;
+            align-self: center;
+        }
+
+        html.layout-desktop #deckEditorModal .deck-editor-menu-toggle {
+            width: 40px;
+            min-width: 40px;
+            height: 40px;
+            min-height: 40px;
+            max-height: 40px;
         }
 
         .modal-header .deck-editor-title-section {

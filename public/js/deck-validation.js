@@ -92,24 +92,6 @@ function calculateIconTotals(deckCards) {
 
 // Function to update deck summary with stats and validation
 async function updateDeckSummary(deckCards) {
-    // DEBUG: Check font sizes after update and force apply
-    setTimeout(() => {
-        const statLabels = document.querySelectorAll('.deck-summary-stats .stat-label');
-        const statValues = document.querySelectorAll('.deck-summary-stats .stat-value');
-        if (statLabels.length > 0) {
-            // Force apply font size to ALL labels
-            statLabels.forEach(l => {
-                l.style.setProperty('font-size', '0.65rem', 'important');
-            });
-        }
-        if (statValues.length > 0) {
-            // Force apply font size to ALL values
-            statValues.forEach(v => {
-                v.style.setProperty('font-size', '0.85rem', 'important');
-            });
-        }
-    }, 100);
-    
     // Update total card count using shared function
     const totalCards = calculateTotalCardCount(deckCards);
     

@@ -213,19 +213,25 @@
     border-bottom-color: rgba(255, 255, 255, 0.04) !important;
 }
 
-/* Extend the header shading slightly into the seam area below */
+/* Extend the header shading slightly into the seam area below (keep short — tall strip reads as empty header space) */
 #deckEditorModal .modal-header::after {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -10px;
-    height: 10px;
+    bottom: -4px;
+    height: 4px;
     /* Fade out to avoid a hard edge line */
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0));
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     pointer-events: none;
+}
+
+/* DTV: shorter seam so it does not read as extra header padding */
+html.layout-desktop #deckEditorModal .modal-header::after {
+    bottom: -2px;
+    height: 2px;
 }
 
 .deck-summary-section {
@@ -249,4 +255,19 @@
 /* In read-only mode, make deck pane full width with background */
 .read-only-mode .deck-pane {
     background: rgba(0, 0, 0, 0.432); /* Increased shading by 20% (was 0.36) */
+}
+
+/*
+ * Deck editor header MAX/TOTAL strip — typography lives here so it loads after index.css
+ * (deck-editor-search / deck-editor-mobile / this file). span.stat-value = cyan numbers.
+ */
+#deckEditorModal .deck-editor-top-row .deck-summary-stats .summary-stat span.stat-value {
+    font-size: 18px !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+}
+
+#deckEditorModal .deck-editor-top-row .deck-summary-stats .summary-stat .stat-label {
+    font-size: 11px !important;
+    line-height: 1.1 !important;
 }
