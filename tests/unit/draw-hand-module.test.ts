@@ -319,6 +319,17 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
             expect(eventCard).toBeTruthy();
         });
 
+        it('should render landscape event art on inner .drawn-card-face', () => {
+            const cards = [{ type: 'event', cardId: 'event-1', quantity: 1 }];
+            mockAvailableCardsMap.set('event-1', { id: 'event-1', name: 'Event Card 1' });
+
+            window.DrawHand?.displayDrawnCards(cards);
+
+            const face = mockDrawHandContent.querySelector('.drawn-card.event-card .drawn-card-face') as HTMLElement;
+            expect(face).toBeTruthy();
+            expect(face.style.backgroundImage).toContain('url(');
+        });
+
         it('should apply KO dimming when SimulateKO is available', () => {
             // Mock SimulateKO
             (window as any).SimulateKO = {
@@ -441,14 +452,12 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
     });
 
     describe('close() - Close Functionality', () => {
-        it('should hide pane and reset button text', () => {
+        it('should hide pane', () => {
             mockDrawHandSection.style.display = 'block';
-            mockDrawHandBtn.textContent = 'Draw Hand';
 
             window.DrawHand?.close();
 
             expect(mockDrawHandSection.style.display).toBe('none');
-            expect(mockDrawHandBtn.textContent).toBe('Draw Hand');
         });
 
         it('should handle missing elements gracefully', () => {
@@ -630,6 +639,101 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
             window.displayDrawnCards?.(testCards);
 
             expect(window.drawnCards).toEqual(testCards);
+        });
+    });
+
+    describe('Mobile draw-hand chrome (layout-mobile)', () => {
+        let deckModal: HTMLElement;
+
+        beforeEach(() => {
+            document.documentElement.classList.add('layout-mobile');
+            deckModal = document.createElement('div');
+            deckModal.id = 'deckEditorModal';
+            const header = document.createElement('div');
+            header.className = 'modal-header';
+            deckModal.appendChild(header);
+            document.body.appendChild(deckModal);
+            (window as any).applyDevMobileDeckHeaderCollapsed = jest.fn();
+        });
+
+        afterEach(() => {
+            document.documentElement.classList.remove('layout-mobile');
+            deckModal.remove();
+            delete (window as any).applyDevMobileDeckHeaderCollapsed;
+        });
+
+        it('toggle adds draw-hand-active and uses flex display on mobile', () => {
+            mockDeckEditorCards = Array.from({ length: 10 }, (_, i) => ({
+                type: 'power',
+                cardId: `power-${i}`,
+                quantity: 1
+            }));
+            (window as any).deckEditorCards = mockDeckEditorCards;
+
+            window.DrawHand?.toggle();
+
+            expect(deckModal.classList.contains('draw-hand-active')).toBe(true);
+            expect(mockDrawHandSection.style.display).toBe('flex');
+            expect((window as any).applyDevMobileDeckHeaderCollapsed).toHaveBeenCalledWith(true);
+        });
+
+        it('close removes draw-hand-active and restores header snapshot', () => {
+            const header = deckModal.querySelector('.modal-header') as HTMLElement;
+            header.classList.add('dev-mobile-deck-header-collapsed');
+            mockDeckEditorCards = Array.from({ length: 10 }, (_, i) => ({
+                type: 'power',
+                cardId: `power-${i}`,
+                quantity: 1
+            }));
+            (window as any).deckEditorCards = mockDeckEditorCards;
+            window.DrawHand?.toggle();
+            (window as any).applyDevMobileDeckHeaderCollapsed.mockClear();
+
+            window.DrawHand?.close();
+
+            expect(deckModal.classList.contains('draw-hand-active')).toBe(false);
+            expect((window as any).applyDevMobileDeckHeaderCollapsed).toHaveBeenCalledWith(true);
+        });
+
+        it('close restores expanded header when snapshot was expanded', () => {
+            mockDeckEditorCards = Array.from({ length: 10 }, (_, i) => ({
+                type: 'power',
+                cardId: `power-${i}`,
+                quantity: 1
+            }));
+            (window as any).deckEditorCards = mockDeckEditorCards;
+            window.DrawHand?.toggle();
+            (window as any).applyDevMobileDeckHeaderCollapsed.mockClear();
+
+            window.DrawHand?.close();
+
+            expect((window as any).applyDevMobileDeckHeaderCollapsed).toHaveBeenCalledWith(false);
+        });
+
+        it('sets stack CSS variables when content has measurable height', () => {
+            jest.useFakeTimers();
+            Object.defineProperty(mockDrawHandContent, 'clientHeight', {
+                configurable: true,
+                value: 400
+            });
+            Object.defineProperty(mockDrawHandContent, 'clientWidth', {
+                configurable: true,
+                value: 264
+            });
+            mockDeckEditorCards = Array.from({ length: 10 }, (_, i) => ({
+                type: 'power',
+                cardId: `power-${i}`,
+                quantity: 1
+            }));
+            (window as any).deckEditorCards = mockDeckEditorCards;
+            window.DrawHand?.toggle();
+            jest.runAllTimers();
+
+            const overlap = mockDrawHandContent.style.getPropertyValue('--draw-hand-stack-overlap');
+            const scale = mockDrawHandContent.style.getPropertyValue('--draw-hand-card-scale');
+            expect(overlap).not.toBe('');
+            expect(scale).not.toBe('');
+            jest.useRealTimers();
         });
     });
 

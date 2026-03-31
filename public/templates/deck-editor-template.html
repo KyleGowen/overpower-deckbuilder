@@ -79,11 +79,15 @@
         <!-- Draw Hand Section -->
         <div class="draw-hand-section" id="drawHandSection" style="display: none;">
             <div class="draw-hand-header">
-                <h4>Draw Hand</h4>
-                <button class="draw-hand-close" data-click-handler="closeDrawHand">×</button>
+                <div class="draw-hand-header-end">
+                    <button type="button" class="draw-hand-close" data-click-handler="closeDrawHand" aria-label="Close draw hand">×</button>
+                </div>
             </div>
             <div class="draw-hand-content" id="drawHandContent">
                 <!-- Drawn cards will be displayed here -->
+            </div>
+            <div class="draw-hand-footer">
+                <button type="button" class="draw-hand-redraw-btn" id="drawHandRedrawBtn" data-click-handler="redrawDrawHand" aria-label="Draw another hand">Draw again</button>
             </div>
         </div>
         

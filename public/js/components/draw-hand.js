@@ -1,398 +1,492 @@
 /**
  * Draw Hand Feature Module
- * 
+ *
  * Encapsulates all Draw Hand functionality for deck editing.
  * Allows users to draw a random hand of 8 cards (9 if events are present)
  * from their deck, excluding characters, locations, and missions.
- * 
- * Features:
- * - Draw random hand from playable cards
- * - Drag and drop reordering of drawn cards
- * - Integration with KO feature for dimming unusable cards
- * - Button state management based on playable card count
- * 
- * Dependencies:
- * - window.deckEditorCards - Deck cards array
- * - window.availableCardsMap - Card data map
- * - window.SimulateKO - KO feature integration (for dimming)
- * - getCardImagePath() - Global function for card image paths
- * 
- * Public API (window.DrawHand):
- * - init() - Initialize module state
- * - drawHand() - Draw a new random hand
- * - displayDrawnCards(cards) - Display cards in draw hand pane
- * - toggle() - Toggle draw hand pane visibility
- * - close() - Close draw hand pane
- * - updateButtonState(deckCards) - Update button enable/disable state
- * - getDrawnCards() - Get current drawn cards array
- * - refresh() - Refresh display (used by KO feature)
- * 
- * Usage:
- * ```javascript
- * // Draw a new hand
- * window.DrawHand.drawHand();
- * 
- * // Toggle pane visibility
- * window.DrawHand.toggle();
- * 
- * // Update button state when deck changes
- * window.DrawHand.updateButtonState(deckCards);
- * ```
- * 
+ *
+ * Mobile (layout-mobile): vertical stacked fan, optional header collapse, tap-to-peek.
+ *
  * @module DrawHand
- * @since Draw Hand refactoring (Phase 1-6)
  */
 
-(function() {
+(function () {
     'use strict';
 
-    // Private state
-    let drawnCards = [];
-    let draggedIndex = null;
+    var drawnCards = [];
+    var draggedIndex = null;
+    var savedHeaderCollapsed = null;
+    var stackResizeObserver = null;
 
-    /**
-     * Initialize Draw Hand module (called on page load)
-     */
+    var BASE_CARD_W = 132;
+    var BASE_CARD_H = 185;
+    var MIN_PEEK = 28;
+
+    function isMobileDrawHandLayout() {
+        return document.documentElement.classList.contains('layout-mobile');
+    }
+
+    function getDeckEditorModal() {
+        return document.getElementById('deckEditorModal');
+    }
+
+    function setDrawHandActive(active) {
+        var modal = getDeckEditorModal();
+        if (!modal) {
+            return;
+        }
+        if (active) {
+            modal.classList.add('draw-hand-active');
+        } else {
+            modal.classList.remove('draw-hand-active');
+        }
+    }
+
+    function openDrawHandChrome() {
+        if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        var modal = getDeckEditorModal();
+        var header = modal && modal.querySelector('.modal-header');
+        if (header) {
+            savedHeaderCollapsed = header.classList.contains('dev-mobile-deck-header-collapsed');
+        } else {
+            savedHeaderCollapsed = false;
+        }
+        if (typeof window.applyDevMobileDeckHeaderCollapsed === 'function') {
+            window.applyDevMobileDeckHeaderCollapsed(true);
+        }
+    }
+
+    function closeDrawHandChrome() {
+        if (!isMobileDrawHandLayout()) {
+            savedHeaderCollapsed = null;
+            return;
+        }
+        if (savedHeaderCollapsed === null) {
+            return;
+        }
+        if (typeof window.applyDevMobileDeckHeaderCollapsed === 'function') {
+            window.applyDevMobileDeckHeaderCollapsed(savedHeaderCollapsed);
+        }
+        savedHeaderCollapsed = null;
+    }
+
+    function updateStackLayout() {
+        var content = document.getElementById('drawHandContent');
+        var modal = getDeckEditorModal();
+        if (!content || !modal || !modal.classList.contains('draw-hand-active')) {
+            return;
+        }
+        if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        var section = document.getElementById('drawHandSection');
+        if (!section || section.style.display === 'none') {
+            return;
+        }
+
+        var cards = content.querySelectorAll('.drawn-card');
+        var n = cards.length;
+        if (n === 0) {
+            return;
+        }
+
+        var available = content.clientHeight;
+        if (available <= 0) {
+            return;
+        }
+
+        var cw = content.clientWidth;
+        var scale = cw > 0 ? cw / BASE_CARD_W : 1;
+        var overlap = 0;
+        var iter;
+        for (iter = 0; iter < 12; iter++) {
+            var H = BASE_CARD_H * scale;
+            var maxOverlap = Math.max(0, H - MIN_PEEK * scale);
+            overlap = n > 1 ? (n * H - available) / (n - 1) : 0;
+            if (overlap < 0) {
+                overlap = 0;
+            }
+            if (overlap > maxOverlap) {
+                overlap = maxOverlap;
+            }
+            var stackH = n * H - (n - 1) * overlap;
+            if (stackH <= available || stackH <= 0) {
+                break;
+            }
+            scale *= available / stackH;
+        }
+
+        content.style.setProperty('--draw-hand-stack-overlap', overlap + 'px');
+        content.style.setProperty('--draw-hand-card-scale', String(scale));
+
+        var i;
+        for (i = 0; i < n; i++) {
+            cards[i].style.zIndex = String(10 + i);
+        }
+    }
+
+    function scheduleStackLayout() {
+        if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        requestAnimationFrame(function () {
+            requestAnimationFrame(updateStackLayout);
+        });
+    }
+
+    function ensureStackResizeObserver() {
+        if (stackResizeObserver || typeof ResizeObserver === 'undefined') {
+            return;
+        }
+        var content = document.getElementById('drawHandContent');
+        if (!content) {
+            return;
+        }
+        stackResizeObserver = new ResizeObserver(function () {
+            updateStackLayout();
+        });
+        stackResizeObserver.observe(content);
+    }
+
+    function ensureDrawHandContentListeners(content) {
+        if (!content || content.getAttribute('data-draw-hand-listeners') === '1') {
+            return;
+        }
+        content.setAttribute('data-draw-hand-listeners', '1');
+        content.addEventListener('dragover', handleContainerDragOver);
+        content.addEventListener('drop', handleContainerDrop);
+        content.addEventListener('click', handleDrawHandContentClick);
+    }
+
+    function handleDrawHandContentClick(e) {
+        if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        var modal = getDeckEditorModal();
+        if (!modal || !modal.classList.contains('draw-hand-active')) {
+            return;
+        }
+        var content = document.getElementById('drawHandContent');
+        if (!content || !content.contains(e.target)) {
+            return;
+        }
+        var card = e.target.closest('.drawn-card');
+        if (card && content.contains(card)) {
+            if (card.classList.contains('draw-hand-peek-active')) {
+                card.classList.remove('draw-hand-peek-active');
+            } else {
+                content.querySelectorAll('.draw-hand-peek-active').forEach(function (c) {
+                    c.classList.remove('draw-hand-peek-active');
+                });
+                card.classList.add('draw-hand-peek-active');
+            }
+            return;
+        }
+        content.querySelectorAll('.draw-hand-peek-active').forEach(function (c) {
+            c.classList.remove('draw-hand-peek-active');
+        });
+    }
+
     function init() {
-        // Initialize state
         drawnCards = [];
         draggedIndex = null;
-        
-        // Maintain window.drawnCards for backward compatibility
         window.drawnCards = drawnCards;
     }
 
-    /**
-     * Draw a random hand from the deck
-     * Filters out characters, locations, and missions
-     * Draws 8 cards, or 9 if event cards are present
-     * 
-     * @public
-     * @function drawHand
-     */
     function drawHand() {
-        const deckCards = window.deckEditorCards || [];
-        
-        // Filter out characters, locations, and missions to create draw pile
-        // Also filter out cards with exclude_from_draw: true
-        const drawPile = [];
-        deckCards.forEach(card => {
+        var deckCards = window.deckEditorCards || [];
+
+        var drawPile = [];
+        deckCards.forEach(function (card) {
             if (card.type !== 'character' && card.type !== 'location' && card.type !== 'mission') {
-                // Skip cards that are excluded from draw hand
                 if (card.exclude_from_draw === true) {
                     return;
                 }
-                // Add each copy of the card to the draw pile
-                for (let i = 0; i < card.quantity; i++) {
+                var q;
+                for (q = 0; q < card.quantity; q++) {
                     drawPile.push(card);
                 }
             }
         });
 
-        // Draw 8 random cards, then check for event cards to determine if we need a 9th
-        const newDrawnCards = [];
-        const usedIndices = new Set();
-        const targetHandSize = 8;
-        
-        // Safety check: don't try to draw more cards than available
-        const maxCardsToDraw = Math.min(targetHandSize, drawPile.length);
-        
-        // Prevent infinite loop: break if we've tried too many times
-        let attempts = 0;
-        const maxAttempts = drawPile.length * 10; // Reasonable limit
-        
+        var newDrawnCards = [];
+        var usedIndices = new Set();
+        var targetHandSize = 8;
+
+        var maxCardsToDraw = Math.min(targetHandSize, drawPile.length);
+
+        var attempts = 0;
+        var maxAttempts = drawPile.length * 10;
+
         while (newDrawnCards.length < maxCardsToDraw && attempts < maxAttempts) {
             attempts++;
-            const randomIndex = Math.floor(Math.random() * drawPile.length);
+            var randomIndex = Math.floor(Math.random() * drawPile.length);
             if (!usedIndices.has(randomIndex)) {
                 usedIndices.add(randomIndex);
                 newDrawnCards.push(drawPile[randomIndex]);
             }
         }
 
-        // Check if we have any event cards and draw a 9th card if so (maximum 9 cards total)
-        const hasEventCards = newDrawnCards.some(card => card.type === 'event');
+        var hasEventCards = newDrawnCards.some(function (card) {
+            return card.type === 'event';
+        });
         if (hasEventCards && drawPile.length > 8 && newDrawnCards.length < 9 && newDrawnCards.length < drawPile.length) {
-            // Draw exactly one more card to make it 9 total (never more than 9)
-            let eventAttempts = 0;
-            const maxEventAttempts = drawPile.length * 2;
+            var eventAttempts = 0;
+            var maxEventAttempts = drawPile.length * 2;
             while (newDrawnCards.length < 9 && eventAttempts < maxEventAttempts) {
                 eventAttempts++;
-                const randomIndex = Math.floor(Math.random() * drawPile.length);
-                if (!usedIndices.has(randomIndex)) {
-                    usedIndices.add(randomIndex);
-                    newDrawnCards.push(drawPile[randomIndex]);
-                    break; // Only draw one additional card
+                var ri = Math.floor(Math.random() * drawPile.length);
+                if (!usedIndices.has(ri)) {
+                    usedIndices.add(ri);
+                    newDrawnCards.push(drawPile[ri]);
+                    break;
                 }
             }
         }
 
-        // Store drawn cards globally for drag and drop (backward compatibility)
         drawnCards = newDrawnCards;
         window.drawnCards = drawnCards;
-        
-        // Display the drawn cards
+
         displayDrawnCards(drawnCards);
     }
 
-    /**
-     * Display drawn cards in the draw hand pane
-     * Includes KO dimming integration with SimulateKO module
-     * 
-     * @public
-     * @function displayDrawnCards
-     * @param {Array} cards - Array of card objects to display
-     */
+    function applyCardBackground(cardElement, imagePath) {
+        cardElement.style.backgroundImage = 'url(\'' + imagePath + '\')';
+    }
+
+    /** Mouse on a different card clears tap-peek so only :hover drives focus (fine pointers only). */
+    function attachDrawFanHoverPeekHandoff(cardElement) {
+        cardElement.addEventListener('mouseenter', function () {
+            if (typeof window.matchMedia !== 'function') {
+                return;
+            }
+            if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                return;
+            }
+            var content = document.getElementById('drawHandContent');
+            if (!content) {
+                return;
+            }
+            content.querySelectorAll('.draw-hand-peek-active').forEach(function (c) {
+                if (c !== cardElement) {
+                    c.classList.remove('draw-hand-peek-active');
+                }
+            });
+        });
+    }
+
     function displayDrawnCards(cards) {
-        const drawHandContent = document.getElementById('drawHandContent');
+        var drawHandContent = document.getElementById('drawHandContent');
         if (!drawHandContent) {
             console.warn('Draw hand content element not found');
             return;
         }
-        
-        // Update internal state
+
         drawnCards = cards || [];
         window.drawnCards = drawnCards;
-        
+
         drawHandContent.innerHTML = '';
 
-        cards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
+        ensureDrawHandContentListeners(drawHandContent);
+        ensureStackResizeObserver();
+
+        cards.forEach(function (card, index) {
+            var cardElement = document.createElement('div');
             cardElement.className = 'drawn-card';
             cardElement.draggable = true;
-            cardElement.dataset.index = index;
-            
-            // Add event-card class for horizontal orientation
+            cardElement.dataset.index = String(index);
+
             if (card.type === 'event') {
                 cardElement.classList.add('event-card');
             }
-            
-            // Check if card should be dimmed based on KO'd characters
-            // Integration with SimulateKO module for KO dimming
+
             if (window.SimulateKO && window.SimulateKO.shouldDimCard) {
-                const shouldDim = window.SimulateKO.shouldDimCard(
-                    card, 
-                    window.availableCardsMap || new Map(), 
+                var shouldDim = window.SimulateKO.shouldDimCard(
+                    card,
+                    window.availableCardsMap || new Map(),
                     window.deckEditorCards || []
                 );
                 if (shouldDim) {
                     cardElement.classList.add('ko-dimmed');
                 }
             }
-            
-            // Get the card image path
-            const availableCard = window.availableCardsMap && window.availableCardsMap.get(card.cardId);
+
+            var availableCard = window.availableCardsMap && window.availableCardsMap.get(card.cardId);
+            var imagePath;
+            var titleText = 'Unknown Card';
             if (availableCard) {
-                const imagePath = getCardImagePath(availableCard, card.type);
-                cardElement.style.backgroundImage = `url('${imagePath}')`;
-                
-                // Add hover tooltip
-                cardElement.title = availableCard.name || availableCard.card_name || card.name || 'Unknown Card';
+                imagePath = getCardImagePath(availableCard, card.type);
+                titleText = availableCard.name || availableCard.card_name || card.name || 'Unknown Card';
             } else {
-                // Fallback for unknown cards
-                cardElement.style.backgroundImage = 'url("' + (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp")';
-                cardElement.title = 'Unknown Card';
+                imagePath = (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp';
             }
-            
-            // Add drag and drop event listeners
+            cardElement.title = titleText;
+
+            if (card.type === 'event') {
+                var face = document.createElement('div');
+                face.className = 'drawn-card-face';
+                face.style.backgroundImage = 'url(\'' + imagePath + '\')';
+                cardElement.appendChild(face);
+            } else {
+                applyCardBackground(cardElement, imagePath);
+            }
+
             cardElement.addEventListener('dragstart', handleDragStart);
             cardElement.addEventListener('dragend', handleDragEnd);
             cardElement.addEventListener('dragover', handleDragOver);
             cardElement.addEventListener('drop', handleDrop);
-            
+            attachDrawFanHoverPeekHandoff(cardElement);
+
             drawHandContent.appendChild(cardElement);
         });
-        
-        // Add drag and drop to the container
-        drawHandContent.addEventListener('dragover', handleContainerDragOver);
-        drawHandContent.addEventListener('drop', handleContainerDrop);
+
+        scheduleStackLayout();
     }
 
-    /**
-     * Handle drag start event for drawn cards
-     */
+    function cardFromEventTarget(target) {
+        if (!target || !target.closest) {
+            return null;
+        }
+        return target.closest('.drawn-card');
+    }
+
     function handleDragStart(e) {
-        draggedIndex = parseInt(e.target.dataset.index);
-        e.target.classList.add('dragging');
+        var el = cardFromEventTarget(e.target);
+        if (!el) {
+            return;
+        }
+        draggedIndex = parseInt(el.dataset.index, 10);
+        el.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', e.target.outerHTML);
-        
-        // Add visual feedback to other cards
-        const allCards = document.querySelectorAll('.drawn-card');
-        allCards.forEach((card, index) => {
+        e.dataTransfer.setData('text/html', el.outerHTML);
+
+        document.querySelectorAll('.drawn-card').forEach(function (card, index) {
             if (index !== draggedIndex) {
                 card.classList.add('drag-target');
             }
         });
     }
 
-    /**
-     * Handle drag end event for drawn cards
-     */
     function handleDragEnd(e) {
-        e.target.classList.remove('dragging');
+        var el = cardFromEventTarget(e.target);
+        if (el) {
+            el.classList.remove('dragging');
+        }
         draggedIndex = null;
-        
-        // Remove visual feedback from all cards
-        const allCards = document.querySelectorAll('.drawn-card');
-        allCards.forEach(card => {
+
+        document.querySelectorAll('.drawn-card').forEach(function (card) {
             card.classList.remove('drag-target');
         });
     }
 
-    /**
-     * Handle drag over event for drawn cards
-     */
     function handleDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
     }
 
-    /**
-     * Handle drop event for drawn cards (reordering)
-     */
     function handleDrop(e) {
         e.preventDefault();
-        const targetIndex = parseInt(e.target.dataset.index);
-        
-        if (draggedIndex !== null && targetIndex !== null && draggedIndex !== targetIndex) {
-            // Swap the cards
-            const temp = drawnCards[draggedIndex];
+        var targetCard = cardFromEventTarget(e.target);
+        if (!targetCard) {
+            return;
+        }
+        var targetIndex = parseInt(targetCard.dataset.index, 10);
+
+        if (draggedIndex !== null && !isNaN(targetIndex) && draggedIndex !== targetIndex) {
+            var temp = drawnCards[draggedIndex];
             drawnCards[draggedIndex] = drawnCards[targetIndex];
             drawnCards[targetIndex] = temp;
-            
-            // Update global state for backward compatibility
             window.drawnCards = drawnCards;
-            
-            // Re-render the cards
             displayDrawnCards(drawnCards);
         }
     }
 
-    /**
-     * Handle drag over event for container
-     */
     function handleContainerDragOver(e) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        e.target.classList.add('drag-over');
+        e.currentTarget.classList.add('drag-over');
     }
 
-    /**
-     * Handle drop event for container
-     */
     function handleContainerDrop(e) {
         e.preventDefault();
-        e.target.classList.remove('drag-over');
+        e.currentTarget.classList.remove('drag-over');
     }
 
-    /**
-     * Toggle draw hand pane visibility
-     * Shows pane and draws hand if hidden, or draws new hand if visible
-     * 
-     * @public
-     * @function toggle
-     */
     function toggle() {
-        const drawHandSection = document.getElementById('drawHandSection');
-        const drawHandBtn = document.getElementById('drawHandBtn');
-        
+        var drawHandSection = document.getElementById('drawHandSection');
+        var drawHandBtn = document.getElementById('drawHandBtn');
+
         if (!drawHandSection || !drawHandBtn) {
             console.warn('Draw hand elements not found');
             return;
         }
-        
-        if (drawHandSection.style.display === 'none' || !drawHandSection.style.display) {
-            drawHandSection.style.display = 'block';
-            // Keep label stable to avoid header button reflow when the pane opens
-            drawHandBtn.textContent = 'Draw Hand';
+
+        var hidden = drawHandSection.style.display === 'none' || !drawHandSection.style.display;
+
+        if (hidden) {
+            openDrawHandChrome();
+            setDrawHandActive(true);
+            drawHandSection.style.display = isMobileDrawHandLayout() ? 'flex' : 'block';
+            ensureStackResizeObserver();
             drawHand();
         } else {
             drawHand();
         }
     }
 
-    /**
-     * Close draw hand pane
-     * Hides the pane and resets button text
-     * 
-     * @public
-     * @function close
-     */
     function close() {
-        const drawHandSection = document.getElementById('drawHandSection');
-        const drawHandBtn = document.getElementById('drawHandBtn');
-        
-        if (!drawHandSection || !drawHandBtn) {
+        var drawHandSection = document.getElementById('drawHandSection');
+        if (!drawHandSection) {
             console.warn('Draw hand elements not found');
             return;
         }
-        
+
+        setDrawHandActive(false);
+        closeDrawHandChrome();
         drawHandSection.style.display = 'none';
-        drawHandBtn.textContent = 'Draw Hand';
     }
 
-    /**
-     * Update button state based on playable card count
-     * Button is enabled when deck has 8+ playable cards
-     * 
-     * @public
-     * @function updateButtonState
-     * @param {Array} deckCards - Array of deck cards
-     */
     function updateButtonState(deckCards) {
-        const drawHandBtn = document.getElementById('drawHandBtn');
-        
+        var drawHandBtn = document.getElementById('drawHandBtn');
+
         if (!drawHandBtn) {
             return;
         }
-        
-        // Count playable cards (excluding characters, locations, missions)
-        const playableCardsCount = (deckCards || [])
-            .filter(card => card.type !== 'character' && card.type !== 'location' && card.type !== 'mission')
-            .reduce((sum, card) => sum + (card.quantity || 0), 0);
-        
+
+        var playableCardsCount = (deckCards || [])
+            .filter(function (card) {
+                return card.type !== 'character' && card.type !== 'location' && card.type !== 'mission';
+            })
+            .reduce(function (sum, card) {
+                return sum + (card.quantity || 0);
+            }, 0);
+
         if (playableCardsCount >= 8) {
             drawHandBtn.disabled = false;
-            drawHandBtn.style.opacity = "1";
-            drawHandBtn.style.cursor = "pointer";
-            drawHandBtn.title = ""; // Remove tooltip when enabled
+            drawHandBtn.style.opacity = '1';
+            drawHandBtn.style.cursor = 'pointer';
+            drawHandBtn.title = '';
         } else {
             drawHandBtn.disabled = true;
-            drawHandBtn.style.opacity = "0.5";
-            drawHandBtn.style.cursor = "not-allowed";
-            drawHandBtn.title = "Deck must contain at least 8 playable cards."; // Add tooltip when disabled
+            drawHandBtn.style.opacity = '0.5';
+            drawHandBtn.style.cursor = 'not-allowed';
+            drawHandBtn.title = 'Deck must contain at least 8 playable cards.';
         }
     }
 
-    /**
-     * Get current drawn cards (for compatibility)
-     * 
-     * @public
-     * @function getDrawnCards
-     * @returns {Array} Array of currently drawn cards
-     */
     function getDrawnCards() {
         return drawnCards;
     }
 
-    /**
-     * Refresh draw hand display (used by KO feature)
-     * Re-displays current drawn cards with updated dimming
-     * Called automatically when characters are KO'd/un-KO'd
-     * 
-     * @public
-     * @function refresh
-     */
     function refresh() {
-        // Use private drawnCards if available, otherwise fall back to window.drawnCards
-        const cardsToDisplay = (drawnCards && drawnCards.length > 0) ? drawnCards : (window.drawnCards || []);
+        var cardsToDisplay = drawnCards && drawnCards.length > 0 ? drawnCards : window.drawnCards || [];
         if (cardsToDisplay && cardsToDisplay.length > 0) {
             displayDrawnCards(cardsToDisplay);
         }
     }
 
-    // Public API
     window.DrawHand = {
         init: init,
         drawHand: drawHand,
@@ -404,21 +498,15 @@
         refresh: refresh
     };
 
-    // Initialize on load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
 
-    // Maintain backward compatibility - expose displayDrawnCards globally
-    // This is used by the KO feature to refresh the draw hand
-    window.displayDrawnCards = function(cards) {
+    window.displayDrawnCards = function (cards) {
         displayDrawnCards(cards);
-        // Update internal state
         drawnCards = cards;
         window.drawnCards = cards;
     };
-
 })();
-

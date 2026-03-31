@@ -32,6 +32,7 @@
 29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
 31. [Collection view — mobile (`layout-mobile`)](#collection-view--mobile-layout-mobile)
+32. [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile)
 
 ## Overview
 
@@ -207,6 +208,13 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Font**: `0.8rem`, `500`
 - **Hover**: `background: rgba(78, 205, 196, 0.3)`; `border-color: rgba(78, 205, 196, 0.4)`
 - These specs keep Draw Hand and List View visually identical and match the size of Save/Cancel buttons.
+
+### Draw Hand mobile (`layout-mobile`)
+- **Marker class**: `#deckEditorModal.draw-hand-active` while the draw-hand pane is open ([`draw-hand.js`](/public/js/components/draw-hand.js)). **`.modal-body`** is hidden so the hand uses the modal height; **`#drawHandSection`** is **`display: flex`** (column) with **`flex: 1`** / **`min-height: 0`** ([`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)).
+- **Header chrome**: On open, the deck editor mobile header is force-collapsed via **`applyDevMobileDeckHeaderCollapsed(true)`**; on close, the previous collapsed/expanded state is restored from a snapshot (not **`localStorage`** alone). **`.draw-hand-header`** is a single row with **`.draw-hand-close`** (×) aligned end. **`.draw-hand-footer`** sits below **`#drawHandContent`** with **`.draw-hand-redraw-btn`** (**Draw again**, **`data-click-handler="redrawDrawHand"`**) centered ([`draw-hand.css`](/public/css/draw-hand.css)).
+- **Vertical fan**: **`#drawHandContent`** is **`flex-direction: column`** with **`flex-wrap: nowrap`** (wrapping would create a second column). **`--draw-hand-card-scale`** starts as **`clientWidth / 132`** so tiles use the full content width (**`width: min(100%, calc(132px * scale))`**), then JS may shrink scale and adjust overlap so the stack fits **`clientHeight`**. Overlap via **`--draw-hand-stack-overlap`** and **`ResizeObserver`**.
+- **Event cards**: **`.drawn-card.event-card`** holds **`.drawn-card-face`** (landscape **`background-image`**) with **`transform: rotate(-90deg)`** inside a portrait slot under **`#deckEditorModal.draw-hand-active`** in [`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css). Non-event cards keep the image on the outer **`.drawn-card`**.
+- **Hover / touch focus (deck tile fan parity):** Under **`draw-hand-active`**, **`:hover`** ( **`@media (hover: hover)`** + **`pointer: fine`** ) and **`:active`** (thumb held) use **`translateY(-12px) scale(1.35)`**, **`z-index: 60`**, 3px cyan border, glow shadow. **`:has(...)`** recedes other cards (**`scale(0.85)`**, **`translateY(6px)`**). Tap toggles **`.draw-hand-peek-active`** with the same pop; fine-pointer **`mouseenter`** clears peek on other cards. Modal / section / **`#drawHandContent`** use **`overflow: visible`** so scaled cards are not clipped. Desktop grid draw-hand (non-active) stays in [`draw-hand.css`](/public/css/draw-hand.css).
 
 ### Cards
 
@@ -541,6 +549,8 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Button Padding**: `6px 12px` to `8px 16px`
 
 ## Deck Editor Layout Specifications (2025)
+
+See also [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile) under **UI Components**.
 
 ### Modal Header Layout
 - **Container**: `.modal-header` with `display: flex`, `flex-direction: column`

@@ -52,6 +52,7 @@ describe('Draw Hand UI Wrappers', () => {
         delete (window as any).DrawHand;
         delete (window as any).toggleDrawHand;
         delete (window as any).closeDrawHand;
+        delete (window as any).redrawDrawHand;
     });
 
     describe('toggleDrawHand()', () => {
@@ -113,6 +114,27 @@ describe('Draw Hand UI Wrappers', () => {
             expect(() => {
                 (window as any).closeDrawHand();
             }).not.toThrow();
+        });
+    });
+
+    describe('redrawDrawHand()', () => {
+        it('should call DrawHand.drawHand when module is available', () => {
+            const mockDraw = jest.fn();
+            (window as any).DrawHand = {
+                drawHand: mockDraw
+            };
+
+            (window as any).redrawDrawHand();
+
+            expect(mockDraw).toHaveBeenCalledTimes(1);
+        });
+
+        it('should log warning when DrawHand module is not available', () => {
+            delete (window as any).DrawHand;
+
+            (window as any).redrawDrawHand();
+
+            expect(console.warn).toHaveBeenCalledWith('Draw Hand module not loaded');
         });
     });
 

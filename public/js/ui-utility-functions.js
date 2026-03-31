@@ -13,6 +13,7 @@
  *   - cancelTitleEdit() - Edit cancellation
  *   - toggleDrawHand() - Draw hand toggle (delegates to DrawHand module)
  *   - closeDrawHand() - Draw hand close (delegates to DrawHand module)
+ *   - redrawDrawHand() - Draw a new hand while pane is open (delegates to DrawHand.drawHand)
  *   - screenshotView() - Screenshot functionality
  * 
  * Note: Draw Hand functionality is now handled by the DrawHand module
@@ -40,9 +41,18 @@ function closeDrawHand() {
     }
 }
 
+function redrawDrawHand() {
+    if (window.DrawHand && window.DrawHand.drawHand) {
+        window.DrawHand.drawHand();
+    } else {
+        console.warn('Draw Hand module not loaded');
+    }
+}
+
 // Expose functions on window for event binder (data-click-handler)
 window.toggleDrawHand = toggleDrawHand;
 window.closeDrawHand = closeDrawHand;
+window.redrawDrawHand = redrawDrawHand;
 
 function toggleScreenshotView() {
     const screenshotViewSection = document.getElementById('screenshotViewSection');

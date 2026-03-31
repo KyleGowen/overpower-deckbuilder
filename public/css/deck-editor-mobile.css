@@ -661,3 +661,151 @@
     padding: 24px 12px;
     color: #cbd5e1;
 }
+
+/* ── Draw Hand (vertical fan) when active on mobile ─────────────────────── */
+.layout-mobile #deckEditorModal.draw-hand-active .deck-editor-modal {
+    min-height: 0;
+    /* Let scaled / translated fan cards paint outside the content box (like deck tile character fan) */
+    overflow: visible;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active .deck-editor-modal > .modal-body {
+    display: none !important;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandSection {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0 10px;
+    padding: 10px 8px 12px;
+    display: flex !important;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 4px 8px;
+    box-sizing: border-box;
+    --draw-hand-card-scale: 1;
+    --draw-hand-stack-overlap: 0px;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    /* Single column: full strip width (scale from JS = clientWidth / 132); cap at 100% */
+    width: min(100%, calc(132px * var(--draw-hand-card-scale, 1)));
+    max-width: 100%;
+    height: calc(185px * var(--draw-hand-card-scale, 1));
+    margin-top: calc(-1 * var(--draw-hand-stack-overlap, 0px));
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 0;
+    transform-origin: center center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card:first-child {
+    margin-top: 0;
+}
+
+/* Recede non-focused cards first; focus rules below override for the hovered / peeked / :active card. */
+@media (hover: hover) and (pointer: fine) {
+    .layout-mobile #deckEditorModal.draw-hand-active #drawHandContent:has(.drawn-card:hover) .drawn-card:not(:hover):not(.dragging) {
+        transform: translateY(6px) scale(0.85);
+        opacity: 1;
+    }
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent:has(.draw-hand-peek-active) .drawn-card:not(.draw-hand-peek-active):not(.dragging),
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent:has(.drawn-card:active) .drawn-card:not(:active):not(.dragging) {
+    transform: translateY(6px) scale(0.85);
+    opacity: 1;
+}
+
+/* Deck tile character fan parity: focused card pops forward (vertical stack). */
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.draw-hand-peek-active,
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card:active {
+    z-index: 60 !important;
+    transform: translateY(-12px) scale(1.35);
+    box-shadow: 0 12px 24px rgba(78, 205, 196, 0.4);
+    border-color: rgba(78, 205, 196, 0.8);
+    border-width: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card:hover {
+        z-index: 60 !important;
+        transform: translateY(-12px) scale(1.35);
+        box-shadow: 0 12px 24px rgba(78, 205, 196, 0.4);
+        border-color: rgba(78, 205, 196, 0.8);
+        border-width: 3px;
+    }
+}
+
+/* Drag reorder beats fan focus (draw-hand.css .dragging loses z-index to fan :hover without this) */
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.dragging,
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.dragging:hover,
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.dragging:active {
+    transform: rotate(5deg) scale(1.1) !important;
+    z-index: 1000 !important;
+    opacity: 0.5;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    border-width: 2px;
+    border-color: rgba(78, 205, 196, 0.3);
+    transition: none;
+}
+
+/* Event cards: portrait slot + rotated face (same rules as desktop non-mobile use .drawn-card-face fill) */
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.event-card {
+    overflow: hidden;
+    background-image: none !important;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active #drawHandContent .drawn-card.event-card .drawn-card-face {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(185px * var(--draw-hand-card-scale, 1));
+    height: calc(132px * var(--draw-hand-card-scale, 1));
+    margin-left: calc(-92.5px * var(--draw-hand-card-scale, 1));
+    margin-top: calc(-66px * var(--draw-hand-card-scale, 1));
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    pointer-events: none;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active .draw-hand-header {
+    margin-bottom: 8px;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active .draw-hand-footer {
+    padding-top: 4px;
+    padding-bottom: 2px;
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active .draw-hand-redraw-btn {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+}
