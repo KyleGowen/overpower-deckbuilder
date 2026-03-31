@@ -668,6 +668,11 @@
 }
 
 /* ── Draw Hand (vertical fan) when active on mobile ─────────────────────── */
+/* Contain overscroll / reduce pull-to-refresh reaching the document (Chrome Android). */
+.layout-mobile #deckEditorModal.draw-hand-active {
+    overscroll-behavior: none;
+}
+
 .layout-mobile #deckEditorModal.draw-hand-active .deck-editor-modal {
     min-height: 0;
     /* Let scaled / translated fan cards paint outside the content box (like deck tile character fan) */
@@ -697,6 +702,7 @@
     width: 100%;
     max-width: 100%;
     overflow: visible;
+    touch-action: none;
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;

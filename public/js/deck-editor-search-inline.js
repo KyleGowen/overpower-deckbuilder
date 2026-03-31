@@ -26,6 +26,7 @@ function initializeDeckEditorSearch() {
             input: searchInput,
             results: searchResults,
             maxResults: 72,
+            clearInputOnSelect: !useMobile,
             clickInsideRootSelectors: clickRoots,
             searchService: new window.CardSearchService({ maxResults: 72 }),
             onSelect: ({ id, type, name }) => {
@@ -222,8 +223,8 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
             return;
         }
         
-        if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.clear === 'function') {
-            window.deckEditorSearchComponent.clear();
+        if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.dismissAfterSelection === 'function') {
+            window.deckEditorSearchComponent.dismissAfterSelection();
         } else {
             const searchInput = document.getElementById('deckEditorSearchInput');
             const mIn = document.getElementById('devMobileDeckSearchInput');
@@ -253,8 +254,8 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         });
 
         if (response.ok) {
-            if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.clear === 'function') {
-                window.deckEditorSearchComponent.clear();
+            if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.dismissAfterSelection === 'function') {
+                window.deckEditorSearchComponent.dismissAfterSelection();
             } else {
                 const searchInput = document.getElementById('deckEditorSearchInput');
                 const mIn = document.getElementById('devMobileDeckSearchInput');

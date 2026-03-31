@@ -251,6 +251,9 @@
         if (fanPointerId === null || e.pointerId !== fanPointerId || fanContentEl === null) {
             return;
         }
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+            e.preventDefault();
+        }
         var content = fanContentEl;
         var n = content.querySelectorAll('.drawn-card').length;
         if (n === 0) {
@@ -279,7 +282,7 @@
         content.addEventListener('drop', handleContainerDrop);
         content.addEventListener('click', handleDrawHandContentClick);
         content.addEventListener('pointerdown', handleDrawHandPointerDown, { passive: false });
-        content.addEventListener('pointermove', handleDrawHandPointerMove);
+        content.addEventListener('pointermove', handleDrawHandPointerMove, { passive: false });
         content.addEventListener('pointerup', handleDrawHandPointerEnd);
         content.addEventListener('pointercancel', handleDrawHandPointerEnd);
     }

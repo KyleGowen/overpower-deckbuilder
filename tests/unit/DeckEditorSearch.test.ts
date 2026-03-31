@@ -70,6 +70,7 @@ describe('DeckEditorSearch Component', () => {
             expect(component.minChars).toBe(2);
             expect(component.debounceMs).toBe(300);
             expect(component.onSelect).toBeDefined();
+            expect(component.clearInputOnSelect).toBe(true);
         });
 
         it('should create instance with custom options', () => {
@@ -92,6 +93,16 @@ describe('DeckEditorSearch Component', () => {
             expect(component.minChars).toBe(3);
             expect(component.debounceMs).toBe(500);
             expect(component.searchService).toBe(customService);
+        });
+
+        it('should set clearInputOnSelect to false when passed false', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+            expect(component.clearInputOnSelect).toBe(false);
         });
 
         it('should use default input and results elements if not provided', () => {
@@ -135,6 +146,20 @@ describe('DeckEditorSearch Component', () => {
             expect(addEventListenerSpy).toHaveBeenCalledWith('blur', expect.any(Function));
             expect(docAddEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
             expect(component._bound).toBe(true);
+        });
+
+        it('should bind focus when clearInputOnSelect is false', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+
+            const addEventListenerSpy = jest.spyOn(mockInput, 'addEventListener');
+            component.mount();
+
+            expect(addEventListenerSpy).toHaveBeenCalledWith('focus', expect.any(Function));
         });
 
         it('should not bind if already bound', () => {
@@ -216,6 +241,22 @@ describe('DeckEditorSearch Component', () => {
             expect(component._bound).toBe(false);
         });
 
+        it('should remove focus listener when clearInputOnSelect is false', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+
+            component.mount();
+
+            const removeEventListenerSpy = jest.spyOn(mockInput, 'removeEventListener');
+            component.unmount();
+
+            expect(removeEventListenerSpy).toHaveBeenCalledWith('focus', expect.any(Function));
+        });
+
         it('should not remove listeners if not bound', () => {
             component = new DeckEditorSearch({
                 input: mockInput,
@@ -255,6 +296,92 @@ describe('DeckEditorSearch Component', () => {
             });
 
             expect(() => component.clear()).not.toThrow();
+        });
+    });
+
+    describe('dismissAfterSelection()', () => {
+        it('should clear input and hide results when clearInputOnSelect is true', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect
+            });
+
+            mockInput.value = 'query';
+            mockResults.style.display = 'block';
+            component.dismissAfterSelection();
+
+            expect(mockInput.value).toBe('');
+            expect(mockResults.style.display).toBe('none');
+        });
+
+        it('should hide results but keep input when clearInputOnSelect is false', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+
+            mockInput.value = 'zeus';
+            mockResults.style.display = 'block';
+            component.dismissAfterSelection();
+
+            expect(mockInput.value).toBe('zeus');
+            expect(mockResults.style.display).toBe('none');
+        });
+    });
+
+    describe('_handleFocus() when clearInputOnSelect is false', () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.useRealTimers();
+        });
+
+        it('should debounce search on focus when input meets minChars', async () => {
+            const mockSearchResults = [
+                { id: '1', name: 'Test Card', type: 'character', image: '/test.jpg' }
+            ];
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false,
+                debounceMs: 300
+            });
+            component.searchService.search = jest.fn().mockResolvedValue(mockSearchResults);
+
+            component.mount();
+            mockInput.value = 'ab';
+            mockInput.dispatchEvent(new FocusEvent('focus'));
+
+            expect(component.searchService.search).not.toHaveBeenCalled();
+
+            jest.advanceTimersByTime(300);
+            await Promise.resolve();
+
+            expect(component.searchService.search).toHaveBeenCalledWith('ab');
+        });
+
+        it('should not search on focus when term is below minChars', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+            component.searchService.search = jest.fn().mockResolvedValue([]);
+
+            component.mount();
+            mockInput.value = 'a';
+            mockInput.dispatchEvent(new FocusEvent('focus'));
+
+            jest.advanceTimersByTime(400);
+
+            expect(component.searchService.search).not.toHaveBeenCalled();
         });
     });
 
@@ -666,6 +793,33 @@ describe('DeckEditorSearch Component', () => {
             resultElement!.dispatchEvent(new MouseEvent('click'));
 
             expect(mockInput.value).toBe('');
+        });
+
+        it('should preserve input after selection when clearInputOnSelect is false', () => {
+            const results = [
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                }
+            ];
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                clearInputOnSelect: false
+            });
+
+            mockInput.value = 'zeus';
+            component.render(results);
+
+            const resultElement = mockResults.querySelector('.deck-editor-search-result');
+            resultElement!.dispatchEvent(new MouseEvent('click'));
+
+            expect(mockInput.value).toBe('zeus');
+            expect(mockResults.style.display).toBe('none');
         });
 
         it('should handle null imagePath', () => {

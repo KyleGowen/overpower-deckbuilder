@@ -29,6 +29,8 @@
      *     any of these selectors (via element.closest) keep the dropdown open. Defaults to
      *     ['.deck-editor-search-container']. Pass e.g. ['.collection-search-container'] for
      *     Collection View, or ['.dev-mobile-deck-search-container'] for DEV in MV.
+     *   - clearInputOnSelect: boolean — if false (e.g. DEV MV), keep the query after picking a
+     *     result and refetch on focus when the field already has minChars. Default: true.
      *
      * Rendering contract:
      *   - The component writes item markup into `results` and toggles its display.
@@ -59,6 +61,7 @@
                 : ['.deck-editor-search-container'];
             this._timeout = null;
             this._bound = false;
+            this.clearInputOnSelect = options.clearInputOnSelect !== false;
         }
 
         _isClickInsideSearchUi(target) {
@@ -77,6 +80,9 @@
 
             this.input.addEventListener('input', this._handleInput);
             this.input.addEventListener('blur', this._handleBlur);
+            if (!this.clearInputOnSelect) {
+                this.input.addEventListener('focus', this._handleFocus);
+            }
             document.addEventListener('click', this._handleDocClick);
         }
 
@@ -85,6 +91,9 @@
             this._bound = false;
             this.input.removeEventListener('input', this._handleInput);
             this.input.removeEventListener('blur', this._handleBlur);
+            if (!this.clearInputOnSelect) {
+                this.input.removeEventListener('focus', this._handleFocus);
+            }
             document.removeEventListener('click', this._handleDocClick);
         }
 
@@ -93,15 +102,41 @@
             this.hideResults();
         }
 
-        // Bound arrow methods to preserve context
-        _handleInput = (e) => {
-            const term = (e.target.value || '').trim().toLowerCase();
-            if (term.length < this.minChars) { this.hideResults(); return; }
+        dismissAfterSelection() {
+            if (this.clearInputOnSelect && this.input) this.input.value = '';
+            this.hideResults();
+        }
+
+        _runDebouncedSearchFromInput() {
+            if (!this.input) return;
             if (this._timeout) clearTimeout(this._timeout);
             this._timeout = setTimeout(async () => {
+                const term = (this.input.value || '').trim().toLowerCase();
+                if (term.length < this.minChars) {
+                    this.hideResults();
+                    return;
+                }
                 const results = await this.searchService.search(term);
                 this.render(results);
             }, this.debounceMs);
+        }
+
+        // Bound arrow methods to preserve context
+        _handleInput = (e) => {
+            const term = (e.target.value || '').trim().toLowerCase();
+            if (term.length < this.minChars) {
+                if (this._timeout) clearTimeout(this._timeout);
+                this.hideResults();
+                return;
+            }
+            this._runDebouncedSearchFromInput();
+        };
+
+        _handleFocus = () => {
+            if (this.clearInputOnSelect || !this.input) return;
+            const term = (this.input.value || '').trim().toLowerCase();
+            if (term.length < this.minChars) return;
+            this._runDebouncedSearchFromInput();
         };
 
         _handleBlur = () => {
@@ -160,7 +195,7 @@
                     const name = el.getAttribute('data-name');
                     const imagePath = el.getAttribute('data-image-path') || null;
                     this.onSelect({ id, type, name, imagePath: imagePath && imagePath.length > 0 ? imagePath : null });
-                    this.clear();
+                    this.dismissAfterSelection();
                 });
             });
             this.showResults();
