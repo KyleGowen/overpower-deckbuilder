@@ -238,6 +238,36 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         return;
     }
 
+    const normDeckCardId = (id) => String(id ?? '').trim();
+    if (cardType === 'character' && Array.isArray(window.deckEditorCards)) {
+        const dup = window.deckEditorCards.some(
+            c => c.type === 'character' &&
+                normDeckCardId(c.cardId) === normDeckCardId(cardId) &&
+                (c.quantity ?? 1) > 0
+        );
+        if (dup) {
+            if (typeof showNotification === 'function') {
+                showNotification('This character is already in your deck', 'error');
+            } else {
+                showToast('This character is already in your deck', 'error');
+            }
+            return;
+        }
+    }
+    if (cardType === 'location' && Array.isArray(window.deckEditorCards)) {
+        const hasLoc = window.deckEditorCards.some(
+            c => c.type === 'location' && (c.quantity ?? 1) > 0
+        );
+        if (hasLoc) {
+            if (typeof showNotification === 'function') {
+                showNotification('Cannot add more than 1 location to a deck', 'error');
+            } else {
+                showToast('Cannot add more than 1 location to a deck', 'error');
+            }
+            return;
+        }
+    }
+
     try {
         const requestBody = {
             cardId: cardId,

@@ -147,9 +147,6 @@ function addAllPowerCards(powerType, cards) {
 // ===== removeCardFromEditor through addAllAdvancedUniverseCardsForCharacter =====
 
 async function removeCardFromEditor(index) {
-    console.log('🗑️ removeCardFromEditor called with index:', index);
-    console.log('📊 Before removal - deckEditorCards:', window.deckEditorCards);
-    
     const layout = document.querySelector('.deck-editor-layout');
     const deckPane = document.querySelector('.deck-pane');
     const cardSelectorPane = document.querySelector('.card-selector-pane');
@@ -251,12 +248,13 @@ async function removeCardFromEditor(index) {
     
     // Validate deck after removing card
     await showDeckValidation(window.deckEditorCards);
+
+    if (typeof window.syncPersistedDeckCardsFromEditor === 'function') {
+        await window.syncPersistedDeckCardsFromEditor();
+    }
 }
 
 async function removeOneCardFromEditor(index) {
-    console.log('🗑️ removeOneCardFromEditor called with index:', index);
-    console.log('📊 Before removal - deckEditorCards:', window.deckEditorCards);
-    
     if (window.deckEditorCards[index]) {
         // Capture current expansion state before re-rendering
         const currentExpansionState = getExpansionState();
@@ -339,7 +337,11 @@ async function removeOneCardFromEditor(index) {
         
         // Validate deck after removing card
         await showDeckValidation(window.deckEditorCards);
-        
+
+        if (typeof window.syncPersistedDeckCardsFromEditor === 'function') {
+            await window.syncPersistedDeckCardsFromEditor();
+        }
+
         // Preserve scroll position after card changes
         setTimeout(() => {
             // Don't change scroll position when adding/removing cards

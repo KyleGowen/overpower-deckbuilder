@@ -463,10 +463,16 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 }
                 
                 const convertedCard = { ...card, type: convertedType };
-                
+                if (
+                    (convertedType === 'character' || convertedType === 'location') &&
+                    (convertedCard.quantity ?? 1) > 1
+                ) {
+                    convertedCard.quantity = 1;
+                }
+
                 // Note: We'll process alternate art detection after availableCardsMap is loaded
                 // This will be done in a separate step after loadAvailableCards completes
-                
+
                 return convertedCard;
             });
             
@@ -844,6 +850,81 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
     }
 }
 
+/**
+ * Serialize window.deckEditorCards to the API shape used by PUT .../cards (same as save).
+ */
+function buildDeckCardsDataForApi() {
+    const cardsData = [];
+    if (!window.deckEditorCards || !Array.isArray(window.deckEditorCards)) {
+        return cardsData;
+    }
+    const extractUUID = (cardId) => {
+        if (!cardId) return null;
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidPattern.test(cardId)) return cardId;
+        const prefixedMatch = cardId.match(/^[a-z]+_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+        if (prefixedMatch && prefixedMatch[1]) return prefixedMatch[1];
+        const parts = cardId.split('_');
+        for (let i = 1; i < parts.length; i++) {
+            const candidate = parts.slice(i).join('_');
+            if (uuidPattern.test(candidate)) return candidate;
+        }
+        return cardId;
+    };
+    window.deckEditorCards.forEach(card => {
+        const hasPerInstanceSelections = card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds) && card.selectedAlternateCardIds.length > 0 && card.selectedAlternateCardIds.some(id => id !== undefined && id !== null);
+        if (hasPerInstanceSelections && card.quantity > 1) {
+            for (let i = 0; i < card.quantity; i++) {
+                const rawCardIdForInstance = (card.selectedAlternateCardIds[i] !== undefined && card.selectedAlternateCardIds[i] !== null) ? card.selectedAlternateCardIds[i] : (card.selectedAlternateCardId || card.cardId);
+                const instanceData = { cardType: card.type, cardId: extractUUID(rawCardIdForInstance), quantity: 1 };
+                if (card.exclude_from_draw !== undefined) instanceData.exclude_from_draw = card.exclude_from_draw;
+                cardsData.push(instanceData);
+            }
+        } else {
+            const rawCardIdToSave = card.selectedAlternateCardId || card.cardId;
+            const cardData = { cardType: card.type, cardId: extractUUID(rawCardIdToSave), quantity: card.quantity };
+            if (card.exclude_from_draw !== undefined) cardData.exclude_from_draw = card.exclude_from_draw;
+            cardsData.push(cardData);
+        }
+    });
+    return cardsData;
+}
+
+/**
+ * Push current editor cards to the server so single-card POST (e.g. search add) matches the UI.
+ * Used after remove/remove-one on persisted DB or guest session decks.
+ */
+async function syncPersistedDeckCardsFromEditor() {
+    if (!currentDeckId || document.body.classList.contains('read-only-mode')) {
+        return true;
+    }
+    const deckId = currentDeckId;
+    const cards = buildDeckCardsDataForApi();
+    const isGuest = typeof isGuestUser === 'function' && isGuestUser() && String(deckId).startsWith('guest_');
+    const url = isGuest ? `/api/guest/decks/${deckId}/cards` : `/api/decks/${deckId}/cards`;
+    try {
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ cards })
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showNotification(err.error || 'Failed to sync deck to server', 'error');
+            return false;
+        }
+        return true;
+    } catch (e) {
+        console.error('syncPersistedDeckCardsFromEditor', e);
+        showNotification('Failed to sync deck to server', 'error');
+        return false;
+    }
+}
+
+window.buildDeckCardsDataForApi = buildDeckCardsDataForApi;
+window.syncPersistedDeckCardsFromEditor = syncPersistedDeckCardsFromEditor;
+
 // Save deck changes
 async function saveDeckChanges() {
     if (!currentDeckData) {
@@ -874,37 +955,7 @@ async function saveDeckChanges() {
 
     const isGuest = typeof isGuestUser === 'function' && isGuestUser();
 
-    // Build cards payload (used for both guest and regular save)
-    const cardsData = [];
-    window.deckEditorCards.forEach(card => {
-        const extractUUID = (cardId) => {
-            if (!cardId) return null;
-            const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            if (uuidPattern.test(cardId)) return cardId;
-            const prefixedMatch = cardId.match(/^[a-z]+_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-            if (prefixedMatch && prefixedMatch[1]) return prefixedMatch[1];
-            const parts = cardId.split('_');
-            for (let i = 1; i < parts.length; i++) {
-                const candidate = parts.slice(i).join('_');
-                if (uuidPattern.test(candidate)) return candidate;
-            }
-            return cardId;
-        };
-        const hasPerInstanceSelections = card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds) && card.selectedAlternateCardIds.length > 0 && card.selectedAlternateCardIds.some(id => id !== undefined && id !== null);
-        if (hasPerInstanceSelections && card.quantity > 1) {
-            for (let i = 0; i < card.quantity; i++) {
-                const rawCardIdForInstance = (card.selectedAlternateCardIds[i] !== undefined && card.selectedAlternateCardIds[i] !== null) ? card.selectedAlternateCardIds[i] : (card.selectedAlternateCardId || card.cardId);
-                const instanceData = { cardType: card.type, cardId: extractUUID(rawCardIdForInstance), quantity: 1 };
-                if (card.exclude_from_draw !== undefined) instanceData.exclude_from_draw = card.exclude_from_draw;
-                cardsData.push(instanceData);
-            }
-        } else {
-            const rawCardIdToSave = card.selectedAlternateCardId || card.cardId;
-            const cardData = { cardType: card.type, cardId: extractUUID(rawCardIdToSave), quantity: card.quantity };
-            if (card.exclude_from_draw !== undefined) cardData.exclude_from_draw = card.exclude_from_draw;
-            cardsData.push(cardData);
-        }
-    });
+    const cardsData = buildDeckCardsDataForApi();
 
     const parseApiErrorResponse = async (response) => {
         const fallbackMessage = `Failed to save deck cards: ${response.status} ${response.statusText}`;

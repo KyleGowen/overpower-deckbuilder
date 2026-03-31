@@ -159,6 +159,27 @@ export async function checkIfCardIsOnePerDeck(cardType: string, cardId: string):
 type CardForValidation = { type: string; cardId: string; quantity: number };
 
 export async function validateCardAddition(currentCards: CardForValidation[], cardType: string, cardId: string, quantity: number): Promise<string | null> {
+  const normId = (id: string) => String(id).trim();
+
+  // Characters: at most one deck row per character id (quantity must not stack)
+  if (cardType === 'character') {
+    const incoming = normId(cardId);
+    const already = currentCards.some(
+      c => c.type === 'character' && normId(c.cardId) === incoming && (c.quantity ?? 0) > 0
+    );
+    if (already) {
+      return 'This character is already in the deck';
+    }
+  }
+
+  // Locations: at most one location total (matches client addCardToEditor)
+  if (cardType === 'location') {
+    const hasLocation = currentCards.some(c => c.type === 'location' && (c.quantity ?? 0) > 0);
+    if (hasLocation) {
+      return 'Cannot add more than 1 location to a deck';
+    }
+  }
+
   // Create a copy of current cards and add the new card
   const testCards = [...currentCards];
   
