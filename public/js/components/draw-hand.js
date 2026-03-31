@@ -5,7 +5,7 @@
  * Allows users to draw a random hand of 8 cards (9 if events are present)
  * from their deck, excluding characters, locations, and missions.
  *
- * Mobile (layout-mobile): vertical stacked fan, optional header collapse, tap-to-peek.
+ * Mobile (layout-mobile): vertical stacked fan, optional header collapse, thumb-drag peek stepping.
  *
  * @module DrawHand
  */
@@ -21,6 +21,14 @@
     var BASE_CARD_W = 132;
     var BASE_CARD_H = 185;
     var MIN_PEEK = 28;
+    /** Vertical movement (px) per card step when dragging the mobile fan. */
+    var SWIPE_STEP_THRESHOLD_PX = 48;
+
+    var fanPointerId = null;
+    var fanStepAnchorY = 0;
+    var fanPeekIndex = 0;
+    var fanContentEl = null;
+    var suppressDrawHandClickUntil = 0;
 
     function isMobileDrawHandLayout() {
         return document.documentElement.classList.contains('layout-mobile');
@@ -150,6 +158,118 @@
         stackResizeObserver.observe(content);
     }
 
+    /**
+     * Finger moves up (clientY decreases) → lower index; down → higher index.
+     * @returns {{ peekIndex: number, nextAnchorY: number }}
+     */
+    function computePeekSwipeStep(anchorY, clientY, peekIndex, n, threshold) {
+        var dy = clientY - anchorY;
+        var idx = peekIndex;
+        var t = threshold;
+        while (dy <= -t && idx > 0) {
+            idx--;
+            dy += t;
+        }
+        while (dy >= t && idx < n - 1) {
+            idx++;
+            dy -= t;
+        }
+        return { peekIndex: idx, nextAnchorY: clientY - dy };
+    }
+
+    function resetDrawHandFanPointerHard() {
+        if (fanContentEl !== null && fanPointerId !== null) {
+            try {
+                fanContentEl.releasePointerCapture(fanPointerId);
+            } catch (_err) {}
+        }
+        var content = fanContentEl || document.getElementById('drawHandContent');
+        fanPointerId = null;
+        fanContentEl = null;
+        fanPeekIndex = 0;
+        fanStepAnchorY = 0;
+        if (content) {
+            content.classList.remove('draw-hand-fan-dragging');
+            content.querySelectorAll('.draw-hand-peek-active').forEach(function (c) {
+                c.classList.remove('draw-hand-peek-active');
+            });
+        }
+    }
+
+    function applyDrawHandPeekToIndex(content, index) {
+        var cards = content.querySelectorAll('.drawn-card');
+        var n = cards.length;
+        if (n === 0 || index < 0 || index >= n) {
+            return;
+        }
+        content.querySelectorAll('.draw-hand-peek-active').forEach(function (c) {
+            c.classList.remove('draw-hand-peek-active');
+        });
+        cards[index].classList.add('draw-hand-peek-active');
+    }
+
+    function handleDrawHandPointerDown(e) {
+        if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        var modal = getDeckEditorModal();
+        if (!modal || !modal.classList.contains('draw-hand-active')) {
+            return;
+        }
+        if (e.button !== 0 && e.button !== undefined) {
+            return;
+        }
+        var content = document.getElementById('drawHandContent');
+        if (!content || !content.contains(e.target)) {
+            return;
+        }
+        var card = e.target.closest('.drawn-card');
+        if (!card || !content.contains(card)) {
+            return;
+        }
+        if (fanPointerId !== null) {
+            return;
+        }
+        if (e.pointerType === 'touch') {
+            e.preventDefault();
+        }
+        fanPointerId = e.pointerId;
+        fanContentEl = content;
+        fanPeekIndex = parseInt(card.dataset.index, 10);
+        if (isNaN(fanPeekIndex)) {
+            fanPeekIndex = 0;
+        }
+        fanStepAnchorY = e.clientY;
+        content.classList.add('draw-hand-fan-dragging');
+        try {
+            content.setPointerCapture(e.pointerId);
+        } catch (_err2) {}
+        applyDrawHandPeekToIndex(content, fanPeekIndex);
+    }
+
+    function handleDrawHandPointerMove(e) {
+        if (fanPointerId === null || e.pointerId !== fanPointerId || fanContentEl === null) {
+            return;
+        }
+        var content = fanContentEl;
+        var n = content.querySelectorAll('.drawn-card').length;
+        if (n === 0) {
+            return;
+        }
+        var step = computePeekSwipeStep(fanStepAnchorY, e.clientY, fanPeekIndex, n, SWIPE_STEP_THRESHOLD_PX);
+        fanPeekIndex = step.peekIndex;
+        fanStepAnchorY = step.nextAnchorY;
+        applyDrawHandPeekToIndex(content, fanPeekIndex);
+    }
+
+    function handleDrawHandPointerEnd(e) {
+        if (fanPointerId === null || e.pointerId !== fanPointerId) {
+            return;
+        }
+        suppressDrawHandClickUntil = Date.now() + 350;
+        resetDrawHandFanPointerHard();
+    }
+
     function ensureDrawHandContentListeners(content) {
         if (!content || content.getAttribute('data-draw-hand-listeners') === '1') {
             return;
@@ -158,10 +278,19 @@
         content.addEventListener('dragover', handleContainerDragOver);
         content.addEventListener('drop', handleContainerDrop);
         content.addEventListener('click', handleDrawHandContentClick);
+        content.addEventListener('pointerdown', handleDrawHandPointerDown, { passive: false });
+        content.addEventListener('pointermove', handleDrawHandPointerMove);
+        content.addEventListener('pointerup', handleDrawHandPointerEnd);
+        content.addEventListener('pointercancel', handleDrawHandPointerEnd);
     }
 
     function handleDrawHandContentClick(e) {
         if (!isMobileDrawHandLayout()) {
+            return;
+        }
+        if (Date.now() < suppressDrawHandClickUntil) {
+            e.preventDefault();
+            e.stopPropagation();
             return;
         }
         var modal = getDeckEditorModal();
@@ -287,6 +416,7 @@
         drawnCards = cards || [];
         window.drawnCards = drawnCards;
 
+        resetDrawHandFanPointerHard();
         drawHandContent.innerHTML = '';
 
         ensureDrawHandContentListeners(drawHandContent);
@@ -295,7 +425,7 @@
         cards.forEach(function (card, index) {
             var cardElement = document.createElement('div');
             cardElement.className = 'drawn-card';
-            cardElement.draggable = true;
+            cardElement.draggable = !isMobileDrawHandLayout();
             cardElement.dataset.index = String(index);
 
             if (card.type === 'event') {
@@ -444,6 +574,7 @@
         }
 
         setDrawHandActive(false);
+        resetDrawHandFanPointerHard();
         closeDrawHandChrome();
         drawHandSection.style.display = 'none';
     }
@@ -495,7 +626,9 @@
         close: close,
         updateButtonState: updateButtonState,
         getDrawnCards: getDrawnCards,
-        refresh: refresh
+        refresh: refresh,
+        /** @internal Unit tests only — swipe step math for mobile fan. */
+        __testPeekSwipeStep: computePeekSwipeStep
     };
 
     if (document.readyState === 'loading') {

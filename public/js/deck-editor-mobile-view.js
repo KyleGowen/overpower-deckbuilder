@@ -71,11 +71,12 @@
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>';
     var ICON_MENU_HAND =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="9" height="12" rx="1.5"/><rect x="9" y="7" width="9" height="12" rx="1.5"/></svg>';
-    function devMobileRowMenuItemButton(label, onclickAttr, iconSvg) {
+    function devMobileRowMenuItemButton(label, onclickAttr, iconSvg, iconExtraClass) {
+        var iconClass = 'deck-editor-menu-item-icon' + (iconExtraClass || '');
         return (
             '<button type="button" class="deck-editor-menu-panel-btn touch-target-min" onclick="' + onclickAttr + '">' +
             '<span class="deck-editor-menu-item-label">' + escapeHtml(label) + '</span>' +
-            '<span class="deck-editor-menu-item-icon" aria-hidden="true">' + iconSvg + '</span></button>'
+            '<span class="' + iconClass + '" aria-hidden="true">' + iconSvg + '</span></button>'
         );
     }
 
@@ -163,10 +164,12 @@
         }
 
         if (global.foilCardMap && global.foilCardMap[instId] !== undefined) {
+            var foilActive = !!(lookupAvailableCard(instId, card.type) || {}).is_foil;
             parts.push(devMobileRowMenuItemButton(
                 'Foil',
                 'toggleFoilForCard(\'' + cid + '\',' + safeIndex + ',' + safeInst + ')',
-                ICON_MENU_FOIL
+                ICON_MENU_FOIL,
+                foilActive ? ' deck-editor-menu-item-icon--foil-active' : ''
             ));
         }
 
@@ -367,9 +370,14 @@
                         }
                     }
 
-                    html += '<div class="dev-mobile-deck-row" data-deck-index="' + index + '" data-instance="' + i + '">';
+                    var rowFoilClass = instanceAvailable.is_foil ? ' collection-card-foil' : '';
+                    var nameHtml = escapeHtml(name) +
+                        (instanceAvailable.is_foil
+                            ? '<span class="collection-foil-badge">' + escapeHtml('✦ FOIL') + '</span>'
+                            : '');
+                    html += '<div class="dev-mobile-deck-row' + rowFoilClass + '" data-deck-index="' + index + '" data-instance="' + i + '">';
                     html += '<div class="dev-mobile-deck-row-thumb"><img src="' + escapeAttr(imgSrc) + '" alt=""></div>';
-                    html += '<div class="dev-mobile-deck-row-name">' + escapeHtml(name) + '</div>';
+                    html += '<div class="dev-mobile-deck-row-name">' + nameHtml + '</div>';
                     html += '<div class="dev-mobile-deck-row-actions">' + actions + '</div>';
                     html += '</div>';
                 }

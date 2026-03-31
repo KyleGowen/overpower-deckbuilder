@@ -28,6 +28,13 @@ declare global {
             updateButtonState: (deckCards: any[]) => void;
             getDrawnCards: () => any[];
             refresh: () => void;
+            __testPeekSwipeStep?: (
+                anchorY: number,
+                clientY: number,
+                peekIndex: number,
+                n: number,
+                threshold: number
+            ) => { peekIndex: number; nextAnchorY: number };
         };
         SimulateKO?: {
             init?: () => void;
@@ -390,15 +397,30 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
             expect(cardElement?.title).toBe('Unknown Card');
         });
 
-        it('should make cards draggable', () => {
+        it('should make cards draggable on desktop layout', () => {
             const cards = [
                 { type: 'power', cardId: 'power-1', quantity: 1 }
             ];
 
+            document.documentElement.classList.remove('layout-mobile');
             window.DrawHand?.displayDrawnCards(cards);
 
             const cardElement = mockDrawHandContent.querySelector('.drawn-card') as HTMLElement;
             expect(cardElement?.draggable).toBe(true);
+        });
+
+        it('should not use HTML5 draggable on mobile layout (thumb-drag fan)', () => {
+            const cards = [
+                { type: 'power', cardId: 'power-1', quantity: 1 }
+            ];
+
+            document.documentElement.classList.add('layout-mobile');
+            window.DrawHand?.displayDrawnCards(cards);
+
+            const cardElement = mockDrawHandContent.querySelector('.drawn-card') as HTMLElement;
+            expect(cardElement?.draggable).toBe(false);
+
+            document.documentElement.classList.remove('layout-mobile');
         });
     });
 
@@ -747,6 +769,7 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
             mockAvailableCardsMap.set('power-1', { id: 'power-1', name: 'Power 1' });
             mockAvailableCardsMap.set('power-2', { id: 'power-2', name: 'Power 2' });
 
+            document.documentElement.classList.remove('layout-mobile');
             window.DrawHand?.displayDrawnCards(cards);
 
             const cardElements = mockDrawHandContent.querySelectorAll('.drawn-card');
@@ -786,6 +809,38 @@ describe('Draw Hand Module - Comprehensive Tests', () => {
 
             // Should not throw - the event handler should have been called
             expect(dragOverEvent.preventDefault).toHaveBeenCalled();
+        });
+    });
+
+    describe('Mobile fan peek swipe step (__testPeekSwipeStep)', () => {
+        it('leaves index unchanged when movement is below threshold (anchor carries remainder)', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 130, 3, 8, 48);
+            expect(step).toEqual({ peekIndex: 3, nextAnchorY: 100 });
+        });
+
+        it('decrements index once per threshold when swiping up', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 52, 3, 8, 48);
+            expect(step).toEqual({ peekIndex: 2, nextAnchorY: 52 });
+        });
+
+        it('applies multiple steps in one move when dy is large', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 4, 4, 8, 48);
+            expect(step).toEqual({ peekIndex: 2, nextAnchorY: 4 });
+        });
+
+        it('clamps at index 0 when swiping up', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 0, 0, 8, 48);
+            expect(step?.peekIndex).toBe(0);
+        });
+
+        it('increments index when swiping down', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 148, 6, 8, 48);
+            expect(step).toEqual({ peekIndex: 7, nextAnchorY: 148 });
+        });
+
+        it('clamps at n - 1 when swiping down', () => {
+            const step = window.DrawHand?.__testPeekSwipeStep?.(100, 300, 7, 8, 48);
+            expect(step?.peekIndex).toBe(7);
         });
     });
 });
