@@ -40,10 +40,10 @@ describe('DeckBackgroundService', () => {
       const result = await service.getAvailableBackgrounds();
 
       expect(result.length).toBe(3); // Only PNG files
-      expect(result).toContain('src/resources/cards/images/backgrounds/another.png');
-      expect(result).toContain('src/resources/cards/images/backgrounds/aesclepnotext.png');
-      expect(result).toContain('src/resources/cards/images/backgrounds/bakernotext.png');
-      expect(result).not.toContain('src/resources/cards/images/backgrounds/test.jpg');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/another.png');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/aesclepnotext.png');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/bakernotext.png');
+      expect(result).not.toContain('src/resources/images/backgrounds/landscape/test.jpg');
       expect(mockReaddir).toHaveBeenCalledTimes(1);
     });
 
@@ -53,7 +53,7 @@ describe('DeckBackgroundService', () => {
 
       const result = await service.getAvailableBackgrounds();
 
-      expect(result).toEqual(['src/resources/cards/images/backgrounds/valid.png']);
+      expect(result).toEqual(['src/resources/images/backgrounds/landscape/valid.png']);
       expect(result.length).toBe(1);
     });
 
@@ -65,9 +65,9 @@ describe('DeckBackgroundService', () => {
 
       expect(result.length).toBe(3);
       // The implementation preserves original case in filenames
-      expect(result).toContain('src/resources/cards/images/backgrounds/test.PNG');
-      expect(result).toContain('src/resources/cards/images/backgrounds/test.Png');
-      expect(result).toContain('src/resources/cards/images/backgrounds/test.png');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/test.PNG');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/test.Png');
+      expect(result).toContain('src/resources/images/backgrounds/landscape/test.png');
     });
 
     it('should return sorted list of backgrounds', async () => {
@@ -77,9 +77,9 @@ describe('DeckBackgroundService', () => {
       const result = await service.getAvailableBackgrounds();
 
       expect(result).toEqual([
-        'src/resources/cards/images/backgrounds/alpha.png',
-        'src/resources/cards/images/backgrounds/beta.png',
-        'src/resources/cards/images/backgrounds/zebra.png'
+        'src/resources/images/backgrounds/landscape/alpha.png',
+        'src/resources/images/backgrounds/landscape/beta.png',
+        'src/resources/images/backgrounds/landscape/zebra.png'
       ]);
     });
 
@@ -144,7 +144,7 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should return true for valid background path', async () => {
-      const validPath = 'src/resources/cards/images/backgrounds/aesclepnotext.png';
+      const validPath = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
       mockAccess.mockResolvedValue(undefined);
 
       const result = await service.validateBackgroundPath(validPath);
@@ -163,7 +163,7 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should return false for non-existent file', async () => {
-      const invalidPath = 'src/resources/cards/images/backgrounds/nonexistent.png';
+      const invalidPath = 'src/resources/images/backgrounds/landscape/nonexistent.png';
       mockAccess.mockRejectedValue({ code: 'ENOENT' });
 
       const result = await service.validateBackgroundPath(invalidPath);
@@ -172,7 +172,7 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should return false for path with access error', async () => {
-      const invalidPath = 'src/resources/cards/images/backgrounds/test.png';
+      const invalidPath = 'src/resources/images/backgrounds/landscape/test.png';
       mockAccess.mockRejectedValue(new Error('Permission denied'));
 
       const result = await service.validateBackgroundPath(invalidPath);
@@ -181,7 +181,7 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should handle paths with "backgrounds" in different positions', async () => {
-      const validPath = 'src/resources/cards/images/backgrounds/test.png';
+      const validPath = 'src/resources/images/backgrounds/landscape/test.png';
       mockAccess.mockResolvedValue(undefined);
 
       const result = await service.validateBackgroundPath(validPath);
@@ -190,7 +190,7 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should resolve path correctly from project root', async () => {
-      const relativePath = 'src/resources/cards/images/backgrounds/test.png';
+      const relativePath = 'src/resources/images/backgrounds/landscape/test.png';
       mockAccess.mockResolvedValue(undefined);
 
       await service.validateBackgroundPath(relativePath);

@@ -387,7 +387,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 **Existing context files** (`.context.md` — feature overview and code locations for AI/contributors):
 
 - `public/css/foil-effect.context.md` — foil card styling and CSS
-- `src/services/deck-background.context.md` — deck editor backgrounds; see also `src/resources/cards/images/backgrounds/.cursorrules`
+- `src/services/deck-background.context.md` — deck editor backgrounds; see also `src/resources/images/backgrounds/landscape/.cursorrules`
 
 **Areas that would benefit from a future `.context.md`** (high complexity or many touchpoints):
 

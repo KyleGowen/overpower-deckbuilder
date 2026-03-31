@@ -1,0 +1,3 @@
+# Deck background assets
+
+Landscape deck editor backgrounds (PNG, auto-discovered by `DeckBackgroundService`) live in **`landscape/`**. See [`landscape/.cursorrules`](landscape/.cursorrules).

@@ -708,6 +708,15 @@ jobs:
           --cache-control "public, max-age=31536000, immutable"
         echo "✅ Card images synced to S3"
 
+    - name: Sync deck background images to S3
+      run: |
+        echo "📦 Syncing deck background images to S3..."
+        aws s3 sync src/resources/images/backgrounds/ \
+          s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/images/backgrounds/ \
+          --delete \
+          --cache-control "public, max-age=31536000, immutable"
+        echo "✅ Deck background images synced to S3"
+
     - name: Verify S3 sync (ensure bucket has card images)
       run: |
         COUNT=$(aws s3 ls s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/cards/images/ --recursive 2>/dev/null | wc -l)
@@ -716,6 +725,15 @@ jobs:
           exit 1
         fi
         echo "✅ Verified $COUNT objects in S3 under src/resources/cards/images/"
+
+    - name: Verify S3 sync (deck backgrounds)
+      run: |
+        BG_COUNT=$(aws s3 ls s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/images/backgrounds/ --recursive 2>/dev/null | wc -l)
+        if [ "$BG_COUNT" -lt 1 ]; then
+          echo "::error::S3 bucket has no objects under src/resources/images/backgrounds/. Deck background sync may have failed."
+          exit 1
+        fi
+        echo "✅ Verified $BG_COUNT objects in S3 under src/resources/images/backgrounds/"
 
   run-migrations:
     name: Run Production Migrations

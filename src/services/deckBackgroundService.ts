@@ -7,7 +7,7 @@ import * as path from 'path';
  */
 export class DeckBackgroundService {
   // Use process.cwd() to get project root, works in both dev and production
-  private readonly BACKGROUNDS_DIR = path.join(process.cwd(), 'src/resources/cards/images/backgrounds');
+  private readonly BACKGROUNDS_DIR = path.join(process.cwd(), 'src/resources/images/backgrounds/landscape');
   private cachedBackgrounds: string[] | null = null;
   private cacheTimestamp: number = 0;
   private readonly CACHE_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -30,7 +30,7 @@ export class DeckBackgroundService {
       // Filter for PNG files and return relative paths
       this.cachedBackgrounds = files
         .filter(file => file.toLowerCase().endsWith('.png'))
-        .map(file => `src/resources/cards/images/backgrounds/${file}`)
+        .map(file => `src/resources/images/backgrounds/landscape/${file}`)
         .sort();
       
       this.cacheTimestamp = now;
@@ -46,7 +46,7 @@ export class DeckBackgroundService {
 
   /**
    * Validate that a background image path exists
-   * @param imagePath - Relative path from project root (e.g., "src/resources/cards/images/backgrounds/aesclepnotext.png")
+   * @param imagePath - Relative path from project root (e.g., "src/resources/images/backgrounds/landscape/aesclepnotext.png")
    */
   async validateBackgroundPath(imagePath: string | null): Promise<boolean> {
     if (!imagePath) {

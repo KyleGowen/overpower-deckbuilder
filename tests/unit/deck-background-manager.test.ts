@@ -195,8 +195,8 @@ describe('DeckBackgroundManager', () => {
   describe('loadBackgrounds', () => {
     it('should load backgrounds from API successfully', async () => {
       const mockBackgrounds = [
-        'src/resources/cards/images/backgrounds/aesclepnotext.png',
-        'src/resources/cards/images/backgrounds/bakernotext.png'
+        'src/resources/images/backgrounds/landscape/aesclepnotext.png',
+        'src/resources/images/backgrounds/landscape/bakernotext.png'
       ];
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -250,7 +250,7 @@ describe('DeckBackgroundManager', () => {
         success: true,
         data: {
           metadata: {
-            background_image_path: 'src/resources/cards/images/backgrounds/test.png'
+            background_image_path: 'src/resources/images/backgrounds/landscape/test.png'
           }
         }
       };
@@ -265,7 +265,7 @@ describe('DeckBackgroundManager', () => {
 
       await manager.loadDeckBackground();
 
-      expect(manager.selectedBackground).toBe('src/resources/cards/images/backgrounds/test.png');
+      expect(manager.selectedBackground).toBe('src/resources/images/backgrounds/landscape/test.png');
       expect(manager.applyBackground).toHaveBeenCalled();
     });
 
@@ -313,14 +313,14 @@ describe('DeckBackgroundManager', () => {
   describe('setBackgroundFromDeckData', () => {
     it('should set background from deck metadata', () => {
       const deckMetadata = {
-        background_image_path: 'src/resources/cards/images/backgrounds/test.png'
+        background_image_path: 'src/resources/images/backgrounds/landscape/test.png'
       };
 
       manager.applyBackground = jest.fn();
 
       manager.setBackgroundFromDeckData(deckMetadata);
 
-      expect(manager.selectedBackground).toBe('src/resources/cards/images/backgrounds/test.png');
+      expect(manager.selectedBackground).toBe('src/resources/images/backgrounds/landscape/test.png');
       expect(manager.applyBackground).toHaveBeenCalled();
     });
 
@@ -371,7 +371,7 @@ describe('DeckBackgroundManager', () => {
 
     it('should reveal and enable existing background button when available', () => {
       (global as any).window.currentUser = { id: 'user-1', role: 'USER' };
-      manager.availableBackgrounds = ['src/resources/cards/images/backgrounds/test.png'];
+      manager.availableBackgrounds = ['src/resources/images/backgrounds/landscape/test.png'];
 
       // Reset style to simulate initial hidden placeholder
       mockBackgroundBtn.style.visibility = 'hidden';
@@ -391,11 +391,11 @@ describe('DeckBackgroundManager', () => {
 
   describe('getSelectedBackground', () => {
     it('should return selected background', () => {
-      manager.selectedBackground = 'src/resources/cards/images/backgrounds/test.png';
+      manager.selectedBackground = 'src/resources/images/backgrounds/landscape/test.png';
       
       const result = manager.getSelectedBackground();
       
-      expect(result).toBe('src/resources/cards/images/backgrounds/test.png');
+      expect(result).toBe('src/resources/images/backgrounds/landscape/test.png');
     });
 
     it('should return null if no background selected', () => {
@@ -409,15 +409,15 @@ describe('DeckBackgroundManager', () => {
 
   describe('updateSelectedBackground', () => {
     it('should update selected background', () => {
-      manager.updateSelectedBackground('src/resources/cards/images/backgrounds/new.png');
+      manager.updateSelectedBackground('src/resources/images/backgrounds/landscape/new.png');
       
-      expect(manager.selectedBackground).toBe('src/resources/cards/images/backgrounds/new.png');
+      expect(manager.selectedBackground).toBe('src/resources/images/backgrounds/landscape/new.png');
     });
 
     it('should apply background after update', () => {
       manager.applyBackground = jest.fn();
       
-      manager.updateSelectedBackground('src/resources/cards/images/backgrounds/new.png');
+      manager.updateSelectedBackground('src/resources/images/backgrounds/landscape/new.png');
       
       expect(manager.applyBackground).toHaveBeenCalled();
     });
@@ -538,7 +538,7 @@ describe('DeckBackgroundManager', () => {
 
 
     it('should handle missing modal gracefully', () => {
-      manager.selectedBackground = 'src/resources/cards/images/backgrounds/test.png';
+      manager.selectedBackground = 'src/resources/images/backgrounds/landscape/test.png';
       (mockDocument.getElementById as any) = jest.fn(() => null);
       
       // Should not throw
@@ -549,10 +549,10 @@ describe('DeckBackgroundManager', () => {
   describe('showBackgroundModal', () => {
     beforeEach(() => {
       manager.availableBackgrounds = [
-        'src/resources/cards/images/backgrounds/aesclepnotext.png',
-        'src/resources/cards/images/backgrounds/bakernotext.png',
-        'src/resources/cards/images/backgrounds/dejahnotext.png',
-        'src/resources/cards/images/backgrounds/draculanotext.png'
+        'src/resources/images/backgrounds/landscape/aesclepnotext.png',
+        'src/resources/images/backgrounds/landscape/bakernotext.png',
+        'src/resources/images/backgrounds/landscape/dejahnotext.png',
+        'src/resources/images/backgrounds/landscape/draculanotext.png'
       ];
       
       // Mock document.createElement to return proper elements
@@ -806,7 +806,7 @@ describe('DeckBackgroundManager', () => {
     });
 
     it('should create background option with image', () => {
-      const bgPath = 'src/resources/cards/images/backgrounds/test.png';
+      const bgPath = 'src/resources/images/backgrounds/landscape/test.png';
       const option = manager.createBackgroundOption(bgPath, 'test', false);
 
       expect(option).toBeDefined();
@@ -815,8 +815,8 @@ describe('DeckBackgroundManager', () => {
     });
 
     it('should mark option as selected if it matches current background', () => {
-      manager.selectedBackground = 'src/resources/cards/images/backgrounds/test.png';
-      const option = manager.createBackgroundOption('src/resources/cards/images/backgrounds/test.png', 'test', false);
+      manager.selectedBackground = 'src/resources/images/backgrounds/landscape/test.png';
+      const option = manager.createBackgroundOption('src/resources/images/backgrounds/landscape/test.png', 'test', false);
 
       expect(option.classList.add).toHaveBeenCalledWith('selected');
     });
@@ -830,7 +830,7 @@ describe('DeckBackgroundManager', () => {
 
     it('should add click handler to option', () => {
       manager.selectBackground = jest.fn();
-      const bgPath = 'src/resources/cards/images/backgrounds/test.png';
+      const bgPath = 'src/resources/images/backgrounds/landscape/test.png';
       const option = manager.createBackgroundOption(bgPath, 'test', false);
 
       expect(option.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
@@ -847,7 +847,7 @@ describe('DeckBackgroundManager', () => {
     });
 
     it('should handle image error by showing error message', () => {
-      const bgPath = 'src/resources/cards/images/backgrounds/test.png';
+      const bgPath = 'src/resources/images/backgrounds/landscape/test.png';
       const mockImg: any = {
         src: '',
         alt: '',

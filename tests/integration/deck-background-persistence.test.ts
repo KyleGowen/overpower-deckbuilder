@@ -91,7 +91,7 @@ describe('Deck Background Persistence Integration Tests', () => {
 
   describe('PUT /api/decks/:id - background_image_path persistence', () => {
     it('should persist background_image_path when updating deck', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/aesclepnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
       
       const updateResponse = await request(app)
         .put(`/api/decks/${testDeckId}`)
@@ -106,7 +106,7 @@ describe('Deck Background Persistence Integration Tests', () => {
     });
 
     it('should retrieve persisted background_image_path on GET', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/bakernotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/bakernotext.png';
       
       // Set background
       await request(app)
@@ -133,7 +133,7 @@ describe('Deck Background Persistence Integration Tests', () => {
         .put(`/api/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
-          background_image_path: 'src/resources/cards/images/backgrounds/aesclepnotext.png'
+          background_image_path: 'src/resources/images/backgrounds/landscape/aesclepnotext.png'
         })
         .expect(200);
 
@@ -179,7 +179,7 @@ describe('Deck Background Persistence Integration Tests', () => {
     });
 
     it('should validate background_image_path exists in filesystem', async () => {
-      const invalidPath = 'src/resources/cards/images/backgrounds/nonexistent.png';
+      const invalidPath = 'src/resources/images/backgrounds/landscape/nonexistent.png';
       
       const updateResponse = await request(app)
         .put(`/api/decks/${testDeckId}`)
@@ -209,7 +209,7 @@ describe('Deck Background Persistence Integration Tests', () => {
     });
 
     it('should allow updating other deck fields along with background_image_path', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/dejahnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/dejahnotext.png';
       
       const updateResponse = await request(app)
         .put(`/api/decks/${testDeckId}`)
@@ -228,7 +228,7 @@ describe('Deck Background Persistence Integration Tests', () => {
     });
 
     it('should persist background_image_path in database', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/draculanotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/draculanotext.png';
       const deckRepository = DataSourceConfig.getInstance().getDeckRepository();
       
       // Set background via API
@@ -247,7 +247,7 @@ describe('Deck Background Persistence Integration Tests', () => {
     });
 
     it('should return background_image_path in /api/decks/:id/full endpoint', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/minanotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/minanotext.png';
       
       // Set background
       await request(app)

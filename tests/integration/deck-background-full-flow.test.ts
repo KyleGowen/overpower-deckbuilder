@@ -91,7 +91,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
   describe('Complete Background Selection Flow', () => {
     it('should allow admin to select and save background', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/aesclepnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
       
       // Step 1: Admin gets available backgrounds
       const backgroundsResponse = await request(app)
@@ -126,7 +126,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should persist background across deck saves', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/bakernotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/bakernotext.png';
       
       // Set background
       await request(app)
@@ -156,8 +156,8 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should allow changing background to different image', async () => {
-      const firstBackground = 'src/resources/cards/images/backgrounds/aesclepnotext.png';
-      const secondBackground = 'src/resources/cards/images/backgrounds/dejahnotext.png';
+      const firstBackground = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
+      const secondBackground = 'src/resources/images/backgrounds/landscape/dejahnotext.png';
       
       // Set first background
       await request(app)
@@ -181,7 +181,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should allow removing background (setting to null)', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/aesclepnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
       
       // Set background first
       await request(app)
@@ -207,7 +207,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
   describe('View Mode Background Loading', () => {
     it('should load background in view mode for all users', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/draculanotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/draculanotext.png';
       
       // Admin sets background
       await request(app)
@@ -229,7 +229,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should load background when deck is opened in view mode', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/minanotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/minanotext.png';
       
       // Set background
       await request(app)
@@ -240,9 +240,10 @@ describe('Deck Background Full Flow Integration Tests', () => {
         })
         .expect(200);
 
-      // Simulate opening deck in view mode (unauthenticated or different user)
+      // Simulate owner opening deck in view mode (GET /api/decks/:id requires auth)
       const getResponse = await request(app)
         .get(`/api/decks/${testDeckId}`)
+        .set('Cookie', adminAuthCookie)
         .expect(200);
 
       expect(getResponse.body.data.metadata.background_image_path).toBe(backgroundPath);
@@ -261,7 +262,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should allow regular users to view decks with backgrounds (read-only)', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/robinnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/robinnotext.png';
       
       // Admin sets background
       await request(app)
@@ -311,7 +312,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
   describe('Background Persistence Across Operations', () => {
     it('should maintain background when updating deck name', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/spartannotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/spartannotext.png';
       
       // Set background
       await request(app)
@@ -335,7 +336,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should maintain background when updating description', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/victorynotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/victorynotext.png';
       
       // Set background
       await request(app)
@@ -359,7 +360,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     });
 
     it('should return background in full deck endpoint', async () => {
-      const backgroundPath = 'src/resources/cards/images/backgrounds/watsonnotext.png';
+      const backgroundPath = 'src/resources/images/backgrounds/landscape/watsonnotext.png';
       
       // Set background
       await request(app)

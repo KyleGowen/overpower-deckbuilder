@@ -16,9 +16,7 @@ coverage
 *.spec.ts
 scripts
 # Card images are served from S3/CloudFront in production — not baked into the Docker image.
-# Exception: `backgrounds/` must be in the image so GET /api/deck-backgrounds can readdir() and
-# validateBackgroundPath() works on save. (~25 PNGs, small vs. the full card tree.)
+# Deck backgrounds live under src/resources/images/backgrounds/landscape/ (~25 PNGs) and are
+# included in the image so GET /api/deck-backgrounds can readdir() and validateBackgroundPath()
+# works on save.
 src/resources/cards/images/**
-!src/resources/cards/images/backgrounds
-!src/resources/cards/images/backgrounds/**
-

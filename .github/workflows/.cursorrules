@@ -31,7 +31,7 @@
 - **The `sync-images` job MUST run `npm run generate:thumbnails` before syncing to S3.**
 - Thumbnails (`characters/thumb/`, `missions/thumb/`, `locations/thumb/`) are in `.gitignore` and never committed. Without this step, the S3 bucket has no thumbnails and deck selection card images are blank.
 - The job requires `node-version: '20'` + `npm ci` before calling `npm run generate:thumbnails`.
-- Background images (`backgrounds/*.png`) ARE committed to git and don't need generation — only the three `thumb/` directories need it.
+- Deck background images (`src/resources/images/backgrounds/landscape/*.png`) ARE committed to git and don't need thumbnail generation — only the three `thumb/` directories under `cards/images` need it. They are synced to S3 in a separate `aws s3 sync src/resources/images/backgrounds/` step after card images.
 - **Symptom of missing thumbnails**: deck selection character/mission/location card slots are empty (teal outlined boxes); deck background images still load because backgrounds are committed. Console is clean (no JS errors) because the browser simply requests URLs that return 404/403 from S3.
 
 ## CDN_BASE_URL Must Be in the Container

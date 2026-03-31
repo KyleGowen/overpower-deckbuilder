@@ -102,7 +102,7 @@ describe('Deck Background API Integration Tests', () => {
       
       // Verify all paths are valid background paths
       response.body.data.forEach((path: string) => {
-        expect(path).toContain('src/resources/cards/images/backgrounds/');
+        expect(path).toContain('src/resources/images/backgrounds/landscape/');
         expect(path).toMatch(/\.png$/i);
       });
     });
