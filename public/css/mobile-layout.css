@@ -114,9 +114,7 @@
     container-type: inline-size;
     --dbv-mobile-tile-img-max: 100%;
     --dbv-mobile-tile-img-landscape-max-h: min(56cqw, 480px);
-    /*
-     * Character tbody portrait: width resolves against .card-image-container; with-nav subtracts arrow columns (44+44+8).
-     */
+    /* Shared by Locations/Events tbody portrait width; Characters MV uses flex-grow + cqw caps (see #characters-table tbody rules). */
     --dbv-mobile-table-portrait-img: min(100%, 580px);
     --dbv-mobile-table-portrait-img-with-nav: min(calc(100% - 96px), 520px);
 }
@@ -4831,35 +4829,28 @@
     box-sizing: border-box;
 }
 
-/* Portrait characters: same vw tokens as Special Cards tbody. */
-.layout-mobile #characters-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img:not(.horizontal-card) {
-    flex: 0 0 auto !important;
-    width: var(--dbv-mobile-table-portrait-img) !important;
-    max-width: 100% !important;
+/*
+ * Characters MV row art: alternate vs primary must share one visual frame.
+ * With-nav: flex-grow between arrows (DTV parity) — avoids tiny portrait/alternate imgs on flex: 0 0 auto + width var.
+ * Without nav: full row width up to cap. Single max-height for portrait + landscape (horizontal-card class unused for sizing).
+ */
+.layout-mobile #characters-table tbody td:first-child .card-image-container.card-image-container--with-nav img {
+    flex: 1 1 auto !important;
     min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
     height: auto !important;
-    max-height: none !important;
+    max-height: min(95cqw, 560px) !important;
     object-fit: contain !important;
 }
 
-.layout-mobile #characters-table tbody td:first-child .card-image-container.card-image-container--with-nav img:not(.horizontal-card) {
-    flex: 0 0 auto !important;
-    width: var(--dbv-mobile-table-portrait-img-with-nav) !important;
+.layout-mobile #characters-table tbody td:first-child .card-image-container:not(.card-image-container--with-nav) img {
+    flex: 0 1 auto !important;
+    width: min(100%, 580px) !important;
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
-    max-height: none !important;
-    object-fit: contain !important;
-}
-
-/* Parity with .all-cards-cell img.horizontal-card (scoped — that selector does not match Character rows). */
-.layout-mobile #characters-table tbody td:first-child .card-image-container img.horizontal-card {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: var(--dbv-mobile-tile-img-max) !important;
-    height: auto !important;
-    max-height: var(--dbv-mobile-tile-img-landscape-max-h) !important;
+    max-height: min(95cqw, 560px) !important;
     object-fit: contain !important;
 }
 

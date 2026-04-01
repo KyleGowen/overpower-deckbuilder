@@ -310,15 +310,15 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
         );
     });
 
-    it('sizes Character art with DBV tile tokens and landscape horizontal-card max-height', () => {
+    it('sizes Character MV row art to fill flex track (with-nav) and row width (no nav)', () => {
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container[\s\S]*?width:\s*100%[\s\S]*?max-width:\s*100%/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img:not\(\.horizontal-card\)[\s\S]*?width:\s*var\(\s*--dbv-mobile-table-portrait-img\s*\)\s*!important[\s\S]*?max-height:\s*none\s*!important/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container\.card-image-container--with-nav\s+img[\s\S]*?flex:\s*1\s+1\s+auto\s*!important[\s\S]*?max-height:\s*min\(\s*95cqw\s*,\s*560px\s*\)\s*!important/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container\s+img\.horizontal-card[\s\S]*?max-height:\s*var\(\s*--dbv-mobile-tile-img-landscape-max-h\s*\)\s*!important/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.card-image-container:not\(\.card-image-container--with-nav\)\s+img[\s\S]*?width:\s*min\(\s*100%\s*,\s*580px\s*\)\s*!important[\s\S]*?max-height:\s*min\(\s*95cqw\s*,\s*560px\s*\)\s*!important/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#characters-table\s+tbody\s+\.card-nav-arrow[\s\S]*?min-width:\s*44px/

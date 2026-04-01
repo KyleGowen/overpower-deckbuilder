@@ -679,6 +679,37 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     /* Height will be set by JavaScript after initial render */
 }
 
+/* Characters: locked row/cell (desktop art cycling + applyCharacterImageRowHeightLock) — mirror Special/Power */
+#characters-table tbody tr[data-height-locked="true"] {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#characters-table tbody td:nth-child(1)[data-height-locked="true"] {
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Fill locked td so img max-height: % resolves to full cell (flex row: art + arrows) */
+html:not(.layout-mobile) #characters-table tbody td:nth-child(1)[data-height-locked="true"] .card-image-container {
+    height: 100%;
+    min-height: 0;
+}
+
+#characters-table tbody td:nth-child(1)[data-height-locked="true"] img {
+    max-height: 100% !important;
+    max-width: min(520px, 100%) !important;
+    object-fit: contain;
+    display: block;
+    min-width: 0;
+}
+
+/* Locked + with-nav: keep width auto so flex: 1 1 auto can grow between arrows */
+html:not(.layout-mobile) #characters-table tbody td:nth-child(1)[data-height-locked="true"] .card-image-container.card-image-container--with-nav img {
+    width: auto !important;
+}
+
 /* Special Cards Table - Lock row height after initial render to prevent changes when cycling images */
 /* Only apply to data rows, not header rows */
 #special-cards-table tbody tr {
@@ -753,8 +784,11 @@ html:not(.layout-mobile) #characters-table .characters-stat-panels .characters-s
     display: block; /* Remove inline spacing */
 }
 
+/* Beat global `td img { width: 120px; max-height: 180px } !important` so row art can use flex + max-width */
 #characters-table td:nth-child(1) img {
+    width: auto !important;
     max-width: min(520px, 100%);
+    max-height: none !important;
     height: auto;
     object-fit: contain; /* Ensure images scale properly */
 }
@@ -773,6 +807,11 @@ html:not(.layout-mobile) #characters-table td:nth-child(1) .card-image-container
 
 html:not(.layout-mobile) #characters-table td:nth-child(1) .card-image-container:not(.card-image-container--with-nav) {
     justify-content: center;
+}
+
+/* Single-art DTV rows: scale thumbnails up (width:auto follows intrinsic ~small thumb size) */
+html:not(.layout-mobile) #characters-table td:nth-child(1) .card-image-container:not(.card-image-container--with-nav) img {
+    width: min(520px, 100%) !important;
 }
 
 html:not(.layout-mobile) #characters-table td:nth-child(1) .card-image-container.card-image-container--with-nav img {
@@ -864,6 +903,32 @@ html:not(.layout-mobile) #characters-table td:nth-child(2) .remove-from-collecti
 
 #locations-table tbody td:nth-child(1) {
     min-height: 200px;
+}
+
+/* Locations: locked row/cell (same navigateCardImage height-lock path as Characters) */
+#locations-table tbody tr[data-height-locked="true"] {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#locations-table tbody td:nth-child(1)[data-height-locked="true"] {
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+}
+
+html:not(.layout-mobile) #locations-table tbody td:nth-child(1)[data-height-locked="true"] .card-image-container {
+    height: 100%;
+    min-height: 0;
+}
+
+#locations-table tbody td:nth-child(1)[data-height-locked="true"] img {
+    max-height: 100% !important;
+    width: auto !important;
+    max-width: min(520px, 100%) !important;
+    object-fit: contain;
+    display: block;
+    min-width: 0;
 }
 
 #locations-table td:nth-child(1) img {

@@ -279,14 +279,8 @@ function navigateCardImage(groupId, direction) {
         row.style.setProperty('max-height', lockedRowHeight, 'important');
     }
 
-    if (useHeightLocks && lockedCellHeight && imageCell) {
-        const cellHeightValue = parseFloat(lockedCellHeight);
-        if (!isNaN(cellHeightValue)) {
-            img.style.setProperty('max-height', (cellHeightValue - 20) + 'px', 'important');
-            img.style.setProperty('object-fit', 'contain', 'important');
-        }
-    }
-    
+    /* Img sizing when locked: database-view.css [data-height-locked] rules (max-height: 100% of cell) */
+
     img.classList.remove('horizontal-card');
     img.src = newImagePath;
     img.alt = newImage.name;
