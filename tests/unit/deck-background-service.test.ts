@@ -18,6 +18,23 @@ jest.mock('fs/promises', () => ({
   }
 }));
 
+/** Mutable fixtures for mockImplementation (two readdir calls per getAvailableBackgrounds). */
+let landscapeFilesForMock: string[] = [];
+let portraitFilesForMock: string[] = [];
+
+function setupReaddirMock(): void {
+  mockReaddir.mockImplementation((dirPath: string) => {
+    const base = path.basename(dirPath);
+    if (base === 'landscape') {
+      return Promise.resolve([...landscapeFilesForMock]);
+    }
+    if (base === 'portrait') {
+      return Promise.resolve([...portraitFilesForMock]);
+    }
+    return Promise.reject(new Error(`unexpected readdir path: ${dirPath}`));
+  });
+}
+
 describe('DeckBackgroundService', () => {
   let service: DeckBackgroundService;
 
@@ -25,6 +42,9 @@ describe('DeckBackgroundService', () => {
     service = new DeckBackgroundService();
     jest.clearAllMocks();
     jest.useFakeTimers();
+    landscapeFilesForMock = [];
+    portraitFilesForMock = [];
+    setupReaddirMock();
   });
 
   afterEach(() => {
@@ -34,8 +54,8 @@ describe('DeckBackgroundService', () => {
 
   describe('getAvailableBackgrounds', () => {
     it('should return list of PNG files from backgrounds directory', async () => {
-      const mockFiles = ['aesclepnotext.png', 'bakernotext.png', 'test.jpg', 'another.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['aesclepnotext.png', 'bakernotext.png', 'test.jpg', 'another.png'];
+      portraitFilesForMock = [];
 
       const result = await service.getAvailableBackgrounds();
 
@@ -44,12 +64,25 @@ describe('DeckBackgroundService', () => {
       expect(result).toContain('src/resources/images/backgrounds/landscape/aesclepnotext.png');
       expect(result).toContain('src/resources/images/backgrounds/landscape/bakernotext.png');
       expect(result).not.toContain('src/resources/images/backgrounds/landscape/test.jpg');
-      expect(mockReaddir).toHaveBeenCalledTimes(1);
+      expect(mockReaddir).toHaveBeenCalledTimes(2);
+    });
+
+    it('should merge PNG files from landscape and portrait', async () => {
+      landscapeFilesForMock = ['land.png'];
+      portraitFilesForMock = ['port.png', 'skip.jpg'];
+
+      const result = await service.getAvailableBackgrounds();
+
+      expect(result).toEqual([
+        'src/resources/images/backgrounds/landscape/land.png',
+        'src/resources/images/backgrounds/portrait/port.png'
+      ]);
+      expect(mockReaddir).toHaveBeenCalledTimes(2);
     });
 
     it('should filter out non-PNG files', async () => {
-      const mockFiles = ['test.jpg', 'test.gif', 'test.webp', 'valid.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['test.jpg', 'test.gif', 'test.webp', 'valid.png'];
+      portraitFilesForMock = [];
 
       const result = await service.getAvailableBackgrounds();
 
@@ -58,8 +91,8 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should handle case-insensitive PNG extension matching', async () => {
-      const mockFiles = ['test.PNG', 'test.Png', 'test.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['test.PNG', 'test.Png', 'test.png'];
+      portraitFilesForMock = [];
 
       const result = await service.getAvailableBackgrounds();
 
@@ -71,8 +104,8 @@ describe('DeckBackgroundService', () => {
     });
 
     it('should return sorted list of backgrounds', async () => {
-      const mockFiles = ['zebra.png', 'alpha.png', 'beta.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['zebra.png', 'alpha.png', 'beta.png'];
+      portraitFilesForMock = [];
 
       const result = await service.getAvailableBackgrounds();
 
@@ -83,44 +116,60 @@ describe('DeckBackgroundService', () => {
       ]);
     });
 
+    it('should return portrait paths when landscape folder read fails', async () => {
+      mockReaddir.mockImplementation((dirPath: string) => {
+        const base = path.basename(dirPath);
+        if (base === 'landscape') {
+          return Promise.reject(new Error('Permission denied'));
+        }
+        if (base === 'portrait') {
+          return Promise.resolve(['only.png']);
+        }
+        return Promise.reject(new Error(`unexpected ${dirPath}`));
+      });
+
+      const result = await service.getAvailableBackgrounds();
+
+      expect(result).toEqual(['src/resources/images/backgrounds/portrait/only.png']);
+    });
+
     it('should cache results for 15 minutes', async () => {
-      const mockFiles = ['test.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['test.png'];
+      portraitFilesForMock = [];
 
       // First call - should read from filesystem
       const result1 = await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(1);
+      expect(mockReaddir).toHaveBeenCalledTimes(2);
 
       // Advance time by 14 minutes (still within cache)
       jest.advanceTimersByTime(14 * 60 * 1000);
 
       // Second call - should use cache
       const result2 = await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(1); // Still only called once
+      expect(mockReaddir).toHaveBeenCalledTimes(2); // Still only two readdir per load
       expect(result2).toEqual(result1);
     });
 
     it('should refresh cache after 15 minutes', async () => {
-      const mockFiles1 = ['old.png'];
-      const mockFiles2 = ['old.png', 'new.png'];
-      mockReaddir
-        .mockResolvedValueOnce(mockFiles1)
-        .mockResolvedValueOnce(mockFiles2);
+      landscapeFilesForMock = ['old.png'];
+      portraitFilesForMock = [];
 
       // First call
       const result1 = await service.getAvailableBackgrounds();
       expect(result1.length).toBe(1);
+
+      landscapeFilesForMock = ['old.png', 'new.png'];
 
       // Advance time by 15 minutes and 1 second (cache expired)
       jest.advanceTimersByTime(15 * 60 * 1000 + 1000);
 
       // Second call - should refresh cache
       const result2 = await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(2);
+      expect(mockReaddir).toHaveBeenCalledTimes(4);
       expect(result2.length).toBe(2);
     });
 
-    it('should return empty array on filesystem error', async () => {
+    it('should return empty array when both subfolders fail to read', async () => {
       mockReaddir.mockRejectedValue(new Error('Permission denied'));
 
       const result = await service.getAvailableBackgrounds();
@@ -128,7 +177,7 @@ describe('DeckBackgroundService', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return empty array if directory does not exist', async () => {
+    it('should return empty array if both directories do not exist', async () => {
       mockReaddir.mockRejectedValue({ code: 'ENOENT' });
 
       const result = await service.getAvailableBackgrounds();
@@ -145,6 +194,16 @@ describe('DeckBackgroundService', () => {
 
     it('should return true for valid background path', async () => {
       const validPath = 'src/resources/images/backgrounds/landscape/aesclepnotext.png';
+      mockAccess.mockResolvedValue(undefined);
+
+      const result = await service.validateBackgroundPath(validPath);
+
+      expect(result).toBe(true);
+      expect(mockAccess).toHaveBeenCalled();
+    });
+
+    it('should return true for valid portrait background path', async () => {
+      const validPath = 'src/resources/images/backgrounds/portrait/freya.png';
       mockAccess.mockResolvedValue(undefined);
 
       const result = await service.validateBackgroundPath(validPath);
@@ -205,12 +264,12 @@ describe('DeckBackgroundService', () => {
 
   describe('clearCache', () => {
     it('should clear cached backgrounds', async () => {
-      const mockFiles = ['test.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['test.png'];
+      portraitFilesForMock = [];
 
       // Load cache
       await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(1);
+      expect(mockReaddir).toHaveBeenCalledTimes(2);
 
       // Clear cache
       service.clearCache();
@@ -220,19 +279,19 @@ describe('DeckBackgroundService', () => {
 
       // Should read from filesystem again
       await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(2);
+      expect(mockReaddir).toHaveBeenCalledTimes(4);
     });
 
     it('should reset cache timestamp', async () => {
-      const mockFiles = ['test.png'];
-      mockReaddir.mockResolvedValue(mockFiles);
+      landscapeFilesForMock = ['test.png'];
+      portraitFilesForMock = [];
 
       await service.getAvailableBackgrounds();
       service.clearCache();
 
       // Should immediately refresh on next call
       await service.getAvailableBackgrounds();
-      expect(mockReaddir).toHaveBeenCalledTimes(2);
+      expect(mockReaddir).toHaveBeenCalledTimes(4);
     });
   });
 });

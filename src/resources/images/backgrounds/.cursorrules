@@ -1,3 +1,24 @@
-# Deck background assets
+# Deck Background Images Directory
 
-Landscape deck editor backgrounds (PNG, auto-discovered by `DeckBackgroundService`) live in **`landscape/`**. See [`landscape/.cursorrules`](landscape/.cursorrules).
+## Purpose
+
+This directory holds **deck editor background images**. They are used as full-bleed backgrounds in the deck editor and are **auto-discovered** by `DeckBackgroundService` — there is no manifest or config to update when adding/removing files.
+
+Subfolders:
+
+- **`landscape/`** — wide compositions suited to desktop / horizontal layouts.
+- **`portrait/`** — vertically oriented art suited to mobile (`layout-mobile`) deck editor; same PNG rules as landscape.
+
+## Rules
+
+- **Only PNG files** are included. Other formats are ignored by the service.
+- **Paths are relative to project root**: `src/resources/images/backgrounds/<landscape|portrait>/<filename>.png`. The service merges both folders, sorts paths, and returns them; the frontend uses `/${path}` for `background-image: url()`.
+- **No thumbnails** — the card thumbnail pipeline (`generateCardThumbnails.ts`) does not process this directory. Do not add a `thumb/` subfolder here.
+- **Adding a new background**: drop a `.png` into `landscape/` and/or `portrait/` as appropriate. No code changes required. New images appear in the picker after server restart or when the service cache expires (~15 min).
+- **Naming**: filenames are used as-is; the UI derives a short label by stripping `.png` and `notext` (e.g. `moriartyreapernotext.png` → "moriartyreaper"). Use descriptive, URL-safe names.
+
+## Related Context
+
+- Feature overview and code locations: `src/services/deck-background.context.md`
+- Service implementation: `src/services/deckBackgroundService.ts`
+- Portrait-specific notes: `portrait/.cursorrules`

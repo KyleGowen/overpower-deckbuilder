@@ -100,10 +100,10 @@ describe('Deck Background API Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
       
-      // Verify all paths are valid background paths
-      response.body.data.forEach((path: string) => {
-        expect(path).toContain('src/resources/images/backgrounds/landscape/');
-        expect(path).toMatch(/\.png$/i);
+      // Verify all paths are valid background paths (landscape and/or portrait)
+      response.body.data.forEach((p: string) => {
+        expect(p).toMatch(/src\/resources\/images\/backgrounds\/(landscape|portrait)\//);
+        expect(p).toMatch(/\.png$/i);
       });
     });
 

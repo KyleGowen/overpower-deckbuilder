@@ -1,0 +1,16 @@
+# Portrait deck background images
+
+## Purpose
+
+PNG backgrounds tuned for **vertical / mobile** deck editor use (`layout-mobile`). They appear in the same deck background picker as `landscape/` assets; stored paths look like `src/resources/images/backgrounds/portrait/<filename>.png`.
+
+## Rules
+
+- **PNG only** — same discovery rules as `landscape/` (`DeckBackgroundService`).
+- Prefer compositions that read well behind a tall, narrow editor viewport.
+- **No thumbnails** — full-size assets only; do not add `thumb/` here.
+
+## Related
+
+- Parent directory: `../.cursorrules`
+- Service: `src/services/deckBackgroundService.ts`
