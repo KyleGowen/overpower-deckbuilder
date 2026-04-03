@@ -104,4 +104,26 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/events returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllEvents: jest.fn().mockResolvedValue([{ id: 'e1', name: 'Test Event' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/events').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'e1', name: 'Test Event' }]);
+  });
+
+  it('GET /catalog/events returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllEvents: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/events').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

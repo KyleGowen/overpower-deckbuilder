@@ -1,55 +1,68 @@
 /**
  * Rewrite removed legacy catalog list URLs to /api/v1/catalog/* before any deferred scripts run.
  * Loaded synchronously from index.html <head> (no defer) so fetch() is patched early.
- * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions removed
+ * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions, /events removed
  */
 (function () {
     'use strict';
 
     var nativeFetch = window.fetch.bind(window);
 
+    /** @type {Record<string, string>} */
+    var LEGACY_TO_V1 = {
+        '/api/characters': '/api/v1/catalog/characters',
+        '/api/locations': '/api/v1/catalog/locations',
+        '/api/special-cards': '/api/v1/catalog/special-cards',
+        '/api/missions': '/api/v1/catalog/missions',
+        '/api/events': '/api/v1/catalog/events'
+    };
+
+    function canonicalPathname(pathname) {
+        if (!pathname || pathname === '/') {
+            return pathname;
+        }
+        return pathname.length > 1 && pathname.slice(-1) === '/' ? pathname.slice(0, -1) : pathname;
+    }
+
+    function lookupV1CatalogPath(pathname) {
+        return LEGACY_TO_V1[canonicalPathname(pathname)] || null;
+    }
+
     function rewriteLegacyCatalogListFetchInput(input) {
+        if (typeof URL !== 'undefined' && input instanceof URL) {
+            try {
+                var v1u = lookupV1CatalogPath(input.pathname);
+                if (!v1u) {
+                    return input;
+                }
+                var uCopy = new URL(input.href);
+                uCopy.pathname = v1u;
+                return uCopy;
+            } catch (_e0) {
+                return input;
+            }
+        }
         if (typeof input === 'string') {
             try {
                 var u = new URL(input, window.location.origin);
-                if (u.pathname === '/api/characters') {
-                    u.pathname = '/api/v1/catalog/characters';
-                    return input.indexOf('http') === 0 ? u.href : u.pathname + u.search + u.hash;
+                var v1 = lookupV1CatalogPath(u.pathname);
+                if (!v1) {
+                    return input;
                 }
-                if (u.pathname === '/api/locations') {
-                    u.pathname = '/api/v1/catalog/locations';
-                    return input.indexOf('http') === 0 ? u.href : u.pathname + u.search + u.hash;
-                }
-                if (u.pathname === '/api/special-cards') {
-                    u.pathname = '/api/v1/catalog/special-cards';
-                    return input.indexOf('http') === 0 ? u.href : u.pathname + u.search + u.hash;
-                }
-                if (u.pathname === '/api/missions') {
-                    u.pathname = '/api/v1/catalog/missions';
-                    return input.indexOf('http') === 0 ? u.href : u.pathname + u.search + u.hash;
-                }
+                u.pathname = v1;
+                return input.indexOf('http') === 0 ? u.href : u.pathname + u.search + u.hash;
             } catch (_e) { /* keep original */ }
             return input;
         }
         if (input instanceof Request) {
             try {
                 var ru = new URL(input.url);
-                if (ru.pathname === '/api/characters') {
-                    ru.pathname = '/api/v1/catalog/characters';
-                    return new Request(ru.toString(), input);
+                var v1r = lookupV1CatalogPath(ru.pathname);
+                if (!v1r) {
+                    return input;
                 }
-                if (ru.pathname === '/api/locations') {
-                    ru.pathname = '/api/v1/catalog/locations';
-                    return new Request(ru.toString(), input);
-                }
-                if (ru.pathname === '/api/special-cards') {
-                    ru.pathname = '/api/v1/catalog/special-cards';
-                    return new Request(ru.toString(), input);
-                }
-                if (ru.pathname === '/api/missions') {
-                    ru.pathname = '/api/v1/catalog/missions';
-                    return new Request(ru.toString(), input);
-                }
+                ru.pathname = v1r;
+                return new Request(ru.toString(), input);
             } catch (_e2) { /* keep original */ }
         }
         return input;

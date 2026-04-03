@@ -40,8 +40,10 @@
      *     tests/unit/deck-editor-search-css-rules.test.ts for safeguards.
      *
      * Normalized result shape:
-     *   { id: string, name: string, type: string, image: string, fullImage?: string, character?: string, imagePath?: string }
+     *   { id: string, name: string, type: string, image: string, fullImage?: string, character?: string, imagePath?: string,
+     *     typeCaption?: string, missionBulkIds?: string[], missionSetName?: string }
      *   `image` is thumbnail preview (CDN + /thumb/ when available); `fullImage` is full-res for data-image-path / hover.
+     *   Mission-set aggregate rows use `type: 'mission-set'`, `typeCaption` for the gray subtitle, and `missionBulkIds`.
      *
      * Accessibility & Keyboard Navigation (future work):
      *   - The component is structured to support arrow key navigation and Enter
@@ -173,16 +175,26 @@
                 const fullPath =
                     card.fullImage || card.imagePath || card.image_path || card.image || '';
                 const escapedFullPath = fullPath.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                const typeLine =
+                    card.typeCaption != null && String(card.typeCaption).trim() !== ''
+                        ? String(card.typeCaption)
+                        : typeof global.formatCardType === 'function'
+                          ? global.formatCardType(card.type)
+                          : card.type;
+                const bulkAttr =
+                    card.type === 'mission-set' && Array.isArray(card.missionBulkIds)
+                        ? ` data-bulk-mission-ids="${encodeURIComponent(JSON.stringify(card.missionBulkIds))}"`
+                        : '';
                 return `
                 <div class="deck-editor-search-result"
-                     data-id="${card.id}"
-                     data-type="${card.type}"
-                     data-name="${(card.name || '').replace(/'/g, "\\'")}"
-                     data-image-path="${escapedFullPath}">
+                     data-id="${String(card.id || '').replace(/"/g, '&quot;')}"
+                     data-type="${String(card.type || '').replace(/"/g, '&quot;')}"
+                     data-name="${(card.name || '').replace(/"/g, '&quot;').replace(/'/g, "\\'")}"
+                     data-image-path="${escapedFullPath}"${bulkAttr}>
                     <div class="deck-editor-search-result-image" style="background-image: url('${previewUrl}')"></div>
                     <div class="deck-editor-search-result-info">
                         <div class="deck-editor-search-result-name">${card.name}</div>
-                        <div class="deck-editor-search-result-type">${typeof global.formatCardType === 'function' ? global.formatCardType(card.type) : card.type}</div>
+                        <div class="deck-editor-search-result-type">${typeLine}</div>
                         ${card.character ? `<div class="deck-editor-search-result-character">${card.character}</div>` : ''}
                     </div>
                 </div>
@@ -196,12 +208,26 @@
                     const type = el.getAttribute('data-type');
                     const name = el.getAttribute('data-name');
                     const imagePathAttr = el.getAttribute('data-image-path') || null;
-                    this.onSelect({
+                    let missionBulkIds;
+                    const bulkRaw = el.getAttribute('data-bulk-mission-ids');
+                    if (bulkRaw) {
+                        try {
+                            missionBulkIds = JSON.parse(decodeURIComponent(bulkRaw));
+                        } catch {
+                            missionBulkIds = [];
+                        }
+                    }
+                    const payload = {
                         id,
                         type,
                         name,
                         imagePath: imagePathAttr && imagePathAttr.length > 0 ? imagePathAttr : null
-                    });
+                    };
+                    if (type === 'mission-set' && Array.isArray(missionBulkIds)) {
+                        payload.missionBulkIds = missionBulkIds;
+                        payload.missionSetName = name;
+                    }
+                    this.onSelect(payload);
                     this.dismissAfterSelection();
                 });
             });

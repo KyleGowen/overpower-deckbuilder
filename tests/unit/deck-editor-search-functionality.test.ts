@@ -61,30 +61,34 @@ searchAllCards = async function(searchTerm: string) {
       });
 
     // Search events
-    const eventsResponse = await fetch('/api/events');
+    const eventsResponse = await fetch('/api/v1/catalog/events');
     const events = await eventsResponse.json();
-    if (events.success) {
-      events.data.forEach((event: any) => {
-        // Check if event name contains search term
-        const nameMatch = event.name && event.name.toLowerCase().includes(searchTerm);
-        
-        // Check if mission set contains search term
-        const setMatch = event.mission_set && event.mission_set.toLowerCase().includes(searchTerm);
-        
-        // Check for exact type match
-        const typeMatch = searchTerm === 'event' || searchTerm === 'events';
-        
-        if (nameMatch || setMatch || typeMatch) {
-          results.push({
-            id: event.id,
-            name: event.name,
-            type: 'event',
-            image: `/src/resources/cards/images/${event.image}`,
-            character: event.mission_set
-          });
-        }
-      });
-    }
+    const eventRows =
+      Array.isArray(events?.data) &&
+      (!events?.errors || events.errors.length === 0) &&
+      events.success !== false
+        ? events.data
+        : [];
+    eventRows.forEach((event: any) => {
+      // Check if event name contains search term
+      const nameMatch = event.name && event.name.toLowerCase().includes(searchTerm);
+
+      // Check if mission set contains search term
+      const setMatch = event.mission_set && event.mission_set.toLowerCase().includes(searchTerm);
+
+      // Check for exact type match
+      const typeMatch = searchTerm === 'event' || searchTerm === 'events';
+
+      if (nameMatch || setMatch || typeMatch) {
+        results.push({
+          id: event.id,
+          name: event.name,
+          type: 'event',
+          image: `/src/resources/cards/images/${event.image}`,
+          character: event.mission_set
+        });
+      }
+    });
   } catch (error) {
     console.error('Error searching cards:', error);
   }

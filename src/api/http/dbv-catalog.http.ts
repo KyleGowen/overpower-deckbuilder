@@ -54,4 +54,16 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
       ]);
     }
   });
+
+  router.get('/catalog/events', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getAllEvents();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/events error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch events' }
+      ]);
+    }
+  });
 }

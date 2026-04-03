@@ -48,6 +48,13 @@ describe('API v1 integration', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
+
+    it('GET /api/v1/catalog/events returns v1 envelope and event rows', async () => {
+      const res = await request(app).get('/api/v1/catalog/events').expect(200);
+      expect(res.body.errors).toEqual([]);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toBeGreaterThan(0);
+    });
   });
 
   describe('auth.http', () => {

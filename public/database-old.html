@@ -840,12 +840,13 @@
         // Load and display events
         async function loadEvents() {
             try {
-                const response = await fetch('/api/events');
+                const response = await fetch('/api/v1/catalog/events');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayEvents(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+
+                if (payload.ok) {
+                    displayEvents(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load events');
                 }
@@ -1619,7 +1620,7 @@
                     { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
                     { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/v1/catalog/missions', nameField: 'card_name' },
-                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
+                    { type: 'event', name: 'Events', api: '/api/v1/catalog/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },

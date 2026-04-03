@@ -909,6 +909,44 @@ describe('DeckEditorSearch Component', () => {
             expect(mockResults.innerHTML).toContain('Formatted character');
         });
 
+        it('should render mission-set row with typeCaption and pass missionBulkIds on select', () => {
+            const bulkIds = ['u1', 'u2'];
+            const results = [
+                {
+                    id: 'mission-set-bulk:Foo',
+                    name: 'Time Wars: Pack',
+                    type: 'mission-set',
+                    typeCaption: '2 Card Mission Set',
+                    missionBulkIds: bulkIds,
+                    image: '/thumb.jpg',
+                    fullImage: '/full.jpg'
+                }
+            ];
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect
+            });
+
+            component.render(results);
+
+            expect(mockResults.innerHTML).toContain('2 Card Mission Set');
+            expect(mockResults.innerHTML).not.toContain('Formatted mission-set');
+            const row = mockResults.querySelector('.deck-editor-search-result');
+            expect(row).toBeTruthy();
+            row!.dispatchEvent(new MouseEvent('click'));
+            expect(mockOnSelect).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    id: 'mission-set-bulk:Foo',
+                    type: 'mission-set',
+                    name: 'Time Wars: Pack',
+                    missionSetName: 'Time Wars: Pack',
+                    missionBulkIds: bulkIds
+                })
+            );
+        });
+
         it('should handle missing results element gracefully', () => {
             component = new DeckEditorSearch({
                 input: mockInput,

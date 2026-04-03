@@ -61,6 +61,22 @@
             return false;
         }
 
+        /**
+         * Sort key for picking representative mission thumbnail (lowest set_number first; missing last).
+         * Prefer numeric `set_number_int` when present; else leading digits from `set_number`.
+         */
+        static missionSetNumberSortKey(m) {
+            if (!m) return Number.POSITIVE_INFINITY;
+            const sni = m.set_number_int;
+            if (sni != null && sni !== '' && Number.isFinite(Number(sni))) {
+                return Number(sni);
+            }
+            const sn = m.set_number;
+            if (sn == null || sn === '') return Number.POSITIVE_INFINITY;
+            const match = String(sn).trim().match(/^\d+/);
+            return match ? parseInt(match[0], 10) : Number.POSITIVE_INFINITY;
+        }
+
         _getImagePath(card, cardType) {
             const img = card.image || card.image_path || '';
             return cardType === 'location'
@@ -128,6 +144,51 @@
                 .slice(0, this.maxResults);
         }
 
+        /**
+         * One synthetic row per distinct mission_set whose title includes the term (not for generic "mission"/"missions" queries).
+         */
+        _appendMissionSetBulkResults(termLower, allMissionRows, resultsArray) {
+            if (!termLower || termLower === 'mission' || termLower === 'missions') return;
+            if (!Array.isArray(allMissionRows) || !Array.isArray(resultsArray)) return;
+            const t = String(termLower).toLowerCase();
+            const bySet = new Map();
+            for (let i = 0; i < allMissionRows.length; i++) {
+                const m = allMissionRows[i];
+                const ms = m && m.mission_set;
+                if (ms == null || String(ms).trim() === '') continue;
+                const setName = String(ms);
+                if (!setName.toLowerCase().includes(t)) continue;
+                if (!bySet.has(setName)) bySet.set(setName, []);
+                bySet.get(setName).push(m);
+            }
+            for (const [setName, missionsInSet] of bySet) {
+                if (!missionsInSet.length) continue;
+                const sorted = missionsInSet.slice().sort((a, b) => {
+                    const ka = CardSearchService.missionSetNumberSortKey(a);
+                    const kb = CardSearchService.missionSetNumberSortKey(b);
+                    if (ka !== kb) return ka - kb;
+                    return String(a.id || '').localeCompare(String(b.id || ''));
+                });
+                const thumb = sorted[0];
+                const urls = this._getSearchImageUrls(thumb, 'mission');
+                const count = missionsInSet.length;
+                const missionBulkIds = sorted.map(x => x.id).filter(id => id != null && id !== '');
+                const id = `mission-set-bulk:${encodeURIComponent(setName)}`;
+                resultsArray.push({
+                    id,
+                    name: setName,
+                    type: 'mission-set',
+                    missionSetName: setName,
+                    typeCaption: `${count} Card Mission Set`,
+                    image: urls.image,
+                    fullImage: urls.fullImage,
+                    character: null,
+                    missionBulkIds,
+                    imagePath: thumb.image || thumb.image_path
+                });
+            }
+        }
+
         _searchInMap(searchTerm) {
             const map = typeof window !== 'undefined' ? window.availableCardsMap : null;
             if (!map || map.size === 0) return null;
@@ -177,6 +238,12 @@
                     }
                 }
             }
+            const allMissions = [];
+            for (const card of byId.values()) {
+                const ctype = card.cardType || card.type;
+                if (ctype === 'mission') allMissions.push(card);
+            }
+            this._appendMissionSetBulkResults(term, allMissions, results);
             return results;
         }
 
@@ -217,7 +284,7 @@
                     fetchList('/api/v1/catalog/characters'),
                     fetchList('/api/v1/catalog/special-cards'),
                     fetchList('/api/v1/catalog/missions'),
-                    fetchList('/api/events'),
+                    fetchList('/api/v1/catalog/events'),
                     fetchList('/api/aspects'),
                     fetchList('/api/advanced-universe'),
                     fetchList('/api/teamwork'),
@@ -284,6 +351,7 @@
                             });
                         }
                     });
+                    this._appendMissionSetBulkResults(searchTerm, missions.rows, results);
                 }
 
                 if (events.ok) {

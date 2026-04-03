@@ -182,11 +182,11 @@
           }
         },
         {
-          "name": "GET /api/events",
+          "name": "GET /api/v1/catalog/events",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/events"
+            "url": "{{baseUrl}}/api/v1/catalog/events"
           }
         },
         {

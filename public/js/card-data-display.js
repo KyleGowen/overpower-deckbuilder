@@ -66,15 +66,27 @@ async function loadEvents() {
         return;
     }
     try {
-        const response = await fetch('/api/events');
+        const response = await fetch('/api/v1/catalog/events');
         const data = await response.json();
-        
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('events', data.data);
-            window.eventsData = data.data;
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+
+        if (payload.ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('events', payload.rows);
+            window.eventsData = payload.rows;
             if (typeof populateEventsMissionSetSelect === 'function') populateEventsMissionSetSelect();
             if (typeof applyEventsFilters === 'function') applyEventsFilters();
-            else displayEvents(data.data);
+            else displayEvents(payload.rows);
         }
     } catch (error) {
         console.error('Error loading events:', error);

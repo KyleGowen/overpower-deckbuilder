@@ -91,7 +91,7 @@ describe('Event Mission Filtering Integration Tests', () => {
             expect(addMissionResponse.status).toBe(200);
 
             // Get available events
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             // Filter events by mission set (simulating the frontend filter logic)
@@ -137,7 +137,7 @@ describe('Event Mission Filtering Integration Tests', () => {
             expect(addMissionResponse.status).toBe(200);
 
             // Get available events
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             // Filter events by mission set
@@ -196,7 +196,7 @@ describe('Event Mission Filtering Integration Tests', () => {
             expect(addJungleResponse.status).toBe(200);
 
             // Get available events
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             // Filter events by both mission sets
@@ -239,7 +239,7 @@ describe('Event Mission Filtering Integration Tests', () => {
     describe('Scenario 3: No Missions Selected - All Events Usable', () => {
         it('should consider all events usable when no missions are selected', async () => {
             // Get available events
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             // When no missions are selected, all events should be considered usable
@@ -271,7 +271,7 @@ describe('Event Mission Filtering Integration Tests', () => {
             expect(addCharacterResponse.status).toBe(200);
 
             // Get available events
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             // All events should still be considered usable since no missions are selected
@@ -288,7 +288,7 @@ describe('Event Mission Filtering Integration Tests', () => {
         it('should have consistent mission set names between missions and events', async () => {
             // Get missions and events
             const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             
             expect(missionsResponse.status).toBe(200);
             expect(eventsResponse.status).toBe(200);
@@ -321,7 +321,7 @@ describe('Event Mission Filtering Integration Tests', () => {
         it('should have events for each mission set', async () => {
             // Get missions and events
             const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             
             expect(missionsResponse.status).toBe(200);
             expect(eventsResponse.status).toBe(200);
@@ -342,7 +342,7 @@ describe('Event Mission Filtering Integration Tests', () => {
     describe('Edge Cases and Error Handling', () => {
         it('should handle events with missing mission_set gracefully', async () => {
             // Get events and check for any with missing mission_set
-            const eventsResponse = await apiClient.request('GET', '/api/events');
+            const eventsResponse = await apiClient.request('GET', '/api/v1/catalog/events');
             expect(eventsResponse.status).toBe(200);
 
             const eventsWithMissionSet = eventsResponse.body.data.filter((event: any) => 

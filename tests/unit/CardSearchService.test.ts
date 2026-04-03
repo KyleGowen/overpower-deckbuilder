@@ -82,7 +82,7 @@ describe('CardSearchService', () => {
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/special-cards');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/missions');
-            expect(mockFetch).toHaveBeenCalledWith('/api/events');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/events');
             expect(mockFetch).toHaveBeenCalledWith('/api/aspects');
             expect(mockFetch).toHaveBeenCalledWith('/api/advanced-universe');
             expect(mockFetch).toHaveBeenCalledWith('/api/teamwork');
@@ -315,7 +315,118 @@ describe('CardSearchService', () => {
 
             const results = await service.search('test set');
 
-            expect(results).toHaveLength(1);
+            expect(results.length).toBeGreaterThanOrEqual(2);
+            const bulk = results.find((r: any) => r.type === 'mission-set');
+            expect(bulk).toBeDefined();
+            expect(bulk).toMatchObject({
+                name: 'Test Set',
+                typeCaption: '1 Card Mission Set',
+                missionBulkIds: ['1']
+            });
+            expect(results.some((r: any) => r.type === 'mission' && r.id === '1')).toBe(true);
+        });
+
+        it('should add mission-set bulk row with thumbnail from lowest set_number', async () => {
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        {
+                            id: 'm2',
+                            card_name: 'Mission Two',
+                            mission_set: 'Time Wars Pack',
+                            set_number: '20',
+                            image: 'm2.jpg'
+                        },
+                        {
+                            id: 'm1',
+                            card_name: 'Mission One',
+                            mission_set: 'Time Wars Pack',
+                            set_number: '3',
+                            image: 'm1.jpg'
+                        },
+                        {
+                            id: 'm0',
+                            card_name: 'Mission Zero',
+                            mission_set: 'Time Wars Pack',
+                            set_number: 'no-num',
+                            image: 'm0.jpg'
+                        }
+                    ]
+                })
+            });
+            for (let i = 0; i < 9; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            const results = await service.search('time wars');
+            const bulk = results.find((r: any) => r.type === 'mission-set');
+            expect(bulk).toBeDefined();
+            expect(bulk.missionBulkIds).toHaveLength(3);
+            expect(bulk.image).toContain('m1.webp');
+            expect(bulk.typeCaption).toBe('3 Card Mission Set');
+        });
+
+        it('should not synthesize mission-set rows for generic mission keyword', async () => {
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        { id: 'x', card_name: 'Alpha', mission_set: 'Big Mission Set Name', image: 'a.jpg' }
+                    ]
+                })
+            });
+            for (let i = 0; i < 9; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            const results = await service.search('mission');
+            expect(results.some((r: any) => r.type === 'mission-set')).toBe(false);
+        });
+
+        it('should include mission-set bulk from map even when only one mission matches by name', async () => {
+            (window as any).availableCardsMap = new Map();
+            const setName = 'Shared Set Title';
+            (window as any).availableCardsMap.set('a', {
+                id: 'a',
+                cardType: 'mission',
+                card_name: 'Only Match',
+                mission_set: setName,
+                set_number: '5',
+                image: 'a.jpg'
+            });
+            (window as any).availableCardsMap.set('b', {
+                id: 'b',
+                cardType: 'mission',
+                card_name: 'Other',
+                mission_set: setName,
+                set_number: '1',
+                image: 'b.jpg'
+            });
+
+            const r = await service.search('shared');
+            delete (window as any).availableCardsMap;
+            expect(mockFetch).not.toHaveBeenCalled();
+            const bulk = r.find((x: any) => x.type === 'mission-set');
+            expect(bulk).toBeDefined();
+            expect(bulk.missionBulkIds.sort()).toEqual(['a', 'b'].sort());
+            expect(bulk.image).toContain('b.webp');
         });
 
         it('should search events by name', async () => {

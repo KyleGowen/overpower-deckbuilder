@@ -55,3 +55,4 @@ Paste under the right TOC section (auth, dbv-catalog, …):
 | 2026-04-03 | P0: `GET /api/v1/catalog/special-cards` added; legacy `GET /api/special-cards` removed (same pattern as characters/locations). |
 | 2026-04-03 | Loop step 10: when migration work is complete, **restart `npm run dev`** (after `npm run migrate` if SQL changed); aligns with repo `.cursorrules` / `AGENTS.md`. |
 | 2026-04-03 | P0: `GET /api/v1/catalog/missions` added; legacy `GET /api/missions` removed (same pattern as other catalog lists). |
+| 2026-04-03 | P0: `GET /api/v1/catalog/events` added; legacy `GET /api/events` removed. |

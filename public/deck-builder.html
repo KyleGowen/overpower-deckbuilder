@@ -4833,11 +4833,12 @@
                     }
                 });
             
-            fetch('/api/events')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('total-events').textContent = data.data.length;
+            fetch('/api/v1/catalog/events')
+                .then(async response => {
+                    const data = await response.json();
+                    const payload = catalogListPayload(response, data);
+                    if (payload.ok) {
+                        document.getElementById('total-events').textContent = payload.rows.length;
                     }
                 });
             
@@ -5621,13 +5622,14 @@
         // Event functions
         async function loadEvents() {
             try {
-                const response = await fetch('/api/events');
+                const response = await fetch('/api/v1/catalog/events');
                 const data = await response.json();
-                
-                if (data.success) {
+                const payload = catalogListPayload(response, data);
+
+                if (payload.ok) {
                     // Store events data globally for filtering
-                    window.eventsData = data.data;
-                    displayEvents(data.data);
+                    window.eventsData = payload.rows;
+                    displayEvents(payload.rows);
                 }
             } catch (error) {
                 console.error('Error loading events:', error);
@@ -5671,11 +5673,12 @@
                 }
 
                 try {
-                    const response = await fetch('/api/events');
+                    const response = await fetch('/api/v1/catalog/events');
                     const data = await response.json();
-                    
-                    if (data.success) {
-                        const filteredEvents = data.data.filter(event => 
+                    const payload = catalogListPayload(response, data);
+
+                    if (payload.ok) {
+                        const filteredEvents = payload.rows.filter(event => 
                             event.name.toLowerCase().includes(searchTerm) ||
                             event.mission_set.toLowerCase().includes(searchTerm) ||
                             event.game_effect.toLowerCase().includes(searchTerm)
@@ -10467,7 +10470,7 @@
                     { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
                     { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', api: '/api/v1/catalog/missions', nameField: 'name' },
-                    { type: 'event', api: '/api/events', nameField: 'name' },
+                    { type: 'event', api: '/api/v1/catalog/events', nameField: 'name' },
                     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
@@ -11042,7 +11045,7 @@
                     { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
                     { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/v1/catalog/missions', nameField: 'card_name' },
-                    { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
+                    { type: 'event', name: 'Events', api: '/api/v1/catalog/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },

@@ -133,12 +133,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/events', async (req, res) => {
+  app.get('/api/v1/catalog/events', async (req, res) => {
     try {
       const events = await mockCardRepository.getAllEvents();
-      res.json({ success: true, data: events });
+      res.json({ data: events, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch events' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch events' }]
+      });
     }
   });
 
@@ -495,7 +499,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/events', () => {
+    describe('GET /api/v1/catalog/events', () => {
       it('should return all events successfully', async () => {
         const mockEvents = [
           { id: '1', name: 'Event 1' },
@@ -504,12 +508,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllEvents.mockResolvedValue(mockEvents);
 
         const response = await request(app)
-          .get('/api/events')
+          .get('/api/v1/catalog/events')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockEvents
+          data: mockEvents,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllEvents).toHaveBeenCalled();
       });
