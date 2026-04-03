@@ -63,7 +63,7 @@ Some endpoints return additional fields (for example `validationErrors`, `messag
 |------|---------|
 | 200 | OK |
 | 201 | Created |
-| 304 | Not Modified (`ETag` match — see `GET /api/decks`) |
+| 304 | Not Modified (`ETag` match — see `GET /api/v1/decks`) |
 | 400 | Bad request / validation error |
 | 401 | Not authenticated / invalid session |
 | 403 | Forbidden (wrong role, not owner, guest blocked from mutation, read-only mode) |
@@ -405,31 +405,9 @@ or
 
 ## Decks (database-backed)
 
-### `GET /api/decks`
+### `GET /api/decks` (removed)
 
-**File:** `src/routes/decks.routes.ts` (router mounted at `/api` in `src/routes/index.ts`)
-
-**Auth:** Required.
-
-Returns the current user’s deck list, transformed for the frontend (`transformDeckList`). Sends **ETag** (SHA-1 of JSON body), `Cache-Control: private, max-age=30`, and `Vary: Cookie`. If request header `If-None-Match` matches **ETag**, responds **304** with **empty body**.
-
-**Response 200 (sample structure — fields depend on transformer):**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "deck-uuid",
-      "name": "My Deck",
-      "description": "",
-      "card_count": 60,
-      "user_id": "user-uuid",
-      "...": "additional list fields"
-    }
-  ]
-}
-```
+**Removed:** **`GET /api/decks`** — use **`GET /api/v1/decks`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
 ### Deck CRUD and cards
 
@@ -834,7 +812,7 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | `/api/users` | `users-debug.routes.ts` |
 | GET | `/api/debug/clear-cache`, `/api/debug/clear-card-cache` | `users-debug.routes.ts` |
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
-| GET | `/api/decks` | `decks.routes.ts` |
+| GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
 | POST/GET/PUT/DELETE | `/api/decks`, `/api/decks/validate`, `/api/decks/:id`, `/full`, `/cards`, `/api/deck-stats`, `/ui-preferences` | `deck-api.routes.ts` |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |

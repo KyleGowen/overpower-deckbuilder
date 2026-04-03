@@ -40,13 +40,15 @@ describe('Character Limit Validation API Tests', () => {
       try {
         // Get user's decks and delete them
         const decksResponse = await request(app)
-          .get('/api/decks')
+          .get('/api/v1/decks')
           .set('Cookie', authCookie);
         
         if (decksResponse.status === 200) {
           for (const deck of decksResponse.body.data) {
+            const deckId = deck.metadata?.id ?? deck.id;
+            if (!deckId) continue;
             await request(app)
-              .delete(`/api/decks/${deck.id}`)
+              .delete(`/api/decks/${deckId}`)
               .set('Cookie', authCookie);
           }
         }

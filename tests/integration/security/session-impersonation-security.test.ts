@@ -22,7 +22,7 @@ describe('Session Impersonation Security Integration Tests', () => {
   });
 
   it('rejects missing session cookie on authenticated endpoints (401)', async () => {
-    const response = await request(app).get('/api/decks');
+    const response = await request(app).get('/api/v1/decks');
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
   });
@@ -48,7 +48,7 @@ describe('Session Impersonation Security Integration Tests', () => {
     const tampered = sessionId.slice(0, -1) + (sessionId.slice(-1) === 'a' ? 'b' : 'a');
 
     const response = await request(app)
-      .get('/api/decks')
+      .get('/api/v1/decks')
       .set('Cookie', `sessionId=${tampered}`);
 
     expect(response.status).toBe(401);
@@ -77,7 +77,7 @@ describe('Session Impersonation Security Integration Tests', () => {
     expect(logout.status).toBe(200);
 
     const after = await request(app)
-      .get('/api/decks')
+      .get('/api/v1/decks')
       .set('Cookie', cookie);
 
     expect(after.status).toBe(401);

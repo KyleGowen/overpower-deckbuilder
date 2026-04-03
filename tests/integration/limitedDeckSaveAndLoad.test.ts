@@ -129,11 +129,11 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 5: Verify the deck appears in the deck list with is_limited=true
       const deckListResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(deckListResponse.status).toBe(200);
-      expect(deckListResponse.body.success).toBe(true);
+      expect(deckListResponse.body.errors).toEqual([]);
       
       const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === deckId);
       expect(deckInList).toBeDefined();
@@ -220,11 +220,11 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 5: Verify the deck appears in the deck list with is_limited=false
       const deckListResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(deckListResponse.status).toBe(200);
-      expect(deckListResponse.body.success).toBe(true);
+      expect(deckListResponse.body.errors).toEqual([]);
       
       const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === deckId);
       expect(deckInList).toBeDefined();

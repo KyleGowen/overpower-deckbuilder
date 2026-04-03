@@ -125,11 +125,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(19); // Should show adjusted threat in summary
@@ -172,11 +172,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(18); // Should show normal threat in summary
@@ -221,11 +221,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(20); // Should show adjusted threat in summary
@@ -268,11 +268,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(19); // Should show normal threat in summary
@@ -317,11 +317,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(20); // Should show adjusted threat in summary
@@ -364,11 +364,11 @@ describe('Special Character Threat Display Integration Tests', () => {
 
             // Test deck summary display by getting deck list
             const deckListResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(deckListResponse.body.success).toBe(true);
+            expect(deckListResponse.body.errors).toEqual([]);
             const deckInList = deckListResponse.body.data.find((deck: any) => deck.metadata.id === testDeck.id);
             expect(deckInList).toBeDefined();
             expect(deckInList.metadata.threat).toBe(18); // Should show normal threat in summary
@@ -433,7 +433,7 @@ describe('Special Character Threat Display Integration Tests', () => {
 
                 // Verify deck summary threat (via deck list API)
                 const deckListResponse = await request(app)
-                    .get('/api/decks')
+                    .get('/api/v1/decks')
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .expect(200);
 

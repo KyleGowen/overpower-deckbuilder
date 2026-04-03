@@ -278,7 +278,7 @@ const createTestApp = () => {
   });
 
   // Deck management endpoints
-  app.get('/api/decks', authenticateUser, async (req: any, res) => {
+  app.get('/api/v1/decks', authenticateUser, async (req: any, res) => {
     try {
       const decks = await mockDeckRepository.getDecksByUserId(req.user.id);
       const transformedDecks = decks.map((deck: any) => ({
@@ -297,9 +297,13 @@ const createTestApp = () => {
         },
         cards: deck.cards || []
       }));
-      res.json({ success: true, data: transformedDecks });
+      res.json({ data: transformedDecks, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch decks' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'DECK_LIST_ERROR', message: 'Failed to fetch decks' }]
+      });
     }
   });
 
@@ -809,7 +813,7 @@ describe('API Endpoints - Simplified', () => {
   });
 
   describe('Deck Management Endpoints', () => {
-    describe('GET /api/decks', () => {
+    describe('GET /api/v1/decks', () => {
       it('should return user decks successfully', async () => {
         const mockDecks = [
           {
@@ -830,11 +834,10 @@ describe('API Endpoints - Simplified', () => {
         mockDeckRepository.getDecksByUserId.mockResolvedValue(mockDecks);
 
         const response = await request(app)
-          .get('/api/decks')
+          .get('/api/v1/decks')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
           data: [
             {
               metadata: {
@@ -852,7 +855,9 @@ describe('API Endpoints - Simplified', () => {
               },
               cards: []
             }
-          ]
+          ],
+          meta: {},
+          errors: []
         });
         expect(mockDeckRepository.getDecksByUserId).toHaveBeenCalledWith('test-user-id');
       });
@@ -861,12 +866,13 @@ describe('API Endpoints - Simplified', () => {
         mockDeckRepository.getDecksByUserId.mockRejectedValue(new Error('Database error'));
 
         const response = await request(app)
-          .get('/api/decks')
+          .get('/api/v1/decks')
           .expect(500);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Failed to fetch decks'
+          data: null,
+          meta: {},
+          errors: [{ code: 'DECK_LIST_ERROR', message: 'Failed to fetch decks' }]
         });
       });
     });

@@ -46,7 +46,7 @@ flowchart TB
 1. **`auth.http.ts`** — `/auth/login`, `/auth/logout`, `/auth/me`, token behavior.
 2. **`dbv-catalog.http.ts`** — Card catalog reads backing the Database View.
 3. **`dbv-support.http.ts`** — DBV support reads (`GET /api/v1/dbv/sets`, **`GET /api/v1/dbv/deck-backgrounds`**).
-4. **`decks.http.ts`** (+ optional split) — User-scoped decks.
+4. **`decks.http.ts`** — User-scoped decks (**`GET /api/v1/decks`** list via **`DeckListService`**; session auth like **`GET /api/v1/dbv/deck-backgrounds`**).
 5. **`collections.http.ts`**, **`guest-decks.http.ts`**, **`admin.http.ts`** — As migrations reach those domains.
 
 Registration: `registerApiV1Routes(app, deps)` in [`src/api/http/registerApiV1Routes.ts`](src/api/http/registerApiV1Routes.ts).

@@ -53,15 +53,26 @@
 
             const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             const isGuest = currentUser && currentUser.role === 'GUEST';
-            const url = isGuest ? '/api/guest/decks' : '/api/decks';
+            const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
             const response = await fetch(url, { credentials: 'include' });
-            const data = await response.json();
-            if (data.success) {
-                saveSkeletonCount(data.data);
-                if (typeof setUserDecks === 'function') {
-                    setUserDecks(data.data);
+            const json = await response.json();
+            let decks = null;
+            if (isGuest) {
+                if (json.success) {
+                    decks = json.data;
                 }
-                await window.DeckSelection.displayDecks(data.data);
+            } else if (typeof deckListPayload === 'function') {
+                const parsed = deckListPayload(response, json);
+                if (parsed.ok) {
+                    decks = parsed.decks;
+                }
+            }
+            if (decks) {
+                saveSkeletonCount(decks);
+                if (typeof setUserDecks === 'function') {
+                    setUserDecks(decks);
+                }
+                await window.DeckSelection.displayDecks(decks);
                 updateDeckStats();
             }
         } catch (error) {

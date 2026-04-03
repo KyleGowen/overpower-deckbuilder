@@ -114,7 +114,7 @@ describe('Authentication Scenarios Integration Tests', () => {
 
     it('should access protected USER routes', async () => {
       const response = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', `sessionId=${sessionId}`);
 
       expect(response.status).toBe(200);
@@ -353,7 +353,7 @@ describe('Authentication Scenarios Integration Tests', () => {
 
     it('should return 401 for API routes without session', async () => {
       const response = await request(app)
-        .get('/api/decks');
+        .get('/api/v1/decks');
 
       // Test server now has authentication middleware, so it returns 401
       expect(response.status).toBe(401);
@@ -361,7 +361,7 @@ describe('Authentication Scenarios Integration Tests', () => {
 
     it('should return 401 for API routes with invalid session', async () => {
       const response = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', 'sessionId=invalid-session-id');
 
       // Test server now has authentication middleware, so it returns 401
@@ -378,7 +378,7 @@ describe('Authentication Scenarios Integration Tests', () => {
       });
 
       const response = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', `sessionId=${fakeSession}`);
 
       // Test server now has authentication middleware, so it returns 401

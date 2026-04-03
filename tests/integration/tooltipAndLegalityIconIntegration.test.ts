@@ -20,10 +20,10 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
     afterEach(async () => {
         // Clean up any test decks created
         const decksResponse = await request(app)
-            .get('/api/decks')
+            .get('/api/v1/decks')
             .set('Cookie', authCookie);
 
-        if (decksResponse.status === 200 && decksResponse.body.success) {
+        if (decksResponse.status === 200 && Array.isArray(decksResponse.body.data)) {
             const decks = decksResponse.body.data;
             for (const deck of decks) {
                 if (deck.metadata && deck.metadata.name && deck.metadata.name.startsWith('Test Tooltip Deck')) {

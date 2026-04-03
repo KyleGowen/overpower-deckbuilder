@@ -64,30 +64,117 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 ## P2 — Decks (database-backed)
 
+**Scope:** Authenticated user decks in PostgreSQL; **GUEST** gets **403** on DB deck mutations (same as legacy). **Source:** `API_DOCUMENTATION.md` (Decks), `deck-api.routes.ts`. **P2a list:** [`decks.http.ts`](src/api/http/decks.http.ts) + [`deckListService.ts`](src/api/services/deckListService.ts).
 
-| Area                                         | Legacy (see API_DOCUMENTATION) | v1 prefix      | Migrated | Notes            |
-| -------------------------------------------- | ------------------------------ | -------------- | -------- | ---------------- |
-| List, CRUD, validate, cards, stats, UI prefs | /api/decks…                    | /api/v1/decks… | [ ]      | User-scoped only |
+**v1 prefix:** `/api/v1/decks…` (except legacy **`GET /api/deck-stats`**, proposed as **`GET /api/v1/decks/stats`** below).
+
+### P2a — Deck list (ETag)
+
+| Legacy path     | v1 path (proposed) | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| --------------- | ------------------ | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/decks  | GET /api/v1/decks  | [x]      | `DeckListService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+
+### P2b — Create + validate
+
+| Legacy path              | v1 path (proposed)           | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ------------------------ | ---------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| POST /api/decks          | POST /api/v1/decks           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/decks/validate | POST /api/v1/decks/validate  | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P2c — Single deck (metadata + delete)
+
+| Legacy path                 | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| --------------------------- | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/decks/:id          | GET /api/v1/decks/:id           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/decks/:id/full     | GET /api/v1/decks/:id/full      | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/decks/:id          | PUT /api/v1/decks/:id           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| DELETE /api/decks/:id       | DELETE /api/v1/decks/:id        | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P2d — Deck cards
+
+| Legacy path                   | v1 path (proposed)                | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ----------------------------- | --------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/decks/:id/cards      | GET /api/v1/decks/:id/cards       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/decks/:id/cards     | POST /api/v1/decks/:id/cards      | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/decks/:id/cards      | PUT /api/v1/decks/:id/cards       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| DELETE /api/decks/:id/cards   | DELETE /api/v1/decks/:id/cards    | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P2e — Aggregate deck stats
+
+| Legacy path        | v1 path (proposed)        | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ------------------ | ------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/deck-stats | GET /api/v1/decks/stats   | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P2f — Deck UI preferences
+
+| Legacy path                         | v1 path (proposed)                         | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ----------------------------------- | ------------------------------------------ | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/decks/:id/ui-preferences   | GET /api/v1/decks/:id/ui-preferences       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/decks/:id/ui-preferences   | PUT /api/v1/decks/:id/ui-preferences       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
 
 
 ---
 
 ## P3 — Collections
 
+**Scope:** Authenticated collection + card rows + history. **Source:** `API_DOCUMENTATION.md` (Collections), `collections.routes.ts`.
 
-| Legacy                | v1                       | Migrated |
-| --------------------- | ------------------------ | -------- |
-| /api/collections/me/* | /api/v1/collections/me/* | [ ]      |
+**v1 prefix:** `/api/v1/collections/me…`
+
+### P3a — Collection record
+
+| Legacy path              | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ------------------------ | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/collections/me  | GET /api/v1/collections/me      | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P3b — Collection cards
+
+| Legacy path                                    | v1 path (proposed)                                       | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ---------------------------------------------- | -------------------------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/collections/me/cards                  | GET /api/v1/collections/me/cards                         | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/collections/me/cards                 | POST /api/v1/collections/me/cards                        | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/collections/me/cards/remove-one      | POST /api/v1/collections/me/cards/remove-one             | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/collections/me/cards/:cardId          | PUT /api/v1/collections/me/cards/:cardId                 | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| DELETE /api/collections/me/cards/:cardId       | DELETE /api/v1/collections/me/cards/:cardId              | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+Legacy **DELETE** requires query `cardType` (see `API_DOCUMENTATION.md`); keep the same contract in `API_V1.md` when migrated.
+
+### P3c — Collection history
+
+| Legacy path                            | v1 path (proposed)                            | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| -------------------------------------- | --------------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/collections/me/history        | GET /api/v1/collections/me/history            | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
 
 
 ---
 
 ## P4 — Guest decks
 
+**Scope:** **GUEST** role + session; in-memory guest decks merged with DB list on **`GET`**. **Source:** `API_DOCUMENTATION.md` (Guest decks), `guest-decks.routes.ts`.
 
-| Legacy            | v1                   | Migrated |
-| ----------------- | -------------------- | -------- |
-| /api/guest/decks… | /api/v1/guest/decks… | [ ]      |
+**v1 prefix:** `/api/v1/guest/decks…`
+
+### P4a — Guest list + create
+
+| Legacy path           | v1 path (proposed)        | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| --------------------- | ------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/guest/decks  | GET /api/v1/guest/decks   | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/guest/decks | POST /api/v1/guest/decks  | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P4b — Guest single deck
+
+| Legacy path                | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| -------------------------- | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| GET /api/guest/decks/:id   | GET /api/v1/guest/decks/:id     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/guest/decks/:id   | PUT /api/v1/guest/decks/:id     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| DELETE /api/guest/decks/:id | DELETE /api/v1/guest/decks/:id | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+
+### P4c — Guest deck cards
+
+| Legacy path                     | v1 path (proposed)                    | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
+| ------------------------------- | ------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
+| PUT /api/guest/decks/:id/cards  | PUT /api/v1/guest/decks/:id/cards     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/guest/decks/:id/cards | POST /api/v1/guest/decks/:id/cards    | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
 
 
 ---

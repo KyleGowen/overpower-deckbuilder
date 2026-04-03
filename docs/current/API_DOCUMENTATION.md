@@ -317,7 +317,7 @@ List all guest decks for the current session.
 
 **Authentication:** Required (GUEST role)
 
-**Response:** `200 OK` — same array shape as `GET /api/decks` (metadata + cards per deck).
+**Response:** `200 OK` — same array shape as `GET /api/v1/decks` (metadata + cards per deck).
 
 ### GET /api/guest/decks/:id
 Get a single guest deck by ID. The deck must belong to the current session.
@@ -360,43 +360,9 @@ Delete a guest deck for the current session.
 
 ## Deck Management Endpoints
 
-### GET /api/decks
-Get all decks for the authenticated user.
+### GET /api/decks (removed)
 
-**Authentication:** Required
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "metadata": {
-        "id": "string",
-        "name": "string",
-        "description": "string",
-        "created": "string",
-        "lastModified": "string",
-        "cardCount": "number",
-        "threat": "number",
-        "is_valid": "boolean",
-        "userId": "string",
-        "uiPreferences": "object",
-        "is_limited": "boolean",
-        "background_image_path": "string|null"
-      },
-      "cards": [
-        {
-          "cardType": "string",
-          "cardId": "string",
-          "quantity": "number",
-          "selectedAlternateImage": "string"
-        }
-      ]
-    }
-  ]
-}
-```
+**Removed:** use **`GET /api/v1/decks`** — see [API_V1.md](../../API_V1.md) (v1 envelope; same transformed `data` array as legacy).
 
 ### POST /api/decks
 Create a new deck.

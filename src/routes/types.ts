@@ -47,7 +47,6 @@ export interface RouteDependencies {
   requireAdmin: (req: Request, res: Response) => boolean;
   blockGuestMutation: (req: Request, res: Response, operation: string) => boolean;
   requireDeckOwner: (deckUserId: string, reqUserId: string, res: Response) => boolean | Promise<boolean>;
-  createDeckRoutes: (deps: { deckRepository: RouteDependencies['deckRepository']; authenticateUser: express.RequestHandler }) => express.Router;
   transformDeckList: (decks: unknown[]) => unknown[];
 }
 

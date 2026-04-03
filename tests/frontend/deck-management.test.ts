@@ -61,17 +61,22 @@ async function loadUserDecks() {
       return;
     }
 
-    const response = await fetch('/api/decks', {
+    const isGuest = currentUser.role === 'GUEST';
+    const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
+    const response = await fetch(url, {
       credentials: 'include'
     });
-    const data = await response.json();
-    if (data.success) {
-      userDecks = data.data;
-      if (userDecks.length > 0) {
-        // Decks loaded successfully
+    const json = await response.json();
+    if (isGuest) {
+      if (json.success) {
+        userDecks = json.data;
+      } else {
+        console.error('Failed to load decks:', json.error);
       }
+    } else if (Array.isArray(json.data) && (!json.errors || json.errors.length === 0)) {
+      userDecks = json.data;
     } else {
-      console.error('Failed to load decks:', data.error);
+      console.error('Failed to load decks (v1)');
     }
   } catch (error) {
     console.error('Error loading user decks:', error);
@@ -243,13 +248,14 @@ describe('Deck Management Functions', () => {
       
       mockGetCurrentUser.mockReturnValue({ id: 'user1', username: 'testuser' });
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: true, data: mockDecks })
+        ok: true,
+        json: async () => ({ data: mockDecks, meta: {}, errors: [] })
       });
 
       await loadUserDecks();
 
       expect(mockGetCurrentUser).toHaveBeenCalled();
-      expect(global.fetch).toHaveBeenCalledWith('/api/decks', { credentials: 'include' });
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/decks', { credentials: 'include' });
       expect(userDecks).toEqual(mockDecks);
     });
 
@@ -268,14 +274,15 @@ describe('Deck Management Functions', () => {
     it('should handle API failure', async () => {
       mockGetCurrentUser.mockReturnValue({ id: 'user1' });
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: false, error: 'API Error' })
+        ok: true,
+        json: async () => ({ data: null, meta: {}, errors: [{ code: 'X', message: 'API Error' }] })
       });
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await loadUserDecks();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to load decks:', 'API Error');
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load decks (v1)');
       expect(userDecks).toEqual([]);
       consoleSpy.mockRestore();
     });
@@ -323,12 +330,13 @@ describe('Deck Management Functions', () => {
       
       mockGetCurrentUser.mockReturnValue({ id: 'user1' });
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: true, data: [{ id: 'deck1', name: 'Test Deck' }] })
+        ok: true,
+        json: async () => ({ data: [{ id: 'deck1', name: 'Test Deck' }], meta: {}, errors: [] })
       });
 
       await showDeckSelection('character', 'char1', 'Test Character', mockButton);
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/decks', { credentials: 'include' });
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/decks', { credentials: 'include' });
       expect(mockCreateElement).toHaveBeenCalledWith('div');
     });
 
@@ -338,7 +346,8 @@ describe('Deck Management Functions', () => {
       
       mockGetCurrentUser.mockReturnValue({ id: 'user1' });
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: true, data: [] })
+        ok: true,
+        json: async () => ({ data: [], meta: {}, errors: [] })
       });
 
       await showDeckSelection('character', 'char1', 'Test Character', mockButton);

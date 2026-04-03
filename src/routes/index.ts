@@ -14,7 +14,6 @@ export type { RouteDependencies } from './types';
 export function registerRoutes(app: express.Application, deps: RouteDependencies): void {
   registerAuthRoutes(app, deps);
   registerUsersDebugRoutes(app, deps);
-  app.use('/api', deps.createDeckRoutes({ deckRepository: deps.deckRepository, authenticateUser: deps.authenticateUser }));
   registerGuestDeckRoutes(app, deps);
   registerDeckApiRoutes(app, deps);
   registerCollectionRoutes(app, deps);

@@ -1,10 +1,10 @@
-# HTTP Caching — GET /api/decks
+# HTTP Caching — GET /api/v1/decks
 
 ## Overview
 
-The deck list API response (`GET /api/decks`) uses two complementary HTTP caching headers to reduce unnecessary server load and eliminate redundant network transfers for repeat page visits.
+The deck list API response (`GET /api/v1/decks`) uses two complementary HTTP caching headers to reduce unnecessary server load and eliminate redundant network transfers for repeat page visits.
 
-**File:** `src/routes/decks.routes.ts`
+**File:** `src/api/http/decks.http.ts` (`GET /api/v1/decks`)
 
 ---
 
@@ -12,7 +12,7 @@ The deck list API response (`GET /api/decks`) uses two complementary HTTP cachin
 
 ### `Vary: Cookie`
 
-Tells the browser to include the session cookie value in the cache key. Without this, a guest auto-login session and a real user session share the same cached response for `GET /api/decks` — causing the guest's deck list to appear immediately after a real user logs in (within the 30-second window). With `Vary: Cookie`, each distinct session cookie gets its own cache entry.
+Tells the browser to include the session cookie value in the cache key. Without this, a guest auto-login session and a real user session share the same cached response for `GET /api/v1/decks` — causing the guest's deck list to appear immediately after a real user logs in (within the 30-second window). With `Vary: Cookie`, each distinct session cookie gets its own cache entry.
 
 ### `Cache-Control: private, max-age=30`
 
@@ -21,11 +21,11 @@ Tells the browser it may store this response locally for up to **30 seconds**.
 - `private` — cached only in the user's own browser. Never stored by a shared proxy or CDN. This is correct because each user's deck list is unique.
 - `max-age=30` — within that 30-second window the browser serves the response from its own cache with **zero network round-trip** — the server is not contacted at all.
 
-**Why 30 seconds:** Long enough to eliminate redundant loads from quick page revisits (navigating to the deck editor and back), short enough that a newly created deck is always visible within half a minute. Tune this value in `src/routes/decks.routes.ts`.
+**Why 30 seconds:** Long enough to eliminate redundant loads from quick page revisits (navigating to the deck editor and back), short enough that a newly created deck is always visible within half a minute. Tune this value in `src/api/http/decks.http.ts`.
 
 ### `ETag: "<sha1-hash>"`
 
-A SHA-1 fingerprint of the serialised response body, computed on every request.
+A SHA-1 fingerprint of the serialised **v1** response body (`{"data":...,"meta":{},"errors":[]}`), computed on every request.
 
 After the 30-second `max-age` expires, the browser sends the stored ETag back in an `If-None-Match` request header. The server:
 - Runs the database query and transforms the result as normal
@@ -47,7 +47,7 @@ sequenceDiagram
     participant RDS
 
     Note over Browser,RDS: First visit — no cache
-    Browser->>EC2: GET /api/decks
+    Browser->>EC2: GET /api/v1/decks
     EC2->>RDS: query
     RDS-->>EC2: deck rows
     EC2-->>Browser: 200 + body + Cache-Control + ETag: "abc123"
@@ -56,14 +56,14 @@ sequenceDiagram
     Browser->>Browser: Cache hit — serves locally, no network request
 
     Note over Browser,RDS: Visit after 30 seconds — data unchanged
-    Browser->>EC2: GET /api/decks (If-None-Match: "abc123")
+    Browser->>EC2: GET /api/v1/decks (If-None-Match: "abc123")
     EC2->>RDS: query
     RDS-->>EC2: deck rows (same data)
     EC2-->>Browser: 304 Not Modified (no body)
     Browser->>Browser: Re-uses cached body
 
     Note over Browser,RDS: Visit after 30 seconds — data changed
-    Browser->>EC2: GET /api/decks (If-None-Match: "abc123")
+    Browser->>EC2: GET /api/v1/decks (If-None-Match: "abc123")
     EC2->>RDS: query
     RDS-->>EC2: deck rows (different data)
     EC2-->>Browser: 200 + new body + ETag: "def456"

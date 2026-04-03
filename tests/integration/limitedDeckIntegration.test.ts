@@ -200,11 +200,11 @@ describe('Limited Deck Integration Tests', () => {
 
       // Get all decks
       const getAllResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(getAllResponse.status).toBe(200);
-      expect(getAllResponse.body.success).toBe(true);
+      expect(getAllResponse.body.errors).toEqual([]);
       expect(getAllResponse.body.data).toBeInstanceOf(Array);
       expect(getAllResponse.body.data.length).toBeGreaterThanOrEqual(2);
 
@@ -241,11 +241,11 @@ describe('Limited Deck Integration Tests', () => {
 
       // Get deck list (this would be used by frontend to display Limited icons)
       const deckListResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(deckListResponse.status).toBe(200);
-      expect(deckListResponse.body.success).toBe(true);
+      expect(deckListResponse.body.errors).toEqual([]);
 
       const limitedDeck = deckListResponse.body.data.find((deck: any) => deck.metadata.name === 'Display Test Limited Deck');
       expect(limitedDeck).toBeDefined();
@@ -271,11 +271,11 @@ describe('Limited Deck Integration Tests', () => {
 
       // Get deck list
       const deckListResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(deckListResponse.status).toBe(200);
-      expect(deckListResponse.body.success).toBe(true);
+      expect(deckListResponse.body.errors).toEqual([]);
 
       const regularDeck = deckListResponse.body.data.find((deck: any) => deck.metadata.name === 'Display Test Regular Deck');
       expect(regularDeck).toBeDefined();
@@ -421,11 +421,11 @@ describe('Limited Deck Integration Tests', () => {
 
       // Get deck list (simulating frontend API call)
       const deckListResponse = await request(app)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(deckListResponse.status).toBe(200);
-      expect(deckListResponse.body.success).toBe(true);
+      expect(deckListResponse.body.errors).toEqual([]);
 
       // Simulate frontend processing
       const decks = deckListResponse.body.data;

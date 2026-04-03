@@ -150,11 +150,11 @@ describe('User Signup Integration Tests', () => {
             const cookieValue = typeof sessionCookie === 'string' ? sessionCookie.split(';')[0] : '';
 
             const decksResponse = await request(app)
-                .get('/api/decks')
+                .get('/api/v1/decks')
                 .set('Cookie', cookieValue);
 
             expect(decksResponse.status).toBe(200);
-            expect(decksResponse.body.success).toBe(true);
+            expect(decksResponse.body.errors).toEqual([]);
             expect(Array.isArray(decksResponse.body.data)).toBe(true);
             expect(decksResponse.body.data.length).toBeGreaterThanOrEqual(1);
 

@@ -149,7 +149,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         test('should not persist deck when regular user cancels editor', async () => {
             // Get initial deck count
             const initialResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', regularCookie)
                 .expect(200);
 
@@ -157,7 +157,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Verify no new decks were created by just opening the editor
             const finalResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', regularCookie)
                 .expect(200);
 
@@ -168,7 +168,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         test('should not persist deck when admin user cancels editor', async () => {
             // Get initial deck count
             const initialResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', adminCookie)
                 .expect(200);
 
@@ -176,7 +176,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Verify no new decks were created by just opening the editor
             const finalResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', adminCookie)
                 .expect(200);
 
@@ -189,7 +189,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         test('should allow regular user to create and save deck', async () => {
             // Get initial deck count
             const initialResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', regularCookie)
                 .expect(200);
 
@@ -219,7 +219,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Verify deck count increased
             const finalResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', regularCookie)
                 .expect(200);
 
@@ -230,7 +230,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         test('should allow admin user to create and save deck', async () => {
             // Get initial deck count
             const initialResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', adminCookie)
                 .expect(200);
 
@@ -260,7 +260,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Verify deck count increased
             const finalResponse = await request(app)
-                .get(`/api/decks`)
+                .get(`/api/v1/decks`)
                 .set('Cookie', adminCookie)
                 .expect(200);
 

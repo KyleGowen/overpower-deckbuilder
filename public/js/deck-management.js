@@ -45,13 +45,22 @@ async function loadUserDecks() {
             return;
         }
         const isGuest = currentUser.role === 'GUEST';
-        const url = isGuest ? '/api/guest/decks' : '/api/decks';
+        const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
         const response = await fetch(url, { credentials: 'include' });
-        const data = await response.json();
-        if (data.success) {
-            userDecks = data.data;
-        } else {
-            console.error('Failed to load decks:', data.error);
+        const json = await response.json();
+        if (isGuest) {
+            if (json.success) {
+                userDecks = json.data;
+            } else {
+                console.error('Failed to load decks:', json.error);
+            }
+        } else if (typeof deckListPayload === 'function') {
+            const parsed = deckListPayload(response, json);
+            if (parsed.ok) {
+                userDecks = parsed.decks;
+            } else {
+                console.error('Failed to load decks (v1)');
+            }
         }
     } catch (error) {
         console.error('Error loading user decks:', error);

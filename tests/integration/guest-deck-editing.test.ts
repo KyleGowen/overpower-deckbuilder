@@ -448,7 +448,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should verify all read endpoints are allowed for guests', async () => {
       const readEndpoints = [
-        { method: 'GET', path: '/api/decks' },
+        { method: 'GET', path: '/api/v1/decks' },
         { method: 'GET', path: `/api/decks/${testDeckId}` },
         { method: 'GET', path: `/api/decks/${testDeckId}/cards` }
       ];
@@ -459,7 +459,12 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
           .set('Cookie', guestCookie);
 
         expect(response.status).toBe(200);
-        expect(response.body.success).toBe(true);
+        if (endpoint.path === '/api/v1/decks') {
+          expect(response.body.errors).toEqual([]);
+          expect(Array.isArray(response.body.data)).toBe(true);
+        } else {
+          expect(response.body.success).toBe(true);
+        }
       }
       // UI preferences: only deck owner can read; guest gets 403
       const uiPrefResponse = await request(app)

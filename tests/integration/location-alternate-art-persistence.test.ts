@@ -172,7 +172,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
         });
 
       const decksResponse = await request(server)
-        .get('/api/decks')
+        .get('/api/v1/decks')
         .set('Cookie', authCookie);
 
       expect(decksResponse.status).toBe(200);

@@ -78,11 +78,11 @@ describe('Foil Deck Selection Integration Tests', () => {
 
   it('should return deck list with foil character card having is_foil', async () => {
     const response = await request(app)
-      .get('/api/decks')
+      .get('/api/v1/decks')
       .set('Cookie', authCookie)
       .expect(200);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors).toEqual([]);
     const deck = response.body.data?.find(
       (d: { metadata: { id: string } }) => d.metadata?.id === testDeckId
     );

@@ -336,13 +336,13 @@
       "name": "Decks (DB)",
       "item": [
         {
-          "name": "GET /api/decks",
+          "name": "GET /api/v1/decks",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/decks"
+            "url": "{{baseUrl}}/api/v1/decks"
           },
-          "description": "ETag / 304 support."
+          "description": "v1 envelope `{ data, meta, errors }`. Session cookie (same as legacy list). ETag / 304."
         },
         {
           "name": "POST /api/decks",

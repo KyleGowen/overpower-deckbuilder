@@ -6731,13 +6731,25 @@
                 if (!currentUser) {
                     return;
                 }
-                
-                const response = await fetch('/api/decks');
-                const data = await response.json();
-                    if (data.success) {
-                    await displayDecks(data.data);
-                        updateDeckStats();
+                const isGuest = currentUser.role === 'GUEST';
+                const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
+                const response = await fetch(url, { credentials: 'include' });
+                const json = await response.json();
+                let decks = null;
+                if (isGuest) {
+                    if (json.success) {
+                        decks = json.data;
                     }
+                } else if (typeof deckListPayload === 'function') {
+                    const parsed = deckListPayload(response, json);
+                    if (parsed.ok) {
+                        decks = parsed.decks;
+                    }
+                }
+                if (decks) {
+                    await displayDecks(decks);
+                    updateDeckStats();
+                }
             } catch (error) {
                     console.error('Error loading decks:', error);
                     document.getElementById('deck-list').innerHTML = '<div class="error">Failed to load decks</div>';
