@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="/css/mobile-layout.css">
     <!-- App config: exposes server-side env vars (e.g. window.APP_CDN_BASE) before any other scripts run -->
     <script src="/js/app-config.js"></script>
+    <script src="/js/catalog-legacy-fetch-rewrite.js"></script>
     <!-- Firebase SDK (for Google Sign-In) -->
     <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-auth-compat.js"></script>
@@ -1782,57 +1783,9 @@
         });
         
         // Global fetch interceptor to handle 401 responses (session expired)
-        // This ensures login modal is shown whenever session expires during any API call
+        // Legacy /api/* catalog list URLs are rewritten in <head> via /js/catalog-legacy-fetch-rewrite.js
         const originalFetch = window.fetch;
-        /** Legacy list routes were removed; rewrite so cached/old scripts still work. */
-        function rewriteLegacyCatalogListFetchInput(input) {
-            if (typeof input === 'string') {
-                try {
-                    const u = new URL(input, window.location.origin);
-                    if (u.pathname === '/api/characters') {
-                        u.pathname = '/api/v1/catalog/characters';
-                        return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
-                    }
-                    if (u.pathname === '/api/locations') {
-                        u.pathname = '/api/v1/catalog/locations';
-                        return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
-                    }
-                    if (u.pathname === '/api/special-cards') {
-                        u.pathname = '/api/v1/catalog/special-cards';
-                        return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
-                    }
-                    if (u.pathname === '/api/missions') {
-                        u.pathname = '/api/v1/catalog/missions';
-                        return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
-                    }
-                } catch (_e) { /* keep original */ }
-                return input;
-            }
-            if (input instanceof Request) {
-                try {
-                    const u = new URL(input.url);
-                    if (u.pathname === '/api/characters') {
-                        u.pathname = '/api/v1/catalog/characters';
-                        return new Request(u.toString(), input);
-                    }
-                    if (u.pathname === '/api/locations') {
-                        u.pathname = '/api/v1/catalog/locations';
-                        return new Request(u.toString(), input);
-                    }
-                    if (u.pathname === '/api/special-cards') {
-                        u.pathname = '/api/v1/catalog/special-cards';
-                        return new Request(u.toString(), input);
-                    }
-                    if (u.pathname === '/api/missions') {
-                        u.pathname = '/api/v1/catalog/missions';
-                        return new Request(u.toString(), input);
-                    }
-                } catch (_e) { /* keep original */ }
-            }
-            return input;
-        }
         window.fetch = async function(...args) {
-            args[0] = rewriteLegacyCatalogListFetchInput(args[0]);
             const response = await originalFetch.apply(this, args);
             
             // Check for 401 Unauthorized responses

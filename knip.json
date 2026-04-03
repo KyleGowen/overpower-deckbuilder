@@ -2,6 +2,9 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": ["src/index.ts", "src/test-server.ts"],
   "project": ["src/**/*.ts", "tests/**/*.ts"],
+  "jest": {
+    "config": ["tests/config/jest.*.config.js"]
+  },
   "ignore": [
     "**/*.test.ts",
     "**/*.spec.ts",
@@ -10,6 +13,5 @@
     "src/public/**",
     "tests/setup-deckbuilding.ts"
   ],
-  "ignoreBinaries": ["wait"],
-  "ignoreDependencies": ["jest-environment-jsdom"]
+  "ignoreBinaries": ["wait"]
 }

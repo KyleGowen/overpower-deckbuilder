@@ -17,11 +17,11 @@ Each known vulnerability has a **CVE identifier** (e.g., CVE-2024-12345), a **se
 
 ### Why We Have It
 
-This project has 8 production dependencies and 17 dev dependencies. Those top-level packages pull in hundreds of transitive dependencies:
+This project has 7 production dependencies and 20 dev dependencies (counts from `package.json`). Those top-level packages pull in hundreds of transitive dependencies:
 
 | Dependency Type | Direct Packages | Role |
 |-----------------|-----------------|------|
-| **Production** | `express`, `pg`, `bcrypt`, `cors`, `helmet`, `morgan`, `dotenv`, `@types/bcrypt` | Runtime server, database, security, logging |
+| **Production** | `express`, `pg`, `bcrypt`, `dotenv`, `firebase-admin`, `jsonwebtoken`, `@types/bcrypt` | Runtime server, database, auth, config |
 | **Development** | `jest`, `typescript`, `supertest`, `ts-jest`, `ts-node-dev`, etc. | Testing, type checking, build tooling |
 
 Any of those packages (or their sub-dependencies) could have a disclosed vulnerability at any time. Common real-world examples include:

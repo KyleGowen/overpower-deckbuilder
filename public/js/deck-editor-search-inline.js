@@ -322,15 +322,21 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
     try {
         const requestBody = {
             cardId: cardId,
-            cardType: cardType
+            cardType: cardType,
+            quantity: 1
         };
-        
-        // Add the card to the deck
-        const response = await fetch(`/api/decks/${currentDeckId}/cards`, {
+
+        const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
+        const cardsUrl = isGuestDeck
+            ? `/api/guest/decks/${currentDeckId}/cards`
+            : `/api/decks/${currentDeckId}/cards`;
+
+        const response = await fetch(cardsUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(requestBody)
         });
 
