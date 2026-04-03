@@ -74,6 +74,7 @@ aws ssm send-command \
         "echo FLYWAY_URL=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require >> /opt/app/.env",
         "echo FLYWAY_USER=postgres >> /opt/app/.env",
         "echo FLYWAY_PASSWORD=TempPassword123! >> /opt/app/.env",
+        "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/app/jwt_secret --with-decryption --region us-west-2 --query Parameter.Value --output text 2>/dev/null); if [ -z \"$v\" ]; then echo \"ERROR: Create SSM /op-deckbuilder/dev/app/jwt_secret (SecureString)\"; exit 1; fi; printf \"%s\\n\" \"JWT_SECRET=$v\" >> /opt/app/.env'",
         "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/api_key --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_API_KEY=\"$v\" >> /opt/app/.env'",
         "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/auth_domain --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_AUTH_DOMAIN=\"$v\" >> /opt/app/.env'",
         "bash -c 'v=$(aws ssm get-parameter --name /op-deckbuilder/dev/firebase/project_id --region us-west-2 --query Parameter.Value --output text 2>/dev/null); [ -n \"$v\" ] && echo FIREBASE_PROJECT_ID=\"$v\" >> /opt/app/.env'",

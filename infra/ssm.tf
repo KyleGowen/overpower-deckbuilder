@@ -183,3 +183,11 @@ resource "aws_ssm_parameter" "cdn_base_url" {
     Environment = var.environment
   }
 }
+
+# -----------------------------------------------------------------------------
+# JWT signing secret for /api/v1 (Bearer tokens) — NOT managed by Terraform.
+# Production requires JWT_SECRET in the container env when NODE_ENV=production.
+# Path (default Terraform vars): /op-deckbuilder/dev/app/jwt_secret (SecureString).
+# Create manually when reviving infra; see docs/current/DEPLOYMENT.md
+# (API v1 / JWT, infrastructure revival checklist).
+# -----------------------------------------------------------------------------

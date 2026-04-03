@@ -91,6 +91,66 @@ The deploy script and EC2 user_data automatically fetch Firebase config from SSM
 - `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_APP_ID` — client config for the frontend
 - `FIREBASE_SERVICE_ACCOUNT_JSON` — server-only, full JSON string for token verification
 
+### API v1 / JWT (`JWT_SECRET`)
+
+The app registers **`/api/v1`** at startup and resolves JWT config immediately. When **`NODE_ENV=production`**, a missing **`JWT_SECRET`** causes the Node process to exit before it listens (Docker health checks fail).
+
+**Source of truth in AWS:** create and maintain a **SecureString** parameter (not managed by Terraform today):
+
+| Item | Value |
+|------|--------|
+| **Name** | `/op-deckbuilder/dev/app/jwt_secret` |
+| **Region** | `us-west-2` |
+| **Type** | `SecureString` |
+
+**How it reaches the container:** the **Run Production Migrations** job in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml) runs [`.github/scripts/append-jwt-env.json`](../../.github/scripts/append-jwt-env.json) on the EC2 instance via SSM. That shell pulls the parameter with **`aws ssm get-parameter --with-decryption`** and appends **`JWT_SECRET=...`** to **`/opt/app/.env`**. The blue-green deploy step starts the new container with **`--env-file /opt/app/.env`**. **`scripts/deploy-to-production.sh`** appends the same variable the same way for manual deploys.
+
+**Create or rotate** (from a machine with IAM permission to write the parameter; use a long random value):
+
+```bash
+aws ssm put-parameter \
+  --name /op-deckbuilder/dev/app/jwt_secret \
+  --value "$(openssl rand -base64 64)" \
+  --type SecureString \
+  --overwrite \
+  --region us-west-2
+```
+
+Rotating the value **invalidates all existing v1 Bearer tokens** until clients log in again.
+
+**Sanity checks:**
+
+```bash
+# Non-empty secret (does not print the value)
+aws ssm get-parameter \
+  --name /op-deckbuilder/dev/app/jwt_secret \
+  --with-decryption \
+  --region us-west-2 \
+  --query 'length(Parameter.Value)' \
+  --output text
+```
+
+After deploy: **`curl -sS https://<host>/health`** should report **`status: OK`** if the app passed JWT initialization.
+
+### Infrastructure revival — SSM and deploy prerequisites
+
+If you rebuild or revive AWS resources (new account, wiped Parameter Store, greenfield region), ensure the following exist **before** expecting production deploy or the manual script to succeed. Defaults use **`op-deckbuilder`** and **`dev`** as in Terraform (`var.project_name`, `var.environment`).
+
+**Managed by Terraform** (recreated by `terraform apply` under `infra/`):
+
+- `/op-deckbuilder/dev/database/*` — host, port, name, username, password, url  
+- `/op-deckbuilder/dev/app/environment`, `/op-deckbuilder/dev/app/port`  
+- `/op-deckbuilder/dev/app/cdn_base_url` — set from CloudFront output  
+- `/op-deckbuilder/dev/firebase/*` — when Firebase variables are supplied at apply  
+
+**Must be created manually** (not defined in `infra/ssm.tf` today):
+
+- **`/op-deckbuilder/dev/app/jwt_secret`** — **SecureString**, required for **`NODE_ENV=production`** and **`/api/v1`** (see previous subsection).
+
+**GitHub Actions** additionally writes many DB and Flyway lines into **`/opt/app/.env`** inline during **Create environment file on EC2** (see deploy workflow); that path is separate from SSM but depends on RDS still matching those values.
+
+After SSM and Terraform are aligned, push to **`main`** (or run **`./scripts/deploy-to-production.sh`**) and confirm **`/health`**.
+
 ### Terraform plan files (security)
 
 Never commit Terraform plan files; they can contain sensitive variable values (e.g. Firebase service account JSON). The repo ignores `infra/tfplan`, `*.tfplan`, and `plan.tfplan`. The domain deploy script (`infra/deploy-domain.sh`) uses `terraform plan -out=plan.tfplan` so the output filename is ignored by `.gitignore`. If you run `terraform plan` manually, use `-out=plan.tfplan` or another `*.tfplan` name and do not commit the file.

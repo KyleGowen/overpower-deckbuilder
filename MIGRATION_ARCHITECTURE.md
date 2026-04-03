@@ -68,7 +68,7 @@ Registration: `registerApiV1Routes(app, deps)` in [`src/api/http/registerApiV1Ro
 
 - **`JWT_SECRET`:** required when `NODE_ENV=production`; optional in development/test with a documented dev default (never use the default in production).
 - **`JWT_EXPIRES_IN`:** optional (e.g. `2h`). Align TTL with product policy.
-- **Deploy:** add `JWT_SECRET` to GitHub Actions secrets (or your secret store) and append to server `.env` on deploy—do not commit secrets.
+- **Production deploy:** store the secret in **AWS SSM Parameter Store** at **`/op-deckbuilder/dev/app/jwt_secret`** (type **SecureString**, region **us-west-2**). GitHub Actions **Run Production Migrations** runs [`.github/scripts/append-jwt-env.json`](.github/scripts/append-jwt-env.json) on the EC2 instance via SSM so **`JWT_SECRET=...`** is appended to **`/opt/app/.env`** before blue-green deploy. The EC2 instance role already has **`ssm:GetParameter`** on `parameter/op-deckbuilder/dev/*`. **`scripts/deploy-to-production.sh`** uses the same SSM path. Do not commit the secret. Full revival steps: [docs/current/DEPLOYMENT.md](docs/current/DEPLOYMENT.md) (SSM checklist and JWT section).
 
 ## Optional standalone API process
 

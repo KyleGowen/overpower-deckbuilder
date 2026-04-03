@@ -19,7 +19,7 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 | `ecr.tf` | ECR Docker image repository (`op-deckbuilder-repo`) |
 | `cloudfront.tf` | CloudFront CDN distribution — EC2 origin (default) + S3 origin (card images) |
 | `s3.tf` | S3 bucket for static card image assets; OAC-only access (no public access) |
-| `ssm.tf` | SSM Parameter Store — DB credentials, app env, Firebase config, CDN base URL |
+| `ssm.tf` | SSM Parameter Store — DB credentials, app env, Firebase config, CDN base URL. **`/…/app/jwt_secret`** for v1 JWT is documented in `docs/current/DEPLOYMENT.md` and is **not** a Terraform resource here—create it manually in Parameter Store when reviving infra. |
 | `dns.tf` | Route 53 hosted zone + A/CNAME/MX/DKIM records |
 | `ssl.tf` | ACM SSL/TLS certificate |
 | `ses.tf` | SES email sending config for `excelsior.cards` |
