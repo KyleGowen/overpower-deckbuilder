@@ -95,10 +95,10 @@ describe('Foil Deck Editor Tile View Integration Tests', () => {
 
   it('should return foil-card-map with mappings', async () => {
     const foilResponse = await request(app)
-      .get('/api/foil-card-map')
+      .get('/api/v1/catalog/foil-card-map')
       .expect(200);
 
-    expect(foilResponse.body.success).toBe(true);
+    expect(foilResponse.body.errors).toEqual([]);
     expect(Array.isArray(foilResponse.body.data)).toBe(true);
     const powerMapping = foilResponse.body.data.find(
       (e: { foilCardId: string }) => e.foilCardId === foilPowerCardId

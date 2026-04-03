@@ -1,7 +1,7 @@
 /**
  * Unit tests for foil API and FoilCardMapRepository.
  *
- * - GET /api/foil-card-map returns { success: true, data: array } with expected shape
+ * - GET /api/v1/catalog/foil-card-map returns v1 envelope with foil map array
  * - FoilCardMapRepository returns entries with foilCardId, baseCardId, cardType
  */
 
@@ -28,13 +28,14 @@ describe('Foil API and Repository', () => {
     ]);
   });
 
-  describe('GET /api/foil-card-map', () => {
-    it('should return success: true and data array with foil_card_id, base_card_id, card_type', async () => {
+  describe('GET /api/v1/catalog/foil-card-map', () => {
+    it('should return v1 envelope with data array (foilCardId, baseCardId, cardType)', async () => {
       const response = await request(app)
-        .get('/api/foil-card-map')
+        .get('/api/v1/catalog/foil-card-map')
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.meta).toEqual({});
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThanOrEqual(1);
 
@@ -46,10 +47,10 @@ describe('Foil API and Repository', () => {
 
     it('should return entries with correct structure', async () => {
       const response = await request(app)
-        .get('/api/foil-card-map')
+        .get('/api/v1/catalog/foil-card-map')
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       for (const entry of response.body.data) {
         expect(typeof entry.foilCardId).toBe('string');
         expect(typeof entry.baseCardId).toBe('string');

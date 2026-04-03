@@ -37,7 +37,7 @@ flowchart TB
 
 ## Legacy `src/routes` vs persistence
 
-- **`card-api.routes.ts`:** Catalog list GETs and **`GET /test`** (catalog slice) call **`CatalogService`** only; the service uses **`CardRepository`** + **`FoilCardMapRepository`**. Do **not** pass `cardRepository` or `foilCardMapRepository` into this route module’s `deps` type—handlers stay **HTTP → service → repository**.
+- **`card-api.routes.ts`:** **`GET /test`** (catalog slice) calls **`CatalogService`** only; the service uses **`CardRepository`** + **`FoilCardMapRepository`** (foil map is exposed via **`GET /api/v1/catalog/foil-card-map`**, not this file). Do **not** pass `cardRepository` or `foilCardMapRepository` into this route module’s `deps` type—handlers stay **HTTP → service → repository**.
 - **`GET /api/deck-backgrounds`** in the same file correctly uses **`deckBackgroundService`** (different aggregate).
 - **General rule:** Express route handlers call **services** (application layer), not repositories or raw DB pools, except where a deliberate exception is documented.
 

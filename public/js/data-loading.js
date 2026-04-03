@@ -223,7 +223,7 @@ async function loadLocations() {
 /**
  * loadFoilCardMap
  *
- * Fetches /api/foil-card-map once at app startup and builds window.foilCardMap —
+ * Fetches GET /api/v1/catalog/foil-card-map once at app startup and builds window.foilCardMap —
  * a bidirectional plain object for O(1) foil ↔ base card ID lookup:
  *
  *   window.foilCardMap[foilCardId]  → baseCardId
@@ -241,14 +241,25 @@ async function loadLocations() {
  */
 async function loadFoilCardMap() {
     try {
-        const response = await fetch('/api/foil-card-map');
+        const response = await fetch('/api/v1/catalog/foil-card-map');
         const data = await response.json();
-        if (!data.success) {
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        !data.errors?.length &&
+                        Array.isArray(data.data),
+                    rows: Array.isArray(data.data) ? data.data : []
+                };
+        if (!payload.ok) {
             throw new Error('Failed to load foil card map');
         }
         // Build bidirectional lookup: foilId → baseId AND baseId → foilId
         const map = {};
-        for (const entry of data.data) {
+        for (const entry of payload.rows) {
             map[entry.foilCardId] = entry.baseCardId;
             map[entry.baseCardId] = entry.foilCardId;
         }

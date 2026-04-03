@@ -272,6 +272,18 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogPowerCardsResponseDto.ts`](src/api/dto/v1/CatalogPowerCardsResponseDto.ts)
 
+### `GET /api/v1/catalog/foil-card-map`
+
+**Auth:** None (same as removed legacy `GET /api/foil-card-map`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of `{ "foilCardId", "baseCardId", "cardType" }` rows (camelCase; same objects the legacy route returned in `data`).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogFoilCardMapResponseDto.ts`](src/api/dto/v1/CatalogFoilCardMapResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -293,3 +305,4 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/training | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/basic-universe | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/power-cards | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/foil-card-map | dbv-catalog.http.ts |

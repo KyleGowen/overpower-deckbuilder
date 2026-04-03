@@ -554,7 +554,7 @@ Index on `base_card_id` for reverse lookups.
 
 ### Frontend: `window.foilCardMap`
 
-Loaded at startup by `loadFoilCardMap()` in `public/js/data-loading.js` from `GET /api/foil-card-map`.
+Loaded at startup by `loadFoilCardMap()` in `public/js/data-loading.js` from `GET /api/v1/catalog/foil-card-map`.
 It is a **bidirectional plain object** — both directions stored for O(1) lookup:
 
 ```js
@@ -570,7 +570,7 @@ Check if a card has a foil version: `window.foilCardMap[card.id] !== undefined`
 |-------|------|
 | DB | `migrations/V231__Create_foil_card_map.sql` |
 | Repository | `src/database/foilCardMapRepository.ts` |
-| API | `GET /api/foil-card-map` in `src/index.ts` |
+| API | `GET /api/v1/catalog/foil-card-map` (`dbv-catalog.http.ts` via `registerApiV1Routes`) |
 | Frontend load | `loadFoilCardMap()` in `public/js/data-loading.js` |
 | Deck editor toggle | `toggleFoilForCard()` in `public/js/deck-editor-core.js` |
 | Deck editor render | `hasFoilVersion` check in `public/js/deck-editor-rendering.js` |

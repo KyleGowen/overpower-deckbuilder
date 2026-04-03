@@ -246,11 +246,11 @@
           }
         },
         {
-          "name": "GET /api/foil-card-map",
+          "name": "GET /api/v1/catalog/foil-card-map",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/foil-card-map"
+            "url": "{{baseUrl}}/api/v1/catalog/foil-card-map"
           }
         },
         {

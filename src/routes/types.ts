@@ -26,7 +26,7 @@ export interface RouteDependencies {
     updateUIPreferences: (id: string, preferences: unknown) => Promise<boolean>;
   };
   cardRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
-  /** Card catalog + foil map reads; legacy `/api/*` catalog GETs and `/api/v1/catalog/*` use this—never call `cardRepository` from `card-api.routes.ts`. */
+  /** Card catalog + foil map reads; `/api/v1/catalog/*` and legacy **`GET /test`** use this—never call `cardRepository` from `card-api.routes.ts`. */
   catalogService: CatalogService;
   userRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
   deckValidationService: { validateDeck: (cards: unknown[]) => Promise<unknown[]> };

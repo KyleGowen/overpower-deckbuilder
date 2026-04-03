@@ -150,4 +150,16 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
       ]);
     }
   });
+
+  router.get('/catalog/foil-card-map', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getFoilCardMap();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/foil-card-map error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch foil card map' }
+      ]);
+    }
+  });
 }

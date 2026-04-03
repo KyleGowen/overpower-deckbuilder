@@ -280,4 +280,31 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/foil-card-map returns v1 envelope with data', async () => {
+    const foilRows = [{ foilCardId: 'f1', baseCardId: 'b1', cardType: 'power' as const }];
+    const cards: Partial<CatalogCardRepository> = {
+      getAllCharacters: jest.fn().mockResolvedValue([])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, {
+      getFoilCardMap: jest.fn().mockResolvedValue(foilRows)
+    });
+    const res = await request(buildApp(catalogService)).get('/catalog/foil-card-map').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual(foilRows);
+  });
+
+  it('GET /catalog/foil-card-map returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllCharacters: jest.fn().mockResolvedValue([])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, {
+      getFoilCardMap: jest.fn().mockRejectedValue(new Error('db down'))
+    });
+    const res = await request(buildApp(catalogService)).get('/catalog/foil-card-map').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

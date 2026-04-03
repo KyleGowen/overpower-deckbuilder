@@ -2,17 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork, /ally-universe, /training, /basic-universe, /power-cards removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/foil-card-map', async (_req, res) => {
-    try {
-      const entries = await deps.catalogService.getFoilCardMap();
-      res.json({ success: true, data: entries });
-    } catch (error) {
-      console.error('Error fetching foil card map:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch foil card map' });
-    }
-  });
+  // GET /api/characters, … /power-cards, /foil-card-map removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/deck-backgrounds', deps.authenticateUser, async (req: Request, res) => {
     try {
