@@ -43,7 +43,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 | GET /api/basic-universe    | GET /api/v1/catalog/basic-universe    | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/power-cards       | GET /api/v1/catalog/power-cards       | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/foil-card-map     | GET /api/v1/catalog/foil-card-map     | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
-| GET /api/sets              | GET /api/v1/dbv/sets                  | [ ]      | dbv-support                              | [ ]       | [ ]    | [ ]       |
+| GET /api/sets              | GET /api/v1/dbv/sets                  | [x]      | `DbvSupportService` + `dbv-support.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/deck-backgrounds  | GET /api/v1/dbv/deck-backgrounds      | [ ]      | dbv-support                              | [ ]       | [ ]    | [ ]       |
 | GET /api/test (diagnostic) | TBD or skip                           | [ ]      | —                                        | [ ]       | [ ]    | [ ]       |
 

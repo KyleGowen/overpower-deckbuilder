@@ -46,6 +46,7 @@ All v1 JSON responses use:
 
 1. [Auth](#auth)
 2. [DBV catalog](#dbv-catalog)
+3. [DBV support](#dbv-support)
 
 ---
 
@@ -286,6 +287,24 @@ All v1 JSON responses use:
 
 ---
 
+## DBV support
+
+Reference data for Database View and collection UI (set codes → display names, etc.).
+
+### `GET /api/v1/dbv/sets`
+
+**Auth:** None (same as removed legacy `GET /api/sets`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of `{ "code", "name" }` rows from the `sets` table, ordered by `name` ascending (same shape as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/dbvSupportService.ts`](src/api/services/dbvSupportService.ts) · HTTP [`src/api/http/dbv-support.http.ts`](src/api/http/dbv-support.http.ts) · response shape [`src/api/dto/v1/DbvSetsResponseDto.ts`](src/api/dto/v1/DbvSetsResponseDto.ts)
+
+---
+
 ## Route index (v1)
 
 | Method | Path | Router module |
@@ -306,3 +325,4 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/basic-universe | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/power-cards | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/foil-card-map | dbv-catalog.http.ts |
+| GET | /api/v1/dbv/sets | dbv-support.http.ts |

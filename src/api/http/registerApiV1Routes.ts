@@ -5,8 +5,10 @@ import type { UserRole } from '../../types';
 import { resolveJwtConfig } from '../config/jwtConfig';
 import { V1JwtTokenService } from '../services/v1JwtTokenService';
 import { CatalogService } from '../services/catalogService';
+import { DbvSupportService } from '../services/dbvSupportService';
 import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
+import { registerDbvSupportV1HttpRoutes } from './dbv-support.http';
 
 export interface RegisterApiV1Deps {
   authenticationService: AuthenticationService;
@@ -19,6 +21,7 @@ export interface RegisterApiV1Deps {
     updateLastLoginAt: (id: string) => Promise<void>;
   };
   catalogService: CatalogService;
+  dbvSupportService: DbvSupportService;
 }
 
 /**
@@ -37,6 +40,10 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
 
   registerDbvCatalogV1HttpRoutes(router, {
     catalogService: deps.catalogService
+  });
+
+  registerDbvSupportV1HttpRoutes(router, {
+    dbvSupportService: deps.dbvSupportService
   });
 
   return router;

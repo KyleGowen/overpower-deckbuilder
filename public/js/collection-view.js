@@ -29,7 +29,7 @@ function collectionIsLayoutMobile() {
 // GUEST sandbox localStorage key
 const GUEST_COLLECTION_KEY = 'guestCollection';
 
-/** Uppercase set code → display name; seeded for offline / before GET /api/sets */
+/** Uppercase set code → display name; seeded for offline / before GET /api/v1/dbv/sets */
 const DEFAULT_COLLECTION_SET_NAMES = new Map([
     ['ERB', 'Edgar Rice Burroughs and the World Legends'],
     ['ERBP', 'Edgar Rice Burroughs and the World Legends - Promos'],
@@ -286,7 +286,7 @@ function mergeCollectionWithAllCards(owned, allCards) {
 }
 
 /**
- * Load set code → display name from GET /api/sets (uses `sets.name` in DB). Safe to call multiple times.
+ * Load set code → display name from GET /api/v1/dbv/sets (uses `sets.name` in DB). Safe to call multiple times.
  */
 async function ensureCollectionSetNamesLoaded() {
     if (collectionSetNamesFetched) {
@@ -294,14 +294,25 @@ async function ensureCollectionSetNamesLoaded() {
     }
     collectionSetNamesFetched = true;
     try {
-        const res = await fetch('/api/sets', { credentials: 'include' });
+        const res = await fetch('/api/v1/dbv/sets', { credentials: 'include' });
         if (!res.ok) {
             return;
         }
         const data = await res.json();
-        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(res, data)
+                : {
+                    ok:
+                        res.ok !== false &&
+                        data &&
+                        !data.errors?.length &&
+                        Array.isArray(data.data),
+                    rows: Array.isArray(data.data) ? data.data : []
+                };
+        if (payload.ok && payload.rows.length > 0) {
             const map = new Map();
-            for (const row of data.data) {
+            for (const row of payload.rows) {
                 if (row.code) {
                     map.set(String(row.code).trim().toUpperCase(), row.name);
                 }
@@ -309,7 +320,7 @@ async function ensureCollectionSetNamesLoaded() {
             collectionSetNamesByCode = map;
         }
     } catch (e) {
-        console.error('Failed to load /api/sets:', e);
+        console.error('Failed to load /api/v1/dbv/sets:', e);
     }
 }
 

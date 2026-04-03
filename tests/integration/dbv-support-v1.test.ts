@@ -1,0 +1,22 @@
+/**
+ * Integration tests for v1 DBV support routes (read-only; no test data cleanup required).
+ */
+import request from 'supertest';
+import { app, initializeTestServer } from '../../src/test-server';
+
+describe('GET /api/v1/dbv/sets', () => {
+  beforeAll(async () => {
+    await initializeTestServer();
+  });
+
+  it('returns v1 envelope with code/name rows from sets table', async () => {
+    const res = await request(app).get('/api/v1/dbv/sets').expect(200);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.errors).toEqual([]);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    const row = res.body.data[0];
+    expect(typeof row.code).toBe('string');
+    expect(typeof row.name).toBe('string');
+  });
+});

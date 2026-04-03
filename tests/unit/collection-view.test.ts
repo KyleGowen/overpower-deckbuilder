@@ -113,32 +113,34 @@ function setupDOM(extraHtml = '') {
     `;
 }
 
-/** loadCollection always calls GET /api/sets before the collection API */
+/** loadCollection always calls GET /api/v1/dbv/sets before the collection API */
 function mockFetchSetsOkOnce() {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => ({
-            success: true,
             data: [
                 { code: 'ERB', name: 'Edgar Rice Burroughs and the World Legends' },
                 { code: 'SKY', name: 'Skybound' },
             ],
+            meta: {},
+            errors: [],
         }),
     });
 }
 
-/** GUEST flows still run loadCollection → /api/sets (no collection API) */
+/** GUEST flows still run loadCollection → /api/v1/dbv/sets (no collection API) */
 function wireDefaultSetsFetchMock() {
     (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => ({
-            success: true,
             data: [
                 { code: 'ERB', name: 'Edgar Rice Burroughs and the World Legends' },
                 { code: 'SKY', name: 'Skybound' },
             ],
+            meta: {},
+            errors: [],
         }),
     });
 }
@@ -804,7 +806,7 @@ describe('translateSet()', () => {
         expect(fns.translateSet('sky')).toBe('Skybound');
     });
 
-    it('maps ERBP to ERB promos set name (matches sets table / DBV before /api/sets loads)', () => {
+    it('maps ERBP to ERB promos set name (matches sets table / DBV before /api/v1/dbv/sets loads)', () => {
         expect(fns.translateSet('ERBP')).toBe('Edgar Rice Burroughs and the World Legends - Promos');
         expect(fns.translateSet('erbp')).toBe('Edgar Rice Burroughs and the World Legends - Promos');
     });
@@ -1311,12 +1313,12 @@ describe('GUEST sandbox in addCardToCollection()', () => {
         (window as any).allCardsData = [makeAllCard('card-1', 'character')];
     });
 
-    it('saves to localStorage; only fetches /api/sets for labels (not collection API)', async () => {
+    it('saves to localStorage; only fetches /api/v1/dbv/sets for labels (not collection API)', async () => {
         localStorageMock.getItem.mockReturnValue('[]');
         
         await fns.addCardToCollection('card-1', 'character', '/images/card-1.webp');
         
-        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.objectContaining({ credentials: 'include' }));
+        expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/sets', expect.objectContaining({ credentials: 'include' }));
         expect(global.fetch).not.toHaveBeenCalledWith(
             '/api/collections/me/cards',
             expect.anything()
@@ -1430,7 +1432,7 @@ describe('GUEST sandbox in updateCollectionQuantity()', () => {
         
         await fns.updateCollectionQuantity('card-1', 'character', 5, '/img.webp');
         
-        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.anything());
+        expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/sets', expect.anything());
         expect(global.fetch).not.toHaveBeenCalledWith(
             expect.stringMatching(/\/api\/collections\/me\/cards/),
             expect.anything()
@@ -1482,7 +1484,7 @@ describe('GUEST sandbox in removeCardFromCollection()', () => {
         
         await fns.removeCardFromCollection('card-1', 'character');
         
-        expect(global.fetch).toHaveBeenCalledWith('/api/sets', expect.anything());
+        expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/sets', expect.anything());
         expect(global.fetch).not.toHaveBeenCalledWith(
             '/api/collections/me/cards',
             expect.anything()

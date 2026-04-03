@@ -47,7 +47,7 @@ function resolveSetCodeForArtChoice(card) {
     return 'ERB';
 }
 
-/** Friendly display name from set code (GET /api/sets + defaults via collection-view's translateSet). */
+/** Friendly display name from set code (GET /api/v1/dbv/sets + defaults via collection-view's translateSet). */
 function friendlySetDisplayNameFromCode(code) {
     if (typeof window.translateSet === 'function') {
         return window.translateSet(code);
@@ -118,7 +118,7 @@ function buildArtOptionLabels(orderedCards) {
     });
 }
 
-/** Wait for GET /api/sets so translateSet() has full code → name map (deck editor may never open Collection). */
+/** Wait for GET /api/v1/dbv/sets so translateSet() has full code → name map (deck editor may never open Collection). */
 function withSetDisplayNamesReady(buildUi) {
     const go = () => {
         try {

@@ -17,6 +17,7 @@ import { registerRoutes, type RouteDependencies } from './routes';
 import { transformDeckList } from './api/deckTransform';
 import { CatalogService } from './api/services/catalogService';
 import { registerApiV1Routes } from './api/http/registerApiV1Routes';
+import { DbvSupportService } from './api/services/dbvSupportService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import { execSync } from 'child_process';
@@ -350,6 +351,7 @@ export { databaseInit, guestDeckPersistence };
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 
 const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
+const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 
 // Function to get git information
 function getGitInfo() {
@@ -490,6 +492,7 @@ registerRoutes(app, {
 registerApiV1Routes(app, {
   authenticationService: authService,
   userRepository,
-  catalogService
+  catalogService,
+  dbvSupportService
 });
 

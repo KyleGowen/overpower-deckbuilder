@@ -20,6 +20,7 @@ import { createDeckRoutes } from '../routes/decks.routes';
 import { registerRoutes, type RouteDependencies } from '../routes';
 import { transformDeckList } from '../api/deckTransform';
 import { CatalogService } from '../api/services/catalogService';
+import { DbvSupportService } from '../api/services/dbvSupportService';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
 import { setupMiddleware } from '../middleware/setup';
@@ -54,6 +55,7 @@ const collectionService = new CollectionService(collectionsRepository);
 const deckBackgroundService = new DeckBackgroundService();
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
+const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
@@ -142,7 +144,8 @@ registerRoutes(app, testDeps);
 registerApiV1Routes(app, {
   authenticationService: authService,
   userRepository,
-  catalogService
+  catalogService,
+  dbvSupportService
 });
 
 // Error handling middleware

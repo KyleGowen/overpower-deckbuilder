@@ -806,17 +806,9 @@ Optional positive integer `limit`. **Response 200:**
 
 ---
 
-## Sets
+## Sets (removed)
 
-**File:** `src/routes/sets.routes.ts`
-
-### `GET /api/sets`
-
-**Response 200:**
-
-```json
-{ "success": true, "data": [ /* set code → name rows from DB */ ] }
-```
+**Removed:** **`GET /api/sets`** — use **`GET /api/v1/dbv/sets`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
 ---
 
@@ -873,7 +865,6 @@ Quick lookup: **method**, **path**, **source file**.
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
 | POST/GET/PUT/DELETE | `/api/decks`, `/api/decks/validate`, `/api/decks/:id`, `/full`, `/cards`, `/api/deck-stats`, `/ui-preferences` | `deck-api.routes.ts` |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
-| GET | `/api/sets` | `sets.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
 ### API v1 (`/api/v1`)
@@ -886,6 +877,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
+| GET | `/api/v1/dbv/sets` | `src/api/http/dbv-support.http.ts` |
 
 ---
 

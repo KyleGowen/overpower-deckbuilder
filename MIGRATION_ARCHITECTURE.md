@@ -45,7 +45,7 @@ flowchart TB
 
 1. **`auth.http.ts`** — `/auth/login`, `/auth/logout`, `/auth/me`, token behavior.
 2. **`dbv-catalog.http.ts`** — Card catalog reads backing the Database View.
-3. **`dbv-support.http.ts`** — Sets, deck-backgrounds, etc.
+3. **`dbv-support.http.ts`** — DBV support reads (`GET /api/v1/dbv/sets`; deck-backgrounds when migrated).
 4. **`decks.http.ts`** (+ optional split) — User-scoped decks.
 5. **`collections.http.ts`**, **`guest-decks.http.ts`**, **`admin.http.ts`** — As migrations reach those domains.
 

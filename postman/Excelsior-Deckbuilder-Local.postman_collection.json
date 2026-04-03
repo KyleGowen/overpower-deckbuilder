@@ -730,11 +730,11 @@
       "name": "Sets",
       "item": [
         {
-          "name": "GET /api/sets",
+          "name": "GET /api/v1/dbv/sets",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/sets"
+            "url": "{{baseUrl}}/api/v1/dbv/sets"
           }
         }
       ]
