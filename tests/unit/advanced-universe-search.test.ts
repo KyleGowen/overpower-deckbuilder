@@ -109,10 +109,14 @@ describe('Advanced Universe Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/advanced-universe');
+                        const response = await (global as any).fetch('/api/v1/catalog/advanced-universe');
                         const data = await response.json();
 
-                        if (data.success) {
+                        if (
+                            response.ok &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0)
+                        ) {
                             const filteredAdvancedUniverse = data.data.filter((card: any) =>
                                 card.character.toLowerCase().includes(characterTerm)
                             );
@@ -135,10 +139,14 @@ describe('Advanced Universe Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/advanced-universe');
+                        const response = await (global as any).fetch('/api/v1/catalog/advanced-universe');
                         const data = await response.json();
 
-                        if (data.success) {
+                        if (
+                            response.ok &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0)
+                        ) {
                             const filteredAdvancedUniverse = data.data.filter((card: any) => {
                                 const effectText = (card.card_description || card.card_effect || '').toString();
                                 return effectText.toLowerCase().includes(effectTerm);
@@ -157,8 +165,8 @@ describe('Advanced Universe Search Functionality', () => {
 
         // Mock fetch response
         (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
             json: () => Promise.resolve({
-                success: true,
                 data: [
                     {
                         name: 'Shards of the Staff',
@@ -178,7 +186,9 @@ describe('Advanced Universe Search Functionality', () => {
                         card_description: 'For remainder of game, during Discard Phase, after discarding 1 or more duplicate or unusable cards, sort through Power Pack and choose any 1 card and place it in hand. May not be duplicate. **One Per Deck**',
                         card_effect: 'For remainder of game, during Discard Phase, after discarding 1 or more duplicate or unusable cards, sort through Power Pack and choose any 1 card and place it in hand. May not be duplicate. **One Per Deck**'
                     }
-                ]
+                ],
+                meta: {},
+                errors: []
             })
         });
     });
@@ -260,7 +270,7 @@ describe('Advanced Universe Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/advanced-universe');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
         });
 
         test('should filter cards by card effect', async () => {
@@ -274,7 +284,7 @@ describe('Advanced Universe Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/advanced-universe');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
         });
 
         test('should handle empty search terms by reloading all cards', async () => {
@@ -302,7 +312,7 @@ describe('Advanced Universe Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/advanced-universe');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
         });
     });
 
@@ -358,7 +368,7 @@ describe('Advanced Universe Search Functionality', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // Should not crash and should have attempted the fetch
-            expect(global.fetch).toHaveBeenCalledWith('/api/advanced-universe');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
         });
 
         test('should handle missing search inputs gracefully', () => {

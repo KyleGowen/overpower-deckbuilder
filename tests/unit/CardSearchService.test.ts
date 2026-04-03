@@ -84,7 +84,7 @@ describe('CardSearchService', () => {
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/missions');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/events');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
-            expect(mockFetch).toHaveBeenCalledWith('/api/advanced-universe');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
             expect(mockFetch).toHaveBeenCalledWith('/api/teamwork');
             expect(mockFetch).toHaveBeenCalledWith('/api/ally-universe');
             expect(mockFetch).toHaveBeenCalledWith('/api/training');

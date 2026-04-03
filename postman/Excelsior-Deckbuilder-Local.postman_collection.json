@@ -198,11 +198,11 @@
           }
         },
         {
-          "name": "GET /api/advanced-universe",
+          "name": "GET /api/v1/catalog/advanced-universe",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/advanced-universe"
+            "url": "{{baseUrl}}/api/v1/catalog/advanced-universe"
           }
         },
         {

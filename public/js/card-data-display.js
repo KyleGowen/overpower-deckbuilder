@@ -142,12 +142,24 @@ async function loadAdvancedUniverse() {
         return;
     }
     try {
-        const response = await fetch('/api/advanced-universe');
+        const response = await fetch('/api/v1/catalog/advanced-universe');
         const data = await response.json();
-        
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('advanced-universe', data.data);
-            displayAdvancedUniverse(data.data);
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+
+        if (payload.ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('advanced-universe', payload.rows);
+            displayAdvancedUniverse(payload.rows);
         }
     } catch (error) {
         console.error('Error loading advanced universe:', error);

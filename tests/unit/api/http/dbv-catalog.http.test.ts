@@ -148,4 +148,26 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/advanced-universe returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllAdvancedUniverse: jest.fn().mockResolvedValue([{ id: 'au1', name: 'Test UA' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/advanced-universe').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'au1', name: 'Test UA' }]);
+  });
+
+  it('GET /catalog/advanced-universe returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllAdvancedUniverse: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/advanced-universe').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

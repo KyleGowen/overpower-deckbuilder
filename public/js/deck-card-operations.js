@@ -1419,16 +1419,27 @@ function addAllSpecialCardsForCharacter(characterName) {
 
 function addAllAdvancedUniverseCardsForCharacter(characterName) {
     // Fetch advanced universe cards data to get the cards for this character
-    fetch('/api/advanced-universe')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success || !data.data) {
+    fetch('/api/v1/catalog/advanced-universe')
+        .then(response => response.json().then(data => ({ response, data })))
+        .then(({ response, data }) => {
+            const payload =
+                typeof catalogListPayload === 'function'
+                    ? catalogListPayload(response, data)
+                    : {
+                        ok:
+                            response.ok &&
+                            data &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0),
+                        rows: (data && data.data) || []
+                    };
+            if (!payload.ok || !payload.rows) {
                 showNotification('Error loading advanced universe cards', 'error');
                 return;
             }
-            
+
             // Filter cards for the specific character
-            const characterCards = data.data.filter(card => 
+            const characterCards = payload.rows.filter(card => 
                 (card.character || 'Any Character') === characterName
             );
             
@@ -1560,7 +1571,7 @@ function addAllCharacterStack(characterName) {
     Promise.all([
         fetchList('/api/v1/catalog/characters'),
         fetchList('/api/v1/catalog/special-cards'),
-        fetchList('/api/advanced-universe')
+        fetchList('/api/v1/catalog/advanced-universe')
     ])
         .then(async ([charactersData, specialsData, advancedUniverseData]) => {
             if (!charactersData.ok || !Array.isArray(charactersData.rows)) {

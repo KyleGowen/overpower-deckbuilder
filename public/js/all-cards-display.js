@@ -77,7 +77,7 @@ async function loadAllCards() {
     const cardTypes = [
         { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
         { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
-        { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
+        { type: 'advanced-universe', api: '/api/v1/catalog/advanced-universe', nameField: 'name' },
         { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
         { type: 'aspect', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
         { type: 'mission', api: '/api/v1/catalog/missions', nameField: 'name' },

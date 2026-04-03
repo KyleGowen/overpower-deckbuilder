@@ -86,7 +86,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/ally-universe', type: 'ally-universe' },
         { endpoint: '/api/training', type: 'training' },
         { endpoint: '/api/basic-universe', type: 'basic-universe' },
-        { endpoint: '/api/advanced-universe', type: 'advanced-universe' }
+        { endpoint: '/api/v1/catalog/advanced-universe', type: 'advanced-universe' }
       ];
 
       for (const cardType of cardTypes) {
@@ -344,7 +344,7 @@ describe('All Tab Integration Tests', () => {
         '/api/ally-universe',
         '/api/training',
         '/api/basic-universe',
-        '/api/advanced-universe'
+        '/api/v1/catalog/advanced-universe'
       ];
 
       const responses = await Promise.all(

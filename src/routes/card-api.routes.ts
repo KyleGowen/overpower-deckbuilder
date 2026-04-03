@@ -2,17 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /api/locations, /api/special-cards, /api/missions, /api/events, /api/aspects removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/advanced-universe', async (req, res) => {
-    try {
-      const advancedUniverse = await deps.catalogService.getAllAdvancedUniverse();
-      res.json({ success: true, data: advancedUniverse });
-    } catch (error) {
-      console.error('Error fetching advanced universe:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch advanced universe' });
-    }
-  });
+  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/teamwork', async (req, res) => {
     try {

@@ -159,12 +159,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/advanced-universe', async (req, res) => {
+  app.get('/api/v1/catalog/advanced-universe', async (req, res) => {
     try {
       const advancedUniverse = await mockCardRepository.getAllAdvancedUniverse();
-      res.json({ success: true, data: advancedUniverse });
+      res.json({ data: advancedUniverse, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch advanced universe' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch advanced universe' }]
+      });
     }
   });
 
@@ -545,7 +549,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/advanced-universe', () => {
+    describe('GET /api/v1/catalog/advanced-universe', () => {
       it('should return all advanced universe cards successfully', async () => {
         const mockAdvancedUniverse = [
           { id: '1', name: 'Advanced Card 1' },
@@ -554,12 +558,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllAdvancedUniverse.mockResolvedValue(mockAdvancedUniverse);
 
         const response = await request(app)
-          .get('/api/advanced-universe')
+          .get('/api/v1/catalog/advanced-universe')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockAdvancedUniverse
+          data: mockAdvancedUniverse,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllAdvancedUniverse).toHaveBeenCalled();
       });

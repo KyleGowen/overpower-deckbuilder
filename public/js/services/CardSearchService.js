@@ -286,7 +286,7 @@
                     fetchList('/api/v1/catalog/missions'),
                     fetchList('/api/v1/catalog/events'),
                     fetchList('/api/v1/catalog/aspects'),
-                    fetchList('/api/advanced-universe'),
+                    fetchList('/api/v1/catalog/advanced-universe'),
                     fetchList('/api/teamwork'),
                     fetchList('/api/ally-universe'),
                     fetchList('/api/training'),

@@ -137,7 +137,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get Ra's advanced universe cards
     const advancedUniverseResp = await request(app)
-      .get('/api/advanced-universe')
+      .get('/api/v1/catalog/advanced-universe')
       .set('Cookie', authCookie)
       .expect(200);
     

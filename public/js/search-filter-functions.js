@@ -376,11 +376,22 @@ function setupAdvancedUniverseSearch() {
             }
 
             try {
-                const response = await fetch('/api/advanced-universe');
+                const response = await fetch('/api/v1/catalog/advanced-universe');
                 const data = await response.json();
-                
-                if (data.success) {
-                    const filteredAdvancedUniverse = data.data.filter(card => 
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : {
+                            ok:
+                                response.ok !== false &&
+                                data &&
+                                Array.isArray(data.data) &&
+                                data.success !== false &&
+                                (!data.errors || data.errors.length === 0),
+                            rows: (data && data.data) || []
+                        };
+                if (payload.ok) {
+                    const filteredAdvancedUniverse = payload.rows.filter(card => 
                         card.name.toLowerCase().includes(searchTerm) ||
                         card.character.toLowerCase().includes(searchTerm) ||
                         (card.card_description && card.card_description.toLowerCase().includes(searchTerm)) ||
@@ -407,11 +418,22 @@ function setupAdvancedUniverseSearch() {
             }
 
             try {
-                const response = await fetch('/api/advanced-universe');
+                const response = await fetch('/api/v1/catalog/advanced-universe');
                 const data = await response.json();
-                
-                if (data.success) {
-                    const filteredAdvancedUniverse = data.data.filter(card => 
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : {
+                            ok:
+                                response.ok !== false &&
+                                data &&
+                                Array.isArray(data.data) &&
+                                data.success !== false &&
+                                (!data.errors || data.errors.length === 0),
+                            rows: (data && data.data) || []
+                        };
+                if (payload.ok) {
+                    const filteredAdvancedUniverse = payload.rows.filter(card => 
                         card.character.toLowerCase().includes(characterTerm)
                     );
                     displayAdvancedUniverse(filteredAdvancedUniverse);
@@ -435,11 +457,22 @@ function setupAdvancedUniverseSearch() {
             }
 
             try {
-                const response = await fetch('/api/advanced-universe');
+                const response = await fetch('/api/v1/catalog/advanced-universe');
                 const data = await response.json();
-                
-                if (data.success) {
-                    const filteredAdvancedUniverse = data.data.filter(card => {
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : {
+                            ok:
+                                response.ok !== false &&
+                                data &&
+                                Array.isArray(data.data) &&
+                                data.success !== false &&
+                                (!data.errors || data.errors.length === 0),
+                            rows: (data && data.data) || []
+                        };
+                if (payload.ok) {
+                    const filteredAdvancedUniverse = payload.rows.filter(card => {
                         const effectText = (card.card_description || card.card_effect || '').toString();
                         return effectText.toLowerCase().includes(effectTerm);
                     });
