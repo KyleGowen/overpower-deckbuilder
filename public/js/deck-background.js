@@ -99,7 +99,7 @@ class DeckBackgroundManager {
    */
   async loadBackgrounds() {
     try {
-      const response = await fetch('/api/deck-backgrounds', {
+      const response = await fetch('/api/v1/dbv/deck-backgrounds', {
         credentials: 'include'
       });
       
@@ -111,8 +111,19 @@ class DeckBackgroundManager {
       }
       
       const data = await response.json();
-      if (data.success) {
-        this.availableBackgrounds = data.data;
+      const payload =
+        typeof catalogListPayload === 'function'
+          ? catalogListPayload(response, data)
+          : {
+              ok:
+                response.ok !== false &&
+                data &&
+                !data.errors?.length &&
+                Array.isArray(data.data),
+              rows: Array.isArray(data.data) ? data.data : []
+            };
+      if (payload.ok) {
+        this.availableBackgrounds = payload.rows;
       }
     } catch (error) {
       console.error('Error loading backgrounds:', error);

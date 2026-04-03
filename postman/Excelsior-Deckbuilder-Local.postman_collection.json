@@ -254,22 +254,13 @@
           }
         },
         {
-          "name": "GET /api/deck-backgrounds",
+          "name": "GET /api/v1/dbv/deck-backgrounds",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/deck-backgrounds"
+            "url": "{{baseUrl}}/api/v1/dbv/deck-backgrounds"
           },
-          "description": "Requires login."
-        },
-        {
-          "name": "GET /test",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/test"
-          },
-          "description": "Diagnostic JSON."
+          "description": "Requires session cookie login (same as legacy). v1 envelope: { data, meta, errors }."
         }
       ]
     },

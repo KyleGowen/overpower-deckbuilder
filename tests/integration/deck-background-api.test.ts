@@ -70,10 +70,10 @@ describe('Deck Background API Integration Tests', () => {
     // Cleanup is handled automatically by global cleanup functions
   });
 
-  describe('GET /api/deck-backgrounds', () => {
+  describe('GET /api/v1/dbv/deck-backgrounds', () => {
     it('should require authentication', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -82,22 +82,22 @@ describe('Deck Background API Integration Tests', () => {
 
     it('should allow ADMIN users to access background list', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should return list of background image paths', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.length).toBeGreaterThan(0);
       
       // Verify all paths are valid background paths (landscape and/or portrait)
@@ -109,11 +109,11 @@ describe('Deck Background API Integration Tests', () => {
 
     it('should allow non-ADMIN users to access background list', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
@@ -121,14 +121,14 @@ describe('Deck Background API Integration Tests', () => {
       // This test verifies error handling - the service should return empty array on error
       // but the endpoint should still return 200 with success: true
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', adminAuthCookie);
 
       // Should return 200 even if service returns empty array
       expect([200, 500]).toContain(response.status);
       
       if (response.status === 200) {
-        expect(response.body.success).toBe(true);
+        expect(response.body.errors).toEqual([]);
       }
     });
   });
@@ -136,11 +136,11 @@ describe('Deck Background API Integration Tests', () => {
   describe('All roles can access backgrounds list', () => {
     it('should allow USER users to proceed', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
@@ -165,11 +165,11 @@ describe('Deck Background API Integration Tests', () => {
       const testAuthCookie = loginResponse.headers['set-cookie'][0].split(';')[0];
 
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', testAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
   });

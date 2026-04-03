@@ -493,6 +493,8 @@ registerApiV1Routes(app, {
   authenticationService: authService,
   userRepository,
   catalogService,
-  dbvSupportService
+  dbvSupportService,
+  authenticateUser,
+  deckBackgroundService
 });
 

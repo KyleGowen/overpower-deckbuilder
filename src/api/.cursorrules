@@ -5,7 +5,7 @@
 - **HTTP-agnostic logic** in `src/services/` (shared with legacy) and **`src/api/services/`** for v1-specific orchestration when needed.
 - **HTTP adapters** only in **`src/api/http/*.http.ts`** (and `registerApiV1Routes.ts`): parse/validate requests, call services, map status + **v1 JSON envelope**.
 - **Legacy** route files stay in `src/routes/` and stay thin; they delegate to the same services as v1 where migrated.
-- **Legacy catalog:** `card-api.routes.ts` calls **`CatalogService`** only for **`GET /test`** (catalog slice). Catalog lists and **foil map** are **`/api/v1/catalog/*`** in **`dbv-catalog.http.ts`**. Handlers do **not** touch `CardRepository` / `FoilCardMapRepository` directly—those are wired only into **`CatalogService`** in the composition root.
+- **Catalog (DBV lists + foil map):** **`/api/v1/catalog/*`** in **`dbv-catalog.http.ts`** → **`CatalogService`** only. Handlers do **not** touch **`CardRepository`** / **`FoilCardMapRepository`** directly—those are wired only into **`CatalogService`** in the composition root.
 
 ## Documentation (mandatory)
 
@@ -57,7 +57,7 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 
 1. `auth.http.ts` — login, logout, me.
 2. `dbv-catalog.http.ts` — card catalog reads for DBV.
-3. `dbv-support.http.ts` — DBV reference reads (`/dbv/sets` today; deck-backgrounds when migrated).
+3. `dbv-support.http.ts` — DBV reference reads (`/dbv/sets`, `/dbv/deck-backgrounds` with session auth).
 4. `decks.http.ts`, `collections.http.ts`, `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
 
 Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.

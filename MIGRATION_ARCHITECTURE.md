@@ -37,15 +37,15 @@ flowchart TB
 
 ## Legacy `src/routes` vs persistence
 
-- **`card-api.routes.ts`:** **`GET /test`** (catalog slice) calls **`CatalogService`** only; the service uses **`CardRepository`** + **`FoilCardMapRepository`** (foil map is exposed via **`GET /api/v1/catalog/foil-card-map`**, not this file). Do **not** pass `cardRepository` or `foilCardMapRepository` into this route module’s `deps` type—handlers stay **HTTP → service → repository**.
-- **`GET /api/deck-backgrounds`** in the same file correctly uses **`deckBackgroundService`** (different aggregate).
+- **Catalog (DBV lists + foil map):** **`/api/v1/catalog/*`** in **`dbv-catalog.http.ts`** uses **`CatalogService`** only; the service uses **`CardRepository`** + **`FoilCardMapRepository`**. Route modules do **not** take those repositories—**HTTP → service → repository**.
+- **Deck background list** is **`GET /api/v1/dbv/deck-backgrounds`** in **`dbv-support.http.ts`**, using **`deckBackgroundService`** (session auth, same as removed legacy route).
 - **General rule:** Express route handlers call **services** (application layer), not repositories or raw DB pools, except where a deliberate exception is documented.
 
 ## Route file grouping (`src/api/http/`)
 
 1. **`auth.http.ts`** — `/auth/login`, `/auth/logout`, `/auth/me`, token behavior.
 2. **`dbv-catalog.http.ts`** — Card catalog reads backing the Database View.
-3. **`dbv-support.http.ts`** — DBV support reads (`GET /api/v1/dbv/sets`; deck-backgrounds when migrated).
+3. **`dbv-support.http.ts`** — DBV support reads (`GET /api/v1/dbv/sets`, **`GET /api/v1/dbv/deck-backgrounds`**).
 4. **`decks.http.ts`** (+ optional split) — User-scoped decks.
 5. **`collections.http.ts`**, **`guest-decks.http.ts`**, **`admin.http.ts`** — As migrations reach those domains.
 

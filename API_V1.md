@@ -303,6 +303,18 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Implementation:** [`src/api/services/dbvSupportService.ts`](src/api/services/dbvSupportService.ts) · HTTP [`src/api/http/dbv-support.http.ts`](src/api/http/dbv-support.http.ts) · response shape [`src/api/dto/v1/DbvSetsResponseDto.ts`](src/api/dto/v1/DbvSetsResponseDto.ts)
 
+### `GET /api/v1/dbv/deck-backgrounds`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** middleware as legacy `GET /api/deck-backgrounds`). The main web app does not attach a Bearer token here; unauthenticated requests receive **401** with the **legacy** JSON shape `{ "success": false, "error": "..." }` from session middleware.
+
+**Request model:** none.
+
+**Response 200:** `data` is a string array of project-root-relative PNG paths under `src/resources/images/backgrounds/{landscape|portrait}/` (same list as legacy `data`).
+
+**Response 500:** v1 envelope — `errors` with code **`DBV_SUPPORT_ERROR`**; `data` may be `null`.
+
+**Implementation:** [`src/services/deckBackgroundService.ts`](src/services/deckBackgroundService.ts) · HTTP [`src/api/http/dbv-support.http.ts`](src/api/http/dbv-support.http.ts) · response shape [`src/api/dto/v1/DbvDeckBackgroundsResponseDto.ts`](src/api/dto/v1/DbvDeckBackgroundsResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -326,3 +338,4 @@ Reference data for Database View and collection UI (set codes → display names,
 | GET | /api/v1/catalog/power-cards | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/foil-card-map | dbv-catalog.http.ts |
 | GET | /api/v1/dbv/sets | dbv-support.http.ts |
+| GET | /api/v1/dbv/deck-backgrounds | dbv-support.http.ts |

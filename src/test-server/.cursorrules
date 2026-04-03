@@ -6,7 +6,7 @@ This directory provides the integration-test Express app and lifecycle. It does 
 
 - **bootstrap.ts** – Builds the Express app, test `RouteDependencies`, calls `registerRoutes` and `registerTestOnlyRoutes`, then error/404 handlers. Exports `app`, `guestDeckPersistence`, `databaseInit`, and repos for lifecycle.
 - **lifecycle.ts** – `initializeTestServer()` and `closeTestServer()`: DB init, `app.listen(PORT)`, and cleanup. Imports app and guestDeckPersistence from bootstrap.
-- **testOnlyRoutes.ts** – Registers test-only routes: GET `/test`, GET `/deck-editor/:deckId`. Called from bootstrap after `registerRoutes`.
+- **testOnlyRoutes.ts** – Registers test-only routes: GET `/deck-editor/:deckId`, lenient `/users/.../decks` HTML. Called from bootstrap before `registerRoutes`.
 
 ## Conventions
 

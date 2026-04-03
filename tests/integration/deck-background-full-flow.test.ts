@@ -95,11 +95,11 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Step 1: Admin gets available backgrounds
       const backgroundsResponse = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(backgroundsResponse.body.success).toBe(true);
+      expect(backgroundsResponse.body.errors).toEqual([]);
       expect(backgroundsResponse.body.data.length).toBeGreaterThan(0);
       expect(backgroundsResponse.body.data).toContain(backgroundPath);
 
@@ -253,11 +253,11 @@ describe('Deck Background Full Flow Integration Tests', () => {
   describe('Non-Admin Access Restrictions', () => {
     it('should allow regular users to access background list endpoint', async () => {
       const response = await request(app)
-        .get('/api/deck-backgrounds')
+        .get('/api/v1/dbv/deck-backgrounds')
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 

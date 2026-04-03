@@ -1,4 +1,4 @@
-import type { Application, IRouter } from 'express';
+import type { Application, IRouter, RequestHandler } from 'express';
 import express from 'express';
 import type { AuthenticationService } from '../../services/AuthenticationService';
 import type { UserRole } from '../../types';
@@ -8,7 +8,7 @@ import { CatalogService } from '../services/catalogService';
 import { DbvSupportService } from '../services/dbvSupportService';
 import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
-import { registerDbvSupportV1HttpRoutes } from './dbv-support.http';
+import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
 
 export interface RegisterApiV1Deps {
   authenticationService: AuthenticationService;
@@ -22,6 +22,8 @@ export interface RegisterApiV1Deps {
   };
   catalogService: CatalogService;
   dbvSupportService: DbvSupportService;
+  authenticateUser: RequestHandler;
+  deckBackgroundService: DeckBackgroundListReader;
 }
 
 /**
@@ -43,7 +45,9 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
   });
 
   registerDbvSupportV1HttpRoutes(router, {
-    dbvSupportService: deps.dbvSupportService
+    dbvSupportService: deps.dbvSupportService,
+    authenticateUser: deps.authenticateUser,
+    deckBackgroundService: deps.deckBackgroundService
   });
 
   return router;

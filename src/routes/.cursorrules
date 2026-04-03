@@ -2,16 +2,16 @@
 
 - Route registration lives here. **index.ts** exports `registerRoutes(app, deps)` and `RouteDependencies`, and orchestrates registration order by calling domain-specific register functions in sequence.
 - **Shared helpers** (rate limit, read-only mode, guest session, collection card type) live in **helpers.ts**; import from `./helpers` in route modules that need them.
-- **Registration is split by domain:** auth (**auth.routes.ts**), card API (**card-api.routes.ts**), users/debug (**users-debug.routes.ts**), guest decks (**guest-decks.routes.ts**), deck API (**deck-api.routes.ts**), collections (**collections.routes.ts**), pages/SPA (**pages.routes.ts**), static/health (**static-health.routes.ts**). (**Removed:** **sets.routes.ts** — set list is **`GET /api/v1/dbv/sets`**.) **decks.routes.ts** is the sub-router for GET /api/decks, mounted at `/api` from index.
+- **Registration is split by domain:** auth (**auth.routes.ts**), users/debug (**users-debug.routes.ts**), guest decks (**guest-decks.routes.ts**), deck API (**deck-api.routes.ts**), collections (**collections.routes.ts**), pages/SPA (**pages.routes.ts**), static/health (**static-health.routes.ts**). (**Removed:** **card-api.routes.ts** — catalog lists are **`/api/v1/catalog/*`** only; diagnostic **`GET /test`** removed.) (**Removed:** **sets.routes.ts** — set list is **`GET /api/v1/dbv/sets`**.) **decks.routes.ts** is the sub-router for GET /api/decks, mounted at `/api` from index.
 - Handlers receive dependencies from the composition root via `deps`; do not import services from src/index inside route handlers—use `deps` only.
-- **HTTP → service → repository:** Route handlers **must not** call **`cardRepository`**, **`foilCardMapRepository`**, or other persistence types directly. For the card catalog, **`card-api.routes.ts`** uses **`deps.catalogService`** only for **`/test`** catalog stats; **characters, locations, specials, missions, events, aspects, advanced-universe, teamwork, ally-universe, training, basic-universe, power-cards lists, and foil-card-map** are **v1-only** (`/api/v1/catalog/...`). Composition root injects repos into **`CatalogService`**. That matches **`/api/v1`** catalog routes (`registerApiV1Routes`). **`GET /api/deck-backgrounds`** uses **`deckBackgroundService`**, not the catalog service.
+- **HTTP → service → repository:** Route handlers **must not** call **`cardRepository`**, **`foilCardMapRepository`**, or other persistence types directly. Card catalog lists and foil map are **v1-only** (`/api/v1/catalog/...` via **`registerApiV1Routes`** + **`CatalogService`**). **Deck background list** is **`GET /api/v1/dbv/deck-backgrounds`** (`dbv-support.http.ts` + **`deckBackgroundService`**), not legacy **`/api/deck-backgrounds`**.
 - **v1-only** behavior lives under `src/api/http/*.http.ts`; see [`src/api/.cursorrules`](../api/.cursorrules).
 
 ## Error Handling in Route Handlers
 - **ALWAYS use `catch (error)` — never bare `catch {}`** in route handlers. Silent catch blocks make production 500s completely undiagnosable.
 - **ALWAYS log before responding**: `console.error('Error fetching X:', error)` then `res.status(500).json(...)`.
 - The only exception is when the error variable is genuinely not needed (e.g. a trivial default fallback) — in those cases use `catch {}` with a comment explaining why.
-- See `card-api.routes.ts` for the correct pattern applied to all card API routes.
+- See **`src/api/http/dbv-catalog.http.ts`** (v1 catalog) for thin HTTP → service patterns; legacy route modules follow the same discipline.
 
 ## /js/app-config.js (auth.routes.ts)
 - Serves `window.APP_CDN_BASE = "<CDN_BASE_URL>";` from `process.env.CDN_BASE_URL`.

@@ -108,7 +108,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 /src/test-server/
 ├── 📄 bootstrap.ts                 # Builds app, test RouteDependencies, registerRoutes, test-only routes
 ├── 📄 lifecycle.ts                 # initializeTestServer(), closeTestServer()
-├── 📄 testOnlyRoutes.ts            # GET /test, GET /deck-editor/:deckId, lenient /users/:userId/decks
+├── 📄 testOnlyRoutes.ts            # GET /deck-editor/:deckId, lenient /users/:userId/decks
 └── 📄 .cursorrules                 # Directory context
 ```
 

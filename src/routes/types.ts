@@ -26,7 +26,7 @@ export interface RouteDependencies {
     updateUIPreferences: (id: string, preferences: unknown) => Promise<boolean>;
   };
   cardRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
-  /** Card catalog + foil map reads; `/api/v1/catalog/*` and legacy **`GET /test`** use this—never call `cardRepository` from `card-api.routes.ts`. */
+  /** Card catalog + foil map reads for `/api/v1/catalog/*` (via `CatalogService` in the API layer). */
   catalogService: CatalogService;
   userRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
   deckValidationService: { validateDeck: (cards: unknown[]) => Promise<unknown[]> };
@@ -53,12 +53,6 @@ export interface RouteDependencies {
 
 /** Dependencies for auth and config routes only. */
 export type AuthRoutesDeps = Pick<RouteDependencies, 'authService'>;
-
-/** Dependencies for card API and test routes. */
-export type CardApiRoutesDeps = Pick<
-  RouteDependencies,
-  'deckBackgroundService' | 'authenticateUser' | 'catalogService'
->;
 
 /** Dependencies for users and debug routes. */
 export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'requireAdmin' | 'userRepository' | 'deckRepository' | 'cardRepository'>;

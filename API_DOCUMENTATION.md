@@ -273,11 +273,11 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 
 ## Card catalog and backgrounds
 
-**File:** `src/routes/card-api.routes.ts`
+Catalog **list** and **foil map** reads are **`/api/v1/catalog/*`** only ([`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts), [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). Handlers use **`CatalogService`** only; they do **not** call **`CardRepository`** / **`FoilCardMapRepository`** directly.
 
-**Service layer:** **`GET /test`** (catalog counts/stats) calls **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`** where applicable—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`**, **`GET /api/advanced-universe`**, **`GET /api/teamwork`**, **`GET /api/ally-universe`**, **`GET /api/training`**, **`GET /api/basic-universe`**, **`GET /api/power-cards`** (list), **`GET /api/foil-card-map`** — use **`GET /api/v1/catalog/...`** counterparts ([API_V1.md](API_V1.md)); those legacy URLs are **not** registered (expect **404**).
+**Removed:** diagnostic **`GET /test`** (counts/stats JSON). **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`**, **`GET /api/advanced-universe`**, **`GET /api/teamwork`**, **`GET /api/ally-universe`**, **`GET /api/training`**, **`GET /api/basic-universe`**, **`GET /api/power-cards`** (list), **`GET /api/foil-card-map`** — use **`GET /api/v1/catalog/...`** counterparts ([API_V1.md](API_V1.md)); those legacy URLs are **not** registered (expect **404**).
 
-**`GET /api/deck-backgrounds`** uses **`deckBackgroundService`** (separate domain service), not the card catalog service.
+**Removed:** **`GET /api/deck-backgrounds`** — use **`GET /api/v1/dbv/deck-backgrounds`** ([API_V1.md](API_V1.md)); requires session auth like legacy.
 
 Unless noted, these are **GET**, unauthenticated, and return:
 
@@ -316,31 +316,6 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/p
 ### `GET /api/aspects` (removed)
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/aspects`** — see [API_V1.md](API_V1.md).
-
-### `GET /api/deck-backgrounds`
-
-**Auth:** Required (`authenticateUser`).
-
-**Response 200:**
-
-```json
-{ "success": true, "data": [ /* available background descriptors */ ] }
-```
-
-### `GET /test`
-
-Diagnostic JSON (not for production reliance). **Response 200:**
-
-```json
-{
-  "characters": 200,
-  "locations": 50,
-  "stats": { },
-  "sampleLocation": { }
-}
-```
-
-On the **integration test server**, another `GET /test` is registered first and **shadows** this handler (see [Integration test server](#integration-test-server)).
 
 ---
 
@@ -838,7 +813,6 @@ The integration test app calls the same `registerRoutes()` but may register **ad
 - Component static paths: `/components/globalNav.html`, `.css`, `.js`
 - Lenient HTML for `/users/:userId/decks` and `/users/:userId/decks/:deckId` (wins over `pages.routes` on that server)
 - `GET /users/:userId/decks/:deckId/edit` (HTML)
-- `GET /test` (JSON — **shadows** `card-api` `GET /test`)
 - `GET /deck-editor/:deckId` (minimal test HTML)
 - Fallback **404** JSON for unknown routes
 
@@ -857,7 +831,6 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | `/api/database/status` | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
 | GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js` | `auth.routes.ts` |
-| GET | `/deck-backgrounds`, `/test` | `card-api.routes.ts` |
 | GET | `/api/users` | `users-debug.routes.ts` |
 | GET | `/api/debug/clear-cache`, `/api/debug/clear-card-cache` | `users-debug.routes.ts` |
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
@@ -877,7 +850,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
-| GET | `/api/v1/dbv/sets` | `src/api/http/dbv-support.http.ts` |
+| GET | `/api/v1/dbv/sets`, `/api/v1/dbv/deck-backgrounds` | `src/api/http/dbv-support.http.ts` |
 
 ---
 

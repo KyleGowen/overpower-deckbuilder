@@ -201,13 +201,13 @@ describe('DeckBackgroundManager', () => {
       
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true, data: mockBackgrounds })
+        json: async () => ({ data: mockBackgrounds, meta: {}, errors: [] })
       });
 
       await manager.loadBackgrounds();
 
       expect(manager.availableBackgrounds).toEqual(mockBackgrounds);
-      expect(global.fetch).toHaveBeenCalledWith('/api/deck-backgrounds', {
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/deck-backgrounds', {
         credentials: 'include'
       });
     });

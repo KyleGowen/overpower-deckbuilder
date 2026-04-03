@@ -1190,26 +1190,6 @@ Get database status information.
 }
 ```
 
-### GET /test
-Test endpoint for development (returns sample data).
-
-**Response:**
-```json
-{
-  "characters": "number",
-  "locations": "number",
-  "stats": {
-    "characters": "number",
-    "locations": "number"
-  },
-  "sampleLocation": {
-    "id": "string",
-    "name": "string",
-    "description": "string"
-  }
-}
-```
-
 ### GET /api/debug/clear-cache
 Clear the deck cache (development/debugging endpoint).
 

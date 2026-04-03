@@ -1,5 +1,5 @@
 /**
- * Test-only routes: GET /test, GET /deck-editor/:deckId, and lenient page routes for integration tests.
+ * Test-only routes: GET /deck-editor/:deckId and lenient page routes for integration tests.
  * When registered before registerRoutes, lenient /users/:userId/decks take precedence (no auth, serve HTML).
  */
 import express, { Request } from 'express';
@@ -7,11 +7,6 @@ import path from 'path';
 
 export interface TestOnlyRoutesDeps {
   deckRepository: { getDeckById: (id: string) => Promise<unknown> };
-  cardRepository: {
-    getAllCharacters: () => Promise<unknown[]>;
-    getAllLocations: () => Promise<unknown[]>;
-    getCardStats: () => Promise<unknown>;
-  };
   authenticateUser: express.RequestHandler;
 }
 
@@ -33,17 +28,6 @@ export function registerTestOnlyRoutes(app: express.Application, deps: TestOnlyR
   app.get('/users/:userId/decks/:deckId', (_req, res) => {
     res.set({ ...noCache, 'Last-Modified': new Date().toUTCString(), 'ETag': `"${Date.now()}"` });
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
-  });
-
-  app.get('/test', async (_req, res) => {
-    const characters = await deps.cardRepository.getAllCharacters();
-    const locations = await deps.cardRepository.getAllLocations();
-    const cardStats = await deps.cardRepository.getCardStats();
-    res.json({
-      characters: (characters as unknown[]).length,
-      locations: (locations as unknown[]).length,
-      stats: cardStats
-    });
   });
 
   app.get('/deck-editor/:deckId', deps.authenticateUser, async (req: Request, res) => {

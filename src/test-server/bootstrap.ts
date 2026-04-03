@@ -136,7 +136,6 @@ app.get('/components/globalNav.js', (_req, res) => {
 // Test-only routes first so lenient /users/:userId/decks take precedence over auth-required page routes
 registerTestOnlyRoutes(app, {
   deckRepository,
-  cardRepository,
   authenticateUser: optionalAuth
 } as TestOnlyRoutesDeps);
 registerRoutes(app, testDeps);
@@ -145,7 +144,9 @@ registerApiV1Routes(app, {
   authenticationService: authService,
   userRepository,
   catalogService,
-  dbvSupportService
+  dbvSupportService,
+  authenticateUser: optionalAuth,
+  deckBackgroundService
 });
 
 // Error handling middleware

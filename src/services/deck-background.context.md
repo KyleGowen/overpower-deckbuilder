@@ -17,7 +17,7 @@ Users can choose a **background image** for the deck editor (card/tile view). Th
 |------|------|
 | **Background images** | `src/resources/images/backgrounds/landscape/` and `.../portrait/` — only `.png` files; **auto-discovered** (no manifest); merged sorted list. |
 | **Backend service** | `src/services/deckBackgroundService.ts` — lists files, validates paths, 15‑min cache. |
-| **API** | `GET /api/deck-backgrounds` (authenticated) → `{ success, data: string[] }` (paths). Deck PATCH/PUT accept `background_image_path` (string or null). |
+| **API** | `GET /api/v1/dbv/deck-backgrounds` (session cookie) → v1 `{ data, meta, errors }` with `data: string[]` (paths). Deck PATCH/PUT accept `background_image_path` (string or null). |
 | **Frontend** | `public/js/deck-background.js` — `DeckBackgroundManager`: loads list, modal picker, applies CSS `background-image` to editor. |
 | **Deck payload** | `background_image_path` on deck metadata (e.g. `GET /api/decks/:id`, PATCH body). |
 
@@ -37,7 +37,7 @@ No thumbnails: deck backgrounds are full-size images. The card thumbnail pipelin
 
 ## Frontend: DeckBackgroundManager
 
-- **Initialization** — `initialize(deckId, readOnly, deckMetadata?)`: loads current deck background, applies it, shows "Background" button in edit mode, fetches `/api/deck-backgrounds` to fill the picker.
+- **Initialization** — `initialize(deckId, readOnly, deckMetadata?)`: loads current deck background, applies it, shows "Background" button in edit mode, fetches `/api/v1/dbv/deck-backgrounds` to fill the picker.
 - **Modal** — Grid of options: "None" first, then all paths from the API. Option label is derived from filename (e.g. `moriartyreapernotext.png` → "moriartyreaper").
 - **Apply** — Sets `background-image: url(/${selectedBackground})` on the deck editor modal content; no background = black.
 
