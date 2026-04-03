@@ -3,8 +3,10 @@ name: api-layer-migration
 description: >-
   Migrates Express HTTP routes to an encapsulated backend API under src/api/
   (services + src/api/http/*.http.ts), keeps API_DOCUMENTATION.md (legacy) and
-  API_V1.md (v1) accurate, and updates Cursor context. Use for route migration,
-  v1 endpoints, thinning src/routes, or aligning with MIGRATION_ARCHITECTURE.md.
+  API_V1.md (v1) accurate, and updates Cursor context. After each migration,
+  use the Cursor browser on the local dev server to prove new routes work.
+  Use for route migration, v1 endpoints, thinning src/routes, or aligning with
+  MIGRATION_ARCHITECTURE.md.
 ---
 
 # API layer migration (Excelsior)
@@ -39,6 +41,7 @@ description: >-
 8. **Docs** — **`API_V1.md`** for v1; **`API_DOCUMENTATION.md`**: remove or mark **removed** legacy paths (callers must not rely on them); checklist checkboxes and “legacy removed” meaning.
 9. **Cursor context** — update **`src/api/.cursorrules`** only when global API rules change; **`src/routes/.cursorrules`** when legacy wiring changes.
 10. **Local dev server** — when migration work for this task is **complete** (handlers, callers, tests, docs), **restart the local development server** so Express picks up new routes and any in-memory caches stay aligned with the code. Stop the running **`npm run dev`** process (if any), then start it again. Default listen port is **8085** unless **`PORT`** is set. (If you added or edited **`migrations/*.sql`**, run **`npm run migrate`** first, then restart—same workflow as **[.cursorrules](.cursorrules)** / **[AGENTS.md](AGENTS.md)**.)
+11. **Cursor browser proof (required)** — With the **local server** running, use the **Cursor IDE browser** (MCP **`cursor-ide-browser`**: e.g. **`browser_navigate`**, **`browser_snapshot`**, then interact as needed) to **prove the new or changed route behaves correctly** against **`http://127.0.0.1:<PORT>/...`** (default **8085**). Match the contract you migrated: **session cookie** flows → log in through the UI (local admin test creds in **[.cursorrules](.cursorrules)** if needed: **kyle** / **test**); **public GETs** → hit the path or the app screen that triggers it; **401/403** → confirm the browser sees the expected failure when unauthenticated or forbidden. **Do not skip this step**—unit/integration tests validate code paths, but the browser confirms Express mount order, cookies, CORS, and real client usage.
 
 ## Pre-merge checklist (security)
 
@@ -55,6 +58,7 @@ description: >-
 - Documenting v1 in **API_DOCUMENTATION.md** instead of **API_V1.md**.
 - Admin behavior on non-`/admin` paths or driven by request body flags.
 - Skipping **tests** for **`*.http.ts`** files.
+- Skipping **Cursor browser** verification on the **local dev server** after migrating or adding HTTP routes (step 11).
 
 ## Evolving this skill
 

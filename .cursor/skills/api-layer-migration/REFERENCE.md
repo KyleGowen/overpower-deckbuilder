@@ -44,6 +44,7 @@ Paste under the right TOC section (auth, dbv-catalog, …):
 
 - [ ] Unit: every route + success + auth/validation/403/500 branches (mocked deps)
 - [ ] Integration: ≥1 Supertest case against real app wiring (`src/test-server`)
+- [ ] **Cursor browser** on **local `npm run dev`**: prove the route (or the UI flow that calls it) works end-to-end—see skill loop **step 11**
 
 ## Changelog (skill + layer)
 
@@ -54,5 +55,6 @@ Paste under the right TOC section (auth, dbv-catalog, …):
 | 2026-04-03 | Policy: after v1 ships for a route, **remove** legacy handler; update all clients + docs; v1 envelope + `catalog-v1-envelope.js` for list payloads. |
 | 2026-04-03 | P0: `GET /api/v1/catalog/special-cards` added; legacy `GET /api/special-cards` removed (same pattern as characters/locations). |
 | 2026-04-03 | Loop step 10: when migration work is complete, **restart `npm run dev`** (after `npm run migrate` if SQL changed); aligns with repo `.cursorrules` / `AGENTS.md`. |
+| 2026-04-03 | Loop step 11: **always** verify migrated/changed routes with **Cursor IDE browser** against the local server (MCP `cursor-ide-browser`); tests alone are not enough. |
 | 2026-04-03 | P0: `GET /api/v1/catalog/missions` added; legacy `GET /api/missions` removed (same pattern as other catalog lists). |
 | 2026-04-03 | P0: `GET /api/v1/catalog/events` added; legacy `GET /api/events` removed. |
