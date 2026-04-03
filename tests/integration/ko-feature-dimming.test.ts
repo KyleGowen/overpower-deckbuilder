@@ -173,7 +173,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get ally cards
     const allyResp = await request(app)
-      .get('/api/ally-universe')
+      .get('/api/v1/catalog/ally-universe')
       .set('Cookie', authCookie)
       .expect(200);
     

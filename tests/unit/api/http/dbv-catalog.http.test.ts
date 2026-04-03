@@ -192,4 +192,26 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/ally-universe returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllAllyUniverse: jest.fn().mockResolvedValue([{ id: 'a1', card_name: 'Test Ally' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/ally-universe').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'a1', card_name: 'Test Ally' }]);
+  });
+
+  it('GET /catalog/ally-universe returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllAllyUniverse: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/ally-universe').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

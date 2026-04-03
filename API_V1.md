@@ -224,6 +224,18 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogTeamworkResponseDto.ts`](src/api/dto/v1/CatalogTeamworkResponseDto.ts)
 
+### `GET /api/v1/catalog/ally-universe`
+
+**Auth:** None (same as removed legacy `GET /api/ally-universe`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of Universe: Ally records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogAllyUniverseResponseDto.ts`](src/api/dto/v1/CatalogAllyUniverseResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -241,3 +253,4 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/aspects | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/advanced-universe | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/teamwork | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/ally-universe | dbv-catalog.http.ts |

@@ -2,17 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/ally-universe', async (req, res) => {
-    try {
-      const ally = await deps.catalogService.getAllAllyUniverse();
-      res.json({ success: true, data: ally });
-    } catch (error) {
-      console.error('Error fetching ally universe:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch ally universe' });
-    }
-  });
+  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork, /ally-universe removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/training', async (req, res) => {
     try {

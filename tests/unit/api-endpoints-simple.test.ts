@@ -185,12 +185,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/ally-universe', async (req, res) => {
+  app.get('/api/v1/catalog/ally-universe', async (req, res) => {
     try {
       const ally = await mockCardRepository.getAllAllyUniverse();
-      res.json({ success: true, data: ally });
+      res.json({ data: ally, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch ally universe' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch ally universe' }]
+      });
     }
   });
 
@@ -595,7 +599,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/ally-universe', () => {
+    describe('GET /api/v1/catalog/ally-universe', () => {
       it('should return all ally universe cards successfully', async () => {
         const mockAllyUniverse = [
           { id: '1', name: 'Ally Card 1' },
@@ -604,12 +608,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllAllyUniverse.mockResolvedValue(mockAllyUniverse);
 
         const response = await request(app)
-          .get('/api/ally-universe')
+          .get('/api/v1/catalog/ally-universe')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockAllyUniverse
+          data: mockAllyUniverse,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllAllyUniverse).toHaveBeenCalled();
       });

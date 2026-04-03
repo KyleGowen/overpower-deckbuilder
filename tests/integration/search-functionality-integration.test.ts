@@ -5,6 +5,17 @@
 
 import { integrationTestUtils } from '../setup-integration';
 
+function expectV1CatalogList(response: Response, data: any): void {
+  expect(response.ok).toBe(true);
+  expect(data.errors ?? []).toEqual([]);
+  expect(Array.isArray(data.data)).toBe(true);
+}
+
+function expectLegacyCatalogList(data: any): void {
+  expect(data.success).toBe(true);
+  expect(Array.isArray(data.data)).toBe(true);
+}
+
 describe('Search Functionality Integration Tests', () => {
   beforeEach(async () => {
     // Clean up any previous test data
@@ -18,12 +29,10 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Ally Universe Search', () => {
     it('should search ally cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
-      expect(data.data).toBeDefined();
-      expect(Array.isArray(data.data)).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test searching for Allan Quatermain
       const allanCards = data.data.filter((card: any) => 
@@ -43,10 +52,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test Energy stat type
       const energyCards = data.data.filter((card: any) => 
@@ -76,10 +85,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by attack value (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test attack value 2
       const attackValue2Cards = data.data.filter((card: any) => 
@@ -103,10 +112,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by card text', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test searching for "Special" in card text
       const specialCards = data.data.filter((card: any) => 
@@ -120,10 +129,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle case-insensitive search', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test different case variations
       const variations = ['allan', 'ALLAN', 'Allan', 'AlLaN'];
@@ -144,10 +153,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle null/undefined properties gracefully', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test that filtering doesn't crash with null/undefined values
       const filteredCards = data.data.filter((card: any) => 
@@ -303,9 +312,10 @@ describe('Search Functionality Integration Tests', () => {
       
       for (const statType of statTypes) {
         // Test ally cards
-        const allyResponse = await fetch('http://localhost:3000/api/ally-universe');
+        const allyResponse = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
         const allyData = await allyResponse.json();
-        
+        expectV1CatalogList(allyResponse, allyData);
+
         const allyCards = allyData.data.filter((card: any) => 
           (card.stat_type_to_use && card.stat_type_to_use.toLowerCase().includes(statType)) ||
           (card.attack_type && card.attack_type.toLowerCase().includes(statType))
@@ -314,7 +324,8 @@ describe('Search Functionality Integration Tests', () => {
         // Test training cards
         const trainingResponse = await fetch('http://localhost:3000/api/training');
         const trainingData = await trainingResponse.json();
-        
+        expectLegacyCatalogList(trainingData);
+
         const trainingCards = trainingData.data.filter((card: any) => 
           (card.type_1 && card.type_1.toLowerCase().includes(statType)) ||
           (card.type_2 && card.type_2.toLowerCase().includes(statType))
@@ -323,7 +334,8 @@ describe('Search Functionality Integration Tests', () => {
         // Test basic universe cards
         const basicResponse = await fetch('http://localhost:3000/api/basic-universe');
         const basicData = await basicResponse.json();
-        
+        expectLegacyCatalogList(basicData);
+
         const basicCards = basicData.data.filter((card: any) => 
           card.type && card.type.toLowerCase().includes(statType)
         );
@@ -338,13 +350,16 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle empty search terms gracefully', async () => {
-      const endpoints = ['http://localhost:3000/api/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
         const data = await response.json();
-        
-        expect(data.success).toBe(true);
+        if (endpoint.includes('/api/v1/')) {
+          expectV1CatalogList(response, data);
+        } else {
+          expectLegacyCatalogList(data);
+        }
         
         // Empty search should return all cards
         const allCards = data.data.filter((card: any) => 
@@ -356,13 +371,16 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle non-existent search terms', async () => {
-      const endpoints = ['http://localhost:3000/api/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
         const data = await response.json();
-        
-        expect(data.success).toBe(true);
+        if (endpoint.includes('/api/v1/')) {
+          expectV1CatalogList(response, data);
+        } else {
+          expectLegacyCatalogList(data);
+        }
         
         // Non-existent search should return no cards
         const noMatchCards = data.data.filter((card: any) => 
@@ -376,14 +394,14 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Search Performance and Data Integrity', () => {
     it('should return consistent results across multiple calls', async () => {
-      const response1 = await fetch('http://localhost:3000/api/ally-universe');
+      const response1 = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data1 = await response1.json();
       
-      const response2 = await fetch('http://localhost:3000/api/ally-universe');
+      const response2 = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data2 = await response2.json();
       
-      expect(data1.success).toBe(true);
-      expect(data2.success).toBe(true);
+      expectV1CatalogList(response1, data1);
+      expectV1CatalogList(response2, data2);
       expect(data1.data.length).toBe(data2.data.length);
       
       // Test that filtering gives consistent results
@@ -401,7 +419,7 @@ describe('Search Functionality Integration Tests', () => {
     it('should return cards with all required fields', async () => {
       const endpoints = [
         {
-          url: 'http://localhost:3000/api/ally-universe',
+          url: 'http://localhost:3000/api/v1/catalog/ally-universe',
           requiredFields: [
             'id',
             'card_name',
@@ -419,8 +437,11 @@ describe('Search Functionality Integration Tests', () => {
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint.url);
         const data = await response.json();
-        
-        expect(data.success).toBe(true);
+        if (endpoint.url.includes('/api/v1/')) {
+          expectV1CatalogList(response, data);
+        } else {
+          expectLegacyCatalogList(data);
+        }
         expect(data.data.length).toBeGreaterThan(0);
         
         // Check that all cards have required fields
@@ -435,10 +456,10 @@ describe('Search Functionality Integration Tests', () => {
     it('should handle large datasets efficiently', async () => {
       const startTime = Date.now();
       
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Perform multiple filter operations
       const statTypes = ['energy', 'combat', 'brute force', 'intelligence'];

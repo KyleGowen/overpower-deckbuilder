@@ -18,10 +18,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Card Name', () => {
     it('should search for Allan Quatermain by name', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       expect(data.data).toBeDefined();
       expect(Array.isArray(data.data)).toBe(true);
       
@@ -35,10 +36,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should search for Hera by name', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Hera
       const heraCards = data.data.filter((card: any) => 
@@ -50,10 +52,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should search for Guy of Gisborne by name', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Guy of Gisborne
       const guyCards = data.data.filter((card: any) => 
@@ -67,10 +70,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Stat Type', () => {
     it('should filter ally cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Energy stat type
       const energyCards = data.data.filter((card: any) => 
@@ -89,10 +93,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Combat stat type
       const combatCards = data.data.filter((card: any) => 
@@ -111,10 +116,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Brute Force stat type
       const bruteForceCards = data.data.filter((card: any) => 
@@ -133,10 +139,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for Intelligence stat type
       const intelligenceCards = data.data.filter((card: any) => 
@@ -157,10 +164,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Attack Value', () => {
     it('should filter ally cards by attack value 2', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for attack value 2
       const attackValue2Cards = data.data.filter((card: any) => 
@@ -176,10 +184,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by attack value 3', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for attack value 3
       const attackValue3Cards = data.data.filter((card: any) => 
@@ -197,10 +206,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Card Text', () => {
     it('should filter ally cards by card text containing "Special"', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for cards with "Special" in card text
       const specialCards = data.data.filter((card: any) => 
@@ -216,10 +226,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by card text containing "Teammate"', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Filter for cards with "Teammate" in card text
       const teammateCards = data.data.filter((card: any) => 
@@ -237,10 +248,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Case Insensitivity', () => {
     it('should handle case-insensitive search for card names', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Test uppercase search
       const upperCaseCards = data.data.filter((card: any) => 
@@ -264,10 +276,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle case-insensitive search for stat types', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Test uppercase search
       const upperCaseCards = data.data.filter((card: any) => 
@@ -296,10 +309,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Edge Cases', () => {
     it('should handle empty search term gracefully', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Empty search should return all cards
       const allCards = data.data.filter((card: any) => 
@@ -310,10 +324,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle search terms that match no cards', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Search for non-existent card
       const noMatchCards = data.data.filter((card: any) => 
@@ -324,10 +339,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle partial matches correctly', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Search for partial name
       const partialMatchCards = data.data.filter((card: any) => 
@@ -346,10 +362,11 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Data Integrity', () => {
     it('should return cards with all required fields', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       expect(data.data.length).toBeGreaterThan(0);
       
       // Check that all cards have required fields
@@ -365,10 +382,11 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle numeric attack values correctly', async () => {
-      const response = await fetch('http://localhost:3000/api/ally-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(data.errors ?? []).toEqual([]);
       
       // Find cards with numeric attack values
       const numericAttackCards = data.data.filter((card: any) => 

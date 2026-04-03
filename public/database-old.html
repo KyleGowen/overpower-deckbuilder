@@ -880,12 +880,13 @@
         // Load and display ally universe cards
         async function loadAllyUniverse() {
             try {
-                const response = await fetch('/api/ally-universe');
+                const response = await fetch('/api/v1/catalog/ally-universe');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayAllyUniverse(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+
+                if (payload.ok) {
+                    displayAllyUniverse(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load ally universe cards');
                 }
@@ -1625,7 +1626,7 @@
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
-                    { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'card_name' },
+                    { type: 'ally-universe', name: 'Universe: Ally', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'card_name' },
                     { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
                     { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
