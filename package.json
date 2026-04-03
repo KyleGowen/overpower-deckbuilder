@@ -70,7 +70,7 @@
     "start:full": "./scripts/start-server.sh",
     "lint": "eslint src tests --ext .ts",
     "find:unused": "knip",
-    "find:unused:ci": "knip --production"
+    "find:unused:ci": "knip --production --include dependencies,duplicates"
   },
   "keywords": [
     "overpower",
@@ -82,7 +82,6 @@
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.2",
     "express": "^4.18.2",
@@ -91,6 +90,7 @@
     "pg": "^8.11.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.10",

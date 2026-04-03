@@ -180,10 +180,14 @@ describe('Aspects Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/aspects');
+                        const response = await (global as any).fetch('/api/v1/catalog/aspects');
                         const data = await response.json();
 
-                        if (data.success) {
+                        if (
+                            response.ok &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0)
+                        ) {
                             const filteredAspects = data.data.filter((aspect: any) =>
                                 aspect.card_name.toLowerCase().includes(nameTerm)
                             );
@@ -206,10 +210,14 @@ describe('Aspects Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/aspects');
+                        const response = await (global as any).fetch('/api/v1/catalog/aspects');
                         const data = await response.json();
 
-                        if (data.success) {
+                        if (
+                            response.ok &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0)
+                        ) {
                             const filteredAspects = data.data.filter((aspect: any) =>
                                 aspect.location.toLowerCase().includes(locationTerm)
                             );
@@ -232,10 +240,14 @@ describe('Aspects Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/aspects');
+                        const response = await (global as any).fetch('/api/v1/catalog/aspects');
                         const data = await response.json();
 
-                        if (data.success) {
+                        if (
+                            response.ok &&
+                            Array.isArray(data.data) &&
+                            (!data.errors || data.errors.length === 0)
+                        ) {
                             const filteredAspects = data.data.filter((aspect: any) => {
                                 const effectText = (aspect.aspect_description || aspect.card_effect || '').toString();
                                 return effectText.toLowerCase().includes(effectTerm);
@@ -254,8 +266,8 @@ describe('Aspects Search Functionality', () => {
 
         // Mock fetch response
         (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
             json: () => Promise.resolve({
-                success: true,
                 data: [
                     {
                         card_name: 'Amaru: Dragon Legend',
@@ -282,7 +294,9 @@ describe('Aspects Search Functionality', () => {
                         location: 'Any Homebase',
                         aspect_description: 'Homebase makes a level 4 Brute Force attack. Any Front Line Character may make 1 additional attack. May only have 1 "Fortifications" card per deck. Fortifications! One Per Deck'
                     }
-                ]
+                ],
+                meta: {},
+                errors: []
             })
         });
     });
@@ -408,7 +422,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should filter aspects by location', async () => {
@@ -420,7 +434,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should filter aspects by card effect', async () => {
@@ -432,7 +446,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should handle empty search terms by reloading all aspects', async () => {
@@ -456,7 +470,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should filter by partial matches', async () => {
@@ -468,7 +482,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
     });
 
@@ -525,7 +539,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should handle missing search inputs gracefully', () => {
@@ -625,7 +639,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should filter aspects correctly based on location content', async () => {
@@ -637,7 +651,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should filter aspects correctly based on card effect content', async () => {
@@ -649,7 +663,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
 
         test('should handle no matches gracefully', async () => {
@@ -661,7 +675,7 @@ describe('Aspects Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/aspects');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
         });
     });
 });

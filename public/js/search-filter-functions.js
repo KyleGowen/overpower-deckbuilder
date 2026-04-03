@@ -263,10 +263,22 @@ function setupAspectSearch() {
         }
 
         try {
-            const response = await fetch('/api/aspects');
+            const response = await fetch('/api/v1/catalog/aspects');
             const data = await response.json();
-            if (data.success) {
-                const filtered = data.data.filter(aspect => {
+            const payload =
+                typeof catalogListPayload === 'function'
+                    ? catalogListPayload(response, data)
+                    : {
+                        ok:
+                            response.ok !== false &&
+                            data &&
+                            Array.isArray(data.data) &&
+                            data.success !== false &&
+                            (!data.errors || data.errors.length === 0),
+                        rows: (data && data.data) || []
+                    };
+            if (payload.ok) {
+                const filtered = payload.rows.filter(aspect => {
                     const nameMatch = nameTerm.length === 0 || (aspect.card_name || '').toLowerCase().includes(nameTerm);
                     const locationMatch = locationTerm.length === 0 || (aspect.location || '').toLowerCase().includes(locationTerm);
                     const effectText = (aspect.aspect_description || aspect.card_effect || '').toString();

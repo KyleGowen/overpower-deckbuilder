@@ -493,5 +493,3 @@ registerApiV1Routes(app, {
   catalogService
 });
 
-// Export app for testing
-export default app;

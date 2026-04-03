@@ -188,6 +188,18 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogEventsResponseDto.ts`](src/api/dto/v1/CatalogEventsResponseDto.ts)
 
+### `GET /api/v1/catalog/aspects`
+
+**Auth:** None (same as removed legacy `GET /api/aspects`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of aspect records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogAspectsResponseDto.ts`](src/api/dto/v1/CatalogAspectsResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -202,3 +214,4 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/special-cards | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/missions | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/events | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/aspects | dbv-catalog.http.ts |

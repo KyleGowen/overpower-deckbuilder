@@ -79,7 +79,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
         { endpoint: '/api/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' },
-        { endpoint: '/api/aspects', type: 'aspect' },
+        { endpoint: '/api/v1/catalog/aspects', type: 'aspect' },
         { endpoint: '/api/v1/catalog/missions', type: 'mission' },
         { endpoint: '/api/v1/catalog/events', type: 'event' },
         { endpoint: '/api/teamwork', type: 'teamwork' },
@@ -199,7 +199,7 @@ describe('All Tab Integration Tests', () => {
       const [charactersRes, powerRes, aspectRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters').query({ limit: 1 }),
         request(app).get('/api/power-cards').query({ limit: 1 }),
-        request(app).get('/api/aspects').query({ limit: 1 })
+        request(app).get('/api/v1/catalog/aspects').query({ limit: 1 })
       ]);
 
       // Characters should have 'name'
@@ -337,7 +337,7 @@ describe('All Tab Integration Tests', () => {
         '/api/v1/catalog/special-cards',
         '/api/power-cards',
         '/api/v1/catalog/locations',
-        '/api/aspects',
+        '/api/v1/catalog/aspects',
         '/api/v1/catalog/missions',
         '/api/v1/catalog/events',
         '/api/teamwork',

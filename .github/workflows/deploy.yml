@@ -65,7 +65,7 @@ jobs:
       run: npm ci
 
     - name: Run Knip (unused code scan)
-      run: npx knip --production
+      run: npm run find:unused:ci
 
   # Checkout can occasionally be slow on some runners; re-running the job usually helps.
   unit-tests:

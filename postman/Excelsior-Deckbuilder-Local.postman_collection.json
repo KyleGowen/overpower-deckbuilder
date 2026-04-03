@@ -190,11 +190,11 @@
           }
         },
         {
-          "name": "GET /api/aspects",
+          "name": "GET /api/v1/catalog/aspects",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/aspects"
+            "url": "{{baseUrl}}/api/v1/catalog/aspects"
           }
         },
         {

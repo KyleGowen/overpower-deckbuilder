@@ -1,7 +1,7 @@
 /**
  * Rewrite removed legacy catalog list URLs to /api/v1/catalog/* before any deferred scripts run.
  * Loaded synchronously from index.html <head> (no defer) so fetch() is patched early.
- * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions, /events removed
+ * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions, /events, /aspects removed
  */
 (function () {
     'use strict';
@@ -14,7 +14,8 @@
         '/api/locations': '/api/v1/catalog/locations',
         '/api/special-cards': '/api/v1/catalog/special-cards',
         '/api/missions': '/api/v1/catalog/missions',
-        '/api/events': '/api/v1/catalog/events'
+        '/api/events': '/api/v1/catalog/events',
+        '/api/aspects': '/api/v1/catalog/aspects'
     };
 
     function canonicalPathname(pathname) {

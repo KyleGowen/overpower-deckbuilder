@@ -275,7 +275,7 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 
 **File:** `src/routes/card-api.routes.ts`
 
-**Service layer:** **Table-backed catalog** GETs still registered here (`/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`** — use **`GET /api/v1/catalog/characters`**, **`GET /api/v1/catalog/locations`**, **`GET /api/v1/catalog/special-cards`**, **`GET /api/v1/catalog/missions`**, **`GET /api/v1/catalog/events`** ([API_V1.md](API_V1.md)); those legacy list URLs are **not** registered (expect **404**).
+**Service layer:** **Table-backed catalog** GETs still registered here (`/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`** — use **`GET /api/v1/catalog/characters`**, **`GET /api/v1/catalog/locations`**, **`GET /api/v1/catalog/special-cards`**, **`GET /api/v1/catalog/missions`**, **`GET /api/v1/catalog/events`**, **`GET /api/v1/catalog/aspects`** ([API_V1.md](API_V1.md)); those legacy list URLs are **not** registered (expect **404**).
 
 **`GET /api/deck-backgrounds`** uses **`deckBackgroundService`** (separate domain service), not the card catalog service.
 
@@ -289,7 +289,6 @@ Unless noted, these are **GET**, unauthenticated, and return:
 
 | Path | Data |
 |------|------|
-| `/api/aspects` | Aspects |
 | `/api/advanced-universe` | Advanced universe |
 | `/api/teamwork` | Teamwork |
 | `/api/ally-universe` | Ally universe |
@@ -298,24 +297,11 @@ Unless noted, these are **GET**, unauthenticated, and return:
 | `/api/power-cards` | Power cards |
 | `/api/foil-card-map` | Foil mapping rows |
 
-**Sample** (legacy envelope; character, location, special-card, mission, and event **lists** are v1-only — see [API_V1.md](API_V1.md)):
+**Sample** (legacy envelope; character, location, special-card, mission, event, and aspect **lists** are v1-only — see [API_V1.md](API_V1.md)).
 
-```http
-GET /api/aspects HTTP/1.1
-```
+### `GET /api/aspects` (removed)
 
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "uuid",
-      "card_name": "Example Aspect",
-      "...": "additional fields per table"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/aspects`** — see [API_V1.md](API_V1.md).
 
 ### `GET /api/deck-backgrounds`
 

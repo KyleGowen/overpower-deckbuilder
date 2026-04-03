@@ -5431,11 +5431,14 @@
                 }
 
                 try {
-                    const response = await fetch('/api/aspects');
+                    const response = await fetch('/api/v1/catalog/aspects');
                     const data = await response.json();
-                    
-                    if (data.success) {
-                        const filteredAspects = data.data.filter(aspect => 
+                    const payload = typeof catalogListPayload === 'function' ? catalogListPayload(response, data) : {
+                        ok: response.ok && data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0),
+                        rows: (data && data.data) || []
+                    };
+                    if (payload.ok) {
+                        const filteredAspects = payload.rows.filter(aspect => 
                             aspect.card_name.toLowerCase().includes(searchTerm) ||
                             aspect.card_type.toLowerCase().includes(searchTerm) ||
                             aspect.location.toLowerCase().includes(searchTerm) ||
@@ -5699,11 +5702,14 @@
         // Aspect functions
         async function loadAspects() {
             try {
-                const response = await fetch('/api/aspects');
+                const response = await fetch('/api/v1/catalog/aspects');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayAspects(data.data);
+                const payload = typeof catalogListPayload === 'function' ? catalogListPayload(response, data) : {
+                    ok: response.ok && data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+                if (payload.ok) {
+                    displayAspects(payload.rows);
                 }
             } catch (error) {
                 console.error('Error loading aspects:', error);
@@ -10471,7 +10477,7 @@
                     { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', api: '/api/v1/catalog/missions', nameField: 'name' },
                     { type: 'event', api: '/api/v1/catalog/events', nameField: 'name' },
-                    { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
+                    { type: 'aspect', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/ally-universe', nameField: 'card_name' },
@@ -11046,7 +11052,7 @@
                     { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/v1/catalog/missions', nameField: 'card_name' },
                     { type: 'event', name: 'Events', api: '/api/v1/catalog/events', nameField: 'name' },
-                    { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },
+                    { type: 'aspect', name: 'Aspects', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'card_name' },

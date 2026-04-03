@@ -694,7 +694,7 @@ async function loadAllCards(): Promise<any[]> {
     { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
     { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
-    { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
+    { type: 'aspect', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
     { type: 'mission', api: '/api/v1/catalog/missions', nameField: 'name' },
     { type: 'event', api: '/api/v1/catalog/events', nameField: 'name' },
     { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },

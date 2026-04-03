@@ -146,12 +146,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/aspects', async (req, res) => {
+  app.get('/api/v1/catalog/aspects', async (req, res) => {
     try {
       const aspects = await mockCardRepository.getAllAspects();
-      res.json({ success: true, data: aspects });
+      res.json({ data: aspects, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch aspects' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch aspects' }]
+      });
     }
   });
 
@@ -520,7 +524,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/aspects', () => {
+    describe('GET /api/v1/catalog/aspects', () => {
       it('should return all aspects successfully', async () => {
         const mockAspects = [
           { id: '1', name: 'Aspect 1' },
@@ -529,12 +533,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllAspects.mockResolvedValue(mockAspects);
 
         const response = await request(app)
-          .get('/api/aspects')
+          .get('/api/v1/catalog/aspects')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockAspects
+          data: mockAspects,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllAspects).toHaveBeenCalled();
       });

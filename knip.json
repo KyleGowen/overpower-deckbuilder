@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": ["src/index.ts", "src/test-server.ts"],
-  "project": ["src/**/*.ts", "tests/**/*.ts"],
+  "entry": ["src/index.ts!", "src/test-server.ts"],
+  "project": ["src/**/*.ts!", "tests/**/*.ts"],
   "jest": {
     "config": ["tests/config/jest.*.config.js"]
   },

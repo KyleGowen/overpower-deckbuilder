@@ -35,7 +35,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 | GET /api/special-cards     | GET /api/v1/catalog/special-cards     | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/missions          | GET /api/v1/catalog/missions          | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/events            | GET /api/v1/catalog/events            | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
-| GET /api/aspects           | GET /api/v1/catalog/aspects           | [ ]      | catalog service                          | [ ]       | [ ]    | [ ]       |
+| GET /api/aspects           | GET /api/v1/catalog/aspects           | [x]      | `CatalogService` + `dbv-catalog.http.ts` | [x]       | [x]    | [x]       |
 | GET /api/advanced-universe | GET /api/v1/catalog/advanced-universe | [ ]      | catalog service                          | [ ]       | [ ]    | [ ]       |
 | GET /api/teamwork          | GET /api/v1/catalog/teamwork          | [ ]      | catalog service                          | [ ]       | [ ]    | [ ]       |
 | GET /api/ally-universe     | GET /api/v1/catalog/ally-universe     | [ ]      | catalog service                          | [ ]       | [ ]    | [ ]       |

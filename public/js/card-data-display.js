@@ -105,12 +105,24 @@ async function loadAspects() {
         return;
     }
     try {
-        const response = await fetch('/api/aspects');
+        const response = await fetch('/api/v1/catalog/aspects');
         const data = await response.json();
-        
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('aspects', data.data);
-            displayAspects(data.data);
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+
+        if (payload.ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('aspects', payload.rows);
+            displayAspects(payload.rows);
         }
     } catch (error) {
         console.error('Error loading aspects:', error);

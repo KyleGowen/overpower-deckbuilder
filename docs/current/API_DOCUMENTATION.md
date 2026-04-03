@@ -158,25 +158,9 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/m
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/events`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/aspects
-Get all aspect cards.
+### GET /api/aspects (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/aspects`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/advanced-universe
 Get all advanced universe cards.

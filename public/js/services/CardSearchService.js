@@ -285,7 +285,7 @@
                     fetchList('/api/v1/catalog/special-cards'),
                     fetchList('/api/v1/catalog/missions'),
                     fetchList('/api/v1/catalog/events'),
-                    fetchList('/api/aspects'),
+                    fetchList('/api/v1/catalog/aspects'),
                     fetchList('/api/advanced-universe'),
                     fetchList('/api/teamwork'),
                     fetchList('/api/ally-universe'),
