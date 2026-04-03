@@ -2,17 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /api/locations, /api/special-cards removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/missions', async (req, res) => {
-    try {
-      const missions = await deps.catalogService.getAllMissions();
-      res.json({ success: true, data: missions });
-    } catch (error) {
-      console.error('Error fetching missions:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch missions' });
-    }
-  });
+  // GET /api/characters, /api/locations, /api/special-cards, /api/missions removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/events', async (req, res) => {
     try {

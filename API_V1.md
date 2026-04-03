@@ -164,6 +164,18 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogSpecialCardsResponseDto.ts`](src/api/dto/v1/CatalogSpecialCardsResponseDto.ts)
 
+### `GET /api/v1/catalog/missions`
+
+**Auth:** None (same as removed legacy `GET /api/missions`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of mission records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogMissionsResponseDto.ts`](src/api/dto/v1/CatalogMissionsResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -176,3 +188,4 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/characters | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/locations | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/special-cards | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/missions | dbv-catalog.http.ts |

@@ -82,4 +82,26 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/missions returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllMissions: jest.fn().mockResolvedValue([{ id: 'm1', card_name: 'Test Mission' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/missions').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'm1', card_name: 'Test Mission' }]);
+  });
+
+  it('GET /catalog/missions returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllMissions: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/missions').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

@@ -80,7 +80,7 @@ async function loadAllCards() {
         { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
         { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
         { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
-        { type: 'mission', api: '/api/missions', nameField: 'name' },
+        { type: 'mission', api: '/api/v1/catalog/missions', nameField: 'name' },
         { type: 'event', api: '/api/events', nameField: 'name' },
         { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
         { type: 'ally-universe', api: '/api/ally-universe', nameField: 'card_name' },

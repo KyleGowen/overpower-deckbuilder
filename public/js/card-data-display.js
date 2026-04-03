@@ -24,15 +24,27 @@ async function loadMissions() {
         return;
     }
     try {
-        const response = await fetch('/api/missions');
+        const response = await fetch('/api/v1/catalog/missions');
         const data = await response.json();
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
 
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('missions', data.data);
-            window.missionsData = data.data;
+        if (payload.ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('missions', payload.rows);
+            window.missionsData = payload.rows;
             if (typeof populateMissionsMissionSetSelect === 'function') populateMissionsMissionSetSelect();
             if (typeof applyMissionFilters === 'function') applyMissionFilters();
-            else displayMissions(data.data);
+            else displayMissions(payload.rows);
         }
     } catch (error) {
         console.error('Error loading missions:', error);

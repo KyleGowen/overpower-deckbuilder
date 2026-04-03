@@ -150,25 +150,9 @@ Get alternate images for a specific special card.
 }
 ```
 
-### GET /api/missions
-Get all mission cards.
+### GET /api/missions (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/missions`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/events
 Get all event cards.

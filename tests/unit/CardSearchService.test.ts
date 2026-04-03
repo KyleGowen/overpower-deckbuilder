@@ -81,7 +81,7 @@ describe('CardSearchService', () => {
             expect(mockFetch).toHaveBeenCalledTimes(12);
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/special-cards');
-            expect(mockFetch).toHaveBeenCalledWith('/api/missions');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/missions');
             expect(mockFetch).toHaveBeenCalledWith('/api/events');
             expect(mockFetch).toHaveBeenCalledWith('/api/aspects');
             expect(mockFetch).toHaveBeenCalledWith('/api/advanced-universe');
@@ -608,7 +608,7 @@ describe('CardSearchService', () => {
             expect(results).toHaveLength(1);
             expect(results[0]).toMatchObject({
                 id: '1',
-                name: 'Energy',
+                name: '5 Energy',
                 type: 'power'
             });
         });

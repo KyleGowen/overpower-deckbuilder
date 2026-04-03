@@ -174,11 +174,11 @@
           }
         },
         {
-          "name": "GET /api/missions",
+          "name": "GET /api/v1/catalog/missions",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/missions"
+            "url": "{{baseUrl}}/api/v1/catalog/missions"
           }
         },
         {

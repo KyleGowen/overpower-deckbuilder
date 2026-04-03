@@ -234,7 +234,7 @@ describe('card-data-display.js (loadMissions)', () => {
 
     it('API success path: same populate + apply after missionsData', () => {
         expect(source).toMatch(
-            /window\.missionsData\s*=\s*data\.data;\s*\n\s*if\s*\(typeof populateMissionsMissionSetSelect/
+            /window\.missionsData\s*=\s*payload\.rows;\s*\n\s*if\s*\(typeof populateMissionsMissionSetSelect/
         );
     });
 });

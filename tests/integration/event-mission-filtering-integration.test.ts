@@ -73,7 +73,7 @@ describe('Event Mission Filtering Integration Tests', () => {
     describe('Scenario 1: Single Mission Selected - Only Matching Events Usable', () => {
         it('should show only Call of Cthulhu events when Call of Cthulhu mission is selected', async () => {
             // Get available missions
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             expect(missionsResponse.status).toBe(200);
             
             // Find a Call of Cthulhu mission
@@ -119,7 +119,7 @@ describe('Event Mission Filtering Integration Tests', () => {
 
         it('should show only King of the Jungle events when King of the Jungle mission is selected', async () => {
             // Get available missions
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             expect(missionsResponse.status).toBe(200);
             
             // Find a King of the Jungle mission
@@ -167,7 +167,7 @@ describe('Event Mission Filtering Integration Tests', () => {
     describe('Scenario 2: Multiple Missions Selected - Both Mission Sets Usable', () => {
         it('should show events from both Call of Cthulhu and King of the Jungle when both missions are selected', async () => {
             // Get available missions
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             expect(missionsResponse.status).toBe(200);
             
             // Find missions from both sets
@@ -287,7 +287,7 @@ describe('Event Mission Filtering Integration Tests', () => {
     describe('Event Mission Set Validation', () => {
         it('should have consistent mission set names between missions and events', async () => {
             // Get missions and events
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             const eventsResponse = await apiClient.request('GET', '/api/events');
             
             expect(missionsResponse.status).toBe(200);
@@ -320,7 +320,7 @@ describe('Event Mission Filtering Integration Tests', () => {
 
         it('should have events for each mission set', async () => {
             // Get missions and events
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             const eventsResponse = await apiClient.request('GET', '/api/events');
             
             expect(missionsResponse.status).toBe(200);
@@ -359,7 +359,7 @@ describe('Event Mission Filtering Integration Tests', () => {
 
         it('should handle missions with missing mission_set gracefully', async () => {
             // Get missions and check for any with missing mission_set
-            const missionsResponse = await apiClient.request('GET', '/api/missions');
+            const missionsResponse = await apiClient.request('GET', '/api/v1/catalog/missions');
             expect(missionsResponse.status).toBe(200);
 
             const missionsWithMissionSet = missionsResponse.body.data.filter((mission: any) => 

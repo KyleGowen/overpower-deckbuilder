@@ -80,7 +80,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' },
         { endpoint: '/api/aspects', type: 'aspect' },
-        { endpoint: '/api/missions', type: 'mission' },
+        { endpoint: '/api/v1/catalog/missions', type: 'mission' },
         { endpoint: '/api/events', type: 'event' },
         { endpoint: '/api/teamwork', type: 'teamwork' },
         { endpoint: '/api/ally-universe', type: 'ally-universe' },
@@ -171,7 +171,7 @@ describe('All Tab Integration Tests', () => {
         '/api/v1/catalog/special-cards',
         '/api/power-cards',
         '/api/v1/catalog/locations',
-        '/api/missions',
+        '/api/v1/catalog/missions',
         '/api/events'
       ];
 
@@ -338,7 +338,7 @@ describe('All Tab Integration Tests', () => {
         '/api/power-cards',
         '/api/v1/catalog/locations',
         '/api/aspects',
-        '/api/missions',
+        '/api/v1/catalog/missions',
         '/api/events',
         '/api/teamwork',
         '/api/ally-universe',

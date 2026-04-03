@@ -76,7 +76,7 @@ Service behavior
 `CardSearchService` queries all relevant endpoints in parallel, normalizes them to a common shape, sorts alphabetically by name, filters empties, and caps to `maxResults`.
 
 Endpoints searched
-`/api/characters`, `/api/special-cards`, `/api/missions`, `/api/events`, `/api/aspects`, `/api/advanced-universe`, `/api/teamwork`, `/api/ally-universe`, `/api/training`, `/api/basic-universe`, `/api/power-cards`, `/api/locations`.
+`/api/v1/catalog/characters`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/events`, `/api/aspects`, `/api/advanced-universe`, `/api/teamwork`, `/api/ally-universe`, `/api/training`, `/api/basic-universe`, `/api/power-cards`, `/api/v1/catalog/locations`.
 
 Debugging
 - Component: input term, search start/end, injected item count, visibility toggles.

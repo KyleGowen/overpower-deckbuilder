@@ -110,7 +110,7 @@ async function searchAllCards(searchTerm) {
         const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
             fetchList('/api/v1/catalog/characters'),
             fetchList('/api/v1/catalog/special-cards'),
-            fetchList('/api/missions'),
+            fetchList('/api/v1/catalog/missions'),
             fetchList('/api/events'),
             fetchList('/api/aspects'),
             fetchList('/api/advanced-universe'),
@@ -160,7 +160,17 @@ async function searchAllCards(searchTerm) {
         if (ally.ok) ally.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
         if (training.ok) training.rows.forEach(c => !c.is_foil && (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
         if (basic.ok) basic.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));
-        if (power.ok) power.rows.forEach(c => ((c.power_type?.toLowerCase().includes(st)) || st === 'power card') && add(c, 'power', c.power_type, null));
+        if (power.ok) {
+            power.rows.forEach(c => {
+                const matchFn = typeof window.powerCardMatchesSearchTerm === 'function' && window.powerCardMatchesSearchTerm;
+                const fmt = typeof window.formatPowerSearchDisplayName === 'function' && window.formatPowerSearchDisplayName;
+                const matches = matchFn
+                    ? matchFn(c, st)
+                    : (c.power_type?.toLowerCase().includes(st) || st === 'power card');
+                if (!matches) return;
+                add(c, 'power', fmt ? fmt(c) : c.power_type, null);
+            });
+        }
         if (locations.ok) locations.rows.forEach(c => (c.name?.toLowerCase().includes(st) || st === 'location') && add(c, 'location', c.name, null));
     } catch (err) {
         console.error('Error searching cards:', err);

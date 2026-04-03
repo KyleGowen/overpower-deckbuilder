@@ -40,6 +40,27 @@
             return false;
         }
 
+        /** Deck editor search label for power rows: `{value} {power_type}` (power_cards.value + power_type). */
+        static formatPowerSearchDisplayName(card) {
+            if (!card) return '';
+            const pt = String(card.power_type != null ? card.power_type : '').trim();
+            const v = card.value;
+            const num = v != null && v !== '' ? Number(v) : NaN;
+            if (!Number.isNaN(num) && pt) {
+                return `${num} ${pt}`;
+            }
+            return pt || String(card.name != null ? card.name : '').trim();
+        }
+
+        static powerCardMatchesSearchTerm(card, termLower) {
+            if (!card || termLower == null || termLower === '') return false;
+            const t = String(termLower).toLowerCase();
+            if (t === 'power card') return true;
+            const label = CardSearchService.formatPowerSearchDisplayName(card).toLowerCase();
+            if (label.includes(t)) return true;
+            return false;
+        }
+
         _getImagePath(card, cardType) {
             const img = card.image || card.image_path || '';
             return cardType === 'location'
@@ -131,14 +152,14 @@
                 else if (type === 'ally-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'ally')) match = true;
                 else if (type === 'training' && !card.is_foil && ((card.card_name || '').toLowerCase().includes(term) || term === 'training')) match = true;
                 else if (type === 'basic-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'basic')) match = true;
-                else if (type === 'power' && ((card.power_type || '').toLowerCase().includes(term) || term === 'power card')) match = true;
+                else if (type === 'power' && CardSearchService.powerCardMatchesSearchTerm(card, term)) match = true;
                 else if (type === 'location' && (name.includes(term) || term === 'location')) match = true;
                 if (match) {
                     const displayName =
                         type === 'teamwork'
                             ? CardSearchService.formatTeamworkSearchDisplayName(card)
                             : type === 'power'
-                              ? card.power_type
+                              ? CardSearchService.formatPowerSearchDisplayName(card)
                               : card.card_name || card.name || card.power_type;
                     if (displayName) {
                         const linked = this._linkedCharacterRaw(card);
@@ -195,7 +216,7 @@
                 const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
                     fetchList('/api/v1/catalog/characters'),
                     fetchList('/api/v1/catalog/special-cards'),
-                    fetchList('/api/missions'),
+                    fetchList('/api/v1/catalog/missions'),
                     fetchList('/api/events'),
                     fetchList('/api/aspects'),
                     fetchList('/api/advanced-universe'),
@@ -394,17 +415,16 @@
 
                 if (power.ok) {
                     power.rows.forEach(card => {
-                        if ((card.power_type && card.power_type.toLowerCase().includes(searchTerm)) || searchTerm === 'power card') {
-                            const urls = this._getSearchImageUrls(card, 'power');
-                            results.push({
-                                id: card.id,
-                                name: card.power_type,
-                                type: 'power',
-                                image: urls.image,
-                                fullImage: urls.fullImage,
-                                character: null
-                            });
-                        }
+                        if (!CardSearchService.powerCardMatchesSearchTerm(card, searchTerm)) return;
+                        const urls = this._getSearchImageUrls(card, 'power');
+                        results.push({
+                            id: card.id,
+                            name: CardSearchService.formatPowerSearchDisplayName(card),
+                            type: 'power',
+                            image: urls.image,
+                            fullImage: urls.fullImage,
+                            character: null
+                        });
                     });
                 }
 
@@ -436,6 +456,8 @@
     global.CardSearchService = CardSearchService;
     global.formatTeamworkSearchDisplayName = CardSearchService.formatTeamworkSearchDisplayName.bind(CardSearchService);
     global.teamworkCardMatchesSearchTerm = CardSearchService.teamworkCardMatchesSearchTerm.bind(CardSearchService);
+    global.formatPowerSearchDisplayName = CardSearchService.formatPowerSearchDisplayName.bind(CardSearchService);
+    global.powerCardMatchesSearchTerm = CardSearchService.powerCardMatchesSearchTerm.bind(CardSearchService);
 })(window);
 
 

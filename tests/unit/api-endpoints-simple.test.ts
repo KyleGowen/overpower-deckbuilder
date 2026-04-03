@@ -120,12 +120,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/missions', async (req, res) => {
+  app.get('/api/v1/catalog/missions', async (req, res) => {
     try {
       const missions = await mockCardRepository.getAllMissions();
-      res.json({ success: true, data: missions });
+      res.json({ data: missions, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch missions' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch missions' }]
+      });
     }
   });
 
@@ -470,7 +474,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/missions', () => {
+    describe('GET /api/v1/catalog/missions', () => {
       it('should return all missions successfully', async () => {
         const mockMissions = [
           { id: '1', name: 'Mission 1' },
@@ -479,12 +483,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllMissions.mockResolvedValue(mockMissions);
 
         const response = await request(app)
-          .get('/api/missions')
+          .get('/api/v1/catalog/missions')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockMissions
+          data: mockMissions,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllMissions).toHaveBeenCalled();
       });

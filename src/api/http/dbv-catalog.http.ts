@@ -42,4 +42,16 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
       ]);
     }
   });
+
+  router.get('/catalog/missions', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getAllMissions();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/missions error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch missions' }
+      ]);
+    }
+  });
 }

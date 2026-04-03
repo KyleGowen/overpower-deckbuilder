@@ -31,10 +31,15 @@ searchAllCards = async function(searchTerm: string) {
   
   try {
     // Search missions
-    const missionsResponse = await fetch('/api/missions');
+    const missionsResponse = await fetch('/api/v1/catalog/missions');
     const missions = await missionsResponse.json();
-    if (missions.success) {
-      missions.data.forEach((mission: any) => {
+    const missionRows =
+      Array.isArray(missions?.data) &&
+      (!missions?.errors || missions.errors.length === 0) &&
+      missions.success !== false
+        ? missions.data
+        : [];
+    missionRows.forEach((mission: any) => {
         // Check if card name contains search term
         const nameMatch = mission.card_name && mission.card_name.toLowerCase().includes(searchTerm);
         
@@ -54,7 +59,6 @@ searchAllCards = async function(searchTerm: string) {
           });
         }
       });
-    }
 
     // Search events
     const eventsResponse = await fetch('/api/events');
