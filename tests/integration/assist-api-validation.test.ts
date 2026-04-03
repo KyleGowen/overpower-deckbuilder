@@ -211,15 +211,15 @@ describe('Assist API Validation Integration Tests', () => {
       const emptyDeck: any[] = [];
 
       const response = await request(app)
-        .post('/api/decks/validate')
+        .post('/api/v1/decks/validate')
         .set('Cookie', authCookie)
         .send({ cards: emptyDeck });
 
       expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.validationErrors).toBeDefined();
+      expect(response.body.errors.length).toBeGreaterThan(0);
+      expect(response.body.data.validationErrors).toBeDefined();
       // Should have other validation errors (like missing characters), but not assist errors
-      const assistError = response.body.validationErrors.find((error: any) => 
+      const assistError = response.body.data.validationErrors.find((error: any) => 
         error.message && error.message.includes('Assist')
       );
       expect(assistError).toBeUndefined();
@@ -252,7 +252,7 @@ describe('Assist API Validation Integration Tests', () => {
       ];
 
       const response = await request(app)
-        .post('/api/decks/validate')
+        .post('/api/v1/decks/validate')
         .send({ cards: testDeck });
 
       expect(response.status).toBe(401);

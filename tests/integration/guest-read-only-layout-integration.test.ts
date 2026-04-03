@@ -71,7 +71,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
         expect(characterResult.rows.length).toBeGreaterThan(0);
         
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', `sessionId=${regularSessionId}`)
             .send({
                 name: 'Guest Test Deck - Layout',

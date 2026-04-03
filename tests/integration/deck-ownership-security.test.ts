@@ -73,7 +73,7 @@ describe('Deck Ownership Security Integration Tests', () => {
   beforeEach(async () => {
     // Create a fresh deck for each test
     const createDeckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', ownerAuthCookie)
       .send({
         name: 'Security Test Deck',

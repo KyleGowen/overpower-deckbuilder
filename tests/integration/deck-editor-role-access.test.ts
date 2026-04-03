@@ -193,7 +193,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
   describe('Deck Creation API Restrictions', () => {
     it('should deny GUEST users from creating decks via main API (POST /api/decks)', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Test Deck by Guest',
@@ -201,7 +201,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(403);
-      expect(createDeckResponse.body.success).toBe(false);
+      expect(createDeckResponse.body.errors?.length).toBeGreaterThan(0);
       expect(createDeckResponse.body.error).toContain('Guests may not create decks');
     });
 
@@ -225,7 +225,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
     it('should allow USER role users to create decks via API', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck by User Role',
@@ -233,7 +233,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Test Deck by User Role');
 
       const deckId = createDeckResponse.body.data.id;
@@ -244,7 +245,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
     it('should allow ADMIN users to create decks via API', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Test Deck by Admin Role',
@@ -252,7 +253,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Test Deck by Admin Role');
 
       const deckId = createDeckResponse.body.data.id;
@@ -266,7 +268,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     it('should deny GUEST users from modifying decks via API', async () => {
       // Create a test deck first
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck for Guest Modification Test',
@@ -295,7 +297,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     it('should allow USER role users to modify their own decks via API', async () => {
       // Create a test deck for this specific test
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck for User Modification',
@@ -324,7 +326,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     it('should allow ADMIN users to modify decks via API', async () => {
       // Create a test deck with admin user for this specific test
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Test Deck for Admin Modification',
@@ -355,7 +357,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     it('should deny GUEST users from deleting decks via API', async () => {
       // Create a test deck for this specific test
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck for Guest Deletion Test',
@@ -380,7 +382,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     it('should allow USER role users to delete their own decks via API', async () => {
       // Create a test deck for this specific test
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck for User Deletion',

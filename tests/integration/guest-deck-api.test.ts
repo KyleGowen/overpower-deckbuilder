@@ -151,7 +151,7 @@ describe('Guest deck API integration tests', () => {
   describe('GUEST still cannot use main deck API', () => {
     it('should return 403 when GUEST calls POST /api/decks', async () => {
       const res = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', guestSessionCookie)
         .send({ name: 'Guest Main Deck', description: '' });
       expect(res.status).toBe(403);

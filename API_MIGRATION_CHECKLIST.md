@@ -78,8 +78,8 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path              | v1 path (proposed)           | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ------------------------ | ---------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| POST /api/decks          | POST /api/v1/decks           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| POST /api/decks/validate | POST /api/v1/decks/validate  | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| POST /api/decks          | POST /api/v1/decks           | [x]      | `DeckWriteService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+| POST /api/decks/validate | POST /api/v1/decks/validate  | [x]      | `DeckWriteService` + `decks.http.ts` | [x]       | [x]    | [x]       |
 
 ### P2c — Single deck (metadata + delete)
 

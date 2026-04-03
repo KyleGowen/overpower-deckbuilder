@@ -87,7 +87,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
         };
 
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', userAuthToken)
             .send(deckData);
 
@@ -141,7 +141,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             };
 
             const createNewDeckResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', userAuthToken)
                 .send(newDeckData);
 
@@ -191,7 +191,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
                 };
 
                 const createResponse = await request(app)
-                    .post('/api/decks')
+                    .post('/api/v1/decks')
                     .set('Cookie', userAuthToken)
                     .send(newDeckData);
 
@@ -242,7 +242,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             };
 
             const adminCreateResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', adminAuthToken)
                 .send(adminDeckData);
 
@@ -257,7 +257,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             };
 
             const userCreateResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', userAuthToken)
                 .send(userDeckData);
 
@@ -322,7 +322,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', userAuthToken)
                 .send(newDeckData);
 

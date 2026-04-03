@@ -83,7 +83,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
         it('should allow guest user to select Carson of Venus as reserve and see threat change', async () => {
             // Step 1: Create a deck with Carson of Venus
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Carson',
@@ -97,7 +97,8 @@ describe('Guest User Reserve Character Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -159,7 +160,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
         it('should allow guest user to select Morgan le Fay as reserve and see threat change', async () => {
             // Step 1: Create a deck with Morgan le Fay
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Morgan',
@@ -173,7 +174,8 @@ describe('Guest User Reserve Character Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -213,7 +215,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
         it('should allow guest user to select Victory Harben as reserve and see threat change', async () => {
             // Step 1: Create a deck with Victory Harben
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Victory',
@@ -227,7 +229,8 @@ describe('Guest User Reserve Character Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -267,7 +270,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
         it('should prevent guest user from saving deck (simulated guest restriction)', async () => {
             // Create a deck
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - No Save',
@@ -281,7 +284,8 @@ describe('Guest User Reserve Character Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -316,7 +320,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
         it('should handle multiple special characters in one deck', async () => {
             // Create a deck with multiple special characters
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Multiple',
@@ -334,7 +338,8 @@ describe('Guest User Reserve Character Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 

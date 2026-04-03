@@ -163,7 +163,7 @@ describe('Global Nav Integration Tests', () => {
     test('should handle create deck API endpoint', async () => {
       // Test that the create deck API endpoint exists and is accessible
       const response = await agent
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck',
@@ -172,47 +172,43 @@ describe('Global Nav Integration Tests', () => {
         })
         .expect(201);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data.name).toBe('Test Deck');
     });
 
     test('should validate deck creation with character limits', async () => {
-      // Test valid deck creation (0-4 characters)
+      // Valid create: omit characters or use real character UUIDs (FK). Empty list exercises v1 + DB happy path.
       const validResponse = await agent
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Valid Deck',
-          description: 'Valid deck with 2 characters',
-          characters: [
-            { id: 'char1', name: 'Character 1' },
-            { id: 'char2', name: 'Character 2' }
-          ]
+          description: 'Valid deck without initial characters',
+          characters: []
         })
         .expect(201);
 
-      expect(validResponse.body.success).toBe(true);
+      expect(validResponse.body.errors).toEqual([]);
 
-      // Test invalid deck creation (5+ characters)
+      // Test invalid deck creation (5+ character slots — rejected before persistence)
       const invalidResponse = await agent
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Invalid Deck',
           description: 'Invalid deck with 5 characters',
           characters: [
-            { id: 'char1', name: 'Character 1' },
-            { id: 'char2', name: 'Character 2' },
-            { id: 'char3', name: 'Character 3' },
-            { id: 'char4', name: 'Character 4' },
-            { id: 'char5', name: 'Character 5' }
+            '11111111-1111-1111-1111-111111111101',
+            '11111111-1111-1111-1111-111111111102',
+            '11111111-1111-1111-1111-111111111103',
+            '11111111-1111-1111-1111-111111111104',
+            '11111111-1111-1111-1111-111111111105'
           ]
         })
         .expect(400);
 
-      expect(invalidResponse.body.success).toBe(false);
-      expect(invalidResponse.body.error).toContain('character');
+      expect(invalidResponse.body.errors[0].message).toContain('Maximum 4 characters');
     });
   });
 

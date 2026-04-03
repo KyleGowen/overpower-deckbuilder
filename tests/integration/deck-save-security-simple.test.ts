@@ -53,7 +53,7 @@ describe('Deck Save Security - Simple Integration Tests', () => {
 
         // Create test decks
         const adminDeckResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', `session=${adminUserId}`)
             .send({
                 name: 'Admin Test Deck',
@@ -61,7 +61,7 @@ describe('Deck Save Security - Simple Integration Tests', () => {
             });
 
         const regularUserDeckResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', `session=${regularUserId}`)
             .send({
                 name: 'Regular Test Deck',

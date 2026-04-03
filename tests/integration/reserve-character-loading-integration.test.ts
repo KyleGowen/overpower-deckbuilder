@@ -50,7 +50,7 @@ describe('Reserve Character Loading Integration Tests', () => {
 
         // Create test deck
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', `sessionId=${testUser.sessionId}`)
             .send({
                 name: 'Reserve Loading Test Deck',

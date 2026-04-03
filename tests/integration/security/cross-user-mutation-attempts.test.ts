@@ -50,7 +50,7 @@ describe('Cross-User Mutation Attempts Integration Tests', () => {
     const cookieB = loginB.headers['set-cookie'][0].split(';')[0];
 
     const createDeck = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', cookieA)
       .send({ name: 'Owned Deck', description: 'Owned by A', cards: [] });
 

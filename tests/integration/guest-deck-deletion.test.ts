@@ -107,7 +107,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
     it('should block guest from deleting their own deck', async () => {
       // Create a deck for the guest user
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Guest Test Deck',
@@ -116,8 +116,8 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // In some environments unauthenticated cookies may yield 401 instead of 403
       expect([401, 403]).toContain(createDeckResponse.status);
-      if (createDeckResponse.body && typeof createDeckResponse.body.success !== 'undefined') {
-        expect(createDeckResponse.body.success).toBe(false);
+      if (createDeckResponse.status === 403 && Array.isArray(createDeckResponse.body?.errors)) {
+        expect(createDeckResponse.body.errors.length).toBeGreaterThan(0);
       }
     });
 
@@ -203,7 +203,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Create a deck for the regular user
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', regularUserSessionCookie)
         .send({
           name: 'Regular User Test Deck',
@@ -211,7 +211,8 @@ describe('Guest Deck Deletion Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       regularUserDeckId = createDeckResponse.body.data.id;
       
       // Track this deck for cleanup
@@ -274,7 +275,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should allow regular user to create new decks', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', regularUserSessionCookie)
         .send({
           name: 'Another Regular User Deck',
@@ -282,7 +283,8 @@ describe('Guest Deck Deletion Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Another Regular User Deck');
 
       // Clean up the created deck
@@ -293,7 +295,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
     it('should allow regular user to modify their own decks', async () => {
       // Create a deck to modify
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', regularUserSessionCookie)
         .send({
           name: 'Deck to Modify',
@@ -345,7 +347,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Create a deck for the admin user
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Admin Test Deck',
@@ -353,7 +355,8 @@ describe('Guest Deck Deletion Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       adminDeckId = createDeckResponse.body.data.id;
       
       // Track this deck for cleanup
@@ -416,7 +419,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should allow admin to create new decks', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Another Admin Deck',
@@ -424,7 +427,8 @@ describe('Guest Deck Deletion Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Another Admin Deck');
 
       // Clean up the created deck
@@ -435,7 +439,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
     it('should allow admin to modify their own decks', async () => {
       // Create a deck to modify
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Admin Deck to Modify',
@@ -489,14 +493,14 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should block unauthenticated requests to create decks', async () => {
       const createResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .send({
           name: 'Unauthenticated Deck',
           description: 'This should fail'
         });
 
       expect(createResponse.status).toBe(401);
-      expect(createResponse.body.success).toBe(false);
+      expect(createResponse.body.errors?.length).toBeGreaterThan(0);
       expect(createResponse.body.error).toBe('Authentication required');
     });
 

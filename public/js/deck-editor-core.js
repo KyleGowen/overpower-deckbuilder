@@ -1026,7 +1026,7 @@ async function saveDeckChanges() {
 
         // Non-guest: use main deck API
         if (!deckId) {
-            const createResponse = await fetch('/api/decks', {
+            const createResponse = await fetch('/api/v1/decks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1039,22 +1039,22 @@ async function saveDeckChanges() {
                 })
             });
             
-            if (!createResponse.ok) {
-                const errorData = await createResponse.json();
-                throw new Error(errorData.error || 'Failed to create deck');
+            const createPayload = await createResponse.json();
+            if (!createResponse.ok || (createPayload.errors && createPayload.errors.length)) {
+                const msg =
+                    (createPayload.errors && createPayload.errors[0] && createPayload.errors[0].message) ||
+                    createPayload.error ||
+                    'Failed to create deck';
+                throw new Error(msg);
             }
             
-            const createData = await createResponse.json();
-            if (!createData.success) {
-                throw new Error(createData.error || 'Failed to create deck');
-            }
-            
-            // Update the deck ID and data with the response
-            deckId = createData.data.id;
+            // Update the deck ID and data with the response (v1 envelope: data = created deck)
+            const created = createPayload.data;
+            deckId = created.id;
             currentDeckId = deckId;
             currentDeckData.metadata.id = deckId;
-            currentDeckData.metadata.created = createData.data.created_at;
-            currentDeckData.metadata.lastModified = createData.data.updated_at;
+            currentDeckData.metadata.created = created.created_at;
+            currentDeckData.metadata.lastModified = created.updated_at;
             
             // Update URL to include the new deck ID for sharing
             const currentUser = getCurrentUser();

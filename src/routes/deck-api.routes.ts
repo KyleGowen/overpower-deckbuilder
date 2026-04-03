@@ -1,88 +1,11 @@
 import express, { Request } from 'express';
 import { blockInReadOnlyMode, checkRateLimit } from './helpers';
-import type { DeckApiRoutesDeps, DeckRecord, DeckValidationError } from './types';
+import type { DeckApiRoutesDeps, DeckRecord } from './types';
 
 export function registerDeckApiRoutes(app: express.Application, deps: DeckApiRoutesDeps): void {
   const MAX_CARD_QUANTITY_PER_ENTRY = 100;
-  // Deck management API routes
-  app.post('/api/decks', deps.authenticateUser, async (req: Request, res) => {
-    try {
-      // SECURITY: Rate limiting for deck creation
-      if (checkRateLimit(req, res, 'deck creation')) {
-        return;
-      }
-      
-      // SECURITY: Block deck creation in read-only mode
-      if (blockInReadOnlyMode(req, res, 'deck creation')) {
-        return;
-      }
-      
-      // Check if user is guest - guests cannot create decks
-      if (deps.blockGuestMutation(req, res, 'create decks')) return;
-      
-      const { name, description, characters } = req.body;
-      
-      // SECURITY: Comprehensive input validation
-      if (!name || typeof name !== 'string' || name.trim().length === 0) {
-        return res.status(400).json({ success: false, error: 'Deck name is required and must be a non-empty string' });
-      }
-      
-      if (name.length > 100) {
-        return res.status(400).json({ success: false, error: 'Deck name must be 100 characters or less' });
-      }
-      
-      if (description && (typeof description !== 'string' || description.length > 500)) {
-        return res.status(400).json({ success: false, error: 'Description must be a string with 500 characters or less' });
-      }
-      
-      if (characters && (!Array.isArray(characters) || characters.length > 50)) {
-        return res.status(400).json({ success: false, error: 'Characters must be an array with 50 items or less' });
-      }
-      
-      const deck = await deps.deckBusinessService.createDeck(req.user!.id, name, description, characters);
-      res.status(201).json({ success: true, data: deck });
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Maximum 4 characters allowed')) {
-        return res.status(400).json({ 
-          success: false, 
-          error: error.message 
-        });
-      }
-      console.error('Error creating deck:', error);
-      res.status(500).json({ success: false, error: 'Failed to create deck' });
-    }
-  });
-  
-  // Deck validation endpoint
-  app.post('/api/decks/validate', deps.authenticateUser, async (req: Request, res) => {
-    try {
-      const { cards } = req.body;
-      
-      if (!cards || !Array.isArray(cards)) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Cards array is required' 
-        });
-      }
-  
-      const validationErrors = await deps.deckValidationService.validateDeck(cards);
-      
-      if (validationErrors.length > 0) {
-        const errs = validationErrors as DeckValidationError[];
-        return res.status(400).json({
-          success: false,
-          error: errs.map(err => err.message).join('; '),
-          validationErrors: errs
-        });
-      }
-  
-      res.json({ success: true, message: 'Deck is valid' });
-    } catch (error) {
-      console.error('Error validating deck:', error);
-      res.status(500).json({ success: false, error: 'Failed to validate deck' });
-    }
-  });
-  
+  // POST /api/decks and POST /api/decks/validate removed — use POST /api/v1/decks and POST /api/v1/decks/validate (see API_V1.md).
+
   app.get('/api/decks/:id', deps.authenticateUser, async (req: Request, res) => {
     try {
       const deck = (await deps.deckRepository.getDeckById(req.params.id)) as DeckRecord | null;

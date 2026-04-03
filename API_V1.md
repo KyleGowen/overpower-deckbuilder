@@ -48,6 +48,7 @@ All v1 JSON responses use:
 2. [DBV catalog](#dbv-catalog)
 3. [DBV support](#dbv-support)
 4. [User decks (list)](#user-decks-list)
+5. [User decks (create + validate)](#user-decks-create--validate)
 
 ---
 
@@ -336,6 +337,44 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ---
 
+## User decks (create + validate)
+
+### `POST /api/v1/decks`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** as legacy DB deck routes). **GUEST** receives **403** v1 envelope (`errors` with code **`GUEST_FORBIDDEN`**). Unauthenticated requests receive **401** (legacy `{ success, error }` from session middleware).
+
+**Rate limiting / read-only:** Same behavior as legacy create: **429** v1 envelope (`RATE_LIMIT_EXCEEDED`) when the shared per-IP limit is exceeded; **403** v1 envelope (`READ_ONLY_MODE`) when read-only mode is active (query/header as in [API_DOCUMENTATION.md](API_DOCUMENTATION.md)).
+
+**Request model:** [`src/api/http/models/decks/CreateDeckRequestBody.ts`](src/api/http/models/decks/CreateDeckRequestBody.ts) — JSON body:
+
+- **`name`** (string, required, non-empty after trim, max 100)
+- **`description`** (optional string, max 500)
+- **`characters`** (optional string array, max 50 entries; business rule still enforces max **4** character IDs via **`DeckService.createDeck`**)
+
+**Response 201:** v1 envelope; **`data`** is the created deck row (same shape as legacy `data` from `POST /api/decks`).
+
+**Response 400:** v1 envelope — validation (`VALIDATION_ERROR` / field hints) or **`Maximum 4 characters allowed per deck`** in `errors`.
+
+**Response 500:** v1 envelope — `errors` with code **`DECK_CREATE_ERROR`**.
+
+**Implementation:** [`src/api/services/deckWriteService.ts`](src/api/services/deckWriteService.ts) · HTTP [`src/api/http/decks.http.ts`](src/api/http/decks.http.ts) · response [`src/api/dto/v1/DeckCreateV1DataDto.ts`](src/api/dto/v1/DeckCreateV1DataDto.ts)
+
+### `POST /api/v1/decks/validate`
+
+**Auth:** Valid **session cookie**. Unauthenticated requests receive **401** (legacy shape).
+
+**Request model:** [`src/api/http/models/decks/ValidateDeckRequestBody.ts`](src/api/http/models/decks/ValidateDeckRequestBody.ts) — `{ "cards": [ ... ] }` (array required; card shapes match legacy **`POST /api/decks/validate`**).
+
+**Response 200:** v1 envelope; **`data`** is `{ "valid": true, "message": "Deck is valid" }` ([`DeckValidateV1SuccessDto`](src/api/dto/v1/DeckValidateV1SuccessDto.ts)).
+
+**Response 400:** v1 envelope — `errors` with code **`DECK_VALIDATION_FAILED`** and summary message; **`data`** includes **`validationErrors`** (same objects as legacy `validationErrors`, [`DeckValidateV1ErrorDataDto`](src/api/dto/v1/DeckValidateV1ErrorDataDto.ts)).
+
+**Response 500:** v1 envelope — `errors` with code **`DECK_VALIDATE_ERROR`**.
+
+**Implementation:** [`DeckValidationService`](src/services/deckValidationService.ts) via [`DeckWriteService`](src/api/services/deckWriteService.ts) · HTTP [`src/api/http/decks.http.ts`](src/api/http/decks.http.ts)
+
+---
+
 ## Route index (v1)
 
 | Method | Path | Router module |
@@ -359,3 +398,5 @@ Reference data for Database View and collection UI (set codes → display names,
 | GET | /api/v1/dbv/sets | dbv-support.http.ts |
 | GET | /api/v1/dbv/deck-backgrounds | dbv-support.http.ts |
 | GET | /api/v1/decks | decks.http.ts |
+| POST | /api/v1/decks | decks.http.ts |
+| POST | /api/v1/decks/validate | decks.http.ts |

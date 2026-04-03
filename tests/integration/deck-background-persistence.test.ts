@@ -70,7 +70,7 @@ describe('Deck Background Persistence Integration Tests', () => {
   beforeEach(async () => {
     // Create a fresh deck for each test
     const createDeckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', adminAuthCookie)
       .send({
         name: 'Background Test Deck',

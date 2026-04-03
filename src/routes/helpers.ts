@@ -11,10 +11,18 @@ export function isReadOnlyMode(req: Request): boolean {
   return readonlyParam === 'true' || queryReadonly === 'true' || headerReadonly === 'true';
 }
 
-export function blockInReadOnlyMode(req: Request, res: Response, operation: string): boolean {
+export function blockInReadOnlyMode(req: Request, res: Response, operation: string, options?: { v1?: boolean }): boolean {
   if (isReadOnlyMode(req)) {
     console.log(`🔒 SECURITY: Blocking ${operation} - read-only mode detected`);
-    res.status(403).json({ success: false, error: `Operation not allowed in read-only mode` });
+    if (options?.v1) {
+      res.status(403).type('application/json').json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'READ_ONLY_MODE', message: 'Operation not allowed in read-only mode' }]
+      });
+    } else {
+      res.status(403).json({ success: false, error: `Operation not allowed in read-only mode` });
+    }
     return true;
   }
   return false;
@@ -26,7 +34,7 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 export const RATE_LIMIT_WINDOW = 60 * 1000;
 export const RATE_LIMIT_MAX_REQUESTS = 100;
 
-export function checkRateLimit(req: Request, res: Response, operation: string): boolean {
+export function checkRateLimit(req: Request, res: Response, operation: string, options?: { v1?: boolean }): boolean {
   const clientIP = req.ip || req.socket?.remoteAddress || 'unknown';
   const now = Date.now();
   const key = `${clientIP}:${operation}`;
@@ -37,7 +45,16 @@ export function checkRateLimit(req: Request, res: Response, operation: string): 
   }
   if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
     console.log(`🔒 SECURITY: Rate limit exceeded for ${operation} from IP ${clientIP}`);
-    res.status(429).json({ success: false, error: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per minute allowed.` });
+    const msg = `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per minute allowed.`;
+    if (options?.v1) {
+      res.status(429).type('application/json').json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'RATE_LIMIT_EXCEEDED', message: msg }]
+      });
+    } else {
+      res.status(429).json({ success: false, error: msg });
+    }
     return true;
   }
   current.count++;

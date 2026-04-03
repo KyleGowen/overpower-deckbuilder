@@ -79,7 +79,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     // Create a fresh test deck for each test
     const createDeckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', userCookie)
       .send({
         name: `Test Deck for Guest Restrictions ${Date.now()}`,
@@ -87,7 +87,8 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
       });
     
     expect(createDeckResponse.status).toBe(201);
-    expect(createDeckResponse.body.success).toBe(true);
+    expect(createDeckResponse.body.errors).toEqual([]);
+    expect(createDeckResponse.body.data).toBeDefined();
     testDeckId = createDeckResponse.body.data.id;
     expect(testDeckId).toBeDefined();
     
@@ -118,7 +119,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
   describe('Deck Creation Restrictions', () => {
     it('should block guest from creating decks', async () => {
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', guestCookie)
         .send({
           name: 'Guest Attempted Deck',
@@ -126,13 +127,13 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         });
 
       expect(response.status).toBe(403);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Guests may not create decks');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toBe('Guests may not create decks');
     });
 
     it('should allow regular user to create decks', async () => {
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userCookie)
         .send({
           name: 'User Deck',
@@ -140,7 +141,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.name).toBe('User Deck');
       
       // Track this deck for cleanup
@@ -149,7 +150,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should allow admin to create decks', async () => {
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', adminCookie)
         .send({
           name: 'Admin Deck',
@@ -157,7 +158,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.name).toBe('Admin Deck');
       
       // Track this deck for cleanup
@@ -414,7 +415,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
   describe('Comprehensive Guest Restrictions', () => {
     it('should verify all modification endpoints are blocked for guests', async () => {
       const modificationEndpoints = [
-        { method: 'POST', path: '/api/decks', data: { name: 'Test Deck' } },
+        { method: 'POST', path: '/api/v1/decks', data: { name: 'Test Deck' } },
         { method: 'PUT', path: `/api/decks/${testDeckId}`, data: { name: 'Updated Deck' } },
         { method: 'POST', path: `/api/decks/${testDeckId}/cards`, data: { cardType: 'character', cardId: testCharacterId } },
         { method: 'DELETE', path: `/api/decks/${testDeckId}/cards`, data: { cardType: 'character', cardId: testCharacterId } },
@@ -441,8 +442,13 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
         }
 
         expect(response.status).toBe(403);
-        expect(response.body.success).toBe(false);
-        expect(response.body.error).toMatch(/Guests may not/);
+        if (endpoint.path === '/api/v1/decks') {
+          expect(response.body.errors?.length).toBeGreaterThan(0);
+          expect(response.body.errors[0].message).toMatch(/Guests may not/);
+        } else {
+          expect(response.body.success).toBe(false);
+          expect(response.body.error).toMatch(/Guests may not/);
+        }
       }
     });
 
@@ -476,7 +482,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
     it('should test deck deletion with a separate deck', async () => {
       // Create a separate deck for deletion testing
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userCookie)
         .send({
           name: 'Deletion Test Deck',

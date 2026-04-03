@@ -477,12 +477,15 @@ describe('Phase 3: Integration Security Testing', () => {
         ok: false,
         status: 400,
         json: jest.fn().mockResolvedValue({
-          success: false,
-          error: 'Deck name is required and must be a non-empty string'
+          data: null,
+          meta: {},
+          errors: [
+            { code: 'VALIDATION_ERROR', message: 'Deck name is required and must be a non-empty string' }
+          ]
         })
       });
 
-      const response = await mockFetch('/api/decks', {
+      const response = await mockFetch('/api/v1/decks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: '', description: 'Test deck' })
@@ -492,7 +495,7 @@ describe('Phase 3: Integration Security Testing', () => {
 
       // Verify input validation
       expect(response.status).toBe(400);
-      expect(result.error).toContain('Deck name is required');
+      expect(result.errors?.[0]?.message).toContain('Deck name is required');
     });
   });
 

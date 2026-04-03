@@ -34,7 +34,7 @@ describe('Limited Deck Simple Integration Tests', () => {
 
       // This test verifies that the API endpoint structure is correct
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .send(createData);
 
       // We expect a 401 (unauthorized) since we're not authenticated,
@@ -54,7 +54,7 @@ describe('Limited Deck Simple Integration Tests', () => {
       ];
 
       const response = await request(app)
-        .post('/api/decks/validate')
+        .post('/api/v1/decks/validate')
         .send({ cards: invalidDeck });
 
       // The validation endpoint requires authentication
@@ -71,7 +71,7 @@ describe('Limited Deck Simple Integration Tests', () => {
       ];
 
       const response = await request(app)
-        .post('/api/decks/validate')
+        .post('/api/v1/decks/validate')
         .send({ cards: validDeck });
 
       // The validation endpoint requires authentication

@@ -22,7 +22,7 @@ describe('Deck Validation - Unusable Cards Integration Tests', () => {
             };
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send(deckData);
 
@@ -33,7 +33,7 @@ describe('Deck Validation - Unusable Cards Integration Tests', () => {
 
         it('should handle invalid request data', async () => {
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: 'invalid' });
 
@@ -43,7 +43,7 @@ describe('Deck Validation - Unusable Cards Integration Tests', () => {
 
         it('should handle missing cards array', async () => {
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({});
 
@@ -68,7 +68,7 @@ describe('Deck Validation - Unusable Cards Integration Tests', () => {
             };
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send(deckData);
 
@@ -92,7 +92,7 @@ describe('Deck Validation - Unusable Cards Integration Tests', () => {
             };
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send(deckData);
 

@@ -64,7 +64,7 @@ describe('Limited Deck Save and Load Integration Tests', () => {
       
       // Step 1: Create a new deck
       const createResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({
           name: 'Limited Test Deck',
@@ -85,7 +85,8 @@ describe('Limited Deck Save and Load Integration Tests', () => {
         // This will definitely show up in CI output
         fail(`Deck creation failed with status ${createResponse.status}. Response: ${JSON.stringify(createResponse.body, null, 2)}`);
       }
-      expect(createResponse.body.success).toBe(true);
+      expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
       const deckId = createResponse.body.data.id;
       console.log('🔍 Created deck with ID:', deckId);
       
@@ -159,7 +160,7 @@ describe('Limited Deck Save and Load Integration Tests', () => {
       
       // Step 1: Create a new deck
       const createResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({
           name: 'Regular Test Deck',
@@ -176,7 +177,8 @@ describe('Limited Deck Save and Load Integration Tests', () => {
       }
       
       expect(createResponse.status).toBe(201);
-      expect(createResponse.body.success).toBe(true);
+      expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
       const deckId = createResponse.body.data.id;
       console.log('🔍 Created regular deck with ID:', deckId);
       
@@ -240,7 +242,7 @@ describe('Limited Deck Save and Load Integration Tests', () => {
       
       // Step 1: Create a new deck
       const createResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({
           name: 'Toggle Test Deck',
@@ -257,7 +259,8 @@ describe('Limited Deck Save and Load Integration Tests', () => {
       }
       
       expect(createResponse.status).toBe(201);
-      expect(createResponse.body.success).toBe(true);
+      expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
       const deckId = createResponse.body.data.id;
       console.log('🔍 Created toggle test deck with ID:', deckId);
       

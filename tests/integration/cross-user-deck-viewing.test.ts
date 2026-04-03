@@ -88,7 +88,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // Step 4: User A creates a deck
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', `sessionId=${testUserASessionId}`)
         .send({
           name: 'User A\'s Test Deck',
@@ -97,7 +97,8 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.id).toBeDefined();
       createdDeck = createDeckResponse.body.data;
 

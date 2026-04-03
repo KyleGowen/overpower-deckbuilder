@@ -45,7 +45,7 @@ export class ApiClient {
   // Deck management helpers
   async createDeck(deckData: { name: string; description?: string; characters?: string[] }) {
     return request(this.app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', this.cookies)
       .send(deckData)
       .expect(201);

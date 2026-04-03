@@ -43,18 +43,18 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: invalidDeckCards });
 
             expect(response.status).toBe(400);
-            expect(response.body.success).toBe(false);
-            expect(response.body.validationErrors).toBeDefined();
-            expect(Array.isArray(response.body.validationErrors)).toBe(true);
-            expect(response.body.validationErrors.length).toBeGreaterThan(0);
+            expect(response.body.errors.length).toBeGreaterThan(0);
+            expect(response.body.data.validationErrors).toBeDefined();
+            expect(Array.isArray(response.body.data.validationErrors)).toBe(true);
+            expect(response.body.data.validationErrors.length).toBeGreaterThan(0);
 
             // Check that errors are formatted for tooltip display
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toContain('\n');
             expect(tooltipText).toMatch(/characters?/i);
             expect(tooltipText).toMatch(/mission/i);
@@ -77,13 +77,14 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: validDeckCards });
 
             expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
-            expect(response.body.message).toMatch(/valid/i);
+            expect(response.body.errors).toEqual([]);
+            expect(response.body.data.valid).toBe(true);
+            expect(response.body.data.message).toMatch(/valid/i);
         });
     });
 
@@ -94,12 +95,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/exactly 4 characters/i);
         });
 
@@ -110,12 +111,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/mission/i);
         });
 
@@ -126,12 +127,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/exactly 7 mission/i);
         });
 
@@ -143,12 +144,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/at least 56 cards/i);
         });
 
@@ -160,12 +161,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/at most 1 location/i);
         });
 
@@ -177,12 +178,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/at least 51 cards/i);
         });
 
@@ -194,12 +195,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/at least 51 cards/i);
         });
 
@@ -211,12 +212,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/at least 51 cards/i);
         });
 
@@ -230,12 +231,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             expect(tooltipText).toMatch(/mission/i);
         });
     });
@@ -250,12 +251,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             
             // Should contain multiple errors separated by newlines
             expect(tooltipText).toContain('\n');
@@ -279,12 +280,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             
             // Should contain multiple errors
             const errorLines = tooltipText.split('\n');
@@ -315,14 +316,15 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: legalDeckCards });
 
             expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
-            expect(response.body.message).toMatch(/valid/i);
-            expect(response.body.validationErrors).toBeUndefined();
+            expect(response.body.errors).toEqual([]);
+            expect(response.body.data.valid).toBe(true);
+            expect(response.body.data.message).toMatch(/valid/i);
+            expect(response.body.data.validationErrors).toBeUndefined();
         });
 
         test('should return success for legal deck with events', async () => {
@@ -343,14 +345,15 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: legalDeckWithEvents });
 
             expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
-            expect(response.body.message).toMatch(/valid/i);
-            expect(response.body.validationErrors).toBeUndefined();
+            expect(response.body.errors).toEqual([]);
+            expect(response.body.data.valid).toBe(true);
+            expect(response.body.data.message).toMatch(/valid/i);
+            expect(response.body.data.validationErrors).toBeUndefined();
         });
 
         test('should return success for legal deck with location', async () => {
@@ -371,14 +374,15 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: legalDeckWithLocation });
 
             expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
-            expect(response.body.message).toMatch(/valid/i);
-            expect(response.body.validationErrors).toBeUndefined();
+            expect(response.body.errors).toEqual([]);
+            expect(response.body.data.valid).toBe(true);
+            expect(response.body.data.message).toMatch(/valid/i);
+            expect(response.body.data.validationErrors).toBeUndefined();
         });
     });
 
@@ -391,12 +395,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             
             // Should be properly formatted for HTML title attribute
             expect(tooltipText).toContain('\n');
@@ -413,12 +417,12 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .post('/api/decks/validate')
+                .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
                 .send({ cards: deckCards });
 
             expect(response.status).toBe(400);
-            const tooltipText = response.body.validationErrors.map((err: any) => err.message).join('\n');
+            const tooltipText = response.body.data.validationErrors.map((err: any) => err.message).join('\n');
             
             expect(tooltipText).toMatch(/at least 51 cards/i);
         });

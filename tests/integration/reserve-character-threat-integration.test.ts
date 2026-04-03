@@ -92,7 +92,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate normal threat (18) when Carson of Venus is not reserve', async () => {
             // Create deck with Carson of Venus but not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Carson Normal',
@@ -106,7 +106,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -126,7 +127,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate adjusted threat (19) when Carson of Venus is reserve', async () => {
             // Create deck with Carson of Venus first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Carson Reserve',
@@ -140,7 +141,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -172,7 +174,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should update threat when Carson of Venus reserve status changes', async () => {
             // Create deck with Carson of Venus initially not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Carson Change',
@@ -222,7 +224,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate normal threat (19) when Morgan le Fay is not reserve', async () => {
             // Create deck with Morgan le Fay but not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Morgan Normal',
@@ -236,7 +238,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -256,7 +259,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate adjusted threat (20) when Morgan le Fay is reserve', async () => {
             // Create deck with Morgan le Fay first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Morgan Reserve',
@@ -270,7 +273,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -302,7 +306,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should update threat when Morgan le Fay reserve status changes', async () => {
             // Create deck with Morgan le Fay initially not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Morgan Change',
@@ -352,7 +356,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate normal threat (18) when Victory Harben is not reserve', async () => {
             // Create deck with Victory Harben but not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Victory Normal',
@@ -366,7 +370,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -386,7 +391,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should calculate adjusted threat (20) when Victory Harben is reserve', async () => {
             // Create deck with Victory Harben first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Victory Reserve',
@@ -400,7 +405,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -432,7 +438,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should update threat when Victory Harben reserve status changes', async () => {
             // Create deck with Victory Harben initially not as reserve
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Victory Change',
@@ -482,7 +488,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should only adjust threat for the character that is reserve', async () => {
             // Create deck with all three special characters first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Multiple Special',
@@ -500,7 +506,8 @@ describe('Reserve Character Threat Integration Tests', () => {
                 });
 
             expect(createResponse.status).toBe(201);
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             const deckId = createResponse.body.data.id;
             integrationTestUtils.trackTestDeck(deckId);
 
@@ -532,7 +539,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should recalculate threat when switching reserve character', async () => {
             // Create deck with Carson and Victory first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Switch Reserve',
@@ -599,7 +606,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should handle removing reserve character', async () => {
             // Create deck with Carson first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Remove Reserve',
@@ -659,7 +666,7 @@ describe('Reserve Character Threat Integration Tests', () => {
         it('should handle invalid reserve character ID gracefully', async () => {
             // Create deck with Carson first
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Test Deck - Invalid Reserve',

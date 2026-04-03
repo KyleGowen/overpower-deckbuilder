@@ -52,7 +52,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Try to create a deck - should succeed because role is USER
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', sessionCookie)
         .send({
           name: 'Test Deck by Guest Username User Role',
@@ -60,7 +60,8 @@ describe('Role-Based Restrictions Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+      expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Test Deck by Guest Username User Role');
 
       const deckId = createDeckResponse.body.data.id;
@@ -97,7 +98,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Try to create a deck - should fail because role is GUEST
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', sessionCookie)
         .send({
           name: 'Test Deck by Admin Username Guest Role',
@@ -105,8 +106,8 @@ describe('Role-Based Restrictions Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(403);
-      expect(createDeckResponse.body.success).toBe(false);
-      expect(createDeckResponse.body.error).toContain('Guests may not create decks');
+      expect(createDeckResponse.body.errors?.length).toBeGreaterThan(0);
+      expect(createDeckResponse.body.errors[0].message).toContain('Guests may not create decks');
 
       // Clean up user
       await userRepository.deleteUser(testUser.id);
@@ -135,7 +136,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Create a deck as regular user
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', regularSessionCookie)
         .send({
           name: 'Test Deck for Guest',
@@ -208,7 +209,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Create a deck first
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', sessionCookie)
         .send({
           name: 'Test Deck for Modification',
@@ -232,7 +233,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       expect(modifyDeckResponse.status).toBe(200);
       expect(modifyDeckResponse.body.success).toBe(true);
-      expect(modifyDeckResponse.body.data.name).toBe('Modified Deck Name');
+      expect(modifyDeckResponse.body.data.metadata.name).toBe('Modified Deck Name');
 
       // Clean up user
       await userRepository.deleteUser(testUser.id);
@@ -293,7 +294,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
     it('should deny GUEST role users from creating decks regardless of username', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Test Deck by Guest Role',
@@ -301,13 +302,13 @@ describe('Role-Based Restrictions Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(403);
-      expect(createDeckResponse.body.success).toBe(false);
-      expect(createDeckResponse.body.error).toContain('Guests may not create decks');
+      expect(createDeckResponse.body.errors?.length).toBeGreaterThan(0);
+      expect(createDeckResponse.body.errors[0].message).toContain('Guests may not create decks');
     });
 
     it('should allow USER role users to create decks regardless of username', async () => {
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck by User Role',
@@ -315,7 +316,8 @@ describe('Role-Based Restrictions Integration Tests', () => {
         });
 
       expect(createDeckResponse.status).toBe(201);
-      expect(createDeckResponse.body.success).toBe(true);
+      expect(createDeckResponse.body.errors).toEqual([]);
+      expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.name).toBe('Test Deck by User Role');
 
       const deckId = createDeckResponse.body.data.id;
@@ -337,7 +339,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
     it('should allow USER role users to delete their own decks regardless of username', async () => {
       // First create a deck
       const createDeckResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Test Deck for Deletion',

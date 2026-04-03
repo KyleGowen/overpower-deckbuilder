@@ -61,7 +61,7 @@ describe('View Button Read-Only Mode Integration Tests', () => {
     };
 
     const createResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .send(deckData)
       .set('Cookie', `sessionId=${sessionId}`);
 

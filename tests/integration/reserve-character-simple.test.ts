@@ -58,7 +58,7 @@ describe('Reserve Character Simple Integration Tests', () => {
         };
 
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .send(deckData)
             .set('Cookie', `sessionId=${testUser.sessionId}`)
             .expect(201);
@@ -239,7 +239,7 @@ describe('Reserve Character Simple Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);
@@ -283,7 +283,7 @@ describe('Reserve Character Simple Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);

@@ -7024,11 +7024,12 @@
             if (!name) return;
 
             try {
-                const response = await fetch('/api/decks', {
+                const response = await fetch('/api/v1/decks', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify({ 
                         name, 
                         description,
@@ -7037,12 +7038,13 @@
                 });
 
                 const data = await response.json();
-                if (data.success) {
+                if (response.ok && data.data && (!data.errors || data.errors.length === 0)) {
                     closeCreateDeckModal();
                     loadDecks(); // Refresh the deck list
                     showNotification('Deck created successfully!', 'success');
                 } else {
-                    showNotification('Failed to create deck: ' + data.error, 'error');
+                    const errMsg = (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Failed to create deck';
+                    showNotification('Failed to create deck: ' + errMsg, 'error');
                 }
             } catch (error) {
                 console.error('Error creating deck:', error);

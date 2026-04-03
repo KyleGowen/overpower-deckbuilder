@@ -207,7 +207,7 @@ describe('KO Feature Dimming Integration Tests', () => {
    */
   async function createTestDeck(): Promise<string> {
     const createDeckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', authCookie)
       .send({
         name: 'KO Feature Test Deck',
@@ -215,7 +215,8 @@ describe('KO Feature Dimming Integration Tests', () => {
       });
 
     expect(createDeckResponse.status).toBe(201);
-    expect(createDeckResponse.body.success).toBe(true);
+    expect(createDeckResponse.body.errors).toEqual([]);
+        expect(createDeckResponse.body.data).toBeDefined();
     const deckId = createDeckResponse.body.data.id;
     
     // Track the test deck for cleanup

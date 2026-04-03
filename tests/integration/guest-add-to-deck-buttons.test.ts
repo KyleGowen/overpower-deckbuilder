@@ -662,7 +662,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         beforeAll(async () => {
             // Create a test deck for the guest user
             const createDeckResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', guestAuthCookie)
                 .send({
                     name: 'Guest Test Deck',
@@ -750,7 +750,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
 
         it('should block guest users from creating decks', async () => {
             const createDeckResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', guestAuthCookie)
                 .send({
                     name: 'Guest Attempted Deck',
@@ -759,7 +759,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
 
             // Guest users should not be able to create decks (returns 403 for guest restrictions)
             expect(createDeckResponse.status).toBe(403);
-            expect(createDeckResponse.body.success).toBe(false);
+            expect(createDeckResponse.body.errors?.length).toBeGreaterThan(0);
             
             // Track this deck for cleanup
             if (createDeckResponse.body.data && createDeckResponse.body.data.metadata) {

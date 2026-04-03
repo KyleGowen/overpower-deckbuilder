@@ -29,7 +29,7 @@ describe('Deck Editor Search Bar Basic Integration', () => {
 
     // Create test deck
     const deckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', authCookie)
       .send({
         name: 'Search Bar Basic Test Deck',

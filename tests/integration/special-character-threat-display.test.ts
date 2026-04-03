@@ -63,7 +63,7 @@ describe('Special Character Threat Display Integration Tests', () => {
 
         // Create test deck
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .set('Cookie', `sessionId=${testUser.sessionId}`)
             .send({
                 name: 'Threat Display Test Deck',
@@ -390,7 +390,7 @@ describe('Special Character Threat Display Integration Tests', () => {
             for (const scenario of testScenarios) {
                 // Create a new deck for each scenario
                 const createResponse = await request(app)
-                    .post('/api/decks')
+                    .post('/api/v1/decks')
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .send({
                         name: `Test Deck - ${scenario.character} ${scenario.reserve ? 'Reserve' : 'Normal'}`,

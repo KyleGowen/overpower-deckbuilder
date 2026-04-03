@@ -68,12 +68,13 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck 0 Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ name: deckName });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with 0 characters created successfully');
@@ -88,7 +89,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck 1 Character ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -96,7 +97,8 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with 1 character created successfully');
@@ -111,7 +113,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck 4 Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -119,7 +121,8 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with 4 characters created successfully');
@@ -134,7 +137,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck 5 Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -142,8 +145,7 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Maximum 4 characters allowed per deck');
+      expect(response.body.errors[0].message).toBe('Maximum 4 characters allowed per deck');
 
       console.log('✅ Deck with 5 characters correctly rejected');
     });
@@ -157,7 +159,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck 6+ Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -165,8 +167,7 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Maximum 4 characters allowed per deck');
+      expect(response.body.errors[0].message).toBe('Maximum 4 characters allowed per deck');
 
       console.log('✅ Deck with 6+ characters correctly rejected');
     });
@@ -180,7 +181,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck Undefined Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -188,7 +189,8 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with undefined characters array created successfully');
@@ -203,7 +205,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck Null Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -211,7 +213,8 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with null characters array created successfully');
@@ -226,7 +229,7 @@ describe('Character Limit Validation API Tests', () => {
       const deckName = `Test Deck Empty Characters ${generateUUID()}`;
       
       const response = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', authCookie)
         .send({ 
           name: deckName, 
@@ -234,7 +237,8 @@ describe('Character Limit Validation API Tests', () => {
         });
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data).toBeDefined();
       expect(response.body.data.name).toBe(deckName);
 
       console.log('✅ Deck with empty characters array created successfully');

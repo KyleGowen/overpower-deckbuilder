@@ -408,20 +408,20 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Call deck validation endpoint to check for violations
       const validationResponse = await request(app)
-        .post('/api/decks/validate')
+        .post('/api/v1/decks/validate')
         .set('Cookie', authCookie)
         .send({
           cards: deck!.cards
         });
 
       expect(validationResponse.status).toBe(400);
-      expect(validationResponse.body.success).toBe(false);
+      expect(validationResponse.body.errors.length).toBeGreaterThan(0);
       
       // Debug: Log the validation response
       console.log('Validation response:', JSON.stringify(validationResponse.body, null, 2));
       
       // Check if one_per_deck_violation is in the validation errors
-      const validationErrors = validationResponse.body.validationErrors || [];
+      const validationErrors = validationResponse.body.data?.validationErrors || [];
       const hasOnePerDeckViolation = validationErrors.some((error: any) => 
         error.rule === 'one_per_deck_violation'
       );

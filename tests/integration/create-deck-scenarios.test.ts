@@ -197,7 +197,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Create a new deck
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', regularCookie)
                 .send({
                     name: 'Regular User Test Deck',
@@ -209,7 +209,8 @@ describe('Create Deck Scenarios Integration Tests', () => {
                 })
                 .expect(201);
 
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             expect(createResponse.body.data.name).toBe('Regular User Test Deck');
             expect(createResponse.body.data.description).toBe('Test Description');
             expect(createResponse.body.data.user_id).toBe(regularUser.id);
@@ -238,7 +239,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
 
             // Create a new deck
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .set('Cookie', adminCookie)
                 .send({
                     name: 'Admin User Test Deck',
@@ -250,7 +251,8 @@ describe('Create Deck Scenarios Integration Tests', () => {
                 })
                 .expect(201);
 
-            expect(createResponse.body.success).toBe(true);
+            expect(createResponse.body.errors).toEqual([]);
+      expect(createResponse.body.data).toBeDefined();
             expect(createResponse.body.data.name).toBe('Admin User Test Deck');
             expect(createResponse.body.data.description).toBe('Admin Test Description');
             expect(createResponse.body.data.user_id).toBe(adminUser.id);

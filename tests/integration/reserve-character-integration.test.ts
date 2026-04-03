@@ -78,7 +78,7 @@ describe('Reserve Character Integration Tests', () => {
         };
 
         const createResponse = await request(app)
-            .post('/api/decks')
+            .post('/api/v1/decks')
             .send(deckData)
             .set('Cookie', `sessionId=${testUser.sessionId}`)
             .expect(201);
@@ -380,7 +380,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(adminDeckData)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(201);
@@ -428,7 +428,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(adminDeckData)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(201);
@@ -481,7 +481,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(adminDeckData)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(201);
@@ -552,7 +552,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(adminDeckData)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(201);
@@ -625,7 +625,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);
@@ -670,7 +670,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);
@@ -711,7 +711,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);
@@ -755,7 +755,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);
@@ -820,7 +820,7 @@ describe('Reserve Character Integration Tests', () => {
             };
 
             const createResponse = await request(app)
-                .post('/api/decks')
+                .post('/api/v1/decks')
                 .send(deckData)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(201);

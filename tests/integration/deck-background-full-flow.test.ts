@@ -70,7 +70,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
   beforeEach(async () => {
     // Create a fresh deck for each test
     const createDeckResponse = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', adminAuthCookie)
       .send({
         name: 'Background Flow Test Deck',
@@ -285,7 +285,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
     it('should allow regular users to update their own decks without background (background not required)', async () => {
       // Create deck owned by regular user
       const createResponse = await request(app)
-        .post('/api/decks')
+        .post('/api/v1/decks')
         .set('Cookie', regularAuthCookie)
         .send({
           name: 'Regular User Deck',

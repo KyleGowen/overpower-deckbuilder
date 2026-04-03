@@ -423,13 +423,14 @@ describe('Phase 3: Penetration Security Testing', () => {
           ok: false,
           status: 400,
           json: jest.fn().mockResolvedValue({
-            success: false,
-            error: 'Invalid input detected'
+            data: null,
+            meta: {},
+            errors: [{ code: 'VALIDATION_ERROR', message: 'Invalid input detected' }]
           })
         });
 
         // Simulate API call with SQL injection
-        const response = await mockFetch('/api/decks', {
+        const response = await mockFetch('/api/v1/decks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: injection, description: 'Test deck' })
@@ -439,8 +440,7 @@ describe('Phase 3: Penetration Security Testing', () => {
 
         // Verify SQL injection is blocked
         expect(response.status).toBe(400);
-        expect(result.success).toBe(false);
-        expect(result.error).toContain('Invalid input');
+        expect(result.errors?.[0]?.message).toContain('Invalid input');
       }
     });
 
@@ -459,13 +459,14 @@ describe('Phase 3: Penetration Security Testing', () => {
           ok: false,
           status: 400,
           json: jest.fn().mockResolvedValue({
-            success: false,
-            error: 'Invalid input detected'
+            data: null,
+            meta: {},
+            errors: [{ code: 'VALIDATION_ERROR', message: 'Invalid input detected' }]
           })
         });
 
         // Simulate API call with XSS
-        const response = await mockFetch('/api/decks', {
+        const response = await mockFetch('/api/v1/decks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: xss, description: 'Test deck' })
@@ -475,8 +476,7 @@ describe('Phase 3: Penetration Security Testing', () => {
 
         // Verify XSS is blocked
         expect(response.status).toBe(400);
-        expect(result.success).toBe(false);
-        expect(result.error).toContain('Invalid input');
+        expect(result.errors?.[0]?.message).toContain('Invalid input');
       }
     });
   });

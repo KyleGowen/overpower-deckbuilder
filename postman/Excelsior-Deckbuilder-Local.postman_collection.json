@@ -345,7 +345,7 @@
           "description": "v1 envelope `{ data, meta, errors }`. Session cookie (same as legacy list). ETag / 304."
         },
         {
-          "name": "POST /api/decks",
+          "name": "POST /api/v1/decks",
           "request": {
             "method": "POST",
             "header": [
@@ -354,15 +354,16 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks",
+            "url": "{{baseUrl}}/api/v1/decks",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Postman Deck\",\n  \"description\": \"\",\n  \"characters\": []\n}"
             }
-          }
+          },
+          "description": "v1 envelope `{ data, meta, errors }`. Session cookie. Legacy `POST /api/decks` removed."
         },
         {
-          "name": "POST /api/decks/validate",
+          "name": "POST /api/v1/decks/validate",
           "request": {
             "method": "POST",
             "header": [
@@ -371,12 +372,13 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/validate",
+            "url": "{{baseUrl}}/api/v1/decks/validate",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+              "raw": "{\n  \"cards\": [\n    {\n      \"type\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
             }
-          }
+          },
+          "description": "v1 envelope. On success `data.valid` and `data.message`. On 400, `data.validationErrors`. Legacy `POST /api/decks/validate` removed."
         },
         {
           "name": "GET /api/decks/:id",

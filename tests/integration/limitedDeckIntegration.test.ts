@@ -10,11 +10,11 @@ describe('Limited Deck Integration Tests', () => {
   // Helper function to create a deck and automatically track it for cleanup
   const createTrackedDeck = async (deckData: any) => {
     const response = await request(app)
-      .post('/api/decks')
+      .post('/api/v1/decks')
       .set('Cookie', authCookie)
       .send(deckData);
     
-    if (response.status === 201 && response.body.success) {
+    if (response.status === 201 && response.body.data && (!response.body.errors || response.body.errors.length === 0)) {
       integrationTestUtils.trackTestDeck(response.body.data.id);
     }
     
@@ -75,8 +75,8 @@ describe('Limited Deck Integration Tests', () => {
       const response = await createTrackedDeck(deckData);
 
       expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.is_limited).toBe(false);
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.is_limited ?? false).toBe(false);
       expect(response.body.data.name).toBe('Test Limited Deck');
     });
 
@@ -102,7 +102,7 @@ describe('Limited Deck Integration Tests', () => {
 
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.data.is_limited).toBe(true);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(true);
     });
 
     test('should create a deck and then update is_limited to false', async () => {
@@ -137,7 +137,7 @@ describe('Limited Deck Integration Tests', () => {
 
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.data.is_limited).toBe(false);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(false);
     });
   });
 
@@ -392,7 +392,7 @@ describe('Limited Deck Integration Tests', () => {
 
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.data.is_limited).toBe(false);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(false);
     });
   });
 

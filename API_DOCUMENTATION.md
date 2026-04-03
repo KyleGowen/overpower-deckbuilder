@@ -415,53 +415,13 @@ or
 
 Unless noted, **auth required**. Guest users receive **403** on mutations that change DB decks (create, update, delete, card POST/PUT/DELETE, UI prefs PUT).
 
-#### `POST /api/decks`
+#### `POST /api/decks` (removed)
 
-Creates a deck. Rate limit + read-only checks apply.
+**Removed:** use **`POST /api/v1/decks`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-**Body:**
+#### `POST /api/decks/validate` (removed)
 
-```json
-{
-  "name": "New Deck",
-  "description": "Optional",
-  "characters": ["optional-uuid-up-to-50"]
-}
-```
-
-**Response 201:**
-
-```json
-{ "success": true, "data": { /* created deck record */ } }
-```
-
-#### `POST /api/decks/validate`
-
-**Body:**
-
-```json
-{
-  "cards": [
-    { "cardType": "character", "cardId": "uuid", "quantity": 1 }
-  ]
-}
-```
-
-**Response 200:**
-
-```json
-{ "success": true, "message": "Deck is valid" }
-```
-
-**Response 400:**
-
-```json
-{
-  "success": false,
-  "error": "message1; message2",
-  "validationErrors": [{ "message": "...", "...": "..." }]
-}
-```
+**Removed:** use **`POST /api/v1/decks/validate`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
 #### `GET /api/decks/:id` and `GET /api/decks/:id/full`
 
@@ -814,7 +774,7 @@ Quick lookup: **method**, **path**, **source file**.
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
-| POST/GET/PUT/DELETE | `/api/decks`, `/api/decks/validate`, `/api/decks/:id`, `/full`, `/cards`, `/api/deck-stats`, `/ui-preferences` | `deck-api.routes.ts` |
+| POST/GET/PUT/DELETE | `/api/decks/:id`, `/full`, `/cards`, `/api/deck-stats`, `/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
