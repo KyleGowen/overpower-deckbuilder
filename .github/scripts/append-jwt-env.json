@@ -1,7 +1,5 @@
 {
   "commands": [
-    "v=$(aws ssm get-parameter --name /op-deckbuilder/dev/app/jwt_secret --with-decryption --region us-west-2 --query Parameter.Value --output text 2>/dev/null)",
-    "if [ -z \"$v\" ]; then echo 'ERROR: SSM parameter /op-deckbuilder/dev/app/jwt_secret is missing or empty. Create it: aws ssm put-parameter --name /op-deckbuilder/dev/app/jwt_secret --value \"<long-random-secret>\" --type SecureString --region us-west-2'; exit 1; fi",
-    "printf '%s\\n' \"JWT_SECRET=$v\" >> /opt/app/.env"
+    "v=$(aws ssm get-parameter --name /op-deckbuilder/dev/app/jwt_secret --with-decryption --region us-west-2 --query Parameter.Value --output text 2>/dev/null); if [ -z \"$v\" ]; then echo 'ERROR: SSM parameter /op-deckbuilder/dev/app/jwt_secret is missing or empty. Create it: aws ssm put-parameter --name /op-deckbuilder/dev/app/jwt_secret --value \"<long-random-secret>\" --type SecureString --region us-west-2'; exit 1; fi; printf '%s\\n' \"JWT_SECRET=$v\" >> /opt/app/.env"
   ]
 }

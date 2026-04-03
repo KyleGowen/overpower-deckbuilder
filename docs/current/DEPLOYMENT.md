@@ -103,7 +103,7 @@ The app registers **`/api/v1`** at startup and resolves JWT config immediately. 
 | **Region** | `us-west-2` |
 | **Type** | `SecureString` |
 
-**How it reaches the container:** the **Run Production Migrations** job in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml) runs [`.github/scripts/append-jwt-env.json`](../../.github/scripts/append-jwt-env.json) on the EC2 instance via SSM. That shell pulls the parameter with **`aws ssm get-parameter --with-decryption`** and appends **`JWT_SECRET=...`** to **`/opt/app/.env`**. The blue-green deploy step starts the new container with **`--env-file /opt/app/.env`**. **`scripts/deploy-to-production.sh`** appends the same variable the same way for manual deploys.
+**How it reaches the container:** the **Run Production Migrations** job in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml) runs [`.github/scripts/append-jwt-env.json`](../../.github/scripts/append-jwt-env.json) on the EC2 instance via SSM. The file must use **one** `commands[]` string (same pattern as `append-firebase-env.json`): SSM **`AWS-RunShellScript` runs each array element in its own shell**, so splitting fetch / check / `printf` across multiple entries would drop the variable and break deploy. The blue-green deploy step starts the new container with **`--env-file /opt/app/.env`**. **`scripts/deploy-to-production.sh`** appends the same variable the same way for manual deploys.
 
 **Create or rotate** (from a machine with IAM permission to write the parameter; use a long random value):
 
