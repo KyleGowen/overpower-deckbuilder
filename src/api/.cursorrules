@@ -5,6 +5,7 @@
 - **HTTP-agnostic logic** in `src/services/` (shared with legacy) and **`src/api/services/`** for v1-specific orchestration when needed.
 - **HTTP adapters** only in **`src/api/http/*.http.ts`** (and `registerApiV1Routes.ts`): parse/validate requests, call services, map status + **v1 JSON envelope**.
 - **Legacy** route files stay in `src/routes/` and stay thin; they delegate to the same services as v1 where migrated.
+- **Legacy catalog:** `card-api.routes.ts` calls **`CatalogService`** for every table-backed catalog GET (and foil map); it does **not** touch `CardRepository` / `FoilCardMapRepository` directly—those are wired only into **`CatalogService`** in the composition root.
 
 ## Documentation (mandatory)
 

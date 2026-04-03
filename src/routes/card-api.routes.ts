@@ -14,7 +14,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/locations', async (req, res) => {
     try {
-      const locations = await deps.cardRepository.getAllLocations();
+      const locations = await deps.catalogService.getAllLocations();
       res.json({ success: true, data: locations });
     } catch (error) {
       console.error('Error fetching locations:', error);
@@ -24,7 +24,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/special-cards', async (req, res) => {
     try {
-      const specialCards = await deps.cardRepository.getAllSpecialCards();
+      const specialCards = await deps.catalogService.getAllSpecialCards();
       res.json({ success: true, data: specialCards });
     } catch (error) {
       console.error('Error fetching special cards:', error);
@@ -34,7 +34,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/missions', async (req, res) => {
     try {
-      const missions = await deps.cardRepository.getAllMissions();
+      const missions = await deps.catalogService.getAllMissions();
       res.json({ success: true, data: missions });
     } catch (error) {
       console.error('Error fetching missions:', error);
@@ -44,7 +44,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/events', async (req, res) => {
     try {
-      const events = await deps.cardRepository.getAllEvents();
+      const events = await deps.catalogService.getAllEvents();
       res.json({ success: true, data: events });
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -54,7 +54,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/aspects', async (req, res) => {
     try {
-      const aspects = await deps.cardRepository.getAllAspects();
+      const aspects = await deps.catalogService.getAllAspects();
       res.json({ success: true, data: aspects });
     } catch (error) {
       console.error('Error fetching aspects:', error);
@@ -64,7 +64,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/advanced-universe', async (req, res) => {
     try {
-      const advancedUniverse = await deps.cardRepository.getAllAdvancedUniverse();
+      const advancedUniverse = await deps.catalogService.getAllAdvancedUniverse();
       res.json({ success: true, data: advancedUniverse });
     } catch (error) {
       console.error('Error fetching advanced universe:', error);
@@ -74,7 +74,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/teamwork', async (req, res) => {
     try {
-      const teamwork = await deps.cardRepository.getAllTeamwork();
+      const teamwork = await deps.catalogService.getAllTeamwork();
       res.json({ success: true, data: teamwork });
     } catch (error) {
       console.error('Error fetching teamwork:', error);
@@ -84,7 +84,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/ally-universe', async (req, res) => {
     try {
-      const ally = await deps.cardRepository.getAllAllyUniverse();
+      const ally = await deps.catalogService.getAllAllyUniverse();
       res.json({ success: true, data: ally });
     } catch (error) {
       console.error('Error fetching ally universe:', error);
@@ -94,7 +94,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/training', async (req, res) => {
     try {
-      const training = await deps.cardRepository.getAllTraining();
+      const training = await deps.catalogService.getAllTraining();
       res.json({ success: true, data: training });
     } catch (error) {
       console.error('Error fetching training cards:', error);
@@ -104,7 +104,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/basic-universe', async (req, res) => {
     try {
-      const basicUniverse = await deps.cardRepository.getAllBasicUniverse();
+      const basicUniverse = await deps.catalogService.getAllBasicUniverse();
       res.json({ success: true, data: basicUniverse });
     } catch (error) {
       console.error('Error fetching basic universe cards:', error);
@@ -114,7 +114,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/power-cards', async (req, res) => {
     try {
-      const powerCards = await deps.cardRepository.getAllPowerCards();
+      const powerCards = await deps.catalogService.getAllPowerCards();
       res.json({ success: true, data: powerCards });
     } catch (error) {
       console.error('Error fetching power cards:', error);
@@ -124,7 +124,7 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
 
   app.get('/api/foil-card-map', async (_req, res) => {
     try {
-      const entries = await deps.foilCardMapRepository.getFoilCardMap();
+      const entries = await deps.catalogService.getFoilCardMap();
       res.json({ success: true, data: entries });
     } catch (error) {
       console.error('Error fetching foil card map:', error);
@@ -143,13 +143,13 @@ export function registerCardApiRoutes(app: express.Application, deps: CardApiRou
   });
 
   app.get('/test', async (req, res) => {
-    const characters = (await deps.cardRepository.getAllCharacters()) as unknown[];
-    const locations = (await deps.cardRepository.getAllLocations()) as unknown[];
+    const characters = (await deps.catalogService.getAllCharacters()) as unknown[];
+    const locations = (await deps.catalogService.getAllLocations()) as unknown[];
 
     res.json({
       characters: characters.length,
       locations: locations.length,
-      stats: await deps.cardRepository.getCardStats(),
+      stats: await deps.catalogService.getCardStats(),
       sampleLocation: locations[0]
     });
   });

@@ -275,7 +275,9 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 
 **File:** `src/routes/card-api.routes.ts`
 
-**API module:** `GET /api/characters` loads data via **`CatalogService`** ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)) so the same service backs legacy JSON and **`GET /api/v1/catalog/characters`** ([API_V1.md](API_V1.md)).
+**Service layer:** All **table-backed catalog** GETs in this file (`/api/characters`, `/locations`, `/special-cards`, `/missions`, `/events`, `/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **`GET /api/v1/catalog/characters`** uses the same service ([API_V1.md](API_V1.md)).
+
+**`GET /api/deck-backgrounds`** uses **`deckBackgroundService`** (separate domain service), not the card catalog service.
 
 Unless noted, these are **GET**, unauthenticated, and return:
 

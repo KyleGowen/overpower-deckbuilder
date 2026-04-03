@@ -4,7 +4,7 @@
 - **Shared helpers** (rate limit, read-only mode, guest session, collection card type) live in **helpers.ts**; import from `./helpers` in route modules that need them.
 - **Registration is split by domain:** auth (**auth.routes.ts**), card API (**card-api.routes.ts**), users/debug (**users-debug.routes.ts**), guest decks (**guest-decks.routes.ts**), deck API (**deck-api.routes.ts**), collections (**collections.routes.ts**), pages/SPA (**pages.routes.ts**), static/health (**static-health.routes.ts**). **decks.routes.ts** is the sub-router for GET /api/decks, mounted at `/api` from index.
 - Handlers receive dependencies from the composition root via `deps`; do not import services from src/index inside route handlers—use `deps` only.
-- **Migrated catalog reads** use **`deps.catalogService`** (see `card-api.routes.ts` for `GET /api/characters`) so legacy routes share the same service as **`/api/v1`** (`registerApiV1Routes` in `src/api/http/registerApiV1Routes.ts`). Keep handlers thin—no duplicate business logic.
+- **HTTP → service → repository:** Route handlers **must not** call **`cardRepository`**, **`foilCardMapRepository`**, or other persistence types directly. For the card catalog, **`card-api.routes.ts`** uses **`deps.catalogService`** only (all catalog GETs + foil map + `/test` catalog stats); composition root injects repos into **`CatalogService`**. That matches **`/api/v1`** catalog routes (`registerApiV1Routes`). **`GET /api/deck-backgrounds`** uses **`deckBackgroundService`**, not the catalog service.
 - **v1-only** behavior lives under `src/api/http/*.http.ts`; see [`src/api/.cursorrules`](../api/.cursorrules).
 
 ## Error Handling in Route Handlers

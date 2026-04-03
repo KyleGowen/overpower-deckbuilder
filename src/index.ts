@@ -349,7 +349,7 @@ export { databaseInit, guestDeckPersistence };
 // Initialize foil card map repository
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 
-const catalogService = new CatalogService(cardRepository);
+const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
 
 // Function to get git information
 function getGitInfo() {

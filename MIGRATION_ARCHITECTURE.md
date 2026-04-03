@@ -35,6 +35,12 @@ flowchart TB
 
 **Passwords:** v1 login issues JWT **after** existing `AuthenticationService` / repository password verification. **No** hashing algorithm changes, bcrypt cost changes, or password storage migrations in this program.
 
+## Legacy `src/routes` vs persistence
+
+- **`card-api.routes.ts`:** Catalog list GETs and **`GET /test`** (catalog slice) call **`CatalogService`** only; the service uses **`CardRepository`** + **`FoilCardMapRepository`**. Do **not** pass `cardRepository` or `foilCardMapRepository` into this route module’s `deps` type—handlers stay **HTTP → service → repository**.
+- **`GET /api/deck-backgrounds`** in the same file correctly uses **`deckBackgroundService`** (different aggregate).
+- **General rule:** Express route handlers call **services** (application layer), not repositories or raw DB pools, except where a deliberate exception is documented.
+
 ## Route file grouping (`src/api/http/`)
 
 1. **`auth.http.ts`** — `/auth/login`, `/auth/logout`, `/auth/me`, token behavior.

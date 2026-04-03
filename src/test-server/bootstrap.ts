@@ -53,7 +53,7 @@ const collectionsRepository = new CollectionsRepository(dataSource.getPool());
 const collectionService = new CollectionService(collectionsRepository);
 const deckBackgroundService = new DeckBackgroundService();
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
-const catalogService = new CatalogService(cardRepository);
+const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
 
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();

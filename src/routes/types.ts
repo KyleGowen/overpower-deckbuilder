@@ -3,6 +3,7 @@
  * Narrow *RoutesDeps types are used by each registerXxxRoutes so modules only declare what they use.
  */
 import express, { Request, Response } from 'express';
+import type { CatalogService } from '../api/services/catalogService';
 import type { DeckData } from '../types';
 
 export interface RouteDependencies {
@@ -25,8 +26,8 @@ export interface RouteDependencies {
     updateUIPreferences: (id: string, preferences: unknown) => Promise<boolean>;
   };
   cardRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
-  /** Shared catalog reads for legacy `/api/characters` and `/api/v1/catalog/*`. */
-  catalogService: { getAllCharacters: () => Promise<unknown[]> };
+  /** Card catalog + foil map reads; legacy `/api/*` catalog GETs and `/api/v1/catalog/*` use this—never call `cardRepository` from `card-api.routes.ts`. */
+  catalogService: CatalogService;
   userRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
   deckValidationService: { validateDeck: (cards: unknown[]) => Promise<unknown[]> };
   deckBusinessService: { createDeck: (userId: string, name: string, description: string, characters?: unknown) => Promise<unknown> };
@@ -56,7 +57,7 @@ export type AuthRoutesDeps = Pick<RouteDependencies, 'authService'>;
 /** Dependencies for card API and test routes. */
 export type CardApiRoutesDeps = Pick<
   RouteDependencies,
-  'cardRepository' | 'foilCardMapRepository' | 'deckBackgroundService' | 'authenticateUser' | 'catalogService'
+  'deckBackgroundService' | 'authenticateUser' | 'catalogService'
 >;
 
 /** Dependencies for users and debug routes. */
