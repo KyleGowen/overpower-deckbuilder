@@ -198,12 +198,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/training', async (req, res) => {
+  app.get('/api/v1/catalog/training', async (req, res) => {
     try {
       const training = await mockCardRepository.getAllTraining();
-      res.json({ success: true, data: training });
+      res.json({ data: training, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch training cards' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch training cards' }]
+      });
     }
   });
 
@@ -620,7 +624,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/training', () => {
+    describe('GET /api/v1/catalog/training', () => {
       it('should return all training cards successfully', async () => {
         const mockTraining = [
           { id: '1', name: 'Training Card 1' },
@@ -629,12 +633,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllTraining.mockResolvedValue(mockTraining);
 
         const response = await request(app)
-          .get('/api/training')
+          .get('/api/v1/catalog/training')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockTraining
+          data: mockTraining,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllTraining).toHaveBeenCalled();
       });

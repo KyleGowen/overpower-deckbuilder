@@ -114,4 +114,16 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
       ]);
     }
   });
+
+  router.get('/catalog/training', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getAllTraining();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/training error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch training cards' }
+      ]);
+    }
+  });
 }

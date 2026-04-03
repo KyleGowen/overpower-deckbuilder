@@ -275,7 +275,7 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 
 **File:** `src/routes/card-api.routes.ts`
 
-**Service layer:** **Table-backed catalog** GETs still registered here (`/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`**, **`GET /api/advanced-universe`**, **`GET /api/teamwork`**, **`GET /api/ally-universe`** — use **`GET /api/v1/catalog/...`** counterparts ([API_V1.md](API_V1.md)); those legacy list URLs are **not** registered (expect **404**).
+**Service layer:** **Table-backed catalog** GETs still registered here (`/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`**, **`GET /api/advanced-universe`**, **`GET /api/teamwork`**, **`GET /api/ally-universe`**, **`GET /api/training`** — use **`GET /api/v1/catalog/...`** counterparts ([API_V1.md](API_V1.md)); those legacy list URLs are **not** registered (expect **404**).
 
 **`GET /api/deck-backgrounds`** uses **`deckBackgroundService`** (separate domain service), not the card catalog service.
 
@@ -289,12 +289,11 @@ Unless noted, these are **GET**, unauthenticated, and return:
 
 | Path | Data |
 |------|------|
-| `/api/training` | Training |
 | `/api/basic-universe` | Basic universe |
 | `/api/power-cards` | Power cards |
 | `/api/foil-card-map` | Foil mapping rows |
 
-**Sample** (legacy envelope; character, location, special-card, mission, event, aspect, advanced-universe, teamwork, and ally-universe **lists** are v1-only — see [API_V1.md](API_V1.md)).
+**Sample** (legacy envelope; character, location, special-card, mission, event, aspect, advanced-universe, teamwork, ally-universe, and training **lists** are v1-only — see [API_V1.md](API_V1.md)).
 
 ### `GET /api/advanced-universe` (removed)
 
@@ -307,6 +306,10 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/t
 ### `GET /api/ally-universe` (removed)
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/ally-universe`** — see [API_V1.md](API_V1.md).
+
+### `GET /api/training` (removed)
+
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/training`** — see [API_V1.md](API_V1.md).
 
 ### `GET /api/aspects` (removed)
 
@@ -860,7 +863,7 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | `/api/database/status` | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
 | GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js` | `auth.routes.ts` |
-| GET | `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, `/deck-backgrounds`, `/test` | `card-api.routes.ts` |
+| GET | `/basic-universe`, `/power-cards`, `/foil-card-map`, `/deck-backgrounds`, `/test` | `card-api.routes.ts` |
 | GET | `/api/users` | `users-debug.routes.ts` |
 | GET | `/api/debug/clear-cache`, `/api/debug/clear-card-cache` | `users-debug.routes.ts` |
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
@@ -880,7 +883,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/login` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
-| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe` | `src/api/http/dbv-catalog.http.ts` |
+| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training` | `src/api/http/dbv-catalog.http.ts` |
 
 ---
 

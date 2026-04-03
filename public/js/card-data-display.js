@@ -762,15 +762,33 @@ async function loadTraining() {
         return;
     }
     try {
-        const response = await fetch('/api/training');
-        const data = await response.json();
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('training', data.data);
-            window.trainingData = data.data;
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
+        const { ok, rows } = await fetchList('/api/v1/catalog/training');
+        if (ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('training', rows);
+            window.trainingData = rows;
             if (typeof applyTrainingFilters === 'function') {
                 applyTrainingFilters();
             } else {
-                displayTraining(data.data);
+                displayTraining(rows);
             }
         }
     } catch (e) { console.error('Error loading training:', e); }

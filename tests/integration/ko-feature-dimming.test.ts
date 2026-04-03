@@ -183,7 +183,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get training cards
     const trainingResp = await request(app)
-      .get('/api/training')
+      .get('/api/v1/catalog/training')
       .set('Cookie', authCookie)
       .expect(200);
     

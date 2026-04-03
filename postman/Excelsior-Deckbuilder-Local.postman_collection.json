@@ -222,11 +222,11 @@
           }
         },
         {
-          "name": "GET /api/training",
+          "name": "GET /api/v1/catalog/training",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/training"
+            "url": "{{baseUrl}}/api/v1/catalog/training"
           }
         },
         {

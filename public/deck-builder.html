@@ -5945,9 +5945,8 @@
         // Training functions
         async function loadTraining() {
             try {
-                const response = await fetch('/api/training');
-                const data = await response.json();
-                if (data.success) displayTraining(data.data);
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/training');
+                if (ok) displayTraining(rows);
             } catch (e) { console.error('Error loading training:', e); }
         }
 
@@ -5981,10 +5980,9 @@
                 const searchTerm = e.target.value.toLowerCase();
                 if (searchTerm.length === 0) { await loadTraining(); return; }
                 try {
-                    const resp = await fetch('/api/training');
-                    const data = await resp.json();
-                    if (data.success) {
-                        const filtered = data.data.filter(card =>
+                    const { ok, rows } = await fetchCatalogList('/api/v1/catalog/training');
+                    if (ok) {
+                        const filtered = rows.filter(card =>
                             (card.card_name && card.card_name.toLowerCase().includes(searchTerm)) ||
                             (card.type_1 && card.type_1.toLowerCase().includes(searchTerm)) ||
                             (card.type_2 && card.type_2.toLowerCase().includes(searchTerm)) ||
@@ -10483,7 +10481,7 @@
                     { type: 'advanced-universe', api: '/api/v1/catalog/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
-                    { type: 'training', api: '/api/training', nameField: 'card_name' },
+                    { type: 'training', api: '/api/v1/catalog/training', nameField: 'card_name' },
                     { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
                     { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
                 ];
@@ -11064,7 +11062,7 @@
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/v1/catalog/advanced-universe', nameField: 'name' },
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
-                    { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'card_name' },
+                    { type: 'training', name: 'Universe: Training', api: '/api/v1/catalog/training', nameField: 'card_name' },
                     { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
                     { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
                 ];

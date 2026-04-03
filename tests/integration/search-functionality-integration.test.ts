@@ -174,12 +174,10 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Training Search', () => {
     it('should search training cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/training');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
-      expect(data.data).toBeDefined();
-      expect(Array.isArray(data.data)).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test searching for training cards
       const trainingCards = data.data.filter((card: any) => 
@@ -190,10 +188,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search training cards by type_1 and type_2', async () => {
-      const response = await fetch('http://localhost:3000/api/training');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test Energy type
       const energyCards = data.data.filter((card: any) => 
@@ -210,10 +208,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search training cards by value_to_use and bonus (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/training');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test value_to_use
       const valueCards = data.data.filter((card: any) => 
@@ -322,9 +320,9 @@ describe('Search Functionality Integration Tests', () => {
         );
         
         // Test training cards
-        const trainingResponse = await fetch('http://localhost:3000/api/training');
+        const trainingResponse = await fetch('http://localhost:3000/api/v1/catalog/training');
         const trainingData = await trainingResponse.json();
-        expectLegacyCatalogList(trainingData);
+        expectV1CatalogList(trainingResponse, trainingData);
 
         const trainingCards = trainingData.data.filter((card: any) => 
           (card.type_1 && card.type_1.toLowerCase().includes(statType)) ||
@@ -350,7 +348,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle empty search terms gracefully', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
@@ -371,7 +369,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle non-existent search terms', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
@@ -430,7 +428,7 @@ describe('Search Functionality Integration Tests', () => {
             'card_text',
           ],
         },
-        { url: 'http://localhost:3000/api/training', requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
+        { url: 'http://localhost:3000/api/v1/catalog/training', requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
         { url: 'http://localhost:3000/api/basic-universe', requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
       ];
       

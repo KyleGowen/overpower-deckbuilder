@@ -84,7 +84,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/v1/catalog/events', type: 'event' },
         { endpoint: '/api/v1/catalog/teamwork', type: 'teamwork' },
         { endpoint: '/api/v1/catalog/ally-universe', type: 'ally-universe' },
-        { endpoint: '/api/training', type: 'training' },
+        { endpoint: '/api/v1/catalog/training', type: 'training' },
         { endpoint: '/api/basic-universe', type: 'basic-universe' },
         { endpoint: '/api/v1/catalog/advanced-universe', type: 'advanced-universe' }
       ];
@@ -342,7 +342,7 @@ describe('All Tab Integration Tests', () => {
         '/api/v1/catalog/events',
         '/api/v1/catalog/teamwork',
         '/api/v1/catalog/ally-universe',
-        '/api/training',
+        '/api/v1/catalog/training',
         '/api/basic-universe',
         '/api/v1/catalog/advanced-universe'
       ];

@@ -174,25 +174,9 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/t
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/ally-universe`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/training
-Get all training cards.
+### GET /api/training (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/training`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/basic-universe
 Get all basic universe cards.
