@@ -25,6 +25,8 @@ export interface RouteDependencies {
     updateUIPreferences: (id: string, preferences: unknown) => Promise<boolean>;
   };
   cardRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
+  /** Shared catalog reads for legacy `/api/characters` and `/api/v1/catalog/*`. */
+  catalogService: { getAllCharacters: () => Promise<unknown[]> };
   userRepository: Record<string, (...args: unknown[]) => Promise<unknown>>;
   deckValidationService: { validateDeck: (cards: unknown[]) => Promise<unknown[]> };
   deckBusinessService: { createDeck: (userId: string, name: string, description: string, characters?: unknown) => Promise<unknown> };
@@ -52,7 +54,10 @@ export interface RouteDependencies {
 export type AuthRoutesDeps = Pick<RouteDependencies, 'authService'>;
 
 /** Dependencies for card API and test routes. */
-export type CardApiRoutesDeps = Pick<RouteDependencies, 'cardRepository' | 'foilCardMapRepository' | 'deckBackgroundService' | 'authenticateUser'>;
+export type CardApiRoutesDeps = Pick<
+  RouteDependencies,
+  'cardRepository' | 'foilCardMapRepository' | 'deckBackgroundService' | 'authenticateUser' | 'catalogService'
+>;
 
 /** Dependencies for users and debug routes. */
 export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'requireAdmin' | 'userRepository' | 'deckRepository' | 'cardRepository'>;

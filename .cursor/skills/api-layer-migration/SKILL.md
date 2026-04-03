@@ -1,50 +1,59 @@
 ---
 name: api-layer-migration
 description: >-
-  Migrates Express HTTP routes to an encapsulated backend API layer under
-  src/api/, keeps API_DOCUMENTATION.md accurate, and updates Cursor context
-  files. Use when the user asks to migrate routes, encapsulate handlers, thin
-  route files, move logic out of src/routes, or build a backend API layer
-  aligned with API_DOCUMENTATION.md.
+  Migrates Express HTTP routes to an encapsulated backend API under src/api/
+  (services + src/api/http/*.http.ts), keeps API_DOCUMENTATION.md (legacy) and
+  API_V1.md (v1) accurate, and updates Cursor context. Use for route migration,
+  v1 endpoints, thinning src/routes, or aligning with MIGRATION_ARCHITECTURE.md.
 ---
 
 # API layer migration (Excelsior)
 
 ## Goal
 
-Move **business logic, orchestration, and response shaping** out of `src/routes/*.ts` into **`src/api/`** (HTTP-agnostic modules). Route files stay **thin**: parse request → call API module → map status/body → send response. Contract for clients remains **`API_DOCUMENTATION.md`** at repo root.
+- **Legacy** (`/api/...` without v1): thin `src/routes/*.ts` handlers; **`API_DOCUMENTATION.md`**; `{ success, data, error }` + cookies unless documented otherwise.
+- **v1** (`/api/v1/...`): handlers only in **`src/api/http/*.http.ts`**; contract in **`API_V1.md`** only; envelope **`{ data, meta, errors }`**; **Bearer JWT** where auth is required.
+- **Shared business logic** in **service classes** (reuse from legacy + v1). **No** direct DB calls in HTTP modules. **No** password hashing / storage changes—reuse **`AuthenticationService.authenticateUser`** for v1 login.
 
-**Existing pattern:** `src/api/deckTransform.ts` (pure transforms). Extend with domain modules (e.g. `src/api/decks/…`, `src/api/collections/…`) as migrations proceed.
+**Patterns:** `src/api/deckTransform.ts` (transforms); `src/api/services/catalogService.ts`; `registerApiV1Routes` in `src/api/http/registerApiV1Routes.ts`.
 
 ## When to read
 
-1. **`API_DOCUMENTATION.md`** — authoritative method, path, auth, status codes, and JSON shapes for the route(s) being migrated.
-2. **Actual route implementation** — source file named in the doc / Route index.
-3. **`REFERENCE.md`** in this skill — evolving conventions and doc templates (update `REFERENCE.md` when team agrees new rules).
+1. **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** — legacy contract.
+2. **[API_V1.md](API_V1.md)** — v1 contract (examples, status codes, request model file paths).
+3. **[API_MIGRATION_CHECKLIST.md](API_MIGRATION_CHECKLIST.md)** — what to migrate next.
+4. **[MIGRATION_ARCHITECTURE.md](MIGRATION_ARCHITECTURE.md)** — layers, admin namespace, testing, JWT env.
+5. **[src/api/.cursorrules](src/api/.cursorrules)** — authoritative rules for agents.
+6. **Actual route / HTTP module** source files.
+7. **[REFERENCE.md](REFERENCE.md)** in this skill — templates.
 
-## Migration workflow (per route or small group)
+## Repeatable migration loop (one route or small group)
 
-1. **Identify scope** — method(s), path(s), and `src/routes/*.ts` handlers. Confirm behavior matches `API_DOCUMENTATION.md`; if code and doc diverge, fix the **code** to match the documented contract unless the user explicitly wants a contract change.
-2. **Add or extend `src/api/`** — extract logic into typed functions or small modules. Prefer pure functions where possible; inject DB/services via parameters or a narrow factory if needed. **Do not** import `Express` types into the core of the module unless unavoidable; keep `Request`/`Response` in routes.
-3. **Thin the route** — validate input, call `src/api/`, translate errors to the same HTTP status and JSON shape clients already expect.
-4. **Tests** — move or add **unit** tests next to `src/api/` (or existing `tests/unit/` patterns). Keep **integration** tests passing; update only if behavior intentionally changes.
-5. **Update `API_DOCUMENTATION.md`** (required after each migration):
-   - In the route’s section: add an **Implementation** line: `**API module:** \`src/api/<path>.ts\` (handlers in \`src/routes/<file>.ts\`).`
-   - In **[Route index](#route-index)**: add column **API module** for migrated rows, or a footnote listing `path → module` if the table gets too wide.
-   - Under **Maintaining this document**: ensure the bullet about migrations mentions that migrated routes reference `src/api/` (edit that subsection if it does not).
-6. **Update Cursor context** (required after each migration):
-   - **`src/routes/.cursorrules`** — if registration split, naming, or handler patterns change.
-   - **`src/api/.cursorrules`** — create or refresh when new subfolders or conventions are introduced (purpose, naming, “no Express in pure logic”).
-   - **`src/.cursorrules`** — if the high-level backend layout description should mention `src/api/`.
-   - **Domain `.cursorrules`** (e.g. `src/database/deck/`) — only if migration changes how DB helpers are used from routes vs API layer.
-   - Do **not** edit unrelated `.cursorrules` files.
+1. **Pick work** — next unchecked row in **API_MIGRATION_CHECKLIST.md** (respect **P0 → P6** unless told otherwise).
+2. **Services** — implement or extend **service classes** under `src/api/services/` (or reuse existing `src/services/`). **No** `Request`/`Response` in service cores.
+3. **Request models + response DTOs** — one **dedicated file** per inbound contract and per public response shape (`src/api/http/models/...`, `src/api/dto/v1/...`).
+4. **v1 HTTP** — add routes in the correct **`src/api/http/<domain>.http.ts`**; validate → service → **`sendV1Success` / `sendV1Json`** from `v1Envelope.ts`. Register from **`registerApiV1Routes.ts`**.
+5. **Legacy delegate** — update legacy handler to call the **same service** (no duplicated logic).
+6. **Security pass** — authn/authz via middleware; **401 vs 403**; no credential logging; **admin** only under **`/api/v1/admin/...`**; **no** client admin flags; **passwords:** verify-only, no hash changes.
+7. **Tests** — **unit:** services, DTOs, **full coverage** for each touched **`*.http.ts`** (happy + main error paths); **integration:** **≥1** test per **`*.http.ts`** file (Supertest + app from `src/test-server` when DB needed). **Merge blockers:** missing integration test or incomplete router unit coverage.
+8. **Docs** — **`API_V1.md`** for v1; **`API_DOCUMENTATION.md`** only if legacy contract or intro links changed; checklist checkboxes.
+9. **Cursor context** — update **`src/api/.cursorrules`** only when global API rules change; **`src/routes/.cursorrules`** when legacy wiring changes.
+
+## Pre-merge checklist (security)
+
+- Login rate limiting on **`POST /api/v1/auth/login`** (v1 middleware).
+- JWT **`exp`** / TTL documented; **`JWT_SECRET`** required in production.
+- **401** vs **403** used correctly.
+- **No** secrets or Bearer tokens in logs.
+- Timing / enumeration: follow product guidance; do **not** add a second password hash implementation.
 
 ## Anti-patterns
 
-- Changing external JSON shapes or status codes without updating **`API_DOCUMENTATION.md`** and tests.
-- Leaving **`API_DOCUMENTATION.md`** listing only old file paths after logic moved to **`src/api/`**.
-- Skipping **`src/api/.cursorrules`** when `src/api/` gains new domains or rules.
+- Changing legacy JSON without updating **API_DOCUMENTATION.md** and tests.
+- Documenting v1 in **API_DOCUMENTATION.md** instead of **API_V1.md**.
+- Admin behavior on non-`/admin` paths or driven by request body flags.
+- Skipping **tests** for **`*.http.ts`** files.
 
 ## Evolving this skill
 
-After significant migrations, append a one-line note to **`REFERENCE.md`** (date + what changed). Propose updates to **`SKILL.md`** when a new mandatory step or location becomes standard.
+Append a one-line note to **[REFERENCE.md](REFERENCE.md)** when conventions change.

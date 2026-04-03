@@ -1,27 +1,53 @@
 # API layer migration — reference (evolving)
 
-## Conventions (v0)
+## Doc map
 
-- **`src/api/`** — HTTP-agnostic logic, transforms, orchestration. Subfolders by domain as the tree grows.
-- **`src/routes/`** — Wire-up only: deps, validation, call `src/api/`, `res.json` / `res.status`.
-- **Naming** — Prefer `verbNoun` or domain-specific module names; avoid generic `utils.ts` at domain root.
+| Doc | Use |
+|-----|-----|
+| [API_DOCUMENTATION.md](../../../API_DOCUMENTATION.md) | Legacy `/api/...` |
+| [API_V1.md](../../../API_V1.md) | `/api/v1` only |
+| [API_MIGRATION_CHECKLIST.md](../../../API_MIGRATION_CHECKLIST.md) | Progress |
+| [MIGRATION_ARCHITECTURE.md](../../../MIGRATION_ARCHITECTURE.md) | Layers, JWT, testing |
+| [src/api/.cursorrules](../../../src/api/.cursorrules) | Agent rules |
 
-## API_DOCUMENTATION.md snippets
+## Conventions
 
-**Per-route implementation line (after migration):**
+- **`src/api/services/`** — HTTP-agnostic; inject repositories.
+- **`src/api/http/*.http.ts`** — Express only; call services; v1 envelope.
+- **`src/routes/`** — Legacy wire-up; delegate to shared services after migration.
+
+## API_V1.md — per-endpoint template
+
+Paste under the right TOC section (auth, dbv-catalog, …):
 
 ```markdown
-**API module:** `src/api/<relative-path>.ts` · **Route wiring:** `src/routes/<file>.ts`
+### \`METHOD /api/v1/...\`
+
+**Auth:** None | Bearer access token.
+
+**Request model:** \`src/api/http/models/...\`
+
+**Response 200:** \`data\` shape …
+
+**Response 4xx/5xx:** \`errors[]\` entries (no raw reflected input).
+
+**Implementation:** \`src/api/http/<file>.http.ts\` · service \`src/api/services/...\`
 ```
 
-**Route index** — add column or row suffix, e.g.:
+## Legacy API_DOCUMENTATION.md — implementation line
 
-| Method | Path | File | API module |
-|--------|------|------|------------|
-| GET | `/api/example` | `example.routes.ts` | `src/api/example/getThing.ts` |
+```markdown
+**API module:** `src/api/<path>.ts` · **Route wiring:** `src/routes/<file>.ts`
+```
+
+## Test checklist snippet (per `*.http.ts`)
+
+- [ ] Unit: every route + success + auth/validation/403/500 branches (mocked deps)
+- [ ] Integration: ≥1 Supertest case against real app wiring (`src/test-server`)
 
 ## Changelog (skill + layer)
 
 | Date | Note |
 |------|------|
 | 2026-04-03 | Initial skill: doc + Cursor context updates required per migration. |
+| 2026-04-03 | API_V1.md + checklist + MIGRATION_ARCHITECTURE; v1 loop + testing gates. |

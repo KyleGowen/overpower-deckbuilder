@@ -1,5 +1,9 @@
 import { mockUserRepository, mockDeckRepository, mockCardRepository } from './mocks/DatabaseMocks';
 
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'unit-test-jwt-secret-not-for-production';
+}
+
 // Mock the DataSourceConfig to use our mocked repositories
 jest.mock('../src/config/DataSourceConfig', () => ({
   DataSourceConfig: {

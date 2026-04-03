@@ -15,6 +15,8 @@ import { FoilCardMapRepository } from './database/foilCardMapRepository';
 import { createDeckRoutes } from './routes/decks.routes';
 import { registerRoutes, type RouteDependencies } from './routes';
 import { transformDeckList } from './api/deckTransform';
+import { CatalogService } from './api/services/catalogService';
+import { registerApiV1Routes } from './api/http/registerApiV1Routes';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import { execSync } from 'child_process';
@@ -347,6 +349,8 @@ export { databaseInit, guestDeckPersistence };
 // Initialize foil card map repository
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 
+const catalogService = new CatalogService(cardRepository);
+
 // Function to get git information
 function getGitInfo() {
   // In production (Docker), use environment variables set during build
@@ -459,6 +463,7 @@ registerRoutes(app, {
   authenticateUser,
   deckRepository,
   cardRepository,
+  catalogService,
   userRepository,
   deckValidationService,
   deckBusinessService,
@@ -481,6 +486,12 @@ registerRoutes(app, {
   createDeckRoutes,
   transformDeckList
 } as unknown as RouteDependencies);
+
+registerApiV1Routes(app, {
+  authenticationService: authService,
+  userRepository,
+  catalogService
+});
 
 // Export app for testing
 export default app;

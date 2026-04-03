@@ -1,6 +1,62 @@
 # Backend API layer (`src/api/`)
 
-- **Purpose:** HTTP-agnostic logic extracted from `src/routes/` — orchestration, validation helpers that do not need `Request`/`Response`, response DTO shaping, shared transforms (see `deckTransform.ts`).
-- **Routes** stay in `src/routes/` and should call into this folder; avoid growing fat handlers in route files when migrating (see `.cursor/skills/api-layer-migration/SKILL.md`).
-- **Contracts:** Public HTTP behavior is documented in repo-root `API_DOCUMENTATION.md`; after migrating a route, that doc and the Route index must list the API module path.
-- Prefer **pure functions** and explicit parameters over hidden globals; use composition-root `deps` only in route wiring, not inside deep `src/api/` internals unless already the project pattern for a given service.
+## Purpose
+
+- **HTTP-agnostic logic** in `src/services/` (shared with legacy) and **`src/api/services/`** for v1-specific orchestration when needed.
+- **HTTP adapters** only in **`src/api/http/*.http.ts`** (and `registerApiV1Routes.ts`): parse/validate requests, call services, map status + **v1 JSON envelope**.
+- **Legacy** route files stay in `src/routes/` and stay thin; they delegate to the same services as v1 where migrated.
+
+## Documentation (mandatory)
+
+- **Legacy** contract: [API_DOCUMENTATION.md](../../API_DOCUMENTATION.md)
+- **v1** contract: [API_V1.md](../../API_V1.md) — sole place for `/api/v1` paths, examples, `{ data, meta, errors }`.
+- **Migration progress:** [API_MIGRATION_CHECKLIST.md](../../API_MIGRATION_CHECKLIST.md)
+- **Architecture narrative:** [MIGRATION_ARCHITECTURE.md](../../MIGRATION_ARCHITECTURE.md)
+- Agent workflow: [.cursor/skills/api-layer-migration/SKILL.md](../../.cursor/skills/api-layer-migration/SKILL.md)
+
+Any change to a **published HTTP contract** must update the right doc(s) in the **same** change.
+
+## Layering (v1 + migrations)
+
+| Layer | Responsibility | Forbidden |
+|-------|----------------|-----------|
+| **`*.http.ts`** | Routing, validate → **request models**, call **one** service method, v1 envelope | Business rules, direct DB/repository calls, defining request/response types inline as source of truth |
+| **Services** | Business logic; **admin-only** work behind **admin-scoped** entry points only used from `/api/v1/admin/...` | `req`/`res`; branching on **client-supplied** admin/role flags |
+| **Repositories** | Persistence | HTTP |
+| **Request models** | One **file** per body/query/param contract | Ad hoc `req.body` typing in routes only |
+| **Response DTOs** | One **file** per public response shape | Anonymous-only public responses in routes |
+
+## Admin namespace
+
+- Elevated operations only under **`/api/v1/admin/...`**.
+- No `isAdmin` / `role` / `elevated` in request bodies to select privileged code paths.
+- Non-`/admin` routes **must not** call admin-privileged service methods.
+
+## Passwords / hashing
+
+- **Do not** change password hashing, bcrypt cost, or stored credentials as part of API work.
+- v1 login uses **`AuthenticationService.authenticateUser`** (same stack as cookie login); JWT is **after** successful verify.
+
+## Security
+
+- Cross-cutting: middleware (Bearer JWT, rate limits, role checks), not duplicated ad hoc in every handler.
+- **JWT:** `JWT_SECRET` required when `NODE_ENV=production`. See [MIGRATION_ARCHITECTURE.md](../../MIGRATION_ARCHITECTURE.md).
+
+## Testing (mandatory)
+
+- **Unit:** all service + DTO logic; **full** unit coverage per `src/api/http/*.http.ts` (every route + main error branches).
+- **Integration:** **≥1** integration test per `*.http.ts` (Supertest + real app wiring).
+- Do not commit without relevant tests passing (`npm run test:unit`; integration when routes are user-visible).
+
+## Imports
+
+- **Never** import from `public/` or frontend bundles into `src/api/`.
+
+## Route grouping (`src/api/http/`)
+
+1. `auth.http.ts` — login, logout, me.
+2. `dbv-catalog.http.ts` — card catalog reads for DBV.
+3. `dbv-support.http.ts` — sets, deck-backgrounds (when migrated).
+4. `decks.http.ts`, `collections.http.ts`, `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
+
+Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.

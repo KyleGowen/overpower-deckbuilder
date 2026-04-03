@@ -17,6 +17,12 @@
 - **When you need to log in locally as an ADMIN account**, use username **kyle** and password **test**
 - This applies only to local development; do not use or document these credentials in production or public docs
 
+## HTTP API documentation (legacy + v1)
+- **Legacy** route contract changes → update **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** in the same change.
+- **`/api/v1`** route contract changes → update **[API_V1.md](API_V1.md)** in the same change.
+- Tick **[API_MIGRATION_CHECKLIST.md](API_MIGRATION_CHECKLIST.md)** when completing migration rows.
+- Layering, `/admin` rules, testing, and password non-goals: **[src/api/.cursorrules](src/api/.cursorrules)** and **[MIGRATION_ARCHITECTURE.md](MIGRATION_ARCHITECTURE.md)**.
+
 ## Ship Command
 - **When the user says "ship", it means: commit and push everything to git**
 - Stage all changes, create a commit, and push to the remote

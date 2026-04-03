@@ -2,7 +2,13 @@
 
 This document describes the **Excelsior / Overpower Deckbuilder** backend HTTP surface implemented in Express (`src/routes/`, registered from `src/routes/index.ts`). It is intended for developers integrating with or extending the server.
 
-**Related code:** route registration order matches `registerRoutes()` in `src/routes/index.ts`. The application composition root is `src/index.ts`.
+**Legacy contract:** this file documents routes that use the typical `{ success, data, error }` JSON shape and **session cookie** (`sessionId`) authentication unless noted otherwise.
+
+**Versioned API (`/api/v1`):** the separate **[API_V1.md](API_V1.md)** document describes the Bearer JWT API, `{ data, meta, errors }` envelope, and per-endpoint examples. Use it for all new v1 clients.
+
+**Migration:** track route-by-route work in **[API_MIGRATION_CHECKLIST.md](API_MIGRATION_CHECKLIST.md)**. Architecture and layering rules are in **[MIGRATION_ARCHITECTURE.md](MIGRATION_ARCHITECTURE.md)**.
+
+**Related code:** route registration order matches `registerRoutes()` in `src/routes/index.ts`. The application composition root is `src/index.ts`. v1 routes are registered via `registerApiV1Routes()` from `src/api/http/registerApiV1Routes.ts`.
 
 ---
 
@@ -268,6 +274,8 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 ## Card catalog and backgrounds
 
 **File:** `src/routes/card-api.routes.ts`
+
+**API module:** `GET /api/characters` loads data via **`CatalogService`** ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)) so the same service backs legacy JSON and **`GET /api/v1/catalog/characters`** ([API_V1.md](API_V1.md)).
 
 Unless noted, these are **GET**, unauthenticated, and return:
 
@@ -871,10 +879,23 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | `/api/sets` | `sets.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
+### API v1 (`/api/v1`)
+
+Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration: [`src/api/http/registerApiV1Routes.ts`](src/api/http/registerApiV1Routes.ts) (called from `src/index.ts` and `src/test-server/bootstrap.ts`).
+
+| Method | Path | HTTP module |
+|--------|------|-------------|
+| POST | `/api/v1/auth/login` | `src/api/http/auth.http.ts` |
+| GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
+| POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
+| GET | `/api/v1/catalog/characters` | `src/api/http/dbv-catalog.http.ts` |
+
 ---
 
 ## Maintaining this document
 
-When adding or changing routes, update the corresponding `src/routes/*.ts` file and adjust this document so samples and paths stay accurate. Route registration order is defined in `src/routes/index.ts`.
+When adding or changing **legacy** routes, update the corresponding `src/routes/*.ts` file and adjust this document so samples and paths stay accurate. Route registration order is defined in `src/routes/index.ts`.
+
+When adding or changing **`/api/v1`** routes, update **[API_V1.md](API_V1.md)** in the same change and tick **[API_MIGRATION_CHECKLIST.md](API_MIGRATION_CHECKLIST.md)**.
 
 When a route’s implementation moves into **`src/api/`** (encapsulated API layer), update the route’s section and the [Route index](#route-index) to reference both the route file and the API module. Agent workflow: `.cursor/skills/api-layer-migration/SKILL.md`.

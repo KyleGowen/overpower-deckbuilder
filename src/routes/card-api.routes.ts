@@ -4,7 +4,7 @@ import type { CardApiRoutesDeps } from './types';
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
   app.get('/api/characters', async (req, res) => {
     try {
-      const characters = await deps.cardRepository.getAllCharacters();
+      const characters = await deps.catalogService.getAllCharacters();
       res.json({ success: true, data: characters });
     } catch (error) {
       console.error('Error fetching characters:', error);
