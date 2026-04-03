@@ -290,8 +290,8 @@
                     fetchList('/api/v1/catalog/teamwork'),
                     fetchList('/api/v1/catalog/ally-universe'),
                     fetchList('/api/v1/catalog/training'),
-                    fetchList('/api/basic-universe'),
-                    fetchList('/api/power-cards'),
+                    fetchList('/api/v1/catalog/basic-universe'),
+                    fetchList('/api/v1/catalog/power-cards'),
                     fetchList('/api/v1/catalog/locations')
                 ]);
 

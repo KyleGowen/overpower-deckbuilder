@@ -72,12 +72,12 @@ describe('Basic Universe Type Filter - Simple', () => {
 
     describe('API Integration', () => {
         it('should fetch from correct API endpoint', () => {
-            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('fetch(\'/api/basic-universe\')');
+            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('/api/v1/catalog/basic-universe');
         });
 
-        it('should handle API response correctly', () => {
-            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('data.success');
-            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('data.data');
+        it('should handle v1-style catalog JSON', () => {
+            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('Array.isArray(j.data)');
+            expect(cardFilterTogglesContent + cardDataDisplayContent).toContain('j.errors');
         });
     });
 

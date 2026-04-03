@@ -118,10 +118,10 @@ describe('Basic Universe Type Filter', () => {
             expect(cardFilterTogglesContent).toContain('async function applyBasicUniverseFilters()');
         });
 
-        it('should fetch data from /api/basic-universe', () => {
+        it('should load basic universe from v1 catalog when pool is empty', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            expect(functionCode).toContain('fetch(\'/api/basic-universe\')');
+            expect(functionCode).toContain('\'/api/v1/catalog/basic-universe\'');
         });
 
         it('should filter by active toggle buttons', () => {
@@ -222,7 +222,7 @@ describe('Basic Universe Type Filter', () => {
         it('should handle API fetch errors', () => {
             const functionCode = extractFunctionBody(cardFilterTogglesContent, 'applyBasicUniverseFilters');
             expect(functionCode).toBeTruthy();
-            expect(functionCode).toContain('if (!data.success)');
+            expect(functionCode).toContain('if (!ok)');
             expect(functionCode).toContain('return');
         });
 

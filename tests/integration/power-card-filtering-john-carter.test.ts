@@ -49,7 +49,7 @@ describe('Stat Type Filtering - John Carter special case', () => {
     });
 
     // Fetch power cards
-    const powerResp = await request(app).get('/api/power-cards').expect(200);
+    const powerResp = await request(app).get('/api/v1/catalog/power-cards').expect(200);
     const powerCards = powerResp.body.data || [];
 
     const brute8 = powerCards.filter((p: any) => p.power_type === 'Brute Force' && p.value === 8);
@@ -72,7 +72,7 @@ describe('Stat Type Filtering - John Carter special case', () => {
     const johnCarter = characters.find((c: any) => (c.name || '').toLowerCase().includes('john carter'));
     expect(johnCarter).toBeTruthy();
 
-    const powerResp = await request(app).get('/api/power-cards').expect(200);
+    const powerResp = await request(app).get('/api/v1/catalog/power-cards').expect(200);
     const powerCards = powerResp.body.data || [];
 
     const effectiveMax = Math.max(

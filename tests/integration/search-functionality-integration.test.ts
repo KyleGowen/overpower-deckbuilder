@@ -239,12 +239,11 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Basic Universe Search', () => {
     it('should search basic universe cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       expect(data.data).toBeDefined();
-      expect(Array.isArray(data.data)).toBe(true);
       
       // Test searching for any basic universe cards (just verify we have data)
       expect(data.data.length).toBeGreaterThan(0);
@@ -258,10 +257,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search basic universe cards by type', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test Energy type
       const energyCards = data.data.filter((card: any) => 
@@ -275,10 +274,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search basic universe cards by value_to_use and bonus (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Test value_to_use
       const valueCards = data.data.filter((card: any) => 
@@ -330,9 +329,9 @@ describe('Search Functionality Integration Tests', () => {
         );
         
         // Test basic universe cards
-        const basicResponse = await fetch('http://localhost:3000/api/basic-universe');
+        const basicResponse = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
         const basicData = await basicResponse.json();
-        expectLegacyCatalogList(basicData);
+        expectV1CatalogList(basicResponse, basicData);
 
         const basicCards = basicData.data.filter((card: any) => 
           card.type && card.type.toLowerCase().includes(statType)
@@ -348,16 +347,12 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle empty search terms gracefully', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/v1/catalog/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
         const data = await response.json();
-        if (endpoint.includes('/api/v1/')) {
-          expectV1CatalogList(response, data);
-        } else {
-          expectLegacyCatalogList(data);
-        }
+        expectV1CatalogList(response, data);
         
         // Empty search should return all cards
         const allCards = data.data.filter((card: any) => 
@@ -369,16 +364,12 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle non-existent search terms', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/basic-universe'];
+      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/v1/catalog/basic-universe'];
       
       for (const endpoint of endpoints) {
         const response = await fetch(endpoint);
         const data = await response.json();
-        if (endpoint.includes('/api/v1/')) {
-          expectV1CatalogList(response, data);
-        } else {
-          expectLegacyCatalogList(data);
-        }
+        expectV1CatalogList(response, data);
         
         // Non-existent search should return no cards
         const noMatchCards = data.data.filter((card: any) => 
@@ -429,7 +420,7 @@ describe('Search Functionality Integration Tests', () => {
           ],
         },
         { url: 'http://localhost:3000/api/v1/catalog/training', requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
-        { url: 'http://localhost:3000/api/basic-universe', requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
+        { url: 'http://localhost:3000/api/v1/catalog/basic-universe', requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
       ];
       
       for (const endpoint of endpoints) {

@@ -236,4 +236,48 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/basic-universe returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllBasicUniverse: jest.fn().mockResolvedValue([{ id: 'bu1', card_name: 'Basic Card' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/basic-universe').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'bu1', card_name: 'Basic Card' }]);
+  });
+
+  it('GET /catalog/basic-universe returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllBasicUniverse: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/basic-universe').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
+
+  it('GET /catalog/power-cards returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllPowerCards: jest.fn().mockResolvedValue([{ id: 'p1', power_type: '6 Combat', value: 6 }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/power-cards').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'p1', power_type: '6 Combat', value: 6 }]);
+  });
+
+  it('GET /catalog/power-cards returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllPowerCards: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/power-cards').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

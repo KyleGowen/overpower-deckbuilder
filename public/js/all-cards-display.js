@@ -85,8 +85,8 @@ async function loadAllCards() {
         { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
         { type: 'ally-universe', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
         { type: 'training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-        { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
-        { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
+        { type: 'basic-universe', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+        { type: 'power', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
     ];
 
     // Phase 3: Try cache first when database view has already loaded data

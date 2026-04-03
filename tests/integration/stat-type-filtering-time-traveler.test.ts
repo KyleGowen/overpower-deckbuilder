@@ -45,7 +45,7 @@ describe('Stat Type Filtering - Time Traveler special case', () => {
       quantity: 1,
     });
 
-    const powerResp = await request(app).get('/api/power-cards').expect(200);
+    const powerResp = await request(app).get('/api/v1/catalog/power-cards').expect(200);
     const powerCards = powerResp.body.data || [];
 
     const intel8 = powerCards.filter((p: any) => p.power_type === 'Intelligence' && p.value === 8);
@@ -67,7 +67,7 @@ describe('Stat Type Filtering - Time Traveler special case', () => {
     const timeTraveler = characters.find((c: any) => (c.name || '').toLowerCase() === 'time traveler');
     expect(timeTraveler).toBeTruthy();
 
-    const powerResp = await request(app).get('/api/power-cards').expect(200);
+    const powerResp = await request(app).get('/api/v1/catalog/power-cards').expect(200);
     const powerCards = powerResp.body.data || [];
 
     const effectiveMax = Math.max(

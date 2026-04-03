@@ -248,6 +248,30 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogTrainingResponseDto.ts`](src/api/dto/v1/CatalogTrainingResponseDto.ts)
 
+### `GET /api/v1/catalog/basic-universe`
+
+**Auth:** None (same as removed legacy `GET /api/basic-universe`).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of Universe: Basic records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogBasicUniverseResponseDto.ts`](src/api/dto/v1/CatalogBasicUniverseResponseDto.ts)
+
+### `GET /api/v1/catalog/power-cards`
+
+**Auth:** None (same as removed legacy `GET /api/power-cards` list).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of power card records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogPowerCardsResponseDto.ts`](src/api/dto/v1/CatalogPowerCardsResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -267,3 +291,5 @@ All v1 JSON responses use:
 | GET | /api/v1/catalog/teamwork | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/ally-universe | dbv-catalog.http.ts |
 | GET | /api/v1/catalog/training | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/basic-universe | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/power-cards | dbv-catalog.http.ts |

@@ -2,27 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork, /ally-universe, /training removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/basic-universe', async (req, res) => {
-    try {
-      const basicUniverse = await deps.catalogService.getAllBasicUniverse();
-      res.json({ success: true, data: basicUniverse });
-    } catch (error) {
-      console.error('Error fetching basic universe cards:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch basic universe cards' });
-    }
-  });
-
-  app.get('/api/power-cards', async (req, res) => {
-    try {
-      const powerCards = await deps.catalogService.getAllPowerCards();
-      res.json({ success: true, data: powerCards });
-    } catch (error) {
-      console.error('Error fetching power cards:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch power cards' });
-    }
-  });
+  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork, /ally-universe, /training, /basic-universe, /power-cards removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/foil-card-map', async (_req, res) => {
     try {

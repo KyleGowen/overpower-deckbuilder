@@ -211,21 +211,29 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/basic-universe', async (req, res) => {
+  app.get('/api/v1/catalog/basic-universe', async (req, res) => {
     try {
       const basicUniverse = await mockCardRepository.getAllBasicUniverse();
-      res.json({ success: true, data: basicUniverse });
+      res.json({ data: basicUniverse, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch basic universe cards' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch basic universe cards' }]
+      });
     }
   });
 
-  app.get('/api/power-cards', async (req, res) => {
+  app.get('/api/v1/catalog/power-cards', async (req, res) => {
     try {
       const powerCards = await mockCardRepository.getAllPowerCards();
-      res.json({ success: true, data: powerCards });
+      res.json({ data: powerCards, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch power cards' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch power cards' }]
+      });
     }
   });
 
@@ -645,7 +653,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/basic-universe', () => {
+    describe('GET /api/v1/catalog/basic-universe', () => {
       it('should return all basic universe cards successfully', async () => {
         const mockBasicUniverse = [
           { id: '1', name: 'Basic Card 1' },
@@ -654,18 +662,19 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllBasicUniverse.mockResolvedValue(mockBasicUniverse);
 
         const response = await request(app)
-          .get('/api/basic-universe')
+          .get('/api/v1/catalog/basic-universe')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockBasicUniverse
+          data: mockBasicUniverse,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllBasicUniverse).toHaveBeenCalled();
       });
     });
 
-    describe('GET /api/power-cards', () => {
+    describe('GET /api/v1/catalog/power-cards', () => {
       it('should return all power cards successfully', async () => {
         const mockPowerCards = [
           { id: '1', name: 'Power Card 1' },
@@ -674,12 +683,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllPowerCards.mockResolvedValue(mockPowerCards);
 
         const response = await request(app)
-          .get('/api/power-cards')
+          .get('/api/v1/catalog/power-cards')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockPowerCards
+          data: mockPowerCards,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllPowerCards).toHaveBeenCalled();
       });

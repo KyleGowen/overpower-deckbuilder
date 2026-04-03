@@ -69,8 +69,8 @@ describe('Power Cards ordering by value (with OP type tiebreakers)', () => {
 
   it('adds all power cards and verifies value ordering in deck editor', async () => {
     // Fetch all power cards
-    const powerResp = await request(app).get('/api/power-cards').expect(200);
-    expect(powerResp.body.success).toBe(true);
+    const powerResp = await request(app).get('/api/v1/catalog/power-cards').expect(200);
+    expect(powerResp.body.errors ?? []).toEqual([]);
     const allPowerCards = powerResp.body.data as Array<{ id: string; value: number; power_type: string }>;
     expect(allPowerCards.length).toBeGreaterThan(0);
 

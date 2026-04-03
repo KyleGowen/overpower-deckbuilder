@@ -312,11 +312,29 @@ function powerFilterNumericOrNull(desktopEl, mobileEl) {
 // Power Cards filtering functions
 window.applyPowerCardFilters = async function applyPowerCardFilters() {
     try {
-        const resp = await fetch('/api/power-cards');
-        const data = await resp.json();
-        if (!data.success) return;
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
+        const { ok, rows } = await fetchList('/api/v1/catalog/power-cards');
+        if (!ok) return;
 
-        let filtered = data.data;
+        let filtered = rows;
 
         // Filter by power type — active toggle buttons
         const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab .power-type-filter-toggle.is-active'))

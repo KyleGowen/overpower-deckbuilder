@@ -216,11 +216,12 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Test searching for power cards
     const powerSearchResponse = await request(app)
-      .get('/api/power-cards')
+      .get('/api/v1/catalog/power-cards')
       .set('Cookie', authCookie);
 
     expect(powerSearchResponse.status).toBe(200);
-    expect(powerSearchResponse.body.success).toBe(true);
+    expect(powerSearchResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(powerSearchResponse.body.data)).toBe(true);
     expect(powerSearchResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${powerSearchResponse.body.data.length} power cards`);
 

@@ -126,4 +126,28 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
       ]);
     }
   });
+
+  router.get('/catalog/basic-universe', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getAllBasicUniverse();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/basic-universe error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch basic universe cards' }
+      ]);
+    }
+  });
+
+  router.get('/catalog/power-cards', async (_req, res) => {
+    try {
+      const data = await deps.catalogService.getAllPowerCards();
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 /catalog/power-cards error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CATALOG_ERROR', message: 'Failed to fetch power cards' }
+      ]);
+    }
+  });
 }

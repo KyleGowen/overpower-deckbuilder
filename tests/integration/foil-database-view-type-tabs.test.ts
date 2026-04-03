@@ -33,10 +33,10 @@ describe('Foil Database View Type Tabs Integration Tests', () => {
 
   it('should have API return foil rows so frontend groupCardsByVariant can filter them', async () => {
     const response = await request(app)
-      .get('/api/power-cards')
+      .get('/api/v1/catalog/power-cards')
       .expect(200);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors ?? []).toEqual([]);
     const data = response.body.data;
     const hasFoil = data.some((c: { is_foil?: boolean }) => c.is_foil === true);
     const hasBase = data.some((c: { is_foil?: boolean }) => !c.is_foil);

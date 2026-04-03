@@ -302,7 +302,7 @@ describe('Basic Universe Type Filter Behavior', () => {
 
             // Simulate error handling
             try {
-                await mockFetch('/api/basic-universe');
+                await mockFetch('/api/v1/catalog/basic-universe');
             } catch (error) {
                 expect(error).toBeInstanceOf(Error);
                 expect((error as Error).message).toBe('API Error');

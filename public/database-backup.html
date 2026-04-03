@@ -5310,9 +5310,8 @@
         // Basic Universe functions
         async function loadBasicUniverse() {
             try {
-                const resp = await fetch('/api/basic-universe');
-                const data = await resp.json();
-                if (data.success) displayBasicUniverse(data.data);
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                if (ok) displayBasicUniverse(rows);
             } catch (e) { console.error('Error loading basic universe:', e); }
         }
 
@@ -5347,10 +5346,9 @@
                 const searchTerm = e.target.value.toLowerCase();
                 if (searchTerm.length === 0) { await applyBasicUniverseFilters(); return; }
                 try {
-                    const resp = await fetch('/api/basic-universe');
-                    const data = await resp.json();
-                    if (data.success) {
-                        const filtered = data.data.filter(card =>
+                    const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                    if (ok) {
+                        const filtered = rows.filter(card =>
                             card.card_name.toLowerCase().includes(searchTerm) ||
                             card.type.toLowerCase().includes(searchTerm) ||
                             card.value_to_use.toLowerCase().includes(searchTerm) ||
@@ -5396,11 +5394,10 @@
 
         async function applyBasicUniverseFilters() {
             try {
-                const resp = await fetch('/api/basic-universe');
-                const data = await resp.json();
-                if (!data.success) return;
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                if (!ok) return;
 
-                let filtered = data.data;
+                let filtered = rows;
 
                 // Filter by type
                 const selectedTypes = Array.from(document.querySelectorAll('#basic-universe-tab input[type="checkbox"]:checked'))
@@ -5473,9 +5470,8 @@
         // Power Cards functions
         async function loadPowerCards() {
             try {
-                const resp = await fetch('/api/power-cards');
-                const data = await resp.json();
-                if (data.success) displayPowerCards(data.data);
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                if (ok) displayPowerCards(rows);
             } catch (e) { console.error('Error loading power cards:', e); }
         }
 
@@ -5511,10 +5507,9 @@
                     return; 
                 }
                 try {
-                    const resp = await fetch('/api/power-cards');
-                    const data = await resp.json();
-                    if (data.success) {
-                        const filtered = data.data.filter(c =>
+                    const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                    if (ok) {
+                        const filtered = rows.filter(c =>
                             c.power_type.toLowerCase().includes(term) ||
                             String(c.value).includes(term)
                         );
@@ -5619,11 +5614,10 @@
 
         async function applyPowerCardFilters() {
             try {
-                const resp = await fetch('/api/power-cards');
-                const data = await resp.json();
-                if (!data.success) return;
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                if (!ok) return;
 
-                let filtered = data.data;
+                let filtered = rows;
 
                 // Filter by power type
                 const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"]:checked'))
@@ -9585,8 +9579,8 @@
                     { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-                    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
-                    { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
+                    { type: 'basic-universe', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+                    { type: 'power', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
                 ];
                 
                 for (const category of categories) {
@@ -9981,8 +9975,8 @@
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
-                    { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
+                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+                    { type: 'power', name: 'Power Cards', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
                 ];
                 
                 let categoriesHtml = '';

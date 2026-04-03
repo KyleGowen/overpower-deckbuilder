@@ -1,7 +1,7 @@
 /**
  * Unit tests for card APIs returning is_foil field.
  *
- * Verifies that /api/v1/catalog/characters, /api/power-cards, etc. include is_foil
+ * Verifies that /api/v1/catalog/characters, /api/v1/catalog/power-cards, etc. include is_foil
  * in the response structure when foil rows exist.
  */
 
@@ -38,13 +38,13 @@ describe('Card APIs is_foil structure', () => {
     });
   });
 
-  describe('GET /api/power-cards', () => {
+  describe('GET /api/v1/catalog/power-cards', () => {
     it('should include is_foil in response structure', async () => {
       const response = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors ?? []).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
 
       const foilCard = response.body.data.find((c: { is_foil?: boolean }) => c.is_foil === true);
@@ -57,9 +57,10 @@ describe('Card APIs is_foil structure', () => {
       expect(hasFoil).toBe(true);
 
       const response = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
+      expect(response.body.errors ?? []).toEqual([]);
       const foilCards = response.body.data.filter((c: { is_foil?: boolean }) => c.is_foil === true);
       expect(foilCards.length).toBeGreaterThanOrEqual(1);
     });

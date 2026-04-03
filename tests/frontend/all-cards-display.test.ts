@@ -271,7 +271,7 @@ describe('All Cards Display Functions', () => {
             json: () => Promise.resolve({ success: true, data: mockCards.special })
           });
         }
-        if (url === '/api/power-cards') {
+        if (url === '/api/v1/catalog/power-cards') {
           return Promise.resolve({
             ok: true,
             json: () => Promise.resolve({ success: true, data: mockCards.power })
@@ -700,8 +700,8 @@ async function loadAllCards(): Promise<any[]> {
     { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
     { type: 'ally-universe', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
     { type: 'training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
-    { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
+    { type: 'basic-universe', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+    { type: 'power', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
   ];
   
   const loadResults = [];

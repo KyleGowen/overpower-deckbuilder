@@ -230,19 +230,19 @@
           }
         },
         {
-          "name": "GET /api/basic-universe",
+          "name": "GET /api/v1/catalog/basic-universe",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/basic-universe"
+            "url": "{{baseUrl}}/api/v1/catalog/basic-universe"
           }
         },
         {
-          "name": "GET /api/power-cards",
+          "name": "GET /api/v1/catalog/power-cards",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/power-cards"
+            "url": "{{baseUrl}}/api/v1/catalog/power-cards"
           }
         },
         {

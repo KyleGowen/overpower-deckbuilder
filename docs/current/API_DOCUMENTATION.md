@@ -178,46 +178,13 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/a
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/training`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/basic-universe
-Get all basic universe cards.
+### GET /api/basic-universe (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/basic-universe`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/power-cards
-Get all power cards.
+### GET /api/power-cards (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "power_type": "string",
-      "value": "number",
-      "image": "string",
-      "one_per_deck": "boolean",
-      "alternateImages": ["string"]
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/power-cards`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/power-cards/:id/alternate-images
 Get alternate images for a specific power card.

@@ -920,12 +920,13 @@
         // Load and display basic universe cards
         async function loadBasicUniverse() {
             try {
-                const response = await fetch('/api/basic-universe');
+                const response = await fetch('/api/v1/catalog/basic-universe');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayBasicUniverse(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+
+                if (payload.ok) {
+                    displayBasicUniverse(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load basic universe cards');
                 }
@@ -939,12 +940,13 @@
         // Load and display power cards
         async function loadPowerCards() {
             try {
-                const response = await fetch('/api/power-cards');
+                const response = await fetch('/api/v1/catalog/power-cards');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayPowerCards(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+
+                if (payload.ok) {
+                    displayPowerCards(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load power cards');
                 }
@@ -1629,8 +1631,8 @@
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
-                    { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
+                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+                    { type: 'power', name: 'Power Cards', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
                 ];
                 
                 let allCardsLoaded = true;

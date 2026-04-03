@@ -1593,10 +1593,28 @@ function setupPowerCardsSearch() {
             return; 
         }
         try {
-            const resp = await fetch('/api/power-cards');
-            const data = await resp.json();
-            if (data.success) {
-                const filtered = data.data.filter(c =>
+            const fetchList =
+                typeof fetchCatalogList === 'function'
+                    ? fetchCatalogList
+                    : async (url) => {
+                          try {
+                              const r = await fetch(url);
+                              const j = await r.json();
+                              const responseOk = r.ok !== false;
+                              const ok =
+                                  responseOk &&
+                                  j &&
+                                  Array.isArray(j.data) &&
+                                  j.success !== false &&
+                                  (!j.errors || j.errors.length === 0);
+                              return { ok, rows: ok ? j.data : [] };
+                          } catch {
+                              return { ok: false, rows: [] };
+                          }
+                      };
+            const { ok, rows } = await fetchList('/api/v1/catalog/power-cards');
+            if (ok) {
+                const filtered = rows.filter(c =>
                     c.power_type.toLowerCase().includes(term) ||
                     String(c.value).includes(term)
                 );

@@ -5998,11 +5998,10 @@
         // Basic Universe functions
         async function loadBasicUniverse() {
             try {
-                const resp = await fetch('/api/basic-universe');
-                const data = await resp.json();
-                if (data.success) {
-                    window.basicUniverseData = data.data;
-                    displayBasicUniverse(data.data);
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                if (ok) {
+                    window.basicUniverseData = rows;
+                    displayBasicUniverse(rows);
                 }
             } catch (e) { console.error('Error loading basic universe:', e); }
         }
@@ -6117,9 +6116,8 @@
                     const pool = window.basicUniverseData;
                     if (!pool || pool.length === 0) {
                         try {
-                            const resp = await fetch('/api/basic-universe');
-                            const data = await resp.json();
-                            if (data.success) window.basicUniverseData = data.data;
+                            const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                            if (ok) window.basicUniverseData = rows;
                         } catch (err) { console.error('Error searching basic universe:', err); return; }
                     }
                     const src = window.basicUniverseData || [];
@@ -6216,10 +6214,9 @@
             try {
                 let pool = window.basicUniverseData;
                 if (!pool || pool.length === 0) {
-                    const resp = await fetch('/api/basic-universe');
-                    const data = await resp.json();
-                    if (!data.success) return;
-                    pool = data.data;
+                    const { ok, rows } = await fetchCatalogList('/api/v1/catalog/basic-universe');
+                    if (!ok) return;
+                    pool = rows;
                     window.basicUniverseData = pool;
                 }
 
@@ -6318,9 +6315,8 @@
         // Power Cards functions
         async function loadPowerCards() {
             try {
-                const resp = await fetch('/api/power-cards');
-                const data = await resp.json();
-                if (data.success) displayPowerCards(data.data);
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                if (ok) displayPowerCards(rows);
             } catch (e) { console.error('Error loading power cards:', e); }
         }
 
@@ -6386,10 +6382,9 @@
                         return;
                     }
                     try {
-                        const resp = await fetch('/api/power-cards');
-                        const data = await resp.json();
-                        if (data.success) {
-                            const filtered = data.data.filter(
+                        const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                        if (ok) {
+                            const filtered = rows.filter(
                                 (c) =>
                                     (c.power_type && c.power_type.toLowerCase().includes(term)) ||
                                     String(c.value).includes(term)
@@ -6459,11 +6454,10 @@
         }
         async function applyPowerCardFilters() {
             try {
-                const resp = await fetch('/api/power-cards');
-                const data = await resp.json();
-                if (!data.success) return;
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/power-cards');
+                if (!ok) return;
 
-                let filtered = data.data;
+                let filtered = rows;
 
                 const selectedTypes = Array.from(
                     document.querySelectorAll('#power-cards-tab .power-type-filter-toggle.is-active')
@@ -10482,8 +10476,8 @@
                     { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-                    { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
-                    { type: 'power', api: '/api/power-cards', nameField: 'power_type' }
+                    { type: 'basic-universe', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+                    { type: 'power', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
                 ];
                 
                 for (const category of categories) {
@@ -11063,8 +11057,8 @@
                     { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/v1/catalog/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/v1/catalog/training', nameField: 'card_name' },
-                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },
-                    { type: 'power', name: 'Power Cards', api: '/api/power-cards', nameField: 'power_type' }
+                    { type: 'basic-universe', name: 'Universe: Basic', api: '/api/v1/catalog/basic-universe', nameField: 'card_name' },
+                    { type: 'power', name: 'Power Cards', api: '/api/v1/catalog/power-cards', nameField: 'power_type' }
                 ];
                 
                 let categoriesHtml = '';

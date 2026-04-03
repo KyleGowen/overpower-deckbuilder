@@ -81,10 +81,10 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Filter for Energy stat type
       const energyCards = data.data.filter((card: any) => 
@@ -158,10 +158,10 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Filter for Combat stat type
       const combatCards = data.data.filter((card: any) => 
@@ -235,10 +235,10 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Filter for Brute Force stat type
       const bruteForceCards = data.data.filter((card: any) => 
@@ -312,10 +312,10 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/basic-universe');
+      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
       const data = await response.json();
       
-      expect(data.success).toBe(true);
+      expectV1CatalogList(response, data);
       
       // Filter for Intelligence stat type
       const intelligenceCards = data.data.filter((card: any) => 
@@ -341,7 +341,7 @@ describe('Stat Type Filtering Integration Tests', () => {
       const [allyResponse, trainingResponse, basicResponse] = await Promise.all([
         fetch('http://localhost:3000/api/v1/catalog/ally-universe'),
         fetch('http://localhost:3000/api/v1/catalog/training'),
-        fetch('http://localhost:3000/api/basic-universe')
+        fetch('http://localhost:3000/api/v1/catalog/basic-universe')
       ]);
 
       const [allyData, trainingData, basicData] = await Promise.all([
@@ -352,7 +352,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
       expectV1CatalogList(allyResponse, allyData);
       expectV1CatalogList(trainingResponse, trainingData);
-      expectLegacyCatalogList(basicData);
+      expectV1CatalogList(basicResponse, basicData);
 
       // Filter Energy cards from each type
       const allyEnergyCards = allyData.data.filter((card: any) => 
@@ -390,7 +390,7 @@ describe('Stat Type Filtering Integration Tests', () => {
           (card.type_1 && card.type_1.toLowerCase().includes(stat)) ||
           (card.type_2 && card.type_2.toLowerCase().includes(stat))
         },
-        { name: 'basic', endpoint: 'http://localhost:3000/api/basic-universe', filter: (card: any, stat: string) => 
+        { name: 'basic', endpoint: 'http://localhost:3000/api/v1/catalog/basic-universe', filter: (card: any, stat: string) => 
           card.type && card.type.toLowerCase().includes(stat)
         }
       ];

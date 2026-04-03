@@ -77,7 +77,7 @@ describe('All Tab Integration Tests', () => {
       const cardTypes = [
         { endpoint: '/api/v1/catalog/characters', type: 'character' },
         { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
-        { endpoint: '/api/power-cards', type: 'power' },
+        { endpoint: '/api/v1/catalog/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' },
         { endpoint: '/api/v1/catalog/aspects', type: 'aspect' },
         { endpoint: '/api/v1/catalog/missions', type: 'mission' },
@@ -85,7 +85,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/v1/catalog/teamwork', type: 'teamwork' },
         { endpoint: '/api/v1/catalog/ally-universe', type: 'ally-universe' },
         { endpoint: '/api/v1/catalog/training', type: 'training' },
-        { endpoint: '/api/basic-universe', type: 'basic-universe' },
+        { endpoint: '/api/v1/catalog/basic-universe', type: 'basic-universe' },
         { endpoint: '/api/v1/catalog/advanced-universe', type: 'advanced-universe' }
       ];
 
@@ -115,7 +115,7 @@ describe('All Tab Integration Tests', () => {
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters'),
         request(app).get('/api/v1/catalog/special-cards'),
-        request(app).get('/api/power-cards')
+        request(app).get('/api/v1/catalog/power-cards')
       ]);
 
       const allCards = [
@@ -169,7 +169,7 @@ describe('All Tab Integration Tests', () => {
       const endpoints = [
         '/api/v1/catalog/characters',
         '/api/v1/catalog/special-cards',
-        '/api/power-cards',
+        '/api/v1/catalog/power-cards',
         '/api/v1/catalog/locations',
         '/api/v1/catalog/missions',
         '/api/v1/catalog/events'
@@ -198,7 +198,7 @@ describe('All Tab Integration Tests', () => {
     it('should extract correct names for different card types', async () => {
       const [charactersRes, powerRes, aspectRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters').query({ limit: 1 }),
-        request(app).get('/api/power-cards').query({ limit: 1 }),
+        request(app).get('/api/v1/catalog/power-cards').query({ limit: 1 }),
         request(app).get('/api/v1/catalog/aspects').query({ limit: 1 })
       ]);
 
@@ -228,7 +228,7 @@ describe('All Tab Integration Tests', () => {
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters'),
         request(app).get('/api/v1/catalog/special-cards'),
-        request(app).get('/api/power-cards')
+        request(app).get('/api/v1/catalog/power-cards')
       ]);
 
       const allCards = [
@@ -335,7 +335,7 @@ describe('All Tab Integration Tests', () => {
       const endpoints = [
         '/api/v1/catalog/characters',
         '/api/v1/catalog/special-cards',
-        '/api/power-cards',
+        '/api/v1/catalog/power-cards',
         '/api/v1/catalog/locations',
         '/api/v1/catalog/aspects',
         '/api/v1/catalog/missions',
@@ -343,7 +343,7 @@ describe('All Tab Integration Tests', () => {
         '/api/v1/catalog/teamwork',
         '/api/v1/catalog/ally-universe',
         '/api/v1/catalog/training',
-        '/api/basic-universe',
+        '/api/v1/catalog/basic-universe',
         '/api/v1/catalog/advanced-universe'
       ];
 
@@ -434,7 +434,7 @@ describe('All Tab Integration Tests', () => {
       const endpoints = [
         { endpoint: '/api/v1/catalog/characters', type: 'character' },
         { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
-        { endpoint: '/api/power-cards', type: 'power' },
+        { endpoint: '/api/v1/catalog/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' }
       ];
 

@@ -74,7 +74,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should show correct count when adding one of each power card type', async () => {
       // Get available power cards first
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -127,7 +127,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should show correct count when adding multiple cards of each power type', async () => {
       // Get available power cards
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -183,7 +183,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should show correct count when adding same power card multiple times', async () => {
       // Get a single power card
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -221,7 +221,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should show correct count when mixing power cards with other card types', async () => {
       // Add some power cards
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -311,7 +311,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should handle removing power cards and update count correctly', async () => {
       // Add some power cards first
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -367,7 +367,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should handle removing all power cards and show 0 count', async () => {
       // Add some power cards first
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -437,7 +437,7 @@ describe('Power Card Counting Integration Tests', () => {
 
     test('should handle large quantities of power cards', async () => {
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;
@@ -471,7 +471,7 @@ describe('Power Card Counting Integration Tests', () => {
 
     test('should handle multiple different power cards with various quantities', async () => {
       const powerCardsResponse = await request(app)
-        .get('/api/power-cards')
+        .get('/api/v1/catalog/power-cards')
         .expect(200);
 
       const powerCards = powerCardsResponse.body.data;

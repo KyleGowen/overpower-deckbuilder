@@ -149,7 +149,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get high value power cards (Energy 8, 9, Multi-Power, Any-Power)
     const powerCardsResp = await request(app)
-      .get('/api/power-cards')
+      .get('/api/v1/catalog/power-cards')
       .set('Cookie', authCookie)
       .expect(200);
     
@@ -193,7 +193,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get basic universe cards
     const basicUniverseResp = await request(app)
-      .get('/api/basic-universe')
+      .get('/api/v1/catalog/basic-universe')
       .set('Cookie', authCookie)
       .expect(200);
     

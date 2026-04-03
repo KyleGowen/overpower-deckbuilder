@@ -76,9 +76,10 @@ describe('Power Cards Multi-Power Filter', () => {
         beforeEach(() => {
             // Mock the Power Cards filter functions
             applyPowerCardFilters = jest.fn().mockImplementation(async () => {
-                const resp = await fetch('/api/power-cards');
+                const resp = await fetch('/api/v1/catalog/power-cards');
                 const data = await resp.json();
-                if (!data.success) return;
+                const v1Ok = data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0);
+                if (!v1Ok) return;
 
                 let filtered = data.data;
 
@@ -275,9 +276,10 @@ describe('Power Cards Multi-Power Filter', () => {
 
             const applyPowerCardFilters = jest.fn().mockImplementation(async () => {
                 try {
-                    const resp = await fetch('/api/power-cards');
+                    const resp = await fetch('/api/v1/catalog/power-cards');
                     const data = await resp.json();
-                    if (!data.success) return;
+                    const v1Ok = data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0);
+                    if (!v1Ok) return;
                     // ... rest of filtering logic
                 } catch (err) {
                     console.error('Error applying power card filters:', err);
@@ -297,15 +299,17 @@ describe('Power Cards Multi-Power Filter', () => {
         it('should handle empty API response', async () => {
             mockFetch.mockResolvedValue({
                 json: () => Promise.resolve({
-                    success: false,
-                    data: []
+                    data: null,
+                    meta: {},
+                    errors: [{ code: 'CATALOG_ERROR', message: 'fail' }]
                 })
             });
 
             const applyPowerCardFilters = jest.fn().mockImplementation(async () => {
-                const resp = await fetch('/api/power-cards');
+                const resp = await fetch('/api/v1/catalog/power-cards');
                 const data = await resp.json();
-                if (!data.success) return;
+                const v1Ok = data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0);
+                if (!v1Ok) return;
                 // ... rest of filtering logic
             });
 
@@ -331,8 +335,9 @@ describe('Power Cards Multi-Power Filter', () => {
 
             mockFetch.mockResolvedValue({
                 json: () => Promise.resolve({
-                    success: true,
-                    data: largeDataset
+                    data: largeDataset,
+                    meta: {},
+                    errors: []
                 })
             });
 
@@ -343,9 +348,10 @@ describe('Power Cards Multi-Power Filter', () => {
             mockDocument.querySelectorAll.mockReturnValue(mockCheckboxes);
 
             const applyPowerCardFilters = jest.fn().mockImplementation(async () => {
-                const resp = await fetch('/api/power-cards');
+                const resp = await fetch('/api/v1/catalog/power-cards');
                 const data = await resp.json();
-                if (!data.success) return;
+                const v1Ok = data && Array.isArray(data.data) && (!data.errors || data.errors.length === 0);
+                if (!v1Ok) return;
 
                 let filtered = data.data;
                 const selectedTypes = Array.from(document.querySelectorAll('#power-cards-tab input[type="checkbox"]:checked'))

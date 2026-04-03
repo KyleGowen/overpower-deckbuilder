@@ -901,12 +901,30 @@ async function loadBasicUniverse() {
         return;
     }
     try {
-        const resp = await fetch('/api/basic-universe');
-        const data = await resp.json();
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('basic-universe', data.data);
-            window.basicUniverseData = data.data;
-            displayBasicUniverse(data.data);
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
+        const { ok, rows } = await fetchList('/api/v1/catalog/basic-universe');
+        if (ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('basic-universe', rows);
+            window.basicUniverseData = rows;
+            displayBasicUniverse(rows);
         }
     } catch (e) { console.error('Error loading basic universe:', e); }
 }
@@ -1223,11 +1241,29 @@ async function loadPowerCards() {
         return;
     }
     try {
-        const resp = await fetch('/api/power-cards');
-        const data = await resp.json();
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('power-cards', data.data);
-            displayPowerCards(data.data);
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
+        const { ok, rows } = await fetchList('/api/v1/catalog/power-cards');
+        if (ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('power-cards', rows);
+            displayPowerCards(rows);
         }
     } catch (e) { console.error('Error loading power cards:', e); }
 }
