@@ -1,0 +1,10 @@
+# postman/
+
+Postman Collection v2.1 for local API testing.
+
+- **Import:** `Excelsior-Deckbuilder-Local.postman_collection.json` in Postman (Import → file).
+- **Base URL:** Collection variable `baseUrl` defaults to `http://localhost:8085`.
+- **Auth:** Run **POST /api/auth/login** (folder *Auth & config*) so Postman stores the `sessionId` cookie; then call protected routes.
+- **IDs:** Replace collection variables `deckId`, `cardId`, `guestDeckId`, `userId` with real values from responses.
+
+See also root `API_DOCUMENTATION.md` for request/response details.

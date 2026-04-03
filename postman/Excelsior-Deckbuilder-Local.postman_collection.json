@@ -1,0 +1,822 @@
+{
+  "info": {
+    "name": "Excelsior Deckbuilder (Local)",
+    "description": "Local API collection for Excelsior / Overpower Deckbuilder.\n\nSetup: Run npm run dev (default port 8085).\n\nAuth: Run \"POST /api/auth/login\" first; Postman stores the sessionId cookie for localhost:8085. Local admin test user: kyle / test (see project conventions).\n\nVariables: Set deckId, cardId, guestDeckId, userId from API responses after creating resources. Guest deck routes require a GUEST session (log in as guest in the app or use a guest session), not USER.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "excelsior-local-api"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8085"
+    },
+    {
+      "key": "deckId",
+      "value": "REPLACE_WITH_DECK_UUID"
+    },
+    {
+      "key": "cardId",
+      "value": "REPLACE_WITH_CARD_UUID"
+    },
+    {
+      "key": "guestDeckId",
+      "value": "REPLACE_WITH_GUEST_DECK_ID"
+    },
+    {
+      "key": "userId",
+      "value": "REPLACE_WITH_USER_UUID"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & status",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "description": "Public health check (DB, git, migrations)."
+        },
+        {
+          "name": "GET /api/database/status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/database/status"
+          },
+          "description": "Admin only."
+        }
+      ]
+    },
+    {
+      "name": "Auth & config",
+      "item": [
+        {
+          "name": "POST /api/auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"kyle\",\n  \"password\": \"test\"\n}"
+            }
+          },
+          "description": "Sets session cookie."
+        },
+        {
+          "name": "POST /api/auth/signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"changeme\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/auth/google",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/google",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"FIREBASE_ID_TOKEN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/logout"
+          }
+        },
+        {
+          "name": "GET /api/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        },
+        {
+          "name": "GET /api/config/firebase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/config/firebase"
+          }
+        },
+        {
+          "name": "GET /js/app-config.js",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": "{{baseUrl}}/js/app-config.js"
+          },
+          "description": "Returns JavaScript, not JSON."
+        }
+      ]
+    },
+    {
+      "name": "Card catalog",
+      "item": [
+        {
+          "name": "GET /api/characters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/characters"
+          }
+        },
+        {
+          "name": "GET /api/locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/locations"
+          }
+        },
+        {
+          "name": "GET /api/special-cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/special-cards"
+          }
+        },
+        {
+          "name": "GET /api/missions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/missions"
+          }
+        },
+        {
+          "name": "GET /api/events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/events"
+          }
+        },
+        {
+          "name": "GET /api/aspects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/aspects"
+          }
+        },
+        {
+          "name": "GET /api/advanced-universe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/advanced-universe"
+          }
+        },
+        {
+          "name": "GET /api/teamwork",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/teamwork"
+          }
+        },
+        {
+          "name": "GET /api/ally-universe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/ally-universe"
+          }
+        },
+        {
+          "name": "GET /api/training",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/training"
+          }
+        },
+        {
+          "name": "GET /api/basic-universe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/basic-universe"
+          }
+        },
+        {
+          "name": "GET /api/power-cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/power-cards"
+          }
+        },
+        {
+          "name": "GET /api/foil-card-map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/foil-card-map"
+          }
+        },
+        {
+          "name": "GET /api/deck-backgrounds",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/deck-backgrounds"
+          },
+          "description": "Requires login."
+        },
+        {
+          "name": "GET /test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/test"
+          },
+          "description": "Diagnostic JSON."
+        }
+      ]
+    },
+    {
+      "name": "Users & admin",
+      "item": [
+        {
+          "name": "GET /api/users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users"
+          },
+          "description": "Admin only."
+        },
+        {
+          "name": "POST /api/users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"apitest\",\n  \"password\": \"secret\"\n}"
+            }
+          },
+          "description": "Admin only."
+        },
+        {
+          "name": "POST /api/users/change-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users/change-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"newsecret\"\n}"
+            }
+          },
+          "description": "USER or ADMIN."
+        },
+        {
+          "name": "GET /api/debug/clear-cache",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/debug/clear-cache"
+          },
+          "description": "Admin."
+        },
+        {
+          "name": "GET /api/debug/clear-card-cache",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/debug/clear-card-cache"
+          },
+          "description": "Admin."
+        }
+      ]
+    },
+    {
+      "name": "Decks (DB)",
+      "item": [
+        {
+          "name": "GET /api/decks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks"
+          },
+          "description": "ETag / 304 support."
+        },
+        {
+          "name": "POST /api/decks",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Deck\",\n  \"description\": \"\",\n  \"characters\": []\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/decks/validate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/validate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "GET /api/decks/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}"
+          }
+        },
+        {
+          "name": "GET /api/decks/:id/full",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/full"
+          }
+        },
+        {
+          "name": "PUT /api/decks/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Renamed Deck\",\n  \"description\": \"Updated via Postman\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET /api/decks/:id/cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards"
+          }
+        },
+        {
+          "name": "POST /api/decks/:id/cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT /api/decks/:id/cards",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/decks/:id/cards (remove one)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/decks/:id/cards (clear all)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardType\": \"all\",\n  \"cardId\": \"all\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET /api/deck-stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/deck-stats"
+          }
+        },
+        {
+          "name": "GET /api/decks/:id/ui-preferences",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/ui-preferences"
+          }
+        },
+        {
+          "name": "PUT /api/decks/:id/ui-preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}/ui-preferences",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"viewMode\": \"tile\",\n  \"sortBy\": \"name\",\n  \"filterBy\": \"all\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/decks/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/decks/{{deckId}}"
+          },
+          "description": "Owner only. Destructive."
+        }
+      ]
+    },
+    {
+      "name": "Guest decks (session)",
+      "item": [
+        {
+          "name": "POST /api/guest/decks",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/guest/decks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Guest Deck\",\n  \"description\": \"\"\n}"
+            }
+          },
+          "description": "Requires GUEST session."
+        },
+        {
+          "name": "GET /api/guest/decks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/guest/decks"
+          }
+        },
+        {
+          "name": "GET /api/guest/decks/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}"
+          }
+        },
+        {
+          "name": "PUT /api/guest/decks/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Renamed Guest Deck\",\n  \"description\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT /api/guest/decks/:id/cards",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/guest/decks/:id/cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/guest/decks/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Collections",
+      "item": [
+        {
+          "name": "GET /api/collections/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/collections/me"
+          }
+        },
+        {
+          "name": "GET /api/collections/me/cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/collections/me/cards"
+          }
+        },
+        {
+          "name": "POST /api/collections/me/cards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/collections/me/cards",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"cardType\": \"character\",\n  \"quantity\": 1,\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /api/collections/me/cards/remove-one",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/collections/me/cards/remove-one",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"cardType\": \"character\",\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT /api/collections/me/cards/:cardId",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/collections/me/cards/{{cardId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2,\n  \"cardType\": \"character\",\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/collections/me/cards/:cardId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/collections/me/cards/{{cardId}}?cardType=character"
+          }
+        },
+        {
+          "name": "GET /api/collections/me/history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/collections/me/history?limit=50"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sets",
+      "item": [
+        {
+          "name": "GET /api/sets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/sets"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HTML (SPA shell)",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          },
+          "description": "Serves public/index.html"
+        },
+        {
+          "name": "GET /logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/logout"
+          },
+          "description": "Redirect; clears session."
+        },
+        {
+          "name": "GET /data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/data"
+          }
+        },
+        {
+          "name": "GET /users/:userId/decks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/decks"
+          },
+          "description": "Auth required; must match session user or guest."
+        },
+        {
+          "name": "GET /users/:userId/decks/:deckId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/decks/{{deckId}}"
+          }
+        },
+        {
+          "name": "GET /users/:userId/collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{userId}}/collection"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Static (reference)",
+      "item": [
+        {
+          "name": "GET /public/...",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/css/styles.css"
+          },
+          "description": "Example static under /public; path may vary."
+        },
+        {
+          "name": "GET /src/resources/...",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/src/resources/images/backgrounds/landscape/aesclepnotext.png"
+          },
+          "description": "Example asset; adjust filename."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Backend API layer (`src/api/`)
+
+- **Purpose:** HTTP-agnostic logic extracted from `src/routes/` — orchestration, validation helpers that do not need `Request`/`Response`, response DTO shaping, shared transforms (see `deckTransform.ts`).
+- **Routes** stay in `src/routes/` and should call into this folder; avoid growing fat handlers in route files when migrating (see `.cursor/skills/api-layer-migration/SKILL.md`).
+- **Contracts:** Public HTTP behavior is documented in repo-root `API_DOCUMENTATION.md`; after migrating a route, that doc and the Route index must list the API module path.
+- Prefer **pure functions** and explicit parameters over hidden globals; use composition-root `deps` only in route wiring, not inside deep `src/api/` internals unless already the project pattern for a given service.
