@@ -7,6 +7,39 @@
             this.maxResults = options.maxResults || 20;
         }
 
+        /**
+         * Deck editor search label for teamwork rows (matches teamwork_cards columns:
+         * name, followup_attack_types, first_attack_bonus, second_attack_bonus).
+         */
+        static formatTeamworkSearchDisplayName(card) {
+            if (!card) return '';
+            const rawName = card.name != null && String(card.name).trim() !== '' ? card.name : card.to_use;
+            const n = String(rawName != null ? rawName : '').trim();
+            const fut = String(card.followup_attack_types != null ? card.followup_attack_types : '').trim();
+            const f1 = String(card.first_attack_bonus != null ? card.first_attack_bonus : '').trim();
+            const f2 = String(card.second_attack_bonus != null ? card.second_attack_bonus : '').trim();
+            return `${n} - ${fut} - +${f1}/+${f2}`;
+        }
+
+        static teamworkCardMatchesSearchTerm(card, termLower) {
+            if (!card || !termLower) return false;
+            if (termLower === 'teamwork') return true;
+            const keys = [
+                'name',
+                'to_use',
+                'followup_attack_types',
+                'first_attack_bonus',
+                'second_attack_bonus',
+                'character',
+                'character_name'
+            ];
+            for (let i = 0; i < keys.length; i++) {
+                const v = card[keys[i]];
+                if (v != null && String(v).toLowerCase().includes(termLower)) return true;
+            }
+            return false;
+        }
+
         _getImagePath(card, cardType) {
             const img = card.image || card.image_path || '';
             return cardType === 'location'
@@ -94,14 +127,19 @@
                 else if (type === 'event' && (name.includes(term) || (card.mission_set || '').toLowerCase().includes(term) || term === 'event' || term === 'events')) match = true;
                 else if (type === 'aspect' && (card.card_name || '').toLowerCase().includes(term)) match = true;
                 else if (type === 'advanced-universe' && (name.includes(term) || charName.includes(term) || charName === term || term === 'advanced')) match = true;
-                else if (type === 'teamwork' && ((card.to_use || card.name || '').toLowerCase().includes(term) || charName.includes(term) || charName === term || term === 'teamwork')) match = true;
+                else if (type === 'teamwork' && CardSearchService.teamworkCardMatchesSearchTerm(card, term)) match = true;
                 else if (type === 'ally-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'ally')) match = true;
                 else if (type === 'training' && !card.is_foil && ((card.card_name || '').toLowerCase().includes(term) || term === 'training')) match = true;
                 else if (type === 'basic-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'basic')) match = true;
                 else if (type === 'power' && ((card.power_type || '').toLowerCase().includes(term) || term === 'power card')) match = true;
                 else if (type === 'location' && (name.includes(term) || term === 'location')) match = true;
                 if (match) {
-                    const displayName = type === 'teamwork' ? (card.to_use || card.name) : (type === 'power' ? card.power_type : (card.card_name || card.name || card.power_type));
+                    const displayName =
+                        type === 'teamwork'
+                            ? CardSearchService.formatTeamworkSearchDisplayName(card)
+                            : type === 'power'
+                              ? card.power_type
+                              : card.card_name || card.name || card.power_type;
                     if (displayName) {
                         const linked = this._linkedCharacterRaw(card);
                         const t = type === 'advanced-universe' ? type : (type === 'ally-universe' ? type : (type === 'basic-universe' ? type : type));
@@ -156,7 +194,7 @@
                           };
                 const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
                     fetchList('/api/v1/catalog/characters'),
-                    fetchList('/api/special-cards'),
+                    fetchList('/api/v1/catalog/special-cards'),
                     fetchList('/api/missions'),
                     fetchList('/api/events'),
                     fetchList('/api/aspects'),
@@ -286,21 +324,16 @@
                 if (teamwork.ok) {
                     teamwork.rows.forEach(card => {
                         const linked = (card.character || card.character_name || '');
-                        const nameMatch = (card.name || card.to_use) && (card.name || card.to_use).toLowerCase().includes(searchTerm);
-                        const characterMatch = linked && linked.toLowerCase().includes(searchTerm);
-                        const exactCharacterMatch = linked && linked.toLowerCase() === searchTerm;
-                        const typeMatch = searchTerm === 'teamwork';
-                        if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
-                            const urls = this._getSearchImageUrls(card, 'teamwork');
-                            results.push({
-                                id: card.id,
-                                name: card.to_use || card.name,
-                                type: 'teamwork',
-                                image: urls.image,
-                                fullImage: urls.fullImage,
-                                character: linked || null
-                            });
-                        }
+                        if (!CardSearchService.teamworkCardMatchesSearchTerm(card, searchTerm)) return;
+                        const urls = this._getSearchImageUrls(card, 'teamwork');
+                        results.push({
+                            id: card.id,
+                            name: CardSearchService.formatTeamworkSearchDisplayName(card),
+                            type: 'teamwork',
+                            image: urls.image,
+                            fullImage: urls.fullImage,
+                            character: linked || null
+                        });
                     });
                 }
 
@@ -401,6 +434,8 @@
     }
 
     global.CardSearchService = CardSearchService;
+    global.formatTeamworkSearchDisplayName = CardSearchService.formatTeamworkSearchDisplayName.bind(CardSearchService);
+    global.teamworkCardMatchesSearchTerm = CardSearchService.teamworkCardMatchesSearchTerm.bind(CardSearchService);
 })(window);
 
 

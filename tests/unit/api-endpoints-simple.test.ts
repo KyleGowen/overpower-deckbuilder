@@ -107,12 +107,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/special-cards', async (req, res) => {
+  app.get('/api/v1/catalog/special-cards', async (req, res) => {
     try {
       const specialCards = await mockCardRepository.getAllSpecialCards();
-      res.json({ success: true, data: specialCards });
+      res.json({ data: specialCards, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch special cards' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch special cards' }]
+      });
     }
   });
 
@@ -445,7 +449,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/special-cards', () => {
+    describe('GET /api/v1/catalog/special-cards', () => {
       it('should return all special cards successfully', async () => {
         const mockSpecialCards = [
           { id: '1', name: 'Special Card 1' },
@@ -454,12 +458,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllSpecialCards.mockResolvedValue(mockSpecialCards);
 
         const response = await request(app)
-          .get('/api/special-cards')
+          .get('/api/v1/catalog/special-cards')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockSpecialCards
+          data: mockSpecialCards,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllSpecialCards).toHaveBeenCalled();
       });

@@ -108,11 +108,13 @@ const mockSpecialCardsData = [
 
 // Mock fetch for API calls
 (global.fetch as jest.Mock).mockImplementation((url) => {
-    if (url === '/api/special-cards') {
+    if (url === '/api/v1/catalog/special-cards') {
         return Promise.resolve({
+            ok: true,
             json: () => Promise.resolve({
-                success: true,
-                data: mockSpecialCardsData
+                data: mockSpecialCardsData,
+                meta: {},
+                errors: []
             })
         });
     }
@@ -154,10 +156,16 @@ describe('Special Cards Search Functionality', () => {
                 }
 
                 try {
-                    const response = await fetch('/api/special-cards');
+                    const response = await fetch('/api/v1/catalog/special-cards');
                     const data = await response.json();
-                    
-                    if (data.success) {
+                    const ok =
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0);
+
+                    if (ok) {
                         const filteredSpecialCards = data.data.filter((card: any) => {
                             const nameMatch = nameTerm.length === 0 || card.name.toLowerCase().includes(nameTerm);
                             const characterMatch = characterTerm.length === 0 || card.character.toLowerCase().includes(characterTerm);

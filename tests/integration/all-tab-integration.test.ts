@@ -76,7 +76,7 @@ describe('All Tab Integration Tests', () => {
     it('should return all card types with set and set_number fields', async () => {
       const cardTypes = [
         { endpoint: '/api/v1/catalog/characters', type: 'character' },
-        { endpoint: '/api/special-cards', type: 'special' },
+        { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
         { endpoint: '/api/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' },
         { endpoint: '/api/aspects', type: 'aspect' },
@@ -114,7 +114,7 @@ describe('All Tab Integration Tests', () => {
       // Get cards from multiple types
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters'),
-        request(app).get('/api/special-cards'),
+        request(app).get('/api/v1/catalog/special-cards'),
         request(app).get('/api/power-cards')
       ]);
 
@@ -168,7 +168,7 @@ describe('All Tab Integration Tests', () => {
     it('should return cards with consistent data structure across all types', async () => {
       const endpoints = [
         '/api/v1/catalog/characters',
-        '/api/special-cards',
+        '/api/v1/catalog/special-cards',
         '/api/power-cards',
         '/api/v1/catalog/locations',
         '/api/missions',
@@ -227,7 +227,7 @@ describe('All Tab Integration Tests', () => {
       // Get all cards
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
         request(app).get('/api/v1/catalog/characters'),
-        request(app).get('/api/special-cards'),
+        request(app).get('/api/v1/catalog/special-cards'),
         request(app).get('/api/power-cards')
       ]);
 
@@ -334,7 +334,7 @@ describe('All Tab Integration Tests', () => {
 
       const endpoints = [
         '/api/v1/catalog/characters',
-        '/api/special-cards',
+        '/api/v1/catalog/special-cards',
         '/api/power-cards',
         '/api/v1/catalog/locations',
         '/api/aspects',
@@ -433,7 +433,7 @@ describe('All Tab Integration Tests', () => {
     it('should return valid image paths for all card types', async () => {
       const endpoints = [
         { endpoint: '/api/v1/catalog/characters', type: 'character' },
-        { endpoint: '/api/special-cards', type: 'special' },
+        { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
         { endpoint: '/api/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' }
       ];

@@ -1797,6 +1797,10 @@
                         u.pathname = '/api/v1/catalog/locations';
                         return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
                     }
+                    if (u.pathname === '/api/special-cards') {
+                        u.pathname = '/api/v1/catalog/special-cards';
+                        return input.startsWith('http') ? u.href : (u.pathname + u.search + u.hash);
+                    }
                 } catch (_e) { /* keep original */ }
                 return input;
             }
@@ -1809,6 +1813,10 @@
                     }
                     if (u.pathname === '/api/locations') {
                         u.pathname = '/api/v1/catalog/locations';
+                        return new Request(u.toString(), input);
+                    }
+                    if (u.pathname === '/api/special-cards') {
+                        u.pathname = '/api/v1/catalog/special-cards';
                         return new Request(u.toString(), input);
                     }
                 } catch (_e) { /* keep original */ }
@@ -2493,10 +2501,11 @@
                 }
                 
                 if (cardType === 'special' || cardType === '') {
-                    const response = await fetch('/api/special-cards');
+                    const response = await fetch('/api/v1/catalog/special-cards');
                     const data = await response.json();
-                    if (data.success) {
-                        cards.push(...data.data.map(card => ({
+                    const specPayload = catalogListPayload(response, data);
+                    if (specPayload.ok) {
+                        cards.push(...specPayload.rows.map(card => ({
                             ...card,
                             type: 'special',
                             displayName: card.name
@@ -2987,7 +2996,7 @@
                 const categories = [
                     { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
                     { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
-                    { type: 'special', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', api: '/api/missions', nameField: 'name' },
                     { type: 'event', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
@@ -3068,7 +3077,7 @@
                 const categories = [
                     { type: 'character', name: 'Characters', api: '/api/v1/catalog/characters', nameField: 'name' },
                     { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
-                    { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
                     { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },

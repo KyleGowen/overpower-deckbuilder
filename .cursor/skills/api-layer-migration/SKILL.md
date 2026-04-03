@@ -38,6 +38,7 @@ description: >-
 7. **Tests** — **unit:** services, DTOs, **full coverage** for each touched **`*.http.ts`** (happy + main error paths); **integration:** **≥1** test per **`*.http.ts`** file (Supertest + app from `src/test-server` when DB needed). **Merge blockers:** missing integration test or incomplete router unit coverage. Update any test `fetch` mocks with **`ok: true`** when production checks **`response.ok`**.
 8. **Docs** — **`API_V1.md`** for v1; **`API_DOCUMENTATION.md`**: remove or mark **removed** legacy paths (callers must not rely on them); checklist checkboxes and “legacy removed” meaning.
 9. **Cursor context** — update **`src/api/.cursorrules`** only when global API rules change; **`src/routes/.cursorrules`** when legacy wiring changes.
+10. **Local dev server** — when migration work for this task is **complete** (handlers, callers, tests, docs), **restart the local development server** so Express picks up new routes and any in-memory caches stay aligned with the code. Stop the running **`npm run dev`** process (if any), then start it again. Default listen port is **8085** unless **`PORT`** is set. (If you added or edited **`migrations/*.sql`**, run **`npm run migrate`** first, then restart—same workflow as **[.cursorrules](.cursorrules)** / **[AGENTS.md](AGENTS.md)**.)
 
 ## Pre-merge checklist (security)
 

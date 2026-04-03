@@ -744,12 +744,12 @@
         // Load and display special cards
         async function loadSpecialCards() {
             try {
-                const response = await fetch('/api/special-cards');
+                const response = await fetch('/api/v1/catalog/special-cards');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displaySpecialCards(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+                if (payload.ok) {
+                    displaySpecialCards(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load special cards');
                 }
@@ -1616,7 +1616,7 @@
                 const categories = [
                     { type: 'character', name: 'Characters', api: '/api/v1/catalog/characters', nameField: 'name' },
                     { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
-                    { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
                     { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },

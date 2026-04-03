@@ -125,7 +125,7 @@ async function loadCharacters() {
 
 async function loadSpecialCards() {
   try {
-    const response = await fetch('/api/special-cards');
+    const response = await fetch('/api/v1/catalog/special-cards');
     const data = await response.json();
     
     if (data.success) {
@@ -217,7 +217,7 @@ describe('Data Loading Functions', () => {
       await loadDatabaseViewData(false);
 
       expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
-      expect(global.fetch).toHaveBeenCalledWith('/api/special-cards');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/special-cards');
       expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
     });
   });
@@ -312,7 +312,7 @@ describe('Data Loading Functions', () => {
 
       await loadSpecialCards();
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/special-cards');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/special-cards');
       expect(mockDisplaySpecialCards).toHaveBeenCalledWith(mockSpecialCards);
     });
 

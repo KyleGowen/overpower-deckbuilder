@@ -89,7 +89,7 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     (globalThis as any).fetch = jest.fn(async (url: string) => {
       const dataByUrl: Record<string, any[]> = {
         '/api/v1/catalog/characters': characters,
-        '/api/special-cards': specials
+        '/api/v1/catalog/special-cards': specials
       };
       return {
         ok: true,

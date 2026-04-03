@@ -151,12 +151,23 @@ async function loadSpecialCards() {
         return;
     }
     try {
-        const response = await fetch('/api/special-cards');
+        const response = await fetch('/api/v1/catalog/special-cards');
         const data = await response.json();
-        
-        if (data.success) {
-            setCachedCardData('special-cards', data.data);
-            displaySpecialCards(data.data);
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+        if (payload.ok) {
+            setCachedCardData('special-cards', payload.rows);
+            displaySpecialCards(payload.rows);
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (typeof lockAllSpecialCardRowHeights === 'function') {

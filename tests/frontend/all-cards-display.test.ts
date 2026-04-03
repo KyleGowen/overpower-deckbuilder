@@ -265,7 +265,7 @@ describe('All Cards Display Functions', () => {
             json: () => Promise.resolve({ success: true, data: mockCards.character })
           });
         }
-        if (url === '/api/special-cards') {
+        if (url === '/api/v1/catalog/special-cards') {
           return Promise.resolve({
             ok: true,
             json: () => Promise.resolve({ success: true, data: mockCards.special })
@@ -691,7 +691,7 @@ async function loadAllCards(): Promise<any[]> {
   
   const cardTypes = [
     { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
-    { type: 'special', api: '/api/special-cards', nameField: 'name' },
+    { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
     { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },

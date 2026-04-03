@@ -271,7 +271,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Add special cards
       const specialCardsResponse = await request(app)
-        .get('/api/special-cards')
+        .get('/api/v1/catalog/special-cards')
         .expect(200);
 
       const specialCards = specialCardsResponse.body.data;

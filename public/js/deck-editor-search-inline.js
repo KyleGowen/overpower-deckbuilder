@@ -109,7 +109,7 @@ async function searchAllCards(searchTerm) {
                   };
         const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
             fetchList('/api/v1/catalog/characters'),
-            fetchList('/api/special-cards'),
+            fetchList('/api/v1/catalog/special-cards'),
             fetchList('/api/missions'),
             fetchList('/api/events'),
             fetchList('/api/aspects'),
@@ -147,7 +147,16 @@ async function searchAllCards(searchTerm) {
         if (events.ok) events.rows.forEach(e => { const nm = e.name?.toLowerCase(); const ms = e.mission_set?.toLowerCase(); if (nm?.includes(st) || ms?.includes(st) || st === 'event' || st === 'events') add(e, 'event', e.name, e.mission_set); });
         if (aspects.ok) aspects.rows.forEach(a => a.card_name?.toLowerCase().includes(st) && add(a, 'aspect', a.card_name, null));
         if (advanced.ok) advanced.rows.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'advanced') add(c, 'advanced-universe', c.name, c.character); });
-        if (teamwork.ok) teamwork.rows.forEach(c => { const n = (c.to_use || c.name)?.toLowerCase(); const ch = c.character?.toLowerCase(); if (n?.includes(st) || ch?.includes(st) || ch === st || st === 'teamwork') add(c, 'teamwork', c.to_use || c.name, c.character); });
+        if (teamwork.ok) {
+            teamwork.rows.forEach(c => {
+                const matchFn = typeof window.teamworkCardMatchesSearchTerm === 'function' && window.teamworkCardMatchesSearchTerm;
+                const fmt = typeof window.formatTeamworkSearchDisplayName === 'function' && window.formatTeamworkSearchDisplayName;
+                const matches = matchFn ? matchFn(c, st) : (c.to_use || c.name || '').toLowerCase().includes(st) || st === 'teamwork';
+                if (!matches) return;
+                const label = fmt ? fmt(c) : c.to_use || c.name;
+                add(c, 'teamwork', label, c.character);
+            });
+        }
         if (ally.ok) ally.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
         if (training.ok) training.rows.forEach(c => !c.is_foil && (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
         if (basic.ok) basic.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));

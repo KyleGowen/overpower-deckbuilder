@@ -275,7 +275,7 @@ window.APP_CDN_BASE = "https://cdn.example.com";
 
 **File:** `src/routes/card-api.routes.ts`
 
-**Service layer:** **Table-backed catalog** GETs still registered here (`/special-cards`, `/missions`, `/events`, `/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`** and **`GET /api/locations`** — use **`GET /api/v1/catalog/characters`** and **`GET /api/v1/catalog/locations`** ([API_V1.md](API_V1.md)); legacy list URLs are **not** registered (expect **404**).
+**Service layer:** **Table-backed catalog** GETs still registered here (`/missions`, `/events`, `/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, and **`GET /test`** counts/stats) call **`CatalogService`** only ([`src/api/services/catalogService.ts`](src/api/services/catalogService.ts)). The service delegates to **`PostgreSQLCardRepository`** and **`FoilCardMapRepository`**—handlers do **not** call those repositories directly. **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`** — use **`GET /api/v1/catalog/characters`**, **`GET /api/v1/catalog/locations`**, **`GET /api/v1/catalog/special-cards`** ([API_V1.md](API_V1.md)); those legacy list URLs are **not** registered (expect **404**).
 
 **`GET /api/deck-backgrounds`** uses **`deckBackgroundService`** (separate domain service), not the card catalog service.
 
@@ -289,7 +289,6 @@ Unless noted, these are **GET**, unauthenticated, and return:
 
 | Path | Data |
 |------|------|
-| `/api/special-cards` | Special cards |
 | `/api/missions` | Missions |
 | `/api/events` | Events |
 | `/api/aspects` | Aspects |
@@ -301,10 +300,10 @@ Unless noted, these are **GET**, unauthenticated, and return:
 | `/api/power-cards` | Power cards |
 | `/api/foil-card-map` | Foil mapping rows |
 
-**Sample** (legacy envelope; character/location **lists** are v1-only — see [API_V1.md](API_V1.md)):
+**Sample** (legacy envelope; character, location, and special-card **lists** are v1-only — see [API_V1.md](API_V1.md)):
 
 ```http
-GET /api/special-cards HTTP/1.1
+GET /api/missions HTTP/1.1
 ```
 
 ```json
@@ -313,7 +312,7 @@ GET /api/special-cards HTTP/1.1
   "data": [
     {
       "id": "uuid",
-      "name": "Example Special",
+      "name": "Example Mission",
       "...": "additional fields per table"
     }
   ]
@@ -868,7 +867,7 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | `/api/database/status` | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
 | GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js` | `auth.routes.ts` |
-| GET | `/api/special-cards`, `/missions`, `/events`, `/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, `/deck-backgrounds`, `/test` | `card-api.routes.ts` |
+| GET | `/missions`, `/events`, `/aspects`, `/advanced-universe`, `/teamwork`, `/ally-universe`, `/training`, `/basic-universe`, `/power-cards`, `/foil-card-map`, `/deck-backgrounds`, `/test` | `card-api.routes.ts` |
 | GET | `/api/users` | `users-debug.routes.ts` |
 | GET | `/api/debug/clear-cache`, `/api/debug/clear-card-cache` | `users-debug.routes.ts` |
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
@@ -888,7 +887,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/login` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
-| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations` | `src/api/http/dbv-catalog.http.ts` |
+| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards` | `src/api/http/dbv-catalog.http.ts` |
 
 ---
 

@@ -1321,16 +1321,28 @@ async function removeUnusablePowerCards() {
 
 function addAllSpecialCardsForCharacter(characterName) {
     // Fetch special cards data to get the cards for this character
-    fetch('/api/special-cards')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success || !data.data) {
+    fetch('/api/v1/catalog/special-cards')
+        .then(response => response.json().then(data => ({ response, data })))
+        .then(({ response, data }) => {
+            const payload =
+                typeof catalogListPayload === 'function'
+                    ? catalogListPayload(response, data)
+                    : {
+                        ok:
+                            response.ok !== false &&
+                            data &&
+                            Array.isArray(data.data) &&
+                            data.success !== false &&
+                            (!data.errors || data.errors.length === 0),
+                        rows: (data && data.data) || []
+                    };
+            if (!payload.ok) {
                 showNotification('Error loading special cards', 'error');
                 return;
             }
             
             // Filter cards for the specific character
-            const characterCards = data.data.filter(card => {
+            const characterCards = payload.rows.filter(card => {
                 const specialCharacter = card.character || card.character_name || '';
                 
                 // Handle "Any Character" specials - only include them when clicking "Any Character" Add All
@@ -1547,7 +1559,7 @@ function addAllCharacterStack(characterName) {
               };
     Promise.all([
         fetchList('/api/v1/catalog/characters'),
-        fetchList('/api/special-cards'),
+        fetchList('/api/v1/catalog/special-cards'),
         fetchList('/api/advanced-universe')
     ])
         .then(async ([charactersData, specialsData, advancedUniverseData]) => {

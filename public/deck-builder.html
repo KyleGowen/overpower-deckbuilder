@@ -4748,11 +4748,11 @@
         // Load and display special cards
         async function loadSpecialCards() {
             try {
-                const response = await fetch('/api/special-cards');
+                const response = await fetch('/api/v1/catalog/special-cards');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displaySpecialCards(data.data);
+                const payload = catalogListPayload(response, data);
+                if (payload.ok) {
+                    displaySpecialCards(payload.rows);
                 } else {
                     throw new Error('Failed to load special cards');
                 }
@@ -4815,11 +4815,12 @@
 
         function updateAllStats() {
             // This will be called after loading all data types
-            fetch('/api/special-cards')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('total-special-cards').textContent = data.data.length;
+            fetch('/api/v1/catalog/special-cards')
+                .then(async response => {
+                    const data = await response.json();
+                    const payload = catalogListPayload(response, data);
+                    if (payload.ok) {
+                        document.getElementById('total-special-cards').textContent = payload.rows.length;
                     }
                 });
             
@@ -5522,11 +5523,11 @@
                 }
 
                 try {
-                    const response = await fetch('/api/special-cards');
+                    const response = await fetch('/api/v1/catalog/special-cards');
                     const data = await response.json();
-                    
-                    if (data.success) {
-                        const filteredSpecialCards = data.data.filter(card => 
+                    const payload = catalogListPayload(response, data);
+                    if (payload.ok) {
+                        const filteredSpecialCards = payload.rows.filter(card => 
                             card.name.toLowerCase().includes(searchTerm) ||
                             card.character.toLowerCase().includes(searchTerm) ||
                             card.card_effect.toLowerCase().includes(searchTerm) ||
@@ -7370,10 +7371,11 @@
                 }
                 
                 if (cardType === 'special' || cardType === '') {
-                    const response = await fetch('/api/special-cards');
+                    const response = await fetch('/api/v1/catalog/special-cards');
                     const data = await response.json();
-                    if (data.success) {
-                        cards.push(...data.data.map(card => ({
+                    const specPayload = catalogListPayload(response, data);
+                    if (specPayload.ok) {
+                        cards.push(...specPayload.rows.map(card => ({
                             ...card,
                             type: 'special',
                             displayName: card.name
@@ -10460,7 +10462,7 @@
                 const categories = [
                     { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
                     { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
-                    { type: 'special', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'special', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', api: '/api/missions', nameField: 'name' },
                     { type: 'event', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
@@ -10731,16 +10733,17 @@
         function addAllSpecialCardsForCharacter(characterName) {
             
             // Fetch special cards data to get the cards for this character
-            fetch('/api/special-cards')
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success || !data.data) {
+            fetch('/api/v1/catalog/special-cards')
+                .then(response => response.json().then(data => ({ response, data })))
+                .then(({ response, data }) => {
+                    const payload = catalogListPayload(response, data);
+                    if (!payload.ok) {
                         showNotification('Error loading special cards', 'error');
                         return;
                     }
                     
                     // Filter cards for the specific character
-                    const characterCards = data.data.filter(card => {
+                    const characterCards = payload.rows.filter(card => {
                         const specialCharacter = card.character || card.character_name || '';
                         
                         // Handle "Any Character" specials
@@ -11034,7 +11037,7 @@
                 const categories = [
                     { type: 'character', name: 'Characters', api: '/api/v1/catalog/characters', nameField: 'name' },
                     { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
-                    { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
+                    { type: 'special', name: 'Special Cards', api: '/api/v1/catalog/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
                     { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/aspects', nameField: 'card_name' },

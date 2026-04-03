@@ -132,25 +132,9 @@ Get alternate images for a specific character.
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/locations`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/special-cards
-Get all special cards.
+### GET /api/special-cards (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/special-cards`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/special-cards/:id/alternate-images
 Get alternate images for a specific special card.

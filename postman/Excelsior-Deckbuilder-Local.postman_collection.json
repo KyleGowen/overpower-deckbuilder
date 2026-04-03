@@ -166,11 +166,11 @@
           }
         },
         {
-          "name": "GET /api/special-cards",
+          "name": "GET /api/v1/catalog/special-cards",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/special-cards"
+            "url": "{{baseUrl}}/api/v1/catalog/special-cards"
           }
         },
         {

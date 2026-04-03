@@ -124,7 +124,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get Ra's special cards
     const specialCardsResp = await request(app)
-      .get('/api/special-cards')
+      .get('/api/v1/catalog/special-cards')
       .set('Cookie', authCookie)
       .expect(200);
     

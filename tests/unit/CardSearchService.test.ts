@@ -80,7 +80,7 @@ describe('CardSearchService', () => {
 
             expect(mockFetch).toHaveBeenCalledTimes(12);
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
-            expect(mockFetch).toHaveBeenCalledWith('/api/special-cards');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/special-cards');
             expect(mockFetch).toHaveBeenCalledWith('/api/missions');
             expect(mockFetch).toHaveBeenCalledWith('/api/events');
             expect(mockFetch).toHaveBeenCalledWith('/api/aspects');
@@ -436,7 +436,15 @@ describe('CardSearchService', () => {
                 json: jest.fn().mockResolvedValue({
                     success: true,
                     data: [
-                        { id: '1', to_use: '6 Combat', name: 'Teamwork Card', image: 'teamwork.jpg' }
+                        {
+                            id: '1',
+                            to_use: '6 Combat',
+                            name: 'Teamwork Card',
+                            followup_attack_types: 'Brute Force',
+                            first_attack_bonus: '1',
+                            second_attack_bonus: '2',
+                            image: 'teamwork.jpg'
+                        }
                     ]
                 })
             });
@@ -453,10 +461,12 @@ describe('CardSearchService', () => {
             // Results are sorted alphabetically, so check if any teamwork result exists
             const teamworkResults = results.filter((r: any) => r.type === 'teamwork');
             if (teamworkResults.length > 0) {
-                const teamworkResult = teamworkResults.find((r: any) => r.name === '6 Combat');
+                const teamworkResult = teamworkResults.find(
+                    (r: any) => r.name === 'Teamwork Card - Brute Force - +1/+2'
+                );
                 expect(teamworkResult).toBeDefined();
                 expect(teamworkResult).toMatchObject({
-                    name: '6 Combat',
+                    name: 'Teamwork Card - Brute Force - +1/+2',
                     type: 'teamwork'
                 });
             } else {

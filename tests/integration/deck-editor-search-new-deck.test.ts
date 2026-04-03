@@ -99,7 +99,8 @@ describe('Deck Editor Search - New Deck Integration', () => {
       .set('Cookie', authCookie);
 
     expect(charactersResponse.status).toBe(200);
-    expect(charactersResponse.body.success).toBe(true);
+    expect(charactersResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(charactersResponse.body.data)).toBe(true);
     expect(charactersResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${charactersResponse.body.data.length} characters`);
 
@@ -163,11 +164,12 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Step 8: Test searching for different card types
     const specialCardsResponse = await request(app)
-      .get('/api/special-cards')
+      .get('/api/v1/catalog/special-cards')
       .set('Cookie', authCookie);
 
     expect(specialCardsResponse.status).toBe(200);
-    expect(specialCardsResponse.body.success).toBe(true);
+    expect(specialCardsResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(specialCardsResponse.body.data)).toBe(true);
     expect(specialCardsResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${specialCardsResponse.body.data.length} special cards`);
 
@@ -196,17 +198,19 @@ describe('Deck Editor Search - New Deck Integration', () => {
       .set('Cookie', authCookie);
 
     expect(characterSearchResponse.status).toBe(200);
-    expect(characterSearchResponse.body.success).toBe(true);
+    expect(characterSearchResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(characterSearchResponse.body.data)).toBe(true);
     expect(characterSearchResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${characterSearchResponse.body.data.length} character cards`);
 
     // Test searching for special cards
     const specialSearchResponse = await request(app)
-      .get('/api/special-cards')
+      .get('/api/v1/catalog/special-cards')
       .set('Cookie', authCookie);
 
     expect(specialSearchResponse.status).toBe(200);
-    expect(specialSearchResponse.body.success).toBe(true);
+    expect(specialSearchResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(specialSearchResponse.body.data)).toBe(true);
     expect(specialSearchResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${specialSearchResponse.body.data.length} special cards`);
 
@@ -232,8 +236,9 @@ describe('Deck Editor Search - New Deck Integration', () => {
       .set('Cookie', authCookie);
 
     expect(charactersResponse.status).toBe(200);
-    expect(charactersResponse.body.success).toBe(true);
-    
+    expect(charactersResponse.body.errors ?? []).toEqual([]);
+    expect(Array.isArray(charactersResponse.body.data)).toBe(true);
+
     // Filter for something that doesn't exist (like the frontend search would)
     const emptyResults = charactersResponse.body.data.filter((char: any) => 
       char.name && char.name.toLowerCase().includes('nonexistentcard12345')

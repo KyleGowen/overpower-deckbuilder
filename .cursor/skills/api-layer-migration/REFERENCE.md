@@ -52,3 +52,5 @@ Paste under the right TOC section (auth, dbv-catalog, …):
 | 2026-04-03 | Initial skill: doc + Cursor context updates required per migration. |
 | 2026-04-03 | API_V1.md + checklist + MIGRATION_ARCHITECTURE; v1 loop + testing gates. |
 | 2026-04-03 | Policy: after v1 ships for a route, **remove** legacy handler; update all clients + docs; v1 envelope + `catalog-v1-envelope.js` for list payloads. |
+| 2026-04-03 | P0: `GET /api/v1/catalog/special-cards` added; legacy `GET /api/special-cards` removed (same pattern as characters/locations). |
+| 2026-04-03 | Loop step 10: when migration work is complete, **restart `npm run dev`** (after `npm run migrate` if SQL changed); aligns with repo `.cursorrules` / `AGENTS.md`. |
