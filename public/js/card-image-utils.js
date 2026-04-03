@@ -81,22 +81,50 @@ function ensureLocationPathHasTypeFolder(path) {
     return path;
 }
 
+/** Images subdir under /src/resources/cards/images/ that has a thumb/ tree (matches generateCardThumbnails.ts). */
+function thumbImageSubdirForCardType(cardType) {
+    switch (cardType) {
+        case 'character':
+            return 'characters';
+        case 'mission':
+            return 'missions';
+        case 'location':
+            return 'locations';
+        case 'special':
+            return 'specials';
+        case 'power':
+            return 'power-cards';
+        case 'event':
+            return 'events';
+        case 'aspect':
+            return 'aspects';
+        case 'advanced-universe':
+        case 'advanced_universe':
+            return 'advanced-universe';
+        case 'teamwork':
+            return 'teamwork-universe';
+        case 'ally-universe':
+        case 'ally_universe':
+            return 'ally-universe';
+        case 'training':
+            return 'training-universe';
+        case 'basic-universe':
+        case 'basic_universe':
+            return 'basic-universe';
+        default:
+            return null;
+    }
+}
+
 // Internal path builder — returns a relative /src/resources/cards/images/... path.
 // Use getCardImagePath() publicly; it applies the CDN prefix on top.
 function _getCardImagePathRaw(card, cardType, options) {
     const useThumbnail = options && options.useThumbnail === true;
     function maybeThumbnail(path) {
         if (!useThumbnail || !path) return path;
-        if (cardType === 'character' && path.startsWith('/src/resources/cards/images/characters/')) {
-            return toThumbnailPath(path);
-        }
-        if (cardType === 'mission' && path.startsWith('/src/resources/cards/images/missions/')) {
-            return toThumbnailPathForType(path, 'missions');
-        }
-        if (cardType === 'location' && path.startsWith('/src/resources/cards/images/locations/')) {
-            return toThumbnailPathForType(path, 'locations');
-        }
-        return path;
+        const folder = thumbImageSubdirForCardType(cardType);
+        if (!folder) return path;
+        return toThumbnailPathForType(path, folder);
     }
     function finalPath(path) {
         if (cardType === 'location') path = ensureLocationPathHasTypeFolder(path);
@@ -119,35 +147,35 @@ function _getCardImagePathRaw(card, cardType, options) {
             }
             
             // If it's just a filename, construct the full path based on card type
-            if (!imagePath.includes('/')) {
+                if (!imagePath.includes('/')) {
                 switch (cardType) {
                     case 'character':
                         return maybeThumbnail(`/src/resources/cards/images/characters/${imagePath}`);
                     case 'special':
-                        return `/src/resources/cards/images/specials/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/specials/${imagePath}`);
                     case 'power':
-                        return `/src/resources/cards/images/power-cards/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/power-cards/${imagePath}`);
                     case 'location':
                         return finalPath(`/src/resources/cards/images/locations/${imagePath}`);
                     case 'mission':
-                        return `/src/resources/cards/images/missions/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/missions/${imagePath}`);
                     case 'event':
-                        return `/src/resources/cards/images/events/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/events/${imagePath}`);
                     case 'aspect':
-                        return `/src/resources/cards/images/aspects/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/aspects/${imagePath}`);
                     case 'advanced-universe':
                     case 'advanced_universe':
-                        return `/src/resources/cards/images/advanced-universe/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/advanced-universe/${imagePath}`);
                     case 'teamwork':
-                        return `/src/resources/cards/images/teamwork-universe/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/teamwork-universe/${imagePath}`);
                     case 'ally-universe':
                     case 'ally_universe':
-                        return `/src/resources/cards/images/ally-universe/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/ally-universe/${imagePath}`);
                     case 'training':
-                        return `/src/resources/cards/images/training-universe/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/training-universe/${imagePath}`);
                     case 'basic-universe':
                     case 'basic_universe':
-                        return `/src/resources/cards/images/basic-universe/${imagePath}`;
+                        return maybeThumbnail(`/src/resources/cards/images/basic-universe/${imagePath}`);
                     default:
                         return '/src/resources/cards/images/placeholder.webp';
                 }
@@ -181,30 +209,30 @@ function _getCardImagePathRaw(card, cardType, options) {
                 case 'character':
                     return maybeThumbnail(`/src/resources/cards/images/characters/${actualImagePath}`);
                 case 'special':
-                    return `/src/resources/cards/images/specials/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/specials/${actualImagePath}`);
                 case 'power':
-                    return `/src/resources/cards/images/power-cards/${actualImagePath}`;
-                    case 'location':
-                        return finalPath(`/src/resources/cards/images/locations/${actualImagePath}`);
+                    return maybeThumbnail(`/src/resources/cards/images/power-cards/${actualImagePath}`);
+                case 'location':
+                    return finalPath(`/src/resources/cards/images/locations/${actualImagePath}`);
                 case 'mission':
-                    return `/src/resources/cards/images/missions/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/missions/${actualImagePath}`);
                 case 'event':
-                    return `/src/resources/cards/images/events/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/events/${actualImagePath}`);
                 case 'aspect':
-                    return `/src/resources/cards/images/aspects/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/aspects/${actualImagePath}`);
                 case 'advanced-universe':
                 case 'advanced_universe':
-                    return `/src/resources/cards/images/advanced-universe/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/advanced-universe/${actualImagePath}`);
                 case 'teamwork':
-                    return `/src/resources/cards/images/teamwork-universe/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/teamwork-universe/${actualImagePath}`);
                 case 'ally-universe':
                 case 'ally_universe':
-                    return `/src/resources/cards/images/ally-universe/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/ally-universe/${actualImagePath}`);
                 case 'training':
-                    return `/src/resources/cards/images/training-universe/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/training-universe/${actualImagePath}`);
                 case 'basic-universe':
                 case 'basic_universe':
-                    return `/src/resources/cards/images/basic-universe/${actualImagePath}`;
+                    return maybeThumbnail(`/src/resources/cards/images/basic-universe/${actualImagePath}`);
                 default:
                     return '/src/resources/cards/images/placeholder.webp';
             }
@@ -241,4 +269,5 @@ window.mapCardIdToDatabaseId = mapCardIdToDatabaseId;
 window.mapImagePathToActualFile = mapImagePathToActualFile;
 window.toThumbnailPath = toThumbnailPath;
 window.toThumbnailPathForType = toThumbnailPathForType;
+window.thumbImageSubdirForCardType = thumbImageSubdirForCardType;
 window.getCardImagePath = getCardImagePath;

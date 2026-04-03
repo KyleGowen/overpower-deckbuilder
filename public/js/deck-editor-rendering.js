@@ -4,22 +4,18 @@
 // ===== Deck editor card-view image loading (thumbnail-first + progressive full-res) =====
 
 /**
- * Returns the initial image URL for a deck editor card-view tile.
- * For character/location/mission we have thumbnails: return thumbnail so something appears fast.
- * For other types (special, power, etc.) return full-res (no thumbnail exists).
- * Relies on window.toThumbnailPath and window.toThumbnailPathForType from card-image-utils.js.
+ * Returns the initial image URL for a deck editor card-view tile (thumbnail when a thumb/ asset exists).
+ * Relies on thumbImageSubdirForCardType + toThumbnailPathForType from card-image-utils.js.
  */
 function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
     if (!fullResPath || typeof fullResPath !== 'string') return fullResPath;
-    if (cardType === 'character' && typeof window.toThumbnailPath === 'function') {
-        const thumb = window.toThumbnailPath(fullResPath);
-        return thumb !== fullResPath ? thumb : fullResPath;
-    }
-    if ((cardType === 'location' || cardType === 'mission') && typeof window.toThumbnailPathForType === 'function') {
-        const thumb = window.toThumbnailPathForType(fullResPath, cardType === 'location' ? 'locations' : 'missions');
-        return thumb !== fullResPath ? thumb : fullResPath;
-    }
-    return fullResPath;
+    const folder =
+        typeof window.thumbImageSubdirForCardType === 'function'
+            ? window.thumbImageSubdirForCardType(cardType)
+            : null;
+    if (!folder || typeof window.toThumbnailPathForType !== 'function') return fullResPath;
+    const thumb = window.toThumbnailPathForType(fullResPath, folder);
+    return thumb !== fullResPath ? thumb : fullResPath;
 }
 
 /**

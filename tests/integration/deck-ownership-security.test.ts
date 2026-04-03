@@ -137,7 +137,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // Get available characters
       const charactersResponse = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
@@ -165,7 +165,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // First add a card to the deck
       const charactersResponse = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
@@ -266,7 +266,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // Get available characters
       const charactersResponse = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', nonOwnerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
@@ -292,7 +292,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // First add a card to the deck as the owner
       const charactersResponse = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);

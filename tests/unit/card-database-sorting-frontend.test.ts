@@ -44,6 +44,7 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     // Silence the performance logs in tests.
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
 
+    execFrontendScript('public/js/catalog-v1-envelope.js');
     // Load All tab implementation (defines window.loadAllCards)
     execFrontendScript('public/js/all-cards-display.js');
     expect(typeof (window as any).loadAllCards).toBe('function');
@@ -87,10 +88,11 @@ describe('Card Database frontend sorting (All/Special/Locations)', () => {
     // Mock fetch for all card-type endpoints
     (globalThis as any).fetch = jest.fn(async (url: string) => {
       const dataByUrl: Record<string, any[]> = {
-        '/api/characters': characters,
+        '/api/v1/catalog/characters': characters,
         '/api/special-cards': specials
       };
       return {
+        ok: true,
         async json() {
           return { success: true, data: dataByUrl[url] || [] };
         }

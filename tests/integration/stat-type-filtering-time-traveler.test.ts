@@ -33,7 +33,7 @@ describe('Stat Type Filtering - Time Traveler special case', () => {
   });
 
   it('treats Intelligence 8 as usable for Time Traveler, 9 as unusable', async () => {
-    const charactersResp = await request(app).get('/api/characters').expect(200);
+    const charactersResp = await request(app).get('/api/v1/catalog/characters').expect(200);
     const characters = charactersResp.body.data || [];
     const timeTraveler = characters.find((c: any) => (c.name || '').toLowerCase() === 'time traveler');
     expect(timeTraveler).toBeTruthy();
@@ -62,7 +62,7 @@ describe('Stat Type Filtering - Time Traveler special case', () => {
   });
 
   it('uses effective overrides for Any-Power/Multi Power with Time Traveler', async () => {
-    const charactersResp = await request(app).get('/api/characters').expect(200);
+    const charactersResp = await request(app).get('/api/v1/catalog/characters').expect(200);
     const characters = charactersResp.body.data || [];
     const timeTraveler = characters.find((c: any) => (c.name || '').toLowerCase() === 'time traveler');
     expect(timeTraveler).toBeTruthy();

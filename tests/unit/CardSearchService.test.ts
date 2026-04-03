@@ -14,9 +14,15 @@ describe('CardSearchService', () => {
         mockFetch = jest.fn();
         global.fetch = mockFetch as any;
 
-        // Load CardSearchService component
+        // Load card-image-utils first so getCardImagePath resolves thumbs + fullImage
         const fs = require('fs');
         const path = require('path');
+        (window as any).APP_CDN_BASE = '';
+        const utilsCode = fs.readFileSync(
+            path.join(__dirname, '../../public/js/card-image-utils.js'),
+            'utf8'
+        );
+        eval(utilsCode);
         const componentCode = fs.readFileSync(
             path.join(__dirname, '../../public/js/services/CardSearchService.js'),
             'utf8'
@@ -73,7 +79,7 @@ describe('CardSearchService', () => {
             await service.search('test');
 
             expect(mockFetch).toHaveBeenCalledTimes(12);
-            expect(mockFetch).toHaveBeenCalledWith('/api/characters');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
             expect(mockFetch).toHaveBeenCalledWith('/api/special-cards');
             expect(mockFetch).toHaveBeenCalledWith('/api/missions');
             expect(mockFetch).toHaveBeenCalledWith('/api/events');
@@ -84,7 +90,7 @@ describe('CardSearchService', () => {
             expect(mockFetch).toHaveBeenCalledWith('/api/training');
             expect(mockFetch).toHaveBeenCalledWith('/api/basic-universe');
             expect(mockFetch).toHaveBeenCalledWith('/api/power-cards');
-            expect(mockFetch).toHaveBeenCalledWith('/api/locations');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
 
         it('should handle fetch errors gracefully', async () => {
@@ -137,7 +143,7 @@ describe('CardSearchService', () => {
                 });
             } else {
                 // If no results, verify the search was called correctly
-                expect(mockFetch).toHaveBeenCalledWith('/api/characters');
+                expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
             }
         });
 
@@ -622,7 +628,8 @@ describe('CardSearchService', () => {
                 id: '1',
                 name: 'Test Location',
                 type: 'location',
-                image: '/src/resources/cards/images/locations/location.jpg'
+                image: '/src/resources/cards/images/locations/thumb/location.webp',
+                fullImage: '/src/resources/cards/images/locations/location.jpg'
             });
         });
 

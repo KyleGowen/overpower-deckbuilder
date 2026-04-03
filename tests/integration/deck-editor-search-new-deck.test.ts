@@ -95,7 +95,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Step 3: Search for cards using the individual card APIs (like the frontend does)
     const charactersResponse = await request(app)
-      .get('/api/characters')
+      .get('/api/v1/catalog/characters')
       .set('Cookie', authCookie);
 
     expect(charactersResponse.status).toBe(200);
@@ -192,7 +192,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Test searching for characters
     const characterSearchResponse = await request(app)
-      .get('/api/characters')
+      .get('/api/v1/catalog/characters')
       .set('Cookie', authCookie);
 
     expect(characterSearchResponse.status).toBe(200);
@@ -228,7 +228,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Test searching for characters and filtering for something that doesn't exist
     const charactersResponse = await request(app)
-      .get('/api/characters')
+      .get('/api/v1/catalog/characters')
       .set('Cookie', authCookie);
 
     expect(charactersResponse.status).toBe(200);

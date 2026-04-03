@@ -75,10 +75,10 @@ async function loadAllCards() {
     const startTimestamp = new Date().toISOString();
     
     const cardTypes = [
-        { type: 'character', api: '/api/characters', nameField: 'name' },
+        { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
         { type: 'special', api: '/api/special-cards', nameField: 'name' },
         { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
-        { type: 'location', api: '/api/locations', nameField: 'name' },
+        { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
         { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
         { type: 'mission', api: '/api/missions', nameField: 'name' },
         { type: 'event', api: '/api/events', nameField: 'name' },
@@ -136,9 +136,12 @@ async function loadAllCards() {
             const data = await response.json();
             const typeEndTime = performance.now();
             const typeDuration = typeEndTime - typeStartTime;
-            
-            if (data.success && data.data) {
-                const cards = data.data.map(card => ({
+            const payload =
+                typeof catalogListPayload === 'function'
+                    ? catalogListPayload(response, data)
+                    : { ok: !!(data && data.success && data.data), rows: (data && data.data) || [] };
+            if (payload.ok) {
+                const cards = payload.rows.map(card => ({
                     ...card,
                     cardType: cardType.type,
                     nameField: cardType.nameField
@@ -154,7 +157,9 @@ async function loadAllCards() {
                     success: true
                 };
             } else {
-                console.warn(`  ✗ ${cardType.type}: Failed to load (${data.error || 'Unknown error'})`);
+                console.warn(
+                    `  ✗ ${cardType.type}: Failed to load (${(data && data.error) || 'Unknown error'})`
+                );
                 return {
                     type: cardType.type,
                     cards: [],

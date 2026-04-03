@@ -289,16 +289,17 @@
         </div>
     </div>
 
+    <script src="/js/catalog-v1-envelope.js"></script>
     <script>
         // Load characters data
         async function loadCharacters() {
             try {
-                const response = await fetch('/api/characters');
+                const response = await fetch('/api/v1/catalog/characters');
                 const result = await response.json();
-                
-                if (result.success) {
+                const payload = catalogListPayload(response, result);
+                if (payload.ok) {
                     const tbody = document.getElementById('characters-table-body');
-                    tbody.innerHTML = result.data.map(char => `
+                    tbody.innerHTML = payload.rows.map(char => `
                         <tr>
                             <td><strong>${char.name}</strong></td>
                             <td>${char.energy}</td>

@@ -1531,26 +1531,40 @@ function addAllCharacterStack(characterName) {
         return specialCharacter === targetCharacterName;
     };
 
+    const fetchList =
+        typeof fetchCatalogList === 'function'
+            ? fetchCatalogList
+            : async (url) => {
+                  try {
+                      const r = await fetch(url);
+                      const j = await r.json();
+                      return typeof catalogListPayload === 'function'
+                          ? catalogListPayload(r, j)
+                          : { ok: !!(j && j.success), rows: (j && j.data) || [] };
+                  } catch {
+                      return { ok: false, rows: [] };
+                  }
+              };
     Promise.all([
-        fetch('/api/characters').then(response => response.json()),
-        fetch('/api/special-cards').then(response => response.json()),
-        fetch('/api/advanced-universe').then(response => response.json())
+        fetchList('/api/v1/catalog/characters'),
+        fetchList('/api/special-cards'),
+        fetchList('/api/advanced-universe')
     ])
         .then(async ([charactersData, specialsData, advancedUniverseData]) => {
-            if (!charactersData.success || !Array.isArray(charactersData.data)) {
+            if (!charactersData.ok || !Array.isArray(charactersData.rows)) {
                 showNotification('Error loading character cards', 'error');
                 return;
             }
-            if (!specialsData.success || !Array.isArray(specialsData.data)) {
+            if (!specialsData.ok || !Array.isArray(specialsData.rows)) {
                 showNotification('Error loading special cards', 'error');
                 return;
             }
-            if (!advancedUniverseData.success || !Array.isArray(advancedUniverseData.data)) {
+            if (!advancedUniverseData.ok || !Array.isArray(advancedUniverseData.rows)) {
                 showNotification('Error loading Universe: Advanced cards', 'error');
                 return;
             }
 
-            const characterCandidates = charactersData.data.filter(card =>
+            const characterCandidates = charactersData.rows.filter(card =>
                 !card.is_foil &&
                 (card.name || '').trim() === characterName &&
                 (card.name || '').trim() !== 'Any Character'
@@ -1563,10 +1577,10 @@ function addAllCharacterStack(characterName) {
 
             const characterCard = sortPreferredOriginalArt(characterCandidates)[0];
             const specialCards = dedupeByNameWithOriginalFirst(
-                specialsData.data.filter(card => !card.is_foil && specialCardMatchesCharacter(card, characterName))
+                specialsData.rows.filter(card => !card.is_foil && specialCardMatchesCharacter(card, characterName))
             );
             const advancedUniverseCards = dedupeByNameWithOriginalFirst(
-                advancedUniverseData.data.filter(card =>
+                advancedUniverseData.rows.filter(card =>
                     !card.is_foil &&
                     (card.character || '').trim() === characterName &&
                     (card.character || '').trim() !== 'Any Character'

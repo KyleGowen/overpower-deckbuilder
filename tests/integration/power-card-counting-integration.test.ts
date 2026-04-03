@@ -253,7 +253,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Add some non-power cards
       const charactersResponse = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .expect(200);
 
       const characters = charactersResponse.body.data;

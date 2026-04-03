@@ -20,6 +20,7 @@ declare global {
         toThumbnailPath?: (fullPath: string) => string;
         mapDatabaseIdToDeckCardId?: (databaseId: string, cardType: string) => string;
         mapCardIdToDatabaseId?: (cardId: string, cardType: string) => string;
+        thumbImageSubdirForCardType?: (cardType: string) => string | null;
     }
 }
 
@@ -55,6 +56,10 @@ describe('Card Image Utilities', () => {
 
         it('should export toThumbnailPath to window', () => {
             expect(typeof window.toThumbnailPath).toBe('function');
+        });
+
+        it('should export thumbImageSubdirForCardType to window', () => {
+            expect(typeof window.thumbImageSubdirForCardType).toBe('function');
         });
     });
 
@@ -162,6 +167,24 @@ describe('Card Image Utilities', () => {
             const card = { id: '1', name: '221-B Baker St.', image: '221_b_baker_st.webp' };
             const result = window.getCardImagePath!(card, 'location');
             expect(result).toBe('/src/resources/cards/images/locations/221_b_baker_st.webp');
+        });
+
+        it('should return thumbnail path for special when useThumbnail is true', () => {
+            const card = { id: '1', name: 'Shield', image: 'shield.webp' };
+            const result = window.getCardImagePath!(card, 'special', { useThumbnail: true });
+            expect(result).toBe('/src/resources/cards/images/specials/thumb/shield.webp');
+        });
+
+        it('should return thumbnail path for teamwork when useThumbnail is true', () => {
+            const card = { id: '1', name: 'TW', to_use: '6 Combat', image: 'foo.webp' };
+            const result = window.getCardImagePath!(card, 'teamwork', { useThumbnail: true });
+            expect(result).toBe('/src/resources/cards/images/teamwork-universe/thumb/foo.webp');
+        });
+
+        it('maps card types to thumb subdirs', () => {
+            expect(window.thumbImageSubdirForCardType!('power')).toBe('power-cards');
+            expect(window.thumbImageSubdirForCardType!('teamwork')).toBe('teamwork-universe');
+            expect(window.thumbImageSubdirForCardType!('unknown')).toBeNull();
         });
     });
 

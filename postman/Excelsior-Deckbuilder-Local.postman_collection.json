@@ -150,19 +150,19 @@
       "name": "Card catalog",
       "item": [
         {
-          "name": "GET /api/characters",
+          "name": "GET /api/v1/catalog/characters",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/characters"
+            "url": "{{baseUrl}}/api/v1/catalog/characters"
           }
         },
         {
-          "name": "GET /api/locations",
+          "name": "GET /api/v1/catalog/locations",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/locations"
+            "url": "{{baseUrl}}/api/v1/catalog/locations"
           }
         },
         {

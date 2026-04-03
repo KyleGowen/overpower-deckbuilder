@@ -28,9 +28,12 @@ src/resources/cards/images/
     ├── <mission-name>.webp
     └── thumb/
         └── <mission-name>.webp
+├── specials/, power-cards/, events/, aspects/
+├── advanced-universe/, teamwork-universe/, ally-universe/, training-universe/, basic-universe/
+    └── thumb/   ← same pattern under each (mirrors source subdirs)
 ```
 
-The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
 
 ---
 
@@ -38,13 +41,15 @@ The `thumb/` directories are auto-generated. Never edit files inside `thumb/` di
 
 Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either requires updating both.
 
-| Card Type  | Width | Height | CSS Selector |
-|------------|-------|--------|--------------|
-| characters | 190px | 140px  | `.deck-character-card-display` |
-| locations  | 250px | 160px  | `.deck-tile-location-preview` |
-| missions   | 140px | 200px  | `.deck-tile-mission-preview` |
+| Preset (in `THUMB_CONFIGS`) | 2× source (Sharp) | Typical use |
+|----------------------------|-------------------|-------------|
+| Character-like (`cover`)   | 380×280           | characters, specials, power-cards, aspects, universe folders |
+| Mission-like (`cover`)     | 280×400           | missions, events |
+| Location-like (`contain`)  | 500×320           | locations |
 
-To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` **and** the corresponding CSS in `public/css/deck-selection.css`.
+Deck tile CSS still targets characters / locations / missions in `public/css/deck-selection.css`. Other card types reuse the character or mission preset for list/search thumbnails.
+
+To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` **and** any CSS that assumes a fixed thumb aspect ratio.
 
 ### Resize fit (`cover` vs `contain`)
 
@@ -116,27 +121,24 @@ npm run generate:thumbnails
 
 Output example:
 ```
-🖼️  Generating card thumbnails (characters, missions, locations)...
-   Dimensions: characters 190×140, locations 250×160, missions 140×200 | WebP quality: 80
+🖼️  Generating card thumbnails (all card-art directories; backgrounds excluded)...
+   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 contain (2× retina) | WebP quality: 80
 
-📁 characters/  (190×140)
+📁 characters/  (380×280, cover)
    ✓ spider-man.webp → thumb/spider-man.webp
    5 generated, 105 skipped, 0 error(s)
 
-📁 missions/  (140×200)
-   0 generated, 28 skipped, 0 error(s)
+📁 specials/  (380×280, cover)
+   0 generated, 274 skipped, 0 error(s)
 
-📁 locations/  (250×160)
-   0 generated, 12 skipped, 0 error(s)
-
-✅ Done: 5 generated, 145 skipped (up to date), 0 error(s)
+✅ Done: … generated, … skipped (up to date), 0 error(s)
 ```
 
 ---
 
 ## Deck editor card view
 
-The deck editor’s **card view** (cards in the deck with “Change Art”, etc.) uses **thumbnail-first + progressive full-res** for character, location, and mission so the panel fills quickly instead of waiting on full-resolution images.
+The deck editor’s **card view** (cards in the deck with “Change Art”, etc.) uses **thumbnail-first + progressive full-res** for all card types that have `thumb/` assets (via `thumbImageSubdirForCardType` + `toThumbnailPathForType`) so the panel fills quickly instead of waiting on full-resolution images.
 
 - **Initial load**: For character/location/mission, the visible `<img>` `src` is set to the thumbnail URL (via `toThumbnailPath` / `toThumbnailPathForType`). Other types (special, power, event, aspect, teamwork, ally-universe, etc.) have no thumbnails and use full-res only.
 - **Progressive load (two-layer, no flash)**: After the card-view HTML is in the DOM, `initDeckEditorCardViewProgressiveLoad()` in `public/js/deck-editor-rendering.js` finds each `.card-view-image-full[data-full-res]`. It preloads the full-res image, then sets that layer’s `src` and adds `card-view-image-full--loaded` so the full-res fades in over the thumbnail. The thumbnail layer’s `src` is never changed. Same two-layer fade pattern is used in the card hover modal.

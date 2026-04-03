@@ -1,5 +1,5 @@
 // CardSearchService: centralized fetching and normalization of card search results
-// Returns results in the form: { id, name, type, image, character }
+// Returns results in the form: { id, name, type, image, fullImage?, character?, imagePath? }
 
 (function(global) {
     class CardSearchService {
@@ -12,6 +12,27 @@
             return cardType === 'location'
                 ? `/src/resources/cards/images/locations/${img}`
                 : `/src/resources/cards/images/${img}`;
+        }
+
+        /**
+         * Preview URL (thumbnail + CDN when getCardImagePath exists) and full-res URL for data-image-path / hover.
+         */
+        _getSearchImageUrls(card, cardType) {
+            const legacy = this._getImagePath(card, cardType);
+            const g = typeof global.getCardImagePath === 'function' ? global.getCardImagePath.bind(global) : null;
+            if (!g) {
+                return { image: legacy, fullImage: legacy };
+            }
+            try {
+                const preview = g(card, cardType, { useThumbnail: true });
+                const full = g(card, cardType);
+                return {
+                    image: preview || legacy,
+                    fullImage: full || legacy
+                };
+            } catch {
+                return { image: legacy, fullImage: legacy };
+            }
         }
 
         /** Linked character / universe line (API uses `character`; some caches use `character_name`). */
@@ -83,13 +104,16 @@
                     const displayName = type === 'teamwork' ? (card.to_use || card.name) : (type === 'power' ? card.power_type : (card.card_name || card.name || card.power_type));
                     if (displayName) {
                         const linked = this._linkedCharacterRaw(card);
+                        const t = type === 'advanced-universe' ? type : (type === 'ally-universe' ? type : (type === 'basic-universe' ? type : type));
+                        const urls = this._getSearchImageUrls(card, t);
                         results.push({
                             id: card.id,
                             name: displayName,
-                            type: type === 'advanced-universe' ? type : (type === 'ally-universe' ? type : (type === 'basic-universe' ? type : type)),
-                            image: this._getImagePath(card, type),
+                            type: t,
+                            image: urls.image,
+                            fullImage: urls.fullImage,
                             character: linked || null,
-                            imagePath: card.image
+                            imagePath: card.image || card.image_path
                         });
                     }
                 }
@@ -111,31 +135,50 @@
                 }
 
                 // Fallback: fetch all endpoints in parallel when map is empty
+                const fetchList =
+                    typeof fetchCatalogList === 'function'
+                        ? fetchCatalogList
+                        : async (url) => {
+                              try {
+                                  const r = await fetch(url);
+                                  const j = await r.json();
+                                  const responseOk = r.ok !== false;
+                                  const ok =
+                                      responseOk &&
+                                      j &&
+                                      Array.isArray(j.data) &&
+                                      j.success !== false &&
+                                      (!j.errors || j.errors.length === 0);
+                                  return { ok, rows: ok ? j.data : [] };
+                              } catch {
+                                  return { ok: false, rows: [] };
+                              }
+                          };
                 const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
-                    fetch('/api/characters').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/special-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/missions').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/events').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/aspects').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/advanced-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/teamwork').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/ally-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/training').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/basic-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/power-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-                    fetch('/api/locations').then(r => r.json()).catch(() => ({ success: false, data: [] }))
+                    fetchList('/api/v1/catalog/characters'),
+                    fetchList('/api/special-cards'),
+                    fetchList('/api/missions'),
+                    fetchList('/api/events'),
+                    fetchList('/api/aspects'),
+                    fetchList('/api/advanced-universe'),
+                    fetchList('/api/teamwork'),
+                    fetchList('/api/ally-universe'),
+                    fetchList('/api/training'),
+                    fetchList('/api/basic-universe'),
+                    fetchList('/api/power-cards'),
+                    fetchList('/api/v1/catalog/locations')
                 ]);
 
-                if (characters.success) {
-                    characters.data.forEach(char => {
+                if (characters.ok) {
+                    characters.rows.forEach(char => {
                         if (char.name && char.name.toLowerCase().includes(searchTerm)) {
-                            // Add default image as a result
-                            // After migration, alternate cards are separate cards, so we just add the character
+                            const urls = this._getSearchImageUrls(char, 'character');
                             results.push({
                                 id: char.id,
                                 name: char.name,
                                 type: 'character',
-                                image: `/src/resources/cards/images/${char.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null,
                                 imagePath: char.image
                             });
@@ -143,20 +186,21 @@
                     });
                 }
 
-                if (specials.success) {
-                    specials.data.forEach(card => {
+                if (specials.ok) {
+                    specials.rows.forEach(card => {
                         const linkedChar = (card.character || card.character_name || '');
                         const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
                         const characterMatch = linkedChar && linkedChar.toLowerCase().includes(searchTerm);
                         const exactCharacterMatch = linkedChar && linkedChar.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'special';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
-                            // After migration, alternate cards are separate cards, so we just add the special card
+                            const urls = this._getSearchImageUrls(card, 'special');
                             results.push({
                                 id: card.id,
                                 name: card.name,
                                 type: 'special',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: linkedChar || null,
                                 imagePath: card.image
                             });
@@ -164,165 +208,185 @@
                     });
                 }
 
-                if (missions.success) {
-                    missions.data.forEach(mission => {
+                if (missions.ok) {
+                    missions.rows.forEach(mission => {
                         const nameMatch = mission.card_name && mission.card_name.toLowerCase().includes(searchTerm);
                         const setMatch = mission.mission_set && mission.mission_set.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'mission' || searchTerm === 'missions';
                         if (nameMatch || setMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(mission, 'mission');
                             results.push({
                                 id: mission.id,
                                 name: mission.card_name,
                                 type: 'mission',
-                                image: `/src/resources/cards/images/${mission.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: mission.mission_set
                             });
                         }
                     });
                 }
 
-                if (events.success) {
-                    events.data.forEach(event => {
+                if (events.ok) {
+                    events.rows.forEach(event => {
                         const nameMatch = event.name && event.name.toLowerCase().includes(searchTerm);
                         const setMatch = event.mission_set && event.mission_set.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'event' || searchTerm === 'events';
                         if (nameMatch || setMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(event, 'event');
                             results.push({
                                 id: event.id,
                                 name: event.name,
                                 type: 'event',
-                                image: `/src/resources/cards/images/${event.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: event.mission_set
                             });
                         }
                     });
                 }
 
-                if (aspects.success) {
-                    aspects.data.forEach(aspect => {
+                if (aspects.ok) {
+                    aspects.rows.forEach(aspect => {
                         if (aspect.card_name && aspect.card_name.toLowerCase().includes(searchTerm)) {
+                            const urls = this._getSearchImageUrls(aspect, 'aspect');
                             results.push({
                                 id: aspect.id,
                                 name: aspect.card_name,
                                 type: 'aspect',
-                                image: `/src/resources/cards/images/${aspect.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }
                     });
                 }
 
-                if (advanced.success) {
-                    advanced.data.forEach(card => {
+                if (advanced.ok) {
+                    advanced.rows.forEach(card => {
                         const linked = (card.character || card.character_name || '');
                         const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
                         const characterMatch = linked && linked.toLowerCase().includes(searchTerm);
                         const exactCharacterMatch = linked && linked.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'advanced';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'advanced-universe');
                             results.push({
                                 id: card.id,
                                 name: card.name,
                                 type: 'advanced-universe',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: linked || null
                             });
                         }
                     });
                 }
 
-                if (teamwork.success) {
-                    teamwork.data.forEach(card => {
+                if (teamwork.ok) {
+                    teamwork.rows.forEach(card => {
                         const linked = (card.character || card.character_name || '');
                         const nameMatch = (card.name || card.to_use) && (card.name || card.to_use).toLowerCase().includes(searchTerm);
                         const characterMatch = linked && linked.toLowerCase().includes(searchTerm);
                         const exactCharacterMatch = linked && linked.toLowerCase() === searchTerm;
                         const typeMatch = searchTerm === 'teamwork';
                         if (nameMatch || characterMatch || exactCharacterMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'teamwork');
                             results.push({
                                 id: card.id,
                                 name: card.to_use || card.name,
                                 type: 'teamwork',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: linked || null
                             });
                         }
                     });
                 }
 
-                if (ally.success) {
-                    ally.data.forEach(card => {
+                if (ally.ok) {
+                    ally.rows.forEach(card => {
                         const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'ally';
                         if (nameMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'ally-universe');
                             results.push({
                                 id: card.id,
                                 name: card.card_name,
                                 type: 'ally-universe',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }
                     });
                 }
 
-                if (training.success) {
-                    training.data.forEach(card => {
+                if (training.ok) {
+                    training.rows.forEach(card => {
                         if (card.is_foil) return;
                         const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'training';
                         if (nameMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'training');
                             results.push({
                                 id: card.id,
                                 name: card.card_name,
                                 type: 'training',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }
                     });
                 }
 
-                if (basic.success) {
-                    basic.data.forEach(card => {
+                if (basic.ok) {
+                    basic.rows.forEach(card => {
                         const nameMatch = card.card_name && card.card_name.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'basic';
                         if (nameMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'basic-universe');
                             results.push({
                                 id: card.id,
                                 name: card.card_name,
                                 type: 'basic-universe',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }
                     });
                 }
 
-                if (power.success) {
-                    power.data.forEach(card => {
+                if (power.ok) {
+                    power.rows.forEach(card => {
                         if ((card.power_type && card.power_type.toLowerCase().includes(searchTerm)) || searchTerm === 'power card') {
+                            const urls = this._getSearchImageUrls(card, 'power');
                             results.push({
                                 id: card.id,
                                 name: card.power_type,
                                 type: 'power',
-                                image: `/src/resources/cards/images/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }
                     });
                 }
 
-                if (locations.success) {
-                    locations.data.forEach(card => {
+                if (locations.ok) {
+                    locations.rows.forEach(card => {
                         const nameMatch = card.name && card.name.toLowerCase().includes(searchTerm);
                         const typeMatch = searchTerm === 'location';
                         if (nameMatch || typeMatch) {
+                            const urls = this._getSearchImageUrls(card, 'location');
                             results.push({
                                 id: card.id,
                                 name: card.name,
                                 type: 'location',
-                                image: `/src/resources/cards/images/locations/${card.image}`,
+                                image: urls.image,
+                                fullImage: urls.fullImage,
                                 character: null
                             });
                         }

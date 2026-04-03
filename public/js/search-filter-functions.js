@@ -125,11 +125,14 @@ function setupLocationSearch() {
             }
 
             try {
-                const response = await fetch('/api/locations');
+                const response = await fetch('/api/v1/catalog/locations');
                 const data = await response.json();
-                
-                if (data.success) {
-                    const filteredLocations = data.data.filter(location => 
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : { ok: !!(data && data.success), rows: (data && data.data) || [] };
+                if (payload.ok) {
+                    const filteredLocations = payload.rows.filter(location => 
                         location.name.toLowerCase().includes(searchTerm) ||
                         location.special_ability.toLowerCase().includes(searchTerm)
                     );
@@ -153,11 +156,14 @@ function setupLocationSearch() {
             }
 
             try {
-                const response = await fetch('/api/locations');
+                const response = await fetch('/api/v1/catalog/locations');
                 const data = await response.json();
-
-                if (data.success) {
-                    const filteredLocations = data.data.filter(location =>
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : { ok: !!(data && data.success), rows: (data && data.data) || [] };
+                if (payload.ok) {
+                    const filteredLocations = payload.rows.filter(location =>
                         (location.special_ability || '').toLowerCase().includes(abilityTerm)
                     );
                     displayLocations(filteredLocations);
@@ -179,11 +185,14 @@ function setupLocationSearch() {
             }
 
             try {
-                const response = await fetch('/api/locations');
+                const response = await fetch('/api/v1/catalog/locations');
                 const data = await response.json();
-
-                if (data.success) {
-                    const filteredLocations = data.data.filter((location) =>
+                const payload =
+                    typeof catalogListPayload === 'function'
+                        ? catalogListPayload(response, data)
+                        : { ok: !!(data && data.success), rows: (data && data.data) || [] };
+                if (payload.ok) {
+                    const filteredLocations = payload.rows.filter((location) =>
                         (location.name || '').toLowerCase().includes(nameTerm)
                     );
                     displayLocations(filteredLocations);

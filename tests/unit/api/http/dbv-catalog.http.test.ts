@@ -37,4 +37,27 @@ describe('dbv-catalog.http', () => {
     expect(res.body.errors.length).toBe(1);
     expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
   });
+
+  it('GET /catalog/locations returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllLocations: jest.fn().mockResolvedValue([{ id: 'l1', name: 'Gotham' }])
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/locations').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.meta).toEqual({});
+    expect(res.body.data).toEqual([{ id: 'l1', name: 'Gotham' }]);
+    expect(res.headers['content-type']).toMatch(/application\/json/);
+  });
+
+  it('GET /catalog/locations returns 500 on service error', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllLocations: jest.fn().mockRejectedValue(new Error('db down'))
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/locations').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors.length).toBe(1);
+    expect(res.body.errors[0].code).toBe('CATALOG_ERROR');
+  });
 });

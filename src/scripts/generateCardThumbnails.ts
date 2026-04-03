@@ -1,7 +1,9 @@
 /**
- * Generate thumbnails for card images (characters, missions, locations).
+ * Generate thumbnails for card images across all card-art directories.
  * Scans each directory for all image formats, outputs resized WebP thumbnails to thumb subdirectories.
  * Run with: npm run generate:thumbnails
+ *
+ * Excludes non-card assets (e.g. backgrounds/).
  */
 
 import * as fs from 'fs';
@@ -15,7 +17,6 @@ const WEBP_QUALITY = 80;
 const FORCE_REGENERATE = process.argv.includes('--force');
 
 // Dimensions are 2× the CSS pixel display sizes for retina/HiDPI sharpness.
-// The browser requests a 190×140 image slot but on a 2× screen needs 380×280 source pixels to stay crisp.
 type ThumbResizeConfig = {
   width: number;
   height: number;
@@ -24,20 +25,47 @@ type ThumbResizeConfig = {
   background?: ResizeOptions['background'];
 };
 
-const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
-  characters: { width: 380, height: 280, fit: 'cover' },
-  // Locations (incl. ERBP promo alternates) use varied aspect ratios; cover cropped top/bottom in hovers and lists.
-  locations: {
-    width: 500,
-    height: 320,
-    fit: 'contain',
-    background: { r: 26, g: 26, b: 26, alpha: 1 },
-  },
-  missions: { width: 280, height: 400, fit: 'cover' },
+const PRESET_CHARACTER: ThumbResizeConfig = { width: 380, height: 280, fit: 'cover' };
+const PRESET_MISSION: ThumbResizeConfig = { width: 280, height: 400, fit: 'cover' };
+const PRESET_LOCATION: ThumbResizeConfig = {
+  width: 500,
+  height: 320,
+  fit: 'contain',
+  background: { r: 26, g: 26, b: 26, alpha: 1 },
 };
 
+/** One entry per top-level folder under src/resources/cards/images (excluding backgrounds, etc.). */
+const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
+  characters: PRESET_CHARACTER,
+  missions: PRESET_MISSION,
+  locations: PRESET_LOCATION,
+  specials: PRESET_CHARACTER,
+  'power-cards': PRESET_CHARACTER,
+  events: PRESET_MISSION,
+  aspects: PRESET_CHARACTER,
+  'advanced-universe': PRESET_CHARACTER,
+  'teamwork-universe': PRESET_CHARACTER,
+  'ally-universe': PRESET_CHARACTER,
+  'training-universe': PRESET_CHARACTER,
+  'basic-universe': PRESET_CHARACTER,
+};
+
+const THUMBNAIL_DIRS = [
+  'characters',
+  'missions',
+  'locations',
+  'specials',
+  'power-cards',
+  'events',
+  'aspects',
+  'advanced-universe',
+  'teamwork-universe',
+  'ally-universe',
+  'training-universe',
+  'basic-universe',
+] as const;
+
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
-const THUMBNAIL_DIRS = ['characters', 'missions', 'locations'] as const;
 
 function getAllImageFiles(dir: string, basePath: string = dir): string[] {
   const results: string[] = [];
@@ -121,11 +149,14 @@ async function processDirectory(
 }
 
 async function generateThumbnails(): Promise<void> {
-  console.log('🖼️  Generating card thumbnails (characters, missions, locations)...');
+  console.log('🖼️  Generating card thumbnails (all card-art directories; backgrounds excluded)...');
   if (FORCE_REGENERATE) {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
-  console.log('   Dimensions: characters 380×280 (cover), locations 500×320 (contain), missions 280×400 (cover) (2× retina) | WebP quality:', WEBP_QUALITY);
+  console.log(
+    '   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 contain (2× retina) | WebP quality:',
+    WEBP_QUALITY
+  );
   console.log('');
 
   let totalProcessed = 0;

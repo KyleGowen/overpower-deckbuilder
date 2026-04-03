@@ -101,7 +101,7 @@ describe('KO Feature Dimming Integration Tests', () => {
   async function loadCardData() {
     // Get characters
     const charactersResp = await request(app)
-      .get('/api/characters')
+      .get('/api/v1/catalog/characters')
       .set('Cookie', authCookie)
       .expect(200);
     

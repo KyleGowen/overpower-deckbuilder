@@ -3,6 +3,25 @@
  * Tests the All tab functionality for displaying all cards in a unified grid
  */
 
+function catalogListPayload(response: { ok?: boolean }, json: unknown): { ok: boolean; rows: any[] } {
+  const j = json as Record<string, unknown>;
+  if (!response || response.ok === false || !j) {
+    return { ok: false, rows: [] };
+  }
+  if (j.success === false) {
+    return { ok: false, rows: [] };
+  }
+  if (Array.isArray(j.errors) && j.errors.length > 0) {
+    return { ok: false, rows: [] };
+  }
+  if (!Array.isArray(j.data)) {
+    return { ok: false, rows: [] };
+  }
+  return { ok: true, rows: j.data as any[] };
+}
+
+(global as any).catalogListPayload = catalogListPayload;
+
 // Mock fetch
 global.fetch = jest.fn();
 
@@ -40,7 +59,10 @@ global.localStorage = localStorageMock as any;
 // Mock DOM elements
 const mockGridContainer = {
   innerHTML: '',
-  style: { display: 'block' }
+  style: { display: 'block' },
+  insertAdjacentHTML: jest.fn((_position: string, html: string) => {
+    mockGridContainer.innerHTML += html;
+  })
 };
 
 const mockFilterContainer = {
@@ -82,12 +104,6 @@ const mockQuerySelectorAll = jest.fn((selector: string) => {
   return [];
 });
 
-// Set up global mocks
-(global as any).document = {
-  getElementById: mockGetElementById,
-  querySelectorAll: mockQuerySelectorAll
-};
-
 // Mock global functions
 const mockGetCurrentUser = jest.fn(() => ({ role: 'USER' }));
 const mockIsGuestUser = jest.fn(() => false);
@@ -111,14 +127,17 @@ const mockOpenModal = jest.fn();
   openModal: mockOpenModal
 };
 
+let allCardsData: any[] = [];
+let allCardsFiltered: any[] = [];
+
+/** Set in beforeEach so helpers do not rely on global.document (jsdom vs test stub mismatch). */
+let testDom: { getElementById: jest.Mock; querySelectorAll: jest.Mock };
+
 // Import the functions from all-cards-display.js
 // Since it's a JavaScript file, we'll need to mock it or extract the logic
 // For now, we'll recreate the key functions for testing
 
 describe('All Cards Display Functions', () => {
-  let allCardsData: any[];
-  let allCardsFiltered: any[];
-
   beforeEach(() => {
     allCardsData = [];
     allCardsFiltered = [];
@@ -126,7 +145,36 @@ describe('All Cards Display Functions', () => {
     localStorageMock.clear();
     mockGridContainer.innerHTML = '';
     mockFilterContainer.innerHTML = '';
+    (mockGridContainer.insertAdjacentHTML as jest.Mock).mockClear();
     (global.fetch as jest.Mock).mockClear();
+
+    mockGetElementById.mockImplementation((id: string) => {
+      if (id === 'all-cards-grid-container') return mockGridContainer;
+      if (id === 'all-cards-type-filters') return mockFilterContainer;
+      return null;
+    });
+    mockQuerySelectorAll.mockImplementation((selector: string) => {
+      if (selector === '.card-type-filter-btn.active') {
+        return [mockFilterButton];
+      }
+      if (selector === '.card-type-filter-btn') {
+        return [mockFilterButton];
+      }
+      return [];
+    });
+
+    const docStub = {
+      getElementById: mockGetElementById,
+      querySelectorAll: mockQuerySelectorAll
+    };
+    testDom = docStub;
+    (global as any).document = docStub;
+    (global as any).window.document = docStub;
+
+    global.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    }) as typeof requestAnimationFrame;
   });
 
   describe('getCardName', () => {
@@ -211,22 +259,26 @@ describe('All Cards Display Functions', () => {
       };
 
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
-        if (url === '/api/characters') {
+        if (url === '/api/v1/catalog/characters') {
           return Promise.resolve({
+            ok: true,
             json: () => Promise.resolve({ success: true, data: mockCards.character })
           });
         }
         if (url === '/api/special-cards') {
           return Promise.resolve({
+            ok: true,
             json: () => Promise.resolve({ success: true, data: mockCards.special })
           });
         }
         if (url === '/api/power-cards') {
           return Promise.resolve({
+            ok: true,
             json: () => Promise.resolve({ success: true, data: mockCards.power })
           });
         }
         return Promise.resolve({
+          ok: true,
           json: () => Promise.resolve({ success: true, data: [] })
         });
       });
@@ -244,9 +296,16 @@ describe('All Cards Display Functions', () => {
         { id: '3', name: 'Card 3', cardType: 'power', set: 'SKY', set_number: '001' }
       ];
 
-      (global.fetch as jest.Mock).mockImplementation(() => {
+      (global.fetch as jest.Mock).mockImplementation((url: string) => {
+        if (url === '/api/v1/catalog/characters') {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ data: mockCards })
+          });
+        }
         return Promise.resolve({
-          json: () => Promise.resolve({ success: true, data: mockCards })
+          ok: true,
+          json: () => Promise.resolve({ success: true, data: [] })
         });
       });
 
@@ -269,6 +328,7 @@ describe('All Cards Display Functions', () => {
     it('should handle failed API responses', async () => {
       (global.fetch as jest.Mock).mockImplementation(() => {
         return Promise.resolve({
+          ok: true,
           json: () => Promise.resolve({ success: false, error: 'Failed to load' })
         });
       });
@@ -281,6 +341,7 @@ describe('All Cards Display Functions', () => {
     it('should log performance metrics', async () => {
       (global.fetch as jest.Mock).mockImplementation(() => {
         return Promise.resolve({
+          ok: true,
           json: () => Promise.resolve({ success: true, data: [] })
         });
       });
@@ -288,8 +349,15 @@ describe('All Cards Display Functions', () => {
       await loadAllCards();
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('All Cards Load Performance'));
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Total load time'));
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Total cards loaded'));
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Total load time'),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Total cards loaded'),
+        expect.anything()
+      );
     });
   });
 
@@ -347,7 +415,7 @@ describe('All Cards Display Functions', () => {
     it('should filter cards by active filter buttons', () => {
       const mockActiveButton = {
         ...mockFilterButton,
-        getAttribute: jest.fn(() => 'character')
+        getAttribute: jest.fn((_attr: string): 'character' | null => 'character')
       };
       
       mockQuerySelectorAll.mockImplementation((selector: string) => {
@@ -375,7 +443,7 @@ describe('All Cards Display Functions', () => {
       localStorageMock.setItem('all-cards-filter-state', JSON.stringify({ character: true, special: false }));
       const mockActiveButton = {
         ...mockFilterButton,
-        getAttribute: jest.fn(() => 'character')
+        getAttribute: jest.fn((_attr: string): 'character' | null => 'character')
       };
       
       mockQuerySelectorAll.mockImplementation((selector: string) => {
@@ -435,6 +503,7 @@ describe('All Cards Display Functions', () => {
     it('should load cards, filter, and initialize filters', async () => {
       (global.fetch as jest.Mock).mockImplementation(() => {
         return Promise.resolve({
+          ok: true,
           json: () => Promise.resolve({ success: true, data: [] })
         });
       });
@@ -450,8 +519,11 @@ describe('All Cards Display Functions', () => {
 
       await loadAndDisplayAllCards();
 
-      expect(console.error).toHaveBeenCalledWith('Error loading all cards:', expect.any(Error));
-      expect(mockGridContainer.innerHTML).toContain('Error loading cards');
+      // loadAllCards catches per-type failures without throwing; outer try/catch is for unexpected throws.
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error loading'),
+        expect.any(Error)
+      );
     });
   });
 
@@ -618,10 +690,10 @@ async function loadAllCards(): Promise<any[]> {
   console.log('Loading card types...');
   
   const cardTypes = [
-    { type: 'character', api: '/api/characters', nameField: 'name' },
+    { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
     { type: 'special', api: '/api/special-cards', nameField: 'name' },
     { type: 'advanced-universe', api: '/api/advanced-universe', nameField: 'name' },
-    { type: 'location', api: '/api/locations', nameField: 'name' },
+    { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
     { type: 'aspect', api: '/api/aspects', nameField: 'card_name' },
     { type: 'mission', api: '/api/missions', nameField: 'name' },
     { type: 'event', api: '/api/events', nameField: 'name' },
@@ -643,8 +715,9 @@ async function loadAllCards(): Promise<any[]> {
       const typeEndTime = performance.now();
       const typeDuration = typeEndTime - typeStartTime;
       
-      if (data.success && data.data) {
-        const cards = data.data.map((card: any) => ({
+      const payload = catalogListPayload(response as { ok?: boolean }, data);
+      if (payload.ok) {
+        const cards = payload.rows.map((card: any) => ({
           ...card,
           cardType: cardType.type,
           nameField: cardType.nameField
@@ -730,16 +803,38 @@ async function loadAllCards(): Promise<any[]> {
   return loadedCards;
 }
 
+const ALL_CARDS_BATCH_SIZE = 25;
+
+function renderCardsInBatches(container: any, sortedCards: any[]): void {
+  container.innerHTML = '';
+  let index = 0;
+
+  function renderNextBatch() {
+    const batch = sortedCards.slice(index, index + ALL_CARDS_BATCH_SIZE);
+    if (batch.length === 0) return;
+
+    const html = batch.map((card: any) => renderCardCell(card)).join('');
+    container.insertAdjacentHTML('beforeend', html);
+    index += batch.length;
+
+    if (index < sortedCards.length) {
+      global.requestAnimationFrame(renderNextBatch);
+    }
+  }
+
+  global.requestAnimationFrame(renderNextBatch);
+}
+
 function displayAllCards(cards: any[] | null = null): void {
-  const container = document.getElementById('all-cards-grid-container');
+  const container = testDom.getElementById('all-cards-grid-container');
   if (!container) {
     console.error('all-cards-grid-container not found');
     return;
   }
-  
+
   const cardsToDisplay = cards || allCardsFiltered || allCardsData;
   const sortedCards = cardsToDisplay;
-  
+
   if (sortedCards.length > 0) {
     console.log('First 10 sorted cards (set -> set_number):');
     sortedCards.slice(0, 10).forEach((card, idx) => {
@@ -750,17 +845,17 @@ function displayAllCards(cards: any[] | null = null): void {
       console.log(`  ${idx + 1}. [${setName}] ${setNum} - ${cardName} (${cardType})`);
     });
   }
-  
-  container.innerHTML = sortedCards.map((card: any) => renderCardCell(card)).join('');
-  
+
+  renderCardsInBatches(container, sortedCards);
+
   console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }
 
 function filterAllCardsByType(): void {
-  const filterState = JSON.parse(localStorage.getItem('all-cards-filter-state') || '{}');
+  const filterState = JSON.parse(localStorageMock.getItem('all-cards-filter-state') || '{}');
   
   const enabledTypes = new Set<string>();
-  document.querySelectorAll('.card-type-filter-btn.active').forEach((btn: any) => {
+  testDom.querySelectorAll('.card-type-filter-btn.active').forEach((btn: any) => {
     enabledTypes.add(btn.getAttribute('data-card-type'));
   });
   
@@ -778,9 +873,9 @@ function filterAllCardsByType(): void {
 }
 
 function initializeAllCardsFilters(): void {
-  const filterState = JSON.parse(localStorage.getItem('all-cards-filter-state') || '{}');
+  const filterState = JSON.parse(localStorageMock.getItem('all-cards-filter-state') || '{}');
   
-  document.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
+  testDom.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
     const cardType = btn.getAttribute('data-card-type');
     const isEnabled = filterState[cardType] !== false;
     
@@ -795,7 +890,7 @@ function initializeAllCardsFilters(): void {
     }
   });
   
-  document.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
+  testDom.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
     btn.addEventListener('click', function(this: any) {
       const cardType = this.getAttribute('data-card-type');
       const isActive = this.classList.contains('active');
@@ -811,10 +906,10 @@ function initializeAllCardsFilters(): void {
       }
       
       const filterState: { [key: string]: boolean } = {};
-      document.querySelectorAll('.card-type-filter-btn').forEach((b: any) => {
+      testDom.querySelectorAll('.card-type-filter-btn').forEach((b: any) => {
         filterState[b.getAttribute('data-card-type')] = b.classList.contains('active');
       });
-      localStorage.setItem('all-cards-filter-state', JSON.stringify(filterState));
+      localStorageMock.setItem('all-cards-filter-state', JSON.stringify(filterState));
       
       filterAllCardsByType();
     });
@@ -828,7 +923,7 @@ async function loadAndDisplayAllCards(): Promise<void> {
     initializeAllCardsFilters();
   } catch (error) {
     console.error('Error loading all cards:', error);
-    const container = document.getElementById('all-cards-grid-container');
+    const container = testDom.getElementById('all-cards-grid-container');
     if (container) {
       container.innerHTML = '<div style="color: #fff; padding: 20px; text-align: center;">Error loading cards. Please refresh the page.</div>';
     }
@@ -856,11 +951,12 @@ function renderCardCell(card: any): string {
   
   const cardType = card.cardType || 'character';
   const imagePath = mockGetCardImagePathForDisplay(card, cardType);
+  const fullResPath = mockGetCardImagePathForDisplay(card, cardType);
   const escapedName = cardName.replace(/'/g, "\\'");
-  
-  const isAdmin = typeof mockGetCurrentUser === 'function' && mockGetCurrentUser() && mockGetCurrentUser().role === 'ADMIN';
+
+  const hasUser = typeof mockGetCurrentUser === 'function' && mockGetCurrentUser();
   const isGuest = typeof mockIsGuestUser === 'function' && mockIsGuestUser();
-  
+
   let apiCardType = cardType;
   if (cardType === 'advanced-universe') {
     apiCardType = 'advanced_universe';
@@ -869,7 +965,7 @@ function renderCardCell(card: any): string {
   } else if (cardType === 'basic-universe') {
     apiCardType = 'basic_universe';
   }
-  
+
   const deckButtonDisabled = isGuest ? 'disabled style="opacity: 0.5; cursor: not-allowed;" title="Log in to add to decks..."' : '';
   const deckButtonOnClick = isGuest ? '' : `onclick="showDeckSelection('${apiCardType}', '${card.id}', '${escapedName}', this)"`;
   
@@ -905,10 +1001,11 @@ function renderCardCell(card: any): string {
         <button class="add-to-deck-btn" ${deckButtonOnClick} ${deckButtonDisabled} style="margin-bottom: 4px; width: 100%;">
           +Deck
         </button>
-        ${isAdmin ? `
-        <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', '${apiCardType}')" style="width: 100%;">
+        ${hasUser ? `
+        <button class="add-to-collection-btn" onclick="addCardToCollectionFromDatabase('${card.id}', '${apiCardType}', '${fullResPath.replace(/'/g, "\\'")}')" style="width: 100%;">
           +Collection
         </button>
+        <button class="remove-from-collection-btn" data-card-id="${card.id}" data-card-type="${apiCardType}" data-image-path="${fullResPath.replace(/"/g, '&quot;')}" onclick="removeOneFromCollection('${card.id}', '${apiCardType}', '${fullResPath.replace(/'/g, "\\'")}')" style="width: 100%; margin-top: 4px;" disabled title="Card not in collection">-Collection</button>
         ` : ''}
       </div>
     </div>

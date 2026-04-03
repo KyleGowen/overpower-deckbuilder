@@ -123,11 +123,19 @@ describe('Locations Search Functionality', () => {
                     }
 
                     try {
-                        const response = await (global as any).fetch('/api/locations');
+                        const response = await (global as any).fetch('/api/v1/catalog/locations');
                         const data = await response.json();
+                        const rows =
+                            response.ok !== false &&
+                            data &&
+                            Array.isArray(data.data) &&
+                            data.success !== false &&
+                            (!data.errors || data.errors.length === 0)
+                                ? data.data
+                                : [];
 
-                        if (data.success) {
-                            const filteredLocations = data.data.filter((location: any) =>
+                        if (rows.length > 0) {
+                            const filteredLocations = rows.filter((location: any) =>
                                 location.special_ability.toLowerCase().includes(abilityTerm)
                             );
                             (global as any).displayLocations(filteredLocations);
@@ -144,6 +152,7 @@ describe('Locations Search Functionality', () => {
 
         // Mock fetch response
         (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
             json: () => Promise.resolve({
                 success: true,
                 data: [
@@ -246,7 +255,7 @@ describe('Locations Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
 
         test('should handle empty search terms by reloading all locations', async () => {
@@ -274,7 +283,7 @@ describe('Locations Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
 
         test('should filter by partial matches', async () => {
@@ -288,7 +297,7 @@ describe('Locations Search Functionality', () => {
             // Wait for async operations
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
     });
 
@@ -338,7 +347,7 @@ describe('Locations Search Functionality', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // Should not crash and should have attempted the fetch
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
 
         test('should handle missing search input gracefully', () => {
@@ -432,7 +441,7 @@ describe('Locations Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
 
         test('should handle no matches gracefully', async () => {
@@ -445,7 +454,7 @@ describe('Locations Search Functionality', () => {
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+            expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
         });
     });
 });

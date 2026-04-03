@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/js/layout-mode.js"></script>
+    <script src="/js/catalog-v1-envelope.js"></script>
     <script src="/js/dbv/location-threat-placeholders.js" defer></script>
     <script src="/js/dbv-card-name-filter.js" defer></script>
     <title>Excelsior Deckbuilder - Characters Database</title>
@@ -4728,12 +4729,12 @@
         // Load and display characters
         async function loadCharacters() {
             try {
-                const response = await fetch('/api/characters');
+                const response = await fetch('/api/v1/catalog/characters');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayCharacters(data.data);
-                    updateStats(data.data);
+                const payload = catalogListPayload(response, data);
+                if (payload.ok) {
+                    displayCharacters(payload.rows);
+                    updateStats(payload.rows);
                 } else {
                     throw new Error('Failed to load characters');
                 }
@@ -4838,11 +4839,12 @@
                     }
                 });
             
-            fetch('/api/locations')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('total-locations').textContent = data.data.length;
+            fetch('/api/v1/catalog/locations')
+                .then(async response => {
+                    const data = await response.json();
+                    const payload = catalogListPayload(response, data);
+                    if (payload.ok) {
+                        document.getElementById('total-locations').textContent = payload.rows.length;
                     }
                 });
         }
@@ -4910,11 +4912,11 @@
         // Apply all active filters
         async function applyFilters() {
             try {
-                const response = await fetch('/api/characters');
+                const response = await fetch('/api/v1/catalog/characters');
                 const data = await response.json();
-                
-                if (data.success) {
-                    let filteredCharacters = data.data;
+                const charPayload = catalogListPayload(response, data);
+                if (charPayload.ok) {
+                    let filteredCharacters = charPayload.rows;
                     
                     // Apply name search filter
                     const nameSearchInput = document.querySelector('.header-filter[placeholder="Search names..."]');
@@ -5081,11 +5083,11 @@
         // Load and display locations
         async function loadLocations() {
             try {
-                const response = await fetch('/api/locations');
+                const response = await fetch('/api/v1/catalog/locations');
                 const data = await response.json();
-                
-                if (data.success) {
-                    displayLocations(data.data);
+                const payload = catalogListPayload(response, data);
+                if (payload.ok) {
+                    displayLocations(payload.rows);
                 } else {
                     throw new Error('Failed to load locations');
                 }
@@ -5176,11 +5178,12 @@
         // Location filtering functions
         async function applyLocationFilters() {
             try {
-                const resp = await fetch('/api/locations');
+                const resp = await fetch('/api/v1/catalog/locations');
                 const data = await resp.json();
-                if (!data.success) return;
+                const locPayload = catalogListPayload(resp, data);
+                if (!locPayload.ok) return;
 
-                let filtered = data.data;
+                let filtered = locPayload.rows;
 
                 // Filter by threat level range
                 const minThreat = document.getElementById('location-threat-min').value;
@@ -5396,11 +5399,11 @@
                 }
 
                 try {
-                    const response = await fetch('/api/locations');
+                    const response = await fetch('/api/v1/catalog/locations');
                     const data = await response.json();
-                    
-                    if (data.success) {
-                        const filteredLocations = data.data.filter(location => 
+                    const locPayload = catalogListPayload(response, data);
+                    if (locPayload.ok) {
+                        const filteredLocations = locPayload.rows.filter(location => 
                             location.name.toLowerCase().includes(searchTerm) ||
                             location.special_ability.toLowerCase().includes(searchTerm)
                         );
@@ -6762,10 +6765,11 @@
             // Fetch character data to get character names
             let characterMap = {};
             try {
-                const characterResponse = await fetch('/api/characters');
+                const characterResponse = await fetch('/api/v1/catalog/characters');
                 const characterData = await characterResponse.json();
-                if (characterData.success) {
-                    characterData.data.forEach(char => {
+                const charPayload = catalogListPayload(characterResponse, characterData);
+                if (charPayload.ok) {
+                    charPayload.rows.forEach(char => {
                         characterMap[char.id] = char;
                     });
                 }
@@ -6901,11 +6905,11 @@
 
         async function loadCharactersForDeckCreation() {
             try {
-                const response = await fetch('/api/characters');
+                const response = await fetch('/api/v1/catalog/characters');
                 const result = await response.json();
-                
-                if (result.success && result.data) {
-                    const characters = result.data;
+                const payload = catalogListPayload(response, result);
+                if (payload.ok && payload.rows.length > 0) {
+                    const characters = payload.rows;
                     const characterSelect = document.getElementById('characterSelect');
                     characterSelect.innerHTML = '<option value="">Select a character to add...</option>';
                     
@@ -7207,10 +7211,11 @@
             const characterCards = cards.filter(card => card.type === 'character');
             if (characterCards.length > 0) {
                 try {
-                    const response = await fetch('/api/characters');
+                    const response = await fetch('/api/v1/catalog/characters');
                     const result = await response.json();
-                    if (result.success) {
-                        characterMap = result.data.reduce((map, char) => {
+                    const charPayload = catalogListPayload(response, result);
+                    if (charPayload.ok) {
+                        characterMap = charPayload.rows.reduce((map, char) => {
                             map[char.id] = char;
                             return map;
                         }, {});
@@ -7339,10 +7344,11 @@
                 
                 // Search based on card type
                 if (cardType === 'character' || cardType === '') {
-                    const response = await fetch('/api/characters');
+                    const response = await fetch('/api/v1/catalog/characters');
                     const data = await response.json();
-                    if (data.success) {
-                        cards.push(...data.data.map(card => ({
+                    const charPayload = catalogListPayload(response, data);
+                    if (charPayload.ok) {
+                        cards.push(...charPayload.rows.map(card => ({
                             ...card,
                             type: 'character',
                             displayName: card.name
@@ -7351,10 +7357,11 @@
                 }
                 
                 if (cardType === 'location' || cardType === '') {
-                    const response = await fetch('/api/locations');
+                    const response = await fetch('/api/v1/catalog/locations');
                     const data = await response.json();
-                    if (data.success) {
-                        cards.push(...data.data.map(card => ({
+                    const locPayload = catalogListPayload(response, data);
+                    if (locPayload.ok) {
+                        cards.push(...locPayload.rows.map(card => ({
                             ...card,
                             type: 'location',
                             displayName: card.name
@@ -7857,12 +7864,12 @@
             if (characterCards.length > 0) {
                 try {
                     // Fetch character data from the API
-                    const response = await fetch('/api/characters');
+                    const response = await fetch('/api/v1/catalog/characters');
                     const data = await response.json();
-                    
-                    if (data.success) {
+                    const charPayload = catalogListPayload(response, data);
+                    if (charPayload.ok) {
                         const characterMap = {};
-                        data.data.forEach(char => {
+                        charPayload.rows.forEach(char => {
                             characterMap[char.id] = char;
                         });
                         
@@ -7886,12 +7893,12 @@
             if (locationCards.length > 0) {
                 try {
                     // Fetch location data from the API
-                    const response = await fetch('/api/locations');
+                    const response = await fetch('/api/v1/catalog/locations');
                     const data = await response.json();
-                    
-                    if (data.success) {
+                    const locPayload = catalogListPayload(response, data);
+                    if (locPayload.ok) {
                         const locationMap = {};
-                        data.data.forEach(loc => {
+                        locPayload.rows.forEach(loc => {
                             locationMap[loc.id] = loc;
                         });
                         
@@ -8223,10 +8230,12 @@
             
             // Get character names from current deck
             // First, get all character data to map IDs to names
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const _cr = await fetch('/api/v1/catalog/characters');
+            const _cj = await _cr.json();
+            const allCharacters = catalogListPayload(_cr, _cj);
             const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
+            if (allCharacters.ok) {
+                allCharacters.rows.forEach(char => {
                     characterMap[char.id] = char.name;
                 });
             }
@@ -8454,10 +8463,12 @@
             }
             
             // Get character data from current deck
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const _cr = await fetch('/api/v1/catalog/characters');
+            const _cj = await _cr.json();
+            const allCharacters = catalogListPayload(_cr, _cj);
             const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
+            if (allCharacters.ok) {
+                allCharacters.rows.forEach(char => {
                     characterMap[char.id] = char;
                 });
             }
@@ -8654,10 +8665,12 @@
             }
             
             // Get character data from current deck
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const _cr = await fetch('/api/v1/catalog/characters');
+            const _cj = await _cr.json();
+            const allCharacters = catalogListPayload(_cr, _cj);
             const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
+            if (allCharacters.ok) {
+                allCharacters.rows.forEach(char => {
                     characterMap[char.id] = char;
                 });
             }
@@ -8912,10 +8925,12 @@
             }
             
             // Get character data from current deck
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const _cr = await fetch('/api/v1/catalog/characters');
+            const _cj = await _cr.json();
+            const allCharacters = catalogListPayload(_cr, _cj);
             const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
+            if (allCharacters.ok) {
+                allCharacters.rows.forEach(char => {
                     characterMap[char.id] = char;
                 });
             }
@@ -9069,10 +9084,12 @@
             }
             
             // Get character data from current deck
-            const allCharacters = await fetch('/api/characters').then(r => r.json());
+            const _cr = await fetch('/api/v1/catalog/characters');
+            const _cj = await _cr.json();
+            const allCharacters = catalogListPayload(_cr, _cj);
             const characterMap = {};
-            if (allCharacters.success) {
-                allCharacters.data.forEach(char => {
+            if (allCharacters.ok) {
+                allCharacters.rows.forEach(char => {
                     characterMap[char.id] = char;
                 });
             }
@@ -10441,8 +10458,8 @@
         async function loadAvailableCardsData() {
             try {
                 const categories = [
-                    { type: 'character', api: '/api/characters', nameField: 'name' },
-                    { type: 'location', api: '/api/locations', nameField: 'name' },
+                    { type: 'character', api: '/api/v1/catalog/characters', nameField: 'name' },
+                    { type: 'location', api: '/api/v1/catalog/locations', nameField: 'name' },
                     { type: 'special', api: '/api/special-cards', nameField: 'name' },
                     { type: 'mission', api: '/api/missions', nameField: 'name' },
                     { type: 'event', api: '/api/events', nameField: 'name' },
@@ -10459,9 +10476,9 @@
                     try {
                         const response = await fetch(category.api);
                         const data = await response.json();
-                        
-                        if (data.success && data.data.length > 0) {
-                            data.data.forEach(card => {
+                        const payload = catalogListPayload(response, data);
+                        if (payload.ok && payload.rows.length > 0) {
+                            payload.rows.forEach(card => {
                                 availableCardsMap.set(card.id, card);
                                 availableCardsMap.set(`${category.type}_${card.id}`, card);
                             });
@@ -11015,8 +11032,8 @@
                 console.log('[DeckBuilder] Starting to load card categories...');
                 
                 const categories = [
-                    { type: 'character', name: 'Characters', api: '/api/characters', nameField: 'name' },
-                    { type: 'location', name: 'Locations', api: '/api/locations', nameField: 'name' },
+                    { type: 'character', name: 'Characters', api: '/api/v1/catalog/characters', nameField: 'name' },
+                    { type: 'location', name: 'Locations', api: '/api/v1/catalog/locations', nameField: 'name' },
                     { type: 'special', name: 'Special Cards', api: '/api/special-cards', nameField: 'name' },
                     { type: 'mission', name: 'Missions', api: '/api/missions', nameField: 'card_name' },
                     { type: 'event', name: 'Events', api: '/api/events', nameField: 'name' },
@@ -11035,7 +11052,9 @@
                     try {
                         console.log(`[DeckBuilder] Fetching ${category.name} from ${category.api}...`);
                         const response = await fetch(category.api);
-                        const data = await response.json();
+                        const raw = await response.json();
+                        const payload = catalogListPayload(response, raw);
+                        const data = { success: payload.ok, data: payload.rows };
                         console.log(`[DeckBuilder] Received ${category.name}: success=${data.success}, count=${data.data?.length || 0}`);
                         
                         if (data.success && data.data.length > 0) {

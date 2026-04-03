@@ -8,6 +8,7 @@ import { Pool } from 'pg';
 import { app } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
+import { expectOkCatalogList } from './utils/catalogListResponse';
 
 describe('All Tab Integration Tests', () => {
   let pool: Pool;
@@ -74,10 +75,10 @@ describe('All Tab Integration Tests', () => {
   describe('API Endpoints - All Card Types', () => {
     it('should return all card types with set and set_number fields', async () => {
       const cardTypes = [
-        { endpoint: '/api/characters', type: 'character' },
+        { endpoint: '/api/v1/catalog/characters', type: 'character' },
         { endpoint: '/api/special-cards', type: 'special' },
         { endpoint: '/api/power-cards', type: 'power' },
-        { endpoint: '/api/locations', type: 'location' },
+        { endpoint: '/api/v1/catalog/locations', type: 'location' },
         { endpoint: '/api/aspects', type: 'aspect' },
         { endpoint: '/api/missions', type: 'mission' },
         { endpoint: '/api/events', type: 'event' },
@@ -93,8 +94,7 @@ describe('All Tab Integration Tests', () => {
           .get(cardType.endpoint)
           .expect(200);
 
-        expect(response.body.success).toBe(true);
-        expect(Array.isArray(response.body.data)).toBe(true);
+        expectOkCatalogList(response);
 
         if (response.body.data.length > 0) {
           const firstCard = response.body.data[0];
@@ -113,7 +113,7 @@ describe('All Tab Integration Tests', () => {
     it('should return cards sorted by set then set_number when loaded', async () => {
       // Get cards from multiple types
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
-        request(app).get('/api/characters'),
+        request(app).get('/api/v1/catalog/characters'),
         request(app).get('/api/special-cards'),
         request(app).get('/api/power-cards')
       ]);
@@ -167,10 +167,10 @@ describe('All Tab Integration Tests', () => {
 
     it('should return cards with consistent data structure across all types', async () => {
       const endpoints = [
-        '/api/characters',
+        '/api/v1/catalog/characters',
         '/api/special-cards',
         '/api/power-cards',
-        '/api/locations',
+        '/api/v1/catalog/locations',
         '/api/missions',
         '/api/events'
       ];
@@ -180,8 +180,7 @@ describe('All Tab Integration Tests', () => {
           .get(endpoint)
           .expect(200);
 
-        expect(response.body.success).toBe(true);
-        expect(Array.isArray(response.body.data)).toBe(true);
+        expectOkCatalogList(response);
 
         if (response.body.data.length > 0) {
           const card = response.body.data[0];
@@ -198,7 +197,7 @@ describe('All Tab Integration Tests', () => {
   describe('Card Name Extraction', () => {
     it('should extract correct names for different card types', async () => {
       const [charactersRes, powerRes, aspectRes] = await Promise.all([
-        request(app).get('/api/characters').query({ limit: 1 }),
+        request(app).get('/api/v1/catalog/characters').query({ limit: 1 }),
         request(app).get('/api/power-cards').query({ limit: 1 }),
         request(app).get('/api/aspects').query({ limit: 1 })
       ]);
@@ -227,7 +226,7 @@ describe('All Tab Integration Tests', () => {
     it('should filter cards by card type correctly', async () => {
       // Get all cards
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
-        request(app).get('/api/characters'),
+        request(app).get('/api/v1/catalog/characters'),
         request(app).get('/api/special-cards'),
         request(app).get('/api/power-cards')
       ]);
@@ -253,11 +252,10 @@ describe('All Tab Integration Tests', () => {
   describe('Guest User Restrictions', () => {
     it('should allow guest users to view all cards', async () => {
       const response = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expectOkCatalogList(response);
     });
 
     it('should prevent unauthenticated users from adding cards to decks', async () => {
@@ -281,7 +279,7 @@ describe('All Tab Integration Tests', () => {
     it('should allow ADMIN users to add cards to collection', async () => {
       // Get a card to add
       const charactersRes = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .expect(200);
 
       if (charactersRes.body.data.length > 0) {
@@ -309,7 +307,7 @@ describe('All Tab Integration Tests', () => {
     it('should allow all authenticated users to access collection endpoints', async () => {
       // Collection feature is now available to all authenticated users (USER, ADMIN, GUEST)
       const charactersRes = await request(app)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .expect(200);
 
       if (charactersRes.body.data.length > 0) {
@@ -335,10 +333,10 @@ describe('All Tab Integration Tests', () => {
       const startTime = Date.now();
 
       const endpoints = [
-        '/api/characters',
+        '/api/v1/catalog/characters',
         '/api/special-cards',
         '/api/power-cards',
-        '/api/locations',
+        '/api/v1/catalog/locations',
         '/api/aspects',
         '/api/missions',
         '/api/events',
@@ -356,10 +354,10 @@ describe('All Tab Integration Tests', () => {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // All requests should succeed
+      // All requests should succeed (legacy `{ success }` or v1 `{ errors, data }`)
       responses.forEach(response => {
         expect(response.status).toBe(200);
-        expect(response.body.success).toBe(true);
+        expectOkCatalogList(response);
       });
 
       // Should complete in reasonable time (adjust threshold as needed)
@@ -372,8 +370,8 @@ describe('All Tab Integration Tests', () => {
 
     it('should return consistent card counts across requests', async () => {
       const [firstRes, secondRes] = await Promise.all([
-        request(app).get('/api/characters'),
-        request(app).get('/api/characters')
+        request(app).get('/api/v1/catalog/characters'),
+        request(app).get('/api/v1/catalog/characters')
       ]);
 
       expect(firstRes.body.data.length).toBe(secondRes.body.data.length);
@@ -434,10 +432,10 @@ describe('All Tab Integration Tests', () => {
   describe('Card Image Paths', () => {
     it('should return valid image paths for all card types', async () => {
       const endpoints = [
-        { endpoint: '/api/characters', type: 'character' },
+        { endpoint: '/api/v1/catalog/characters', type: 'character' },
         { endpoint: '/api/special-cards', type: 'special' },
         { endpoint: '/api/power-cards', type: 'power' },
-        { endpoint: '/api/locations', type: 'location' }
+        { endpoint: '/api/v1/catalog/locations', type: 'location' }
       ];
 
       for (const { endpoint } of endpoints) {

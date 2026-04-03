@@ -17,7 +17,7 @@ describe('Foil Database View All Tab Integration Tests', () => {
 
   it('should return cards with is_foil when DB has foil rows', async () => {
     const [charactersRes, powerRes] = await Promise.all([
-      request(app).get('/api/characters'),
+      request(app).get('/api/v1/catalog/characters'),
       request(app).get('/api/power-cards'),
     ]);
 

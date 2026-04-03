@@ -259,7 +259,7 @@ describe('Event Mission Filtering Integration Tests', () => {
 
         it('should handle deck with only non-mission cards gracefully', async () => {
             // Add a character to the deck (non-mission card)
-            const charactersResponse = await apiClient.request('GET', '/api/characters');
+            const charactersResponse = await apiClient.request('GET', '/api/v1/catalog/characters');
             expect(charactersResponse.status).toBe(200);
             
             const character = charactersResponse.body.data[0];

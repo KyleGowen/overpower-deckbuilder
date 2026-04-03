@@ -88,43 +88,71 @@ async function searchAllCards(searchTerm) {
     // Legacy fallback when CardSearchService not loaded
     const results = [];
     try {
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
         const [characters, specials, missions, events, aspects, advanced, teamwork, ally, training, basic, power, locations] = await Promise.all([
-            fetch('/api/characters').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/special-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/missions').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/events').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/aspects').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/advanced-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/teamwork').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/ally-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/training').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/basic-universe').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/power-cards').then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch('/api/locations').then(r => r.json()).catch(() => ({ success: false, data: [] }))
+            fetchList('/api/v1/catalog/characters'),
+            fetchList('/api/special-cards'),
+            fetchList('/api/missions'),
+            fetchList('/api/events'),
+            fetchList('/api/aspects'),
+            fetchList('/api/advanced-universe'),
+            fetchList('/api/teamwork'),
+            fetchList('/api/ally-universe'),
+            fetchList('/api/training'),
+            fetchList('/api/basic-universe'),
+            fetchList('/api/power-cards'),
+            fetchList('/api/v1/catalog/locations')
         ]);
         const st = term.toLowerCase();
         const add = (card, type, name, char) => {
             if (!name) return;
-            const img = type === 'location' ? `/src/resources/cards/images/locations/${card.image}` : `/src/resources/cards/images/${card.image}`;
-            results.push({ id: card.id, name, type, image: img, character: char ?? null });
+            const legacy =
+                type === 'location'
+                    ? `/src/resources/cards/images/locations/${card.image}`
+                    : `/src/resources/cards/images/${card.image}`;
+            let image = legacy;
+            let fullImage = legacy;
+            if (typeof getCardImagePath === 'function') {
+                image = getCardImagePath(card, type, { useThumbnail: true }) || legacy;
+                fullImage = getCardImagePath(card, type) || legacy;
+            }
+            results.push({ id: card.id, name, type, image, fullImage, character: char ?? null });
         };
-        if (characters.success) characters.data.forEach(c => c.name?.toLowerCase().includes(st) && add(c, 'character', c.name, null));
-        if (specials.success) specials.data.forEach(c => {
+        if (characters.ok) characters.rows.forEach(c => c.name?.toLowerCase().includes(st) && add(c, 'character', c.name, null));
+        if (specials.ok) specials.rows.forEach(c => {
             const nm = c.name?.toLowerCase();
             const linked = (c.character || c.character_name || '');
             const ch = linked.toLowerCase();
             if (nm?.includes(st) || ch.includes(st) || ch === st || st === 'special') add(c, 'special', c.name, linked || null);
         });
-        if (missions.success) missions.data.forEach(m => { const cn = m.card_name?.toLowerCase(); const ms = m.mission_set?.toLowerCase(); if (cn?.includes(st) || ms?.includes(st) || st === 'mission' || st === 'missions') add(m, 'mission', m.card_name, m.mission_set); });
-        if (events.success) events.data.forEach(e => { const nm = e.name?.toLowerCase(); const ms = e.mission_set?.toLowerCase(); if (nm?.includes(st) || ms?.includes(st) || st === 'event' || st === 'events') add(e, 'event', e.name, e.mission_set); });
-        if (aspects.success) aspects.data.forEach(a => a.card_name?.toLowerCase().includes(st) && add(a, 'aspect', a.card_name, null));
-        if (advanced.success) advanced.data.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'advanced') add(c, 'advanced-universe', c.name, c.character); });
-        if (teamwork.success) teamwork.data.forEach(c => { const n = (c.to_use || c.name)?.toLowerCase(); const ch = c.character?.toLowerCase(); if (n?.includes(st) || ch?.includes(st) || ch === st || st === 'teamwork') add(c, 'teamwork', c.to_use || c.name, c.character); });
-        if (ally.success) ally.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
-        if (training.success) training.data.forEach(c => !c.is_foil && (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
-        if (basic.success) basic.data.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));
-        if (power.success) power.data.forEach(c => ((c.power_type?.toLowerCase().includes(st)) || st === 'power card') && add(c, 'power', c.power_type, null));
-        if (locations.success) locations.data.forEach(c => (c.name?.toLowerCase().includes(st) || st === 'location') && add(c, 'location', c.name, null));
+        if (missions.ok) missions.rows.forEach(m => { const cn = m.card_name?.toLowerCase(); const ms = m.mission_set?.toLowerCase(); if (cn?.includes(st) || ms?.includes(st) || st === 'mission' || st === 'missions') add(m, 'mission', m.card_name, m.mission_set); });
+        if (events.ok) events.rows.forEach(e => { const nm = e.name?.toLowerCase(); const ms = e.mission_set?.toLowerCase(); if (nm?.includes(st) || ms?.includes(st) || st === 'event' || st === 'events') add(e, 'event', e.name, e.mission_set); });
+        if (aspects.ok) aspects.rows.forEach(a => a.card_name?.toLowerCase().includes(st) && add(a, 'aspect', a.card_name, null));
+        if (advanced.ok) advanced.rows.forEach(c => { const nm = c.name?.toLowerCase(); const ch = c.character?.toLowerCase(); if (nm?.includes(st) || ch?.includes(st) || ch === st || st === 'advanced') add(c, 'advanced-universe', c.name, c.character); });
+        if (teamwork.ok) teamwork.rows.forEach(c => { const n = (c.to_use || c.name)?.toLowerCase(); const ch = c.character?.toLowerCase(); if (n?.includes(st) || ch?.includes(st) || ch === st || st === 'teamwork') add(c, 'teamwork', c.to_use || c.name, c.character); });
+        if (ally.ok) ally.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'ally') && add(c, 'ally-universe', c.card_name, null));
+        if (training.ok) training.rows.forEach(c => !c.is_foil && (c.card_name?.toLowerCase().includes(st) || st === 'training') && add(c, 'training', c.card_name, null));
+        if (basic.ok) basic.rows.forEach(c => (c.card_name?.toLowerCase().includes(st) || st === 'basic') && add(c, 'basic-universe', c.card_name, null));
+        if (power.ok) power.rows.forEach(c => ((c.power_type?.toLowerCase().includes(st)) || st === 'power card') && add(c, 'power', c.power_type, null));
+        if (locations.ok) locations.rows.forEach(c => (c.name?.toLowerCase().includes(st) || st === 'location') && add(c, 'location', c.name, null));
     } catch (err) {
         console.error('Error searching cards:', err);
     }
@@ -144,15 +172,19 @@ function displayDeckEditorSearchResults(results) {
         searchResults.innerHTML = '<div class="deck-editor-search-result">No cards found</div>';
     } else {
         const htmlContent = results.map(card => {
-            const escapedImage = (card.image || '').replace(/'/g, "\\'");
+            const preview = (card.image || '').replace(/'/g, "\\'");
+            const hoverPath = (card.fullImage || card.imagePath || card.image_path || card.image || '').replace(
+                /'/g,
+                "\\'"
+            );
             const escapedCardId = String(card.id || '').replace(/'/g, "\\'");
             const escapedCardType = String(card.type || '').replace(/'/g, "\\'");
             return `
             <div class="deck-editor-search-result" 
                  onclick="addCardToDeckFromSearch('${card.id}', '${card.type}', '${card.name.replace(/'/g, "\\'")}')"
-                 onmouseenter="showCardHoverModal('${escapedImage}', '${card.name.replace(/'/g, "\\'")}', '${escapedCardId}', '${escapedCardType}')"
+                 onmouseenter="showCardHoverModal('${hoverPath}', '${card.name.replace(/'/g, "\\'")}', '${escapedCardId}', '${escapedCardType}')"
                  onmouseleave="hideCardHoverModal()">
-                <div class="deck-editor-search-result-image" style="background-image: url('${card.image}')"></div>
+                <div class="deck-editor-search-result-image" style="background-image: url('${preview}')"></div>
                 <div class="deck-editor-search-result-info">
                     <div class="deck-editor-search-result-name">${card.name}</div>
                     <div class="deck-editor-search-result-type">${formatCardType(card.type)}</div>

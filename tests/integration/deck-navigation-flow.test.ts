@@ -130,20 +130,22 @@ describe('Deck Navigation Flow Integration Tests', () => {
     it('should load available cards for deck editor', async () => {
       // Test that characters are available for the deck editor
       const charactersResponse = await request(server)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', authCookie);
 
       expect(charactersResponse.status).toBe(200);
-      expect(charactersResponse.body.success).toBe(true);
+      expect(charactersResponse.body.errors ?? []).toEqual([]);
+      expect(Array.isArray(charactersResponse.body.data)).toBe(true);
       expect(charactersResponse.body.data.length).toBeGreaterThan(0);
 
       // Test other card types
       const locationsResponse = await request(server)
-        .get('/api/locations')
+        .get('/api/v1/catalog/locations')
         .set('Cookie', authCookie);
 
       expect(locationsResponse.status).toBe(200);
-      expect(locationsResponse.body.success).toBe(true);
+      expect(locationsResponse.body.errors ?? []).toEqual([]);
+      expect(Array.isArray(locationsResponse.body.data)).toBe(true);
     });
 
     it('should handle read-only mode correctly for deck owners', async () => {
@@ -326,7 +328,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
       const startTime = Date.now();
       
       const charactersResponse = await request(server)
-        .get('/api/characters')
+        .get('/api/v1/catalog/characters')
         .set('Cookie', authCookie);
 
       const loadTime = Date.now() - startTime;

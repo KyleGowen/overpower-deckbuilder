@@ -109,12 +109,23 @@ async function loadCharacters() {
         return;
     }
     try {
-        const response = await fetch('/api/characters');
+        const response = await fetch('/api/v1/catalog/characters');
         const data = await response.json();
-        
-        if (data.success) {
-            setCachedCardData('characters', data.data);
-            displayCharacters(data.data);
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+        if (payload.ok) {
+            setCachedCardData('characters', payload.rows);
+            displayCharacters(payload.rows);
         } else {
             throw new Error('Failed to load characters');
         }
@@ -171,12 +182,23 @@ async function loadLocations() {
         return;
     }
     try {
-        const response = await fetch('/api/locations');
+        const response = await fetch('/api/v1/catalog/locations');
         const data = await response.json();
-        
-        if (data.success) {
-            setCachedCardData('locations', data.data);
-            displayLocations(data.data);
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : {
+                    ok:
+                        response.ok !== false &&
+                        data &&
+                        Array.isArray(data.data) &&
+                        data.success !== false &&
+                        (!data.errors || data.errors.length === 0),
+                    rows: (data && data.data) || []
+                };
+        if (payload.ok) {
+            setCachedCardData('locations', payload.rows);
+            displayLocations(payload.rows);
         } else {
             throw new Error('Failed to load locations');
         }

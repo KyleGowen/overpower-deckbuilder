@@ -15,7 +15,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 |--------|---------|
 | Legacy path | Current documented path |
 | v1 path | Target under `/api/v1/...` |
-| Migrated | Done when legacy delegates to shared service and v1 route exists |
+| Migrated | Done when **v1 route exists**, **legacy handler removed**, and **callers** (app + tests + Postman) use **`/api/v1/...`** with the v1 envelope |
 | API module | Service + DTO paths |
 | HTTP unit | Full unit tests for the `*.http.ts` file |
 | ≥1 int | At least one integration test for that HTTP module |
@@ -28,7 +28,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 | Legacy path | v1 path (proposed) | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 |-------------|-------------------|----------|------------|-----------|--------|-----------|
 | GET /api/characters | GET /api/v1/catalog/characters | [x] | `CatalogService` + `dbv-catalog.http.ts` | [x] | [x] | [x] |
-| GET /api/locations | GET /api/v1/catalog/locations | [ ] | catalog service | [ ] | [ ] | [ ] |
+| GET /api/locations | GET /api/v1/catalog/locations | [x] | `CatalogService` + `dbv-catalog.http.ts` | [x] | [x] | [x] |
 | GET /api/special-cards | GET /api/v1/catalog/special-cards | [ ] | catalog service | [ ] | [ ] | [ ] |
 | GET /api/missions | GET /api/v1/catalog/missions | [ ] | catalog service | [ ] | [ ] | [ ] |
 | GET /api/events | GET /api/v1/catalog/events | [ ] | catalog service | [ ] | [ ] | [ ] |

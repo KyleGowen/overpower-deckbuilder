@@ -69,12 +69,16 @@ const createTestApp = () => {
   };
 
   // Card data endpoints
-  app.get('/api/characters', async (req, res) => {
+  app.get('/api/v1/catalog/characters', async (req, res) => {
     try {
       const characters = await mockCardRepository.getAllCharacters();
-      res.json({ success: true, data: characters });
+      res.json({ data: characters, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch characters' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch characters' }]
+      });
     }
   });
 
@@ -90,12 +94,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/locations', async (req, res) => {
+  app.get('/api/v1/catalog/locations', async (req, res) => {
     try {
       const locations = await mockCardRepository.getAllLocations();
-      res.json({ success: true, data: locations });
+      res.json({ data: locations, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch locations' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch locations' }]
+      });
     }
   });
 
@@ -315,7 +323,7 @@ describe('API Endpoints - Simplified', () => {
   });
 
   describe('Card Data Endpoints', () => {
-    describe('GET /api/characters', () => {
+    describe('GET /api/v1/catalog/characters', () => {
       it('should return all characters successfully', async () => {
         const mockCharacters = [
           { id: '1', name: 'Character 1', threat_level: 10 },
@@ -324,12 +332,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllCharacters.mockResolvedValue(mockCharacters);
 
         const response = await request(app)
-          .get('/api/characters')
+          .get('/api/v1/catalog/characters')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockCharacters
+          data: mockCharacters,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllCharacters).toHaveBeenCalled();
       });
@@ -338,12 +347,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllCharacters.mockRejectedValue(new Error('Database error'));
 
         const response = await request(app)
-          .get('/api/characters')
+          .get('/api/v1/catalog/characters')
           .expect(500);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Failed to fetch characters'
+          data: null,
+          meta: {},
+          errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch characters' }]
         });
       });
     });
@@ -400,7 +410,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/locations', () => {
+    describe('GET /api/v1/catalog/locations', () => {
       it('should return all locations successfully', async () => {
         const mockLocations = [
           { id: '1', name: 'Location 1', threat_level: 5 },
@@ -409,12 +419,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllLocations.mockResolvedValue(mockLocations);
 
         const response = await request(app)
-          .get('/api/locations')
+          .get('/api/v1/catalog/locations')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockLocations
+          data: mockLocations,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllLocations).toHaveBeenCalled();
       });
@@ -423,12 +434,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllLocations.mockRejectedValue(new Error('Database error'));
 
         const response = await request(app)
-          .get('/api/locations')
+          .get('/api/v1/catalog/locations')
           .expect(500);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Failed to fetch locations'
+          data: null,
+          meta: {},
+          errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch locations' }]
         });
       });
     });

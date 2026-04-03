@@ -4,11 +4,14 @@
 // Character filter for database view
 async function applyFilters() {
     try {
-        const response = await fetch('/api/characters');
+        const response = await fetch('/api/v1/catalog/characters');
         const data = await response.json();
-        
-        if (data.success) {
-            let filteredCharacters = data.data;
+        const payload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(response, data)
+                : { ok: !!(data && data.success), rows: (data && data.data) || [] };
+        if (payload.ok) {
+            let filteredCharacters = payload.rows;
             
             // Check if any filters are actually applied
             let hasActiveFilters = false;
@@ -93,7 +96,7 @@ async function applyFilters() {
             displayCharacters(filteredCharacters);
             } else {
                 // No filters active, show all characters
-                displayCharacters(data.data);
+                displayCharacters(payload.rows);
             }
         }
     } catch (error) {
@@ -104,11 +107,15 @@ async function applyFilters() {
 // Location filtering
 async function applyLocationFilters() {
     try {
-        const resp = await fetch('/api/locations');
+        const resp = await fetch('/api/v1/catalog/locations');
         const data = await resp.json();
-        if (!data.success) return;
+        const locPayload =
+            typeof catalogListPayload === 'function'
+                ? catalogListPayload(resp, data)
+                : { ok: !!(data && data.success), rows: (data && data.data) || [] };
+        if (!locPayload.ok) return;
 
-        let filtered = data.data;
+        let filtered = locPayload.rows;
 
         // Filter by threat level range
         const minThreat = document.getElementById('location-threat-min').value;
@@ -352,10 +359,10 @@ async function toggleSpecialCardsCharacterFilter() {
     
     // Get character names from current deck
     // First, get all character data to map IDs to names
-    const allCharacters = await fetch('/api/characters').then(r => r.json());
+    const allCharacters = await fetchCatalogList('/api/v1/catalog/characters');
     const characterMap = {};
-    if (allCharacters.success) {
-        allCharacters.data.forEach(char => {
+    if (allCharacters.ok) {
+        allCharacters.rows.forEach(char => {
             characterMap[char.id] = char.name;
         });
     }
@@ -569,10 +576,10 @@ async function togglePowerCardsCharacterFilter() {
     }
     
     // Get character data from current deck
-    const allCharacters = await fetch('/api/characters').then(r => r.json());
+    const allCharacters = await fetchCatalogList('/api/v1/catalog/characters');
     const characterMap = {};
-    if (allCharacters.success) {
-        allCharacters.data.forEach(char => {
+    if (allCharacters.ok) {
+        allCharacters.rows.forEach(char => {
             characterMap[char.id] = char;
         });
     }
@@ -795,10 +802,10 @@ async function toggleBasicUniverseCharacterFilter() {
     }
     
     // Get character data from current deck
-    const allCharacters = await fetch('/api/characters').then(r => r.json());
+    const allCharacters = await fetchCatalogList('/api/v1/catalog/characters');
     const characterMap = {};
-    if (allCharacters.success) {
-        allCharacters.data.forEach(char => {
+    if (allCharacters.ok) {
+        allCharacters.rows.forEach(char => {
             characterMap[char.id] = char;
         });
     }
@@ -1058,10 +1065,10 @@ async function toggleTrainingCharacterFilter() {
     }
     
     // Get character data from current deck
-    const allCharacters = await fetch('/api/characters').then(r => r.json());
+    const allCharacters = await fetchCatalogList('/api/v1/catalog/characters');
     const characterMap = {};
-    if (allCharacters.success) {
-        allCharacters.data.forEach(char => {
+    if (allCharacters.ok) {
+        allCharacters.rows.forEach(char => {
             characterMap[char.id] = char;
         });
     }
@@ -1218,10 +1225,10 @@ async function toggleAllyUniverseCharacterFilter() {
     }
     
     // Get character data from current deck
-    const allCharacters = await fetch('/api/characters').then(r => r.json());
+    const allCharacters = await fetchCatalogList('/api/v1/catalog/characters');
     const characterMap = {};
-    if (allCharacters.success) {
-        allCharacters.data.forEach(char => {
+    if (allCharacters.ok) {
+        allCharacters.rows.forEach(char => {
             characterMap[char.id] = char;
         });
     }

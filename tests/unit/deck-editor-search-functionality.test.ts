@@ -100,16 +100,19 @@ displayDeckEditorSearchResults = function(results: any[]) {
   if (results.length === 0) {
     searchResults!.innerHTML = '<div class="deck-editor-search-result">No cards found</div>';
   } else {
-    const htmlContent = results.map(card => `
+    const htmlContent = results.map(card => {
+      const preview = card.image || '';
+      return `
       <div class="deck-editor-search-result">
-        <div class="deck-editor-search-result-image" style="background-image: url('${card.image}')"></div>
+        <div class="deck-editor-search-result-image" style="background-image: url('${preview}')"></div>
         <div class="deck-editor-search-result-info">
           <div class="deck-editor-search-result-name">${card.name}</div>
           <div class="deck-editor-search-result-type">${card.type}</div>
           ${card.character ? `<div class="deck-editor-search-result-character">${card.character}</div>` : ''}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
     
     searchResults!.innerHTML = htmlContent;
   }

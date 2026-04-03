@@ -14,7 +14,7 @@
 
 - **`src/api/services/`** — HTTP-agnostic; inject repositories.
 - **`src/api/http/*.http.ts`** — Express only; call services; v1 envelope.
-- **`src/routes/`** — Legacy wire-up; delegate to shared services after migration.
+- **`src/routes/`** — Legacy wire-up only for routes **not** yet migrated to v1. After migration, **remove** the legacy handler and move callers to **`/api/v1/...`**.
 
 ## API_V1.md — per-endpoint template
 
@@ -51,3 +51,4 @@ Paste under the right TOC section (auth, dbv-catalog, …):
 |------|------|
 | 2026-04-03 | Initial skill: doc + Cursor context updates required per migration. |
 | 2026-04-03 | API_V1.md + checklist + MIGRATION_ARCHITECTURE; v1 loop + testing gates. |
+| 2026-04-03 | Policy: after v1 ships for a route, **remove** legacy handler; update all clients + docs; v1 envelope + `catalog-v1-envelope.js` for list payloads. |

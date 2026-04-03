@@ -48,6 +48,8 @@ describe('Card Filter Toggles', () => {
     let code: string;
 
     beforeEach(() => {
+        const envelopePath = path.join(__dirname, '../../public/js/catalog-v1-envelope.js');
+        new Function(fs.readFileSync(envelopePath, 'utf-8'))();
         const filePath = path.join(__dirname, '../../public/js/card-filter-toggles.js');
         code = fs.readFileSync(filePath, 'utf-8');
         new Function(code)();

@@ -110,27 +110,9 @@ Returns empty values or 404 if Firebase is not configured.
 
 ## Card Data Endpoints
 
-### GET /api/characters
-Get all character cards.
+### GET /api/characters (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number",
-      "power": "number",
-      "health": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/characters`** — see [API_V1.md](../../API_V1.md) for the v1 envelope (`{ data, meta, errors }`).
 
 ### GET /api/characters/:id/alternate-images
 Get alternate images for a specific character.
@@ -146,25 +128,9 @@ Get alternate images for a specific character.
 }
 ```
 
-### GET /api/locations
-Get all location cards.
+### GET /api/locations (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/locations`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/special-cards
 Get all special cards.

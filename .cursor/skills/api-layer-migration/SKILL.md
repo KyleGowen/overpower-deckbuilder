@@ -33,10 +33,10 @@ description: >-
 2. **Services** — implement or extend **service classes** under `src/api/services/` (or reuse existing `src/services/`). **No** `Request`/`Response` in service cores.
 3. **Request models + response DTOs** — one **dedicated file** per inbound contract and per public response shape (`src/api/http/models/...`, `src/api/dto/v1/...`).
 4. **v1 HTTP** — add routes in the correct **`src/api/http/<domain>.http.ts`**; validate → service → **`sendV1Success` / `sendV1Json`** from `v1Envelope.ts`. Register from **`registerApiV1Routes.ts`**.
-5. **Legacy delegate** — update legacy handler to call the **same service** (no duplicated logic).
+5. **Legacy removal + clients** — when v1 for that route is ready to own the contract: **delete** the legacy **`app.get/post/...`** handler in `src/routes/` (do **not** leave a parallel legacy URL that still works). **Grep** the repo for the old path (`public/`, `tests/`, **Postman**, scripts) and **switch callers** to **`/api/v1/...`**. Parse the v1 envelope **`{ data, meta, errors }`** (not `{ success, data }`). Shared list parsing: **`public/js/catalog-v1-envelope.js`** (`catalogListPayload` / `fetchCatalogList`) until all callers are v1-only.
 6. **Security pass** — authn/authz via middleware; **401 vs 403**; no credential logging; **admin** only under **`/api/v1/admin/...`**; **no** client admin flags; **passwords:** verify-only, no hash changes.
-7. **Tests** — **unit:** services, DTOs, **full coverage** for each touched **`*.http.ts`** (happy + main error paths); **integration:** **≥1** test per **`*.http.ts`** file (Supertest + app from `src/test-server` when DB needed). **Merge blockers:** missing integration test or incomplete router unit coverage.
-8. **Docs** — **`API_V1.md`** for v1; **`API_DOCUMENTATION.md`** only if legacy contract or intro links changed; checklist checkboxes.
+7. **Tests** — **unit:** services, DTOs, **full coverage** for each touched **`*.http.ts`** (happy + main error paths); **integration:** **≥1** test per **`*.http.ts`** file (Supertest + app from `src/test-server` when DB needed). **Merge blockers:** missing integration test or incomplete router unit coverage. Update any test `fetch` mocks with **`ok: true`** when production checks **`response.ok`**.
+8. **Docs** — **`API_V1.md`** for v1; **`API_DOCUMENTATION.md`**: remove or mark **removed** legacy paths (callers must not rely on them); checklist checkboxes and “legacy removed” meaning.
 9. **Cursor context** — update **`src/api/.cursorrules`** only when global API rules change; **`src/routes/.cursorrules`** when legacy wiring changes.
 
 ## Pre-merge checklist (security)
@@ -49,6 +49,7 @@ description: >-
 
 ## Anti-patterns
 
+- Leaving **both** legacy and v1 URLs working indefinitely for the same resource (duplicated contracts, drift risk).
 - Changing legacy JSON without updating **API_DOCUMENTATION.md** and tests.
 - Documenting v1 in **API_DOCUMENTATION.md** instead of **API_V1.md**.
 - Admin behavior on non-`/admin` paths or driven by request body flags.

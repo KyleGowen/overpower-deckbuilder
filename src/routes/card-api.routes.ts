@@ -2,25 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  app.get('/api/characters', async (req, res) => {
-    try {
-      const characters = await deps.catalogService.getAllCharacters();
-      res.json({ success: true, data: characters });
-    } catch (error) {
-      console.error('Error fetching characters:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch characters' });
-    }
-  });
-
-  app.get('/api/locations', async (req, res) => {
-    try {
-      const locations = await deps.catalogService.getAllLocations();
-      res.json({ success: true, data: locations });
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch locations' });
-    }
-  });
+  // GET /api/characters and GET /api/locations removed — use GET /api/v1/catalog/characters|locations (API_V1.md).
 
   app.get('/api/special-cards', async (req, res) => {
     try {

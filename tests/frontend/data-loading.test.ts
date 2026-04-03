@@ -6,6 +6,24 @@
 // Mock fetch
 global.fetch = jest.fn();
 
+/** Mirrors public/js/catalog-v1-envelope.js + legacy `{ success, data }` */
+function catalogListPayload(response: { ok?: boolean }, json: unknown): { ok: boolean; rows: any[] } {
+  const j = json as Record<string, unknown>;
+  if (!response || response.ok === false || !j) {
+    return { ok: false, rows: [] };
+  }
+  if (j.success === false) {
+    return { ok: false, rows: [] };
+  }
+  if (Array.isArray(j.errors) && j.errors.length > 0) {
+    return { ok: false, rows: [] };
+  }
+  if (!Array.isArray(j.data)) {
+    return { ok: false, rows: [] };
+  }
+  return { ok: true, rows: j.data as any[] };
+}
+
 // Mock DOM elements
 const mockElement = {
   style: { display: 'none' },
@@ -84,15 +102,15 @@ async function loadDatabaseViewData(forceCharactersTab: boolean = false) {
 
 async function loadCharacters() {
   try {
-    const response = await fetch('/api/characters');
+    const response = await fetch('/api/v1/catalog/characters');
     const data = await response.json();
-    
-    if (data.success) {
+    const payload = catalogListPayload(response as { ok?: boolean }, data);
+    if (payload.ok) {
       // Small delay to ensure DOM is ready
       await new Promise(resolve => setTimeout(resolve, 10));
       
-      mockDisplayCharacters(data.data);
-      console.log('✅ Characters loaded and displayed successfully:', data.data.length);
+      mockDisplayCharacters(payload.rows);
+      console.log('✅ Characters loaded and displayed successfully:', payload.rows.length);
     } else {
       throw new Error('Failed to load characters');
     }
@@ -126,11 +144,11 @@ async function loadSpecialCards() {
 
 async function loadLocations() {
   try {
-    const response = await fetch('/api/locations');
+    const response = await fetch('/api/v1/catalog/locations');
     const data = await response.json();
-    
-    if (data.success) {
-      mockDisplayLocations(data.data);
+    const payload = catalogListPayload(response as { ok?: boolean }, data);
+    if (payload.ok) {
+      mockDisplayLocations(payload.rows);
     } else {
       throw new Error('Failed to load locations');
     }
@@ -153,9 +171,9 @@ describe('Data Loading Functions', () => {
   describe('loadDatabaseViewData', () => {
     it('should load database view data without forcing characters tab', async () => {
       (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) });
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) });
 
       await loadDatabaseViewData(false);
 
@@ -167,9 +185,9 @@ describe('Data Loading Functions', () => {
 
     it('should force characters tab when requested', async () => {
       (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) });
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) });
 
       await loadDatabaseViewData(true);
 
@@ -192,15 +210,15 @@ describe('Data Loading Functions', () => {
 
     it('should call all required loading functions', async () => {
       (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: [] }) });
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true, data: [] }) });
 
       await loadDatabaseViewData(false);
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/characters');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
       expect(global.fetch).toHaveBeenCalledWith('/api/special-cards');
-      expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
     });
   });
 
@@ -212,6 +230,7 @@ describe('Data Loading Functions', () => {
       ];
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: true, data: mockCharacters })
       });
 
@@ -219,7 +238,7 @@ describe('Data Loading Functions', () => {
 
       await loadCharacters();
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/characters');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/characters');
       expect(mockDisplayCharacters).toHaveBeenCalledWith(mockCharacters);
       expect(consoleSpy).toHaveBeenCalledWith('✅ Characters loaded and displayed successfully:', 2);
       consoleSpy.mockRestore();
@@ -227,6 +246,7 @@ describe('Data Loading Functions', () => {
 
     it('should handle API failure', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: false })
       });
 
@@ -266,6 +286,7 @@ describe('Data Loading Functions', () => {
     it('should add delay before displaying characters', async () => {
       const mockCharacters = [{ id: '1', name: 'Character 1' }];
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: true, data: mockCharacters })
       });
 
@@ -285,6 +306,7 @@ describe('Data Loading Functions', () => {
       ];
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: true, data: mockSpecialCards })
       });
 
@@ -296,6 +318,7 @@ describe('Data Loading Functions', () => {
 
     it('should handle API failure', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: false })
       });
 
@@ -341,17 +364,19 @@ describe('Data Loading Functions', () => {
       ];
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: true, data: mockLocations })
       });
 
       await loadLocations();
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/locations');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/catalog/locations');
       expect(mockDisplayLocations).toHaveBeenCalledWith(mockLocations);
     });
 
     it('should handle API failure', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => ({ success: false })
       });
 
@@ -392,6 +417,7 @@ describe('Data Loading Functions', () => {
   describe('error handling', () => {
     it('should handle JSON parsing errors', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
         json: async () => { throw new Error('Invalid JSON'); }
       });
 

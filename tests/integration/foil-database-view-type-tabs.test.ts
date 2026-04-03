@@ -1,7 +1,7 @@
 /**
  * Integration tests for foil handling in DBView type tabs.
  *
- * 1. Type tab API returns foil rows: GET /api/characters returns both base and foil rows
+ * 1. Type tab API returns foil rows: GET /api/v1/catalog/characters returns both base and foil rows
  * 2. Foil exclusion contract: groupCardsByVariant filters is_foil; type tabs show only non-foil
  */
 
@@ -17,10 +17,10 @@ describe('Foil Database View Type Tabs Integration Tests', () => {
 
   it('should return both base and foil rows from character API', async () => {
     const response = await request(app)
-      .get('/api/characters')
+      .get('/api/v1/catalog/characters')
       .expect(200);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors ?? []).toEqual([]);
     const data = response.body.data;
     const baseCards = data.filter((c: { is_foil?: boolean }) => !c.is_foil);
     const foilCards = data.filter((c: { is_foil?: boolean }) => c.is_foil === true);

@@ -40,7 +40,8 @@
      *     tests/unit/deck-editor-search-css-rules.test.ts for safeguards.
      *
      * Normalized result shape:
-     *   { id: string, name: string, type: string, image: string, character?: string, imagePath?: string }
+     *   { id: string, name: string, type: string, image: string, fullImage?: string, character?: string, imagePath?: string }
+     *   `image` is thumbnail preview (CDN + /thumb/ when available); `fullImage` is full-res for data-image-path / hover.
      *
      * Accessibility & Keyboard Navigation (future work):
      *   - The component is structured to support arrow key navigation and Enter
@@ -168,16 +169,17 @@
             }
 
             const html = results.map(card => {
-                // After migration, alternate cards are separate cards, so we use the card's image directly
-                const imagePath = card.image || card.image_path || '';
-                const escapedImagePath = imagePath.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                const previewUrl = card.image || '';
+                const fullPath =
+                    card.fullImage || card.imagePath || card.image_path || card.image || '';
+                const escapedFullPath = fullPath.replace(/"/g, '&quot;').replace(/'/g, "\\'");
                 return `
                 <div class="deck-editor-search-result"
                      data-id="${card.id}"
                      data-type="${card.type}"
                      data-name="${(card.name || '').replace(/'/g, "\\'")}"
-                     data-image-path="${escapedImagePath}">
-                    <div class="deck-editor-search-result-image" style="background-image: url('${card.image}')"></div>
+                     data-image-path="${escapedFullPath}">
+                    <div class="deck-editor-search-result-image" style="background-image: url('${previewUrl}')"></div>
                     <div class="deck-editor-search-result-info">
                         <div class="deck-editor-search-result-name">${card.name}</div>
                         <div class="deck-editor-search-result-type">${typeof global.formatCardType === 'function' ? global.formatCardType(card.type) : card.type}</div>
@@ -193,8 +195,13 @@
                     const id = el.getAttribute('data-id');
                     const type = el.getAttribute('data-type');
                     const name = el.getAttribute('data-name');
-                    const imagePath = el.getAttribute('data-image-path') || null;
-                    this.onSelect({ id, type, name, imagePath: imagePath && imagePath.length > 0 ? imagePath : null });
+                    const imagePathAttr = el.getAttribute('data-image-path') || null;
+                    this.onSelect({
+                        id,
+                        type,
+                        name,
+                        imagePath: imagePathAttr && imagePathAttr.length > 0 ? imagePathAttr : null
+                    });
                     this.dismissAfterSelection();
                 });
             });

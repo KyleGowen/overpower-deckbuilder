@@ -36,7 +36,7 @@ describe('Stat Type Filtering - John Carter special case', () => {
 
   it('treats Brute Force 8 as usable for John Carter, 9 as unusable', async () => {
     // Get characters
-    const charactersResp = await request(app).get('/api/characters').expect(200);
+    const charactersResp = await request(app).get('/api/v1/catalog/characters').expect(200);
     const characters = charactersResp.body.data || [];
     const johnCarter = characters.find((c: any) => (c.name || '').toLowerCase().includes('john carter'));
     expect(johnCarter).toBeTruthy();
@@ -67,7 +67,7 @@ describe('Stat Type Filtering - John Carter special case', () => {
   });
 
   it('uses effective overrides for Any-Power/Multi Power with John Carter', async () => {
-    const charactersResp = await request(app).get('/api/characters').expect(200);
+    const charactersResp = await request(app).get('/api/v1/catalog/characters').expect(200);
     const characters = charactersResp.body.data || [];
     const johnCarter = characters.find((c: any) => (c.name || '').toLowerCase().includes('john carter'));
     expect(johnCarter).toBeTruthy();

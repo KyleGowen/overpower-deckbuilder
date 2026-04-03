@@ -140,6 +140,18 @@ All v1 JSON responses use:
 
 **Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogCharactersResponseDto.ts`](src/api/dto/v1/CatalogCharactersResponseDto.ts)
 
+### `GET /api/v1/catalog/locations`
+
+**Auth:** None (same as legacy `GET /api/locations`).
+
+**Request model:** none (no body; no query contract file required for this GET).
+
+**Response 200:** `data` is an array of location records (same objects as legacy `data` array).
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** [`src/api/services/catalogService.ts`](src/api/services/catalogService.ts) · HTTP [`src/api/http/dbv-catalog.http.ts`](src/api/http/dbv-catalog.http.ts) · response shape [`src/api/dto/v1/CatalogLocationsResponseDto.ts`](src/api/dto/v1/CatalogLocationsResponseDto.ts)
+
 ---
 
 ## Route index (v1)
@@ -150,3 +162,4 @@ All v1 JSON responses use:
 | GET | /api/v1/auth/me | auth.http.ts |
 | POST | /api/v1/auth/logout | auth.http.ts |
 | GET | /api/v1/catalog/characters | dbv-catalog.http.ts |
+| GET | /api/v1/catalog/locations | dbv-catalog.http.ts |
