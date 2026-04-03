@@ -125,7 +125,7 @@ async function searchAllCards(searchTerm) {
             fetchList('/api/v1/catalog/events'),
             fetchList('/api/v1/catalog/aspects'),
             fetchList('/api/v1/catalog/advanced-universe'),
-            fetchList('/api/teamwork'),
+            fetchList('/api/v1/catalog/teamwork'),
             fetchList('/api/ally-universe'),
             fetchList('/api/training'),
             fetchList('/api/basic-universe'),

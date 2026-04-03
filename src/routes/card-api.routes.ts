@@ -2,17 +2,7 @@ import express, { Request } from 'express';
 import type { CardApiRoutesDeps } from './types';
 
 export function registerCardApiRoutes(app: express.Application, deps: CardApiRoutesDeps): void {
-  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe removed — use GET /api/v1/catalog/... (API_V1.md).
-
-  app.get('/api/teamwork', async (req, res) => {
-    try {
-      const teamwork = await deps.catalogService.getAllTeamwork();
-      res.json({ success: true, data: teamwork });
-    } catch (error) {
-      console.error('Error fetching teamwork:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch teamwork' });
-    }
-  });
+  // GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe, /teamwork removed — use GET /api/v1/catalog/... (API_V1.md).
 
   app.get('/api/ally-universe', async (req, res) => {
     try {

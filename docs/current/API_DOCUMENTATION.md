@@ -166,25 +166,9 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/a
 
 The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/advanced-universe`** — see [API_V1.md](../../API_V1.md).
 
-### GET /api/teamwork
-Get all teamwork cards.
+### GET /api/teamwork (removed)
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "image": "string",
-      "alternateImages": ["string"],
-      "threat": "number"
-    }
-  ]
-}
-```
+The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/teamwork`** — see [API_V1.md](../../API_V1.md).
 
 ### GET /api/ally-universe
 Get all ally universe cards.

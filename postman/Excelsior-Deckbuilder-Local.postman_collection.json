@@ -206,11 +206,11 @@
           }
         },
         {
-          "name": "GET /api/teamwork",
+          "name": "GET /api/v1/catalog/teamwork",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/teamwork"
+            "url": "{{baseUrl}}/api/v1/catalog/teamwork"
           }
         },
         {

@@ -163,7 +163,7 @@ describe('KO Feature Dimming Integration Tests', () => {
     
     // Get teamwork cards
     const teamworkResp = await request(app)
-      .get('/api/teamwork')
+      .get('/api/v1/catalog/teamwork')
       .set('Cookie', authCookie)
       .expect(200);
     

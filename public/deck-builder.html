@@ -5498,11 +5498,10 @@
                 }
 
                 try {
-                    const response = await fetch('/api/teamwork');
-                    const data = await response.json();
+                    const { ok, rows } = await fetchCatalogList('/api/v1/catalog/teamwork');
                     
-                    if (data.success) {
-                        const filteredTeamwork = data.data.filter(card => 
+                    if (ok) {
+                        const filteredTeamwork = rows.filter(card => 
                             card.card_type.toLowerCase().includes(searchTerm) ||
                             card.to_use.toLowerCase().includes(searchTerm) ||
                             card.acts_as.toLowerCase().includes(searchTerm) ||
@@ -5840,11 +5839,10 @@
         // Teamwork functions
         async function loadTeamwork() {
             try {
-                const response = await fetch('/api/teamwork');
-                const data = await response.json();
+                const { ok, rows } = await fetchCatalogList('/api/v1/catalog/teamwork');
                 
-                if (data.success) {
-                    displayTeamwork(data.data);
+                if (ok) {
+                    displayTeamwork(rows);
                 }
             } catch (error) {
                 console.error('Error loading teamwork:', error);
@@ -10485,7 +10483,7 @@
                     { type: 'event', api: '/api/v1/catalog/events', nameField: 'name' },
                     { type: 'aspect', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', api: '/api/v1/catalog/advanced-universe', nameField: 'name' },
-                    { type: 'teamwork', api: '/api/teamwork', nameField: 'card_type' },
+                    { type: 'teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', api: '/api/ally-universe', nameField: 'card_name' },
                     { type: 'training', api: '/api/training', nameField: 'card_name' },
                     { type: 'basic-universe', api: '/api/basic-universe', nameField: 'card_name' },
@@ -11066,7 +11064,7 @@
                     { type: 'event', name: 'Events', api: '/api/v1/catalog/events', nameField: 'name' },
                     { type: 'aspect', name: 'Aspects', api: '/api/v1/catalog/aspects', nameField: 'card_name' },
                     { type: 'advanced-universe', name: 'Advanced Universe', api: '/api/v1/catalog/advanced-universe', nameField: 'name' },
-                    { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/teamwork', nameField: 'card_type' },
+                    { type: 'teamwork', name: 'Universe: Teamwork', api: '/api/v1/catalog/teamwork', nameField: 'card_type' },
                     { type: 'ally-universe', name: 'Universe: Ally', api: '/api/ally-universe', nameField: 'card_name' },
                     { type: 'training', name: 'Universe: Training', api: '/api/training', nameField: 'card_name' },
                     { type: 'basic-universe', name: 'Universe: Basic', api: '/api/basic-universe', nameField: 'card_name' },

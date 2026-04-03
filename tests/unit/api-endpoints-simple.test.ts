@@ -172,12 +172,16 @@ const createTestApp = () => {
     }
   });
 
-  app.get('/api/teamwork', async (req, res) => {
+  app.get('/api/v1/catalog/teamwork', async (req, res) => {
     try {
       const teamwork = await mockCardRepository.getAllTeamwork();
-      res.json({ success: true, data: teamwork });
+      res.json({ data: teamwork, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch teamwork' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'CATALOG_ERROR', message: 'Failed to fetch teamwork' }]
+      });
     }
   });
 
@@ -570,7 +574,7 @@ describe('API Endpoints - Simplified', () => {
       });
     });
 
-    describe('GET /api/teamwork', () => {
+    describe('GET /api/v1/catalog/teamwork', () => {
       it('should return all teamwork cards successfully', async () => {
         const mockTeamwork = [
           { id: '1', name: 'Teamwork Card 1' },
@@ -579,12 +583,13 @@ describe('API Endpoints - Simplified', () => {
         mockCardRepository.getAllTeamwork.mockResolvedValue(mockTeamwork);
 
         const response = await request(app)
-          .get('/api/teamwork')
+          .get('/api/v1/catalog/teamwork')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockTeamwork
+          data: mockTeamwork,
+          meta: {},
+          errors: []
         });
         expect(mockCardRepository.getAllTeamwork).toHaveBeenCalled();
       });

@@ -85,7 +85,7 @@ describe('CardSearchService', () => {
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/events');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/aspects');
             expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/advanced-universe');
-            expect(mockFetch).toHaveBeenCalledWith('/api/teamwork');
+            expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/teamwork');
             expect(mockFetch).toHaveBeenCalledWith('/api/ally-universe');
             expect(mockFetch).toHaveBeenCalledWith('/api/training');
             expect(mockFetch).toHaveBeenCalledWith('/api/basic-universe');
@@ -582,7 +582,7 @@ describe('CardSearchService', () => {
                 });
             } else {
                 // If no results, verify the search was called correctly
-                expect(mockFetch).toHaveBeenCalledWith('/api/teamwork');
+                expect(mockFetch).toHaveBeenCalledWith('/api/v1/catalog/teamwork');
             }
         });
 

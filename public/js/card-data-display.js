@@ -451,13 +451,30 @@ async function loadTeamwork() {
         return;
     }
     try {
-        const response = await fetch('/api/teamwork');
-        const data = await response.json();
-        
-        if (data.success) {
-            if (typeof setCachedCardData === 'function') setCachedCardData('teamwork', data.data);
-            window.teamworkData = data.data;
-            displayTeamwork(data.data);
+        const fetchList =
+            typeof fetchCatalogList === 'function'
+                ? fetchCatalogList
+                : async (url) => {
+                      try {
+                          const r = await fetch(url);
+                          const j = await r.json();
+                          const responseOk = r.ok !== false;
+                          const ok =
+                              responseOk &&
+                              j &&
+                              Array.isArray(j.data) &&
+                              j.success !== false &&
+                              (!j.errors || j.errors.length === 0);
+                          return { ok, rows: ok ? j.data : [] };
+                      } catch {
+                          return { ok: false, rows: [] };
+                      }
+                  };
+        const { ok, rows } = await fetchList('/api/v1/catalog/teamwork');
+        if (ok) {
+            if (typeof setCachedCardData === 'function') setCachedCardData('teamwork', rows);
+            window.teamworkData = rows;
+            displayTeamwork(rows);
         }
     } catch (error) {
         console.error('Error loading teamwork:', error);
