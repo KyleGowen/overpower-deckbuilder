@@ -643,15 +643,15 @@
           }
         },
         {
-          "name": "GET /api/collections/me/cards",
+          "name": "GET /api/v1/collections/me/cards",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/collections/me/cards"
+            "url": "{{baseUrl}}/api/v1/collections/me/cards"
           }
         },
         {
-          "name": "POST /api/collections/me/cards",
+          "name": "POST /api/v1/collections/me/cards",
           "request": {
             "method": "POST",
             "header": [
@@ -660,7 +660,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/collections/me/cards",
+            "url": "{{baseUrl}}/api/v1/collections/me/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"cardType\": \"character\",\n  \"quantity\": 1,\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
@@ -668,7 +668,7 @@
           }
         },
         {
-          "name": "POST /api/collections/me/cards/remove-one",
+          "name": "POST /api/v1/collections/me/cards/remove-one",
           "request": {
             "method": "POST",
             "header": [
@@ -677,7 +677,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/collections/me/cards/remove-one",
+            "url": "{{baseUrl}}/api/v1/collections/me/cards/remove-one",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"cardType\": \"character\",\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
@@ -685,7 +685,7 @@
           }
         },
         {
-          "name": "PUT /api/collections/me/cards/:cardId",
+          "name": "PUT /api/v1/collections/me/cards/:cardId",
           "request": {
             "method": "PUT",
             "header": [
@@ -694,7 +694,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/collections/me/cards/{{cardId}}",
+            "url": "{{baseUrl}}/api/v1/collections/me/cards/{{cardId}}",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"quantity\": 2,\n  \"cardType\": \"character\",\n  \"imagePath\": \"src/resources/cards/images/characters/foo.png\"\n}"
@@ -702,11 +702,11 @@
           }
         },
         {
-          "name": "DELETE /api/collections/me/cards/:cardId",
+          "name": "DELETE /api/v1/collections/me/cards/:cardId",
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/api/collections/me/cards/{{cardId}}?cardType=character"
+            "url": "{{baseUrl}}/api/v1/collections/me/cards/{{cardId}}?cardType=character"
           }
         },
         {

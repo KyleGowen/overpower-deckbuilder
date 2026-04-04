@@ -99,7 +99,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Step 2: Add card
       const addResponse = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -109,12 +109,12 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         })
         .expect(200);
 
-      expect(addResponse.body.success).toBe(true);
+      expect(addResponse.body.errors).toEqual([]);
       expect(addResponse.body.data.quantity).toBe(1);
 
       // Step 3: Retrieve collection
       const getResponse = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -123,7 +123,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Step 4: Update quantity
       const updateResponse = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterIds[0]}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterIds[0]}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -136,7 +136,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Step 5: Verify update
       const verifyResponse = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -144,15 +144,15 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Step 6: Remove card
       const deleteResponse = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterIds[0]}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterIds[0]}?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(deleteResponse.body.success).toBe(true);
+      expect(deleteResponse.body.errors).toEqual([]);
 
       // Step 7: Verify removal
       const finalResponse = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -164,7 +164,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle building a complete collection with multiple card types', async () => {
       // Add characters
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -174,7 +174,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[1],
@@ -185,7 +185,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Add power cards
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[0],
@@ -195,7 +195,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[1],
@@ -206,7 +206,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Add special cards
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testSpecialCardIds[0],
@@ -217,7 +217,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Retrieve and verify collection
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -235,7 +235,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle updating multiple cards in sequence', async () => {
       // Add multiple cards
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -245,7 +245,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[0],
@@ -256,7 +256,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Update first card
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterIds[0]}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterIds[0]}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 3,
@@ -267,7 +267,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Update second card
       await request(app)
-        .put(`/api/collections/me/cards/${testPowerCardIds[0]}`)
+        .put(`/api/v1/collections/me/cards/${testPowerCardIds[0]}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -278,7 +278,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Verify both updates
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -294,7 +294,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle incremental quantity increases', async () => {
       // Add card with quantity 1
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -306,7 +306,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
       // Incrementally increase quantity
       for (let i = 2; i <= 5; i++) {
         await request(app)
-          .put(`/api/collections/me/cards/${testCharacterIds[0]}`)
+          .put(`/api/v1/collections/me/cards/${testCharacterIds[0]}`)
           .set('Cookie', adminAuthCookie)
           .send({
             quantity: i,
@@ -318,7 +318,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Verify final quantity
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -329,7 +329,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle quantity decrease to zero (removal)', async () => {
       // Add card with quantity 5
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -341,7 +341,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
       // Decrease quantity step by step
       for (let i = 4; i >= 0; i--) {
         await request(app)
-          .put(`/api/collections/me/cards/${testCharacterIds[0]}`)
+          .put(`/api/v1/collections/me/cards/${testCharacterIds[0]}`)
           .set('Cookie', adminAuthCookie)
           .send({
             quantity: i,
@@ -353,7 +353,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Verify card was removed
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -365,7 +365,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
       // Add same card multiple times
       for (let i = 0; i < 3; i++) {
         await request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie)
           .send({
             cardId: testCharacterIds[0],
@@ -378,7 +378,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Verify total quantity
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -391,7 +391,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     beforeEach(async () => {
       // Set up a collection with multiple cards
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[0],
@@ -401,7 +401,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterIds[1],
@@ -411,7 +411,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[0],
@@ -437,11 +437,11 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
     it('should retrieve all cards with correct data', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.length).toBeGreaterThanOrEqual(3);
 
       // Verify all required fields are present
@@ -456,7 +456,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should maintain collection state across multiple retrievals', async () => {
       // Get initial state
       const initialResponse = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -464,7 +464,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Make changes
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testSpecialCardIds[0],
@@ -475,7 +475,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Retrieve again
       const updatedResponse = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -488,7 +488,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
       // Add multiple characters
       for (let i = 0; i < 3; i++) {
         await request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie)
           .send({
             cardId: testCharacterIds[i],
@@ -499,7 +499,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
       }
 
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -510,7 +510,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle managing a power card collection', async () => {
       // Add power cards with varying quantities
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[0],
@@ -520,7 +520,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardIds[1],
@@ -531,7 +531,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
       // Update quantities
       await request(app)
-        .put(`/api/collections/me/cards/${testPowerCardIds[0]}`)
+        .put(`/api/v1/collections/me/cards/${testPowerCardIds[0]}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 6,
@@ -540,7 +540,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
         });
 
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 

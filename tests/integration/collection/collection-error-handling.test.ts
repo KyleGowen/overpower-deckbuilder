@@ -80,10 +80,10 @@ describe('Collection Error Handling Integration Tests', () => {
     await pool.end();
   });
 
-  describe('POST /api/collections/me/cards - Error Cases', () => {
+  describe('POST /api/v1/collections/me/cards - Error Cases', () => {
     it('should return 400 when cardId is missing', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardType: 'character',
@@ -92,13 +92,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cardId and cardType are required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cardId and cardType are required');
     });
 
     it('should return 400 when cardType is missing', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -107,13 +107,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cardId and cardType are required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cardId and cardType are required');
     });
 
     it('should return 400 when both cardId and cardType are missing', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 1,
@@ -121,13 +121,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cardId and cardType are required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cardId and cardType are required');
     });
 
     it('should return 404 when card does not exist', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: '00000000-0000-0000-0000-000000000000',
@@ -138,12 +138,12 @@ describe('Collection Error Handling Integration Tests', () => {
 
       // May return 404 or 500 depending on validation
       expect([404, 500]).toContain(response.status);
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.length).toBeGreaterThan(0);
     });
 
     it('should handle empty string cardId', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: '',
@@ -153,12 +153,12 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.length).toBeGreaterThan(0);
     });
 
     it('should handle invalid cardType', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -173,7 +173,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should handle negative quantity', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -188,7 +188,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should handle zero quantity', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -203,7 +203,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should handle very large quantity', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -218,7 +218,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should handle missing imagePath gracefully', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -231,11 +231,11 @@ describe('Collection Error Handling Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/collections/me/cards/:cardId - Error Cases', () => {
+  describe('PUT /api/v1/collections/me/cards/:cardId - Error Cases', () => {
     beforeEach(async () => {
       // Add a card first for update tests
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -247,7 +247,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should return 400 when quantity is missing', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           cardType: 'character',
@@ -255,13 +255,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('quantity is required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('quantity is required');
     });
 
     it('should return 400 when quantity is null', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: null,
@@ -270,13 +270,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('quantity is required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('quantity is required');
     });
 
     it('should return 400 when cardType is missing', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -284,13 +284,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cardType is required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cardType is required');
     });
 
     it('should return 400 when imagePath is missing', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -298,13 +298,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('imagePath is required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('imagePath is required');
     });
 
     it('should return 400 when quantity is negative', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: -1,
@@ -313,13 +313,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cannot be negative');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cannot be negative');
     });
 
     it('should return 404 when card is not in collection', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/non-existent-card-id`)
+        .put(`/api/v1/collections/me/cards/non-existent-card-id`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -328,13 +328,13 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(404);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('not found');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('not found');
     });
 
     it('should handle invalid cardId format', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/invalid-format`)
+        .put(`/api/v1/collections/me/cards/invalid-format`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -343,15 +343,15 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(404);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.length).toBeGreaterThan(0);
     });
   });
 
-  describe('DELETE /api/collections/me/cards/:cardId - Error Cases', () => {
+  describe('DELETE /api/v1/collections/me/cards/:cardId - Error Cases', () => {
     beforeEach(async () => {
       // Add a card first for deletion tests
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -363,42 +363,42 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should return 400 when cardType query parameter is missing', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .expect(400);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('cardType query parameter is required');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('cardType query parameter is required');
     });
 
     it('should return 404 when card is not in collection', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/non-existent-card-id?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/non-existent-card-id?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(404);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('not found');
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('not found');
     });
 
     it('should handle invalid cardId format', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/invalid-format?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/invalid-format?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(404);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.length).toBeGreaterThan(0);
     });
   });
 
-  describe('GET /api/collections/me/cards - Error Cases', () => {
+  describe('GET /api/v1/collections/me/cards - Error Cases', () => {
     it('should return empty array for empty collection', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toEqual([]);
     });
 
@@ -415,11 +415,11 @@ describe('Collection Error Handling Integration Tests', () => {
       }
 
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
@@ -427,17 +427,17 @@ describe('Collection Error Handling Integration Tests', () => {
   describe('Malformed Request Handling', () => {
     it('should handle empty request body', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({})
         .expect(400);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.length).toBeGreaterThan(0);
     });
 
     it('should handle invalid JSON', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .set('Content-Type', 'application/json')
         .send('invalid json')
@@ -449,7 +449,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
     it('should handle extra unexpected fields', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -468,7 +468,7 @@ describe('Collection Error Handling Integration Tests', () => {
     it('should handle updating card that was just added', async () => {
       // Add card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -480,7 +480,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
       // Immediately update
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 10,
@@ -489,14 +489,14 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.quantity).toBe(10);
     });
 
     it('should handle deleting card that was just added', async () => {
       // Add card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -508,17 +508,17 @@ describe('Collection Error Handling Integration Tests', () => {
 
       // Immediately delete
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
     });
 
     it('should handle setting quantity to 0 immediately after adding', async () => {
       // Add card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -530,7 +530,7 @@ describe('Collection Error Handling Integration Tests', () => {
 
       // Set to 0
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 0,
@@ -539,8 +539,8 @@ describe('Collection Error Handling Integration Tests', () => {
         })
         .expect(200);
 
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeNull();
-      expect(response.body.message).toContain('removed');
     });
   });
 });

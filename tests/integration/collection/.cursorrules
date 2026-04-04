@@ -109,13 +109,13 @@ describe('Feature Name Integration Tests', () => {
  * 
  * Tests all CRUD operations for the collection feature:
  * - GET /api/v1/collections/me - Get current user's collection (v1 envelope)
- * - POST /api/collections/me/cards - Add card to collection
+ * - POST /api/v1/collections/me/cards - Add card to collection
  * 
  * All endpoints require ADMIN role.
  */
 
 describe('Collection API Endpoints', () => {
-  describe('POST /api/collections/me/cards', () => {
+  describe('POST /api/v1/collections/me/cards', () => {
     // Tests for adding cards
     it('should add character card to collection', async () => {
       // Test implementation

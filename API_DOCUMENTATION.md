@@ -517,89 +517,15 @@ Add card; same rule checks as DB add (one-per-deck, cataclysm, etc.). **Response
 All routes require authentication.
 
 **Valid `cardType` values** for collection APIs:  
-`character`, `special`, `power`, `location`, `mission`, `event`, `aspect`, `advanced_universe`, `teamwork`, `ally_universe`, `training`, `basic_universe` (see `isValidCollectionCardType` in `src/routes/helpers.ts`).
+`character`, `special`, `power`, `location`, `mission`, `event`, `aspect`, `advanced_universe`, `teamwork`, `ally_universe`, `training`, `basic_universe` (see `isValidCollectionCardType` in [`src/validation/collectionCardType.ts`](src/validation/collectionCardType.ts), re-exported from `src/routes/helpers.ts`).
 
 ### ~~`GET /api/collections/me`~~ (removed)
 
 **Removed:** use **`GET /api/v1/collections/me`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-### `GET /api/collections/me/cards`
+### ~~`GET /api/collections/me/cards`~~ · ~~`POST`~~ · ~~`POST .../remove-one`~~ · ~~`PUT .../:cardId`~~ · ~~`DELETE .../:cardId`~~ (removed)
 
-**Response 200:**
-
-```json
-{ "success": true, "data": [ /* collection rows from service */ ] }
-```
-
-### `POST /api/collections/me/cards`
-
-**Body:**
-
-```json
-{
-  "cardId": "card-uuid",
-  "cardType": "character",
-  "quantity": 1,
-  "imagePath": "optional/path"
-}
-```
-
-**Response 200:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "card_id": "card-uuid",
-    "card_type": "character",
-    "image_path": "...",
-    "quantity": 1
-  }
-}
-```
-
-### `POST /api/collections/me/cards/remove-one`
-
-**Body:**
-
-```json
-{
-  "cardId": "card-uuid",
-  "cardType": "character",
-  "imagePath": "/path/to/image.png"
-}
-```
-
-**Response 200:**
-
-```json
-{
-  "success": true,
-  "data": { /* updated row */ },
-  "message": "One copy removed from collection"
-}
-```
-
-### `PUT /api/collections/me/cards/:cardId`
-
-**Body:**
-
-```json
-{
-  "quantity": 2,
-  "cardType": "character",
-  "imagePath": "/path.png",
-  "oldImagePath": "/optional/previous.png"
-}
-```
-
-**Response 200:** Updated row in `data`, or `data: null` with `message: "Card removed from collection"` when quantity is 0.
-
-### `DELETE /api/collections/me/cards/:cardId?cardType=character`
-
-**Query:** `cardType` required and must be valid.
-
-**Response 200:** `{ "success": true, "message": "Card removed from collection" }`
+**Removed:** use **`GET/POST/PUT/DELETE /api/v1/collections/me/cards`** and related paths ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**). **`DELETE`** still requires query **`cardType`** on the v1 URL.
 
 ### `GET /api/collections/me/history?limit=50`
 
@@ -667,7 +593,7 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
 | POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~, ~~`/api/decks/:id/ui-preferences`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**; create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | *use v1* · [`decks.http.ts`](src/api/http/decks.http.ts) |
-| GET/POST/PUT/DELETE | ~~`/api/collections/me`~~ (removed — **`GET /api/v1/collections/me`**) · `/api/collections/me/cards`, `.../history`, mutations | `collections.routes.ts` + [`collections.http.ts`](src/api/http/collections.http.ts) |
+| GET | ~~`/api/collections/me`~~, ~~`/api/collections/me/cards`~~ and card mutations (removed — **`/api/v1/collections/me`**, **`/api/v1/collections/me/cards`** … — [API_V1.md](API_V1.md)) · `/api/collections/me/history` | [`collections.http.ts`](src/api/http/collections.http.ts) + `collections.routes.ts` (history only) |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
 ### API v1 (`/api/v1`)
@@ -681,7 +607,10 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
 | GET | `/api/v1/dbv/sets`, `/api/v1/dbv/deck-backgrounds` | `src/api/http/dbv-support.http.ts` |
-| GET | `/api/v1/collections/me` | `src/api/http/collections.http.ts` |
+| GET | `/api/v1/collections/me`, `/api/v1/collections/me/cards` | `src/api/http/collections.http.ts` |
+| POST | `/api/v1/collections/me/cards`, `/api/v1/collections/me/cards/remove-one` | `src/api/http/collections.http.ts` |
+| PUT | `/api/v1/collections/me/cards/:cardId` | `src/api/http/collections.http.ts` |
+| DELETE | `/api/v1/collections/me/cards/:cardId` | `src/api/http/collections.http.ts` |
 
 ---
 

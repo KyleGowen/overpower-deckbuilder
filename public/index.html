@@ -2406,7 +2406,8 @@
                     });
 
                     const data = await response.json();
-                    if (data.success) {
+                    const ok = response.ok && data && (!data.errors || data.errors.length === 0);
+                    if (ok) {
                         // Reload deck details
                         loadDeckDetails(currentDeckId);
                         // Refresh deck list
@@ -2422,7 +2423,8 @@
                             }
                         }, 100);
                     } else {
-                        showNotification('Failed to remove card: ' + data.error, 'error');
+                        const msg = (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Request failed';
+                        showNotification('Failed to remove card: ' + msg, 'error');
                     }
                 } catch (error) {
                     console.error('Error removing card:', error);

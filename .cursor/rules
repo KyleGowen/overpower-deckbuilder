@@ -676,10 +676,10 @@ All endpoints require authentication. GUEST users bypass these via localStorage.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/collections/me` | Fetch user's collection (v1 envelope) |
-| GET | `/api/collections/me/cards` | Fetch collection cards |
-| POST | `/api/collections/me/cards` | Add card to collection |
-| PUT | `/api/collections/me/cards/:cardId` | Update card quantity |
-| DELETE | `/api/collections/me/cards/:cardId` | Remove card from collection |
+| GET | `/api/v1/collections/me/cards` | Fetch collection cards |
+| POST | `/api/v1/collections/me/cards` | Add card to collection |
+| PUT | `/api/v1/collections/me/cards/:cardId` | Update card quantity |
+| DELETE | `/api/v1/collections/me/cards/:cardId` | Remove card from collection |
 | GET | `/api/collections/me/history` | Fetch collection change history |
 
 ### Frontend Flow
@@ -690,7 +690,7 @@ loadCollection()
     ├─ isGuestUser()? ──yes──► loadGuestCollectionFromStorage()
     │                         showGuestSandboxBanner()
     │
-    └─ no ──► fetch('/api/collections/me/cards')
+    └─ no ──► fetch('/api/v1/collections/me/cards')
 ```
 
 ### Files

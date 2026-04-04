@@ -20,10 +20,10 @@ The tests are organized into 6 comprehensive test suites, each covering a specif
 
 **Coverage**:
 - `GET /api/v1/collections/me` - Get current user's collection (v1 JSON)
-- `GET /api/collections/me/cards` - Get all cards in collection
-- `POST /api/collections/me/cards` - Add card to collection
-- `PUT /api/collections/me/cards/:cardId` - Update card quantity
-- `DELETE /api/collections/me/cards/:cardId` - Remove card from collection
+- `GET /api/v1/collections/me/cards` - Get all cards in collection
+- `POST /api/v1/collections/me/cards` - Add card to collection
+- `PUT /api/v1/collections/me/cards/:cardId` - Update card quantity
+- `DELETE /api/v1/collections/me/cards/:cardId` - Remove card from collection
 
 **Key Test Scenarios**:
 - Collection creation and retrieval

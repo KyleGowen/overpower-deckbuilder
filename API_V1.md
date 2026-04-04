@@ -558,6 +558,64 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 **Implementation:** [`CollectionService`](src/services/collectionService.ts) · HTTP [`collections.http.ts`](src/api/http/collections.http.ts) · response shape [`CollectionMeV1DataDto`](src/api/dto/v1/CollectionMeV1DataDto.ts)
 
+### `GET /api/v1/collections/me/cards`
+
+**Auth:** Valid **session cookie** (`authenticateUser`). Unauthenticated → **401** (legacy `{ success, error }` from session middleware).
+
+**Response 200:** v1 envelope; **`data`** is an array of collection rows (same shape as legacy `GET /api/collections/me/cards` payload): snake_case fields including `card_id`, `card_type`, `quantity`, `image_path`, plus joined card metadata when present.
+
+**Response 500:** `errors` with code **`COLLECTION_CARDS_FETCH_ERROR`**.
+
+### `POST /api/v1/collections/me/cards`
+
+**Auth:** Session cookie.
+
+**Body:** JSON — **`cardId`** (string), **`cardType`** (valid collection type; see `isValidCollectionCardType` in [`src/validation/collectionCardType.ts`](src/validation/collectionCardType.ts)), optional **`quantity`** (defaults like legacy: numeric `|| 1`), optional **`imagePath`**.
+
+**Response 200:** v1 envelope; **`data`** is the full collection row after add (same as legacy).
+
+**Response 400:** **`VALIDATION_ERROR`** (missing/invalid fields).
+
+**Response 404:** **`COLLECTION_CARD_NOT_FOUND`** when the card does not exist in the catalog table for that type.
+
+**Response 500:** **`COLLECTION_CARD_ADD_ERROR`**.
+
+### `POST /api/v1/collections/me/cards/remove-one`
+
+**Auth:** Session cookie.
+
+**Body:** **`cardId`**, **`cardType`**, **`imagePath`** (all required non-empty strings; **`cardType`** must be valid).
+
+**Response 200:** v1 envelope; **`data`** is the updated row or **`null`** if the last copy was removed.
+
+**Response 400 / 404 / 500:** **`VALIDATION_ERROR`**, **`COLLECTION_REMOVE_ONE_NOT_FOUND`**, **`COLLECTION_REMOVE_ONE_ERROR`**.
+
+### `PUT /api/v1/collections/me/cards/:cardId`
+
+**Auth:** Session cookie.
+
+**Body:** **`quantity`** (number, ≥ 0), **`cardType`** (valid), **`imagePath`** (required), optional **`oldImagePath`**.
+
+**Response 200:** v1 envelope; **`data`** is the updated row, or **`null`** when **`quantity`** is **0** and the row was removed.
+
+**Response 400:** **`VALIDATION_ERROR`** (missing fields, negative quantity, etc.).
+
+**Response 404:** **`COLLECTION_CARD_NOT_IN_COLLECTION`** when the row does not exist (and **`quantity`** was not 0).
+
+**Response 500:** **`COLLECTION_CARD_UPDATE_ERROR`**.
+
+### `DELETE /api/v1/collections/me/cards/:cardId`
+
+**Auth:** Session cookie.
+
+**Query:** **`cardType`** required (valid collection type). Removes **all** rows for that **`cardId` + `cardType`** (same semantics as legacy).
+
+**Response 200:** v1 envelope; **`data`** is `{ "message": "Card removed from collection" }`.
+
+**Response 400 / 404 / 500:** **`VALIDATION_ERROR`**, **`COLLECTION_CARD_NOT_IN_COLLECTION`**, **`COLLECTION_CARD_DELETE_ERROR`**.
+
+**Implementation (cards):** [`CollectionService`](src/services/collectionService.ts) · HTTP [`collections.http.ts`](src/api/http/collections.http.ts) · row type [`CollectionCardRowV1Dto`](src/api/dto/v1/CollectionCardRowV1Dto.ts)
+
 ---
 
 ## Route index (v1)
@@ -597,3 +655,8 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 | PUT | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | DELETE | /api/v1/decks/:id | decks.http.ts |
 | GET | /api/v1/collections/me | collections.http.ts |
+| GET | /api/v1/collections/me/cards | collections.http.ts |
+| POST | /api/v1/collections/me/cards | collections.http.ts |
+| POST | /api/v1/collections/me/cards/remove-one | collections.http.ts |
+| PUT | /api/v1/collections/me/cards/:cardId | collections.http.ts |
+| DELETE | /api/v1/collections/me/cards/:cardId | collections.http.ts |

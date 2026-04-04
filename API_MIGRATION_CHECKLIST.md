@@ -131,11 +131,11 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path                                    | v1 path (proposed)                                       | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ---------------------------------------------- | -------------------------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/collections/me/cards                  | GET /api/v1/collections/me/cards                         | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| POST /api/collections/me/cards                 | POST /api/v1/collections/me/cards                        | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| POST /api/collections/me/cards/remove-one      | POST /api/v1/collections/me/cards/remove-one             | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| PUT /api/collections/me/cards/:cardId          | PUT /api/v1/collections/me/cards/:cardId                 | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| DELETE /api/collections/me/cards/:cardId       | DELETE /api/v1/collections/me/cards/:cardId              | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/collections/me/cards                  | GET /api/v1/collections/me/cards                         | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
+| POST /api/collections/me/cards                 | POST /api/v1/collections/me/cards                        | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
+| POST /api/collections/me/cards/remove-one      | POST /api/v1/collections/me/cards/remove-one             | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
+| PUT /api/collections/me/cards/:cardId          | PUT /api/v1/collections/me/cards/:cardId                 | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
+| DELETE /api/collections/me/cards/:cardId       | DELETE /api/v1/collections/me/cards/:cardId              | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
 
 Legacy **DELETE** requires query `cardType` (see `API_DOCUMENTATION.md`); keep the same contract in `API_V1.md` when migrated.
 

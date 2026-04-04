@@ -582,13 +582,13 @@ describe('displayCollectionCards() mobile layout', () => {
         (global.fetch as jest.Mock).mockResolvedValue({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: {} })
+            json: async () => ({ errors: [], meta: {}, data: {} })
         });
         mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValue({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: [] })
+            json: async () => ({ errors: [], meta: {}, data: [] })
         });
 
         const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
@@ -602,7 +602,7 @@ describe('displayCollectionCards() mobile layout', () => {
         });
 
         expect(global.fetch).toHaveBeenCalledWith(
-            '/api/collections/me/cards/card-1',
+            '/api/v1/collections/me/cards/card-1',
             expect.objectContaining({
                 method: 'PUT',
                 body: expect.stringContaining('"quantity":3')
@@ -857,7 +857,7 @@ describe('loadCollection()', () => {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: apiCards })
+            json: async () => ({ errors: [], meta: {}, data: apiCards })
         });
 
         // Provide allCardsData globally so the merge can proceed
@@ -903,7 +903,7 @@ describe('loadCollection()', () => {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: apiCards })
+            json: async () => ({ errors: [], meta: {}, data: apiCards })
         });
 
         // Remove allCardsData and loadAllCards so fallback path is exercised
@@ -923,7 +923,7 @@ describe('loadCollection()', () => {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: apiCards })
+            json: async () => ({ errors: [], meta: {}, data: apiCards })
         });
 
         (window as any).allCardsData = [
@@ -1105,13 +1105,13 @@ describe('handleCollectionQuantityClick()', () => {
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: {} })
+            json: async () => ({ errors: [], meta: {}, data: {} })
         });
         mockFetchSetsOkOnce();
         (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             status: 200,
-            json: async () => ({ success: true, data: [] })
+            json: async () => ({ errors: [], meta: {}, data: [] })
         });
 
         const btn = document.createElement('button');
@@ -1121,7 +1121,7 @@ describe('handleCollectionQuantityClick()', () => {
         await fns.handleCollectionQuantityClick(btn, 2);
 
         expect(global.fetch).toHaveBeenCalledWith(
-            '/api/collections/me/cards/card-1',
+            '/api/v1/collections/me/cards/card-1',
             expect.objectContaining({
                 method: 'PUT',
                 body: expect.stringContaining('"quantity":2')
@@ -1320,7 +1320,7 @@ describe('GUEST sandbox in addCardToCollection()', () => {
         
         expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/sets', expect.objectContaining({ credentials: 'include' }));
         expect(global.fetch).not.toHaveBeenCalledWith(
-            '/api/collections/me/cards',
+            '/api/v1/collections/me/cards',
             expect.anything()
         );
         expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -1486,7 +1486,7 @@ describe('GUEST sandbox in removeCardFromCollection()', () => {
         
         expect(global.fetch).toHaveBeenCalledWith('/api/v1/dbv/sets', expect.anything());
         expect(global.fetch).not.toHaveBeenCalledWith(
-            '/api/collections/me/cards',
+            '/api/v1/collections/me/cards',
             expect.anything()
         );
         const savedCall = localStorageMock.setItem.mock.calls.find(

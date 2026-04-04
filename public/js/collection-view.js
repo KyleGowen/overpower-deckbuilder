@@ -29,6 +29,22 @@ function collectionIsLayoutMobile() {
 // GUEST sandbox localStorage key
 const GUEST_COLLECTION_KEY = 'guestCollection';
 
+/** Authenticated collection card CRUD (v1 envelope). */
+const COLLECTION_V1_CARDS_BASE = '/api/v1/collections/me/cards';
+
+function collectionV1IsSuccess(body) {
+    return body && Array.isArray(body.errors) && body.errors.length === 0;
+}
+
+function collectionApiErrorMessage(errorData) {
+    if (!errorData) return 'Unknown error';
+    if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+        return errorData.errors.map(function (e) { return e.message; }).join('; ');
+    }
+    if (typeof errorData.error === 'string') return errorData.error;
+    return 'Unknown error';
+}
+
 /** Uppercase set code → display name; seeded for offline / before GET /api/v1/dbv/sets */
 const DEFAULT_COLLECTION_SET_NAMES = new Map([
     ['ERB', 'Edgar Rice Burroughs and the World Legends'],
@@ -62,7 +78,7 @@ function normalizeCollectionCardTypeForApi(cardType) {
 
 /**
  * Fetch collection and build map for database view -Collection buttons.
- * GUEST: build from localStorage; USER/ADMIN: fetch GET /api/collections/me/cards.
+ * GUEST: build from localStorage; USER/ADMIN: fetch GET /api/v1/collections/me/cards.
  */
 async function fetchDatabaseViewCollection() {
     if (isGuestUser()) {
@@ -75,10 +91,10 @@ async function fetchDatabaseViewCollection() {
         return;
     }
     try {
-        const response = await fetch('/api/collections/me/cards', { credentials: 'include' });
+        const response = await fetch(COLLECTION_V1_CARDS_BASE, { credentials: 'include' });
         if (!response.ok) return;
         const data = await response.json();
-        if (!data.success || !Array.isArray(data.data)) return;
+        if (!collectionV1IsSuccess(data) || !Array.isArray(data.data)) return;
         databaseViewCollectionMap = new Map();
         data.data.forEach(c => {
             const key = getCollectionMapKey(c.card_id, c.card_type, c.image_path);
@@ -631,7 +647,7 @@ async function loadCollection() {
             existingBanner.remove();
         }
 
-        const response = await fetch('/api/collections/me/cards', {
+        const response = await fetch(COLLECTION_V1_CARDS_BASE, {
             credentials: 'include'
         });
 
@@ -640,7 +656,7 @@ async function loadCollection() {
         }
 
         const data = await response.json();
-        if (data.success) {
+        if (collectionV1IsSuccess(data)) {
             collectionCards = data.data;
 
             // Reuse already-loaded allCardsData if available; otherwise load on-demand
@@ -661,7 +677,7 @@ async function loadCollection() {
 
             displayCollectionCards(mergedCollectionData);
         } else {
-            console.error('Failed to load collection:', data.error);
+            console.error('Failed to load collection:', collectionApiErrorMessage(data));
         }
     } catch (error) {
         console.error('Error loading collection:', error);
@@ -1414,7 +1430,7 @@ saveGuestCollectionToStorage(guestCards);
             requestBody.imagePath = imagePath;
         }
         
-        const url = '/api/collections/me/cards';
+        const url = COLLECTION_V1_CARDS_BASE;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -1436,15 +1452,15 @@ saveGuestCollectionToStorage(guestCards);
                 errorData
             });
             if (typeof showNotification === 'function') {
-                showNotification(`Failed to add card: ${errorData.error || 'Unknown error'}`, 'error');
+                showNotification(`Failed to add card: ${collectionApiErrorMessage(errorData)}`, 'error');
             } else {
-                alert(`Failed to add card: ${errorData.error || 'Unknown error'}`);
+                alert(`Failed to add card: ${collectionApiErrorMessage(errorData)}`);
             }
             return;
         }
 
         const data = await response.json();
-        if (data.success) {
+        if (collectionV1IsSuccess(data)) {
             // Clear search
             const searchInput = document.getElementById('collectionSearchInput');
             if (searchInput) {
@@ -1532,7 +1548,7 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
     }
 
     // For authenticated users (USER/ADMIN), use API
-    const url = `/api/collections/me/cards/${cardId}`;
+    const url = `${COLLECTION_V1_CARDS_BASE}/${encodeURIComponent(cardId)}`;
     const requestBody = {
         quantity: newQuantity,
         cardType: resolvedType,
@@ -1563,13 +1579,13 @@ async function updateCollectionQuantity(cardId, cardType, newQuantity, imagePath
                 requestBody
             });
             if (typeof showNotification === 'function') {
-                showNotification(`Failed to update quantity: ${errorData.error || 'Unknown error'}`, 'error');
+                showNotification(`Failed to update quantity: ${collectionApiErrorMessage(errorData)}`, 'error');
             }
             return;
         }
 
         const data = await response.json();
-        if (data.success) {
+        if (collectionV1IsSuccess(data)) {
             // Reload collection
             await loadCollection();
         }
@@ -1649,7 +1665,7 @@ async function removeOneFromCollection(cardId, cardType, imagePath) {
 
     // For USER/ADMIN, call remove-one API
     try {
-        const response = await fetch('/api/collections/me/cards/remove-one', {
+        const response = await fetch(`${COLLECTION_V1_CARDS_BASE}/remove-one`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -1659,14 +1675,14 @@ async function removeOneFromCollection(cardId, cardType, imagePath) {
         const data = await response.json();
         if (!response.ok) {
             if (typeof showNotification === 'function') {
-                showNotification(data.error || 'Failed to remove one from collection', 'error');
+                showNotification(collectionApiErrorMessage(data) || 'Failed to remove one from collection', 'error');
             } else {
-                alert(data.error || 'Failed to remove one from collection');
+                alert(collectionApiErrorMessage(data) || 'Failed to remove one from collection');
             }
             return;
         }
 
-        if (data.success) {
+        if (collectionV1IsSuccess(data)) {
             databaseViewCollectionMap = null;
             if (typeof refreshDatabaseViewCollectionButtons === 'function') {
                 refreshDatabaseViewCollectionButtons();
@@ -1713,7 +1729,7 @@ async function removeCardFromCollection(cardId, cardType) {
 
     // For authenticated users (USER/ADMIN), use API
     try {
-        const response = await fetch(`/api/collections/me/cards/${cardId}?cardType=${encodeURIComponent(resolvedType)}`, {
+        const response = await fetch(`${COLLECTION_V1_CARDS_BASE}/${encodeURIComponent(cardId)}?cardType=${encodeURIComponent(resolvedType)}`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -1721,15 +1737,15 @@ async function removeCardFromCollection(cardId, cardType) {
         if (!response.ok) {
             const errorData = await response.json();
             if (typeof showNotification === 'function') {
-                showNotification(`Failed to remove card: ${errorData.error || 'Unknown error'}`, 'error');
+                showNotification(`Failed to remove card: ${collectionApiErrorMessage(errorData)}`, 'error');
             } else {
-                alert(`Failed to remove card: ${errorData.error || 'Unknown error'}`);
+                alert(`Failed to remove card: ${collectionApiErrorMessage(errorData)}`);
             }
             return;
         }
 
         const data = await response.json();
-        if (data.success) {
+        if (collectionV1IsSuccess(data)) {
             // Reload collection
             await loadCollection();
 

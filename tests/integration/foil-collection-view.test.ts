@@ -62,7 +62,7 @@ describe('Foil Collection View Integration Tests', () => {
     authCookie = loginResponse.headers['set-cookie']![0].split(';')[0];
 
     await request(app)
-      .post('/api/collections/me/cards')
+      .post('/api/v1/collections/me/cards')
       .set('Cookie', authCookie)
       .send({
         cardId: foilPowerCardId,
@@ -79,11 +79,11 @@ describe('Foil Collection View Integration Tests', () => {
 
   it('should return collection cards with foil card including is_foil', async () => {
     const response = await request(app)
-      .get('/api/collections/me/cards')
+      .get('/api/v1/collections/me/cards')
       .set('Cookie', authCookie)
       .expect(200);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors).toEqual([]);
     const foilCard = response.body.data?.find(
       (c: { card_id: string }) => c.card_id === foilPowerCardId
     );

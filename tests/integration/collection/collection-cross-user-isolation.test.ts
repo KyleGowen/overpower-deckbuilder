@@ -155,7 +155,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should isolate cards between users', async () => {
       // User 1 adds card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .send({
           cardId: testCharacterId1,
@@ -167,7 +167,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
       // User 2 adds different card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .send({
           cardId: testCharacterId2,
@@ -179,12 +179,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
       // Verify each user only sees their own cards
       const response1 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -197,7 +197,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should allow same card in multiple users\' collections', async () => {
       // Both users add the same card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .send({
           cardId: testCharacterId1,
@@ -208,7 +208,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
         .expect(200);
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .send({
           cardId: testCharacterId1,
@@ -220,12 +220,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
       // Verify both have the card with their own quantities
       const response1 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -238,7 +238,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     beforeEach(async () => {
       // Both users add the same card with different quantities
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .send({
           cardId: testCharacterId1,
@@ -248,7 +248,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .send({
           cardId: testCharacterId1,
@@ -260,12 +260,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
     it('should maintain independent quantities per user', async () => {
       const response1 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -276,7 +276,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should allow independent quantity updates', async () => {
       // User 1 updates quantity
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId1}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId1}`)
         .set('Cookie', adminAuthCookie1)
         .send({
           quantity: 10,
@@ -287,7 +287,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
       // User 2 updates quantity differently
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId1}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId1}`)
         .set('Cookie', adminAuthCookie2)
         .send({
           quantity: 7,
@@ -298,12 +298,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
       // Verify independent updates
       const response1 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -316,7 +316,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     beforeEach(async () => {
       // Both users add the same card
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .send({
           cardId: testCharacterId1,
@@ -326,7 +326,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .send({
           cardId: testCharacterId1,
@@ -339,19 +339,19 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should allow one user to remove card without affecting others', async () => {
       // User 1 removes card
       await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId1}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId1}?cardType=character`)
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       // Verify User 1's collection is empty
       const response1 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       // Verify User 2 still has the card
       const response2 = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -366,7 +366,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
       // All three users add different cards
       await Promise.all([
         request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie1)
           .send({
             cardId: testCharacterId1,
@@ -375,7 +375,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
             imagePath: '/images/char1.webp'
           }),
         request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie2)
           .send({
             cardId: testCharacterId2,
@@ -384,7 +384,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
             imagePath: '/images/char2.webp'
           }),
         request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie3)
           .send({
             cardId: testPowerCardId1,
@@ -397,13 +397,13 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
       // Verify each user has their own card
       const [response1, response2, response3] = await Promise.all([
         request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie1),
         request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie2),
         request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie3)
       ]);
 
@@ -416,7 +416,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
       // Both users add the same card
       await Promise.all([
         request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie1)
           .send({
             cardId: testCharacterId1,
@@ -425,7 +425,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
             imagePath: '/images/char1.webp'
           }),
         request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie2)
           .send({
             cardId: testCharacterId1,
@@ -438,7 +438,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
       // Both users update simultaneously
       await Promise.all([
         request(app)
-          .put(`/api/collections/me/cards/${testCharacterId1}`)
+          .put(`/api/v1/collections/me/cards/${testCharacterId1}`)
           .set('Cookie', adminAuthCookie1)
           .send({
             quantity: 10,
@@ -446,7 +446,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
             imagePath: '/images/char1.webp'
           }),
         request(app)
-          .put(`/api/collections/me/cards/${testCharacterId1}`)
+          .put(`/api/v1/collections/me/cards/${testCharacterId1}`)
           .set('Cookie', adminAuthCookie2)
           .send({
             quantity: 20,
@@ -458,10 +458,10 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
       // Verify independent updates
       const [response1, response2] = await Promise.all([
         request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie1),
         request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie2)
       ]);
 
@@ -498,7 +498,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should store collection cards with correct collection_id foreign keys', async () => {
       // Add cards to both users
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie1)
         .send({
           cardId: testCharacterId1,
@@ -508,7 +508,7 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie2)
         .send({
           cardId: testCharacterId2,

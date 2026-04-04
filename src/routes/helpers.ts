@@ -109,13 +109,6 @@ export function transformGuestDeckToListItem(deckData: DeckData) {
   };
 }
 
-// ----- Collection card types -----
+// ----- Collection card types (shared with v1 collections HTTP) -----
 
-const COLLECTION_CARD_TYPES = new Set([
-  'character', 'special', 'power', 'location', 'mission', 'event', 'aspect',
-  'advanced_universe', 'teamwork', 'ally_universe', 'training', 'basic_universe',
-]);
-
-export function isValidCollectionCardType(value: unknown): value is string {
-  return typeof value === 'string' && COLLECTION_CARD_TYPES.has(value);
-}
+export { isValidCollectionCardType } from '../validation/collectionCardType';

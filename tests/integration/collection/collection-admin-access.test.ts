@@ -149,47 +149,47 @@ describe('Collection Access Control Integration Tests', () => {
     });
   });
 
-  describe('GET /api/collections/me/cards', () => {
+  describe('GET /api/v1/collections/me/cards', () => {
     it('should allow ADMIN users to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should allow USER to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should allow GUEST users to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .set('Cookie', guestAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .get('/api/collections/me/cards')
+        .get('/api/v1/collections/me/cards')
         .expect(401);
 
       expect(response.body.success).toBe(false);
     });
   });
 
-  describe('POST /api/collections/me/cards', () => {
+  describe('POST /api/v1/collections/me/cards', () => {
     beforeEach(async () => {
       // Clear all test users' collections before each test
       for (const user of [adminUser, regularUser, guestUser]) {
@@ -206,7 +206,7 @@ describe('Collection Access Control Integration Tests', () => {
 
     it('should allow ADMIN users to add cards', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -216,13 +216,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should allow USER to add cards', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', regularAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -232,13 +232,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should allow GUEST users to add cards', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', guestAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -248,13 +248,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .send({
           cardId: testCharacterId,
           cardType: 'character',
@@ -267,7 +267,7 @@ describe('Collection Access Control Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/collections/me/cards/:cardId', () => {
+  describe('PUT /api/v1/collections/me/cards/:cardId', () => {
     beforeEach(async () => {
       // Add a card to all test users' collections for testing updates
       for (const user of [adminUser, regularUser, guestUser]) {
@@ -296,7 +296,7 @@ describe('Collection Access Control Integration Tests', () => {
 
     it('should allow ADMIN users to update cards', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -305,13 +305,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.quantity).toBe(5);
     });
 
     it('should allow USER to update cards', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', regularAuthCookie)
         .send({
           quantity: 5,
@@ -320,13 +320,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.quantity).toBe(5);
     });
 
     it('should allow GUEST users to update cards', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', guestAuthCookie)
         .send({
           quantity: 5,
@@ -335,13 +335,13 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.quantity).toBe(5);
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .send({
           quantity: 5,
           cardType: 'character',
@@ -353,7 +353,7 @@ describe('Collection Access Control Integration Tests', () => {
     });
   });
 
-  describe('DELETE /api/collections/me/cards/:cardId', () => {
+  describe('DELETE /api/v1/collections/me/cards/:cardId', () => {
     beforeEach(async () => {
       // Add a card to all test users' collections for testing deletion
       for (const user of [adminUser, regularUser, guestUser]) {
@@ -382,37 +382,37 @@ describe('Collection Access Control Integration Tests', () => {
 
     it('should allow ADMIN users to delete cards', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('removed');
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.message).toContain('removed');
     });
 
     it('should allow USER to delete cards', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('removed');
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.message).toContain('removed');
     });
 
     it('should allow GUEST users to delete cards', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', guestAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('removed');
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.message).toContain('removed');
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -423,10 +423,10 @@ describe('Collection Access Control Integration Tests', () => {
     it('should require authentication for all collection endpoints', async () => {
       const endpoints = [
         { method: 'get', path: '/api/v1/collections/me' },
-        { method: 'get', path: '/api/collections/me/cards' },
-        { method: 'post', path: '/api/collections/me/cards', body: { cardId: testCharacterId, cardType: 'character', quantity: 1, imagePath: '/images/test.webp' } },
-        { method: 'put', path: `/api/collections/me/cards/${testCharacterId}`, body: { quantity: 5, cardType: 'character', imagePath: '/images/test.webp' } },
-        { method: 'delete', path: `/api/collections/me/cards/${testCharacterId}?cardType=character` }
+        { method: 'get', path: '/api/v1/collections/me/cards' },
+        { method: 'post', path: '/api/v1/collections/me/cards', body: { cardId: testCharacterId, cardType: 'character', quantity: 1, imagePath: '/images/test.webp' } },
+        { method: 'put', path: `/api/v1/collections/me/cards/${testCharacterId}`, body: { quantity: 5, cardType: 'character', imagePath: '/images/test.webp' } },
+        { method: 'delete', path: `/api/v1/collections/me/cards/${testCharacterId}?cardType=character` }
       ];
 
       for (const endpoint of endpoints) {
@@ -452,10 +452,10 @@ describe('Collection Access Control Integration Tests', () => {
         expect(meResponse.body.errors).toEqual([]);
 
         const cardsResponse = await request(app)
-          .get('/api/collections/me/cards')
+          .get('/api/v1/collections/me/cards')
           .set('Cookie', cookie)
           .expect(200);
-        expect(cardsResponse.body.success).toBe(true);
+        expect(cardsResponse.body.errors).toEqual([]);
       }
     });
   });

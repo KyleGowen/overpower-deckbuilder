@@ -263,7 +263,7 @@ describe('All Tab Integration Tests', () => {
       const deckId = 'test-deck-id';
       
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${deckId}/cards`)
         .send({
           cardType: 'character',
           cardId: 'test-id',
@@ -286,7 +286,7 @@ describe('All Tab Integration Tests', () => {
         const card = charactersRes.body.data[0];
 
         const response = await request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', adminAuthCookie)
           .send({
             cardId: card.id,
@@ -295,11 +295,11 @@ describe('All Tab Integration Tests', () => {
           })
           .expect(200);
 
-        expect(response.body.success).toBe(true);
+        expect(response.body.errors).toEqual([]);
 
         // Cleanup
         await request(app)
-          .delete(`/api/collections/me/cards/${card.id}?cardType=character`)
+          .delete(`/api/v1/collections/me/cards/${card.id}?cardType=character`)
           .set('Cookie', adminAuthCookie);
       }
     });
@@ -314,7 +314,7 @@ describe('All Tab Integration Tests', () => {
         const card = charactersRes.body.data[0];
 
         const response = await request(app)
-          .post('/api/collections/me/cards')
+          .post('/api/v1/collections/me/cards')
           .set('Cookie', regularAuthCookie)
           .send({
             cardId: card.id,
@@ -323,7 +323,7 @@ describe('All Tab Integration Tests', () => {
           })
           .expect(200); // Now allowed for all authenticated users
 
-        expect(response.body.success).toBe(true);
+        expect(response.body.errors).toEqual([]);
       }
     });
   });

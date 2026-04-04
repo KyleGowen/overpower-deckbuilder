@@ -131,7 +131,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     it('should persist card addition to database', async () => {
       // Add card via API
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -163,7 +163,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     it('should persist multiple cards correctly', async () => {
       // Add multiple cards
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -173,7 +173,7 @@ describe('Collection Database Persistence Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardId,
@@ -183,7 +183,7 @@ describe('Collection Database Persistence Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testSpecialCardId,
@@ -212,7 +212,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
     it('should set created_at and updated_at timestamps on card addition', async () => {
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -243,7 +243,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     beforeEach(async () => {
       // Add a card first
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -256,7 +256,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     it('should persist quantity updates to database', async () => {
       // Update quantity via API
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 5,
@@ -299,7 +299,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
       // Update quantity
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 3,
@@ -322,7 +322,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     beforeEach(async () => {
       // Add cards first
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -332,7 +332,7 @@ describe('Collection Database Persistence Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testPowerCardId,
@@ -358,7 +358,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
       // Delete card via API
       await request(app)
-        .delete(`/api/collections/me/cards/${testCharacterId}?cardType=character`)
+        .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -386,7 +386,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
       // Set quantity to 0 via API
       await request(app)
-        .put(`/api/collections/me/cards/${testCharacterId}`)
+        .put(`/api/v1/collections/me/cards/${testCharacterId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           quantity: 0,
@@ -423,7 +423,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
     it('should maintain referential integrity between collection_cards and collections', async () => {
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -451,7 +451,7 @@ describe('Collection Database Persistence Integration Tests', () => {
     it('should handle duplicate card additions correctly', async () => {
       // Add same card twice
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,
@@ -461,7 +461,7 @@ describe('Collection Database Persistence Integration Tests', () => {
         });
 
       await request(app)
-        .post('/api/collections/me/cards')
+        .post('/api/v1/collections/me/cards')
         .set('Cookie', adminAuthCookie)
         .send({
           cardId: testCharacterId,

@@ -79,7 +79,7 @@ describe('Collection SQL Injection Hardening Integration Tests', () => {
 
   it('rejects injection-shaped cardType with 400 (not 404/500)', async () => {
     const response = await request(app)
-      .post('/api/collections/me/cards')
+      .post('/api/v1/collections/me/cards')
       .set('Cookie', adminAuthCookie)
       .send({
         cardId: testCharacterId,
@@ -88,12 +88,12 @@ describe('Collection SQL Injection Hardening Integration Tests', () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
+    expect(response.body.errors?.length).toBeGreaterThan(0);
   });
 
   it('rejects unknown cardType with 400', async () => {
     const response = await request(app)
-      .post('/api/collections/me/cards')
+      .post('/api/v1/collections/me/cards')
       .set('Cookie', adminAuthCookie)
       .send({
         cardId: testCharacterId,
@@ -102,12 +102,12 @@ describe('Collection SQL Injection Hardening Integration Tests', () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
+    expect(response.body.errors?.length).toBeGreaterThan(0);
   });
 
   it('still allows valid cardType + existing cardId (happy path)', async () => {
     const response = await request(app)
-      .post('/api/collections/me/cards')
+      .post('/api/v1/collections/me/cards')
       .set('Cookie', adminAuthCookie)
       .send({
         cardId: testCharacterId,
@@ -116,7 +116,7 @@ describe('Collection SQL Injection Hardening Integration Tests', () => {
       });
 
     expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors).toEqual([]);
     expect(response.body.data).toBeDefined();
     expect(response.body.data.card_id).toBeDefined();
     expect(response.body.data.card_type).toBe('character');
