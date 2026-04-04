@@ -4,6 +4,7 @@ import type { Deck } from '../../types';
 import { checkRateLimit, blockInReadOnlyMode } from '../../routes/helpers';
 import type { DeckWriteService } from '../services/deckWriteService';
 import type { DeckListService } from '../services/deckListService';
+import type { DeckStatsService } from '../services/deckStatsService';
 import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCardsService } from '../services/deckCardsService';
 import type { DeckCreateV1DataDto } from '../dto/v1/DeckCreateV1DataDto';
@@ -19,6 +20,7 @@ import { DeckCardsPutBody } from './models/decks/DeckCardsPutBody';
 import type { DeckBackgroundListReader } from './dbv-support.http';
 import type { DeckRepository } from '../../repository/DeckRepository';
 import type { UIPreferences } from '../../types';
+import type { DeckStatsV1DataDto } from '../dto/v1/DeckStatsV1DataDto';
 
 /**
  * Maps validated JSON fields to repository `Partial<Deck>`.
@@ -46,6 +48,7 @@ function toDeckPartialUpdates(u: UpdateDeckParsed): Partial<Deck> {
 
 export interface DecksV1HttpDeps {
   deckListService: DeckListService;
+  deckStatsService: DeckStatsService;
   deckWriteService: DeckWriteService;
   deckDetailService: DeckDetailService;
   deckCardsService: DeckCardsService;
@@ -89,6 +92,17 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     } catch (error) {
       console.error('v1 GET /decks error:', error);
       sendV1Json(res, 500, null, [{ code: 'DECK_LIST_ERROR', message: 'Failed to fetch decks' }]);
+    }
+  });
+
+  router.get('/decks/stats', deps.authenticateUser, async (req, res) => {
+    try {
+      const stats = await deps.deckStatsService.getAggregateStatsForUser(req.user!.id);
+      const data: DeckStatsV1DataDto = stats;
+      sendV1Success(res, data);
+    } catch (error) {
+      console.error('v1 GET /decks/stats error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_STATS_ERROR', message: 'Failed to fetch deck stats' }]);
     }
   });
 

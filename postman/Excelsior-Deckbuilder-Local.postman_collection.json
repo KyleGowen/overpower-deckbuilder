@@ -490,11 +490,11 @@
           }
         },
         {
-          "name": "GET /api/deck-stats",
+          "name": "GET /api/v1/decks/stats",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/deck-stats"
+            "url": "{{baseUrl}}/api/v1/decks/stats"
           }
         },
         {

@@ -6,6 +6,7 @@ import type { DeckListService } from '../../../../src/api/services/deckListServi
 import type { DeckWriteService } from '../../../../src/api/services/deckWriteService';
 import type { DeckDetailService } from '../../../../src/api/services/deckDetailService';
 import type { DeckCardsService } from '../../../../src/api/services/deckCardsService';
+import type { DeckStatsService } from '../../../../src/api/services/deckStatsService';
 
 const noopDeckBackground = {
   getAvailableBackgrounds: jest.fn().mockResolvedValue([]),
@@ -19,6 +20,17 @@ function stubDeckCards(): DeckCardsService {
     putReplaceCards: jest.fn(),
     deleteCards: jest.fn()
   } as unknown as DeckCardsService;
+}
+
+function stubDeckStats(): DeckStatsService {
+  return {
+    getAggregateStatsForUser: jest.fn().mockResolvedValue({
+      totalDecks: 0,
+      totalCards: 0,
+      averageCardsPerDeck: 0,
+      largestDeckSize: 0
+    })
+  } as unknown as DeckStatsService;
 }
 
 function stubDeckRepository(): DecksV1HttpDeps['deckRepository'] {
@@ -85,6 +97,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -112,6 +125,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -138,6 +152,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -161,6 +176,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -172,6 +188,69 @@ describe('decks.http', () => {
     const res = await request(buildApp(deps)).get('/decks').expect(500);
     expect(res.body.data).toBeNull();
     expect(res.body.errors[0].code).toBe('DECK_LIST_ERROR');
+  });
+
+  it('GET /decks/stats returns v1 envelope with stats', async () => {
+    const deckStatsService = {
+      getAggregateStatsForUser: jest.fn().mockResolvedValue({
+        totalDecks: 2,
+        totalCards: 10,
+        averageCardsPerDeck: 5,
+        largestDeckSize: 7
+      })
+    } as unknown as DeckStatsService;
+    const deckListService = {
+      getTransformedListForUser: jest.fn()
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService,
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).get('/decks/stats').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data).toEqual({
+      totalDecks: 2,
+      totalCards: 10,
+      averageCardsPerDeck: 5,
+      largestDeckSize: 7
+    });
+    expect(deckStatsService.getAggregateStatsForUser).toHaveBeenCalledWith('user-1');
+  });
+
+  it('GET /decks/stats returns 500 v1 envelope on service error', async () => {
+    const deckStatsService = {
+      getAggregateStatsForUser: jest.fn().mockRejectedValue(new Error('db'))
+    } as unknown as DeckStatsService;
+    const deckListService = {
+      getTransformedListForUser: jest.fn()
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService,
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).get('/decks/stats').expect(500);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors[0].code).toBe('DECK_STATS_ERROR');
   });
 
   it('POST /decks returns 201 with created deck in data', async () => {
@@ -190,6 +269,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -214,6 +294,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -235,6 +316,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -255,6 +337,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -277,6 +360,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn().mockResolvedValue([])
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -301,6 +385,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn().mockResolvedValue([{ rule: 'r', message: 'bad' }])
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -324,6 +409,7 @@ describe('decks.http', () => {
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService: stubDetail(),
@@ -366,6 +452,7 @@ describe('decks.http', () => {
       deleteDeckIfOwner: jest.fn()
     } as unknown as DeckDetailService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -390,6 +477,7 @@ describe('decks.http', () => {
       deleteDeckIfOwner: jest.fn()
     } as unknown as DeckDetailService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -413,6 +501,7 @@ describe('decks.http', () => {
       deleteDeckIfOwner: jest.fn()
     } as unknown as DeckDetailService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -440,6 +529,7 @@ describe('decks.http', () => {
       deleteDeckIfOwner: jest.fn()
     } as unknown as DeckDetailService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -460,6 +550,7 @@ describe('decks.http', () => {
     const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
     const deckDetailService = stubDetail();
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -482,6 +573,7 @@ describe('decks.http', () => {
       deleteDeckIfOwner: jest.fn().mockResolvedValue({ ok: true })
     } as unknown as DeckDetailService;
     const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
       deckListService,
       deckWriteService,
       deckDetailService,
@@ -505,6 +597,7 @@ describe('decks.http', () => {
         data: [{ type: 'character', cardId: 'c1', quantity: 1 }]
       });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -522,6 +615,7 @@ describe('decks.http', () => {
       const deckCardsService = stubDeckCards();
       (deckCardsService.getDeckCards as jest.Mock).mockResolvedValue({ ok: false, kind: 'not_implemented' });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -538,6 +632,7 @@ describe('decks.http', () => {
       const deckCardsService = stubDeckCards();
       (deckCardsService.getDeckCards as jest.Mock).mockResolvedValue({ ok: false, kind: 'server_error' });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -554,6 +649,7 @@ describe('decks.http', () => {
       const deckCardsService = stubDeckCards();
       (deckCardsService.postCard as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -572,6 +668,7 @@ describe('decks.http', () => {
     it('POST returns 403 for GUEST', async () => {
       const deckCardsService = stubDeckCards();
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -591,6 +688,7 @@ describe('decks.http', () => {
     it('POST returns 400 when body invalid', async () => {
       const deckCardsService = stubDeckCards();
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -607,6 +705,7 @@ describe('decks.http', () => {
     it('POST maps forbidden / not_found / bad_request from service', async () => {
       const deckCardsService = stubDeckCards();
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -651,6 +750,7 @@ describe('decks.http', () => {
       const deckCardsService = stubDeckCards();
       (deckCardsService.putReplaceCards as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -669,6 +769,7 @@ describe('decks.http', () => {
     it('PUT returns 403 for GUEST', async () => {
       const deckCardsService = stubDeckCards();
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -694,6 +795,7 @@ describe('decks.http', () => {
         details: 'does not exist'
       });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -713,6 +815,7 @@ describe('decks.http', () => {
       const deckCardsService = stubDeckCards();
       (deckCardsService.deleteCards as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),
@@ -731,6 +834,7 @@ describe('decks.http', () => {
     it('DELETE returns 403 for GUEST', async () => {
       const deckCardsService = stubDeckCards();
       const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
         deckListService,
         deckWriteService,
         deckDetailService: stubDetail(),

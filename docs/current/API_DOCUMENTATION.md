@@ -787,23 +787,9 @@ All endpoints include comprehensive input validation:
 
 ## Statistics Endpoints
 
-### GET /api/deck-stats
-Get deck statistics for the authenticated user.
+### GET /api/deck-stats (removed)
 
-**Authentication:** Required
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "totalDecks": "number",
-    "totalCards": "number",
-    "averageCardsPerDeck": "number",
-    "largestDeckSize": "number"
-  }
-}
-```
+Use **`GET /api/v1/decks/stats`** — see [API_V1.md](../../API_V1.md). The legacy path is not registered.
 
 ---
 

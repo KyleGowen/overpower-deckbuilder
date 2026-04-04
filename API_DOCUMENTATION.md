@@ -433,21 +433,9 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 **Removed:** use **`GET` / `POST` / `PUT` / `DELETE`** **`/api/v1/decks/:id/cards`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**).
 
-#### `GET /api/deck-stats`
+#### `GET /api/deck-stats` (removed)
 
-**Response 200:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "totalDecks": 3,
-    "totalCards": 180,
-    "averageCardsPerDeck": 60,
-    "largestDeckSize": 75
-  }
-}
-```
+**Removed:** use **`GET /api/v1/decks/stats`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
 #### `GET /api/decks/:id/ui-preferences` / `PUT /api/decks/:id/ui-preferences`
 
@@ -688,7 +676,7 @@ Quick lookup: **method**, **path**, **source file**.
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
-| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~ (removed — **`/api/v1/decks/...`**), `/api/deck-stats`, `/api/decks/:id/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
+| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**), `/api/decks/:id/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 

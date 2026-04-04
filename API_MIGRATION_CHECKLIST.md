@@ -66,7 +66,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 **Scope:** Authenticated user decks in PostgreSQL; **GUEST** gets **403** on DB deck mutations (same as legacy). **Source:** `API_DOCUMENTATION.md` (Decks), `deck-api.routes.ts`. **P2a list:** [`decks.http.ts`](src/api/http/decks.http.ts) + [`deckListService.ts`](src/api/services/deckListService.ts).
 
-**v1 prefix:** `/api/v1/decks…` (except legacy **`GET /api/deck-stats`**, proposed as **`GET /api/v1/decks/stats`** below).
+**v1 prefix:** `/api/v1/decks…`.
 
 ### P2a — Deck list (ETag)
 
@@ -103,7 +103,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path        | v1 path (proposed)        | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ------------------ | ------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/deck-stats | GET /api/v1/decks/stats   | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/deck-stats | GET /api/v1/decks/stats   | [x]      | `DeckStatsService` + `decks.http.ts` | [x]       | [x]    | [x]       |
 
 ### P2f — Deck UI preferences
 

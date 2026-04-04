@@ -338,6 +338,23 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Implementation:** [`src/api/services/deckListService.ts`](src/api/services/deckListService.ts) · HTTP [`src/api/http/decks.http.ts`](src/api/http/decks.http.ts) · response shape [`src/api/dto/v1/DeckListV1DataDto.ts`](src/api/dto/v1/DeckListV1DataDto.ts)
 
+### `GET /api/v1/decks/stats`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** as **`GET /api/v1/decks`**). Unauthenticated requests receive **401** (legacy `{ success, error }` from session middleware).
+
+**Request model:** none.
+
+**Response 200:** v1 envelope; **`data`** is aggregate counts for the user’s database-backed decks:
+
+- **`totalDecks`** — number of decks owned by the user
+- **`totalCards`** — sum of card quantities across all those decks
+- **`averageCardsPerDeck`** — `Math.round(totalCards / totalDecks)`, or **0** when `totalDecks` is 0
+- **`largestDeckSize`** — maximum per-deck total quantity (sum of `quantity` per deck)
+
+**Response 500:** v1 envelope — `errors` with code **`DECK_STATS_ERROR`**.
+
+**Implementation:** [`DeckStatsService`](src/api/services/deckStatsService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts) · response shape [`DeckStatsV1DataDto`](src/api/dto/v1/DeckStatsV1DataDto.ts)
+
 ---
 
 ## User decks (create + validate)
@@ -549,6 +566,7 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 | GET | /api/v1/dbv/sets | dbv-support.http.ts |
 | GET | /api/v1/dbv/deck-backgrounds | dbv-support.http.ts |
 | GET | /api/v1/decks | decks.http.ts |
+| GET | /api/v1/decks/stats | decks.http.ts |
 | POST | /api/v1/decks | decks.http.ts |
 | POST | /api/v1/decks/validate | decks.http.ts |
 | GET | /api/v1/decks/:id/full | decks.http.ts |

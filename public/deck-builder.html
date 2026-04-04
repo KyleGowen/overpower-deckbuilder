@@ -4799,11 +4799,11 @@
         function updateStats(characters) {
             document.getElementById('total-characters').textContent = characters.length;
             // Load deck stats to get actual deck count
-            fetch('/api/deck-stats')
+            fetch('/api/v1/decks/stats', { credentials: 'include' })
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('db-total-decks').textContent = data.data.totalDecks;
+                .then(envelope => {
+                    if (envelope.data && (!envelope.errors || envelope.errors.length === 0)) {
+                        document.getElementById('db-total-decks').textContent = envelope.data.totalDecks;
                     }
                 })
                 .catch(error => {
@@ -6903,11 +6903,11 @@
         }
 
         function updateDeckStats() {
-            fetch('/api/deck-stats')
+            fetch('/api/v1/decks/stats', { credentials: 'include' })
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('total-decks').textContent = data.data.totalDecks;
+                .then(envelope => {
+                    if (envelope.data && (!envelope.errors || envelope.errors.length === 0)) {
+                        document.getElementById('total-decks').textContent = envelope.data.totalDecks;
                     }
                 })
                 .catch(error => {
