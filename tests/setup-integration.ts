@@ -4,7 +4,9 @@
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 if (!process.env.PORT) {
-  process.env.PORT = '3000';
+  // Avoid EADDRINUSE when Jest runs multiple workers (e.g. CI passes --maxWorkers=2).
+  const worker = Number(process.env.JEST_WORKER_ID ?? '0');
+  process.env.PORT = String(3000 + worker);
 }
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = 'integration-test-jwt-secret-not-for-production';

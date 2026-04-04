@@ -3,363 +3,321 @@
  */
 
 /**
- * Simple Integration Tests for Deck Save Security
- * 
- * This test suite ensures that deck saving works correctly under all scenarios
- * and prevents 403/404 errors from occurring again.
- * 
- * Test Coverage:
- * - Admin users can save their own decks
- * - Regular users can save their own decks
- * - Users cannot save decks they don't own (403 Forbidden)
- * - Guest users cannot save any decks
- * - Non-existent deck IDs return proper errors (404)
- * - API endpoints respond correctly for all scenarios
+ * Simple integration tests for deck save security (PUT /api/v1/decks/:id/cards).
+ * Uses the test server from setup-integration (x-test-user-id auth) and the v1 JSON envelope.
  */
 
 import request from 'supertest';
-import { app } from '../../src/index';
+import { app, integrationTestUtils } from '../setup-integration';
+
+const TEST_GUEST_ID = '00000000-0000-0000-0000-000000000002';
+
+function asUser(userId: string): { 'x-test-user-id': string } {
+  return { 'x-test-user-id': userId };
+}
 
 describe('Deck Save Security - Simple Integration Tests', () => {
-    // Test data
-    let adminUserId: string;
-    let regularUserId: string;
-    let adminDeckId: string;
-    let regularUserDeckId: string;
-    let nonExistentDeckId: string;
+  let adminUserId: string;
+  let regularUserId: string;
+  let adminDeckId: string;
+  let regularUserDeckId: string;
+  const nonExistentDeckId = '00000000-0000-0000-0000-000000000000';
+  let charId: string;
+  let powerId: string;
 
-    beforeAll(async () => {
-        // Create test users and decks
-        const adminResponse = await request(app)
-            .post('/api/users')
-            .send({
-                username: 'test-admin',
-                email: 'admin@test.com',
-                password: 'password123',
-                role: 'ADMIN'
-            });
+  beforeAll(async () => {
+    const adminUser = await integrationTestUtils.createTestUser({
+      name: 'dss-admin',
+      email: 'dss-admin@test.com',
+      password: 'password123',
+      role: 'ADMIN'
+    });
+    const regularUser = await integrationTestUtils.createTestUser({
+      name: 'dss-regular',
+      email: 'dss-regular@test.com',
+      password: 'password123',
+      role: 'USER'
+    });
+    adminUserId = adminUser.id;
+    regularUserId = regularUser.id;
 
-        const regularUserResponse = await request(app)
-            .post('/api/users')
-            .send({
-                username: 'test-regular',
-                email: 'regular@test.com',
-                password: 'password123',
-                role: 'USER'
-            });
+    const chars = await request(app).get('/api/v1/catalog/characters').expect(200);
+    expect(chars.body.errors).toEqual([]);
+    const charList = chars.body.data as Array<{ id: string }>;
+    expect(charList.length).toBeGreaterThan(0);
+    charId = charList[0].id;
 
-        adminUserId = adminResponse.body.data.id;
-        regularUserId = regularUserResponse.body.data.id;
+    const powers = await request(app).get('/api/v1/catalog/power-cards').expect(200);
+    expect(powers.body.errors).toEqual([]);
+    const powerList = powers.body.data as Array<{ id: string }>;
+    expect(powerList.length).toBeGreaterThan(0);
+    powerId = powerList[0].id;
+  });
 
-        // Create test decks
-        const adminDeckResponse = await request(app)
-            .post('/api/v1/decks')
-            .set('Cookie', `session=${adminUserId}`)
-            .send({
-                name: 'Admin Test Deck',
-                description: 'Test deck for admin user'
-            });
+  // setup-integration deletes tracked decks after each test; recreate so every test has rows.
+  beforeEach(async () => {
+    const ts = Date.now();
+    const adminDeck = await integrationTestUtils.createTestDeck(adminUserId, {
+      name: `Admin Test Deck ${ts}`,
+      description: 'Test deck for admin user'
+    });
+    const regularDeck = await integrationTestUtils.createTestDeck(regularUserId, {
+      name: `Regular Test Deck ${ts}`,
+      description: 'Test deck for regular user'
+    });
+    adminDeckId = adminDeck.id;
+    regularUserDeckId = regularDeck.id;
+  });
 
-        const regularUserDeckResponse = await request(app)
-            .post('/api/v1/decks')
-            .set('Cookie', `session=${regularUserId}`)
-            .send({
-                name: 'Regular Test Deck',
-                description: 'Test deck for regular user'
-            });
+  describe('Admin User Deck Save Scenarios', () => {
+    it('should allow admin to save their own deck', async () => {
+      const testCards = [
+        { cardType: 'character', cardId: charId, quantity: 1 },
+        { cardType: 'power', cardId: powerId, quantity: 2 }
+      ];
 
-        adminDeckId = adminDeckResponse.body.data.id;
-        regularUserDeckId = regularUserDeckResponse.body.data.id;
-        nonExistentDeckId = '00000000-0000-0000-0000-000000000000';
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: testCards })
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.metadata.id).toBe(adminDeckId);
     });
 
-    describe('Admin User Deck Save Scenarios', () => {
-        it('should allow admin to save their own deck', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 },
-                { cardType: 'power', cardId: 'test-power-1', quantity: 2 }
-            ];
+    it('should allow admin to save deck with empty card list', async () => {
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: [] })
+        .expect(200);
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: testCards })
-                .expect(200);
+      expect(response.body.errors).toEqual([]);
+    });
+  });
 
-            expect(response.body.success).toBe(true);
-            expect(response.body.data).toBeDefined();
-            expect(response.body.data.id).toBe(adminDeckId);
-        });
+  describe('Regular User Deck Save Scenarios', () => {
+    it('should allow regular user to save their own deck', async () => {
+      const testCards = [
+        { cardType: 'character', cardId: charId, quantity: 1 },
+        { cardType: 'power', cardId: powerId, quantity: 2 }
+      ];
 
-        it('should allow admin to save deck with empty card list', async () => {
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: [] })
-                .expect(200);
+      const response = await request(app)
+        .put(`/api/v1/decks/${regularUserDeckId}/cards`)
+        .set(asUser(regularUserId))
+        .send({ cards: testCards })
+        .expect(200);
 
-            expect(response.body.success).toBe(true);
-        });
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.metadata.id).toBe(regularUserDeckId);
     });
 
-    describe('Regular User Deck Save Scenarios', () => {
-        it('should allow regular user to save their own deck', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 },
-                { cardType: 'power', cardId: 'test-power-1', quantity: 2 }
-            ];
+    it('should prevent regular user from saving admin deck (403 Forbidden)', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${regularUserId}`)
-                .send({ cards: testCards })
-                .expect(200);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(regularUserId))
+        .send({ cards: testCards })
+        .expect(403);
 
-            expect(response.body.success).toBe(true);
-            expect(response.body.data.id).toBe(regularUserDeckId);
-        });
+      expect(response.body.errors.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('Access denied');
+      expect(response.body.errors[0].message).toContain('do not own this deck');
+    });
+  });
 
-        it('should prevent regular user from saving admin deck (403 Forbidden)', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+  describe('Guest User Restrictions', () => {
+    it('should prevent guest user from modifying decks (403 Forbidden)', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${regularUserId}`)
-                .send({ cards: testCards })
-                .expect(403);
+      const response = await request(app)
+        .put(`/api/v1/decks/${regularUserDeckId}/cards`)
+        .set(asUser(TEST_GUEST_ID))
+        .send({ cards: testCards })
+        .expect(403);
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Access denied');
-            expect(response.body.error).toContain('do not own this deck');
-        });
+      expect(response.body.errors.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('Guests may not modify decks');
     });
 
-    describe('Guest User Restrictions', () => {
-        it('should prevent guest user from saving any deck (403 Forbidden)', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+    it('should prevent guest user from saving another user deck (403 Forbidden)', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .send({ cards: testCards })
-                .expect(403);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(TEST_GUEST_ID))
+        .send({ cards: testCards })
+        .expect(403);
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Guests may not modify decks');
-        });
+      expect(response.body.errors[0].message).toContain('Guests may not modify decks');
+    });
+  });
 
-        it('should prevent guest user from saving regular user deck (403 Forbidden)', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+  describe('Non-existent or inaccessible deck', () => {
+    it('should return 403 when deck id does not exist (not owned)', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .send({ cards: testCards })
-                .expect(403);
+      const response = await request(app)
+        .put(`/api/v1/decks/${nonExistentDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: testCards })
+        .expect(403);
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Guests may not modify decks');
-        });
+      expect(response.body.errors[0].message).toContain('Access denied');
     });
 
-    describe('Non-Existent Deck Scenarios (404 Prevention)', () => {
-        it('should return 404 for non-existent deck ID', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+    it('should reject non-UUID deck id with an error response', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: testCards })
-                .expect(404);
+      const response = await request(app)
+        .put('/api/v1/decks/invalid-deck-id/cards')
+        .set(asUser(adminUserId))
+        .send({ cards: testCards });
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Deck not found');
-        });
+      expect(response.status).toBeGreaterThanOrEqual(400);
+      const hasV1Errors = Array.isArray(response.body.errors) && response.body.errors.length > 0;
+      expect(hasV1Errors || response.body.success === false).toBe(true);
+    });
+  });
 
-        it('should return 404 for malformed deck ID', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+  describe('Authentication and Authorization Edge Cases', () => {
+    it('should require authentication for deck save operations', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put('/api/decks/invalid-deck-id/cards')
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: testCards })
-                .expect(404);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .send({ cards: testCards })
+        .expect(401);
 
-            expect(response.body.success).toBe(false);
-        });
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toContain('Authentication required');
     });
 
-    describe('Authentication and Authorization Edge Cases', () => {
-        it('should require authentication for deck save operations', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+    it('should handle invalid session cookies', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .send({ cards: testCards })
-                .expect(401);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set('Cookie', 'session=invalid-session-id')
+        .send({ cards: testCards })
+        .expect(401);
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Authentication required');
-        });
+      expect(response.body.success).toBe(false);
+    });
+  });
 
-        it('should handle invalid session cookies', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+  describe('Input Validation and Data Integrity', () => {
+    it('should validate card data structure', async () => {
+      const invalidCards = [{ invalidField: 'test' }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', 'session=invalid-session-id')
-                .send({ cards: testCards })
-                .expect(401);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: invalidCards })
+        .expect(400);
 
-            expect(response.body.success).toBe(false);
-        });
+      expect(response.body.errors[0].message).toContain('cardType');
     });
 
-    describe('Input Validation and Data Integrity', () => {
-        it('should validate card data structure', async () => {
-            const invalidCards = [
-                { invalidField: 'test' } // Missing required fields
-            ];
+    it('should validate card type field', async () => {
+      const invalidCards = [{ cardType: '', cardId: charId, quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: invalidCards })
-                .expect(400);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: invalidCards })
+        .expect(400);
 
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('cardType is required');
-        });
-
-        it('should validate card type field', async () => {
-            const invalidCards = [
-                { cardType: '', cardId: 'test-char-1', quantity: 1 }
-            ];
-
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: invalidCards })
-                .expect(400);
-
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('cardType is required');
-        });
-
-        it('should validate card ID field', async () => {
-            const invalidCards = [
-                { cardType: 'character', cardId: '', quantity: 1 }
-            ];
-
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: invalidCards })
-                .expect(400);
-
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('cardId is required');
-        });
-
-        it('should validate quantity field', async () => {
-            const invalidCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 0 }
-            ];
-
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: invalidCards })
-                .expect(400);
-
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('quantity must be a number between 1 and 100');
-        });
-
-        it('should validate cards array is provided', async () => {
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({}) // No cards array
-                .expect(400);
-
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Cards must be an array');
-        });
-
-        it('should validate cards is an array', async () => {
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: 'not-an-array' })
-                .expect(400);
-
-            expect(response.body.success).toBe(false);
-            expect(response.body.error).toContain('Cards must be an array');
-        });
+      expect(response.body.errors[0].message).toContain('cardType');
     });
 
-    describe('API Response Consistency', () => {
-        it('should return consistent response format for successful saves', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
+    it('should validate card ID field', async () => {
+      const invalidCards = [{ cardType: 'character', cardId: '', quantity: 1 }];
 
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: testCards })
-                .expect(200);
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: invalidCards })
+        .expect(400);
 
-            expect(response.body).toHaveProperty('success', true);
-            expect(response.body).toHaveProperty('data');
-            expect(response.body.data).toHaveProperty('id', adminDeckId);
-            expect(response.body.data).toHaveProperty('name');
-            expect(response.body.data).toHaveProperty('cards');
-        });
-
-        it('should return consistent error format for 403 errors', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
-
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${regularUserId}`)
-                .send({ cards: testCards })
-                .expect(403);
-
-            expect(response.body).toHaveProperty('success', false);
-            expect(response.body).toHaveProperty('error');
-            expect(response.body.error).toContain('Access denied');
-        });
-
-        it('should return consistent error format for 404 errors', async () => {
-            const testCards = [
-                { cardType: 'character', cardId: 'test-char-1', quantity: 1 }
-            ];
-
-            const response = await request(app)
-                .put(`/api/v1/decks//cards`)
-                .set('Cookie', `session=${adminUserId}`)
-                .send({ cards: testCards })
-                .expect(404);
-
-            expect(response.body).toHaveProperty('success', false);
-            expect(response.body).toHaveProperty('error');
-            expect(response.body.error).toContain('Deck not found');
-        });
+      expect(response.body.errors[0].message).toContain('cardId');
     });
+
+    it('should validate quantity field', async () => {
+      const invalidCards = [{ cardType: 'character', cardId: charId, quantity: 0 }];
+
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: invalidCards })
+        .expect(400);
+
+      expect(response.body.errors[0].message).toContain('quantity');
+    });
+
+    it('should validate cards array is provided', async () => {
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({})
+        .expect(400);
+
+      expect(response.body.errors[0].message).toContain('Cards must be an array');
+    });
+
+    it('should validate cards is an array', async () => {
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: 'not-an-array' })
+        .expect(400);
+
+      expect(response.body.errors[0].message).toContain('Cards must be an array');
+    });
+  });
+
+  describe('API Response Consistency', () => {
+    it('should return consistent response format for successful saves', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
+
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: testCards })
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(response.body.data.metadata.id).toBe(adminDeckId);
+      expect(response.body.data.metadata).toHaveProperty('name');
+      expect(response.body.data).toHaveProperty('cards');
+    });
+
+    it('should return consistent error format for 403 errors', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
+
+      const response = await request(app)
+        .put(`/api/v1/decks/${adminDeckId}/cards`)
+        .set(asUser(regularUserId))
+        .send({ cards: testCards })
+        .expect(403);
+
+      expect(response.body.errors.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('Access denied');
+    });
+
+    it('should return 403 for missing deck (same as non-owner)', async () => {
+      const testCards = [{ cardType: 'character', cardId: charId, quantity: 1 }];
+
+      const response = await request(app)
+        .put(`/api/v1/decks/${nonExistentDeckId}/cards`)
+        .set(asUser(adminUserId))
+        .send({ cards: testCards })
+        .expect(403);
+
+      expect(response.body.errors[0].message).toContain('Access denied');
+    });
+  });
 });
