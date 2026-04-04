@@ -199,7 +199,7 @@ function createDeckSelectionMenu(cardType: string, cardId: string, cardName: str
 
 async function addCardToDatabaseDeck(deckId: string, cardType: string, cardId: string, cardName: string) {
   try {
-    const response = await fetch(`/api/decks/${deckId}/cards`, {
+    const response = await fetch(`/api/v1/decks//cards`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

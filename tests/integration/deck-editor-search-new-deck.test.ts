@@ -115,7 +115,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
     // Step 4: Add the first matching character to the deck
     const firstCard = minaCharacters[0];
     const addCardResponse = await request(app)
-      .post(`/api/decks/${testDeckId}/cards`)
+      .post(`/api/v1/decks//cards`)
       .set('Cookie', authCookie)
       .send({
         cardId: firstCard.id,
@@ -141,7 +141,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
     if (minaCharacters.length > 1) {
       const secondCard = minaCharacters[1];
       const addSecondCardResponse = await request(app)
-        .post(`/api/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardId: secondCard.id,

@@ -75,7 +75,7 @@ export class ApiClient {
 
   async addCardToDeck(deckId: string, cardData: { cardType: string; cardId: string; quantity: number }) {
     const response = await request(this.app)
-      .post(`/api/decks/${deckId}/cards`)
+      .post(`/api/v1/decks//cards`)
       .set('Cookie', this.cookies)
       .send(cardData);
     
@@ -93,7 +93,7 @@ export class ApiClient {
 
   async removeCardFromDeck(deckId: string, cardData: { cardType: string; cardId: string; quantity: number }) {
     return request(this.app)
-      .delete(`/api/decks/${deckId}/cards`)
+      .delete(`/api/v1/decks//cards`)
       .set('Cookie', this.cookies)
       .send(cardData)
       .expect(200);

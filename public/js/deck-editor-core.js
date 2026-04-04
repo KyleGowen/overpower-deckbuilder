@@ -920,7 +920,7 @@ async function syncPersistedDeckCardsFromEditor() {
     const deckId = currentDeckId;
     const cards = buildDeckCardsDataForApi();
     const isGuest = typeof isGuestUser === 'function' && isGuestUser() && String(deckId).startsWith('guest_');
-    const url = isGuest ? `/api/guest/decks/${deckId}/cards` : `/api/decks/${deckId}/cards`;
+    const url = isGuest ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
     try {
         const res = await fetch(url, {
             method: 'PUT',
@@ -978,27 +978,24 @@ async function saveDeckChanges() {
 
     const parseApiErrorResponse = async (response) => {
         const fallbackMessage = `Failed to save deck cards: ${response.status} ${response.statusText}`;
-
+        const raw = await response.text();
+        if (!raw) {
+            return fallbackMessage;
+        }
         try {
-            const responseBody = await response.json();
+            const responseBody = JSON.parse(raw);
+            const v1Msg = responseBody?.errors?.[0]?.message;
+            if (v1Msg) {
+                return v1Msg;
+            }
             const specificMessage = responseBody?.error || responseBody?.details;
             if (specificMessage) {
                 return specificMessage;
             }
-        } catch (jsonError) {
-            console.warn('[saveDeckChanges] Failed to parse error response JSON:', jsonError);
+        } catch (parseError) {
+            console.warn('[saveDeckChanges] Failed to parse error response as JSON:', parseError);
         }
-
-        try {
-            const textBody = await response.text();
-            if (textBody) {
-                return textBody;
-            }
-        } catch (textError) {
-            console.warn('[saveDeckChanges] Failed to parse error response text:', textError);
-        }
-
-        return fallbackMessage;
+        return raw.length > 200 ? `${raw.slice(0, 200)}...` : raw;
     };
 
     try {
@@ -1089,7 +1086,7 @@ async function saveDeckChanges() {
         });
         
         // Bulk replace all cards in one atomic operation
-        const cardsEndpoint = `/api/decks/${deckId}/cards`;
+        const cardsEndpoint = `/api/v1/decks/${deckId}/cards`;
         console.log('💾 [saveDeckChanges] Saving cards to endpoint:', cardsEndpoint);
         console.log('💾 [saveDeckChanges] deckId:', deckId, 'currentDeckId:', currentDeckId);
         

@@ -7,7 +7,7 @@ async function changeCardQuantity(cardId, change) {
     if (!currentDeckId) return;
     
     try {
-        const response = await fetch(`/api/decks/${currentDeckId}/cards`, {
+        const response = await fetch(`/api/v1/decks//cards`, {
             method: change > 0 ? 'POST' : 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ async function addCardToDeck(cardType, cardId) {
     }
     
     try {
-        const response = await fetch(`/api/decks/${currentDeckId}/cards`, {
+        const response = await fetch(`/api/v1/decks//cards`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

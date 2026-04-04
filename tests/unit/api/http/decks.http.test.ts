@@ -5,11 +5,30 @@ import { registerDecksV1HttpRoutes, type DecksV1HttpDeps } from '../../../../src
 import type { DeckListService } from '../../../../src/api/services/deckListService';
 import type { DeckWriteService } from '../../../../src/api/services/deckWriteService';
 import type { DeckDetailService } from '../../../../src/api/services/deckDetailService';
+import type { DeckCardsService } from '../../../../src/api/services/deckCardsService';
 
 const noopDeckBackground = {
   getAvailableBackgrounds: jest.fn().mockResolvedValue([]),
   validateBackgroundPath: jest.fn().mockResolvedValue(true)
 };
+
+function stubDeckCards(): DeckCardsService {
+  return {
+    getDeckCards: jest.fn(),
+    postCard: jest.fn(),
+    putReplaceCards: jest.fn(),
+    deleteCards: jest.fn()
+  } as unknown as DeckCardsService;
+}
+
+function stubDeckRepository(): DecksV1HttpDeps['deckRepository'] {
+  return {
+    getUIPreferences: jest.fn().mockResolvedValue({}),
+    updateUIPreferences: jest.fn().mockResolvedValue(true),
+    getDeckById: jest.fn().mockResolvedValue({ id: 'd1', user_id: 'user-1' }),
+    userOwnsDeck: jest.fn().mockResolvedValue(true)
+  };
+}
 
 function stubDetail(): DeckDetailService {
   return {
@@ -70,6 +89,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
@@ -95,6 +116,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const app = buildApp(deps);
@@ -119,6 +142,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
@@ -140,6 +165,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(500);
@@ -167,6 +194,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -189,6 +218,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).post('/decks').send({ name: '   ' }).expect(400);
@@ -208,6 +239,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuthGuest
     };
     const res = await request(buildApp(deps)).post('/decks').send({ name: 'x' }).expect(403);
@@ -226,6 +259,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -246,6 +281,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -268,6 +305,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -289,6 +328,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).post('/decks/validate').send({}).expect(400);
@@ -329,6 +370,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/d1').expect(200);
@@ -351,6 +394,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/d1/full').expect(200);
@@ -372,6 +417,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/missing').expect(404);
@@ -397,6 +444,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(200);
@@ -415,6 +464,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuthGuest
     };
     const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(403);
@@ -435,6 +486,8 @@ describe('decks.http', () => {
       deckWriteService,
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckRepository: stubDeckRepository(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).delete('/decks/d1').expect(200);

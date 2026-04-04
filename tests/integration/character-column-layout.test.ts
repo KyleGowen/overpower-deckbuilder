@@ -109,7 +109,7 @@ describe('Character Column Layout Integration Tests', () => {
     it('should maintain single column layout after adding cards to deck', async () => {
       // First, add a character card to the deck
       const addCardResponse = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardId: 'test-character-1',

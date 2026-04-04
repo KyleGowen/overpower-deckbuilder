@@ -696,7 +696,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         it('should prevent guest users from adding character cards to deck', async () => {
             // Try to add a character card to the deck
             const addCardResponse = await request(app)
-                .post(`/api/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks//cards`)
                 .set('Cookie', guestAuthCookie)
                 .send({
                     cardType: 'character',
@@ -712,7 +712,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         it('should prevent guest users from adding special cards to deck', async () => {
             // Try to add a special card to the deck
             const addCardResponse = await request(app)
-                .post(`/api/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks//cards`)
                 .set('Cookie', guestAuthCookie)
                 .send({
                     cardType: 'special',
@@ -734,7 +734,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
 
             for (const cardType of cardTypes) {
                 const addCardResponse = await request(app)
-                    .post(`/api/decks/${testDeckId}/cards`)
+                    .post(`/api/v1/decks//cards`)
                     .set('Cookie', guestAuthCookie)
                     .send({
                         cardType: cardType,
@@ -794,7 +794,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
             }
 
             const deleteCardResponse = await request(app)
-                .delete(`/api/decks/${testDeckId}/cards`)
+                .delete(`/api/v1/decks//cards`)
                 .set('Cookie', guestAuthCookie)
                 .send({
                     cardType: 'character',

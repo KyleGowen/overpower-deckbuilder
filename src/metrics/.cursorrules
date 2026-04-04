@@ -1,0 +1,4 @@
+# Endpoint hit metrics
+
+- **endpointHitMetrics.ts** — Enumerates Express routes for DB seeding, builds canonical `METHOD /path` keys from `req`, async `res.finish` upsert into `endpoint_hit_counts` (`hit_count`, `last_hit_at` set on each hit; seeded rows use `last_hit_at` NULL until first hit).
+- Used from `src/index.ts` only when `NODE_ENV !== 'test'` (no middleware/seed in tests).

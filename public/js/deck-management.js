@@ -228,7 +228,7 @@ async function addCardToDeckFromSelection(deckId, cardType, cardId, cardName) {
     }
     const requestBody = { cardType, cardId, quantity: 1 };
     const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/decks/${deckId}/cards`;
+    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks//cards`;
     try {
         const response = await fetch(url, {
             method: 'POST',

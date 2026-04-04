@@ -84,7 +84,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -96,7 +96,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
 
         it('should allow admin to save deck with empty card list', async () => {
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: [] })
                 .expect(200);
@@ -112,7 +112,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             }));
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -129,7 +129,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${regularUserDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${regularUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -144,7 +144,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${regularUser.id}`)
                 .send({ cards: testCards })
                 .expect(403);
@@ -160,7 +160,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${otherUserDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${regularUser.id}`)
                 .send({ cards: testCards })
                 .expect(403);
@@ -178,7 +178,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .send({ cards: testCards })
                 .expect(403);
 
@@ -192,7 +192,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${regularUserDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .send({ cards: testCards })
                 .expect(403);
 
@@ -208,7 +208,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${nonExistentDeckId}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(404);
@@ -253,7 +253,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .send({ cards: testCards })
                 .expect(401);
 
@@ -267,7 +267,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', 'session=invalid-session-id')
                 .send({ cards: testCards })
                 .expect(401);
@@ -282,7 +282,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
 
             // Create a user but don't set up proper session
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', 'session=expired-session')
                 .send({ cards: testCards })
                 .expect(401);
@@ -298,7 +298,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: invalidCards })
                 .expect(400);
@@ -313,7 +313,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: invalidCards })
                 .expect(400);
@@ -328,7 +328,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: invalidCards })
                 .expect(400);
@@ -343,7 +343,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: invalidCards })
                 .expect(400);
@@ -360,7 +360,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             }));
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: tooManyCards })
                 .expect(400);
@@ -371,7 +371,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
 
         it('should validate cards array is provided', async () => {
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({}) // No cards array
                 .expect(400);
@@ -382,7 +382,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
 
         it('should validate cards is an array', async () => {
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: 'not-an-array' })
                 .expect(400);
@@ -401,7 +401,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -417,7 +417,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
 
             // Save cards
             await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -441,11 +441,11 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             // Perform concurrent saves
             const [response1, response2] = await Promise.all([
                 request(app)
-                    .put(`/api/decks/${adminDeck.id}/cards`)
+                    .put(`/api/v1/decks//cards`)
                     .set('Cookie', `session=${adminUser.id}`)
                     .send({ cards: testCards1 }),
                 request(app)
-                    .put(`/api/decks/${regularUserDeck.id}/cards`)
+                    .put(`/api/v1/decks//cards`)
                     .set('Cookie', `session=${regularUser.id}`)
                     .send({ cards: testCards2 })
             ]);
@@ -466,7 +466,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             // Make multiple rapid requests
             const promises = Array.from({ length: 5 }, () =>
                 request(app)
-                    .put(`/api/decks/${adminDeck.id}/cards`)
+                    .put(`/api/v1/decks//cards`)
                     .set('Cookie', `session=${adminUser.id}`)
                     .send({ cards: testCards })
             );
@@ -489,7 +489,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: maliciousCards })
                 .expect(400);
@@ -508,7 +508,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: xssCards })
                 .expect(400);
@@ -526,7 +526,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(400);
@@ -542,7 +542,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(400);
@@ -557,7 +557,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(400);
@@ -572,7 +572,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(400);
@@ -587,7 +587,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(400);
@@ -631,7 +631,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(200);
@@ -649,7 +649,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${adminDeck.id}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${regularUser.id}`)
                 .send({ cards: testCards })
                 .expect(403);
@@ -665,7 +665,7 @@ describe('Deck Save Security - Comprehensive Integration Tests', () => {
             ];
 
             const response = await request(app)
-                .put(`/api/decks/${nonExistentDeckId}/cards`)
+                .put(`/api/v1/decks//cards`)
                 .set('Cookie', `session=${adminUser.id}`)
                 .send({ cards: testCards })
                 .expect(404);

@@ -68,11 +68,11 @@ describe('deck-editor-core saveDeckChanges error specificity', () => {
       ok: false,
       status: 400,
       statusText: 'Bad Request',
-      json: async () => ({
-        success: false,
-        error: 'Card at index 4: quantity must be a number between 1 and 100'
-      }),
-      text: async () => 'ignored text'
+      text: async () =>
+        JSON.stringify({
+          success: false,
+          error: 'Card at index 4: quantity must be a number between 1 and 100'
+        })
     });
 
     await sandbox.saveDeckChanges();
@@ -88,9 +88,6 @@ describe('deck-editor-core saveDeckChanges error specificity', () => {
       ok: false,
       status: 400,
       statusText: 'Bad Request',
-      json: async () => {
-        throw new Error('invalid json');
-      },
       text: async () => ''
     });
 

@@ -213,7 +213,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
   describe('Card Addition Restrictions', () => {
     it('should block guest from adding cards to deck', async () => {
       const response = await request(app)
-        .post(`/api/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', guestCookie)
         .send({
           cardType: 'character',
@@ -228,7 +228,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should allow deck owner to add cards', async () => {
       const response = await request(app)
-        .post(`/api/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', userCookie)
         .send({
           cardType: 'character',
@@ -242,7 +242,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should block non-owner from adding cards', async () => {
       const response = await request(app)
-        .post(`/api/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', adminCookie)
         .send({
           cardType: 'character',
@@ -260,7 +260,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
     beforeEach(async () => {
       // Add a card to the deck first
       await request(app)
-        .post(`/api/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', userCookie)
         .send({
           cardType: 'character',
@@ -271,7 +271,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should block guest from removing cards from deck', async () => {
       const response = await request(app)
-        .delete(`/api/decks/${testDeckId}/cards`)
+        .delete(`/api/v1/decks//cards`)
         .set('Cookie', guestCookie)
         .send({
           cardType: 'character',
@@ -286,7 +286,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should allow deck owner to remove cards', async () => {
       const response = await request(app)
-        .delete(`/api/decks/${testDeckId}/cards`)
+        .delete(`/api/v1/decks//cards`)
         .set('Cookie', userCookie)
         .send({
           cardType: 'character',
@@ -300,7 +300,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should block non-owner from removing cards', async () => {
       const response = await request(app)
-        .delete(`/api/decks/${testDeckId}/cards`)
+        .delete(`/api/v1/decks//cards`)
         .set('Cookie', adminCookie)
         .send({
           cardType: 'character',
@@ -394,7 +394,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
     it('should allow guest to view deck cards', async () => {
       const response = await request(app)
-        .get(`/api/decks/${testDeckId}/cards`)
+        .get(`/api/v1/decks//cards`)
         .set('Cookie', guestCookie);
 
       expect(response.status).toBe(200);
@@ -417,8 +417,8 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
       const modificationEndpoints = [
         { method: 'POST', path: '/api/v1/decks', data: { name: 'Test Deck' } },
         { method: 'PUT', path: `/api/v1/decks/${testDeckId}`, data: { name: 'Updated Deck' } },
-        { method: 'POST', path: `/api/decks/${testDeckId}/cards`, data: { cardType: 'character', cardId: testCharacterId } },
-        { method: 'DELETE', path: `/api/decks/${testDeckId}/cards`, data: { cardType: 'character', cardId: testCharacterId } },
+        { method: 'POST', path: `/api/v1/decks//cards`, data: { cardType: 'character', cardId: testCharacterId } },
+        { method: 'DELETE', path: `/api/v1/decks//cards`, data: { cardType: 'character', cardId: testCharacterId } },
         { method: 'PUT', path: `/api/v1/decks/${testDeckId}/ui-preferences`, data: { expansionState: {} } }
       ];
 
@@ -456,7 +456,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
       const readEndpoints = [
         { method: 'GET', path: '/api/v1/decks' },
         { method: 'GET', path: `/api/v1/decks/${testDeckId}` },
-        { method: 'GET', path: `/api/decks/${testDeckId}/cards` }
+        { method: 'GET', path: `/api/v1/decks//cards` }
       ];
 
       for (const endpoint of readEndpoints) {

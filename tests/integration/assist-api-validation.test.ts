@@ -62,7 +62,7 @@ describe('Assist API Validation Integration Tests', () => {
       const assistCard = assistResult.rows[0];
 
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -93,7 +93,7 @@ describe('Assist API Validation Integration Tests', () => {
         
         // First, add the first assist card
         const firstResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -106,7 +106,7 @@ describe('Assist API Validation Integration Tests', () => {
         
         // Now try to add a second assist card - this should fail
         const secondResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -139,7 +139,7 @@ describe('Assist API Validation Integration Tests', () => {
         const regularSpecialCard = regularSpecialResult.rows[0];
         
         const response = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -169,7 +169,7 @@ describe('Assist API Validation Integration Tests', () => {
       });
       
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -191,7 +191,7 @@ describe('Assist API Validation Integration Tests', () => {
       });
       
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'character',
@@ -235,7 +235,7 @@ describe('Assist API Validation Integration Tests', () => {
       });
       
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .send({
           cardType: 'special',
           cardId: '12345678-1234-1234-1234-123456789012',
@@ -268,7 +268,7 @@ describe('Assist API Validation Integration Tests', () => {
       });
       
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -304,7 +304,7 @@ describe('Assist API Validation Integration Tests', () => {
       // This test would require mocking the database connection to fail
       // For now, we'll just ensure the API handles errors without crashing
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',

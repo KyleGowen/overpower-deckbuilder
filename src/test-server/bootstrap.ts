@@ -23,6 +23,7 @@ import { DbvSupportService } from '../api/services/dbvSupportService';
 import { DeckListService } from '../api/services/deckListService';
 import { DeckWriteService } from '../api/services/deckWriteService';
 import { DeckDetailService } from '../api/services/deckDetailService';
+import { DeckCardsService } from '../api/services/deckCardsService';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
 import { setupMiddleware } from '../middleware/setup';
@@ -61,6 +62,14 @@ const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 const deckListService = new DeckListService(deckRepository);
 const deckWriteService = new DeckWriteService(deckBusinessService, deckValidationService);
 const deckDetailService = new DeckDetailService(deckRepository);
+const deckCardsService = new DeckCardsService(deckRepository, {
+  validateCardAddition,
+  checkIfCardIsCataclysm,
+  checkIfCardIsAssist,
+  checkIfCardIsAmbush,
+  checkIfCardIsFortification,
+  checkIfCardIsOnePerDeck
+});
 
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
@@ -153,7 +162,9 @@ registerApiV1Routes(app, {
   deckBackgroundService,
   deckListService,
   deckWriteService,
-  deckDetailService
+  deckDetailService,
+  deckCardsService,
+  deckRepository
 });
 
 // Error handling middleware

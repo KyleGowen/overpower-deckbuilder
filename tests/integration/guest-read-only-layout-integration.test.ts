@@ -95,7 +95,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
         
         for (const character of uniqueCharacters) {
             await request(app)
-                .post(`/api/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks//cards`)
                 .set('Cookie', `sessionId=${regularSessionId}`)
                 .send({
                     cardType: 'character',

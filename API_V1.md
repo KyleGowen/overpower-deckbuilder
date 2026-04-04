@@ -434,6 +434,30 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Implementation:** [`DeckDetailService`](src/api/services/deckDetailService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
 
+### `GET /api/v1/decks/:id/ui-preferences`
+
+**Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Response 200:** v1 envelope; **`data`** = UI preferences object (JSON stored on `decks.ui_preferences`), or `{}` if unset.
+
+**Response 500:** **`UI_PREFERENCES_FETCH_ERROR`**.
+
+**Implementation:** [`DeckRepository`](src/repository/DeckRepository.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `PUT /api/v1/decks/:id/ui-preferences`
+
+**Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Rate limiting / read-only:** Same patterns as other deck mutations (`checkRateLimit`, `blockInReadOnlyMode`).
+
+**Body:** JSON object (same validation rules as legacy **`PUT /api/decks/:id/ui-preferences`**: optional **`viewMode`** (`tile` \| `list`), **`sortBy`**, **`filterBy`**, max object size 1000 characters).
+
+**Response 200:** v1 envelope; **`data`** = saved preferences body.
+
+**Response 400 / 404 / 500:** **`VALIDATION_ERROR`**, **`DECK_NOT_FOUND`**, **`UI_PREFERENCES_UPDATE_ERROR`**.
+
+**Implementation:** [`DeckRepository`](src/repository/DeckRepository.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
 ---
 
 ## Route index (v1)
@@ -464,4 +488,6 @@ Reference data for Database View and collection UI (set codes → display names,
 | GET | /api/v1/decks/:id/full | decks.http.ts |
 | GET | /api/v1/decks/:id | decks.http.ts |
 | PUT | /api/v1/decks/:id | decks.http.ts |
+| GET | /api/v1/decks/:id/ui-preferences | decks.http.ts |
+| PUT | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | DELETE | /api/v1/decks/:id | decks.http.ts |

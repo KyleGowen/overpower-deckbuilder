@@ -20,8 +20,14 @@ import { DbvSupportService } from './api/services/dbvSupportService';
 import { DeckListService } from './api/services/deckListService';
 import { DeckWriteService } from './api/services/deckWriteService';
 import { DeckDetailService } from './api/services/deckDetailService';
+import { DeckCardsService } from './api/services/deckCardsService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
+import {
+  createEndpointHitMetricsMiddleware,
+  enumerateExpressRoutes,
+  seedEndpointHitCounts
+} from './metrics/endpointHitMetrics';
 import { execSync } from 'child_process';
 
 export const app = express();
@@ -357,6 +363,14 @@ const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 const deckListService = new DeckListService(deckRepository);
 const deckWriteService = new DeckWriteService(deckBusinessService, deckValidationService);
 const deckDetailService = new DeckDetailService(deckRepository);
+const deckCardsService = new DeckCardsService(deckRepository, {
+  validateCardAddition,
+  checkIfCardIsCataclysm,
+  checkIfCardIsAssist,
+  checkIfCardIsAmbush,
+  checkIfCardIsFortification,
+  checkIfCardIsOnePerDeck
+});
 
 // Function to get git information
 function getGitInfo() {
@@ -407,6 +421,10 @@ function getGitInfo() {
 // Middleware (first block: body, cookie, static image mounts)
 setupMiddleware(app);
 
+if (process.env.NODE_ENV !== 'test') {
+  app.use(createEndpointHitMetricsMiddleware(dataSource.getPool()));
+}
+
 // Initialize database
 async function initializeServer() {
   try {
@@ -414,6 +432,10 @@ async function initializeServer() {
     
     // First, initialize database with Flyway migrations and data
     await databaseInit.initializeDatabase();
+
+    if (process.env.NODE_ENV !== 'test') {
+      await seedEndpointHitCounts(dataSource.getPool(), enumerateExpressRoutes(app));
+    }
 
     // Migrations may have changed card rows; drop cached catalog payloads from any prior in-process state
     (cardRepository as { clearCaches?: () => void }).clearCaches?.();
@@ -502,6 +524,8 @@ registerApiV1Routes(app, {
   deckBackgroundService,
   deckListService,
   deckWriteService,
-  deckDetailService
+  deckDetailService,
+  deckCardsService,
+  deckRepository
 });
 

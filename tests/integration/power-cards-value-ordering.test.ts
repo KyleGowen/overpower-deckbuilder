@@ -77,7 +77,7 @@ describe('Power Cards ordering by value (with OP type tiebreakers)', () => {
     // Add every power card to the deck
     for (const card of allPowerCards) {
       const add = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({ cardId: card.id, cardType: 'power' });
       expect([200, 201, 204]).toContain(add.status);

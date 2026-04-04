@@ -121,7 +121,7 @@ describe('Assist Database Integration Tests', () => {
 
       // Step 2: Add the assist card via API
       const addResponse = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -152,7 +152,7 @@ describe('Assist Database Integration Tests', () => {
         const secondAssistCard = secondAssistResult.rows[0];
 
         const secondAddResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -191,7 +191,7 @@ describe('Assist Database Integration Tests', () => {
 
         // Add the regular special card
         const addResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -232,7 +232,7 @@ describe('Assist Database Integration Tests', () => {
 
         // Add the assist card via API
         const addResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -245,7 +245,7 @@ describe('Assist Database Integration Tests', () => {
 
         // Now remove the assist card via API
         const removeResponse = await request(app)
-          .delete(`/api/decks/${testDeck.id}/cards`)
+          .delete(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -273,7 +273,7 @@ describe('Assist Database Integration Tests', () => {
           const otherAssistCard = otherAssistResult.rows[0];
 
           const addResponse = await request(app)
-            .post(`/api/decks/${testDeck.id}/cards`)
+            .post(`/api/v1/decks//cards`)
             .set('Cookie', authCookie)
             .send({
               cardType: 'special',
@@ -304,7 +304,7 @@ describe('Assist Database Integration Tests', () => {
 
         // Add the assist card via API
         const firstAddResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -317,7 +317,7 @@ describe('Assist Database Integration Tests', () => {
 
         // Now try to add the same assist card again (should fail)
         const addResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -357,7 +357,7 @@ describe('Assist Database Integration Tests', () => {
 
       for (const card of regularCards.rows) {
         const addResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -378,7 +378,7 @@ describe('Assist Database Integration Tests', () => {
         const startTime = Date.now();
         
         const addResponse = await request(app)
-          .post(`/api/decks/${testDeck.id}/cards`)
+          .post(`/api/v1/decks//cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -410,7 +410,7 @@ describe('Assist Database Integration Tests', () => {
       // For now, we'll just ensure the system handles errors without crashing
       
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -430,7 +430,7 @@ describe('Assist Database Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/decks/${testDeck.id}/cards`)
+        .post(`/api/v1/decks//cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',

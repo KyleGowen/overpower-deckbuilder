@@ -5,6 +5,7 @@ import { checkRateLimit, blockInReadOnlyMode } from '../../routes/helpers';
 import type { DeckWriteService } from '../services/deckWriteService';
 import type { DeckListService } from '../services/deckListService';
 import type { DeckDetailService } from '../services/deckDetailService';
+import type { DeckCardsService } from '../services/deckCardsService';
 import type { DeckCreateV1DataDto } from '../dto/v1/DeckCreateV1DataDto';
 import type { DeckValidateV1SuccessDto } from '../dto/v1/DeckValidateV1SuccessDto';
 import type { DeckDeleteV1DataDto } from '../dto/v1/DeckDeleteV1DataDto';
@@ -13,7 +14,11 @@ import { sendV1Json, sendV1Success } from './v1Envelope';
 import { CreateDeckRequestBody } from './models/decks/CreateDeckRequestBody';
 import { ValidateDeckRequestBody } from './models/decks/ValidateDeckRequestBody';
 import { UpdateDeckRequestBody, type UpdateDeckParsed } from './models/decks/UpdateDeckRequestBody';
+import { DeckCardsPostBody } from './models/decks/DeckCardsPostBody';
+import { DeckCardsPutBody } from './models/decks/DeckCardsPutBody';
 import type { DeckBackgroundListReader } from './dbv-support.http';
+import type { DeckRepository } from '../../repository/DeckRepository';
+import type { UIPreferences } from '../../types';
 
 /**
  * Maps validated JSON fields to repository `Partial<Deck>`.
@@ -43,8 +48,13 @@ export interface DecksV1HttpDeps {
   deckListService: DeckListService;
   deckWriteService: DeckWriteService;
   deckDetailService: DeckDetailService;
+  deckCardsService: DeckCardsService;
   deckBackgroundService: DeckBackgroundListReader;
   authenticateUser: RequestHandler;
+  deckRepository: Pick<
+    DeckRepository,
+    'getUIPreferences' | 'updateUIPreferences' | 'getDeckById' | 'userOwnsDeck'
+  >;
 }
 
 function stableV1DeckListBody<T>(data: T): string {
@@ -154,6 +164,160 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     }
   });
 
+  router.get('/decks/:id/cards', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const result = await deps.deckCardsService.getDeckCards(req.params.id);
+      if (!result.ok) {
+        if (result.kind === 'not_implemented') {
+          sendV1Json(res, 501, null, [{ code: 'NOT_IMPLEMENTED', message: 'Not implemented' }]);
+          return;
+        }
+        sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_FETCH_ERROR', message: 'Failed to fetch deck cards' }]);
+        return;
+      }
+      sendV1Success(res, result.data);
+    } catch (error) {
+      console.error('v1 GET /decks/:id/cards error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_FETCH_ERROR', message: 'Failed to fetch deck cards' }]);
+    }
+  });
+
+  router.post('/decks/:id/cards', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (checkRateLimit(req, res, 'card addition', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'card addition', { v1: true })) {
+        return;
+      }
+      if (req.user?.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'modify decks');
+        return;
+      }
+
+      const parsed = DeckCardsPostBody.parse(req.body);
+      if (!parsed.ok) {
+        sendV1Json(res, 400, null, parsed.errors);
+        return;
+      }
+
+      const { cardType, cardId, quantity } = parsed.value;
+      const result = await deps.deckCardsService.postCard(
+        req.params.id,
+        req.user!.id,
+        cardType,
+        cardId,
+        quantity
+      );
+
+      if (!result.ok) {
+        if (result.kind === 'forbidden') {
+          sendV1Json(res, 403, null, [{ code: 'DECK_ACCESS_DENIED', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'not_found') {
+          sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'bad_request') {
+          sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: result.message }]);
+          return;
+        }
+        sendV1Json(res, 500, null, [{ code: 'DECK_CARD_ADD_ERROR', message: result.message }]);
+        return;
+      }
+
+      sendV1Success(res, result.data);
+    } catch (error) {
+      console.error('v1 POST /decks/:id/cards error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_CARD_ADD_ERROR', message: 'Failed to add card to deck' }]);
+    }
+  });
+
+  router.put('/decks/:id/cards', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (checkRateLimit(req, res, 'card replacement', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'card replacement', { v1: true })) {
+        return;
+      }
+      if (req.user?.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'modify decks');
+        return;
+      }
+
+      const parsed = DeckCardsPutBody.parse(req.body);
+      if (!parsed.ok) {
+        sendV1Json(res, 400, null, parsed.errors);
+        return;
+      }
+
+      const result = await deps.deckCardsService.putReplaceCards(req.params.id, req.user!.id, parsed.value.cards);
+
+      if (!result.ok) {
+        if (result.kind === 'forbidden') {
+          sendV1Json(res, 403, null, [{ code: 'DECK_ACCESS_DENIED', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'replace_failed') {
+          const msg = result.details ? `${result.message}: ${result.details}` : result.message;
+          sendV1Json(res, result.status, null, [{ code: 'DECK_CARDS_REPLACE_FAILED', message: msg }]);
+          return;
+        }
+        sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_REPLACE_ERROR', message: result.message }]);
+        return;
+      }
+
+      sendV1Success(res, result.data);
+    } catch (error) {
+      console.error('v1 PUT /decks/:id/cards error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_REPLACE_ERROR', message: 'Failed to replace cards in deck' }]);
+    }
+  });
+
+  router.delete('/decks/:id/cards', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (checkRateLimit(req, res, 'card removal', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'card removal', { v1: true })) {
+        return;
+      }
+      if (req.user?.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'modify decks');
+        return;
+      }
+
+      const parsed = DeckCardsPostBody.parse(req.body);
+      if (!parsed.ok) {
+        sendV1Json(res, 400, null, parsed.errors);
+        return;
+      }
+
+      const { cardType, cardId, quantity } = parsed.value;
+      const result = await deps.deckCardsService.deleteCards(req.params.id, req.user!.id, cardType, cardId, quantity);
+
+      if (!result.ok) {
+        if (result.kind === 'forbidden') {
+          sendV1Json(res, 403, null, [{ code: 'DECK_ACCESS_DENIED', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'not_found') {
+          sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: result.message }]);
+          return;
+        }
+        sendV1Json(res, 500, null, [{ code: 'DECK_CARD_REMOVE_ERROR', message: result.message }]);
+        return;
+      }
+
+      sendV1Success(res, result.data);
+    } catch (error) {
+      console.error('v1 DELETE /decks/:id/cards error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_CARD_REMOVE_ERROR', message: 'Failed to remove card from deck' }]);
+    }
+  });
+
   router.get('/decks/:id/full', deps.authenticateUser, async (req: Request, res: Response) => {
     try {
       const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, req.user!.id);
@@ -260,6 +424,99 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
           code: 'DECK_UPDATE_ERROR',
           message: error instanceof Error ? error.message : 'Failed to update deck'
         }
+      ]);
+    }
+  });
+
+  router.get('/decks/:id/ui-preferences', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (req.user?.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'view UI preferences');
+        return;
+      }
+      const { id } = req.params;
+      if (!(await deps.deckRepository.userOwnsDeck(id, req.user!.id))) {
+        sendV1Json(res, 403, null, [
+          { code: 'DECK_ACCESS_DENIED', message: 'Access denied. You do not own this deck.' }
+        ]);
+        return;
+      }
+      const preferences = await deps.deckRepository.getUIPreferences(id);
+      sendV1Success(res, preferences ?? {});
+    } catch (error) {
+      console.error('v1 GET /decks/:id/ui-preferences error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'UI_PREFERENCES_FETCH_ERROR', message: 'Failed to fetch UI preferences' }
+      ]);
+    }
+  });
+
+  router.put('/decks/:id/ui-preferences', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (checkRateLimit(req, res, 'UI preferences save', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'UI preferences save', { v1: true })) {
+        return;
+      }
+      if (req.user?.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'modify UI preferences');
+        return;
+      }
+
+      const { id } = req.params;
+      const preferences = req.body as UIPreferences & Record<string, unknown>;
+
+      if (!preferences || typeof preferences !== 'object' || Array.isArray(preferences)) {
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'Preferences must be an object' }]);
+        return;
+      }
+
+      if (preferences.viewMode && !['tile', 'list'].includes(String(preferences.viewMode))) {
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'viewMode must be either "tile" or "list"' }]);
+        return;
+      }
+
+      if (preferences.sortBy && (typeof preferences.sortBy !== 'string' || preferences.sortBy.length > 50)) {
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'sortBy must be a string with 50 characters or less' }]);
+        return;
+      }
+
+      if (preferences.filterBy && (typeof preferences.filterBy !== 'string' || preferences.filterBy.length > 50)) {
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'filterBy must be a string with 50 characters or less' }]);
+        return;
+      }
+
+      const preferencesString = JSON.stringify(preferences);
+      if (preferencesString.length > 1000) {
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'Preferences object is too large (max 1000 characters)' }]);
+        return;
+      }
+
+      const deck = await deps.deckRepository.getDeckById(id);
+      if (!deck) {
+        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
+        return;
+      }
+
+      if (!(await deps.deckRepository.userOwnsDeck(id, req.user!.id))) {
+        sendV1Json(res, 403, null, [
+          { code: 'DECK_ACCESS_DENIED', message: 'Access denied. You do not own this deck.' }
+        ]);
+        return;
+      }
+
+      const success = await deps.deckRepository.updateUIPreferences(id, preferences as UIPreferences);
+      if (!success) {
+        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
+        return;
+      }
+
+      sendV1Success(res, preferences);
+    } catch (error) {
+      console.error('v1 PUT /decks/:id/ui-preferences error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'UI_PREFERENCES_UPDATE_ERROR', message: 'Failed to update UI preferences' }
       ]);
     }
   });

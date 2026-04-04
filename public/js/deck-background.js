@@ -448,6 +448,11 @@ class DeckBackgroundManager {
 // Create global instance
 window.deckBackgroundManager = new DeckBackgroundManager();
 
+/** Event-binder / data-click-handler expects `window.showBackgroundModal` */
+window.showBackgroundModal = function showBackgroundModal() {
+  return window.deckBackgroundManager.showBackgroundModal();
+};
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DeckBackgroundManager;

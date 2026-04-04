@@ -378,7 +378,7 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
     const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
     const cardsUrl = isGuestDeck
         ? `/api/guest/decks/${currentDeckId}/cards`
-        : `/api/decks/${currentDeckId}/cards`;
+        : `/api/v1/decks//cards`;
 
     let ok = 0;
     let bad = 0;
@@ -541,7 +541,7 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
         const cardsUrl = isGuestDeck
             ? `/api/guest/decks/${currentDeckId}/cards`
-            : `/api/decks/${currentDeckId}/cards`;
+            : `/api/v1/decks//cards`;
 
         const response = await fetch(cardsUrl, {
             method: 'POST',

@@ -17,12 +17,19 @@ async function loadUIPreferences(deckId) {
         
         console.log('Loaded UI preferences from database:', data);
         
-        if (data.success) {
-            return data.data || {};
-        } else {
-            console.warn('Failed to load UI preferences:', data.error);
+        // v1 envelope: { data, meta, errors }; legacy: { success, data }
+        if (data && Array.isArray(data.errors) && data.errors.length > 0) {
+            console.warn('Failed to load UI preferences:', data.errors[0]?.message || data.errors);
             return {};
         }
+        if (data.success === true && data.data !== undefined) {
+            return data.data || {};
+        }
+        if (data.data !== undefined && data.errors !== undefined) {
+            return data.data || {};
+        }
+        console.warn('Failed to load UI preferences:', data.error || 'unknown');
+        return {};
     } catch (error) {
         console.error('Error loading UI preferences:', error);
         return {};
@@ -68,8 +75,9 @@ async function saveUIPreferences(deckId, preferences) {
         });
         
             const data = await response.json();
-            if (!data.success) {
-                console.warn('Failed to save UI preferences:', data.error);
+            const errMsg = data.errors?.[0]?.message || data.error;
+            if (data.errors?.length > 0 || data.success === false) {
+                console.warn('Failed to save UI preferences:', errMsg || data);
             }
         } catch (error) {
             console.error('Error saving UI preferences:', error);
