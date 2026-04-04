@@ -3,7 +3,16 @@
  * Tests the deck data clearing and DOM manipulation when creating a new deck
  */
 
+/** Mirrors `renderDeckEditorMobileView` empty state in deck-editor-mobile-view.js */
+const MOBILE_EMPTY_DECK_EDITOR_HTML =
+    '<div class="empty-deck-message dev-mobile-empty-deck">' +
+    '<p>No cards in this deck yet.</p>' +
+    '<p>Use the card search above to find cards by name, type, character, and more.</p></div>';
+
 describe('createNewDeck Functionality', () => {
+    /** When true, simulate showDeckEditor() replacing editor with MV empty markup (deck-editor-core.js). */
+    let simulateMobileEmptyAfterShowDeckEditor = false;
+
     // Mock DOM elements
     const mockDeckCardsContainer = {
         innerHTML: ''
@@ -34,7 +43,7 @@ describe('createNewDeck Functionality', () => {
     const mockGetCurrentUser = jest.fn();
     const mockHistoryPushState = jest.fn();
     const mockGetElementById = jest.fn();
-    const mockSetTimeout = jest.fn((callback, delay) => {
+    const mockSetTimeout = jest.fn((callback, _delay) => {
         callback();
         return 123;
     });
@@ -72,7 +81,8 @@ describe('createNewDeck Functionality', () => {
             { id: 'card2', type: 'power', name: 'Test Power' }
         ];
         mockIsCreatingNewDeck = false;
-        
+        simulateMobileEmptyAfterShowDeckEditor = false;
+
         // Reset DOM element innerHTML
         mockDeckCardsContainer.innerHTML = '<div>Existing deck cards</div>';
         mockDeckCardsEditor.innerHTML = '<div>Existing deck editor cards</div>';
@@ -145,8 +155,11 @@ describe('createNewDeck Functionality', () => {
         mockDescriptionElement.style.display = 'block';
         mockDescriptionElement.classList.add('placeholder');
         
-        // Call functions
+        // Call functions (real app: showDeckEditor runs renderDeckEditorMobileView when MV + empty)
         mockShowDeckEditor();
+        if (simulateMobileEmptyAfterShowDeckEditor) {
+            mockDeckCardsEditor.innerHTML = MOBILE_EMPTY_DECK_EDITOR_HTML;
+        }
         mockLoadAvailableCards();
         mockUpdateDeckCardCount();
         
@@ -222,6 +235,28 @@ describe('createNewDeck Functionality', () => {
             expect(mockDescriptionElement.textContent).toBe('Click to add description');
             expect(mockDescriptionElement.style.display).toBe('block');
             expect(mockDescriptionElement.classList.add).toHaveBeenCalledWith('placeholder');
+        });
+    });
+
+    describe('DOM Manipulation (layout-mobile after showDeckEditor)', () => {
+        beforeEach(() => {
+            simulateMobileEmptyAfterShowDeckEditor = true;
+        });
+
+        test('should set deckCardsEditor to mobile empty copy with card search guidance', () => {
+            simulateCreateNewDeck();
+
+            expect(mockDeckCardsEditor.innerHTML).toBe(MOBILE_EMPTY_DECK_EDITOR_HTML);
+            expect(mockDeckCardsEditor.innerHTML).toContain('card search');
+            expect(mockDeckCardsEditor.innerHTML).not.toContain('right panel');
+        });
+
+        test('should leave deckCardsContainer on desktop tile empty message until globalNav branches', () => {
+            simulateCreateNewDeck();
+
+            expect(mockDeckCardsContainer.innerHTML).toBe(
+                '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>'
+            );
         });
     });
 

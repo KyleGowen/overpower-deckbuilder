@@ -294,7 +294,7 @@
             deckCardsEditor.innerHTML =
                 '<div class="empty-deck-message dev-mobile-empty-deck">' +
                 '<p>No cards in this deck yet.</p>' +
-                '<p>Use search above to add cards.</p></div>';
+                '<p>Use the card search above to find cards by name, type, character, and more.</p></div>';
             if (typeof global.updateDeckEditorCardCount === 'function') global.updateDeckEditorCardCount();
             if (typeof global.updateDeckSummary === 'function') global.updateDeckSummary(cards);
             return;

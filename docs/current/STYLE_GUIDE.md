@@ -332,7 +332,7 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
       - `.deck-tile-title` uses **Info Blue** at ~90% opacity (`rgba(72, 219, 251, 0.9)`) and a retro-futuristic system font stack (`"Trebuchet MS"`, `"Avenir Next"`, `"Segoe UI"`, `system-ui`)
     - **Preview sizing**:
       - Characters stack: `.deck-character-card-display` (`190px × 140px`, overlap via `margin-left: -38px`)
-      - Location preview: `.deck-tile-preview-card.deck-tile-location-preview` (`250px × 160px`, border `rgba(254, 202, 87, 0.45)`). Thumbnails are **`contain`**-fitted into the 500×320 source canvas (2× retina) with **transparent** letterboxing so tall promo / alternate location art is not cropped; filled slots use `background-color: transparent` so the tile shows through the gutters (see `IMAGE_PIPELINE.md`).
+      - Location preview: `.deck-tile-preview-card.deck-tile-location-preview` (`250px × 160px`, border `rgba(254, 202, 87, 0.45)`). Thumbnails use **`cover`** at 500×320 so art fills the slot; **`border-radius: 10px`** and **`overflow: hidden`** align the frame with the clipped background image (see `IMAGE_PIPELINE.md`).
       - Mission preview: `.deck-tile-preview-card.deck-tile-mission-preview` (`140px × 200px`)
       - Empty preview state (no selection): `.deck-tile-preview-card--empty`
         - **Goal**: empty **Location** and **Mission** slots should match empty **Character** slots

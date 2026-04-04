@@ -263,6 +263,16 @@ function showDeckEditor() {
         
         // Initialize deck editor search
         initializeDeckEditorSearch();
+
+        // MV: replace any desktop empty markup (e.g. from globalNav new-deck) with mobile empty state
+        if (
+            typeof window.isLayoutMobile === 'function' &&
+            window.isLayoutMobile() &&
+            typeof window.renderDeckEditorMobileView === 'function' &&
+            (!window.deckEditorCards || window.deckEditorCards.length === 0)
+        ) {
+            window.renderDeckEditorMobileView();
+        }
         
         // Initialize the resizable divider after modal paint
         requestAnimationFrame(() => {
