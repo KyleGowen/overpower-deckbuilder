@@ -95,17 +95,17 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 2: Verify the deck was created with is_limited=false by default
       const initialLoadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(initialLoadResponse.status).toBe(200);
-      expect(initialLoadResponse.body.success).toBe(true);
+      expect(initialLoadResponse.body.errors).toEqual([]);
       expect(initialLoadResponse.body.data.metadata.is_limited).toBe(false);
       console.log('🔍 Initial deck is_limited:', initialLoadResponse.body.data.metadata.is_limited);
 
       // Step 3: Update the deck to set is_limited=true
       const updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Limited Test Deck',
@@ -114,17 +114,17 @@ describe('Limited Deck Save and Load Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.data.is_limited).toBe(true);
-      console.log('🔍 Updated deck is_limited to:', updateResponse.body.data.is_limited);
+      expect(updateResponse.body.errors).toEqual([]);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(true);
+      console.log('🔍 Updated deck is_limited to:', updateResponse.body.data.metadata.is_limited);
 
       // Step 4: Load the deck again and verify is_limited is preserved
       const reloadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(reloadResponse.status).toBe(200);
-      expect(reloadResponse.body.success).toBe(true);
+      expect(reloadResponse.body.errors).toEqual([]);
       expect(reloadResponse.body.data.metadata.is_limited).toBe(true);
       console.log('🔍 Reloaded deck is_limited:', reloadResponse.body.data.metadata.is_limited);
 
@@ -143,11 +143,11 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 6: Test the /api/decks/:id/full endpoint as well
       const fullDeckResponse = await request(app)
-        .get(`/api/decks/${deckId}/full`)
+        .get(`/api/v1/decks/${deckId}/full`)
         .set('Cookie', authCookie);
 
       expect(fullDeckResponse.status).toBe(200);
-      expect(fullDeckResponse.body.success).toBe(true);
+      expect(fullDeckResponse.body.errors).toEqual([]);
       expect(fullDeckResponse.body.data.metadata.is_limited).toBe(true);
       console.log('🔍 Full deck endpoint is_limited:', fullDeckResponse.body.data.metadata.is_limited);
     });
@@ -187,17 +187,17 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 2: Verify the deck was created with is_limited=false by default
       const initialLoadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(initialLoadResponse.status).toBe(200);
-      expect(initialLoadResponse.body.success).toBe(true);
+      expect(initialLoadResponse.body.errors).toEqual([]);
       expect(initialLoadResponse.body.data.metadata.is_limited).toBe(false);
       console.log('🔍 Initial regular deck is_limited:', initialLoadResponse.body.data.metadata.is_limited);
 
       // Step 3: Explicitly set is_limited=false (should remain false)
       const updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Regular Test Deck',
@@ -206,17 +206,17 @@ describe('Limited Deck Save and Load Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.success).toBe(true);
-      expect(updateResponse.body.data.is_limited).toBe(false);
-      console.log('🔍 Updated regular deck is_limited to:', updateResponse.body.data.is_limited);
+      expect(updateResponse.body.errors).toEqual([]);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(false);
+      console.log('🔍 Updated regular deck is_limited to:', updateResponse.body.data.metadata.is_limited);
 
       // Step 4: Load the deck again and verify is_limited is preserved as false
       const reloadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(reloadResponse.status).toBe(200);
-      expect(reloadResponse.body.success).toBe(true);
+      expect(reloadResponse.body.errors).toEqual([]);
       expect(reloadResponse.body.data.metadata.is_limited).toBe(false);
       console.log('🔍 Reloaded regular deck is_limited:', reloadResponse.body.data.metadata.is_limited);
 
@@ -269,19 +269,19 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 2: Toggle to Limited (true)
       let updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           is_limited: true
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.data.is_limited).toBe(true);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(true);
       console.log('🔍 Toggled to Limited (true)');
 
       // Step 3: Verify Limited state
       let loadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(loadResponse.status).toBe(200);
@@ -290,19 +290,19 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 4: Toggle back to Regular (false)
       updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           is_limited: false
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.data.is_limited).toBe(false);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(false);
       console.log('🔍 Toggled back to Regular (false)');
 
       // Step 5: Verify Regular state
       loadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(loadResponse.status).toBe(200);
@@ -311,19 +311,19 @@ describe('Limited Deck Save and Load Integration Tests', () => {
 
       // Step 6: Toggle to Limited again (true)
       updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           is_limited: true
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.data.is_limited).toBe(true);
+      expect(updateResponse.body.data.metadata.is_limited).toBe(true);
       console.log('🔍 Toggled to Limited again (true)');
 
       // Step 7: Final verification
       loadResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(loadResponse.status).toBe(200);

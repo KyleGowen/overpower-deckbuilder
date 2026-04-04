@@ -404,22 +404,22 @@ describe('Phase 3: Integration Security Testing', () => {
       const apiScenarios = [
         {
           name: 'Read-only mode API call',
-          request: { url: '/api/decks/deck-123', method: 'PUT', readonly: true },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', readonly: true },
           expectedResponse: { status: 403, error: 'Operation not allowed in read-only mode' }
         },
         {
           name: 'Guest user API call',
-          request: { url: '/api/decks/deck-123', method: 'POST', userRole: 'GUEST' },
+          request: { url: '/api/v1/decks/deck-123', method: 'POST', userRole: 'GUEST' },
           expectedResponse: { status: 403, error: 'Guests may not create decks' }
         },
         {
           name: 'Non-owner API call',
-          request: { url: '/api/decks/deck-123', method: 'PUT', isOwner: false },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', isOwner: false },
           expectedResponse: { status: 403, error: 'Access denied. You do not own this deck.' }
         },
         {
           name: 'Valid owner API call',
-          request: { url: '/api/decks/deck-123', method: 'PUT', isOwner: true },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', isOwner: true },
           expectedResponse: { status: 200, success: true }
         }
       ];
@@ -458,7 +458,7 @@ describe('Phase 3: Integration Security Testing', () => {
         })
       });
 
-      const response = await mockFetch('/api/decks/deck-123', {
+      const response = await mockFetch('/api/v1/decks/deck-123', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'Updated Deck' })

@@ -75,8 +75,51 @@
         }
     }
 
+    /**
+     * Single deck GET/PUT v1 payload (`data` = `{ metadata, cards }`).
+     * @param {Response} response
+     * @param {any} json
+     * @returns {{ ok: boolean, deck: any | null }}
+     */
+    function deckDetailPayload(response, json) {
+        if (!response || !response.ok || !json) {
+            return { ok: false, deck: null };
+        }
+        if (json.success === false) {
+            return { ok: false, deck: null };
+        }
+        if (json.errors && json.errors.length > 0) {
+            return { ok: false, deck: null };
+        }
+        var d = json.data;
+        if (!d || typeof d !== 'object' || !d.metadata) {
+            return { ok: false, deck: null };
+        }
+        return { ok: true, deck: d };
+    }
+
+    /**
+     * True when v1 envelope has no errors (and optional legacy success).
+     * @param {Response} response
+     * @param {any} json
+     */
+    function v1ResponseOk(response, json) {
+        if (!response || !response.ok || !json) {
+            return false;
+        }
+        if (json.success === false) {
+            return false;
+        }
+        if (json.errors && json.errors.length > 0) {
+            return false;
+        }
+        return true;
+    }
+
     window.catalogListPayload = catalogListPayload;
     window.fetchCatalogList = fetchCatalogList;
     window.deckListPayload = deckListPayload;
     window.fetchDeckList = fetchDeckList;
+    window.deckDetailPayload = deckDetailPayload;
+    window.v1ResponseOk = v1ResponseOk;
 })();

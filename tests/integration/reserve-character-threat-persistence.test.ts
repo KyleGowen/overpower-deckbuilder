@@ -95,7 +95,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Set Carson as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -108,7 +108,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 19 (adjusted from 18)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -130,7 +130,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Don't set any reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -143,7 +143,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 18 (normal)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -167,7 +167,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Set Morgan as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -180,7 +180,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 20 (adjusted from 19)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -202,7 +202,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Don't set any reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -215,7 +215,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 19 (normal)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -239,7 +239,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Set Victory as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -252,7 +252,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 20 (adjusted from 18)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -274,7 +274,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Don't set any reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -287,7 +287,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Verify the deck threat level is 18 (normal)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -313,7 +313,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Set Carson of Venus as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -327,7 +327,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
             // Verify the deck threat level is 19 + 19 + 18 = 56
             // (Carson adjusted to 19, Morgan normal 19, Victory normal 18)
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -351,7 +351,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // First set Carson as reserve (19 + 19 + 18 = 56)
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -361,7 +361,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
                 .expect(200);
 
             let getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -369,7 +369,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Then change to Morgan as reserve (18 + 20 + 18 = 56)
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -379,7 +379,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
                 .expect(200);
 
             getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -387,7 +387,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Finally change to Victory as reserve (18 + 19 + 20 = 57)
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Threat Test Deck',
@@ -397,7 +397,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
                 .expect(200);
 
             getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 

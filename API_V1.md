@@ -49,6 +49,7 @@ All v1 JSON responses use:
 3. [DBV support](#dbv-support)
 4. [User decks (list)](#user-decks-list)
 5. [User decks (create + validate)](#user-decks-create--validate)
+6. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
 
 ---
 
@@ -375,6 +376,66 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ---
 
+## User decks (single: get, full, update, delete)
+
+### `GET /api/v1/decks/:id`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** as other DB deck routes). Unauthenticated requests receive **401** (legacy `{ success, error }`).
+
+**Request model:** none (path param **`id`** = deck UUID).
+
+**Response 200:** v1 envelope; **`data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc.).
+
+**Response 404:** v1 envelope — `errors` with code **`DECK_NOT_FOUND`**.
+
+**Response 500:** v1 envelope — `errors` with code **`DECK_FETCH_ERROR`**.
+
+**Implementation:** [`DeckDetailService`](src/api/services/deckDetailService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `GET /api/v1/decks/:id/full`
+
+**Auth:** Valid **session cookie**.
+
+**Request model:** none.
+
+**Response 200:** Same **`data`** shape as **`GET /api/v1/decks/:id`**, using **`getDeckSummaryWithAllCards`** (heavier card hydration).
+
+**Response 404 / 500:** Same codes as **`GET /api/v1/decks/:id`** (`DECK_NOT_FOUND` / `DECK_FETCH_ERROR`; full route uses “full deck data” in the 500 message).
+
+### `PUT /api/v1/decks/:id`
+
+**Auth:** Session cookie. **GUEST** → **403** v1 envelope (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Rate limiting / read-only:** Same pattern as **`POST /api/v1/decks`** (**429** `RATE_LIMIT_EXCEEDED`, **403** `READ_ONLY_MODE`).
+
+**Request model:** partial JSON (same fields as legacy **`PUT /api/decks/:id`**): optional **`name`**, **`description`**, **`is_limited`**, **`is_valid`**, **`reserve_character`**, **`display_mission_card_id`**, **`background_image_path`** (non-empty paths validated via **`DeckBackgroundService.validateBackgroundPath`**). Validated in [`UpdateDeckRequestBody.ts`](src/api/http/models/decks/UpdateDeckRequestBody.ts).
+
+**Response 200:** v1 envelope; **`data`** = `{ "metadata", "cards": [] }` (updated metadata, empty cards array on success path).
+
+**Response 400:** validation or invalid background (`INVALID_BACKGROUND`, `VALIDATION_ERROR`).
+
+**Response 404:** **`DECK_NOT_FOUND`**.
+
+**Response 500:** **`DECK_UPDATE_ERROR`**.
+
+**Implementation:** [`DeckDetailService`](src/api/services/deckDetailService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `DELETE /api/v1/decks/:id`
+
+**Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Rate limiting / read-only:** Same as **`PUT`**.
+
+**Response 200:** v1 envelope; **`data`** = `{ "message": "Deck deleted successfully" }` ([`DeckDeleteV1DataDto`](src/api/dto/v1/DeckDeleteV1DataDto.ts)).
+
+**Response 404:** **`DECK_NOT_FOUND`**.
+
+**Response 500:** **`DECK_DELETE_ERROR`**.
+
+**Implementation:** [`DeckDetailService`](src/api/services/deckDetailService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+---
+
 ## Route index (v1)
 
 | Method | Path | Router module |
@@ -400,3 +461,7 @@ Reference data for Database View and collection UI (set codes → display names,
 | GET | /api/v1/decks | decks.http.ts |
 | POST | /api/v1/decks | decks.http.ts |
 | POST | /api/v1/decks/validate | decks.http.ts |
+| GET | /api/v1/decks/:id/full | decks.http.ts |
+| GET | /api/v1/decks/:id | decks.http.ts |
+| PUT | /api/v1/decks/:id | decks.http.ts |
+| DELETE | /api/v1/decks/:id | decks.http.ts |

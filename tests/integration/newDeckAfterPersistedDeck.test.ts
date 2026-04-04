@@ -99,7 +99,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
         // Clean up test deck
         if (testDeckId) {
             await request(app)
-                .delete(`/api/decks/${testDeckId}`)
+                .delete(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
         }
     });
@@ -127,7 +127,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
         test('should create truly empty deck after viewing persisted deck', async () => {
             // Step 1: Get the persisted deck to simulate viewing it
             const getDeckResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getDeckResponse.status).toBe(200);
@@ -150,7 +150,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 3: Verify the new deck is truly empty
             const getNewDeckResponse = await request(app)
-                .get(`/api/decks/${newDeckId}`)
+                .get(`/api/v1/decks/${newDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getNewDeckResponse.status).toBe(200);
@@ -159,7 +159,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 4: Verify the persisted deck is unchanged
             const getPersistedDeckAgainResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getPersistedDeckAgainResponse.status).toBe(200);
@@ -167,14 +167,14 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Clean up the new deck
             await request(app)
-                .delete(`/api/decks/${newDeckId}`)
+                .delete(`/api/v1/decks/${newDeckId}`)
                 .set('Cookie', userAuthToken);
         });
 
         test('should handle multiple deck operations without interference', async () => {
             // Step 1: Get the persisted deck
             const getDeckResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getDeckResponse.status).toBe(200);
@@ -200,7 +200,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
                 // Verify each new deck is empty
                 const getNewDeckResponse = await request(app)
-                    .get(`/api/decks/${createResponse.body.data.id}`)
+                    .get(`/api/v1/decks/${createResponse.body.data.id}`)
                     .set('Cookie', userAuthToken);
 
                 expect(getNewDeckResponse.status).toBe(200);
@@ -210,7 +210,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 3: Verify the original persisted deck is still unchanged
             const getPersistedDeckAgainResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getPersistedDeckAgainResponse.status).toBe(200);
@@ -220,7 +220,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             // Clean up the new decks
             for (const deckId of newDeckIds) {
                 await request(app)
-                    .delete(`/api/decks/${deckId}`)
+                    .delete(`/api/v1/decks/${deckId}`)
                     .set('Cookie', userAuthToken);
             }
         });
@@ -228,7 +228,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
         test('should maintain deck isolation between users', async () => {
             // Step 1: Admin user gets the persisted deck (should succeed with read-only access)
             const adminGetDeckResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', adminAuthToken);
 
             expect(adminGetDeckResponse.status).toBe(200); // Read-only access allowed
@@ -266,7 +266,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 4: Verify both decks are empty and separate
             const adminGetNewDeckResponse = await request(app)
-                .get(`/api/decks/${adminDeckId}`)
+                .get(`/api/v1/decks/${adminDeckId}`)
                 .set('Cookie', adminAuthToken);
 
             expect(adminGetNewDeckResponse.status).toBe(200);
@@ -274,7 +274,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
             expect(adminGetNewDeckResponse.body.data.metadata.name).toBe('Admin Empty Deck');
 
             const userGetNewDeckResponse = await request(app)
-                .get(`/api/decks/${userDeckId}`)
+                .get(`/api/v1/decks/${userDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(userGetNewDeckResponse.status).toBe(200);
@@ -283,14 +283,14 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 5: Verify users can access each other's decks in read-only mode
             const adminAccessUserDeckResponse = await request(app)
-                .get(`/api/decks/${userDeckId}`)
+                .get(`/api/v1/decks/${userDeckId}`)
                 .set('Cookie', adminAuthToken);
 
             expect(adminAccessUserDeckResponse.status).toBe(200);
             expect(adminAccessUserDeckResponse.body.data.metadata.isOwner).toBe(false);
 
             const userAccessAdminDeckResponse = await request(app)
-                .get(`/api/decks/${adminDeckId}`)
+                .get(`/api/v1/decks/${adminDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(userAccessAdminDeckResponse.status).toBe(200);
@@ -298,18 +298,18 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Clean up
             await request(app)
-                .delete(`/api/decks/${adminDeckId}`)
+                .delete(`/api/v1/decks/${adminDeckId}`)
                 .set('Cookie', adminAuthToken);
 
             await request(app)
-                .delete(`/api/decks/${userDeckId}`)
+                .delete(`/api/v1/decks/${userDeckId}`)
                 .set('Cookie', userAuthToken);
         });
 
         test('should handle deck creation with different UI preferences', async () => {
             // Step 1: Get the persisted deck with its UI preferences
             const getDeckResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getDeckResponse.status).toBe(200);
@@ -331,7 +331,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 3: Verify new deck is empty and has default UI preferences
             const getNewDeckResponse = await request(app)
-                .get(`/api/decks/${newDeckId}`)
+                .get(`/api/v1/decks/${newDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getNewDeckResponse.status).toBe(200);
@@ -340,7 +340,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Step 4: Verify original deck is unchanged
             const getOriginalDeckAgainResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', userAuthToken);
 
             expect(getOriginalDeckAgainResponse.status).toBe(200);
@@ -348,7 +348,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             // Clean up
             await request(app)
-                .delete(`/api/decks/${newDeckId}`)
+                .delete(`/api/v1/decks/${newDeckId}`)
                 .set('Cookie', userAuthToken);
         });
     });

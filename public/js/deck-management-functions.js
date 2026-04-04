@@ -106,17 +106,20 @@ function viewDeck(deckId) {
 
 function deleteDeck(deckId) {
     if (confirm('Are you sure you want to delete this deck? This action cannot be undone.')) {
-        fetch(`/api/decks/${deckId}`, {
+        fetch(`/api/v1/decks/${deckId}`, {
             method: 'DELETE',
             credentials: 'include'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        .then(async (response) => {
+            const data = await response.json();
+            const ok = typeof v1ResponseOk === 'function' ? v1ResponseOk(response, data) : data.success;
+            if (ok) {
                 loadDecks(); // Refresh the deck list
                 showNotification('Deck deleted successfully!', 'success');
             } else {
-                showNotification('Failed to delete deck: ' + data.error, 'error');
+                const msg =
+                    (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Unknown error';
+                showNotification('Failed to delete deck: ' + msg, 'error');
             }
         })
         .catch(error => {

@@ -137,14 +137,18 @@ class DeckBackgroundManager {
     if (!this.currentDeckId) return;
     
     try {
-      const response = await fetch(`/api/decks/${this.currentDeckId}`, {
+      const response = await fetch(`/api/v1/decks/${this.currentDeckId}`, {
         credentials: 'include'
       });
       
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.data.metadata) {
-          const backgroundPath = data.data.metadata.background_image_path || null;
+        const detail =
+          typeof window.deckDetailPayload === 'function'
+            ? window.deckDetailPayload(response, data)
+            : null;
+        if (detail && detail.ok && detail.deck.metadata) {
+          const backgroundPath = detail.deck.metadata.background_image_path || null;
           this.selectedBackground = backgroundPath;
           // Apply immediately after loading
           this.applyBackground();

@@ -80,7 +80,7 @@ describe('Foil Deck Editor List View Integration Tests', () => {
 
   it('should return deck with foil card when deck has foil power card', async () => {
     const deckResponse = await request(app)
-      .get(`/api/decks/${testDeckId}`)
+      .get(`/api/v1/decks/${testDeckId}`)
       .set('Cookie', authCookie)
       .expect(200);
 

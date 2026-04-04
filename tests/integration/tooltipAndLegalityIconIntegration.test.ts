@@ -28,7 +28,7 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
             for (const deck of decks) {
                 if (deck.metadata && deck.metadata.name && deck.metadata.name.startsWith('Test Tooltip Deck')) {
                     await request(app)
-                        .delete(`/api/decks/${deck.metadata.id}`)
+                        .delete(`/api/v1/decks/${deck.metadata.id}`)
                         .set('Cookie', authCookie);
                 }
             }

@@ -105,7 +105,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Step 2: Admin selects a background and saves
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -117,7 +117,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Step 3: Verify background persists on reload
       const getResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -130,7 +130,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -139,7 +139,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Update deck name (simulating a save)
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           name: 'Updated Deck Name'
@@ -148,7 +148,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Verify background still persists
       const getResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -161,7 +161,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set first background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: firstBackground
@@ -170,7 +170,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Change to second background
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: secondBackground
@@ -185,7 +185,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background first
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -194,7 +194,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Remove background
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: null
@@ -211,7 +211,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Admin sets background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -220,7 +220,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Regular user can view deck and see background
       const getResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
@@ -233,7 +233,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -242,7 +242,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Simulate owner opening deck in view mode (GET /api/decks/:id requires auth)
       const getResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -266,7 +266,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Admin sets background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -275,7 +275,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Regular user can view (but not modify)
       const getResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
@@ -299,7 +299,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Regular user can update their deck (without background)
       const updateResponse = await request(app)
-        .put(`/api/decks/${userDeckId}`)
+        .put(`/api/v1/decks/${userDeckId}`)
         .set('Cookie', regularAuthCookie)
         .send({
           name: 'Updated Name'
@@ -316,7 +316,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -325,7 +325,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Update name only
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           name: 'New Deck Name'
@@ -340,7 +340,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -349,7 +349,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Update description only
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           description: 'New description'
@@ -364,7 +364,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       
       // Set background
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminAuthCookie)
         .send({
           background_image_path: backgroundPath
@@ -373,7 +373,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
 
       // Get full deck data
       const fullResponse = await request(app)
-        .get(`/api/decks/${testDeckId}/full`)
+        .get(`/api/v1/decks/${testDeckId}/full`)
         .set('Cookie', adminAuthCookie)
         .expect(200);
 

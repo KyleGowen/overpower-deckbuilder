@@ -41,8 +41,9 @@ describe('POST /api/v1/decks and /decks/validate', () => {
     const id = res.body.data.id as string;
     integrationTestUtils.trackTestDeck(id);
 
-    const del = await request(app).delete(`/api/decks/${id}`).set('Cookie', cookie).expect(200);
-    expect(del.body.success).toBe(true);
+    const del = await request(app).delete(`/api/v1/decks/${id}`).set('Cookie', cookie).expect(200);
+    expect(del.body.errors).toEqual([]);
+    expect(del.body.data.message).toBe('Deck deleted successfully');
   });
 
   it('returns validate success v1 envelope when authenticated', async () => {

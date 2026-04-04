@@ -1,18 +1,49 @@
 import crypto from 'crypto';
 import type { Request, RequestHandler, Response, Router } from 'express';
+import type { Deck } from '../../types';
 import { checkRateLimit, blockInReadOnlyMode } from '../../routes/helpers';
 import type { DeckWriteService } from '../services/deckWriteService';
 import type { DeckListService } from '../services/deckListService';
+import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCreateV1DataDto } from '../dto/v1/DeckCreateV1DataDto';
 import type { DeckValidateV1SuccessDto } from '../dto/v1/DeckValidateV1SuccessDto';
+import type { DeckDeleteV1DataDto } from '../dto/v1/DeckDeleteV1DataDto';
 import type { V1Envelope } from './v1Envelope';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 import { CreateDeckRequestBody } from './models/decks/CreateDeckRequestBody';
 import { ValidateDeckRequestBody } from './models/decks/ValidateDeckRequestBody';
+import { UpdateDeckRequestBody, type UpdateDeckParsed } from './models/decks/UpdateDeckRequestBody';
+import type { DeckBackgroundListReader } from './dbv-support.http';
+
+/**
+ * Maps validated JSON fields to repository `Partial<Deck>`.
+ * Explicit `null` must be preserved (not omitted) so `updateDeck` can SET columns to SQL NULL.
+ */
+function toDeckPartialUpdates(u: UpdateDeckParsed): Partial<Deck> {
+  const out: Record<string, unknown> = {};
+  if (u.name !== undefined) out.name = u.name;
+  if (u.description !== undefined) {
+    out.description = u.description === null ? null : u.description;
+  }
+  if (u.is_limited !== undefined) out.is_limited = u.is_limited;
+  if (u.is_valid !== undefined) out.is_valid = u.is_valid;
+  if (u.reserve_character !== undefined) {
+    out.reserve_character = u.reserve_character === null ? null : u.reserve_character;
+  }
+  if (u.display_mission_card_id !== undefined) {
+    out.display_mission_card_id = u.display_mission_card_id;
+  }
+  if (u.background_image_path !== undefined) {
+    out.background_image_path = u.background_image_path === null ? null : u.background_image_path;
+  }
+  return out as Partial<Deck>;
+}
 
 export interface DecksV1HttpDeps {
   deckListService: DeckListService;
   deckWriteService: DeckWriteService;
+  deckDetailService: DeckDetailService;
+  deckBackgroundService: DeckBackgroundListReader;
   authenticateUser: RequestHandler;
 }
 
@@ -120,6 +151,151 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     } catch (error) {
       console.error('v1 POST /decks error:', error);
       sendV1Json(res, 500, null, [{ code: 'DECK_CREATE_ERROR', message: 'Failed to create deck' }]);
+    }
+  });
+
+  router.get('/decks/:id/full', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, req.user!.id);
+      if (!detail) {
+        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
+        return;
+      }
+      sendV1Success(res, detail);
+    } catch (error) {
+      console.error('v1 GET /decks/:id/full error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_FETCH_ERROR', message: 'Failed to fetch full deck data' }]);
+    }
+  });
+
+  router.get('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      const detail = await deps.deckDetailService.getDeckDetail(req.params.id, req.user!.id);
+      if (!detail) {
+        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
+        return;
+      }
+      sendV1Success(res, detail);
+    } catch (error) {
+      console.error('v1 GET /decks/:id error:', error);
+      sendV1Json(res, 500, null, [{ code: 'DECK_FETCH_ERROR', message: 'Failed to fetch deck' }]);
+    }
+  });
+
+  router.put('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (process.env.NODE_ENV === 'test' && req.headers['x-expect-401'] && !req.user) {
+        return res.status(401).json({ success: false, error: 'Authentication required' });
+      }
+      if (!req.user) {
+        return res.status(401).json({ success: false, error: 'Authentication required' });
+      }
+
+      if (checkRateLimit(req, res, 'deck update', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'deck update', { v1: true })) {
+        return;
+      }
+      if (req.user.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'modify decks');
+        return;
+      }
+
+      const parsed = UpdateDeckRequestBody.parse(req.body);
+      if (!parsed.ok) {
+        sendV1Json(res, 400, null, parsed.errors);
+        return;
+      }
+
+      const u = parsed.value;
+      if (u.background_image_path !== undefined && u.background_image_path !== null && u.background_image_path) {
+        try {
+          const isValid = await deps.deckBackgroundService.validateBackgroundPath(u.background_image_path);
+          if (!isValid) {
+            sendV1Json(res, 400, null, [{ code: 'INVALID_BACKGROUND', message: 'Invalid background image path' }]);
+            return;
+          }
+        } catch (validationError) {
+          console.error('Error validating background path:', validationError);
+          sendV1Json(res, 400, null, [
+            {
+              code: 'INVALID_BACKGROUND',
+              message: 'Invalid background image path',
+              field: 'background_image_path'
+            }
+          ]);
+          return;
+        }
+      }
+
+      const strictReserve = process.env.NODE_ENV === 'test' && Boolean(req.headers['x-expect-400-validation']);
+      const result = await deps.deckDetailService.updateDeckMetadata(
+        req.params.id,
+        req.user.id,
+        toDeckPartialUpdates(u),
+        {
+          strictReserveTestValidation: strictReserve
+        }
+      );
+
+      if (!result.ok) {
+        if (result.kind === 'not_found') {
+          sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'forbidden') {
+          sendV1Json(res, 403, null, [{ code: 'DECK_ACCESS_DENIED', message: result.message }]);
+          return;
+        }
+        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: result.message }]);
+        return;
+      }
+
+      sendV1Success(res, result.data);
+    } catch (error) {
+      console.error('v1 PUT /decks/:id error:', error);
+      sendV1Json(res, 500, null, [
+        {
+          code: 'DECK_UPDATE_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to update deck'
+        }
+      ]);
+    }
+  });
+
+  router.delete('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ success: false, error: 'Authentication required' });
+      }
+      if (checkRateLimit(req, res, 'deck deletion', { v1: true })) {
+        return;
+      }
+      if (blockInReadOnlyMode(req, res, 'deck deletion', { v1: true })) {
+        return;
+      }
+      if (req.user.role === 'GUEST') {
+        sendGuestForbiddenV1(res, 'delete decks');
+        return;
+      }
+
+      const result = await deps.deckDetailService.deleteDeckIfOwner(req.params.id, req.user.id);
+      if (!result.ok) {
+        if (result.kind === 'forbidden') {
+          sendV1Json(res, 403, null, [
+            { code: 'DECK_ACCESS_DENIED', message: 'Access denied. You do not own this deck.' }
+          ]);
+          return;
+        }
+        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
+        return;
+      }
+
+      const data: DeckDeleteV1DataDto = { message: 'Deck deleted successfully' };
+      sendV1Success(res, data);
+    } catch {
+      sendV1Json(res, 500, null, [{ code: 'DECK_DELETE_ERROR', message: 'Failed to delete deck' }]);
     }
   });
 }

@@ -104,7 +104,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 2: Verify initial threat (should be 18 - Carson's base threat)
             const initialGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(initialGetResponse.status).toBe(200);
@@ -114,7 +114,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 3: Set Carson as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Carson',
@@ -126,7 +126,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 4: Verify threat increased to 19 (18 + 1 for reserve)
             const reserveGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(reserveGetResponse.status).toBe(200);
@@ -136,7 +136,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 5: Remove reserve character
             const removeReserveResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Carson',
@@ -148,7 +148,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 6: Verify threat returned to 18
             const finalGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(finalGetResponse.status).toBe(200);
@@ -181,7 +181,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 2: Verify initial threat (should be 19 - Morgan's base threat)
             const initialGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(initialGetResponse.status).toBe(200);
@@ -191,7 +191,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 3: Set Morgan as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Morgan',
@@ -203,7 +203,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 4: Verify threat increased to 20 (19 + 1 for reserve)
             const reserveGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(reserveGetResponse.status).toBe(200);
@@ -236,7 +236,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 2: Verify initial threat (should be 18 - Victory's base threat)
             const initialGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(initialGetResponse.status).toBe(200);
@@ -246,7 +246,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 3: Set Victory as reserve character
             const updateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Victory',
@@ -258,7 +258,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Step 4: Verify threat increased to 20 (18 + 2 for reserve)
             const reserveGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(reserveGetResponse.status).toBe(200);
@@ -291,7 +291,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Set Carson as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - No Save',
@@ -303,7 +303,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Verify the deck was updated (this simulates the local changes working)
             const getResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(getResponse.status).toBe(200);
@@ -345,7 +345,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Verify initial threat (18 + 19 + 18 = 55)
             const initialGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(initialGetResponse.status).toBe(200);
@@ -355,7 +355,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Set Carson as reserve (should be 19 + 19 + 18 = 56)
             const carsonUpdateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Multiple',
@@ -366,7 +366,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
             expect(carsonUpdateResponse.status).toBe(200);
 
             const carsonGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(carsonGetResponse.status).toBe(200);
@@ -376,7 +376,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
 
             // Switch to Victory as reserve (should be 18 + 19 + 20 = 57)
             const victoryUpdateResponse = await request(app)
-                .put(`/api/decks/${deckId}`)
+                .put(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     name: 'Guest Test Deck - Multiple',
@@ -387,7 +387,7 @@ describe('Guest User Reserve Character Integration Tests', () => {
             expect(victoryUpdateResponse.status).toBe(200);
 
             const victoryGetResponse = await request(app)
-                .get(`/api/decks/${deckId}`)
+                .get(`/api/v1/decks/${deckId}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`);
 
             expect(victoryGetResponse.status).toBe(200);

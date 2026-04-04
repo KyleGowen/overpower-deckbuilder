@@ -254,7 +254,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -285,7 +285,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -319,7 +319,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -364,7 +364,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -407,7 +407,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -439,7 +439,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -469,7 +469,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -501,7 +501,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -532,7 +532,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -564,7 +564,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -597,7 +597,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);
@@ -650,7 +650,7 @@ describe('KO Feature Dimming Integration Tests', () => {
       
       // Get the deck
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
       
       expect(getDeckResponse.status).toBe(200);

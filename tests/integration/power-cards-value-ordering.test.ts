@@ -88,7 +88,7 @@ describe('Power Cards ordering by value (with OP type tiebreakers)', () => {
       powerCardsSortMode: 'value'
     } as any;
     const putPrefs = await request(app)
-      .put(`/api/decks/${testDeck.id}/ui-preferences`)
+      .put(`/api/v1/decks/${testDeck.id}/ui-preferences`)
       .set('Cookie', authCookie)
       .send(prefs);
     expect([200, 201]).toContain(putPrefs.status);

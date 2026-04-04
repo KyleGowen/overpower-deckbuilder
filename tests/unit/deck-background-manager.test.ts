@@ -76,7 +76,15 @@ const mockDocument: any = {
   currentUser: null,
   getCurrentUser: null,
   deckManager: null,
-  authService: null
+  authService: null,
+  deckDetailPayload(response: { ok: boolean }, json: Record<string, unknown>) {
+    if (!response?.ok || !json) return { ok: false, deck: null };
+    const errs = json.errors as unknown[] | undefined;
+    if (errs && errs.length > 0) return { ok: false, deck: null };
+    const d = json.data as { metadata?: unknown } | undefined;
+    if (!d || typeof d !== 'object' || !d.metadata) return { ok: false, deck: null };
+    return { ok: true, deck: d };
+  }
 };
 
 // Load the deck-background.js module
@@ -247,12 +255,14 @@ describe('DeckBackgroundManager', () => {
     it('should load background from deck API', async () => {
       manager.currentDeckId = 'deck-123';
       const mockDeckData = {
-        success: true,
         data: {
           metadata: {
             background_image_path: 'src/resources/images/backgrounds/landscape/test.png'
-          }
-        }
+          },
+          cards: []
+        },
+        meta: {},
+        errors: []
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -272,12 +282,14 @@ describe('DeckBackgroundManager', () => {
     it('should handle null background_image_path', async () => {
       manager.currentDeckId = 'deck-123';
       const mockDeckData = {
-        success: true,
         data: {
           metadata: {
             background_image_path: null
-          }
-        }
+          },
+          cards: []
+        },
+        meta: {},
+        errors: []
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({

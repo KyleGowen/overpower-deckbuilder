@@ -682,7 +682,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
             for (const deckId of createdDeckIds) {
                 try {
                     await request(app)
-                        .delete(`/api/decks/${deckId}`)
+                        .delete(`/api/v1/decks/${deckId}`)
                         .set('Cookie', guestAuthCookie);
                 } catch (error) {
                     console.warn(`Failed to delete test deck ${deckId}:`, error);
@@ -774,7 +774,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
             }
 
             const updateDeckResponse = await request(app)
-                .put(`/api/decks/${testDeckId}`)
+                .put(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', guestAuthCookie)
                 .send({
                     name: 'Modified Guest Deck',

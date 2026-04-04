@@ -86,7 +86,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Step 2: Verify the deck is empty initially
     const getDeckResponse = await request(app)
-      .get(`/api/decks/${testDeckId}`)
+      .get(`/api/v1/decks/${testDeckId}`)
       .set('Cookie', authCookie);
 
     expect(getDeckResponse.status).toBe(200);
@@ -128,7 +128,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Step 5: Verify the card was added to the deck
     const getDeckAfterFirstResponse = await request(app)
-      .get(`/api/decks/${testDeckId}`)
+      .get(`/api/v1/decks/${testDeckId}`)
       .set('Cookie', authCookie);
 
     expect(getDeckAfterFirstResponse.status).toBe(200);
@@ -154,7 +154,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
       // Step 7: Verify both cards are in the deck
       const getDeckAfterSecondResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
 
       expect(getDeckAfterSecondResponse.status).toBe(200);
@@ -176,7 +176,7 @@ describe('Deck Editor Search - New Deck Integration', () => {
 
     // Step 9: Verify deck statistics are updated
     const finalDeckResponse = await request(app)
-      .get(`/api/decks/${testDeckId}`)
+      .get(`/api/v1/decks/${testDeckId}`)
       .set('Cookie', authCookie);
 
     expect(finalDeckResponse.status).toBe(200);

@@ -86,7 +86,7 @@ describe('Deck Type Conversion', () => {
             async function loadDeckForEditing(deckId: string, urlUserId: string | null = null, isReadOnly: boolean = false) {
                 console.log('loadDeckForEditing called with deckId:', deckId);
                 try {
-                    const response = await fetch(`/api/decks/${deckId}`, {
+                    const response = await fetch(`/api/v1/decks/${deckId}`, {
                         credentials: 'include'
                     });
                     const data = await response.json();
@@ -197,7 +197,7 @@ describe('Deck Type Conversion', () => {
 
             // Define the loadDeckForEditing function
             async function loadDeckForEditing(deckId: string) {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -259,7 +259,7 @@ describe('Deck Type Conversion', () => {
 
             // Define the loadDeckForEditing function
             async function loadDeckForEditing(deckId: string) {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -333,7 +333,7 @@ describe('Deck Type Conversion', () => {
 
             // Define the loadDeckForEditing function
             async function loadDeckForEditing(deckId: string) {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -422,7 +422,7 @@ describe('Deck Type Conversion', () => {
 
             // Define the loadDeckForEditing function
             async function loadDeckForEditing(deckId: string) {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -482,7 +482,7 @@ describe('Deck Type Conversion', () => {
 
             // Define the loadDeckForEditing function
             async function loadDeckForEditing(deckId: string) {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();

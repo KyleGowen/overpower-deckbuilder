@@ -365,22 +365,22 @@ describe('Phase 3: Penetration Security Testing', () => {
       const unauthorizedAttempts = [
         {
           name: 'Read-only mode API call',
-          request: { url: '/api/decks/deck-123', method: 'PUT', readonly: true },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', readonly: true },
           expectedResponse: { status: 403, error: 'Operation not allowed in read-only mode' }
         },
         {
           name: 'Guest user API call',
-          request: { url: '/api/decks/deck-123', method: 'POST', userRole: 'GUEST' },
+          request: { url: '/api/v1/decks/deck-123', method: 'POST', userRole: 'GUEST' },
           expectedResponse: { status: 403, error: 'Guests may not create decks' }
         },
         {
           name: 'Non-owner API call',
-          request: { url: '/api/decks/deck-123', method: 'PUT', isOwner: false },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', isOwner: false },
           expectedResponse: { status: 403, error: 'Access denied. You do not own this deck.' }
         },
         {
           name: 'Rate limit exceeded',
-          request: { url: '/api/decks/deck-123', method: 'PUT', rateLimited: true },
+          request: { url: '/api/v1/decks/deck-123', method: 'PUT', rateLimited: true },
           expectedResponse: { status: 429, error: 'Rate limit exceeded. Maximum 100 requests per minute allowed.' }
         }
       ];

@@ -2284,13 +2284,15 @@
             const cardSelectorPane = document.querySelector('.card-selector-pane');
             
             try {
-                const response = await fetch(`/api/decks/${deckId}`, {
+                const response = await fetch(`/api/v1/decks/${deckId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
+                const detailPayload =
+                    typeof deckDetailPayload === 'function' ? deckDetailPayload(response, data) : null;
                 
-                if (data.success) {
-                    const deck = data.data;
+                if (detailPayload && detailPayload.ok) {
+                    const deck = detailPayload.deck;
                     
                     // Update modal title and metadata
                     document.getElementById('viewDeckTitle').textContent = deck.metadata.name;
@@ -2301,7 +2303,9 @@
                     // Display deck cards
                     displayDeckCards(deck.cards);
                 } else {
-                    showNotification('Failed to load deck details: ' + data.error, 'error');
+                    const msg =
+                        (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Unknown error';
+                    showNotification('Failed to load deck details: ' + msg, 'error');
                 }
             } catch (error) {
                 console.error('Error loading deck details:', error);

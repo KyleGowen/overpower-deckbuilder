@@ -101,7 +101,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
     it('should load deck data correctly in editor', async () => {
       // Get deck data via API
       const deckDataResponse = await request(server)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', authCookie)
         .set('x-test-user-id', testUser.id);
 
@@ -151,7 +151,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
     it('should handle read-only mode correctly for deck owners', async () => {
       // Test deck ownership verification
       const deckResponse = await request(server)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', authCookie)
         .set('x-test-user-id', testUser.id);
 
@@ -184,7 +184,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
 
       // Try to access the deck as non-owner with proper authentication
       const deckResponse = await request(server)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', otherUserAuthCookie);
 
       expect(deckResponse.status).toBe(200);

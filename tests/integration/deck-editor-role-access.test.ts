@@ -282,7 +282,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(testDeckId);
 
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Modified Deck Name by Guest',
@@ -311,7 +311,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(testDeckId);
 
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', userSessionCookie)
         .send({
           name: 'Modified Deck Name by User',
@@ -340,7 +340,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(testDeckId);
 
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Modified Deck Name by Admin',
@@ -371,7 +371,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(testDeckId);
 
       const deleteDeckResponse = await request(app)
-        .delete(`/api/decks/${testDeckId}`)
+        .delete(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', guestSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(403);
@@ -396,7 +396,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(testDeckId);
 
       const deleteDeckResponse = await request(app)
-        .delete(`/api/decks/${testDeckId}`)
+        .delete(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', userSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(200);

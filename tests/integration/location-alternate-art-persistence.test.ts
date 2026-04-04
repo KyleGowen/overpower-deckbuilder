@@ -115,7 +115,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
       expect(addResponse.body.success).toBe(true);
 
       const deckResponse = await request(server)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
 
       expect(deckResponse.status).toBe(200);
@@ -138,7 +138,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
       expect(putResponse.body.success).toBe(true);
 
       const deckResponse = await request(server)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
 
       expect(deckResponse.status).toBe(200);

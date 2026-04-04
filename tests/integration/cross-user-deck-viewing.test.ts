@@ -130,7 +130,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // Step 7: User B views User A's deck (should be read-only)
       const viewDeckResponse = await request(app)
-        .get(`/api/decks/${createdDeck.id}`)
+        .get(`/api/v1/decks/${createdDeck.id}`)
         .set('Cookie', `sessionId=${testUserBSessionId}`);
 
       expect(viewDeckResponse.status).toBe(200);
@@ -146,7 +146,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // Step 8: Verify User B cannot modify User A's deck
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${createdDeck.id}`)
+        .put(`/api/v1/decks/${createdDeck.id}`)
         .set('Cookie', `sessionId=${testUserBSessionId}`)
         .send({
           name: 'Hacked Deck Name',
@@ -160,7 +160,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // Step 9: Verify User B cannot delete User A's deck
       const deleteDeckResponse = await request(app)
-        .delete(`/api/decks/${createdDeck.id}`)
+        .delete(`/api/v1/decks/${createdDeck.id}`)
         .set('Cookie', `sessionId=${testUserBSessionId}`);
 
       expect(deleteDeckResponse.status).toBe(403);
@@ -169,7 +169,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // Step 10: Verify User B can still view the deck after failed modification attempts
       const viewDeckAgainResponse = await request(app)
-        .get(`/api/decks/${createdDeck.id}`)
+        .get(`/api/v1/decks/${createdDeck.id}`)
         .set('Cookie', `sessionId=${testUserBSessionId}`);
 
       expect(viewDeckAgainResponse.status).toBe(200);
@@ -191,7 +191,7 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
 
       // User A should be able to modify their own deck
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${createdDeck.id}`)
+        .put(`/api/v1/decks/${createdDeck.id}`)
         .set('Cookie', `sessionId=${testUserASessionId}`)
         .send({
           name: 'User A\'s Updated Deck',

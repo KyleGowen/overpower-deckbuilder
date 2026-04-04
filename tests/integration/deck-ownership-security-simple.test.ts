@@ -101,7 +101,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing deck ownership verification for owner...');
 
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
@@ -115,7 +115,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing deck ownership verification for non-owner...');
 
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
@@ -131,7 +131,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing deck metadata modification by owner...');
 
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie)
         .send({
           name: 'Updated Security Test Deck',
@@ -178,7 +178,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing UI preferences save by owner...');
 
       const savePreferencesResponse = await request(app)
-        .put(`/api/decks/${testDeckId}/ui-preferences`)
+        .put(`/api/v1/decks/${testDeckId}/ui-preferences`)
         .set('Cookie', ownerAuthCookie)
         .send({
           dividerPosition: 75,
@@ -197,7 +197,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing deck metadata modification block for non-owner...');
 
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           name: 'Hacked Deck Name',
@@ -241,7 +241,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       console.log('🧪 Testing UI preferences save block for non-owner...');
 
       const savePreferencesResponse = await request(app)
-        .put(`/api/decks/${testDeckId}/ui-preferences`)
+        .put(`/api/v1/decks/${testDeckId}/ui-preferences`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           dividerPosition: 25,
@@ -268,7 +268,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
 
       // Get original deck state
       const originalDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       if (originalDeckResponse.status !== 200) {
@@ -280,7 +280,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       
       // Attempt unauthorized modifications (these should fail)
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           name: 'Hacked Name',
@@ -297,7 +297,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
 
       // Verify deck data is unchanged
       const finalDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       if (finalDeckResponse.status === 200) {
@@ -334,7 +334,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       // Test with a non-existent deck ID to avoid cleanup issues
       const fakeDeckId = '00000000-0000-0000-0000-000000000000';
       const unauthenticatedResponse = await request(app)
-        .get(`/api/decks/${fakeDeckId}`);
+        .get(`/api/v1/decks/${fakeDeckId}`);
 
       // API might return 404 for non-existent deck or 401 for auth failure
       expect([401, 404]).toContain(unauthenticatedResponse.status);

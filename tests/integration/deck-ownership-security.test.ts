@@ -101,11 +101,11 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing deck ownership verification...');
 
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
-      expect(getDeckResponse.body.success).toBe(true);
+      expect(getDeckResponse.body.errors).toEqual([]);
       expect(getDeckResponse.body.data.metadata.isOwner).toBe(true);
       
       console.log('✅ Deck ownership verified for owner');
@@ -117,7 +117,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing deck metadata modification by owner...');
 
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie)
         .send({
           name: 'Updated Owner Deck',
@@ -125,7 +125,7 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.success).toBe(true);
+      expect(updateResponse.body.errors).toEqual([]);
       expect(updateResponse.body.data.metadata.name).toBe('Updated Owner Deck');
       expect(updateResponse.body.data.metadata.description).toBe('Updated description by owner');
       
@@ -141,7 +141,7 @@ describe('Deck Ownership Security Integration Tests', () => {
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
-      expect(charactersResponse.body.success).toBe(true);
+      expect(charactersResponse.body.errors).toEqual([]);
       expect(charactersResponse.body.data.length).toBeGreaterThan(0);
 
       const firstCharacter = charactersResponse.body.data[0];
@@ -169,7 +169,7 @@ describe('Deck Ownership Security Integration Tests', () => {
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
-      expect(charactersResponse.body.success).toBe(true);
+      expect(charactersResponse.body.errors).toEqual([]);
       expect(charactersResponse.body.data.length).toBeGreaterThan(0);
 
       const firstCharacter = charactersResponse.body.data[0];
@@ -187,11 +187,11 @@ describe('Deck Ownership Security Integration Tests', () => {
       
       // Now get the deck to see the added card
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
-      expect(getDeckResponse.body.success).toBe(true);
+      expect(getDeckResponse.body.errors).toEqual([]);
       expect(getDeckResponse.body.data.cards.length).toBeGreaterThan(0);
 
       const firstCard = getDeckResponse.body.data.cards[0];
@@ -214,7 +214,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing UI preferences save by owner...');
 
       const savePreferencesResponse = await request(app)
-        .put(`/api/decks/${testDeckId}/ui-preferences`)
+        .put(`/api/v1/decks/${testDeckId}/ui-preferences`)
         .set('Cookie', ownerAuthCookie)
         .send({
           dividerPosition: 75,
@@ -233,11 +233,11 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing deck access by non-owner...');
 
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
-      expect(getDeckResponse.body.success).toBe(true);
+      expect(getDeckResponse.body.errors).toEqual([]);
       expect(getDeckResponse.body.data.metadata.isOwner).toBe(false);
       
       console.log('✅ Non-owner can view deck but isOwner is false');
@@ -247,7 +247,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing deck metadata modification block for non-owner...');
 
       const updateResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           name: 'Hacked Deck Name',
@@ -255,8 +255,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(403);
-      expect(updateResponse.body.success).toBe(false);
-      expect(updateResponse.body.error).toContain('Access denied');
+      expect(updateResponse.body.data).toBeNull();
+      expect(updateResponse.body.errors[0].message).toContain('Access denied');
       
       console.log('✅ Non-owner blocked from modifying deck metadata');
     });
@@ -296,7 +296,7 @@ describe('Deck Ownership Security Integration Tests', () => {
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
-      expect(charactersResponse.body.success).toBe(true);
+      expect(charactersResponse.body.errors).toEqual([]);
       expect(charactersResponse.body.data.length).toBeGreaterThan(0);
 
       const firstCharacter = charactersResponse.body.data[0];
@@ -314,7 +314,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       
       // Now get the deck to see the added card
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
@@ -341,7 +341,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing UI preferences save block for non-owner...');
 
       const savePreferencesResponse = await request(app)
-        .put(`/api/decks/${testDeckId}/ui-preferences`)
+        .put(`/api/v1/decks/${testDeckId}/ui-preferences`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           dividerPosition: 25,
@@ -403,11 +403,12 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing invalid deck ID access...');
 
       const invalidDeckResponse = await request(app)
-        .get('/api/decks/invalid-deck-id')
+        .get('/api/v1/decks/invalid-deck-id')
         .set('Cookie', ownerAuthCookie);
 
       expect(invalidDeckResponse.status).toBe(404);
-      expect(invalidDeckResponse.body.success).toBe(false);
+      expect(invalidDeckResponse.body.data).toBeNull();
+      expect(invalidDeckResponse.body.errors.length).toBeGreaterThan(0);
       
       console.log('✅ Invalid deck ID properly handled');
     });
@@ -416,13 +417,10 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing unauthenticated deck access...');
 
       const unauthenticatedResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`);
+        .get(`/api/v1/decks/${testDeckId}`);
 
-
-      // Unauthenticated users can view decks but with isOwner: false
-      expect(unauthenticatedResponse.status).toBe(200);
-      expect(unauthenticatedResponse.body.success).toBe(true);
-      expect(unauthenticatedResponse.body.data.metadata.isOwner).toBe(false);
+      expect(unauthenticatedResponse.status).toBe(401);
+      expect(unauthenticatedResponse.body.success).toBe(false);
       
       console.log('✅ Unauthenticated access properly blocked');
     });
@@ -431,14 +429,11 @@ describe('Deck Ownership Security Integration Tests', () => {
       console.log('🧪 Testing invalid session deck access...');
 
       const invalidSessionResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', 'invalid-session-cookie');
 
-
-      // Invalid session users can view decks but with isOwner: false
-      expect(invalidSessionResponse.status).toBe(200);
-      expect(invalidSessionResponse.body.success).toBe(true);
-      expect(invalidSessionResponse.body.data.metadata.isOwner).toBe(false);
+      expect(invalidSessionResponse.status).toBe(401);
+      expect(invalidSessionResponse.body.success).toBe(false);
       
       console.log('✅ Invalid session properly handled');
     });
@@ -456,7 +451,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // Get original deck state
       const originalDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       if (originalDeckResponse.status !== 200) {
@@ -468,7 +463,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       
       // Attempt unauthorized modifications (these should fail)
       await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           name: 'Hacked Name',
@@ -485,7 +480,7 @@ describe('Deck Ownership Security Integration Tests', () => {
 
       // Verify deck data is unchanged
       const finalDeckResponse = await request(app)
-        .get(`/api/decks/${testDeckId}`)
+        .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', ownerAuthCookie);
 
       if (finalDeckResponse.status === 200) {

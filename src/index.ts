@@ -19,6 +19,7 @@ import { registerApiV1Routes } from './api/http/registerApiV1Routes';
 import { DbvSupportService } from './api/services/dbvSupportService';
 import { DeckListService } from './api/services/deckListService';
 import { DeckWriteService } from './api/services/deckWriteService';
+import { DeckDetailService } from './api/services/deckDetailService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import { execSync } from 'child_process';
@@ -355,6 +356,7 @@ const catalogService = new CatalogService(cardRepository, foilCardMapRepository)
 const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 const deckListService = new DeckListService(deckRepository);
 const deckWriteService = new DeckWriteService(deckBusinessService, deckValidationService);
+const deckDetailService = new DeckDetailService(deckRepository);
 
 // Function to get git information
 function getGitInfo() {
@@ -499,6 +501,7 @@ registerApiV1Routes(app, {
   authenticateUser,
   deckBackgroundService,
   deckListService,
-  deckWriteService
+  deckWriteService,
+  deckDetailService
 });
 

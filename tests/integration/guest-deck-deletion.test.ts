@@ -123,7 +123,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should block guest from deleting another user\'s deck', async () => {
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${testDeckId}`)
+        .delete(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', guestSessionCookie);
 
       expect([401, 403]).toContain(deleteResponse.status);
@@ -134,7 +134,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should block guest from modifying decks', async () => {
       const modifyResponse = await request(app)
-        .put(`/api/decks/${testDeckId}`)
+        .put(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Modified Deck Name',
@@ -232,7 +232,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should allow regular user to delete their own deck', async () => {
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${regularUserDeckId}`)
+        .delete(`/api/v1/decks/${regularUserDeckId}`)
         .set('Cookie', regularUserSessionCookie);
 
       expect(deleteResponse.status).toBe(200);
@@ -241,7 +241,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Verify deck is actually deleted
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${regularUserDeckId}`)
+        .get(`/api/v1/decks/${regularUserDeckId}`)
         .set('Cookie', regularUserSessionCookie);
 
       expect(getDeckResponse.status).toBe(404);
@@ -262,7 +262,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
       
       // Try to delete the admin's deck with regular user's session
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${adminDeck.id}`)
+        .delete(`/api/v1/decks/${adminDeck.id}`)
         .set('Cookie', regularUserSessionCookie);
 
       expect(deleteResponse.status).toBe(403);
@@ -307,7 +307,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Modify the deck
       const modifyResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', regularUserSessionCookie)
         .send({
           name: 'Modified Deck Name',
@@ -376,7 +376,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should allow admin to delete their own deck', async () => {
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${adminDeckId}`)
+        .delete(`/api/v1/decks/${adminDeckId}`)
         .set('Cookie', adminSessionCookie);
 
       expect(deleteResponse.status).toBe(200);
@@ -385,7 +385,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Verify deck is actually deleted
       const getDeckResponse = await request(app)
-        .get(`/api/decks/${adminDeckId}`)
+        .get(`/api/v1/decks/${adminDeckId}`)
         .set('Cookie', adminSessionCookie);
 
       expect(getDeckResponse.status).toBe(404);
@@ -406,7 +406,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
       
       // Try to delete the regular user's deck with admin's session
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${regularUserDeck.id}`)
+        .delete(`/api/v1/decks/${regularUserDeck.id}`)
         .set('Cookie', adminSessionCookie);
 
       expect(deleteResponse.status).toBe(403);
@@ -454,7 +454,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
       // Modify the deck
       const modifyResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', adminSessionCookie)
         .send({
           name: 'Modified Admin Deck',
@@ -481,7 +481,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
       );
       
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${tempDeck.id}`);
+        .delete(`/api/v1/decks/${tempDeck.id}`);
 
       expect(deleteResponse.status).toBe(401);
       expect(deleteResponse.body.success).toBe(false);
@@ -513,7 +513,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
       );
       
       const modifyResponse = await request(app)
-        .put(`/api/decks/${tempDeck.id}`)
+        .put(`/api/v1/decks/${tempDeck.id}`)
         .set('x-expect-401', 'true')
         .send({
           name: 'Modified by Unauthenticated',
@@ -549,7 +549,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
     it('should handle deletion of non-existent deck', async () => {
       const fakeDeckId = '00000000-0000-0000-0000-000000000000';
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${fakeDeckId}`)
+        .delete(`/api/v1/decks/${fakeDeckId}`)
         .set('Cookie', regularUserSessionCookie);
 
       expect(deleteResponse.status).toBe(404);
@@ -560,7 +560,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
     it('should handle invalid deck ID format', async () => {
       const invalidDeckId = 'invalid-id';
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${invalidDeckId}`)
+        .delete(`/api/v1/decks/${invalidDeckId}`)
         .set('Cookie', regularUserSessionCookie);
 
       // Should return 404 (deck not found) due to invalid UUID format
@@ -577,7 +577,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
       );
       
       const deleteResponse = await request(app)
-        .delete(`/api/decks/${tempDeck.id}`)
+        .delete(`/api/v1/decks/${tempDeck.id}`)
         .set('Cookie', 'sessionId=invalid-session-id');
 
       expect(deleteResponse.status).toBe(401);

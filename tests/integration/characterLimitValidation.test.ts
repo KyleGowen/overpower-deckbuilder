@@ -48,7 +48,7 @@ describe('Character Limit Validation API Tests', () => {
             const deckId = deck.metadata?.id ?? deck.id;
             if (!deckId) continue;
             await request(app)
-              .delete(`/api/decks/${deckId}`)
+              .delete(`/api/v1/decks/${deckId}`)
               .set('Cookie', authCookie);
           }
         }

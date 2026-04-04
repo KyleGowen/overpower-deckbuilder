@@ -15,7 +15,7 @@ describe('Limited Deck Simple Integration Tests', () => {
       // This test verifies that the API endpoint structure is correct
       // We don't need to actually update a deck, just verify the endpoint exists
       const response = await request(app)
-        .put('/api/decks/non-existent-id')
+        .put('/api/v1/decks/non-existent-id')
         .send(updateData);
 
       // We expect a 404 or 401, but not a 400 (bad request) which would indicate

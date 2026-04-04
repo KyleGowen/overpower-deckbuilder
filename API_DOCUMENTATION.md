@@ -423,55 +423,11 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 **Removed:** use **`POST /api/v1/decks/validate`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-#### `GET /api/decks/:id` and `GET /api/decks/:id/full`
+#### `GET /api/decks/:id`, `GET /api/decks/:id/full`, `PUT /api/decks/:id`, `DELETE /api/decks/:id` (removed)
 
-**Response 200:**
+**Removed:** use **`GET /api/v1/decks/:id`**, **`GET /api/v1/decks/:id/full`**, **`PUT /api/v1/decks/:id`**, **`DELETE /api/v1/decks/:id`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**).
 
-```json
-{
-  "success": true,
-  "data": {
-    "metadata": {
-      "id": "deck-uuid",
-      "name": "My Deck",
-      "description": "",
-      "created": "2026-01-01T00:00:00.000Z",
-      "lastModified": "2026-01-02T00:00:00.000Z",
-      "cardCount": 60,
-      "userId": "owner-uuid",
-      "uiPreferences": {},
-      "isOwner": true,
-      "is_limited": false,
-      "reserve_character": null,
-      "display_mission_card_id": null,
-      "background_image_path": null
-    },
-    "cards": [
-      { "type": "character", "cardId": "uuid", "quantity": 1 }
-    ]
-  }
-}
-```
-
-`/full` uses a heavier repository load (`getDeckSummaryWithAllCards`) for full card hydration.
-
-**404** if deck missing.
-
-#### `PUT /api/decks/:id`
-
-**Owner only.** Optional fields: `name`, `description`, `is_limited`, `is_valid`, `reserve_character`, `display_mission_card_id`, `background_image_path` (validated against known backgrounds when set).
-
-**Response 200:** `success` + `data` with `metadata` (updated) and `cards: []` in the success path shown in code.
-
-#### `DELETE /api/decks/:id`
-
-**Owner only.**
-
-**Response 200:**
-
-```json
-{ "success": true, "message": "Deck deleted successfully" }
-```
+`/full` uses a heavier repository load (`getDeckSummaryWithAllCards`) for full card hydration. **PUT** is **owner only**; success **`data`** includes updated **`metadata`** and **`cards: []`**. **DELETE** success **`data`** is **`{ "message": "Deck deleted successfully" }`** in the v1 envelope.
 
 #### `GET /api/decks/:id/cards`
 

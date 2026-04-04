@@ -4,6 +4,21 @@ import crypto from 'crypto';
 import { registerDecksV1HttpRoutes, type DecksV1HttpDeps } from '../../../../src/api/http/decks.http';
 import type { DeckListService } from '../../../../src/api/services/deckListService';
 import type { DeckWriteService } from '../../../../src/api/services/deckWriteService';
+import type { DeckDetailService } from '../../../../src/api/services/deckDetailService';
+
+const noopDeckBackground = {
+  getAvailableBackgrounds: jest.fn().mockResolvedValue([]),
+  validateBackgroundPath: jest.fn().mockResolvedValue(true)
+};
+
+function stubDetail(): DeckDetailService {
+  return {
+    getDeckDetail: jest.fn(),
+    getDeckFullDetail: jest.fn(),
+    updateDeckMetadata: jest.fn(),
+    deleteDeckIfOwner: jest.fn()
+  } as unknown as DeckDetailService;
+}
 
 const passAuth: RequestHandler = (req: Request, _res, next) => {
   (req as Request & { user?: { id: string; name: string; email: string; role: string } }).user = {
@@ -50,7 +65,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
     expect(res.body.errors).toEqual([]);
     expect(res.body.meta).toEqual({});
@@ -69,7 +90,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const app = buildApp(deps);
     const first = await request(app).get('/decks').expect(200);
     const etag = first.headers.etag;
@@ -87,7 +114,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
     const expectedBody = JSON.stringify({ data: sampleList, meta: {}, errors: [] });
     const expectedEtag = `"${crypto.createHash('sha1').update(expectedBody).digest('hex')}"`;
@@ -102,7 +135,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps)).get('/decks').expect(500);
     expect(res.body.data).toBeNull();
     expect(res.body.errors[0].code).toBe('DECK_LIST_ERROR');
@@ -123,7 +162,13 @@ describe('decks.http', () => {
       createDeck: jest.fn().mockResolvedValue(created),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps))
       .post('/decks')
       .send({ name: 'N', description: 'd' })
@@ -139,7 +184,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps)).post('/decks').send({ name: '   ' }).expect(400);
     expect(res.body.data).toBeNull();
     expect(res.body.errors.length).toBeGreaterThan(0);
@@ -152,7 +203,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuthGuest };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuthGuest
+    };
     const res = await request(buildApp(deps)).post('/decks').send({ name: 'x' }).expect(403);
     expect(res.body.errors[0].code).toBe('GUEST_FORBIDDEN');
     expect(deckWriteService.createDeck).not.toHaveBeenCalled();
@@ -164,7 +221,13 @@ describe('decks.http', () => {
       createDeck: jest.fn().mockRejectedValue(new Error('Maximum 4 characters allowed per deck')),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps))
       .post('/decks')
       .send({ name: 'x', characters: ['a', 'b', 'c', 'd', 'e'] })
@@ -178,7 +241,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn().mockResolvedValue([])
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps))
       .post('/decks/validate')
       .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1 }] })
@@ -194,7 +263,13 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn().mockResolvedValue([{ rule: 'r', message: 'bad' }])
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps))
       .post('/decks/validate')
       .send({ cards: [] })
@@ -209,9 +284,160 @@ describe('decks.http', () => {
       createDeck: jest.fn(),
       validateDeckCards: jest.fn()
     } as unknown as DeckWriteService;
-    const deps: DecksV1HttpDeps = { deckListService, deckWriteService, authenticateUser: passAuth };
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
     const res = await request(buildApp(deps)).post('/decks/validate').send({}).expect(400);
     expect(res.body.errors[0].field).toBe('cards');
     expect(deckWriteService.validateDeckCards).not.toHaveBeenCalled();
+  });
+
+  const sampleDetail = {
+    metadata: {
+      id: 'd1',
+      name: 'N',
+      description: '',
+      created: '2026-01-01T00:00:00.000Z',
+      lastModified: '2026-01-01T00:00:00.000Z',
+      cardCount: 0,
+      userId: 'user-1',
+      uiPreferences: {},
+      isOwner: true,
+      is_limited: false,
+      reserve_character: null,
+      display_mission_card_id: null,
+      background_image_path: null
+    },
+    cards: [] as unknown[]
+  };
+
+  it('GET /decks/:id returns 200 v1 envelope', async () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn().mockResolvedValue(sampleDetail),
+      getDeckFullDetail: jest.fn(),
+      updateDeckMetadata: jest.fn(),
+      deleteDeckIfOwner: jest.fn()
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).get('/decks/d1').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data).toEqual(sampleDetail);
+    expect(deckDetailService.getDeckDetail).toHaveBeenCalledWith('d1', 'user-1');
+  });
+
+  it('GET /decks/:id/full returns 200 v1 envelope', async () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn(),
+      getDeckFullDetail: jest.fn().mockResolvedValue(sampleDetail),
+      updateDeckMetadata: jest.fn(),
+      deleteDeckIfOwner: jest.fn()
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).get('/decks/d1/full').expect(200);
+    expect(res.body.data).toEqual(sampleDetail);
+    expect(deckDetailService.getDeckFullDetail).toHaveBeenCalledWith('d1', 'user-1');
+  });
+
+  it('GET /decks/:id returns 404 when missing', async () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn().mockResolvedValue(null),
+      getDeckFullDetail: jest.fn(),
+      updateDeckMetadata: jest.fn(),
+      deleteDeckIfOwner: jest.fn()
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).get('/decks/missing').expect(404);
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors[0].code).toBe('DECK_NOT_FOUND');
+  });
+
+  it('PUT /decks/:id returns 200 on success', async () => {
+    const updated = {
+      metadata: { ...sampleDetail.metadata, name: 'X' },
+      cards: []
+    };
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn(),
+      getDeckFullDetail: jest.fn(),
+      updateDeckMetadata: jest.fn().mockResolvedValue({ ok: true, data: updated }),
+      deleteDeckIfOwner: jest.fn()
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(200);
+    expect(res.body.data).toEqual(updated);
+    expect(deckDetailService.updateDeckMetadata).toHaveBeenCalledWith('d1', 'user-1', { name: 'X' }, {
+      strictReserveTestValidation: false
+    });
+  });
+
+  it('PUT /decks/:id returns 403 for GUEST', async () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = stubDetail();
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuthGuest
+    };
+    const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(403);
+    expect(res.body.errors[0].code).toBe('GUEST_FORBIDDEN');
+  });
+
+  it('DELETE /decks/:id returns 200 with message', async () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn(),
+      getDeckFullDetail: jest.fn(),
+      updateDeckMetadata: jest.fn(),
+      deleteDeckIfOwner: jest.fn().mockResolvedValue({ ok: true })
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      authenticateUser: passAuth
+    };
+    const res = await request(buildApp(deps)).delete('/decks/d1').expect(200);
+    expect(res.body.data.message).toBe('Deck deleted successfully');
   });
 });

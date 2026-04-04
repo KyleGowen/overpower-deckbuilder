@@ -53,14 +53,14 @@ export class ApiClient {
 
   async getDeck(deckId: string) {
     return request(this.app)
-      .get(`/api/decks/${deckId}`)
+      .get(`/api/v1/decks/${deckId}`)
       .set('Cookie', this.cookies)
       .expect(200);
   }
 
   async updateDeck(deckId: string, deckData: { name?: string; description?: string }) {
     return request(this.app)
-      .put(`/api/decks/${deckId}`)
+      .put(`/api/v1/decks/${deckId}`)
       .set('Cookie', this.cookies)
       .send(deckData)
       .expect(200);
@@ -68,7 +68,7 @@ export class ApiClient {
 
   async deleteDeck(deckId: string) {
     return request(this.app)
-      .delete(`/api/decks/${deckId}`)
+      .delete(`/api/v1/decks/${deckId}`)
       .set('Cookie', this.cookies)
       .expect(200);
   }

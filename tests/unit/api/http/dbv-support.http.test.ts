@@ -24,7 +24,8 @@ describe('dbv-support.http', () => {
   } as unknown as DbvSupportService;
 
   const emptyBackgrounds = {
-    getAvailableBackgrounds: jest.fn().mockResolvedValue([])
+    getAvailableBackgrounds: jest.fn().mockResolvedValue([]),
+    validateBackgroundPath: jest.fn().mockResolvedValue(true)
   };
 
   it('GET /dbv/sets returns v1 envelope with data', async () => {
@@ -60,7 +61,8 @@ describe('dbv-support.http', () => {
   it('GET /dbv/deck-backgrounds returns v1 envelope when authenticated', async () => {
     const paths = ['src/resources/images/backgrounds/landscape/x.png'];
     const deckBackgroundService = {
-      getAvailableBackgrounds: jest.fn().mockResolvedValue(paths)
+      getAvailableBackgrounds: jest.fn().mockResolvedValue(paths),
+      validateBackgroundPath: jest.fn().mockResolvedValue(true)
     };
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService: emptySetsService,
@@ -74,7 +76,8 @@ describe('dbv-support.http', () => {
 
   it('GET /dbv/deck-backgrounds returns 500 on service error', async () => {
     const deckBackgroundService = {
-      getAvailableBackgrounds: jest.fn().mockRejectedValue(new Error('fs'))
+      getAvailableBackgrounds: jest.fn().mockRejectedValue(new Error('fs')),
+      validateBackgroundPath: jest.fn().mockResolvedValue(true)
     };
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService: emptySetsService,

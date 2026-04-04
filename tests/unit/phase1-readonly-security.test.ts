@@ -111,7 +111,7 @@ describe('Phase 1 Read-Only Mode Security Tests', () => {
                     return;
                 }
                 // Simulate API call
-                await fetch(`/api/decks/${deckId}/ui-preferences`, {
+                await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -139,7 +139,7 @@ describe('Phase 1 Read-Only Mode Security Tests', () => {
                     console.log('🔒 SECURITY: Blocking UI preferences save - user does not own this deck');
                     return;
                 }
-                await fetch(`/api/decks/${deckId}/ui-preferences`, {
+                await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -167,7 +167,7 @@ describe('Phase 1 Read-Only Mode Security Tests', () => {
                     console.log('🔒 SECURITY: Blocking UI preferences save - user does not own this deck');
                     return;
                 }
-                await fetch(`/api/decks/${deckId}/ui-preferences`, {
+                await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -179,7 +179,7 @@ describe('Phase 1 Read-Only Mode Security Tests', () => {
             
             expect(mockConsoleLog).not.toHaveBeenCalledWith(expect.stringContaining('🔒 SECURITY'));
             expect(global.fetch).toHaveBeenCalledWith(
-                `/api/decks/${mockCurrentDeckId}/ui-preferences`,
+                `/api/v1/decks/${mockCurrentDeckId}/ui-preferences`,
                 expect.objectContaining({
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -501,7 +501,7 @@ describe('Phase 1 Read-Only Mode Security Tests', () => {
                     console.log('🔒 SECURITY: Blocking UI preferences save - user does not own this deck');
                     return;
                 }
-                await fetch(`/api/decks/${deckId}/ui-preferences`, {
+                await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

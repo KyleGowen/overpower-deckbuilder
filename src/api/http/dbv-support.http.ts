@@ -4,6 +4,7 @@ import { sendV1Json, sendV1Success } from './v1Envelope';
 
 export interface DeckBackgroundListReader {
   getAvailableBackgrounds(): Promise<string[]>;
+  validateBackgroundPath(imagePath: string | null): Promise<boolean>;
 }
 
 export interface DbvSupportV1HttpDeps {

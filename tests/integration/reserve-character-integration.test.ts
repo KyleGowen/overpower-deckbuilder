@@ -104,7 +104,7 @@ describe('Reserve Character Integration Tests', () => {
     describe('Guest User Reserve Character Functionality', () => {
         it('should show "Reserve" buttons on all characters when no reserve is selected', async () => {
             const response = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .expect(200);
 
             expect(response.body.success).toBe(true);
@@ -134,7 +134,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Simulate selecting a reserve character by updating the deck
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -154,7 +154,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has the reserve character set
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .expect(200);
 
             expect(getResponse.body.data.metadata.reserve_character).toBe(testCharacterIds[0]);
@@ -163,7 +163,7 @@ describe('Reserve Character Integration Tests', () => {
         it('should allow deselecting a reserve character', async () => {
             // First set a reserve character
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -180,7 +180,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Then deselect it
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -200,7 +200,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has no reserve character
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .expect(200);
 
             expect(getResponse.body.data.reserve_character).toBeNull();
@@ -210,7 +210,7 @@ describe('Reserve Character Integration Tests', () => {
     describe('Regular User Reserve Character Functionality', () => {
         it('should show "Reserve" buttons on all characters when no reserve is selected', async () => {
             const response = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -237,7 +237,7 @@ describe('Reserve Character Integration Tests', () => {
         it('should allow selecting a reserve character and update button states', async () => {
             // Select first character as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -258,7 +258,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has the reserve character set
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -268,7 +268,7 @@ describe('Reserve Character Integration Tests', () => {
         it('should allow switching reserve character to a different character', async () => {
             // First select first character as reserve
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -286,7 +286,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Then switch to second character
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -307,7 +307,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has the new reserve character
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -317,7 +317,7 @@ describe('Reserve Character Integration Tests', () => {
         it('should allow deselecting a reserve character', async () => {
             // First set a reserve character
             await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -335,7 +335,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Then deselect it
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -356,7 +356,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has no reserve character
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeck.id}`)
+                .get(`/api/v1/decks/${testDeck.id}`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
@@ -389,7 +389,7 @@ describe('Reserve Character Integration Tests', () => {
             integrationTestUtils.trackTestDeck(adminDeck.id);
 
             const response = await request(app)
-                .get(`/api/decks/${adminDeck.id}`)
+                .get(`/api/v1/decks/${adminDeck.id}`)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(200);
 
@@ -438,7 +438,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Select first character as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${adminDeck.id}`)
+                .put(`/api/v1/decks/${adminDeck.id}`)
                 .send({
                     name: 'Admin Reserve Test Deck',
                     description: 'Test deck for admin reserve character functionality',
@@ -459,7 +459,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has the reserve character set
             const getResponse = await request(app)
-                .get(`/api/decks/${adminDeck.id}`)
+                .get(`/api/v1/decks/${adminDeck.id}`)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(200);
 
@@ -491,7 +491,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // First select first character as reserve
             await request(app)
-                .put(`/api/decks/${adminDeck.id}`)
+                .put(`/api/v1/decks/${adminDeck.id}`)
                 .send({
                     name: 'Admin Reserve Test Deck',
                     description: 'Test deck for admin reserve character functionality',
@@ -509,7 +509,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Then switch to second character
             const updateResponse = await request(app)
-                .put(`/api/decks/${adminDeck.id}`)
+                .put(`/api/v1/decks/${adminDeck.id}`)
                 .send({
                     name: 'Admin Reserve Test Deck',
                     description: 'Test deck for admin reserve character functionality',
@@ -530,7 +530,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has the new reserve character
             const getResponse = await request(app)
-                .get(`/api/decks/${adminDeck.id}`)
+                .get(`/api/v1/decks/${adminDeck.id}`)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(200);
 
@@ -562,7 +562,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // First set a reserve character
             await request(app)
-                .put(`/api/decks/${adminDeck.id}`)
+                .put(`/api/v1/decks/${adminDeck.id}`)
                 .send({
                     name: 'Admin Reserve Test Deck',
                     description: 'Test deck for admin reserve character functionality',
@@ -580,7 +580,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Then deselect it
             const updateResponse = await request(app)
-                .put(`/api/decks/${adminDeck.id}`)
+                .put(`/api/v1/decks/${adminDeck.id}`)
                 .send({
                     name: 'Admin Reserve Test Deck',
                     description: 'Test deck for admin reserve character functionality',
@@ -601,7 +601,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Verify the updated deck has no reserve character
             const getResponse = await request(app)
-                .get(`/api/decks/${adminDeck.id}`)
+                .get(`/api/v1/decks/${adminDeck.id}`)
                 .set('Cookie', `sessionId=${testAdmin.sessionId}`)
                 .expect(200);
 
@@ -635,7 +635,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Try to modify the deck as testAdmin (should be read-only)
             const updateResponse = await request(app)
-                .put(`/api/decks/${otherUserDeck.id}`)
+                .put(`/api/v1/decks/${otherUserDeck.id}`)
                 .send({
                     name: 'Other User Deck',
                     description: 'Deck owned by another user',
@@ -721,7 +721,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Should be able to select the single character as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${singleCharDeck.id}`)
+                .put(`/api/v1/decks/${singleCharDeck.id}`)
                 .send({
                     name: 'Single Character Deck',
                     description: 'Deck with only one character',
@@ -765,7 +765,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Should be able to select first character as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${twoCharDeck.id}`)
+                .put(`/api/v1/decks/${twoCharDeck.id}`)
                 .send({
                     name: 'Two Character Deck',
                     description: 'Deck with two characters',
@@ -786,7 +786,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Should be able to switch to second character
             const switchResponse = await request(app)
-                .put(`/api/decks/${twoCharDeck.id}`)
+                .put(`/api/v1/decks/${twoCharDeck.id}`)
                 .send({
                     name: 'Two Character Deck',
                     description: 'Deck with two characters',
@@ -830,7 +830,7 @@ describe('Reserve Character Integration Tests', () => {
 
             // Should be able to select any of the three characters as reserve
             const updateResponse = await request(app)
-                .put(`/api/decks/${threeCharDeck.id}`)
+                .put(`/api/v1/decks/${threeCharDeck.id}`)
                 .send({
                     name: 'Three Character Deck',
                     description: 'Deck with three characters',
@@ -854,7 +854,7 @@ describe('Reserve Character Integration Tests', () => {
     describe('Edge Cases and Error Handling', () => {
         it('should handle invalid character ID as reserve character', async () => {
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -883,7 +883,7 @@ describe('Reserve Character Integration Tests', () => {
                 const invalidCharacterId = characterResult.rows[0].id;
                 
                 const updateResponse = await request(app)
-                    .put(`/api/decks/${testDeck.id}`)
+                    .put(`/api/v1/decks/${testDeck.id}`)
                     .send({
                         name: 'Reserve Test Deck',
                         description: 'Test deck for reserve character functionality',
@@ -907,7 +907,7 @@ describe('Reserve Character Integration Tests', () => {
 
         it('should handle empty string as reserve character', async () => {
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',
@@ -929,7 +929,7 @@ describe('Reserve Character Integration Tests', () => {
 
         it('should handle undefined reserve character (should be treated as null)', async () => {
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeck.id}`)
+                .put(`/api/v1/decks/${testDeck.id}`)
                 .send({
                     name: 'Reserve Test Deck',
                     description: 'Test deck for reserve character functionality',

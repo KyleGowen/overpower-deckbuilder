@@ -85,10 +85,10 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path                 | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | --------------------------- | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/decks/:id          | GET /api/v1/decks/:id           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| GET /api/decks/:id/full     | GET /api/v1/decks/:id/full      | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| PUT /api/decks/:id          | PUT /api/v1/decks/:id           | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| DELETE /api/decks/:id       | DELETE /api/v1/decks/:id        | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/decks/:id          | GET /api/v1/decks/:id           | [x]      | `DeckDetailService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+| GET /api/decks/:id/full     | GET /api/v1/decks/:id/full      | [x]      | `DeckDetailService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+| PUT /api/decks/:id          | PUT /api/v1/decks/:id           | [x]      | `DeckDetailService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+| DELETE /api/decks/:id       | DELETE /api/v1/decks/:id        | [x]      | `DeckDetailService` + `decks.http.ts` | [x]       | [x]    | [x]       |
 
 ### P2d — Deck cards
 

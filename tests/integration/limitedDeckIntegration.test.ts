@@ -92,7 +92,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Then update it to be limited
       const updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Limited Test Deck',
@@ -117,7 +117,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update to limited first
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Unlimited Test Deck',
@@ -127,7 +127,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Then update back to not limited
       const updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Unlimited Test Deck',
@@ -153,7 +153,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update to limited
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Retrieval Test Deck',
@@ -163,7 +163,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Retrieve the deck
       const getResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(getResponse.status).toBe(200);
@@ -190,7 +190,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Make first deck limited
       await request(app)
-        .put(`/api/decks/${deck1Id}`)
+        .put(`/api/v1/decks/${deck1Id}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Limited Deck 1',
@@ -231,7 +231,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update to limited
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Display Test Limited Deck',
@@ -303,7 +303,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update to limited
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Persistence Test Deck',
@@ -313,14 +313,14 @@ describe('Limited Deck Integration Tests', () => {
 
       // Verify it's limited
       let getResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(getResponse.body.data.metadata.is_limited).toBe(true);
 
       // Update name but keep limited flag
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Updated Persistence Test Deck',
@@ -330,7 +330,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Verify it's still limited
       getResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(getResponse.body.data.metadata.is_limited).toBe(true);
@@ -338,7 +338,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update to not limited
       await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Updated Persistence Test Deck',
@@ -348,7 +348,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Verify it's no longer limited
       getResponse = await request(app)
-        .get(`/api/decks/${deckId}`)
+        .get(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie);
 
       expect(getResponse.body.data.metadata.is_limited).toBe(false);
@@ -360,7 +360,7 @@ describe('Limited Deck Integration Tests', () => {
       const fakeDeckId = 'non-existent-deck-id';
 
       const response = await request(app)
-        .put(`/api/decks/${fakeDeckId}`)
+        .put(`/api/v1/decks/${fakeDeckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Non-existent Deck',
@@ -383,7 +383,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Update without is_limited field (should default to false)
       const updateResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', authCookie)
         .send({
           name: 'No Limited Field Test',
@@ -411,7 +411,7 @@ describe('Limited Deck Integration Tests', () => {
 
       // Make first deck limited
       await request(app)
-        .put(`/api/decks/${limitedDeckResponse.body.data.id}`)
+        .put(`/api/v1/decks/${limitedDeckResponse.body.data.id}`)
         .set('Cookie', authCookie)
         .send({
           name: 'Frontend Limited Deck',

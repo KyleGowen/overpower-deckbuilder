@@ -10,7 +10,7 @@ async function loadUIPreferences(deckId) {
     }
     
     try {
-        const response = await fetch(`/api/decks/${deckId}/ui-preferences`, {
+        const response = await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
             credentials: 'include'
         });
         const data = await response.json();
@@ -58,7 +58,7 @@ async function saveUIPreferences(deckId, preferences) {
     
     saveUIPreferencesTimeout = setTimeout(async () => {
         try {
-        const response = await fetch(`/api/decks/${deckId}/ui-preferences`, {
+        const response = await fetch(`/api/v1/decks/${deckId}/ui-preferences`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

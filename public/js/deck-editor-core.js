@@ -378,13 +378,19 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
     const isReadOnlyQuery = new URLSearchParams(window.location.search).get('readonly') === 'true';
     if (isGuest && isDbDeck && !isReadOnlyQuery) {
         try {
-            const res = await fetch(`/api/decks/${deckId}`, { credentials: 'include' });
+            const res = await fetch(`/api/v1/decks/${deckId}`, { credentials: 'include' });
             const json = await res.json();
-            if (!res.ok || !json.success || !json.data) {
-                showNotification('Could not load deck: ' + (json.error || 'Unknown error'), 'error');
+            const guestClonePayload =
+                typeof deckDetailPayload === 'function' ? deckDetailPayload(res, json) : null;
+            if (!guestClonePayload || !guestClonePayload.ok || !guestClonePayload.deck) {
+                const msg =
+                    (json.errors && json.errors[0] && json.errors[0].message) ||
+                    json.error ||
+                    'Unknown error';
+                showNotification('Could not load deck: ' + msg, 'error');
                 return;
             }
-            const deck = json.data;
+            const deck = guestClonePayload.deck;
             const createRes = await fetch('/api/guest/decks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -433,17 +439,28 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
 
     currentDeckId = deckId;
     const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const deckUrl = isGuestDeck ? `/api/guest/decks/${deckId}` : `/api/decks/${deckId}`;
+    const deckUrl = isGuestDeck ? `/api/guest/decks/${deckId}` : `/api/v1/decks/${deckId}`;
     try {
         const response = await fetch(deckUrl, {
             credentials: 'include'
         });
         const data = await response.json();
-        
-        if (data.success) {
-            currentDeckData = data.data;
-            window.currentDeckData = data.data; // Also set on window for global access
-            window.deckEditorCards = [...data.data.cards]; // Create working copy
+        let loadedDeck = null;
+        if (isGuestDeck) {
+            if (data.success && data.data) {
+                loadedDeck = data.data;
+            }
+        } else if (typeof deckDetailPayload === 'function') {
+            const detail = deckDetailPayload(response, data);
+            if (detail.ok) {
+                loadedDeck = detail.deck;
+            }
+        }
+
+        if (loadedDeck) {
+            currentDeckData = loadedDeck;
+            window.currentDeckData = loadedDeck; // Also set on window for global access
+            window.deckEditorCards = [...(loadedDeck.cards || [])]; // Create working copy
             
             // Load background immediately from deck data (before other initialization)
             if (window.deckBackgroundManager && currentDeckData.metadata) {
@@ -479,7 +496,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             // Determine read-only mode based on URL parameter and ownership
             const urlParams = new URLSearchParams(window.location.search);
             const isReadOnlyFromQuery = urlParams.get('readonly') === 'true';
-            const isDeckOwner = data.data.metadata && data.data.metadata.isOwner === true;
+            const isDeckOwner = loadedDeck.metadata && loadedDeck.metadata.isOwner === true;
             const isForcedReadOnlyMode = isReadOnlyFromQuery || !isDeckOwner;
 
             // Track forced read-only separately from user-triggered Preview mode
@@ -489,10 +506,10 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             if (isReadOnlyFromQuery) {
                 // If readonly=true is in URL, always use read-only mode (regardless of ownership)
                 isReadOnlyMode = true;
-            } else if (data.data.metadata && data.data.metadata.isOwner !== undefined) {
+            } else if (loadedDeck.metadata && loadedDeck.metadata.isOwner !== undefined) {
                 // Use API response for ownership-based read-only mode
                 // Non-owners should always be in read-only mode
-                isReadOnlyMode = !data.data.metadata.isOwner;
+                isReadOnlyMode = !loadedDeck.metadata.isOwner;
             } else {
                 // Fallback: if no ownership info, assume read-only for safety
                 isReadOnlyMode = true;
@@ -815,8 +832,10 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 });
             });
         } else {
-            console.error('Failed to load deck for editing:', data.error);
-            showNotification('Deck not found or access denied: ' + data.error, 'error');
+            const errMsg =
+                (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Unknown error';
+            console.error('Failed to load deck for editing:', errMsg);
+            showNotification('Deck not found or access denied: ' + errMsg, 'error');
             
             // Redirect to user's deck list if deck doesn't exist or access denied
             const currentUser = getCurrentUser();
@@ -1184,7 +1203,7 @@ async function saveDeckChanges() {
         console.log('currentDeckId:', currentDeckId);
         console.log('💾 [saveDeckChanges] Saving reserve_character:', reserveCharacterToSave);
         
-        const updateResponse = await fetch(`/api/decks/${currentDeckId}`, {
+        const updateResponse = await fetch(`/api/v1/decks/${currentDeckId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -1210,9 +1229,13 @@ async function saveDeckChanges() {
         const updateResult = await updateResponse.json();
         console.log('Deck update response:', updateResult);
         
-        // Update background manager after save
-        if (updateResult.success && window.deckBackgroundManager) {
-            const savedBackground = updateResult.data?.metadata?.background_image_path;
+        // Update background manager after save (v1 envelope)
+        const updateDetail =
+            typeof deckDetailPayload === 'function'
+                ? deckDetailPayload(updateResponse, updateResult)
+                : null;
+        if (updateDetail && updateDetail.ok && window.deckBackgroundManager) {
+            const savedBackground = updateDetail.deck.metadata?.background_image_path;
             if (savedBackground !== undefined) {
                 window.deckBackgroundManager.updateSelectedBackground(savedBackground);
             }

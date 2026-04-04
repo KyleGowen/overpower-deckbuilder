@@ -168,7 +168,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Try to modify the deck as guest - should fail because role is GUEST
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', guestSessionCookie)
         .send({
           name: 'Modified Deck Name',
@@ -224,7 +224,7 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Try to modify the deck - should succeed because role is USER
       const modifyDeckResponse = await request(app)
-        .put(`/api/decks/${deckId}`)
+        .put(`/api/v1/decks/${deckId}`)
         .set('Cookie', sessionCookie)
         .send({
           name: 'Modified Deck Name',
@@ -328,12 +328,12 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
     it('should deny GUEST role users from deleting decks regardless of username', async () => {
       const deleteDeckResponse = await request(app)
-        .delete('/api/decks/non-existent-deck-id')
+        .delete('/api/v1/decks/non-existent-deck-id')
         .set('Cookie', guestSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(403);
-      expect(deleteDeckResponse.body.success).toBe(false);
-      expect(deleteDeckResponse.body.error).toContain('Guests may not delete decks');
+      expect(deleteDeckResponse.body.data).toBeNull();
+      expect(deleteDeckResponse.body.errors[0].code).toBe('GUEST_FORBIDDEN');
     });
 
     it('should allow USER role users to delete their own decks regardless of username', async () => {
@@ -354,12 +354,12 @@ describe('Role-Based Restrictions Integration Tests', () => {
 
       // Now delete it
       const deleteDeckResponse = await request(app)
-        .delete(`/api/decks/${deckId}`)
+        .delete(`/api/v1/decks/${deckId}`)
         .set('Cookie', userSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(200);
-      expect(deleteDeckResponse.body.success).toBe(true);
-      expect(deleteDeckResponse.body.message).toBe('Deck deleted successfully');
+      expect(deleteDeckResponse.body.errors).toEqual([]);
+      expect(deleteDeckResponse.body.data.message).toBe('Deck deleted successfully');
 
       // Untrack since it's deleted
       integrationTestUtils.untrackTestDeck(deckId);

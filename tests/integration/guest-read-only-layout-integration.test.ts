@@ -115,7 +115,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
     describe('Guest User Deck Viewing', () => {
         it('should allow guest user to view deck in read-only mode', async () => {
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`);
 
             expect(getResponse.status).toBe(200);
@@ -126,7 +126,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
 
         it('should return deck data with proper structure for frontend layout', async () => {
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`);
 
             expect(getResponse.status).toBe(200);
@@ -158,7 +158,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
         it('should prevent guest user from modifying deck', async () => {
             // Attempt to update the deck
             const updateResponse = await request(app)
-                .put(`/api/decks/${testDeckId}`)
+                .put(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`)
                 .send({
                     name: 'Modified Deck Name',
@@ -170,7 +170,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
 
             // Verify no changes were persisted
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`);
             
             expect(getResponse.status).toBe(200);
@@ -342,7 +342,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
             
             if (powerResult.rows.length > 0) {
                 const updateResponse = await request(app)
-                    .put(`/api/decks/${testDeckId}`)
+                    .put(`/api/v1/decks/${testDeckId}`)
                     .set('Cookie', `sessionId=${guestUser.sessionId}`)
                     .send({
                         power_cards: powerResult.rows.map(row => row.id)
@@ -354,7 +354,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
 
             // Verify the deck still has only characters
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`);
 
             expect(getResponse.status).toBe(200);
@@ -368,7 +368,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
             const fakeDeckId = '00000000-0000-0000-0000-000000000000';
             
             const getResponse = await request(app)
-                .get(`/api/decks/${fakeDeckId}`)
+                .get(`/api/v1/decks/${fakeDeckId}`)
                 .set('Cookie', `sessionId=${guestUser.sessionId}`);
 
             expect(getResponse.status).toBe(404);
@@ -376,7 +376,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
 
         it('should handle invalid session gracefully', async () => {
             const getResponse = await request(app)
-                .get(`/api/decks/${testDeckId}`)
+                .get(`/api/v1/decks/${testDeckId}`)
                 .set('Cookie', 'sessionId=invalid-session-id');
 
             expect(getResponse.status).toBe(401);

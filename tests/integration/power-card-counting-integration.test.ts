@@ -56,7 +56,7 @@ describe('Power Card Counting Integration Tests', () => {
     test('should show 0 power cards when no power cards are added', async () => {
       // Get the deck data to verify no power cards are present
       const response = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -113,7 +113,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify the deck now has the expected number of power cards
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -170,7 +170,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify the deck now has the expected number of power cards
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -207,7 +207,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify the deck has the correct quantity
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -289,7 +289,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify only power cards are counted in power card total
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -332,7 +332,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify initial count
       let deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -355,7 +355,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify updated count
       deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -388,7 +388,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify initial count
       let deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -411,7 +411,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify count is now 0
       deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -459,7 +459,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify the count is correct
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
@@ -501,7 +501,7 @@ describe('Power Card Counting Integration Tests', () => {
 
       // Verify the total count
       const deckResponse = await request(app)
-        .get(`/api/decks/${testDeck.id}`)
+        .get(`/api/v1/decks/${testDeck.id}`)
         .set('Cookie', userCookie)
         .expect(200);
 
