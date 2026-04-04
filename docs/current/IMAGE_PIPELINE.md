@@ -44,8 +44,8 @@ Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either r
 | Preset (in `THUMB_CONFIGS`) | 2× source (Sharp) | Typical use |
 |----------------------------|-------------------|-------------|
 | Character-like (`cover`)   | 380×280           | characters, specials, power-cards, aspects, universe folders |
-| Mission-like (`cover`)     | 280×400           | missions, events |
-| Location-like (`cover`)    | 500×320           | locations |
+| Mission-like (`cover`)     | 264×378           | missions, events |
+| Location-like (`cover`)    | 472×302           | locations |
 
 Deck tile CSS still targets characters / locations / missions in `public/css/deck-selection.css`. Other card types reuse the character or mission preset for list/search thumbnails.
 
@@ -54,7 +54,7 @@ To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbna
 ### Resize fit (`cover` vs `contain`)
 
 - **Characters** and **missions**: thumbnails use Sharp **`cover`** (fills the box; may crop edges).
-- **Locations**: thumbnails use Sharp **`cover`** at 500×320 (same aspect as the deck-tile location slot `250×160`). The bitmap fills the frame edge-to-edge in deck selection (no letterboxing). **Tall or wide source art may be cropped** at top/bottom or sides; full-card views should use full-resolution art or the editor/hover layer. DBV and other surfaces that use location thumbs share this crop.
+- **Locations**: thumbnails use Sharp **`cover`** at 472×302 (2× the deck-tile location slot `236×151`). The bitmap fills the frame edge-to-edge in deck selection (no letterboxing). **Tall or wide source art may be cropped** at top/bottom or sides; full-card views should use full-resolution art or the editor/hover layer. DBV and other surfaces that use location thumbs share this crop.
 
 After changing resize behavior, regenerate all location thumbs once: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
 
@@ -122,7 +122,7 @@ npm run generate:thumbnails
 Output example:
 ```
 🖼️  Generating card thumbnails (all card-art directories; backgrounds excluded)...
-   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 cover (2× retina) | WebP quality: 80
+   Presets: character-like 380×280 cover; mission/event-like 264×378 cover; locations 472×302 cover (2× retina) | WebP quality: 80
 
 📁 characters/  (380×280, cover)
    ✓ spider-man.webp → thumb/spider-man.webp

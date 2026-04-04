@@ -26,9 +26,9 @@ type ThumbResizeConfig = {
 };
 
 const PRESET_CHARACTER: ThumbResizeConfig = { width: 380, height: 280, fit: 'cover' };
-const PRESET_MISSION: ThumbResizeConfig = { width: 280, height: 400, fit: 'cover' };
-/** Matches deck tile slot 250×160 (2×); `cover` fills the frame with no letterboxing (may crop tall/wide art). */
-const PRESET_LOCATION: ThumbResizeConfig = { width: 500, height: 320, fit: 'cover' };
+const PRESET_MISSION: ThumbResizeConfig = { width: 264, height: 378, fit: 'cover' };
+/** Matches deck tile location slot 236×151 (2×); `cover` fills the frame (may crop tall/wide art). */
+const PRESET_LOCATION: ThumbResizeConfig = { width: 472, height: 302, fit: 'cover' };
 
 /** One entry per top-level folder under src/resources/cards/images (excluding backgrounds, etc.). */
 const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
@@ -150,7 +150,7 @@ async function generateThumbnails(): Promise<void> {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
   console.log(
-    '   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 cover (2× retina) | WebP quality:',
+    '   Presets: character-like 380×280 cover; mission/event-like 264×378 cover; locations 472×302 cover (2× retina) | WebP quality:',
     WEBP_QUALITY
   );
   console.log('');

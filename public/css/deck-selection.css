@@ -132,8 +132,8 @@
 }
 
 .deck-card.deck-tile.deck-tile--compact .deck-tile-location-preview {
-    width: 250px;
-    height: 160px;
+    width: 236px;
+    height: 151px;
     border-color: rgba(254, 202, 87, 0.45);
     /* Slightly tighter radius + clip so background art matches the frame edge-to-edge */
     border-radius: 10px;
@@ -141,9 +141,9 @@
 }
 
 .deck-card.deck-tile.deck-tile--compact .deck-tile-mission-preview {
-    width: 140px;
-    height: 200px;
-    border-radius: 18px;
+    width: 132px;
+    height: 189px;
+    border-radius: 17px;
 }
 
 /* Hover focus for location/mission previews (match character-accordion “lift” feel) */
