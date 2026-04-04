@@ -62,3 +62,7 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 5. `collections.http.ts`, `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
 
 Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.
+
+## Endpoint hit metrics
+
+- New **`/api/v1/...`** routes added in `*.http.ts` and mounted through **`registerApiV1Routes`** are included in **`enumerateExpressRoutes`** at server startup and get a **`endpoint_hit_counts` row at zero** (plus runtime upsert on first hit). No Flyway INSERT per route—see [`docs/current/ENDPOINT_HIT_METRICS.md`](../../docs/current/ENDPOINT_HIT_METRICS.md) and [`src/metrics/.cursorrules`](../metrics/.cursorrules).

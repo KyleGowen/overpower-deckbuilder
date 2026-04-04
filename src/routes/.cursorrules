@@ -6,6 +6,7 @@
 - Handlers receive dependencies from the composition root via `deps`; do not import services from src/index inside route handlers—use `deps` only.
 - **HTTP → service → repository:** Route handlers **must not** call **`cardRepository`**, **`foilCardMapRepository`**, or other persistence types directly. Card catalog lists and foil map are **v1-only** (`/api/v1/catalog/...` via **`registerApiV1Routes`** + **`CatalogService`**). **Deck background list** is **`GET /api/v1/dbv/deck-backgrounds`** (`dbv-support.http.ts` + **`deckBackgroundService`**), not legacy **`/api/deck-backgrounds`**.
 - **v1-only** behavior lives under `src/api/http/*.http.ts`; see [`src/api/.cursorrules`](../api/.cursorrules).
+- **Endpoint hit metrics:** Any new route registered here (or composed into `app` before listen) is picked up by startup seeding into `endpoint_hit_counts` at zero hits—no per-route SQL. See [`docs/current/ENDPOINT_HIT_METRICS.md`](../../docs/current/ENDPOINT_HIT_METRICS.md) and [`src/metrics/.cursorrules`](../metrics/.cursorrules).
 
 ## Error Handling in Route Handlers
 - **ALWAYS use `catch (error)` — never bare `catch {}`** in route handlers. Silent catch blocks make production 500s completely undiagnosable.
