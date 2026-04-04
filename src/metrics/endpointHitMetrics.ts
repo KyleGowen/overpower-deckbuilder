@@ -143,6 +143,29 @@ export async function seedEndpointHitCounts(pool: Pool, keys: string[]): Promise
   );
 }
 
+const PRUNE_STALE_SQL = `
+DELETE FROM endpoint_hit_counts
+WHERE NOT (endpoint_key = ANY($1::text[]))
+`;
+
+/**
+ * Removes `endpoint_hit_counts` rows whose keys are not present in the current Express route catalog.
+ * Skips work when `keys` is empty so a failed enumeration cannot wipe the table.
+ * Call after {@link seedEndpointHitCounts} with the same `keys` array from {@link enumerateExpressRoutes}.
+ */
+export async function pruneStaleEndpointHitCounts(pool: Pool, keys: string[]): Promise<void> {
+  if (keys.length === 0) {
+    return;
+  }
+  const result = await pool.query(PRUNE_STALE_SQL, [keys]);
+  const n = result.rowCount ?? 0;
+  if (n > 0) {
+    console.log(
+      `🧹 endpoint_hit_counts: removed ${n} stale row(s) for routes no longer registered in Express`
+    );
+  }
+}
+
 export function createEndpointHitMetricsMiddleware(pool: Pool): RequestHandler {
   return (_req: Request, res: Response, next: () => void) => {
     const req = _req;

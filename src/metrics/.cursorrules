@@ -1,11 +1,11 @@
 # Endpoint hit metrics
 
-- **endpointHitMetrics.ts** — Enumerates Express routes for DB seeding, builds canonical `METHOD /path` keys from `req`, async `res.finish` upsert into `endpoint_hit_counts` (`hit_count`, `last_hit_at` set on each hit; seeded rows use `last_hit_at` NULL until first hit).
-- Used from `src/index.ts` only when `NODE_ENV !== 'test'` (no middleware/seed in tests).
+- **endpointHitMetrics.ts** — Enumerates Express routes for DB seeding, builds canonical `METHOD /path` keys from `req`, async `res.finish` upsert into `endpoint_hit_counts` (`hit_count`, `last_hit_at` set on each hit; seeded rows use `last_hit_at` NULL until first hit). On startup (after seed), **`pruneStaleEndpointHitCounts`** deletes rows whose keys are no longer in `enumerateExpressRoutes(app)` so removed routes do not leave orphan metric rows. Prune is skipped if enumeration returns no keys (safety).
+- Used from `src/index.ts` only when `NODE_ENV !== 'test'` (no middleware/seed/prune in tests).
 
 ## When adding or changing HTTP endpoints (agents and humans)
 
-1. **New counted endpoints** must be **normal Express routes** (`app.get`, `router.post`, mounted `Router`, etc.). Startup runs `enumerateExpressRoutes(app)` and inserts missing keys at **zero** hits (`seedEndpointHitCounts`). **Do not** add one Flyway migration row per new route.
-2. After adding routes, **restart the server** (or redeploy) so the catalog includes new keys; the runtime upsert still increments if a hit arrives before seed runs.
+1. **New counted endpoints** must be **normal Express routes** (`app.get`, `router.post`, mounted `Router`, etc.). Startup runs `enumerateExpressRoutes(app)`, inserts missing keys at **zero** hits (`seedEndpointHitCounts`), then removes stale keys (`pruneStaleEndpointHitCounts`). **Do not** add one Flyway migration row per new route.
+2. After adding or **removing** routes, **restart the server** (or redeploy) so the catalog and DB rows stay aligned; the runtime upsert still increments if a hit arrives before seed runs.
 3. **Table schema** changes (new columns, indexes) belong in a **new** `migrations/V###__*.sql` file only—not per-route data seeds.
 4. **Docs:** See [docs/current/ENDPOINT_HIT_METRICS.md](../../docs/current/ENDPOINT_HIT_METRICS.md).

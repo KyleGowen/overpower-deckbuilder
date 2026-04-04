@@ -58,11 +58,11 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 1. `auth.http.ts` — login, logout, me.
 2. `dbv-catalog.http.ts` — card catalog reads for DBV.
 3. `dbv-support.http.ts` — DBV reference reads (`/dbv/sets`, `/dbv/deck-backgrounds` with session auth).
-4. `decks.http.ts` — user decks: list (`GET /decks`, `DeckListService`); create/validate (`DeckWriteService`); single deck read/update/delete and `/decks/:id/full` (`DeckDetailService`, `UpdateDeckRequestBody`, session auth).
+4. `decks.http.ts` — user decks: list (`GET /decks`, `DeckListService`); create/validate (`DeckWriteService`); single deck read/update/delete and `/decks/:id/full` (`DeckDetailService`, `UpdateDeckRequestBody`); deck cards (`GET`/`POST`/`PUT`/`DELETE /decks/:id/cards`, `DeckCardsService`, `DeckCardsPostBody` / `DeckCardsPutBody`); UI preferences (`/decks/:id/ui-preferences`). Session auth (same `authenticateUser` as other DB deck routes).
 5. `collections.http.ts`, `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
 
 Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.
 
 ## Endpoint hit metrics
 
-- New **`/api/v1/...`** routes added in `*.http.ts` and mounted through **`registerApiV1Routes`** are included in **`enumerateExpressRoutes`** at server startup and get a **`endpoint_hit_counts` row at zero** (plus runtime upsert on first hit). No Flyway INSERT per route—see [`docs/current/ENDPOINT_HIT_METRICS.md`](../../docs/current/ENDPOINT_HIT_METRICS.md) and [`src/metrics/.cursorrules`](../metrics/.cursorrules).
+- New **`/api/v1/...`** routes added in `*.http.ts` and mounted through **`registerApiV1Routes`** are included in **`enumerateExpressRoutes`** at server startup and get a **`endpoint_hit_counts` row at zero** (plus runtime upsert on first hit). **Removed** Express routes are dropped from the table on the next startup via **`pruneStaleEndpointHitCounts`**. No Flyway INSERT per route—see [`docs/current/ENDPOINT_HIT_METRICS.md`](../../docs/current/ENDPOINT_HIT_METRICS.md) and [`src/metrics/.cursorrules`](../metrics/.cursorrules).

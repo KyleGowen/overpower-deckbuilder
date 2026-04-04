@@ -50,6 +50,8 @@ All v1 JSON responses use:
 4. [User decks (list)](#user-decks-list)
 5. [User decks (create + validate)](#user-decks-create--validate)
 6. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
+7. [User decks (cards)](#user-decks-cards)
+8. [User decks (UI preferences)](#user-decks-ui-preferences)
 
 ---
 
@@ -434,6 +436,70 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Implementation:** [`DeckDetailService`](src/api/services/deckDetailService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
 
+---
+
+## User decks (cards)
+
+Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`** routes are **removed** — only these v1 paths are registered.
+
+### `GET /api/v1/decks/:id/cards`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** as **`GET /api/v1/decks/:id`**). Matches legacy behavior: **any authenticated user** may read the card list (no ownership check in the service).
+
+**Response 200:** v1 envelope; **`data`** is an array of `{ "type", "cardId", "quantity"? }` rows from the repository’s **`getDeckCards`**.
+
+**Response 501:** v1 envelope — **`NOT_IMPLEMENTED`** if the repository does not expose **`getDeckCards`** (unexpected for PostgreSQL).
+
+**Response 500:** **`DECK_CARDS_FETCH_ERROR`**.
+
+**Implementation:** [`DeckCardsService`](src/api/services/deckCardsService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `POST /api/v1/decks/:id/cards`
+
+**Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Rate limiting / read-only:** Same pattern as **`POST /api/v1/decks`** (**429**, **403** `READ_ONLY_MODE`).
+
+**Request model:** [`DeckCardsPostBody.ts`](src/api/http/models/decks/DeckCardsPostBody.ts) — JSON **`{ "cardType", "cardId", "quantity"? }`** (default quantity **1**).
+
+**Response 200:** v1 envelope; **`data`** is transformed deck detail (`metadata` + `cards`) after add.
+
+**Response 400:** validation or game rules (`VALIDATION_ERROR`); **404** `DECK_NOT_FOUND`; **500** `DECK_CARD_ADD_ERROR`.
+
+**Implementation:** [`DeckCardsService`](src/api/services/deckCardsService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `PUT /api/v1/decks/:id/cards`
+
+**Auth:** Session cookie. **GUEST** → **403**. **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
+
+**Rate limiting / read-only:** Same as **`POST`**.
+
+**Request model:** [`DeckCardsPutBody.ts`](src/api/http/models/decks/DeckCardsPutBody.ts) — **`{ "cards": [ { "cardType", "cardId", "quantity", "exclude_from_draw"? }, … ] }`** (max **100** entries per request).
+
+**Response 200:** v1 envelope; **`data`** is updated deck detail after bulk replace.
+
+**Response 400 / 500:** **`DECK_CARDS_REPLACE_FAILED`** (includes invalid card references); **`DECK_CARDS_REPLACE_ERROR`**.
+
+**Implementation:** [`DeckCardsService`](src/api/services/deckCardsService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+### `DELETE /api/v1/decks/:id/cards`
+
+**Auth:** Session cookie. **GUEST** → **403**. **Owner only**.
+
+**Rate limiting / read-only:** Same as **`POST`**.
+
+**Request model:** same shape as **`POST`** ([`DeckCardsPostBody`](src/api/http/models/decks/DeckCardsPostBody.ts)) — partial remove with **`cardType`**, **`cardId`**, **`quantity`**, or clear all with **`cardType`: `"all"`**, **`cardId`: `"all"`**.
+
+**Response 200:** v1 envelope; **`data`** is updated deck detail.
+
+**Response 404 / 500:** **`DECK_NOT_FOUND`** / **`DECK_CARD_REMOVE_ERROR`**.
+
+**Implementation:** [`DeckCardsService`](src/api/services/deckCardsService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+
+---
+
+## User decks (UI preferences)
+
 ### `GET /api/v1/decks/:id/ui-preferences`
 
 **Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
@@ -488,6 +554,10 @@ Reference data for Database View and collection UI (set codes → display names,
 | GET | /api/v1/decks/:id/full | decks.http.ts |
 | GET | /api/v1/decks/:id | decks.http.ts |
 | PUT | /api/v1/decks/:id | decks.http.ts |
+| GET | /api/v1/decks/:id/cards | decks.http.ts |
+| POST | /api/v1/decks/:id/cards | decks.http.ts |
+| PUT | /api/v1/decks/:id/cards | decks.http.ts |
+| DELETE | /api/v1/decks/:id/cards | decks.http.ts |
 | GET | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | PUT | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | DELETE | /api/v1/decks/:id | decks.http.ts |

@@ -493,4 +493,257 @@ describe('decks.http', () => {
     const res = await request(buildApp(deps)).delete('/decks/d1').expect(200);
     expect(res.body.data.message).toBe('Deck deleted successfully');
   });
+
+  describe('deck cards /decks/:id/cards', () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+
+    it('GET returns 200 with card rows', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.getDeckCards as jest.Mock).mockResolvedValue({
+        ok: true,
+        data: [{ type: 'character', cardId: 'c1', quantity: 1 }]
+      });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(200);
+      expect(res.body.errors).toEqual([]);
+      expect(res.body.data).toEqual([{ type: 'character', cardId: 'c1', quantity: 1 }]);
+    });
+
+    it('GET returns 501 when service reports not implemented', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.getDeckCards as jest.Mock).mockResolvedValue({ ok: false, kind: 'not_implemented' });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(501);
+      expect(res.body.errors[0].code).toBe('NOT_IMPLEMENTED');
+    });
+
+    it('GET returns 500 on server_error from service', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.getDeckCards as jest.Mock).mockResolvedValue({ ok: false, kind: 'server_error' });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(500);
+      expect(res.body.errors[0].code).toBe('DECK_CARDS_FETCH_ERROR');
+    });
+
+    it('POST returns 200 with deck detail', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.postCard as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps))
+        .post('/decks/d1/cards')
+        .send({ cardType: 'character', cardId: 'x', quantity: 1 })
+        .expect(200);
+      expect(res.body.data).toEqual(sampleDetail);
+    });
+
+    it('POST returns 403 for GUEST', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuthGuest
+      };
+      const res = await request(buildApp(deps))
+        .post('/decks/d1/cards')
+        .send({ cardType: 'character', cardId: 'x', quantity: 1 })
+        .expect(403);
+      expect(res.body.errors[0].code).toBe('GUEST_FORBIDDEN');
+      expect(deckCardsService.postCard).not.toHaveBeenCalled();
+    });
+
+    it('POST returns 400 when body invalid', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).post('/decks/d1/cards').send({}).expect(400);
+      expect(res.body.errors.length).toBeGreaterThan(0);
+      expect(deckCardsService.postCard).not.toHaveBeenCalled();
+    });
+
+    it('POST maps forbidden / not_found / bad_request from service', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      (deckCardsService.postCard as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'forbidden',
+        message: 'no'
+      });
+      expect(
+        (await request(buildApp(deps)).post('/decks/d1/cards').send({ cardType: 'c', cardId: 'i', quantity: 1 }))
+          .status
+      ).toBe(403);
+
+      (deckCardsService.postCard as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'not_found',
+        message: 'nf'
+      });
+      expect(
+        (await request(buildApp(deps)).post('/decks/d1/cards').send({ cardType: 'c', cardId: 'i', quantity: 1 }))
+          .status
+      ).toBe(404);
+
+      (deckCardsService.postCard as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'bad_request',
+        message: 'bad'
+      });
+      const bad = await request(buildApp(deps))
+        .post('/decks/d1/cards')
+        .send({ cardType: 'c', cardId: 'i', quantity: 1 })
+        .expect(400);
+      expect(bad.body.errors[0].code).toBe('VALIDATION_ERROR');
+    });
+
+    it('PUT returns 200 after bulk replace', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.putReplaceCards as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps))
+        .put('/decks/d1/cards')
+        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1 }] })
+        .expect(200);
+      expect(res.body.data).toEqual(sampleDetail);
+    });
+
+    it('PUT returns 403 for GUEST', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuthGuest
+      };
+      await request(buildApp(deps))
+        .put('/decks/d1/cards')
+        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1 }] })
+        .expect(403);
+      expect(deckCardsService.putReplaceCards).not.toHaveBeenCalled();
+    });
+
+    it('PUT maps replace_failed status from service', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.putReplaceCards as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'replace_failed',
+        status: 400,
+        message: 'Failed to replace cards in deck',
+        details: 'does not exist'
+      });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps))
+        .put('/decks/d1/cards')
+        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1 }] })
+        .expect(400);
+      expect(res.body.errors[0].code).toBe('DECK_CARDS_REPLACE_FAILED');
+    });
+
+    it('DELETE returns 200 after remove', async () => {
+      const deckCardsService = stubDeckCards();
+      (deckCardsService.deleteCards as jest.Mock).mockResolvedValue({ ok: true, data: sampleDetail });
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps))
+        .delete('/decks/d1/cards')
+        .send({ cardType: 'character', cardId: 'x', quantity: 1 })
+        .expect(200);
+      expect(res.body.data).toEqual(sampleDetail);
+    });
+
+    it('DELETE returns 403 for GUEST', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckRepository: stubDeckRepository(),
+        authenticateUser: passAuthGuest
+      };
+      await request(buildApp(deps))
+        .delete('/decks/d1/cards')
+        .send({ cardType: 'character', cardId: 'x', quantity: 1 })
+        .expect(403);
+      expect(deckCardsService.deleteCards).not.toHaveBeenCalled();
+    });
+  });
 });

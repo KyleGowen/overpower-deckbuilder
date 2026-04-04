@@ -429,51 +429,9 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 `/full` uses a heavier repository load (`getDeckSummaryWithAllCards`) for full card hydration. **PUT** is **owner only**; success **`data`** includes updated **`metadata`** and **`cards: []`**. **DELETE** success **`data`** is **`{ "message": "Deck deleted successfully" }`** in the v1 envelope.
 
-#### `GET /api/decks/:id/cards`
+#### `GET /api/decks/:id/cards`, `POST /api/decks/:id/cards`, `PUT /api/decks/:id/cards`, `DELETE /api/decks/:id/cards` (removed)
 
-If the repository implements `getDeckCards`, **200:** `{ "success": true, "data": [ /* cards */ ] }`. Otherwise **501:** `{ "success": false, "error": "Not implemented" }`.
-
-#### `POST /api/decks/:id/cards`
-
-**Owner only.** **Body:**
-
-```json
-{ "cardType": "character", "cardId": "uuid", "quantity": 1 }
-```
-
-**Response 200:** `{ "success": true, "data": { /* full deck from getDeckById */ } }`
-
-May **400** for game rules (one-per-deck, cataclysm/assist/ambush/fortification limits, etc.) or **403** if not owner.
-
-#### `PUT /api/decks/:id/cards`
-
-Bulk replace (max 100 cards). **Body:**
-
-```json
-{
-  "cards": [
-    { "cardType": "character", "cardId": "uuid", "quantity": 1 }
-  ]
-}
-```
-
-**Response 200:** `{ "success": true, "data": { /* updated deck */ } }`
-
-#### `DELETE /api/decks/:id/cards`
-
-**Body** for partial remove:
-
-```json
-{ "cardType": "character", "cardId": "uuid", "quantity": 1 }
-```
-
-**Body** to clear all cards:
-
-```json
-{ "cardType": "all", "cardId": "all" }
-```
-
-**Response 200:** `{ "success": true, "data": { /* updated deck */ } }`
+**Removed:** use **`GET` / `POST` / `PUT` / `DELETE`** **`/api/v1/decks/:id/cards`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**).
 
 #### `GET /api/deck-stats`
 
@@ -730,7 +688,7 @@ Quick lookup: **method**, **path**, **source file**.
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
-| POST/GET/PUT/DELETE | `/api/decks/:id`, `/full`, `/cards`, `/api/deck-stats`, `/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
+| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~ (removed — **`/api/v1/decks/...`**), `/api/deck-stats`, `/api/decks/:id/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 

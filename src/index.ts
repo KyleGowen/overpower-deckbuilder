@@ -26,6 +26,7 @@ import { setupMiddleware } from './middleware/setup';
 import {
   createEndpointHitMetricsMiddleware,
   enumerateExpressRoutes,
+  pruneStaleEndpointHitCounts,
   seedEndpointHitCounts
 } from './metrics/endpointHitMetrics';
 import { execSync } from 'child_process';
@@ -434,7 +435,9 @@ async function initializeServer() {
     await databaseInit.initializeDatabase();
 
     if (process.env.NODE_ENV !== 'test') {
-      await seedEndpointHitCounts(dataSource.getPool(), enumerateExpressRoutes(app));
+      const endpointKeys = enumerateExpressRoutes(app);
+      await seedEndpointHitCounts(dataSource.getPool(), endpointKeys);
+      await pruneStaleEndpointHitCounts(dataSource.getPool(), endpointKeys);
     }
 
     // Migrations may have changed card rows; drop cached catalog payloads from any prior in-process state

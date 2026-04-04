@@ -171,8 +171,8 @@
 ## Endpoint hit metrics (database)
 
 - **`endpoint_hit_counts`** stores per-route hit counts and `last_hit_at` (see [`docs/current/ENDPOINT_HIT_METRICS.md`](docs/current/ENDPOINT_HIT_METRICS.md)).
-- **Adding a new HTTP endpoint:** Register it as a normal Express route (legacy `src/routes/` or v1 `src/api/http/` + `registerApiV1Routes`). On **server startup**, the app **enumerates routes** and **inserts missing keys at zero**—do **not** add one Flyway row per new endpoint. Only **schema** changes (columns, etc.) belong in new **`migrations/V###__*.sql`** files.
-- **After changing routes**, restart the dev server / redeploy so the new route keys appear in the seed pass.
+- **Adding a new HTTP endpoint:** Register it as a normal Express route (legacy `src/routes/` or v1 `src/api/http/` + `registerApiV1Routes`). On **server startup**, the app **enumerates routes**, **inserts missing keys at zero**, and **deletes rows for endpoints no longer registered**—do **not** add one Flyway row per new endpoint. Only **schema** changes (columns, etc.) belong in new **`migrations/V###__*.sql`** files.
+- **After changing routes**, restart the dev server / redeploy so the route catalog and `endpoint_hit_counts` rows stay in sync (seed + prune).
 
 ## Testing Commands
 - `npm run test:unit` - Run all unit tests

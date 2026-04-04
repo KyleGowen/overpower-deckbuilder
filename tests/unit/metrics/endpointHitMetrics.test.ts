@@ -2,7 +2,8 @@ import express from 'express';
 import {
   buildEndpointMetricKey,
   enumerateExpressRoutes,
-  normalizeEndpointPath
+  normalizeEndpointPath,
+  pruneStaleEndpointHitCounts
 } from '../../../src/metrics/endpointHitMetrics';
 
 describe('endpointHitMetrics', () => {
@@ -48,6 +49,24 @@ describe('endpointHitMetrics', () => {
     it('returns null when no route matched', () => {
       const req = { method: 'GET', baseUrl: '' };
       expect(buildEndpointMetricKey(req)).toBeNull();
+    });
+  });
+
+  describe('pruneStaleEndpointHitCounts', () => {
+    it('runs DELETE with current route keys', async () => {
+      const pool = {
+        query: jest.fn().mockResolvedValue({ rowCount: 0 })
+      };
+      await pruneStaleEndpointHitCounts(pool as never, ['GET /a', 'POST /b']);
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      expect(pool.query.mock.calls[0][0]).toContain('DELETE FROM endpoint_hit_counts');
+      expect(pool.query.mock.calls[0][1]).toEqual([['GET /a', 'POST /b']]);
+    });
+
+    it('does not query when keys is empty', async () => {
+      const pool = { query: jest.fn() };
+      await pruneStaleEndpointHitCounts(pool as never, []);
+      expect(pool.query).not.toHaveBeenCalled();
     });
   });
 });
