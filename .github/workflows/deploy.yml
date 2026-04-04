@@ -326,7 +326,7 @@ jobs:
             slug: deck-security-save
             script: test:integration:deck-security-save
             args: ""
-            timeout: 20
+            timeout: 10
           - category: Deck Security Frontend
             slug: deck-security-frontend
             script: test:integration:deck-security-frontend

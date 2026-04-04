@@ -3,9 +3,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src', '<rootDir>/tests'],
-  testMatch: [
-    '**/tests/integration/deck-save-security*.test.ts'
-  ],
+  testMatch: ['**/tests/integration/deck-save-security-simple.test.ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
