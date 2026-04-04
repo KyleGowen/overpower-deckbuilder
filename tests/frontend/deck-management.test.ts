@@ -199,7 +199,7 @@ function createDeckSelectionMenu(cardType: string, cardId: string, cardName: str
 
 async function addCardToDatabaseDeck(deckId: string, cardType: string, cardId: string, cardName: string) {
   try {
-    const response = await fetch(`/api/v1/decks//cards`, {
+    const response = await fetch(`/api/v1/decks/${deckId}/cards`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -213,8 +213,8 @@ async function addCardToDatabaseDeck(deckId: string, cardType: string, cardId: s
     });
     
     const data = await response.json();
-    
-    if (data.success) {
+    const ok = response.ok && data && (!data.errors || data.errors.length === 0);
+    if (ok) {
       mockShowNotification(`Added "${cardName}" to deck successfully!`, 'success');
       
       // Remove the deck selection menu
@@ -223,7 +223,9 @@ async function addCardToDatabaseDeck(deckId: string, cardType: string, cardId: s
         menu.remove();
       }
     } else {
-      mockShowNotification(`Failed to add card to deck: ${data.error}`, 'error');
+      const msg =
+        (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Request failed';
+      mockShowNotification(`Failed to add card to deck: ${msg}`, 'error');
     }
   } catch (error) {
     console.error('Error adding card to deck:', error);
@@ -412,12 +414,13 @@ describe('Deck Management Functions', () => {
   describe('addCardToDatabaseDeck', () => {
     it('should add card to deck successfully', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: true })
+        ok: true,
+        json: async () => ({ data: { metadata: { id: 'deck1' } }, meta: {}, errors: [] })
       });
 
       await addCardToDatabaseDeck('deck1', 'character', 'char1', 'Test Character');
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/decks/deck1/cards', {
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/decks/deck1/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -433,7 +436,8 @@ describe('Deck Management Functions', () => {
 
     it('should handle API failure', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: false, error: 'Deck not found' })
+        ok: false,
+        json: async () => ({ data: null, meta: {}, errors: [{ code: 'X', message: 'Deck not found' }] })
       });
 
       await addCardToDatabaseDeck('deck1', 'character', 'char1', 'Test Character');
@@ -456,7 +460,8 @@ describe('Deck Management Functions', () => {
     it('should handle missing menu element gracefully', async () => {
       mockGetElementById.mockReturnValue(null);
       (global.fetch as jest.Mock).mockResolvedValueOnce({
-        json: async () => ({ success: true })
+        ok: true,
+        json: async () => ({ data: { metadata: { id: 'deck1' } }, meta: {}, errors: [] })
       });
 
       await addCardToDatabaseDeck('deck1', 'character', 'char1', 'Test Character');
@@ -472,8 +477,14 @@ describe('Deck Management Functions', () => {
       
       mockGetCurrentUser.mockReturnValue({ id: 'user1' });
       (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({ json: async () => ({ success: true, data: userDecks }) })
-        .mockResolvedValueOnce({ json: async () => ({ success: true }) });
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ data: userDecks, meta: {}, errors: [] })
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ data: { metadata: { id: 'deck1' } }, meta: {}, errors: [] })
+        });
 
       await showDeckSelection('character', 'char1', 'Test Character', mockButton);
 

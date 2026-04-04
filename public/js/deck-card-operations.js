@@ -7,7 +7,7 @@ async function changeCardQuantity(cardId, change) {
     if (!currentDeckId) return;
     
     try {
-        const response = await fetch(`/api/v1/decks//cards`, {
+        const response = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
             method: change > 0 ? 'POST' : 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -21,13 +21,16 @@ async function changeCardQuantity(cardId, change) {
         });
 
         const data = await response.json();
-        if (data.success) {
+        const ok = response.ok && data && (!data.errors || data.errors.length === 0);
+        if (ok) {
             // Reload deck details to show updated quantities
             loadDeckDetails(currentDeckId);
             // Refresh deck list
             loadDecks();
         } else {
-            showNotification('Failed to update card quantity: ' + data.error, 'error');
+            const msg =
+                (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Request failed';
+            showNotification('Failed to update card quantity: ' + msg, 'error');
         }
     } catch (error) {
         console.error('Error updating card quantity:', error);
@@ -45,7 +48,7 @@ async function addCardToDeck(cardType, cardId) {
     }
     
     try {
-        const response = await fetch(`/api/v1/decks//cards`, {
+        const response = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -59,7 +62,8 @@ async function addCardToDeck(cardType, cardId) {
         });
 
         const data = await response.json();
-        if (data.success) {
+        const ok = response.ok && data && (!data.errors || data.errors.length === 0);
+        if (ok) {
             showNotification('Card added to deck!', 'success');
             // Reload deck details
             loadDeckDetails(currentDeckId);
@@ -68,7 +72,9 @@ async function addCardToDeck(cardType, cardId) {
             // Close add cards modal
             closeAddCardsModal();
         } else {
-            showNotification('Failed to add card: ' + data.error, 'error');
+            const msg =
+                (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Request failed';
+            showNotification('Failed to add card: ' + msg, 'error');
         }
     } catch (error) {
         console.error('Error adding card to deck:', error);

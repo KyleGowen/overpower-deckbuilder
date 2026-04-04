@@ -149,7 +149,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should block guest from adding cards to decks', async () => {
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', guestSessionCookie)
         .send({
           cardType: 'character',
@@ -165,7 +165,7 @@ describe('Guest Deck Deletion Integration Tests', () => {
 
     it('should block guest from removing cards from decks', async () => {
       const removeCardResponse = await request(app)
-        .delete(`/api/v1/decks//cards`)
+        .delete(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', guestSessionCookie)
         .send({
           cardType: 'character',

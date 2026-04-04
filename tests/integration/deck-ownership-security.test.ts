@@ -147,7 +147,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', ownerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -155,8 +155,9 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(200);
-      expect(addCardResponse.body.success).toBe(true);
-      
+      expect(addCardResponse.body.errors).toEqual([]);
+      expect(addCardResponse.body.data.metadata).toBeDefined();
+
       console.log('✅ Card added successfully by owner:', firstCharacter.name);
     });
 
@@ -175,7 +176,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', ownerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -183,8 +184,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(200);
-      expect(addCardResponse.body.success).toBe(true);
-      
+      expect(addCardResponse.body.errors).toEqual([]);
+
       // Now get the deck to see the added card
       const getDeckResponse = await request(app)
         .get(`/api/v1/decks/${testDeckId}`)
@@ -197,7 +198,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCard = getDeckResponse.body.data.cards[0];
       
       const removeCardResponse = await request(app)
-        .delete(`/api/v1/decks//cards`)
+        .delete(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', ownerAuthCookie)
         .send({
           cardId: firstCard.cardId,
@@ -205,8 +206,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(removeCardResponse.status).toBe(200);
-      expect(removeCardResponse.body.success).toBe(true);
-      
+      expect(removeCardResponse.body.errors).toEqual([]);
+
       console.log('✅ Card removed successfully by owner');
     });
 
@@ -222,8 +223,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(savePreferencesResponse.status).toBe(200);
-      expect(savePreferencesResponse.body.success).toBe(true);
-      
+      expect(savePreferencesResponse.body.errors).toEqual([]);
+
       console.log('✅ UI preferences saved successfully by owner');
     });
   });
@@ -273,7 +274,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -281,9 +282,9 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(403);
-      expect(addCardResponse.body.success).toBe(false);
-      expect(addCardResponse.body.error).toContain('Access denied');
-      
+      expect(addCardResponse.body.data).toBeNull();
+      expect(addCardResponse.body.errors[0].message).toContain('Access denied');
+
       console.log('✅ Non-owner blocked from adding cards');
     });
 
@@ -302,7 +303,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', ownerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -310,8 +311,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(200);
-      expect(addCardResponse.body.success).toBe(true);
-      
+      expect(addCardResponse.body.errors).toEqual([]);
+
       // Now get the deck to see the added card
       const getDeckResponse = await request(app)
         .get(`/api/v1/decks/${testDeckId}`)
@@ -323,7 +324,7 @@ describe('Deck Ownership Security Integration Tests', () => {
       const firstCard = getDeckResponse.body.data.cards[0];
       
       const removeCardResponse = await request(app)
-        .delete(`/api/v1/decks//cards`)
+        .delete(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           cardId: firstCard.cardId,
@@ -331,9 +332,9 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(removeCardResponse.status).toBe(403);
-      expect(removeCardResponse.body.success).toBe(false);
-      expect(removeCardResponse.body.error).toContain('Access denied');
-      
+      expect(removeCardResponse.body.data).toBeNull();
+      expect(removeCardResponse.body.errors[0].message).toContain('Access denied');
+
       console.log('✅ Non-owner blocked from removing cards');
     });
 
@@ -349,9 +350,9 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       expect(savePreferencesResponse.status).toBe(403);
-      expect(savePreferencesResponse.body.success).toBe(false);
-      expect(savePreferencesResponse.body.error).toContain('Access denied');
-      
+      expect(savePreferencesResponse.body.data).toBeNull();
+      expect(savePreferencesResponse.body.errors[0].message).toContain('Access denied');
+
       console.log('✅ Non-owner blocked from saving UI preferences');
     });
   });
@@ -471,7 +472,7 @@ describe('Deck Ownership Security Integration Tests', () => {
         });
 
       await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           cardId: 'some-card-id',

@@ -91,7 +91,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 19 in deck editor and summary when Carson of Venus IS reserve character', async () => {
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -138,7 +138,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 18 in deck editor and summary when Carson of Venus is NOT reserve character', async () => {
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -187,7 +187,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 20 in deck editor and summary when Morgan le Fay IS reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -234,7 +234,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 19 in deck editor and summary when Morgan le Fay is NOT reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -283,7 +283,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 20 in deck editor and summary when Victory Harben IS reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -330,7 +330,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 18 in deck editor and summary when Victory Harben is NOT reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks//cards`)
+                .post(`/api/v1/decks/${testDeckId}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -403,7 +403,7 @@ describe('Special Character Threat Display Integration Tests', () => {
 
                 // Add the character to deck
                 await request(app)
-                    .post(`/api/v1/decks//cards`)
+                    .post(`/api/v1/decks/${testDeckId}/cards`)
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .send({
                         cardType: 'character',

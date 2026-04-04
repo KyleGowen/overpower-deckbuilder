@@ -76,11 +76,13 @@ if (process.env.NODE_ENV === 'test' && typeof (rateLimitCleanupInterval as { unr
 
 export function requireGuestSession(req: Request, res: Response): string | null {
   if (req.user?.role !== 'GUEST') {
+    console.log(`🔒 SECURITY: Guest deck endpoint rejected - role is ${req.user?.role ?? 'unauthenticated'}`);
     res.status(403).json({ success: false, error: 'Guest deck endpoints are only available to GUEST users' });
     return null;
   }
   const sessionId = req.cookies?.sessionId;
   if (!sessionId) {
+    console.log('🔒 SECURITY: Guest deck request blocked - missing session cookie');
     res.status(401).json({ success: false, error: 'Session required for guest decks' });
     return null;
   }

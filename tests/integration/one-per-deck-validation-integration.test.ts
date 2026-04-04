@@ -73,7 +73,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse1 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'advanced-universe',
@@ -86,7 +86,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to add the same card again - should fail
       const addResponse2 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'advanced-universe',
@@ -122,7 +122,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse1 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'power',
@@ -135,7 +135,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to add the same card again - should fail
       const addResponse2 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'power',
@@ -170,7 +170,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse1 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'teamwork',
@@ -183,7 +183,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to add the same card again - should fail
       const addResponse2 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'teamwork',
@@ -218,7 +218,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse1 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'training',
@@ -231,7 +231,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to add the same card again - should fail
       const addResponse2 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'training',
@@ -267,7 +267,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse1 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'power',
@@ -280,7 +280,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to add the same card again - should fail
       const addResponse2 = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'power',
@@ -315,7 +315,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Add the card once - should succeed
       const addResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'advanced-universe',
@@ -328,7 +328,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
       // Try to increase quantity - should fail
       const increaseResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'advanced-universe',
@@ -458,7 +458,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
         // Add the card once
         await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: cardType.type,
@@ -468,7 +468,7 @@ describe('One Per Deck Validation Integration Tests', () => {
 
         // Try to add again
         const response = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: cardType.type,

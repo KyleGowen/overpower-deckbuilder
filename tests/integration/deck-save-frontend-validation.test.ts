@@ -276,7 +276,7 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
 
             const saveDeckChanges = async () => {
                 try {
-                    const response = await (window as any).fetch(`/api/decks/test-deck-id/cards`, {
+                    const response = await (window as any).fetch(`/api/v1/decks/test-deck-id/cards`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cards: [] })
@@ -315,7 +315,7 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
 
             const saveDeckChanges = async () => {
                 try {
-                    const response = await (window as any).fetch(`/api/decks/non-existent-deck/cards`, {
+                    const response = await (window as any).fetch(`/api/v1/decks/non-existent-deck/cards`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cards: [] })
@@ -347,7 +347,7 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
 
             const saveDeckChanges = async () => {
                 try {
-                    const response = await (window as any).fetch(`/api/decks/test-deck-id/cards`, {
+                    const response = await (window as any).fetch(`/api/v1/decks/test-deck-id/cards`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cards: [] })
@@ -385,7 +385,7 @@ describe('Deck Save Frontend Validation - Integration Tests', () => {
 
             const saveDeckChanges = async () => {
                 try {
-                    const response = await (window as any).fetch(`/api/decks/test-deck-id/cards`, {
+                    const response = await (window as any).fetch(`/api/v1/decks/test-deck-id/cards`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cards: [] })

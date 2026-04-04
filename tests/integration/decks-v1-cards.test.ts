@@ -15,7 +15,7 @@ describe('GET/POST/PUT/DELETE /api/v1/decks/:id/cards', () => {
     expect(res.body.success).toBe(false);
   });
 
-  it('GET empty, PUT replace one character, GET list, DELETE card, DELETE deck', async () => {
+  it('GET empty, POST add, GET list, DELETE card, PUT replace, GET, DELETE card, DELETE deck', async () => {
     const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
     expect(login.status).toBe(200);
     const cookie = login.headers['set-cookie'][0].split(';')[0];
@@ -40,13 +40,13 @@ describe('GET/POST/PUT/DELETE /api/v1/decks/:id/cards', () => {
     expect(Array.isArray(get0.body.data)).toBe(true);
     expect(get0.body.data.length).toBe(0);
 
-    const put = await request(app)
-      .put(`/api/v1/decks/${deckId}/cards`)
+    const postOne = await request(app)
+      .post(`/api/v1/decks/${deckId}/cards`)
       .set('Cookie', cookie)
-      .send({ cards: [{ cardType: 'character', cardId: charId, quantity: 1 }] })
+      .send({ cardType: 'character', cardId: charId, quantity: 1 })
       .expect(200);
-    expect(put.body.errors).toEqual([]);
-    expect(put.body.data.metadata.id).toBe(deckId);
+    expect(postOne.body.errors).toEqual([]);
+    expect(postOne.body.data.metadata.id).toBe(deckId);
 
     const get1 = await request(app).get(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookie).expect(200);
     expect(get1.body.data.some((c: { cardId: string }) => c.cardId === charId)).toBe(true);
@@ -57,6 +57,26 @@ describe('GET/POST/PUT/DELETE /api/v1/decks/:id/cards', () => {
       .send({ cardType: 'character', cardId: charId, quantity: 1 })
       .expect(200);
     expect(delCard.body.errors).toEqual([]);
+
+    const getEmpty = await request(app).get(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookie).expect(200);
+    expect(getEmpty.body.data.length).toBe(0);
+
+    const put = await request(app)
+      .put(`/api/v1/decks/${deckId}/cards`)
+      .set('Cookie', cookie)
+      .send({ cards: [{ cardType: 'character', cardId: charId, quantity: 1 }] })
+      .expect(200);
+    expect(put.body.errors).toEqual([]);
+    expect(put.body.data.metadata.id).toBe(deckId);
+
+    const getAfterPut = await request(app).get(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookie).expect(200);
+    expect(getAfterPut.body.data.some((c: { cardId: string }) => c.cardId === charId)).toBe(true);
+
+    await request(app)
+      .delete(`/api/v1/decks/${deckId}/cards`)
+      .set('Cookie', cookie)
+      .send({ cardType: 'character', cardId: charId, quantity: 1 })
+      .expect(200);
 
     const get2 = await request(app).get(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookie).expect(200);
     expect(get2.body.data.length).toBe(0);

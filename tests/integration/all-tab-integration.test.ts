@@ -263,7 +263,7 @@ describe('All Tab Integration Tests', () => {
       const deckId = 'test-deck-id';
       
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .send({
           cardType: 'character',
           cardId: 'test-id',

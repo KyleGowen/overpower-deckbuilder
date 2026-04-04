@@ -940,7 +940,9 @@ async function syncPersistedDeckCardsFromEditor() {
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            showNotification(err.error || 'Failed to sync deck to server', 'error');
+            const msg =
+                (err.errors && err.errors[0] && err.errors[0].message) || err.error || 'Failed to sync deck to server';
+            showNotification(msg, 'error');
             return false;
         }
         return true;

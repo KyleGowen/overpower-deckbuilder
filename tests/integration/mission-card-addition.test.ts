@@ -180,7 +180,7 @@ describe('Mission Card Addition Integration Tests', () => {
 
       // Add the mission card via API
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'mission',
@@ -205,7 +205,7 @@ describe('Mission Card Addition Integration Tests', () => {
 
     it('should return 400 when trying to add a non-existent mission card via API', async () => {
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'mission',
@@ -226,7 +226,7 @@ describe('Mission Card Addition Integration Tests', () => {
       // Add each mission card
       for (const mission of missionsResult.rows) {
         const response = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'mission',
@@ -254,7 +254,7 @@ describe('Mission Card Addition Integration Tests', () => {
 
       // Add the mission card with quantity 2
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'mission',
@@ -287,7 +287,7 @@ describe('Mission Card Addition Integration Tests', () => {
 
       // Step 2: Add the mission card to deck via API (simulating "Add to Deck" button click)
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'mission',
@@ -329,7 +329,7 @@ describe('Mission Card Addition Integration Tests', () => {
 
       // Add the mission card - this should NOT return 404
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'mission',

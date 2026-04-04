@@ -70,7 +70,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         const cataclysmCard = cataclysmResult.rows[0];
         
         const response = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -105,7 +105,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
 
         // First, add the first cataclysm card
         const firstResponse = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -118,7 +118,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         
         // Now try to add a second cataclysm card - this should fail
         const secondResponse = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -151,7 +151,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         const regularSpecialCard = regularSpecialResult.rows[0];
 
         const response = await request(app)
-          .post(`/api/v1/decks//cards`)
+          .post(`/api/v1/decks/${testDeckId}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -175,7 +175,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -191,7 +191,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
 
     it('should handle non-special card types correctly', async () => {
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           type: 'character',
@@ -237,7 +237,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .send({
           cardType: 'special',
           cardId: '12345678-1234-1234-1234-123456789012', // Valid UUID format but doesn't exist
@@ -270,7 +270,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -284,7 +284,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
 
     it('should handle invalid deck ID', async () => {
       const response = await request(app)
-        .post('/api/decks/12345678-1234-1234-1234-123456789012/cards') // Valid UUID format but doesn't exist
+        .post('/api/v1/decks/12345678-1234-1234-1234-123456789012/cards') // Valid UUID format but doesn't exist
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -306,7 +306,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       // This test would require mocking the database connection to fail
       // For now, we'll just ensure the API handles errors without crashing
       const response = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',

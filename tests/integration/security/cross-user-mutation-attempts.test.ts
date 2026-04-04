@@ -60,13 +60,13 @@ describe('Cross-User Mutation Attempts Integration Tests', () => {
 
     expect((await request(app).put(`/api/v1/decks/${deckId}`).set('Cookie', cookieB).send({ name: 'Hacked' })).status).toBe(403);
 
-    expect((await request(app).post(`/api/v1/decks//cards`).set('Cookie', cookieB).send({ cardType: 'character', cardId: testCharacterId, quantity: 1 })).status).toBe(403);
+    expect((await request(app).post(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookieB).send({ cardType: 'character', cardId: testCharacterId, quantity: 1 })).status).toBe(403);
 
-    expect((await request(app).put(`/api/v1/decks//cards`).set('Cookie', cookieB).send({ cards: [{ cardType: 'character', cardId: testCharacterId, quantity: 1 }] })).status).toBe(403);
+    expect((await request(app).put(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookieB).send({ cards: [{ cardType: 'character', cardId: testCharacterId, quantity: 1 }] })).status).toBe(403);
 
     expect((await request(app).put(`/api/v1/decks/${deckId}/ui-preferences`).set('Cookie', cookieB).send({ viewMode: 'tile' })).status).toBe(403);
 
-    expect((await request(app).delete(`/api/v1/decks//cards`).set('Cookie', cookieB).send({ cardType: 'character', cardId: testCharacterId, quantity: 1 })).status).toBe(403);
+    expect((await request(app).delete(`/api/v1/decks/${deckId}/cards`).set('Cookie', cookieB).send({ cardType: 'character', cardId: testCharacterId, quantity: 1 })).status).toBe(403);
 
     expect((await request(app).delete(`/api/v1/decks/${deckId}`).set('Cookie', cookieB)).status).toBe(403);
   });

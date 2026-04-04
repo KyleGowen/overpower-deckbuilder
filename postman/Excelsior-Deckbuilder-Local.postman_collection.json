@@ -418,7 +418,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards"
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/cards"
           }
         },
         {
@@ -431,7 +431,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
@@ -448,7 +448,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
@@ -465,7 +465,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
@@ -482,7 +482,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardType\": \"all\",\n  \"cardId\": \"all\"\n}"

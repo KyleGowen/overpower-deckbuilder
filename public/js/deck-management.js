@@ -228,7 +228,7 @@ async function addCardToDeckFromSelection(deckId, cardType, cardId, cardName) {
     }
     const requestBody = { cardType, cardId, quantity: 1 };
     const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks//cards`;
+    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -239,8 +239,12 @@ async function addCardToDeckFromSelection(deckId, cardType, cardId, cardName) {
         if (response.ok) {
             showNotification(`Added ${cardName} to deck`, 'success');
         } else {
-            const errorData = await response.json();
-            showNotification(`Failed to add card: ${errorData.error || 'Unknown error'}`, 'error');
+            const errorData = await response.json().catch(() => ({}));
+            const msg =
+                (errorData.errors && errorData.errors[0] && errorData.errors[0].message) ||
+                errorData.error ||
+                'Unknown error';
+            showNotification(`Failed to add card: ${msg}`, 'error');
         }
     } catch (error) {
         console.error('Error adding card to deck:', error);

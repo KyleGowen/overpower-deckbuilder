@@ -232,7 +232,7 @@ describe('KO Feature Dimming Integration Tests', () => {
    */
   async function addCardToDeck(deckId: string, cardType: string, cardId: string, quantity: number = 1) {
     const response = await request(app)
-      .post(`/api/v1/decks//cards`)
+      .post(`/api/v1/decks/${testDeckId}/cards`)
       .set('Cookie', authCookie)
       .send({
         cardType,

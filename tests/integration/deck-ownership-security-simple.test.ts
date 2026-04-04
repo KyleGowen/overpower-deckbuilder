@@ -161,7 +161,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', ownerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -223,7 +223,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       const firstCharacter = charactersResponse.body.data[0];
       
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           cardId: firstCharacter.id,
@@ -288,7 +288,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       await request(app)
-        .post(`/api/v1/decks//cards`)
+        .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', nonOwnerAuthCookie)
         .send({
           cardId: 'some-card-id',

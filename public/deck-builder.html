@@ -7304,7 +7304,7 @@
             if (!currentDeckId) return;
             
             try {
-                const response = await fetch(`/api/v1/decks//cards`, {
+                const response = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: change > 0 ? 'POST' : 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -7336,7 +7336,7 @@
             
             if (confirm('Are you sure you want to remove this card from the deck?')) {
                 try {
-                    const response = await fetch(`/api/v1/decks//cards`, {
+                    const response = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
@@ -7458,7 +7458,7 @@
             }
             
             try {
-                const response = await fetch(`/api/v1/decks//cards`, {
+                const response = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -12430,7 +12430,7 @@
                 });
                 
                 // Bulk replace all cards in one atomic operation
-                const replaceResponse = await fetch(`/api/v1/decks//cards`, {
+                const replaceResponse = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -13010,7 +13010,7 @@
                 });
                 
                 // Bulk replace all cards in one atomic operation
-                const replaceResponse = await fetch(`/api/v1/decks//cards`, {
+                const replaceResponse = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -13590,7 +13590,7 @@
                 });
                 
                 // Bulk replace all cards in one atomic operation
-                const replaceResponse = await fetch(`/api/v1/decks//cards`, {
+                const replaceResponse = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -14170,7 +14170,7 @@
                 });
                 
                 // Bulk replace all cards in one atomic operation
-                const replaceResponse = await fetch(`/api/v1/decks//cards`, {
+                const replaceResponse = await fetch(`/api/v1/decks/${currentDeckId}/cards`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

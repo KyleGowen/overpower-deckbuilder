@@ -66,7 +66,7 @@ describe('Foil Deck Selection Integration Tests', () => {
     authCookie = loginResponse.headers['set-cookie']![0].split(';')[0];
 
     await request(app)
-      .post(`/api/v1/decks//cards`)
+      .post(`/api/v1/decks/${testDeckId}/cards`)
       .set('Cookie', authCookie)
       .send({ cardId: foilCharacterId, cardType: 'character', quantity: 1 })
       .expect(200);
