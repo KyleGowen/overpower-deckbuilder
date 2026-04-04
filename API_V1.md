@@ -52,6 +52,7 @@ All v1 JSON responses use:
 6. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
 7. [User decks (cards)](#user-decks-cards)
 8. [User decks (UI preferences)](#user-decks-ui-preferences)
+9. [Collections (current user)](#collections-current-user)
 
 ---
 
@@ -543,6 +544,22 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 ---
 
+## Collections (current user)
+
+### `GET /api/v1/collections/me`
+
+**Auth:** Valid **session cookie** (same **`authenticateUser`** as **`GET /api/v1/decks`**). Unauthenticated requests receive **401** with the **legacy** JSON shape `{ "success": false, "error": "..." }` from session middleware.
+
+**Request model:** none.
+
+**Response 200:** v1 envelope; **`data`** is `{ "id": "<collection uuid>", "user_id": "<authenticated user id>" }` — same field names as removed legacy **`GET /api/collections/me`**. The server **gets or creates** the user’s collection row.
+
+**Response 500:** v1 envelope — `errors` with code **`COLLECTION_ME_ERROR`**; **`data`** may be `null`.
+
+**Implementation:** [`CollectionService`](src/services/collectionService.ts) · HTTP [`collections.http.ts`](src/api/http/collections.http.ts) · response shape [`CollectionMeV1DataDto`](src/api/dto/v1/CollectionMeV1DataDto.ts)
+
+---
+
 ## Route index (v1)
 
 | Method | Path | Router module |
@@ -579,3 +596,4 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 | GET | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | PUT | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | DELETE | /api/v1/decks/:id | decks.http.ts |
+| GET | /api/v1/collections/me | collections.http.ts |

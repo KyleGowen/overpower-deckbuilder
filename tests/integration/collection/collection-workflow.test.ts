@@ -90,7 +90,7 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
     it('should handle full workflow: create -> add -> update -> remove', async () => {
       // Step 1: Create collection
       const createResponse = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -423,12 +423,12 @@ describe('Collection End-to-End Workflow Integration Tests', () => {
 
     it('should retrieve collection ID consistently', async () => {
       const response1 = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 

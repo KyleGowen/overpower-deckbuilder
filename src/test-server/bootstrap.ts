@@ -169,7 +169,8 @@ registerApiV1Routes(app, {
   deckWriteService,
   deckDetailService,
   deckCardsService,
-  deckUIPreferencesService
+  deckUIPreferencesService,
+  collectionService
 });
 
 // Error handling middleware

@@ -98,7 +98,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
       // Access collection endpoint
       await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -114,7 +114,7 @@ describe('Collection Database Persistence Integration Tests', () => {
 
     it('should set created_at timestamp on collection creation', async () => {
       await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
@@ -407,7 +407,7 @@ describe('Collection Database Persistence Integration Tests', () => {
   describe('Data Integrity', () => {
     it('should maintain referential integrity between collections and users', async () => {
       await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 

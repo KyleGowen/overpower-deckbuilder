@@ -125,7 +125,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path              | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ------------------------ | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/collections/me  | GET /api/v1/collections/me      | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/collections/me  | GET /api/v1/collections/me      | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
 
 ### P3b — Collection cards
 

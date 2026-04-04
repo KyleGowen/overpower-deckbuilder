@@ -809,21 +809,9 @@ Legacy **`GET` / `PUT` `/api/decks/:id/ui-preferences`** are **not** registered.
 
 Collection endpoints manage the authenticated user's card collection. GUEST users use a sandbox (localStorage) on the client; USER and ADMIN persist via these APIs.
 
-### GET /api/collections/me
-Get the current user's collection ID.
+### ~~GET /api/collections/me~~ (removed)
 
-**Authentication:** Required
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "string",
-    "user_id": "string"
-  }
-}
-```
+Use **`GET /api/v1/collections/me`** — v1 envelope `{ data, meta, errors }`; see [API_V1.md](../../API_V1.md). Legacy path returns **404**.
 
 ### GET /api/collections/me/cards
 Get all cards in the current user's collection.

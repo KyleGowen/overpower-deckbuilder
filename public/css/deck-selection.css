@@ -137,6 +137,11 @@
     border-color: rgba(254, 202, 87, 0.45);
 }
 
+/* Transparent thumb gutters: no tint behind background-image (see IMAGE_PIPELINE location preset). */
+.deck-card.deck-tile.deck-tile--compact .deck-tile-location-preview:not(.deck-tile-preview-card--empty) {
+    background-color: transparent;
+}
+
 .deck-card.deck-tile.deck-tile--compact .deck-tile-mission-preview {
     width: 140px;
     height: 200px;

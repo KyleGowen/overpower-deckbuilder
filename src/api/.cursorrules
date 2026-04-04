@@ -59,7 +59,8 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 2. `dbv-catalog.http.ts` — card catalog reads for DBV.
 3. `dbv-support.http.ts` — DBV reference reads (`/dbv/sets`, `/dbv/deck-backgrounds` with session auth).
 4. `decks.http.ts` — user decks: list (`GET /decks`, `DeckListService`); aggregate stats (`GET /decks/stats`, `DeckStatsService`); create/validate (`DeckWriteService`); single deck read/update/delete and `/decks/:id/full` (`DeckDetailService`, `UpdateDeckRequestBody`); deck cards (`GET`/`POST`/`PUT`/`DELETE /decks/:id/cards`, `DeckCardsService`, `DeckCardsPostBody` / `DeckCardsPutBody`); UI preferences (`/decks/:id/ui-preferences`, `DeckUIPreferencesService`). Session auth (same `authenticateUser` as other DB deck routes).
-5. `collections.http.ts`, `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
+5. `collections.http.ts` — **`GET /collections/me`** (`CollectionService.getOrCreateCollection`, session auth). Further collection routes (P3b/P3c) land here as migrated.
+6. `guest-decks.http.ts`, `admin.http.ts` — as migrations land.
 
 Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.
 

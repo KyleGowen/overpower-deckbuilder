@@ -10,6 +10,8 @@ import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
 import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
 import { registerDecksV1HttpRoutes } from './decks.http';
+import { registerCollectionsV1HttpRoutes } from './collections.http';
+import type { CollectionService } from '../../services/collectionService';
 import type { DeckListService } from '../services/deckListService';
 import type { DeckStatsService } from '../services/deckStatsService';
 import type { DeckWriteService } from '../services/deckWriteService';
@@ -37,6 +39,7 @@ export interface RegisterApiV1Deps {
   deckDetailService: DeckDetailService;
   deckCardsService: DeckCardsService;
   deckUIPreferencesService: DeckUIPreferencesService;
+  collectionService: CollectionService;
 }
 
 /**
@@ -72,6 +75,11 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     deckBackgroundService: deps.deckBackgroundService,
     authenticateUser: deps.authenticateUser,
     deckUIPreferencesService: deps.deckUIPreferencesService
+  });
+
+  registerCollectionsV1HttpRoutes(router, {
+    collectionService: deps.collectionService,
+    authenticateUser: deps.authenticateUser
   });
 
   return router;

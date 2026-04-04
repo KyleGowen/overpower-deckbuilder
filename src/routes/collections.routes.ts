@@ -3,17 +3,6 @@ import { isValidCollectionCardType } from './helpers';
 import type { CollectionRoutesDeps } from './types';
 
 export function registerCollectionRoutes(app: express.Application, deps: CollectionRoutesDeps): void {
-  // Get current user's collection
-  app.get('/api/collections/me', deps.authenticateUser, async (req: Request, res) => {
-    try {
-      const collectionId = await deps.collectionService.getOrCreateCollection(req.user!.id);
-      res.json({ success: true, data: { id: collectionId, user_id: req.user!.id } });
-    } catch (error) {
-      console.error('Error getting collection:', error);
-      res.status(500).json({ success: false, error: 'Failed to get collection' });
-    }
-  });
-  
   // Get all cards in user's collection
   app.get('/api/collections/me/cards', deps.authenticateUser, async (req: Request, res) => {
     try {

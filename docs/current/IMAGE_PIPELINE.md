@@ -45,7 +45,7 @@ Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either r
 |----------------------------|-------------------|-------------|
 | Character-like (`cover`)   | 380×280           | characters, specials, power-cards, aspects, universe folders |
 | Mission-like (`cover`)     | 280×400           | missions, events |
-| Location-like (`contain`)  | 500×320           | locations |
+| Location-like (`contain` + transparent pad) | 500×320 | locations |
 
 Deck tile CSS still targets characters / locations / missions in `public/css/deck-selection.css`. Other card types reuse the character or mission preset for list/search thumbnails.
 
@@ -54,7 +54,7 @@ To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbna
 ### Resize fit (`cover` vs `contain`)
 
 - **Characters** and **missions**: thumbnails use Sharp **`cover`** (fills the box; may crop edges).
-- **Locations**: thumbnails use **`contain`** with a dark gray letterbox (`#1a1a1a`-style). Promo / alternate location art often has a taller aspect ratio than the 250×160 tile box; **`cover` was cropping the top and bottom** in deck tiles, card DB tables, and the hover preview (thumb layer). **`contain`** keeps the full card visible; letterboxing is expected in the slot.
+- **Locations**: thumbnails use **`contain`** with a **transparent** letterbox (alpha 0). Promo / alternate location art often has a taller aspect ratio than the 250×160 tile box; **`cover` was cropping the top and bottom** in deck tiles, card DB tables, and the hover preview (thumb layer). **`contain`** keeps the full card visible; side gutters are transparent WebP pixels so the UI behind the image (deck tile background, table cell, etc.) shows through.
 
 After changing resize behavior, regenerate all location thumbs once: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
 

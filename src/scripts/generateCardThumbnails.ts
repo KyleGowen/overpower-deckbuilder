@@ -31,7 +31,8 @@ const PRESET_LOCATION: ThumbResizeConfig = {
   width: 500,
   height: 320,
   fit: 'contain',
-  background: { r: 26, g: 26, b: 26, alpha: 1 },
+  /** Transparent letterbox so deck tiles / DBV show the surface behind the slot (not opaque bars). */
+  background: { r: 0, g: 0, b: 0, alpha: 0 },
 };
 
 /** One entry per top-level folder under src/resources/cards/images (excluding backgrounds, etc.). */
@@ -154,7 +155,7 @@ async function generateThumbnails(): Promise<void> {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
   console.log(
-    '   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 contain (2× retina) | WebP quality:',
+    '   Presets: character-like 380×280 cover; mission/event-like 280×400 cover; locations 500×320 contain + transparent letterbox (2× retina) | WebP quality:',
     WEBP_QUALITY
   );
   console.log('');

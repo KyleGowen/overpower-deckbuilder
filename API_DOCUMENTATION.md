@@ -519,13 +519,9 @@ All routes require authentication.
 **Valid `cardType` values** for collection APIs:  
 `character`, `special`, `power`, `location`, `mission`, `event`, `aspect`, `advanced_universe`, `teamwork`, `ally_universe`, `training`, `basic_universe` (see `isValidCollectionCardType` in `src/routes/helpers.ts`).
 
-### `GET /api/collections/me`
+### ~~`GET /api/collections/me`~~ (removed)
 
-**Response 200:**
-
-```json
-{ "success": true, "data": { "id": "collection-uuid", "user_id": "user-uuid" } }
-```
+**Removed:** use **`GET /api/v1/collections/me`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
 ### `GET /api/collections/me/cards`
 
@@ -671,7 +667,7 @@ Quick lookup: **method**, **path**, **source file**.
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
 | POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~, ~~`/api/decks/:id/ui-preferences`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**; create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | *use v1* · [`decks.http.ts`](src/api/http/decks.http.ts) |
-| GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
+| GET/POST/PUT/DELETE | ~~`/api/collections/me`~~ (removed — **`GET /api/v1/collections/me`**) · `/api/collections/me/cards`, `.../history`, mutations | `collections.routes.ts` + [`collections.http.ts`](src/api/http/collections.http.ts) |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
 ### API v1 (`/api/v1`)
@@ -685,6 +681,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
 | GET | `/api/v1/dbv/sets`, `/api/v1/dbv/deck-backgrounds` | `src/api/http/dbv-support.http.ts` |
+| GET | `/api/v1/collections/me` | `src/api/http/collections.http.ts` |
 
 ---
 

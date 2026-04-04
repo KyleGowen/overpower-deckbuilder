@@ -2,7 +2,7 @@
  * Integration tests for Collection API endpoints
  * 
  * Tests all CRUD operations for the collection feature:
- * - GET /api/collections/me - Get current user's collection
+ * - GET /api/v1/collections/me - Get current user's collection (v1 envelope)
  * - GET /api/collections/me/cards - Get all cards in user's collection
  * - POST /api/collections/me/cards - Add card to collection
  * - PUT /api/collections/me/cards/:cardId - Update card quantity
@@ -76,10 +76,10 @@ describe('Collection API Endpoints Integration Tests', () => {
     await pool.end();
   });
 
-  describe('GET /api/collections/me', () => {
+  describe('GET /api/v1/collections/me', () => {
     it('should require authentication', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -88,11 +88,11 @@ describe('Collection API Endpoints Integration Tests', () => {
 
     it('should return collection ID for ADMIN user', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.user_id).toBe(adminUser.id);
@@ -100,22 +100,22 @@ describe('Collection API Endpoints Integration Tests', () => {
 
     it('should create collection if it does not exist', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data.id).toBeDefined();
     });
 
     it('should return same collection ID on subsequent calls', async () => {
       const firstResponse = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
       const secondResponse = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 

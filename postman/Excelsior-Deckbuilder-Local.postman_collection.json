@@ -635,11 +635,11 @@
       "name": "Collections",
       "item": [
         {
-          "name": "GET /api/collections/me",
+          "name": "GET /api/v1/collections/me",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/collections/me"
+            "url": "{{baseUrl}}/api/v1/collections/me"
           }
         },
         {

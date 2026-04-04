@@ -675,7 +675,7 @@ All endpoints require authentication. GUEST users bypass these via localStorage.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/collections/me` | Fetch user's collection |
+| GET | `/api/v1/collections/me` | Fetch user's collection (v1 envelope) |
 | GET | `/api/collections/me/cards` | Fetch collection cards |
 | POST | `/api/collections/me/cards` | Add card to collection |
 | PUT | `/api/collections/me/cards/:cardId` | Update card quantity |

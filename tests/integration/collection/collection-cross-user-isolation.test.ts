@@ -122,12 +122,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
   describe('Collection ID Isolation', () => {
     it('should create separate collections for different users', async () => {
       const response1 = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response2 = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 
@@ -138,12 +138,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
 
     it('should maintain consistent collection IDs per user', async () => {
       const response1a = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       const response1b = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
@@ -474,12 +474,12 @@ describe('Collection Cross-User Isolation Integration Tests', () => {
     it('should store collections with correct user_id foreign keys', async () => {
       // Create collections for all users
       await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie1)
         .expect(200);
 
       await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie2)
         .expect(200);
 

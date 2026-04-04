@@ -108,7 +108,7 @@ describe('Feature Name Integration Tests', () => {
  * Integration tests for Collection API Endpoints
  * 
  * Tests all CRUD operations for the collection feature:
- * - GET /api/collections/me - Get current user's collection
+ * - GET /api/v1/collections/me - Get current user's collection (v1 envelope)
  * - POST /api/collections/me/cards - Add card to collection
  * 
  * All endpoints require ADMIN role.

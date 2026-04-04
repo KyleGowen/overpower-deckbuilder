@@ -108,40 +108,40 @@ describe('Collection Access Control Integration Tests', () => {
     await pool.end();
   });
 
-  describe('GET /api/collections/me', () => {
+  describe('GET /api/v1/collections/me', () => {
     it('should allow ADMIN users to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', adminAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should allow USER to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', regularAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should allow GUEST users to access', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .set('Cookie', guestAuthCookie)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.errors).toEqual([]);
       expect(response.body.data).toBeDefined();
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .get('/api/collections/me')
+        .get('/api/v1/collections/me')
         .expect(401);
 
       expect(response.body.success).toBe(false);
@@ -422,7 +422,7 @@ describe('Collection Access Control Integration Tests', () => {
   describe('Authentication requirement across all endpoints', () => {
     it('should require authentication for all collection endpoints', async () => {
       const endpoints = [
-        { method: 'get', path: '/api/collections/me' },
+        { method: 'get', path: '/api/v1/collections/me' },
         { method: 'get', path: '/api/collections/me/cards' },
         { method: 'post', path: '/api/collections/me/cards', body: { cardId: testCharacterId, cardType: 'character', quantity: 1, imagePath: '/images/test.webp' } },
         { method: 'put', path: `/api/collections/me/cards/${testCharacterId}`, body: { quantity: 5, cardType: 'character', imagePath: '/images/test.webp' } },
@@ -446,10 +446,10 @@ describe('Collection Access Control Integration Tests', () => {
       
       for (const cookie of cookies) {
         const meResponse = await request(app)
-          .get('/api/collections/me')
+          .get('/api/v1/collections/me')
           .set('Cookie', cookie)
           .expect(200);
-        expect(meResponse.body.success).toBe(true);
+        expect(meResponse.body.errors).toEqual([]);
 
         const cardsResponse = await request(app)
           .get('/api/collections/me/cards')
