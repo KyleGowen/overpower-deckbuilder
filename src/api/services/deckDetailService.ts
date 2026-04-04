@@ -84,7 +84,7 @@ export class DeckDetailService {
     return { ok: true };
   }
 
-  /** Legacy `deck-api.routes.ts`: reserve_character vs deck cards only in `NODE_ENV === 'test'`. */
+  /** Legacy deck metadata routes: reserve_character vs deck cards only in `NODE_ENV === 'test'`. */
   private async validateReserveCharacter(
     deckId: string,
     reserveCharacter: string,

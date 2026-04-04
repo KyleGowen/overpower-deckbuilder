@@ -409,9 +409,9 @@ or
 
 **Removed:** **`GET /api/decks`** — use **`GET /api/v1/decks`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-### Deck CRUD and cards
+### Deck CRUD, cards, and UI preferences
 
-**File:** `src/routes/deck-api.routes.ts`
+**v1:** `src/api/http/decks.http.ts` (+ services under `src/api/services/`). Legacy **`deck-api.routes.ts`** is **removed** — there is no `src/routes/deck-api.routes.ts`.
 
 Unless noted, **auth required**. Guest users receive **403** on mutations that change DB decks (create, update, delete, card POST/PUT/DELETE, UI prefs PUT).
 
@@ -437,15 +437,9 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 **Removed:** use **`GET /api/v1/decks/stats`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-#### `GET /api/decks/:id/ui-preferences` / `PUT /api/decks/:id/ui-preferences`
+#### `GET /api/decks/:id/ui-preferences` / `PUT /api/decks/:id/ui-preferences` (removed)
 
-**Owner only** (GET/PUT check ownership).
-
-**GET 200:** `{ "success": true, "data": { } }` (object may be empty).
-
-**PUT body:** JSON object, e.g. `{ "viewMode": "tile", "sortBy": "name", "filterBy": "all" }`. Constraints: `viewMode` ∈ `tile` | `list`; string fields max length; total JSON string length ≤ 1000.
-
-**PUT 200:** `{ "success": true, "data": { /* same preferences sent */ } }`
+**Removed:** use **`GET /api/v1/decks/:id/ui-preferences`** and **`PUT /api/v1/decks/:id/ui-preferences`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**).
 
 ---
 
@@ -676,7 +670,7 @@ Quick lookup: **method**, **path**, **source file**.
 | POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
-| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**), `/api/decks/:id/ui-preferences` (create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | `deck-api.routes.ts` + `decks.http.ts` |
+| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~, ~~`/api/decks/:id/ui-preferences`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**; create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | *use v1* · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | GET/POST/PUT/DELETE | `/api/collections/me/*` | `collections.routes.ts` |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 

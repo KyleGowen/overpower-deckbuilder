@@ -793,61 +793,15 @@ Use **`GET /api/v1/decks/stats`** — see [API_V1.md](../../API_V1.md). The lega
 
 ---
 
-## UI Preferences Endpoints
+## UI Preferences Endpoints (legacy removed)
 
-### GET /api/decks/:id/ui-preferences
-Get UI preferences for a specific deck.
+Legacy **`GET` / `PUT` `/api/decks/:id/ui-preferences`** are **not** registered. Use **`GET` / `PUT` `/api/v1/decks/:id/ui-preferences`** — see [API_V1.md](../../API_V1.md).
 
-**Authentication:** Required
+**Authentication:** Required (USER or ADMIN for PUT; GUEST receives **403** on v1).
 
-**Parameters:**
-- `id` (string): Deck ID
+**Security (PUT):** Read-only mode detection, rate limiting, ownership validation, preferences object size ≤ 1000 characters (see API_V1.md).
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "viewMode": "tile|list",
-    "sortBy": "string",
-    "filterBy": "string"
-  }
-}
-```
-
-### PUT /api/decks/:id/ui-preferences
-Update UI preferences for a specific deck.
-
-**Authentication:** Required (USER or ADMIN role, not GUEST)
-**Security:** 
-- Read-only mode detection (blocks if `readonly=true` in URL/query/headers)
-- Rate limiting: 100 requests per minute per IP
-- Ownership validation required
-- Input validation: preferences object size limited to 1000 characters
-
-**Parameters:**
-- `id` (string): Deck ID
-
-**Request Body:**
-```json
-{
-  "viewMode": "tile|list",
-  "sortBy": "string",
-  "filterBy": "string"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "viewMode": "tile|list",
-    "sortBy": "string",
-    "filterBy": "string"
-  }
-}
-```
+**Response:** v1 envelope `{ data, meta, errors }` — see **User decks (UI preferences)** in [API_V1.md](../../API_V1.md).
 
 ---
 

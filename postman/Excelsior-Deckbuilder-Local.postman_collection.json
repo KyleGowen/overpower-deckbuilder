@@ -498,15 +498,15 @@
           }
         },
         {
-          "name": "GET /api/decks/:id/ui-preferences",
+          "name": "GET /api/v1/decks/:id/ui-preferences",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/ui-preferences"
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/ui-preferences"
           }
         },
         {
-          "name": "PUT /api/decks/:id/ui-preferences",
+          "name": "PUT /api/v1/decks/:id/ui-preferences",
           "request": {
             "method": "PUT",
             "header": [
@@ -515,7 +515,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/decks/{{deckId}}/ui-preferences",
+            "url": "{{baseUrl}}/api/v1/decks/{{deckId}}/ui-preferences",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"viewMode\": \"tile\",\n  \"sortBy\": \"name\",\n  \"filterBy\": \"all\"\n}"

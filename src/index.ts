@@ -22,6 +22,7 @@ import { DeckStatsService } from './api/services/deckStatsService';
 import { DeckWriteService } from './api/services/deckWriteService';
 import { DeckDetailService } from './api/services/deckDetailService';
 import { DeckCardsService } from './api/services/deckCardsService';
+import { DeckUIPreferencesService } from './api/services/deckUIPreferencesService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import {
@@ -374,6 +375,7 @@ const deckCardsService = new DeckCardsService(deckRepository, {
   checkIfCardIsFortification,
   checkIfCardIsOnePerDeck
 });
+const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
 // Function to get git information
 function getGitInfo() {
@@ -532,6 +534,6 @@ registerApiV1Routes(app, {
   deckWriteService,
   deckDetailService,
   deckCardsService,
-  deckRepository
+  deckUIPreferencesService
 });
 

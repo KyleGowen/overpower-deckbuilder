@@ -25,6 +25,7 @@ import { DeckStatsService } from '../api/services/deckStatsService';
 import { DeckWriteService } from '../api/services/deckWriteService';
 import { DeckDetailService } from '../api/services/deckDetailService';
 import { DeckCardsService } from '../api/services/deckCardsService';
+import { DeckUIPreferencesService } from '../api/services/deckUIPreferencesService';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
 import { setupMiddleware } from '../middleware/setup';
@@ -72,6 +73,7 @@ const deckCardsService = new DeckCardsService(deckRepository, {
   checkIfCardIsFortification,
   checkIfCardIsOnePerDeck
 });
+const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
@@ -167,7 +169,7 @@ registerApiV1Routes(app, {
   deckWriteService,
   deckDetailService,
   deckCardsService,
-  deckRepository
+  deckUIPreferencesService
 });
 
 // Error handling middleware

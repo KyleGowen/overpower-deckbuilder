@@ -220,7 +220,7 @@ describe('Guest API Restrictions', () => {
       expect(response.body.error).toBe('Guests may not modify decks');
     });
 
-    it('should block PUT /api/decks/:id/ui-preferences (update preferences)', () => {
+    it('should block PUT /api/v1/decks/:id/ui-preferences (update preferences)', () => {
       const response = simulateApiResponse(guestUser, 'modify');
       expect(response.status).toBe(403);
       expect(response.body.error).toBe('Guests may not modify decks');

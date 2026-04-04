@@ -525,7 +525,7 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 **Response 500:** **`UI_PREFERENCES_FETCH_ERROR`**.
 
-**Implementation:** [`DeckRepository`](src/repository/DeckRepository.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+**Implementation:** [`DeckUIPreferencesService`](src/api/services/deckUIPreferencesService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
 
 ### `PUT /api/v1/decks/:id/ui-preferences`
 
@@ -533,13 +533,13 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 **Rate limiting / read-only:** Same patterns as other deck mutations (`checkRateLimit`, `blockInReadOnlyMode`).
 
-**Body:** JSON object (same validation rules as legacy **`PUT /api/decks/:id/ui-preferences`**: optional **`viewMode`** (`tile` \| `list`), **`sortBy`**, **`filterBy`**, max object size 1000 characters).
+**Body:** JSON object (optional **`viewMode`** (`tile` \| `list`), **`sortBy`**, **`filterBy`**, max object size 1000 characters).
 
 **Response 200:** v1 envelope; **`data`** = saved preferences body.
 
 **Response 400 / 404 / 500:** **`VALIDATION_ERROR`**, **`DECK_NOT_FOUND`**, **`UI_PREFERENCES_UPDATE_ERROR`**.
 
-**Implementation:** [`DeckRepository`](src/repository/DeckRepository.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
+**Implementation:** [`DeckUIPreferencesService`](src/api/services/deckUIPreferencesService.ts) · HTTP [`decks.http.ts`](src/api/http/decks.http.ts)
 
 ---
 

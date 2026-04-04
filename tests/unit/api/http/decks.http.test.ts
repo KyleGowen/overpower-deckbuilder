@@ -7,6 +7,7 @@ import type { DeckWriteService } from '../../../../src/api/services/deckWriteSer
 import type { DeckDetailService } from '../../../../src/api/services/deckDetailService';
 import type { DeckCardsService } from '../../../../src/api/services/deckCardsService';
 import type { DeckStatsService } from '../../../../src/api/services/deckStatsService';
+import type { DeckUIPreferencesService } from '../../../../src/api/services/deckUIPreferencesService';
 
 const noopDeckBackground = {
   getAvailableBackgrounds: jest.fn().mockResolvedValue([]),
@@ -33,13 +34,11 @@ function stubDeckStats(): DeckStatsService {
   } as unknown as DeckStatsService;
 }
 
-function stubDeckRepository(): DecksV1HttpDeps['deckRepository'] {
+function stubDeckUIPreferences(): DeckUIPreferencesService {
   return {
-    getUIPreferences: jest.fn().mockResolvedValue({}),
-    updateUIPreferences: jest.fn().mockResolvedValue(true),
-    getDeckById: jest.fn().mockResolvedValue({ id: 'd1', user_id: 'user-1' }),
-    userOwnsDeck: jest.fn().mockResolvedValue(true)
-  };
+    getForOwner: jest.fn().mockResolvedValue({ ok: true, data: {} }),
+    updateForOwner: jest.fn().mockResolvedValue({ ok: true, data: { viewMode: 'tile' } })
+  } as unknown as DeckUIPreferencesService;
 }
 
 function stubDetail(): DeckDetailService {
@@ -103,7 +102,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
@@ -131,7 +130,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const app = buildApp(deps);
@@ -158,7 +157,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
@@ -182,7 +181,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(500);
@@ -213,7 +212,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/stats').expect(200);
@@ -245,7 +244,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/stats').expect(500);
@@ -275,7 +274,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -300,7 +299,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).post('/decks').send({ name: '   ' }).expect(400);
@@ -322,7 +321,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuthGuest
     };
     const res = await request(buildApp(deps)).post('/decks').send({ name: 'x' }).expect(403);
@@ -343,7 +342,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -366,7 +365,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -391,7 +390,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps))
@@ -415,7 +414,7 @@ describe('decks.http', () => {
       deckDetailService: stubDetail(),
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).post('/decks/validate').send({}).expect(400);
@@ -458,7 +457,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/d1').expect(200);
@@ -483,7 +482,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/d1/full').expect(200);
@@ -507,7 +506,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks/missing').expect(404);
@@ -535,7 +534,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(200);
@@ -556,7 +555,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuthGuest
     };
     const res = await request(buildApp(deps)).put('/decks/d1').send({ name: 'X' }).expect(403);
@@ -579,7 +578,7 @@ describe('decks.http', () => {
       deckDetailService,
       deckBackgroundService: noopDeckBackground,
       deckCardsService: stubDeckCards(),
-      deckRepository: stubDeckRepository(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).delete('/decks/d1').expect(200);
@@ -603,7 +602,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(200);
@@ -621,7 +620,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(501);
@@ -638,7 +637,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps)).get('/decks/d1/cards').expect(500);
@@ -655,7 +654,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps))
@@ -674,7 +673,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuthGuest
       };
       const res = await request(buildApp(deps))
@@ -694,7 +693,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps)).post('/decks/d1/cards').send({}).expect(400);
@@ -711,7 +710,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       (deckCardsService.postCard as jest.Mock).mockResolvedValue({
@@ -756,7 +755,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps))
@@ -775,7 +774,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuthGuest
       };
       await request(buildApp(deps))
@@ -801,7 +800,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps))
@@ -821,7 +820,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuth
       };
       const res = await request(buildApp(deps))
@@ -840,7 +839,7 @@ describe('decks.http', () => {
         deckDetailService: stubDetail(),
         deckBackgroundService: noopDeckBackground,
         deckCardsService,
-        deckRepository: stubDeckRepository(),
+        deckUIPreferencesService: stubDeckUIPreferences(),
         authenticateUser: passAuthGuest
       };
       await request(buildApp(deps))
@@ -848,6 +847,143 @@ describe('decks.http', () => {
         .send({ cardType: 'character', cardId: 'x', quantity: 1 })
         .expect(403);
       expect(deckCardsService.deleteCards).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ui-preferences /decks/:id/ui-preferences', () => {
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+
+    it('GET returns 200 with preferences data', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.getForOwner as jest.Mock).mockResolvedValue({ ok: true, data: { viewMode: 'list' } });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).get('/decks/d1/ui-preferences').expect(200);
+      expect(res.body.data).toEqual({ viewMode: 'list' });
+      expect(svc.getForOwner).toHaveBeenCalledWith('d1', 'user-1');
+    });
+
+    it('GET returns 403 for GUEST', async () => {
+      const svc = stubDeckUIPreferences();
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuthGuest
+      };
+      await request(buildApp(deps)).get('/decks/d1/ui-preferences').expect(403);
+      expect(svc.getForOwner).not.toHaveBeenCalled();
+    });
+
+    it('GET returns 403 when not owner', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.getForOwner as jest.Mock).mockResolvedValue({ ok: false, kind: 'forbidden' });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).get('/decks/d1/ui-preferences').expect(403);
+      expect(res.body.errors[0].code).toBe('DECK_ACCESS_DENIED');
+    });
+
+    it('PUT returns 200 with saved preferences', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.updateForOwner as jest.Mock).mockResolvedValue({ ok: true, data: { viewMode: 'tile' } });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).put('/decks/d1/ui-preferences').send({ viewMode: 'tile' }).expect(200);
+      expect(res.body.data).toEqual({ viewMode: 'tile' });
+      expect(svc.updateForOwner).toHaveBeenCalledWith('d1', 'user-1', { viewMode: 'tile' });
+    });
+
+    it('PUT returns 400 on validation_error from service', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.updateForOwner as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'validation_error',
+        message: 'Preferences must be an object'
+      });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).put('/decks/d1/ui-preferences').send({}).expect(400);
+      expect(res.body.errors[0].code).toBe('VALIDATION_ERROR');
+    });
+
+    it('PUT returns 404 on not_found from service', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.updateForOwner as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'not_found',
+        message: 'Deck not found'
+      });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).put('/decks/x/ui-preferences').send({ viewMode: 'tile' }).expect(404);
+      expect(res.body.errors[0].code).toBe('DECK_NOT_FOUND');
+    });
+
+    it('PUT returns 403 when forbidden from service', async () => {
+      const svc = stubDeckUIPreferences();
+      (svc.updateForOwner as jest.Mock).mockResolvedValue({
+        ok: false,
+        kind: 'forbidden',
+        message: 'Access denied. You do not own this deck.'
+      });
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService: stubDeckCards(),
+        deckUIPreferencesService: svc,
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps)).put('/decks/d1/ui-preferences').send({ viewMode: 'tile' }).expect(403);
+      expect(res.body.errors[0].code).toBe('DECK_ACCESS_DENIED');
     });
   });
 });

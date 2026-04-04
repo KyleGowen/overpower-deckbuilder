@@ -59,10 +59,6 @@ export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 
 /** Dependencies for guest deck routes. */
 export type GuestDeckRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'guestDeckPersistence' | 'deckRepository' | 'transformDeckList' | 'validateCardAddition' | 'checkIfCardIsOnePerDeck' | 'checkIfCardIsCataclysm'>;
 
-/** Dependencies for main deck API routes. */
-export type DeckApiRoutesDeps = Pick<RouteDependencies,
-  'authenticateUser' | 'blockGuestMutation' | 'deckRepository' | 'deckBusinessService' | 'deckValidationService' | 'requireDeckOwner' | 'deckBackgroundService' | 'validateCardAddition' | 'checkIfCardIsOnePerDeck' | 'checkIfCardIsCataclysm' | 'checkIfCardIsAssist' | 'checkIfCardIsAmbush' | 'checkIfCardIsFortification'>;
-
 /** Dependencies for collection routes. */
 export type CollectionRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'collectionService'>;
 

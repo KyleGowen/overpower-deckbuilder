@@ -165,7 +165,7 @@ if (currentDeckData && currentDeckData.metadata && !currentDeckData.metadata.isO
   - `/api/decks` (POST)
   - `/api/decks/:id` (PUT/DELETE)
   - `/api/decks/:id/cards` (PUT/POST/DELETE)
-  - `/api/decks/:id/ui-preferences` (PUT)
+  - `/api/v1/decks/:id/ui-preferences` (PUT)
 
 ##### 3. Server-Side Read-Only Mode Detection ✅
 - ✅ **Check URL parameters** for `readonly=true`

@@ -3,7 +3,6 @@ import express from 'express';
 import { registerAuthRoutes } from './auth.routes';
 import { registerUsersDebugRoutes } from './users-debug.routes';
 import { registerGuestDeckRoutes } from './guest-decks.routes';
-import { registerDeckApiRoutes } from './deck-api.routes';
 import { registerCollectionRoutes } from './collections.routes';
 import { registerPageRoutes } from './pages.routes';
 import { registerStaticAndHealthRoutes } from './static-health.routes';
@@ -15,7 +14,6 @@ export function registerRoutes(app: express.Application, deps: RouteDependencies
   registerAuthRoutes(app, deps);
   registerUsersDebugRoutes(app, deps);
   registerGuestDeckRoutes(app, deps);
-  registerDeckApiRoutes(app, deps);
   registerCollectionRoutes(app, deps);
   registerPageRoutes(app, deps);
   registerStaticAndHealthRoutes(app, deps);

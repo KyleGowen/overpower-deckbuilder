@@ -64,7 +64,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 ## P2 — Decks (database-backed)
 
-**Scope:** Authenticated user decks in PostgreSQL; **GUEST** gets **403** on DB deck mutations (same as legacy). **Source:** `API_DOCUMENTATION.md` (Decks), `deck-api.routes.ts`. **P2a list:** [`decks.http.ts`](src/api/http/decks.http.ts) + [`deckListService.ts`](src/api/services/deckListService.ts).
+**Scope:** Authenticated user decks in PostgreSQL; **GUEST** gets **403** on DB deck mutations (same as legacy). **Source:** `API_DOCUMENTATION.md` (Decks). **P2a list:** [`decks.http.ts`](src/api/http/decks.http.ts) + [`deckListService.ts`](src/api/services/deckListService.ts).
 
 **v1 prefix:** `/api/v1/decks…`.
 
@@ -109,8 +109,8 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 | Legacy path                         | v1 path (proposed)                         | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ----------------------------------- | ------------------------------------------ | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/decks/:id/ui-preferences   | GET /api/v1/decks/:id/ui-preferences       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| PUT /api/decks/:id/ui-preferences   | PUT /api/v1/decks/:id/ui-preferences       | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/decks/:id/ui-preferences   | GET /api/v1/decks/:id/ui-preferences       | [x]      | `DeckUIPreferencesService` + `decks.http.ts` | [x]       | [x]    | [x]       |
+| PUT /api/decks/:id/ui-preferences   | PUT /api/v1/decks/:id/ui-preferences       | [x]      | `DeckUIPreferencesService` + `decks.http.ts` | [x]       | [x]    | [x]       |
 
 
 ---

@@ -15,7 +15,7 @@ import type { DeckStatsService } from '../services/deckStatsService';
 import type { DeckWriteService } from '../services/deckWriteService';
 import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCardsService } from '../services/deckCardsService';
-import type { DeckRepository } from '../../repository/DeckRepository';
+import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
 
 export interface RegisterApiV1Deps {
   authenticationService: AuthenticationService;
@@ -36,10 +36,7 @@ export interface RegisterApiV1Deps {
   deckWriteService: DeckWriteService;
   deckDetailService: DeckDetailService;
   deckCardsService: DeckCardsService;
-  deckRepository: Pick<
-    DeckRepository,
-    'getUIPreferences' | 'updateUIPreferences' | 'getDeckById' | 'userOwnsDeck'
-  >;
+  deckUIPreferencesService: DeckUIPreferencesService;
 }
 
 /**
@@ -74,7 +71,7 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     deckCardsService: deps.deckCardsService,
     deckBackgroundService: deps.deckBackgroundService,
     authenticateUser: deps.authenticateUser,
-    deckRepository: deps.deckRepository
+    deckUIPreferencesService: deps.deckUIPreferencesService
   });
 
   return router;

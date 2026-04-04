@@ -18,9 +18,8 @@ import { UpdateDeckRequestBody, type UpdateDeckParsed } from './models/decks/Upd
 import { DeckCardsPostBody } from './models/decks/DeckCardsPostBody';
 import { DeckCardsPutBody } from './models/decks/DeckCardsPutBody';
 import type { DeckBackgroundListReader } from './dbv-support.http';
-import type { DeckRepository } from '../../repository/DeckRepository';
-import type { UIPreferences } from '../../types';
 import type { DeckStatsV1DataDto } from '../dto/v1/DeckStatsV1DataDto';
+import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
 
 /**
  * Maps validated JSON fields to repository `Partial<Deck>`.
@@ -54,10 +53,7 @@ export interface DecksV1HttpDeps {
   deckCardsService: DeckCardsService;
   deckBackgroundService: DeckBackgroundListReader;
   authenticateUser: RequestHandler;
-  deckRepository: Pick<
-    DeckRepository,
-    'getUIPreferences' | 'updateUIPreferences' | 'getDeckById' | 'userOwnsDeck'
-  >;
+  deckUIPreferencesService: DeckUIPreferencesService;
 }
 
 function stableV1DeckListBody<T>(data: T): string {
@@ -449,14 +445,14 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
         return;
       }
       const { id } = req.params;
-      if (!(await deps.deckRepository.userOwnsDeck(id, req.user!.id))) {
+      const result = await deps.deckUIPreferencesService.getForOwner(id, req.user!.id);
+      if (!result.ok) {
         sendV1Json(res, 403, null, [
           { code: 'DECK_ACCESS_DENIED', message: 'Access denied. You do not own this deck.' }
         ]);
         return;
       }
-      const preferences = await deps.deckRepository.getUIPreferences(id);
-      sendV1Success(res, preferences ?? {});
+      sendV1Success(res, result.data);
     } catch (error) {
       console.error('v1 GET /decks/:id/ui-preferences error:', error);
       sendV1Json(res, 500, null, [
@@ -479,54 +475,24 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
       }
 
       const { id } = req.params;
-      const preferences = req.body as UIPreferences & Record<string, unknown>;
+      const result = await deps.deckUIPreferencesService.updateForOwner(id, req.user!.id, req.body);
 
-      if (!preferences || typeof preferences !== 'object' || Array.isArray(preferences)) {
-        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'Preferences must be an object' }]);
-        return;
-      }
-
-      if (preferences.viewMode && !['tile', 'list'].includes(String(preferences.viewMode))) {
-        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'viewMode must be either "tile" or "list"' }]);
-        return;
-      }
-
-      if (preferences.sortBy && (typeof preferences.sortBy !== 'string' || preferences.sortBy.length > 50)) {
-        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'sortBy must be a string with 50 characters or less' }]);
-        return;
-      }
-
-      if (preferences.filterBy && (typeof preferences.filterBy !== 'string' || preferences.filterBy.length > 50)) {
-        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'filterBy must be a string with 50 characters or less' }]);
-        return;
-      }
-
-      const preferencesString = JSON.stringify(preferences);
-      if (preferencesString.length > 1000) {
-        sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: 'Preferences object is too large (max 1000 characters)' }]);
-        return;
-      }
-
-      const deck = await deps.deckRepository.getDeckById(id);
-      if (!deck) {
-        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
-        return;
-      }
-
-      if (!(await deps.deckRepository.userOwnsDeck(id, req.user!.id))) {
+      if (!result.ok) {
+        if (result.kind === 'validation_error') {
+          sendV1Json(res, 400, null, [{ code: 'VALIDATION_ERROR', message: result.message }]);
+          return;
+        }
+        if (result.kind === 'not_found') {
+          sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: result.message }]);
+          return;
+        }
         sendV1Json(res, 403, null, [
-          { code: 'DECK_ACCESS_DENIED', message: 'Access denied. You do not own this deck.' }
+          { code: 'DECK_ACCESS_DENIED', message: result.message }
         ]);
         return;
       }
 
-      const success = await deps.deckRepository.updateUIPreferences(id, preferences as UIPreferences);
-      if (!success) {
-        sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
-        return;
-      }
-
-      sendV1Success(res, preferences);
+      sendV1Success(res, result.data);
     } catch (error) {
       console.error('v1 PUT /decks/:id/ui-preferences error:', error);
       sendV1Json(res, 500, null, [
