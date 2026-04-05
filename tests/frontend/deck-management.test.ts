@@ -62,18 +62,12 @@ async function loadUserDecks() {
     }
 
     const isGuest = currentUser.role === 'GUEST';
-    const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
+    const url = isGuest ? '/api/v1/guest/decks' : '/api/v1/decks';
     const response = await fetch(url, {
       credentials: 'include'
     });
     const json = await response.json();
-    if (isGuest) {
-      if (json.success) {
-        userDecks = json.data;
-      } else {
-        console.error('Failed to load decks:', json.error);
-      }
-    } else if (Array.isArray(json.data) && (!json.errors || json.errors.length === 0)) {
+    if (Array.isArray(json.data) && (!json.errors || json.errors.length === 0)) {
       userDecks = json.data;
     } else {
       console.error('Failed to load decks (v1)');

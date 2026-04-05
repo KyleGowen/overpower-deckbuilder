@@ -12,7 +12,8 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
 
   it('returns 401 without session for GET :id', async () => {
     const res = await request(app).get('/api/v1/decks/some-uuid').expect(401);
-    expect(res.body.success).toBe(false);
+    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(res.body.data).toBeNull();
   });
 
   it('CRUD flow: create, GET, GET full, PUT, DELETE with v1 envelope', async () => {

@@ -1,4 +1,4 @@
-import express, { Request } from 'express';
+import express from 'express';
 import type { StaticHealthRoutesDeps } from './types';
 
 export function registerStaticAndHealthRoutes(app: express.Application, deps: StaticHealthRoutesDeps): void {
@@ -190,29 +190,6 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
       healthData.latency = `${Date.now() - startTime}ms`;
       
       res.status(503).json(healthData);
-    }
-  });
-  
-  // Database status endpoint (ADMIN only)
-  app.get('/api/database/status', deps.authenticateUser, async (req: Request, res) => {
-    try {
-      if (!deps.requireAdmin(req, res)) return;
-      const isValid = await deps.databaseInit.validateDatabase();
-      const isUpToDate = await deps.databaseInit.checkDatabaseStatus();
-      
-      res.json({
-        status: 'OK',
-        database: {
-          valid: isValid,
-          upToDate: isUpToDate,
-          migrations: 'Flyway managed'
-        }
-      });
-    } catch (error) {
-      res.status(500).json({
-        status: 'ERROR',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
     }
   });
 }

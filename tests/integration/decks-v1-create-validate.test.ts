@@ -12,7 +12,8 @@ describe('POST /api/v1/decks and /decks/validate', () => {
 
   it('returns 401 without session for create', async () => {
     const res = await request(app).post('/api/v1/decks').send({ name: 'x' }).expect(401);
-    expect(res.body.success).toBe(false);
+    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(res.body.data).toBeNull();
   });
 
   it('returns 401 without session for validate', async () => {
@@ -20,7 +21,8 @@ describe('POST /api/v1/decks and /decks/validate', () => {
       .post('/api/v1/decks/validate')
       .send({ cards: [] })
       .expect(401);
-    expect(res.body.success).toBe(false);
+    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(res.body.data).toBeNull();
   });
 
   it('creates a deck with v1 envelope and cleans up', async () => {

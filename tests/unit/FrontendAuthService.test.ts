@@ -259,7 +259,7 @@ describe('FrontendAuthService', () => {
         ok: true,
         json: () => Promise.resolve({
           success: true,
-          data: { userId: 'test-id', username: 'testuser' }
+          data: { id: 'test-id', name: 'testuser', email: 'test@example.com', role: 'USER' }
         })
       });
 
@@ -272,7 +272,7 @@ describe('FrontendAuthService', () => {
       expect(result.currentUser).toEqual({
         id: 'test-id',
         name: 'testuser',
-        email: '',
+        email: 'test@example.com',
         role: 'USER'
       });
     });
@@ -296,6 +296,44 @@ describe('FrontendAuthService', () => {
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('currentUser');
       expect(result.isAuthenticated).toBe(false);
       expect(result.currentUser).toBeNull();
+    });
+
+    it('should silently re-login as GUEST when /api/auth/me returns 401 (e.g. server restart)', async () => {
+      const guestStored: User = {
+        id: 'guest-db-id',
+        name: 'guest',
+        email: '',
+        role: 'GUEST'
+      };
+
+      mockLocalStorage.getItem.mockReturnValue(JSON.stringify(guestStored));
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 401
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: { userId: 'guest-db-id', username: 'guest', role: 'GUEST' as UserRole }
+            })
+        });
+
+      const result = await authService.checkAuthentication();
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch.mock.calls[0][0]).toBe('/api/auth/me');
+      expect(mockFetch.mock.calls[1][0]).toBe('/api/auth/login');
+      expect(result.isAuthenticated).toBe(true);
+      expect(result.currentUser).toEqual({
+        id: 'guest-db-id',
+        name: 'guest',
+        email: '',
+        role: 'GUEST'
+      });
+      expect(mockLocalStorage.removeItem).not.toHaveBeenCalled();
     });
 
     it('should handle session verification errors', async () => {

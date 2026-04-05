@@ -72,4 +72,7 @@ export interface CardRepository {
     basicUniverse: number;
     powerCards: number;
   }>;
+
+  /** Optional: in-memory cache clears (e.g. PostgreSQL implementation; admin debug). */
+  clearCaches?(): void;
 }

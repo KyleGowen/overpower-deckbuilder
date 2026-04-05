@@ -11,7 +11,7 @@ import type { DeckCreateV1DataDto } from '../dto/v1/DeckCreateV1DataDto';
 import type { DeckValidateV1SuccessDto } from '../dto/v1/DeckValidateV1SuccessDto';
 import type { DeckDeleteV1DataDto } from '../dto/v1/DeckDeleteV1DataDto';
 import type { V1Envelope } from './v1Envelope';
-import { sendV1Json, sendV1Success } from './v1Envelope';
+import { sendV1Json, sendV1Success, sendV1Unauthorized } from './v1Envelope';
 import { CreateDeckRequestBody } from './models/decks/CreateDeckRequestBody';
 import { ValidateDeckRequestBody } from './models/decks/ValidateDeckRequestBody';
 import { UpdateDeckRequestBody, type UpdateDeckParsed } from './models/decks/UpdateDeckRequestBody';
@@ -359,10 +359,10 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
   router.put('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
     try {
       if (process.env.NODE_ENV === 'test' && req.headers['x-expect-401'] && !req.user) {
-        return res.status(401).json({ success: false, error: 'Authentication required' });
+        return sendV1Unauthorized(res, 'Authentication required');
       }
       if (!req.user) {
-        return res.status(401).json({ success: false, error: 'Authentication required' });
+        return sendV1Unauthorized(res, 'Authentication required');
       }
 
       if (checkRateLimit(req, res, 'deck update', { v1: true })) {
@@ -504,7 +504,7 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
   router.delete('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ success: false, error: 'Authentication required' });
+        return sendV1Unauthorized(res, 'Authentication required');
       }
       if (checkRateLimit(req, res, 'deck deletion', { v1: true })) {
         return;

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { UserRepository } from '../repository/UserRepository';
 import { User } from '../types';
 import crypto from 'crypto';
+import { sendV1Unauthorized } from '../api/http/v1Envelope';
 import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdmin';
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
 import { NewUserSampleDeckService } from './newUserSampleDeckService';
@@ -403,25 +404,33 @@ export class AuthenticationService {
       
       if (!sessionId) {
         // Return JSON error for API calls, redirect for page requests
+        if (req.originalUrl.startsWith('/api/v1')) {
+          return sendV1Unauthorized(res, 'Authentication required');
+        }
         if (req.originalUrl.startsWith('/api/')) {
           return res.status(401).json({ success: false, error: 'Authentication required' });
         }
         return res.redirect('/');
       }
-      
+
       const session = this.validateSession(sessionId);
-      
+
       if (!session) {
-        // Return JSON error for API calls, redirect for page requests
+        if (req.originalUrl.startsWith('/api/v1')) {
+          return sendV1Unauthorized(res, 'Invalid or expired session');
+        }
         if (req.originalUrl.startsWith('/api/')) {
           return res.status(401).json({ success: false, error: 'Invalid or expired session' });
         }
         return res.redirect('/');
       }
-      
+
       // Get the full user object from the database
       const user = await this.getUserById(session.userId);
       if (!user) {
+        if (req.originalUrl.startsWith('/api/v1')) {
+          return sendV1Unauthorized(res, 'User not found');
+        }
         if (req.originalUrl.startsWith('/api/')) {
           return res.status(401).json({ success: false, error: 'User not found' });
         }

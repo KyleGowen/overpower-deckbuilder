@@ -680,7 +680,7 @@ All endpoints require authentication. GUEST users bypass these via localStorage.
 | POST | `/api/v1/collections/me/cards` | Add card to collection |
 | PUT | `/api/v1/collections/me/cards/:cardId` | Update card quantity |
 | DELETE | `/api/v1/collections/me/cards/:cardId` | Remove card from collection |
-| GET | `/api/collections/me/history` | Fetch collection change history |
+| GET | `/api/v1/collections/me/history` | Fetch collection change history (v1 envelope) |
 
 ### Frontend Flow
 

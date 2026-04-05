@@ -237,43 +237,63 @@ const createTestApp = () => {
     }
   });
 
-  // User management endpoints
-  app.get('/api/users', async (req, res) => {
+  // User management endpoints (mirrors /api/v1/admin/users v1 envelope)
+  app.get('/api/v1/admin/users', authenticateAdmin, async (_req, res) => {
     try {
       const users = await mockUserRepository.getAllUsers();
-      res.json({ success: true, data: users });
+      res.json({ data: users, meta: {}, errors: [] });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to fetch users' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'ADMIN_USERS_LIST_ERROR', message: 'Failed to fetch users' }]
+      });
     }
   });
 
-  app.post('/api/users', authenticateAdmin, async (req: any, res) => {
+  app.post('/api/v1/admin/users', authenticateAdmin, async (req: any, res) => {
     try {
       const currentUser = req.user;
       if (currentUser.role !== 'ADMIN') {
-        return res.status(403).json({ success: false, error: 'Only ADMIN users can create new users' });
+        return res.status(403).json({
+          data: null,
+          meta: {},
+          errors: [{ code: 'ADMIN_REQUIRED', message: 'Only ADMIN users can access this endpoint' }]
+        });
       }
 
       const { username, password } = req.body;
       if (!username || !password) {
-        return res.status(400).json({ success: false, error: 'Username and password are required' });
+        return res.status(400).json({
+          data: null,
+          meta: {},
+          errors: [{ code: 'VALIDATION_ERROR', message: 'Username and password are required' }]
+        });
       }
 
       const existingUser = await mockUserRepository.getUserByUsername(username);
       if (existingUser) {
-        return res.status(409).json({ success: false, error: 'Username already exists' });
+        return res.status(409).json({
+          data: null,
+          meta: {},
+          errors: [{ code: 'USERNAME_EXISTS', message: 'Username already exists' }]
+        });
       }
 
       const newUser = await mockUserRepository.createUser(username, `${username}@example.com`, password, 'USER');
       const { password_hash, ...userWithoutPassword } = newUser as any;
-      
-      res.status(201).json({ 
-        success: true, 
+
+      res.status(201).json({
         data: userWithoutPassword,
-        message: `User "${username}" created successfully`
+        meta: {},
+        errors: []
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'Failed to create user' });
+      res.status(500).json({
+        data: null,
+        meta: {},
+        errors: [{ code: 'ADMIN_USER_CREATE_ERROR', message: 'Failed to create user' }]
+      });
     }
   });
 
@@ -701,7 +721,7 @@ describe('API Endpoints - Simplified', () => {
   });
 
   describe('User Management Endpoints', () => {
-    describe('GET /api/users', () => {
+    describe('GET /api/v1/admin/users', () => {
       it('should return all users successfully', async () => {
         const mockUsers = [
           { id: '1', username: 'user1', role: 'USER' },
@@ -710,12 +730,13 @@ describe('API Endpoints - Simplified', () => {
         mockUserRepository.getAllUsers.mockResolvedValue(mockUsers);
 
         const response = await request(app)
-          .get('/api/users')
+          .get('/api/v1/admin/users')
           .expect(200);
 
         expect(response.body).toEqual({
-          success: true,
-          data: mockUsers
+          data: mockUsers,
+          meta: {},
+          errors: []
         });
         expect(mockUserRepository.getAllUsers).toHaveBeenCalled();
       });
@@ -724,17 +745,18 @@ describe('API Endpoints - Simplified', () => {
         mockUserRepository.getAllUsers.mockRejectedValue(new Error('Database error'));
 
         const response = await request(app)
-          .get('/api/users')
+          .get('/api/v1/admin/users')
           .expect(500);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Failed to fetch users'
+          data: null,
+          meta: {},
+          errors: [{ code: 'ADMIN_USERS_LIST_ERROR', message: 'Failed to fetch users' }]
         });
       });
     });
 
-    describe('POST /api/users', () => {
+    describe('POST /api/v1/admin/users', () => {
       it('should create user successfully when admin', async () => {
         const newUser = {
           id: 'new-user-id',
@@ -747,19 +769,19 @@ describe('API Endpoints - Simplified', () => {
         mockUserRepository.createUser.mockResolvedValue(newUser);
 
         const response = await request(app)
-          .post('/api/users')
+          .post('/api/v1/admin/users')
           .send({ username: 'newuser', password: 'password123' })
           .expect(201);
 
         expect(response.body).toEqual({
-          success: true,
           data: {
             id: 'new-user-id',
             username: 'newuser',
             email: 'newuser@example.com',
             role: 'USER'
           },
-          message: 'User "newuser" created successfully'
+          meta: {},
+          errors: []
         });
         expect(mockUserRepository.createUser).toHaveBeenCalledWith(
           'newuser',
@@ -771,25 +793,27 @@ describe('API Endpoints - Simplified', () => {
 
       it('should return 400 when username is missing', async () => {
         const response = await request(app)
-          .post('/api/users')
+          .post('/api/v1/admin/users')
           .send({ password: 'password123' })
           .expect(400);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Username and password are required'
+          data: null,
+          meta: {},
+          errors: [{ code: 'VALIDATION_ERROR', message: 'Username and password are required' }]
         });
       });
 
       it('should return 400 when password is missing', async () => {
         const response = await request(app)
-          .post('/api/users')
+          .post('/api/v1/admin/users')
           .send({ username: 'newuser' })
           .expect(400);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Username and password are required'
+          data: null,
+          meta: {},
+          errors: [{ code: 'VALIDATION_ERROR', message: 'Username and password are required' }]
         });
       });
 
@@ -800,13 +824,14 @@ describe('API Endpoints - Simplified', () => {
         });
 
         const response = await request(app)
-          .post('/api/users')
+          .post('/api/v1/admin/users')
           .send({ username: 'existinguser', password: 'password123' })
           .expect(409);
 
         expect(response.body).toEqual({
-          success: false,
-          error: 'Username already exists'
+          data: null,
+          meta: {},
+          errors: [{ code: 'USERNAME_EXISTS', message: 'Username already exists' }]
         });
       });
     });

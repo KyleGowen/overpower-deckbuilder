@@ -7,6 +7,7 @@
  * - POST /api/v1/collections/me/cards - Add card to collection
  * - PUT /api/v1/collections/me/cards/:cardId - Update card quantity
  * - DELETE /api/v1/collections/me/cards/:cardId - Remove card from collection
+ * - GET /api/v1/collections/me/history - Collection change history (optional limit)
  * 
  * All endpoints require ADMIN role.
  */
@@ -82,8 +83,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         .get('/api/v1/collections/me')
         .expect(401);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Authentication required');
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should return collection ID for ADMIN user', async () => {
@@ -123,6 +124,44 @@ describe('Collection API Endpoints Integration Tests', () => {
     });
   });
 
+  describe('GET /api/v1/collections/me/history', () => {
+    it('should require authentication', async () => {
+      const response = await request(app).get('/api/v1/collections/me/history').expect(401);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
+    });
+
+    it('should return v1 envelope with array data', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history')
+        .set('Cookie', adminAuthCookie)
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should reject non-positive limit', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history?limit=0')
+        .set('Cookie', adminAuthCookie)
+        .expect(400);
+
+      expect(response.body.errors?.length).toBeGreaterThan(0);
+      expect(response.body.errors[0].message).toContain('positive integer');
+    });
+
+    it('should accept positive limit', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history?limit=25')
+        .set('Cookie', adminAuthCookie)
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+  });
+
   describe('GET /api/v1/collections/me/cards', () => {
     beforeEach(async () => {
       // Clear collection before each test
@@ -141,7 +180,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         .get('/api/v1/collections/me/cards')
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should return empty array for empty collection', async () => {
@@ -242,7 +282,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         })
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should add character card to collection', async () => {
@@ -421,7 +462,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         })
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should update card quantity', async () => {
@@ -565,7 +607,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should remove card from collection', async () => {
@@ -628,7 +671,8 @@ describe('Collection API Endpoints Integration Tests', () => {
         .send({ cardId: testCharacterId, cardType: 'character', imagePath: testImagePath })
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should return 400 when missing cardId, cardType, or imagePath', async () => {

@@ -389,7 +389,14 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
     if (isGuest && isDbDeck && !isReadOnlyQuery) {
         try {
             const res = await fetch(`/api/v1/decks/${deckId}`, { credentials: 'include' });
-            const json = await res.json();
+            const raw = await res.text();
+            let json = null;
+            try {
+                json = raw ? JSON.parse(raw) : null;
+            } catch (_parseErr) {
+                showNotification('Could not load deck: server returned a non-JSON response', 'error');
+                return;
+            }
             const guestClonePayload =
                 typeof deckDetailPayload === 'function' ? deckDetailPayload(res, json) : null;
             if (!guestClonePayload || !guestClonePayload.ok || !guestClonePayload.deck) {
@@ -401,7 +408,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 return;
             }
             const deck = guestClonePayload.deck;
-            const createRes = await fetch('/api/guest/decks', {
+            const createRes = await fetch('/api/v1/guest/decks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -411,11 +418,17 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 })
             });
             const createData = await createRes.json();
-            if (!createRes.ok || !createData.success || !createData.data || !createData.data.id) {
-                showNotification('Could not create session copy: ' + (createData.error || 'Unknown error'), 'error');
+            const createPayload =
+                typeof v1DataPayload === 'function' ? v1DataPayload(createRes, createData) : null;
+            if (!createPayload || !createPayload.ok || !createPayload.data || !createPayload.data.id) {
+                const msg =
+                    (createData.errors && createData.errors[0] && createData.errors[0].message) ||
+                    createData.error ||
+                    'Unknown error';
+                showNotification('Could not create session copy: ' + msg, 'error');
                 return;
             }
-            const guestDeckId = createData.data.id;
+            const guestDeckId = createPayload.data.id;
             const cards = (deck.cards || []).map(function (c, i) {
                 return {
                     cardType: c.type,
@@ -425,15 +438,19 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 };
             });
             if (cards.length > 0) {
-                const putRes = await fetch(`/api/guest/decks/${guestDeckId}/cards`, {
+                const putRes = await fetch(`/api/v1/guest/decks/${guestDeckId}/cards`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ cards: cards })
                 });
-                if (!putRes.ok) {
-                    const errData = await putRes.json();
-                    showNotification('Could not copy deck cards: ' + (errData.error || 'Unknown error'), 'error');
+                const putJson = await putRes.json().catch(() => ({}));
+                if (!putRes.ok || (typeof v1ResponseOk === 'function' && !v1ResponseOk(putRes, putJson))) {
+                    const msg =
+                        (putJson.errors && putJson.errors[0] && putJson.errors[0].message) ||
+                        putJson.error ||
+                        'Unknown error';
+                    showNotification('Could not copy deck cards: ' + msg, 'error');
                     return;
                 }
             }
@@ -449,18 +466,14 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
 
     currentDeckId = deckId;
     const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const deckUrl = isGuestDeck ? `/api/guest/decks/${deckId}` : `/api/v1/decks/${deckId}`;
+    const deckUrl = isGuestDeck ? `/api/v1/guest/decks/${deckId}` : `/api/v1/decks/${deckId}`;
     try {
         const response = await fetch(deckUrl, {
             credentials: 'include'
         });
         const data = await response.json();
         let loadedDeck = null;
-        if (isGuestDeck) {
-            if (data.success && data.data) {
-                loadedDeck = data.data;
-            }
-        } else if (typeof deckDetailPayload === 'function') {
+        if (typeof deckDetailPayload === 'function') {
             const detail = deckDetailPayload(response, data);
             if (detail.ok) {
                 loadedDeck = detail.deck;
@@ -930,7 +943,7 @@ async function syncPersistedDeckCardsFromEditor() {
     const deckId = currentDeckId;
     const cards = buildDeckCardsDataForApi();
     const isGuest = typeof isGuestUser === 'function' && isGuestUser() && String(deckId).startsWith('guest_');
-    const url = isGuest ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
+    const url = isGuest ? `/api/v1/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
     try {
         const res = await fetch(url, {
             method: 'PUT',
@@ -938,10 +951,12 @@ async function syncPersistedDeckCardsFromEditor() {
             credentials: 'include',
             body: JSON.stringify({ cards })
         });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
+        const syncJson = await res.json().catch(() => ({}));
+        if (!res.ok || (typeof v1ResponseOk === 'function' && !v1ResponseOk(res, syncJson))) {
             const msg =
-                (err.errors && err.errors[0] && err.errors[0].message) || err.error || 'Failed to sync deck to server';
+                (syncJson.errors && syncJson.errors[0] && syncJson.errors[0].message) ||
+                syncJson.error ||
+                'Failed to sync deck to server';
             showNotification(msg, 'error');
             return false;
         }
@@ -1015,7 +1030,7 @@ async function saveDeckChanges() {
 
         if (isGuest) {
             if (!deckId) {
-                const createResponse = await fetch('/api/guest/decks', {
+                const createResponse = await fetch('/api/v1/guest/decks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1025,27 +1040,40 @@ async function saveDeckChanges() {
                     })
                 });
                 const createData = await createResponse.json();
-                if (!createResponse.ok || !createData.success) {
-                    throw new Error(createData.error || 'Failed to create guest deck');
+                const createPl =
+                    typeof v1DataPayload === 'function' ? v1DataPayload(createResponse, createData) : null;
+                if (!createPl || !createPl.ok || !createPl.data) {
+                    throw new Error(
+                        (createData.errors && createData.errors[0] && createData.errors[0].message) ||
+                            createData.error ||
+                            'Failed to create guest deck'
+                    );
                 }
-                deckId = createData.data.id;
+                deckId = createPl.data.id;
                 currentDeckId = deckId;
                 currentDeckData.metadata.id = deckId;
-                currentDeckData.metadata.created = createData.data.created_at;
-                currentDeckData.metadata.lastModified = createData.data.updated_at;
+                currentDeckData.metadata.created = createPl.data.created_at;
+                currentDeckData.metadata.lastModified = createPl.data.updated_at;
                 const userId = getCurrentUser() ? (getCurrentUser().userId || getCurrentUser().id) : 'guest';
                 window.history.pushState({ deckId, userId }, '', `/users/${userId}/decks/${deckId}`);
             }
-            const cardsEndpoint = `/api/guest/decks/${deckId}/cards`;
+            const cardsEndpoint = `/api/v1/guest/decks/${deckId}/cards`;
             const replaceResponse = await fetch(cardsEndpoint, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ cards: cardsData })
             });
-            if (!replaceResponse.ok) {
-                const errData = await replaceResponse.json();
-                throw new Error(errData.error || 'Failed to save guest deck cards');
+            const replaceJson = await replaceResponse.json().catch(() => ({}));
+            if (
+                !replaceResponse.ok ||
+                (typeof v1ResponseOk === 'function' && !v1ResponseOk(replaceResponse, replaceJson))
+            ) {
+                throw new Error(
+                    (replaceJson.errors && replaceJson.errors[0] && replaceJson.errors[0].message) ||
+                        replaceJson.error ||
+                        'Failed to save guest deck cards'
+                );
             }
             if (typeof saveDeckExpansionState === 'function') saveDeckExpansionState();
             if (typeof showNotification === 'function') showNotification('Guest deck saved (session only)', 'success');

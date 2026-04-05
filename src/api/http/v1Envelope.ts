@@ -24,3 +24,8 @@ export function sendV1Json<T>(res: Response, status: number, data: T | null, err
 export function sendV1Success<T>(res: Response, data: T, status = 200): void {
   sendV1Json(res, status, data, []);
 }
+
+/** Session/Bearer missing or invalid for `/api/v1` routes (per v1 contract). */
+export function sendV1Unauthorized(res: Response, message: string): void {
+  sendV1Json(res, 401, null, [{ code: 'UNAUTHORIZED', message }]);
+}

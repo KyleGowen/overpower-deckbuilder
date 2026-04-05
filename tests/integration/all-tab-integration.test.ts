@@ -271,7 +271,8 @@ describe('All Tab Integration Tests', () => {
         })
         .expect(401); // Unauthorized
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 

@@ -41,6 +41,31 @@ export function registerCollectionsV1HttpRoutes(router: Router, deps: Collection
     }
   });
 
+  router.get('/collections/me/history', deps.authenticateUser, async (req, res) => {
+    try {
+      const limitRaw = firstQueryString(req.query.limit);
+      let limit: number | undefined;
+      if (limitRaw !== undefined) {
+        const n = parseInt(limitRaw, 10);
+        if (Number.isNaN(n) || n < 1) {
+          return sendV1Json(res, 400, null, [
+            { code: 'VALIDATION_ERROR', message: 'limit must be a positive integer' }
+          ]);
+        }
+        limit = n;
+      }
+
+      const collectionId = await deps.collectionService.getOrCreateCollection(req.user!.id);
+      const history = await deps.collectionService.getCollectionHistory(collectionId, limit);
+      sendV1Success(res, history);
+    } catch (error) {
+      console.error('v1 GET /collections/me/history error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'COLLECTION_HISTORY_ERROR', message: 'Failed to get collection history' }
+      ]);
+    }
+  });
+
   router.post('/collections/me/cards', deps.authenticateUser, async (req, res) => {
     try {
       const { cardId, cardType, quantity, imagePath } = req.body as Record<string, unknown>;

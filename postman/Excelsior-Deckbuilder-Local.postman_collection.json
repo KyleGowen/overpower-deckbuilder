@@ -41,13 +41,13 @@
           "description": "Public health check (DB, git, migrations)."
         },
         {
-          "name": "GET /api/database/status",
+          "name": "GET /api/v1/admin/database/status",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/database/status"
+            "url": "{{baseUrl}}/api/v1/admin/database/status"
           },
-          "description": "Admin only."
+          "description": "Admin session cookie. v1 envelope `{ data, meta, errors }`."
         }
       ]
     },
@@ -268,16 +268,16 @@
       "name": "Users & admin",
       "item": [
         {
-          "name": "GET /api/users",
+          "name": "GET /api/v1/admin/users",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/users"
+            "url": "{{baseUrl}}/api/v1/admin/users"
           },
-          "description": "Admin only."
+          "description": "Admin session cookie. v1 envelope `{ data, meta, errors }`."
         },
         {
-          "name": "POST /api/users",
+          "name": "POST /api/v1/admin/users",
           "request": {
             "method": "POST",
             "header": [
@@ -286,13 +286,13 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/users",
+            "url": "{{baseUrl}}/api/v1/admin/users",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"apitest\",\n  \"password\": \"secret\"\n}"
             }
           },
-          "description": "Admin only."
+          "description": "Admin session cookie. v1 envelope; 201 on success."
         },
         {
           "name": "POST /api/users/change-password",
@@ -313,22 +313,22 @@
           "description": "USER or ADMIN."
         },
         {
-          "name": "GET /api/debug/clear-cache",
+          "name": "GET /api/v1/admin/debug/clear-cache",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/debug/clear-cache"
+            "url": "{{baseUrl}}/api/v1/admin/debug/clear-cache"
           },
-          "description": "Admin."
+          "description": "Admin session cookie. v1 envelope."
         },
         {
-          "name": "GET /api/debug/clear-card-cache",
+          "name": "GET /api/v1/admin/debug/clear-card-cache",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/debug/clear-card-cache"
+            "url": "{{baseUrl}}/api/v1/admin/debug/clear-card-cache"
           },
-          "description": "Admin."
+          "description": "Admin session cookie. v1 envelope."
         }
       ]
     },
@@ -534,10 +534,10 @@
       ]
     },
     {
-      "name": "Guest decks (session)",
+      "name": "Guest decks (session) — v1",
       "item": [
         {
-          "name": "POST /api/guest/decks",
+          "name": "POST /api/v1/guest/decks",
           "request": {
             "method": "POST",
             "header": [
@@ -546,32 +546,32 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/guest/decks",
+            "url": "{{baseUrl}}/api/v1/guest/decks",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Guest Deck\",\n  \"description\": \"\"\n}"
             }
           },
-          "description": "Requires GUEST session."
+          "description": "Requires GUEST session + sessionId cookie. Response: v1 envelope { data, meta, errors }."
         },
         {
-          "name": "GET /api/guest/decks",
+          "name": "GET /api/v1/guest/decks",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/guest/decks"
+            "url": "{{baseUrl}}/api/v1/guest/decks"
           }
         },
         {
-          "name": "GET /api/guest/decks/:id",
+          "name": "GET /api/v1/guest/decks/:id",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}"
+            "url": "{{baseUrl}}/api/v1/guest/decks/{{guestDeckId}}"
           }
         },
         {
-          "name": "PUT /api/guest/decks/:id",
+          "name": "PUT /api/v1/guest/decks/:id",
           "request": {
             "method": "PUT",
             "header": [
@@ -580,7 +580,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}",
+            "url": "{{baseUrl}}/api/v1/guest/decks/{{guestDeckId}}",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Renamed Guest Deck\",\n  \"description\": \"\"\n}"
@@ -588,7 +588,7 @@
           }
         },
         {
-          "name": "PUT /api/guest/decks/:id/cards",
+          "name": "PUT /api/v1/guest/decks/:id/cards",
           "request": {
             "method": "PUT",
             "header": [
@@ -597,7 +597,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/guest/decks/{{guestDeckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"{{cardId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
@@ -605,7 +605,7 @@
           }
         },
         {
-          "name": "POST /api/guest/decks/:id/cards",
+          "name": "POST /api/v1/guest/decks/:id/cards",
           "request": {
             "method": "POST",
             "header": [
@@ -614,7 +614,7 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}/cards",
+            "url": "{{baseUrl}}/api/v1/guest/decks/{{guestDeckId}}/cards",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"{{cardId}}\",\n  \"quantity\": 1\n}"
@@ -622,11 +622,11 @@
           }
         },
         {
-          "name": "DELETE /api/guest/decks/:id",
+          "name": "DELETE /api/v1/guest/decks/:id",
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/api/guest/decks/{{guestDeckId}}"
+            "url": "{{baseUrl}}/api/v1/guest/decks/{{guestDeckId}}"
           }
         }
       ]
@@ -710,11 +710,11 @@
           }
         },
         {
-          "name": "GET /api/collections/me/history",
+          "name": "GET /api/v1/collections/me/history",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/collections/me/history?limit=50"
+            "url": "{{baseUrl}}/api/v1/collections/me/history?limit=50"
           }
         }
       ]

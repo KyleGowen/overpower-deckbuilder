@@ -321,39 +321,19 @@ The legacy **list** endpoint is **not** registered. Use **`GET /api/v1/catalog/a
 
 ## Users, admin, and debug
 
-**File:** `src/routes/users-debug.routes.ts`
+**File:** `src/routes/users-debug.routes.ts` (legacy **change-password** only). **Admin list/create, debug cache clears, and database status** are **`/api/v1/admin/...`** — see [API_V1.md](API_V1.md) **Admin**.
 
-### `GET /api/users`
+### `GET /api/users` / `POST /api/users` (removed)
 
-**Auth:** Admin only.
+**Removed:** use **`GET /api/v1/admin/users`** and **`POST /api/v1/admin/users`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**). Responses use the **v1** envelope (`data`, `meta`, `errors`); **ADMIN** session required.
 
-**Response 200:**
+### `GET /api/debug/clear-cache` / `GET /api/debug/clear-card-cache` (removed)
 
-```json
-{ "success": true, "data": [ /* user records; shape from user repository */ ] }
-```
+**Removed:** use **`GET /api/v1/admin/debug/clear-cache`** and **`GET /api/v1/admin/debug/clear-card-cache`**. Legacy URLs are **not** registered.
 
-### `POST /api/users`
+### `GET /api/database/status` (removed)
 
-**Auth:** Admin only.
-
-**Body:**
-
-```json
-{ "username": "demo", "password": "secret" }
-```
-
-**Response 201:**
-
-```json
-{
-  "success": true,
-  "data": { "id": "...", "name": "demo", "email": "demo@example.com", "role": "USER" },
-  "message": "User \"demo\" created successfully"
-}
-```
-
-Password hash is not returned. **409** if username exists.
+**Removed:** use **`GET /api/v1/admin/database/status`**. The legacy URL is **not** registered.
 
 ### `POST /api/users/change-password`
 
@@ -366,40 +346,6 @@ Password hash is not returned. **409** if username exists.
 ```
 
 **Response 200:** `{ "success": true, "message": "Password updated" }`
-
-### `GET /api/debug/clear-cache` / `GET /api/debug/clear-card-cache`
-
-**Auth:** Admin only.
-
-**Response 200:**
-
-```json
-{ "success": true, "message": "Deck cache cleared" }
-```
-
-or
-
-```json
-{ "success": true, "message": "Card repository cache cleared" }
-```
-
-### `GET /api/database/status`
-
-**File:** `src/routes/static-health.routes.ts`  
-**Auth:** Admin only.
-
-**Response 200:**
-
-```json
-{
-  "status": "OK",
-  "database": {
-    "valid": true,
-    "upToDate": true,
-    "migrations": "Flyway managed"
-  }
-}
-```
 
 ---
 
@@ -423,9 +369,11 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 **Removed:** use **`POST /api/v1/decks/validate`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
 
-#### `GET /api/decks/:id`, `GET /api/decks/:id/full`, `PUT /api/decks/:id`, `DELETE /api/decks/:id` (removed)
+#### `GET /api/decks/:id`, `GET /api/decks/:id/full` (compatibility)
 
-**Removed:** use **`GET /api/v1/decks/:id`**, **`GET /api/v1/decks/:id/full`**, **`PUT /api/v1/decks/:id`**, **`DELETE /api/v1/decks/:id`** ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**).
+**Compatibility only:** **`GET /api/decks/:id`** and **`GET /api/decks/:id/full`** are registered for cached clients; responses use the **same v1 JSON envelope** as **`GET /api/v1/decks/:id`** / **`/full`** ([API_V1.md](API_V1.md)). Implementation: **[`legacyDeckReadCompat.http.ts`](src/api/http/legacyDeckReadCompat.http.ts)**.
+
+**Still removed (404):** **`PUT /api/decks/:id`**, **`DELETE /api/decks/:id`** — use **`PUT` / `DELETE`** **`/api/v1/decks/:id`**.
 
 `/full` uses a heavier repository load (`getDeckSummaryWithAllCards`) for full card hydration. **PUT** is **owner only**; success **`data`** includes updated **`metadata`** and **`cards: []`**. **DELETE** success **`data`** is **`{ "message": "Deck deleted successfully" }`** in the v1 envelope.
 
@@ -443,97 +391,26 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 ---
 
-## Guest decks (session memory)
+## Guest decks (session memory) — removed legacy JSON
 
-**File:** `src/routes/guest-decks.routes.ts`
+**Removed:** **`/api/guest/decks`** and related paths are **not** registered. Use **`/api/v1/guest/decks...`** with the **v1 envelope** — see **[API_V1.md](API_V1.md)** (Guest decks) and implementation **[`guest-decks.http.ts`](src/api/http/guest-decks.http.ts)** + **[`GuestDeckService`](src/api/services/guestDeckService.ts)**.
 
-All routes require **GUEST** role and a **session cookie** (`requireGuestSession`). Non-guests get **403** `{ "success": false, "error": "Guest deck endpoints are only available to GUEST users" }`.
-
-Guest decks are stored **in memory** keyed by session; they are **not** persisted to PostgreSQL.
-
-### `POST /api/guest/decks`
-
-**Body (optional):** `{ "name": "My Deck", "description": "" }`
-
-**Response 201:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "guest-deck-id",
-    "name": "My Deck",
-    "description": "",
-    "created_at": "2026-04-03T12:00:00.000Z",
-    "updated_at": "2026-04-03T12:00:00.000Z"
-  }
-}
-```
-
-### `GET /api/guest/decks`
-
-Returns **merged** list: DB decks for the guest user (`getDecksByUserId` + `transformDeckList`) **plus** session guest decks as list items.
-
-```json
-{ "success": true, "data": [ /* combined list */ ] }
-```
-
-### `GET /api/guest/decks/:id`
-
-**Response 200:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "metadata": { "id": "...", "name": "...", "isOwner": true, "...": "..." },
-    "cards": []
-  }
-}
-```
-
-### `PUT /api/guest/decks/:id`
-
-Updates name/description. **Response 200:** `{ "success": true, "data": { /* list item shape */ } }`
-
-### `PUT /api/guest/decks/:id/cards`
-
-Replace all cards (same validation style as DB deck replace, max 100). **Response 200:** `{ "success": true, "data": { "metadata": {...}, "cards": [...] } }`
-
-### `POST /api/guest/decks/:id/cards`
-
-Add card; same rule checks as DB add (one-per-deck, cataclysm, etc.). **Response 200:** full guest deck object in `data`.
-
-### `DELETE /api/guest/decks/:id`
-
-**Response 200:** `{ "success": true }`
+**Auth:** **GUEST** role + **session cookie** (same **`authenticateUser`** as other deck routes) + **`sessionId`** cookie for in-memory guest persistence. Non-guests → **403** v1 `errors` (`GUEST_ONLY`). Missing **`sessionId`** → **401** (`SESSION_REQUIRED`).
 
 ---
 
 ## Collections
 
-**File:** `src/routes/collections.routes.ts`
+**Implementation:** [`collections.http.ts`](src/api/http/collections.http.ts) — all collection JSON endpoints are **`/api/v1/collections/me...`** ([API_V1.md](API_V1.md)). **No** legacy **`/api/collections/me/*`** routes are registered (expect **404**).
 
-All routes require authentication.
+All v1 collection routes require authentication (session cookie).
 
-**Valid `cardType` values** for collection APIs:  
+**Valid `cardType` values** for collection card mutations:  
 `character`, `special`, `power`, `location`, `mission`, `event`, `aspect`, `advanced_universe`, `teamwork`, `ally_universe`, `training`, `basic_universe` (see `isValidCollectionCardType` in [`src/validation/collectionCardType.ts`](src/validation/collectionCardType.ts), re-exported from `src/routes/helpers.ts`).
 
-### ~~`GET /api/collections/me`~~ (removed)
+### Legacy `/api/collections/me/*` (removed)
 
-**Removed:** use **`GET /api/v1/collections/me`** ([API_V1.md](API_V1.md)). The legacy URL is **not** registered (expect **404**).
-
-### ~~`GET /api/collections/me/cards`~~ · ~~`POST`~~ · ~~`POST .../remove-one`~~ · ~~`PUT .../:cardId`~~ · ~~`DELETE .../:cardId`~~ (removed)
-
-**Removed:** use **`GET/POST/PUT/DELETE /api/v1/collections/me/cards`** and related paths ([API_V1.md](API_V1.md)). Legacy URLs are **not** registered (expect **404**). **`DELETE`** still requires query **`cardType`** on the v1 URL.
-
-### `GET /api/collections/me/history?limit=50`
-
-Optional positive integer `limit`. **Response 200:**
-
-```json
-{ "success": true, "data": [ /* history entries */ ] }
-```
+Use **`GET /api/v1/collections/me`**, **`/api/v1/collections/me/cards`**, **`/api/v1/collections/me/history`**, and the card mutation paths documented in [API_V1.md](API_V1.md).
 
 ---
 
@@ -584,16 +461,14 @@ Quick lookup: **method**, **path**, **source file**.
 |--------|------|------|
 | * | `/public`, `/`, `/src/resources` (+ setup mounts) | `static-health.routes.ts`, `middleware/setup.ts` |
 | GET | `/health` | `static-health.routes.ts` |
-| GET | `/api/database/status` | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
 | GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js` | `auth.routes.ts` |
-| GET | `/api/users` | `users-debug.routes.ts` |
-| GET | `/api/debug/clear-cache`, `/api/debug/clear-card-cache` | `users-debug.routes.ts` |
-| POST | `/api/users`, `/api/users/change-password` | `users-debug.routes.ts` |
+| POST | `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
-| POST/GET/PUT/DELETE | `/api/guest/decks`, `/api/guest/decks/:id`, `.../cards` | `guest-decks.routes.ts` |
-| POST/GET/PUT/DELETE | ~~`/api/decks/:id`~~, ~~`/full`~~, ~~`/cards`~~, ~~`/api/deck-stats`~~, ~~`/api/decks/:id/ui-preferences`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**; create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | *use v1* · [`decks.http.ts`](src/api/http/decks.http.ts) |
-| GET | ~~`/api/collections/me`~~, ~~`/api/collections/me/cards`~~ and card mutations (removed — **`/api/v1/collections/me`**, **`/api/v1/collections/me/cards`** … — [API_V1.md](API_V1.md)) · `/api/collections/me/history` | [`collections.http.ts`](src/api/http/collections.http.ts) + `collections.routes.ts` (history only) |
+| POST/GET/PUT/DELETE | ~~`/api/guest/decks`~~ (removed) | *use* **`/api/v1/guest/decks...`** · [`guest-decks.http.ts`](src/api/http/guest-decks.http.ts) |
+| GET | **`/api/decks/:id`**, **`/api/decks/:id/full`** (compat — v1 envelope; **`PUT`/`DELETE`** still v1 only) | [`legacyDeckReadCompat.http.ts`](src/api/http/legacyDeckReadCompat.http.ts) |
+| POST/GET/PUT/DELETE | ~~`/api/decks/:id/cards`~~, ~~`/api/deck-stats`~~, ~~`/api/decks/:id/ui-preferences`~~ (removed — **`/api/v1/decks/...`**, **`/api/v1/decks/stats`**; create + validate: **`/api/v1/decks`**, **`/api/v1/decks/validate`** — see [API_V1.md](API_V1.md)) | *use v1* · [`decks.http.ts`](src/api/http/decks.http.ts) |
+| * | Legacy `/api/collections/me/*` (removed — use [API_V1.md](API_V1.md) **`/api/v1/collections/me...`**) | [`collections.http.ts`](src/api/http/collections.http.ts) |
 | GET | `/`, `/logout`, `/users/...`, `/data` | `pages.routes.ts` |
 
 ### API v1 (`/api/v1`)
@@ -607,10 +482,15 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
 | GET | `/api/v1/dbv/sets`, `/api/v1/dbv/deck-backgrounds` | `src/api/http/dbv-support.http.ts` |
-| GET | `/api/v1/collections/me`, `/api/v1/collections/me/cards` | `src/api/http/collections.http.ts` |
+| GET | `/api/v1/collections/me`, `/api/v1/collections/me/cards`, `/api/v1/collections/me/history` | `src/api/http/collections.http.ts` |
 | POST | `/api/v1/collections/me/cards`, `/api/v1/collections/me/cards/remove-one` | `src/api/http/collections.http.ts` |
 | PUT | `/api/v1/collections/me/cards/:cardId` | `src/api/http/collections.http.ts` |
 | DELETE | `/api/v1/collections/me/cards/:cardId` | `src/api/http/collections.http.ts` |
+| GET/POST | `/api/v1/guest/decks` | `src/api/http/guest-decks.http.ts` |
+| GET/PUT/DELETE | `/api/v1/guest/decks/:id` | `src/api/http/guest-decks.http.ts` |
+| PUT/POST | `/api/v1/guest/decks/:id/cards` | `src/api/http/guest-decks.http.ts` |
+| GET | `/api/v1/admin/users`, `/api/v1/admin/database/status`, `/api/v1/admin/debug/clear-cache`, `/api/v1/admin/debug/clear-card-cache` | `src/api/http/admin.http.ts` |
+| POST | `/api/v1/admin/users` | `src/api/http/admin.http.ts` |
 
 ---
 

@@ -172,7 +172,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       // Verify deck editor elements are present
       expect(response.text).toContain('id="deckEditorTitle"');
       expect(response.text).toContain('id="deckEditorDescription"');
-      expect(response.text).toContain('class="editable-title"');
+      expect(response.text).toMatch(/editable-title/);
       expect(response.text).toContain('data-edit-handler="startEditingTitle"');
       expect(response.text).toContain('data-edit-handler="startEditingDescription"');
     });
@@ -202,25 +202,25 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
       expect(createDeckResponse.status).toBe(403);
       expect(createDeckResponse.body.errors?.length).toBeGreaterThan(0);
-      expect(createDeckResponse.body.error).toContain('Guests may not create decks');
+      expect(createDeckResponse.body.errors?.[0]?.code).toBe('GUEST_FORBIDDEN');
     });
 
-    it('should allow GUEST users to create and save a deck via guest API (POST /api/guest/decks)', async () => {
+    it('should allow GUEST users to create and save a deck via guest API (POST /api/v1/guest/decks)', async () => {
       const createRes = await request(app)
-        .post('/api/guest/decks')
+        .post('/api/v1/guest/decks')
         .set('Cookie', guestSessionCookie)
         .send({ name: 'Guest Session Deck', description: 'Session-scoped deck' });
       expect(createRes.status).toBe(201);
-      expect(createRes.body.success).toBe(true);
+      expect(createRes.body.errors).toEqual([]);
       expect(createRes.body.data.id).toMatch(/^guest_/);
       const deckId = createRes.body.data.id;
 
       const putRes = await request(app)
-        .put(`/api/guest/decks/${deckId}/cards`)
+        .put(`/api/v1/guest/decks/${deckId}/cards`)
         .set('Cookie', guestSessionCookie)
         .send({ cards: [] });
       expect(putRes.status).toBe(200);
-      expect(putRes.body.success).toBe(true);
+      expect(putRes.body.errors).toEqual([]);
     });
 
     it('should allow USER role users to create decks via API', async () => {
@@ -290,8 +290,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(modifyDeckResponse.status).toBe(403);
-      expect(modifyDeckResponse.body.success).toBe(false);
-      expect(modifyDeckResponse.body.error).toContain('Guests may not modify decks');
+      expect(modifyDeckResponse.body.errors?.[0]?.code).toBe('GUEST_FORBIDDEN');
     });
 
     it('should allow USER role users to modify their own decks via API', async () => {
@@ -319,8 +318,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(modifyDeckResponse.status).toBe(200);
-      expect(modifyDeckResponse.body.success).toBe(true);
-      expect(modifyDeckResponse.body.data.name).toBe('Modified Deck Name by User');
+      expect(modifyDeckResponse.body.errors).toEqual([]);
+      expect(modifyDeckResponse.body.data.metadata.name).toBe('Modified Deck Name by User');
     });
 
     it('should allow ADMIN users to modify decks via API', async () => {
@@ -348,8 +347,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         });
 
       expect(modifyDeckResponse.status).toBe(200);
-      expect(modifyDeckResponse.body.success).toBe(true);
-      expect(modifyDeckResponse.body.data.name).toBe('Modified Deck Name by Admin');
+      expect(modifyDeckResponse.body.errors).toEqual([]);
+      expect(modifyDeckResponse.body.data.metadata.name).toBe('Modified Deck Name by Admin');
     });
   });
 
@@ -375,8 +374,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', guestSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(403);
-      expect(deleteDeckResponse.body.success).toBe(false);
-      expect(deleteDeckResponse.body.error).toContain('Guests may not delete decks');
+      expect(deleteDeckResponse.body.errors?.[0]?.code).toBe('GUEST_FORBIDDEN');
     });
 
     it('should allow USER role users to delete their own decks via API', async () => {
@@ -400,8 +398,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', userSessionCookie);
 
       expect(deleteDeckResponse.status).toBe(200);
-      expect(deleteDeckResponse.body.success).toBe(true);
-      expect(deleteDeckResponse.body.message).toBe('Deck deleted successfully');
+      expect(deleteDeckResponse.body.errors).toEqual([]);
+      expect(deleteDeckResponse.body.data?.message).toBe('Deck deleted successfully');
 
       // Untrack since it's deleted
       integrationTestUtils.untrackTestDeck(testDeckId);

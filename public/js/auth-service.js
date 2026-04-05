@@ -52,6 +52,21 @@ class FrontendAuthService {
     this.isReadOnlyMode = readOnly;
   }
 
+  /**
+   * Map GET /api/auth/me `data` (full User or legacy { userId, username }) to a stable client user shape.
+   */
+  normalizeUserFromSessionPayload(u) {
+    if (!u || typeof u !== 'object') return null;
+    const id = u.id ?? u.userId;
+    if (!id) return null;
+    return {
+      id,
+      name: u.name ?? u.username ?? '',
+      email: u.email ?? '',
+      role: u.role || 'USER'
+    };
+  }
+
   async checkAuthentication() {
     const authResult = {
       isAuthenticated: false,
@@ -83,17 +98,36 @@ class FrontendAuthService {
         
         if (response.ok) {
           const data = await response.json();
-          this.currentUser = data.data;
-          this.storeUser(this.currentUser);
-          authResult.isAuthenticated = true;
-          authResult.currentUser = this.currentUser;
+          const normalized = this.normalizeUserFromSessionPayload(data.data);
+          if (normalized) {
+            this.currentUser = normalized;
+            this.storeUser(this.currentUser);
+            authResult.isAuthenticated = true;
+            authResult.currentUser = this.currentUser;
+          } else {
+            this.clearStoredUser();
+            this.currentUser = null;
+            authResult.currentUser = null;
+            await this.showLoginModal();
+          }
         } else {
-          // Session expired, clear stored user
-          this.clearStoredUser();
-          this.currentUser = null;
-          authResult.currentUser = null;
-          // Show login modal when session expires
-          await this.showLoginModal();
+          // Sessions live in server memory — restart drops them while localStorage still has the user.
+          // GUEST: transparently re-establish session so guest decks and /api/v1/guest/* keep working.
+          let recovered = false;
+          if (storedUser.role === 'GUEST') {
+            const gr = await this.guestLogin();
+            recovered = !!(gr.success && gr.data);
+          }
+          if (recovered) {
+            authResult.isAuthenticated = true;
+            authResult.currentUser = this.currentUser;
+            this.hideLoginModal();
+          } else {
+            this.clearStoredUser();
+            this.currentUser = null;
+            authResult.currentUser = null;
+            await this.showLoginModal();
+          }
         }
       } catch (error) {
         console.error('Error verifying session:', error);

@@ -10,6 +10,7 @@ export interface LoginResponse {
   data?: {
     userId: string;
     username: string;
+    role?: UserRole;
   };
   error?: string;
 }
@@ -44,6 +45,18 @@ export class FrontendAuthService {
 
   public getCurrentUser(): User | null {
     return this.currentUser;
+  }
+
+  /** Map GET /api/auth/me `data` (full `User` or legacy `{ userId, username }`) to client `User`. */
+  private normalizeUserFromMePayload(data: unknown): User | null {
+    if (data === null || typeof data !== 'object') return null;
+    const o = data as Record<string, unknown>;
+    const id = (o.userId ?? o.id) as string | undefined;
+    if (!id || typeof id !== 'string') return null;
+    const name = typeof o.username === 'string' ? o.username : typeof o.name === 'string' ? o.name : '';
+    const email = typeof o.email === 'string' ? o.email : '';
+    const role = o.role === 'GUEST' || o.role === 'USER' || o.role === 'ADMIN' ? o.role : 'USER';
+    return { id, name, email, role };
   }
 
   public isAuthenticated(): boolean {
@@ -105,23 +118,32 @@ export class FrontendAuthService {
         });
         
         if (response.ok) {
-          const data = await response.json() as { success: boolean; data: { userId: string; username: string } };
-          if (data.data) {
-            this.currentUser = {
-              id: data.data.userId,
-              name: data.data.username,
-              email: '',
-              role: 'USER' as UserRole
-            };
+          const data = await response.json() as { success?: boolean; data?: unknown };
+          const normalized = this.normalizeUserFromMePayload(data.data);
+          if (normalized) {
+            this.currentUser = normalized;
             this.storeUser(this.currentUser);
             authResult.isAuthenticated = true;
             authResult.currentUser = this.currentUser;
+          } else {
+            this.clearStoredUser();
+            this.currentUser = null;
+            authResult.currentUser = null;
           }
         } else {
-          // Session expired, clear stored user
-          this.clearStoredUser();
-          this.currentUser = null;
-          authResult.currentUser = null;
+          let recovered = false;
+          if (storedUser.role === 'GUEST') {
+            const gr = await this.login({ username: 'guest', password: 'guest' });
+            recovered = !!(gr.success && gr.data);
+          }
+          if (recovered) {
+            authResult.isAuthenticated = true;
+            authResult.currentUser = this.currentUser;
+          } else {
+            this.clearStoredUser();
+            this.currentUser = null;
+            authResult.currentUser = null;
+          }
         }
       } catch (error) {
         console.error('Error verifying session:', error);
@@ -169,11 +191,15 @@ export class FrontendAuthService {
       const data = await response.json() as LoginResponse;
 
       if (data.success && data.data) {
+        const role =
+          data.data.role === 'GUEST' || data.data.role === 'USER' || data.data.role === 'ADMIN'
+            ? data.data.role
+            : 'USER';
         this.currentUser = {
           id: data.data.userId,
           name: data.data.username,
           email: '',
-          role: 'USER' as UserRole
+          role
         };
         this.storeUser(this.currentUser);
         this.hideLoginModal();

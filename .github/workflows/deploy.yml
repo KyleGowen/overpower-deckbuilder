@@ -40,7 +40,8 @@ jobs:
       with:
         name: dist
         path: dist/
-        retention-days: 1
+        # Short retention breaks "Re-run failed jobs" once GitHub deletes the artifact.
+        retention-days: 14
 
   knip:
     name: Knip (unused code scan)
@@ -413,10 +414,16 @@ jobs:
       run: npm ci
 
     - name: Download dist artifact
+      id: download-dist
+      continue-on-error: true
       uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/
+
+    - name: Build dist if artifact missing
+      if: steps.download-dist.outcome == 'failure'
+      run: npm run build
 
     - name: Wait for PostgreSQL
       run: |
@@ -498,10 +505,16 @@ jobs:
       run: npm ci
 
     - name: Download dist artifact
+      id: download-dist-docker
+      continue-on-error: true
       uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/
+
+    - name: Build dist if artifact missing
+      if: steps.download-dist-docker.outcome == 'failure'
+      run: npm run build
 
     - name: Generate card image thumbnails
       run: npm run generate:thumbnails

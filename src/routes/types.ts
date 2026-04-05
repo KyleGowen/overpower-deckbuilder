@@ -4,8 +4,6 @@
  */
 import express, { Request, Response } from 'express';
 import type { CatalogService } from '../api/services/catalogService';
-import type { DeckData } from '../types';
-
 export interface RouteDependencies {
   authService: { handleLogin: (req: express.Request, res: Response) => void; handleSignup: (req: express.Request, res: Response) => void; handleGoogleLogin: (req: express.Request, res: Response) => void; handleLogout: (req: express.Request, res: Response) => void; handleSessionValidation: (req: express.Request, res: Response) => void; createAuthMiddleware: () => express.RequestHandler; destroySession: (sessionId: string) => void };
   authenticateUser: express.RequestHandler;
@@ -33,7 +31,6 @@ export interface RouteDependencies {
   deckBusinessService: { createDeck: (userId: string, name: string, description: string, characters?: unknown) => Promise<unknown> };
   collectionService: Record<string, (...args: unknown[]) => Promise<unknown>>;
   deckBackgroundService: Record<string, (...args: unknown[]) => Promise<unknown>>;
-  guestDeckPersistence: { createDeck: (sessionId: string, deckData: DeckData) => string; getDeck: (sessionId: string, deckId: string) => DeckData | undefined; getAllDecksForSession: (sessionId: string) => DeckData[]; updateDeck: (sessionId: string, deckId: string, deckData: DeckData) => boolean; deleteDeck: (sessionId: string, deckId: string) => boolean };
   foilCardMapRepository: { getFoilCardMap: () => Promise<unknown[]> };
   databaseInit: { validateDatabase: () => Promise<boolean>; checkDatabaseStatus: () => Promise<boolean> };
   dataSource: { getPool: () => { connect: () => Promise<{ query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>; release: () => void }> } };
@@ -53,20 +50,14 @@ export interface RouteDependencies {
 /** Dependencies for auth and config routes only. */
 export type AuthRoutesDeps = Pick<RouteDependencies, 'authService'>;
 
-/** Dependencies for users and debug routes. */
-export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'requireAdmin' | 'userRepository' | 'deckRepository' | 'cardRepository'>;
-
-/** Dependencies for guest deck routes. */
-export type GuestDeckRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'guestDeckPersistence' | 'deckRepository' | 'transformDeckList' | 'validateCardAddition' | 'checkIfCardIsOnePerDeck' | 'checkIfCardIsCataclysm'>;
-
-/** Dependencies for collection routes. */
-export type CollectionRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'collectionService'>;
+/** Dependencies for legacy `POST /api/users/change-password` only. */
+export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'userRepository'>;
 
 /** Dependencies for page/SPA routes. */
 export type PageRoutesDeps = Pick<RouteDependencies, 'authService' | 'authenticateUser'>;
 
 /** Dependencies for static and health routes. */
-export type StaticHealthRoutesDeps = Pick<RouteDependencies, 'getGitInfo' | 'dataSource' | 'databaseInit' | 'authenticateUser' | 'requireAdmin'>;
+export type StaticHealthRoutesDeps = Pick<RouteDependencies, 'getGitInfo' | 'dataSource' | 'authenticateUser'>;
 
 /** Shape of deck record returned by deckRepository.getDeckById / getDeckSummaryWithAllCards (typed for route handlers). */
 export interface DeckRecord {

@@ -2,6 +2,11 @@ import express, { Request } from 'express';
 import path from 'path';
 import type { PageRoutesDeps } from './types';
 
+/** Lets Firebase (and other) OAuth popups communicate with the opener; avoids COOP blocking `window.closed`. */
+const HTML_POPUP_FRIENDLY_HEADERS = {
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+} as const;
+
 export function registerPageRoutes(app: express.Application, deps: PageRoutesDeps): void {
   // GET /logout - clears session and redirects to home (for testing/browser automation)
   app.get('/logout', (req, res) => {
@@ -20,7 +25,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
+      'Expires': '0',
+      ...HTML_POPUP_FRIENDLY_HEADERS
     });
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
   });
@@ -42,7 +48,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
+      'Expires': '0',
+      ...HTML_POPUP_FRIENDLY_HEADERS
     });
     
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
@@ -58,7 +65,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
       'Pragma': 'no-cache',
       'Expires': '0',
       'Last-Modified': new Date().toUTCString(),
-      'ETag': `"${Date.now()}"`
+      'ETag': `"${Date.now()}"`,
+      ...HTML_POPUP_FRIENDLY_HEADERS
     });
     
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
@@ -72,7 +80,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
       'Pragma': 'no-cache',
       'Expires': '0',
       'Last-Modified': new Date().toUTCString(),
-      'ETag': `"${Date.now()}"`
+      'ETag': `"${Date.now()}"`,
+      ...HTML_POPUP_FRIENDLY_HEADERS
     });
     
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
@@ -84,7 +93,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
+      'Expires': '0',
+      ...HTML_POPUP_FRIENDLY_HEADERS
     });
     res.sendFile(path.join(process.cwd(), 'public/index.html'));
   });

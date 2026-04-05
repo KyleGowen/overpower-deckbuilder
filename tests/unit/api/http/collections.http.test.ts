@@ -29,6 +29,7 @@ function stubCollectionService(over: Partial<CollectionService> = {}): Collectio
   return {
     getOrCreateCollection: jest.fn().mockResolvedValue('col-uuid'),
     getCollectionCards: jest.fn().mockResolvedValue([]),
+    getCollectionHistory: jest.fn().mockResolvedValue([]),
     addCardToCollection: jest.fn(),
     updateCardQuantity: jest.fn(),
     removeOneFromCollection: jest.fn(),
@@ -249,5 +250,52 @@ describe('collections.http', () => {
       .delete('/collections/me/cards/c1?cardType=character')
       .expect(404);
     expect(res.body.errors[0].code).toBe('COLLECTION_CARD_NOT_IN_COLLECTION');
+  });
+
+  it('GET /collections/me/history returns history rows', async () => {
+    const entries = [
+      {
+        id: 'h1',
+        collection_id: 'col-uuid',
+        card_id: 'c1',
+        action: 'ADD' as const,
+        new_quantity: 1,
+        created_at: '2020-01-01T00:00:00.000Z'
+      }
+    ];
+    const collectionService = stubCollectionService({
+      getCollectionHistory: jest.fn().mockResolvedValue(entries)
+    });
+    const deps: CollectionsV1HttpDeps = { collectionService, authenticateUser: passAuth };
+    const res = await request(buildApp(deps)).get('/collections/me/history').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data).toEqual(entries);
+    expect(collectionService.getCollectionHistory).toHaveBeenCalledWith('col-uuid', undefined);
+  });
+
+  it('GET /collections/me/history passes limit query', async () => {
+    const collectionService = stubCollectionService({
+      getCollectionHistory: jest.fn().mockResolvedValue([])
+    });
+    const deps: CollectionsV1HttpDeps = { collectionService, authenticateUser: passAuth };
+    await request(buildApp(deps)).get('/collections/me/history?limit=50').expect(200);
+    expect(collectionService.getCollectionHistory).toHaveBeenCalledWith('col-uuid', 50);
+  });
+
+  it('GET /collections/me/history returns 400 for invalid limit', async () => {
+    const collectionService = stubCollectionService();
+    const deps: CollectionsV1HttpDeps = { collectionService, authenticateUser: passAuth };
+    const res = await request(buildApp(deps)).get('/collections/me/history?limit=0').expect(400);
+    expect(res.body.errors[0].message).toContain('positive integer');
+    expect(collectionService.getCollectionHistory).not.toHaveBeenCalled();
+  });
+
+  it('GET /collections/me/history returns 500 on service error', async () => {
+    const collectionService = stubCollectionService({
+      getCollectionHistory: jest.fn().mockRejectedValue(new Error('db'))
+    });
+    const deps: CollectionsV1HttpDeps = { collectionService, authenticateUser: passAuth };
+    const res = await request(buildApp(deps)).get('/collections/me/history').expect(500);
+    expect(res.body.errors[0].code).toBe('COLLECTION_HISTORY_ERROR');
   });
 });

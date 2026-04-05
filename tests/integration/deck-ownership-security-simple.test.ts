@@ -105,7 +105,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         .set('Cookie', ownerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
-      expect(getDeckResponse.body.success).toBe(true);
+      expect(getDeckResponse.body.errors).toEqual([]);
       expect(getDeckResponse.body.data.metadata.isOwner).toBe(true);
       
       console.log('✅ Deck ownership verified for owner');
@@ -119,7 +119,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         .set('Cookie', nonOwnerAuthCookie);
 
       expect(getDeckResponse.status).toBe(200);
-      expect(getDeckResponse.body.success).toBe(true);
+      expect(getDeckResponse.body.errors).toEqual([]);
       expect(getDeckResponse.body.data.metadata.isOwner).toBe(false);
       
       console.log('✅ Deck ownership verified for non-owner (isOwner: false)');
@@ -139,7 +139,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.success).toBe(true);
+      expect(updateResponse.body.errors).toEqual([]);
       expect(updateResponse.body.data.metadata.name).toBe('Updated Security Test Deck');
       expect(updateResponse.body.data.metadata.description).toBe('Updated description by owner');
       
@@ -155,7 +155,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         .set('Cookie', ownerAuthCookie);
 
       expect(charactersResponse.status).toBe(200);
-      expect(charactersResponse.body.success).toBe(true);
+      expect(charactersResponse.body.errors).toEqual([]);
       expect(charactersResponse.body.data.length).toBeGreaterThan(0);
 
       const firstCharacter = charactersResponse.body.data[0];
@@ -169,7 +169,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(200);
-      expect(addCardResponse.body.success).toBe(true);
+      expect(addCardResponse.body.errors).toEqual([]);
       
       console.log('✅ Card added successfully by owner:', firstCharacter.name);
     });
@@ -186,7 +186,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(savePreferencesResponse.status).toBe(200);
-      expect(savePreferencesResponse.body.success).toBe(true);
+      expect(savePreferencesResponse.body.errors).toEqual([]);
       
       console.log('✅ UI preferences saved successfully by owner');
     });
@@ -205,8 +205,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(updateResponse.status).toBe(403);
-      expect(updateResponse.body.success).toBe(false);
-      expect(updateResponse.body.error).toContain('Access denied');
+      expect(updateResponse.body.errors?.[0]?.code).toBe('DECK_ACCESS_DENIED');
       
       console.log('✅ Non-owner blocked from modifying deck metadata');
     });
@@ -231,8 +230,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(addCardResponse.status).toBe(403);
-      expect(addCardResponse.body.success).toBe(false);
-      expect(addCardResponse.body.error).toContain('Access denied');
+      expect(addCardResponse.body.errors?.[0]?.code).toBe('DECK_ACCESS_DENIED');
       
       console.log('✅ Non-owner blocked from adding cards');
     });
@@ -249,8 +247,7 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
         });
 
       expect(savePreferencesResponse.status).toBe(403);
-      expect(savePreferencesResponse.body.success).toBe(false);
-      expect(savePreferencesResponse.body.error).toContain('Access denied');
+      expect(savePreferencesResponse.body.errors?.[0]?.code).toBe('DECK_ACCESS_DENIED');
       
       console.log('✅ Non-owner blocked from saving UI preferences');
     });
@@ -336,9 +333,9 @@ describe('Deck Ownership Security - Simple Integration Tests', () => {
       const unauthenticatedResponse = await request(app)
         .get(`/api/v1/decks/${fakeDeckId}`);
 
-      // API might return 404 for non-existent deck or 401 for auth failure
-      expect([401, 404]).toContain(unauthenticatedResponse.status);
-      expect(unauthenticatedResponse.body.success).toBe(false);
+      expect(unauthenticatedResponse.status).toBe(401);
+      expect(unauthenticatedResponse.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(unauthenticatedResponse.body.data).toBeNull();
       
       console.log('✅ Unauthenticated access properly blocked');
     });

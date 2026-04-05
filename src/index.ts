@@ -16,6 +16,7 @@ import { registerRoutes, type RouteDependencies } from './routes';
 import { transformDeckList } from './api/deckTransform';
 import { CatalogService } from './api/services/catalogService';
 import { registerApiV1Routes } from './api/http/registerApiV1Routes';
+import { registerLegacyDeckReadCompatRoutes } from './api/http/legacyDeckReadCompat.http';
 import { DbvSupportService } from './api/services/dbvSupportService';
 import { DeckListService } from './api/services/deckListService';
 import { DeckStatsService } from './api/services/deckStatsService';
@@ -23,6 +24,8 @@ import { DeckWriteService } from './api/services/deckWriteService';
 import { DeckDetailService } from './api/services/deckDetailService';
 import { DeckCardsService } from './api/services/deckCardsService';
 import { DeckUIPreferencesService } from './api/services/deckUIPreferencesService';
+import { GuestDeckService } from './api/services/guestDeckService';
+import { AdminService } from './api/services/adminService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import {
@@ -377,6 +380,21 @@ const deckCardsService = new DeckCardsService(deckRepository, {
 });
 const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
+const guestDeckService = new GuestDeckService({
+  guestDeckPersistence,
+  deckRepository,
+  validateCardAddition,
+  checkIfCardIsOnePerDeck,
+  checkIfCardIsCataclysm
+});
+
+const adminService = new AdminService({
+  userRepository,
+  deckRepository,
+  cardRepository,
+  databaseInit
+});
+
 // Function to get git information
 function getGitInfo() {
   // In production (Docker), use environment variables set during build
@@ -505,7 +523,6 @@ registerRoutes(app, {
   deckBusinessService,
   collectionService,
   deckBackgroundService,
-  guestDeckPersistence,
   foilCardMapRepository,
   databaseInit,
   dataSource,
@@ -535,6 +552,13 @@ registerApiV1Routes(app, {
   deckDetailService,
   deckCardsService,
   deckUIPreferencesService,
-  collectionService
+  collectionService,
+  guestDeckService,
+  adminService
+});
+
+registerLegacyDeckReadCompatRoutes(app, {
+  authenticateUser,
+  deckDetailService
 });
 

@@ -2,7 +2,8 @@
  * Normalize v1 GET responses: DBV catalog and deck list.
  * - Catalog: legacy `{ success, data }` or v1 `{ data, meta, errors }` via `catalogListPayload` / `fetchCatalogList`.
  * - Deck list: v1 `{ data, meta, errors }` via `deckListPayload` / `fetchDeckList` (`GET /api/v1/decks`).
- * Load before scripts that call migrated `/api/v1/catalog/*` or `/api/v1/decks`.
+ * - Guest decks: `v1DataPayload` for POST create / arbitrary `data` object (`/api/v1/guest/decks`).
+ * Load before scripts that call migrated `/api/v1/catalog/*`, `/api/v1/decks`, or `/api/v1/guest/decks`.
  */
 (function () {
     'use strict';
@@ -116,10 +117,24 @@
         return true;
     }
 
+    /**
+     * Generic v1 success payload (`data` may be object, array, or primitive).
+     * @param {Response} response
+     * @param {any} json
+     * @returns {{ ok: boolean, data: any | null }}
+     */
+    function v1DataPayload(response, json) {
+        if (!v1ResponseOk(response, json)) {
+            return { ok: false, data: null };
+        }
+        return { ok: true, data: json.data };
+    }
+
     window.catalogListPayload = catalogListPayload;
     window.fetchCatalogList = fetchCatalogList;
     window.deckListPayload = deckListPayload;
     window.fetchDeckList = fetchDeckList;
     window.deckDetailPayload = deckDetailPayload;
     window.v1ResponseOk = v1ResponseOk;
+    window.v1DataPayload = v1DataPayload;
 })();

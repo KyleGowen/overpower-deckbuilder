@@ -1,7 +1,7 @@
 // Deck API response mappers
 // Extracted from src/index.ts to reduce file size while preserving behavior.
 
-import { Deck } from '../types';
+import type { Deck, DeckData } from '../types';
 
 export function transformDeckListItem(deck: Deck) {
   return {
@@ -25,6 +25,27 @@ export function transformDeckListItem(deck: Deck) {
 
 export function transformDeckList(decks: Deck[]) {
   return decks.map(transformDeckListItem);
+}
+
+/** Guest session deck → same list shape as `transformDeckListItem` for merged GUEST deck list. */
+export function transformGuestDeckToListItem(deckData: DeckData) {
+  return {
+    metadata: {
+      id: deckData.metadata.id,
+      name: deckData.metadata.name,
+      description: deckData.metadata.description,
+      created: deckData.metadata.created,
+      lastModified: deckData.metadata.lastModified,
+      cardCount: deckData.metadata.cardCount ?? deckData.cards?.length ?? 0,
+      threat: 0,
+      is_valid: false,
+      userId: deckData.metadata.userId,
+      uiPreferences: deckData.metadata.uiPreferences,
+      is_limited: false,
+      background_image_path: null
+    },
+    cards: deckData.cards || []
+  };
 }
 
 /** Single-deck GET/PUT response shape (legacy + v1 `data`). */

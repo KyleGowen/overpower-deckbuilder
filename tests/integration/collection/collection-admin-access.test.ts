@@ -144,8 +144,8 @@ describe('Collection Access Control Integration Tests', () => {
         .get('/api/v1/collections/me')
         .expect(401);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Authentication required');
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -185,7 +185,47 @@ describe('Collection Access Control Integration Tests', () => {
         .get('/api/v1/collections/me/cards')
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
+    });
+  });
+
+  describe('GET /api/v1/collections/me/history', () => {
+    it('should allow ADMIN users to access', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history')
+        .set('Cookie', adminAuthCookie)
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should allow USER to access', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history')
+        .set('Cookie', regularAuthCookie)
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should allow GUEST users to access', async () => {
+      const response = await request(app)
+        .get('/api/v1/collections/me/history')
+        .set('Cookie', guestAuthCookie)
+        .expect(200);
+
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should require authentication', async () => {
+      const response = await request(app).get('/api/v1/collections/me/history').expect(401);
+
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -263,7 +303,8 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -349,7 +390,8 @@ describe('Collection Access Control Integration Tests', () => {
         })
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -415,7 +457,8 @@ describe('Collection Access Control Integration Tests', () => {
         .delete(`/api/v1/collections/me/cards/${testCharacterId}?cardType=character`)
         .expect(401);
 
-      expect(response.body.success).toBe(false);
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -424,6 +467,7 @@ describe('Collection Access Control Integration Tests', () => {
       const endpoints = [
         { method: 'get', path: '/api/v1/collections/me' },
         { method: 'get', path: '/api/v1/collections/me/cards' },
+        { method: 'get', path: '/api/v1/collections/me/history' },
         { method: 'post', path: '/api/v1/collections/me/cards', body: { cardId: testCharacterId, cardType: 'character', quantity: 1, imagePath: '/images/test.webp' } },
         { method: 'put', path: `/api/v1/collections/me/cards/${testCharacterId}`, body: { quantity: 5, cardType: 'character', imagePath: '/images/test.webp' } },
         { method: 'delete', path: `/api/v1/collections/me/cards/${testCharacterId}?cardType=character` }
@@ -435,7 +479,8 @@ describe('Collection Access Control Integration Tests', () => {
           .send(endpoint.body || {})
           .expect(401);
 
-        expect(response.body.success).toBe(false);
+        expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+        expect(response.body.data).toBeNull();
       }
     });
   });
@@ -456,6 +501,12 @@ describe('Collection Access Control Integration Tests', () => {
           .set('Cookie', cookie)
           .expect(200);
         expect(cardsResponse.body.errors).toEqual([]);
+
+        const historyResponse = await request(app)
+          .get('/api/v1/collections/me/history')
+          .set('Cookie', cookie)
+          .expect(200);
+        expect(historyResponse.body.errors).toEqual([]);
       }
     });
   });

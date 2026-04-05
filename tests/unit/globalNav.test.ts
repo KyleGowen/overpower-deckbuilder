@@ -527,18 +527,26 @@ describe('Global Navigation Component', () => {
 
         it('should handle guest user', async () => {
             mockGetCurrentUser.mockReturnValue({ role: 'GUEST', id: 'guest', userId: 'guest' });
+            (window as any).v1DataPayload = (response: { ok: boolean }, json: { errors?: unknown[]; data?: unknown }) => {
+                if (!response?.ok || !json || (json.errors && json.errors.length)) {
+                    return { ok: false, data: null };
+                }
+                return { ok: true, data: json.data };
+            };
             const mockFetch = jest.fn().mockResolvedValue({
                 ok: true,
-                json: () => Promise.resolve({
-                    success: true,
-                    data: {
-                        id: 'guest_session_123',
-                        name: 'New Deck',
-                        description: '',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }
-                })
+                json: () =>
+                    Promise.resolve({
+                        data: {
+                            id: 'guest_session_123',
+                            name: 'New Deck',
+                            description: '',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        },
+                        meta: {},
+                        errors: []
+                    })
             });
             (global as any).fetch = mockFetch;
 

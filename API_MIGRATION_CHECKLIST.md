@@ -117,7 +117,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 ## P3 — Collections
 
-**Scope:** Authenticated collection + card rows + history. **Source:** `API_DOCUMENTATION.md` (Collections), `collections.routes.ts`.
+**Scope:** Authenticated collection + card rows + history. **Source:** `API_DOCUMENTATION.md` (Collections), [`collections.http.ts`](src/api/http/collections.http.ts).
 
 **v1 prefix:** `/api/v1/collections/me…`
 
@@ -143,14 +143,14 @@ Legacy **DELETE** requires query `cardType` (see `API_DOCUMENTATION.md`); keep t
 
 | Legacy path                            | v1 path (proposed)                            | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | -------------------------------------- | --------------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/collections/me/history        | GET /api/v1/collections/me/history            | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/collections/me/history        | GET /api/v1/collections/me/history            | [x]      | `CollectionService` + `collections.http.ts` | [x]       | [x]    | [x]       |
 
 
 ---
 
 ## P4 — Guest decks
 
-**Scope:** **GUEST** role + session; in-memory guest decks merged with DB list on **`GET`**. **Source:** `API_DOCUMENTATION.md` (Guest decks), `guest-decks.routes.ts`.
+**Scope:** **GUEST** role + session; in-memory guest decks merged with DB list on **`GET`**. **Source:** `API_DOCUMENTATION.md` (Guest decks), [`guest-decks.http.ts`](src/api/http/guest-decks.http.ts) + [`guestDeckService.ts`](src/api/services/guestDeckService.ts).
 
 **v1 prefix:** `/api/v1/guest/decks…`
 
@@ -158,23 +158,23 @@ Legacy **DELETE** requires query `cardType` (see `API_DOCUMENTATION.md`); keep t
 
 | Legacy path           | v1 path (proposed)        | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | --------------------- | ------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/guest/decks  | GET /api/v1/guest/decks   | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| POST /api/guest/decks | POST /api/v1/guest/decks  | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/guest/decks  | GET /api/v1/guest/decks   | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
+| POST /api/guest/decks | POST /api/v1/guest/decks  | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
 
 ### P4b — Guest single deck
 
 | Legacy path                | v1 path (proposed)              | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | -------------------------- | ------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| GET /api/guest/decks/:id   | GET /api/v1/guest/decks/:id     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| PUT /api/guest/decks/:id   | PUT /api/v1/guest/decks/:id     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| DELETE /api/guest/decks/:id | DELETE /api/v1/guest/decks/:id | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| GET /api/guest/decks/:id   | GET /api/v1/guest/decks/:id     | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
+| PUT /api/guest/decks/:id   | PUT /api/v1/guest/decks/:id     | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
+| DELETE /api/guest/decks/:id | DELETE /api/v1/guest/decks/:id | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
 
 ### P4c — Guest deck cards
 
 | Legacy path                     | v1 path (proposed)                    | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
 | ------------------------------- | ------------------------------------- | -------- | ---------- | --------- | ------ | --------- |
-| PUT /api/guest/decks/:id/cards  | PUT /api/v1/guest/decks/:id/cards     | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
-| POST /api/guest/decks/:id/cards | POST /api/v1/guest/decks/:id/cards    | [ ]      | TBD        | [ ]       | [ ]    | [ ]       |
+| PUT /api/guest/decks/:id/cards  | PUT /api/v1/guest/decks/:id/cards     | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
+| POST /api/guest/decks/:id/cards | POST /api/v1/guest/decks/:id/cards    | [x]      | `GuestDeckService` + `guest-decks.http.ts` | [x]       | [x]    | [x]       |
 
 
 ---
@@ -186,21 +186,25 @@ All elevated operations must live under `/api/v1/admin/...` (no client “admin�
 
 | Legacy                      | v1                            | Migrated |
 | --------------------------- | ----------------------------- | -------- |
-| GET/POST /api/users (admin) | /api/v1/admin/users…          | [ ]      |
-| GET /api/debug/*            | /api/v1/admin/debug/*         | [ ]      |
-| GET /api/database/status    | /api/v1/admin/database/status | [ ]      |
+| GET/POST /api/users (admin) | /api/v1/admin/users…          | [x]      |
+| GET /api/debug/*            | /api/v1/admin/debug/*         | [x]      |
+| GET /api/database/status    | /api/v1/admin/database/status | [x]      |
 
 
 ---
 
 ## P6 — Static, health, HTML shell
 
-Usually out of scope for JSON v1; list here only if product requires API-style docs.
+**Documented N/A** — no **`/api/v1/health`**; JSON v1 contract applies only under **`/api/v1`**. See [API_V1.md](API_V1.md) **Non-v1 surfaces**.
+
+- **`GET /health`** — ops/monitoring; remains non-versioned.
+- **Static assets** — non-versioned.
+- **HTML shell routes** (`/users/...` pages, etc.) — non-versioned; see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
 
 
 | Legacy                                 | Notes                          |
 | -------------------------------------- | ------------------------------ |
-| /health, static, /data, /users/… pages | [ ] N/A or document separately |
+| /health, static, /data, /users/… pages | **N/A** — documented in API_V1.md (Non-v1 surfaces) |
 
 
 ---

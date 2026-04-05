@@ -26,7 +26,10 @@ import { DeckWriteService } from '../api/services/deckWriteService';
 import { DeckDetailService } from '../api/services/deckDetailService';
 import { DeckCardsService } from '../api/services/deckCardsService';
 import { DeckUIPreferencesService } from '../api/services/deckUIPreferencesService';
+import { GuestDeckService } from '../api/services/guestDeckService';
+import { AdminService } from '../api/services/adminService';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
+import { registerLegacyDeckReadCompatRoutes } from '../api/http/legacyDeckReadCompat.http';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
 import { setupMiddleware } from '../middleware/setup';
 
@@ -42,6 +45,7 @@ import {
 } from '../index';
 
 import { registerTestOnlyRoutes, type TestOnlyRoutesDeps } from './testOnlyRoutes';
+import { sendV1Unauthorized } from '../api/http/v1Envelope';
 
 // Importing from index runs it and ensures DataSourceConfig / DB init exist
 
@@ -75,6 +79,21 @@ const deckCardsService = new DeckCardsService(deckRepository, {
 });
 const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
+const guestDeckService = new GuestDeckService({
+  guestDeckPersistence,
+  deckRepository,
+  validateCardAddition,
+  checkIfCardIsOnePerDeck,
+  checkIfCardIsCataclysm
+});
+
+const adminService = new AdminService({
+  userRepository,
+  deckRepository,
+  cardRepository,
+  databaseInit
+});
+
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
 const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -89,7 +108,11 @@ const optionalAuth = async (req: Request, res: Response, next: NextFunction) => 
       if (user) req.user = user;
       next();
     } else {
-      res.status(401).json({ success: false, error: 'Authentication required' });
+      if (req.originalUrl.startsWith('/api/v1')) {
+        sendV1Unauthorized(res, 'Authentication required');
+      } else {
+        res.status(401).json({ success: false, error: 'Authentication required' });
+      }
     }
   } catch {
     next();
@@ -119,7 +142,6 @@ const testDeps = {
   deckBusinessService,
   collectionService,
   deckBackgroundService,
-  guestDeckPersistence,
   foilCardMapRepository,
   databaseInit,
   dataSource,
@@ -170,7 +192,14 @@ registerApiV1Routes(app, {
   deckDetailService,
   deckCardsService,
   deckUIPreferencesService,
-  collectionService
+  collectionService,
+  guestDeckService,
+  adminService
+});
+
+registerLegacyDeckReadCompatRoutes(app, {
+  authenticateUser: optionalAuth,
+  deckDetailService
 });
 
 // Error handling middleware

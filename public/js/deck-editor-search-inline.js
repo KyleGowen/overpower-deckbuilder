@@ -377,7 +377,7 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
 
     const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
     const cardsUrl = isGuestDeck
-        ? `/api/guest/decks/${currentDeckId}/cards`
+        ? `/api/v1/guest/decks/${currentDeckId}/cards`
         : `/api/v1/decks/${currentDeckId}/cards`;
 
     let ok = 0;
@@ -397,7 +397,10 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
                 bad++;
                 try {
                     const err = await response.json();
-                    showToast(err.error || `Failed to add mission`, 'error');
+                    showToast(
+                        (err.errors && err.errors[0] && err.errors[0].message) || err.error || `Failed to add mission`,
+                        'error'
+                    );
                 } catch {
                     showToast('Failed to add a mission from the set', 'error');
                 }
@@ -431,7 +434,7 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
 
 /**
  * Guest deck editor URLs are canonical: /users/:userId/decks/:deckId.
- * Keep global currentDeckId aligned so POST /api/guest/decks/:id/cards matches the visible deck.
+ * Keep global currentDeckId aligned so POST /api/v1/guest/decks/:id/cards matches the visible deck.
  */
 function syncGuestCurrentDeckIdFromUrl() {
     try {
@@ -540,7 +543,7 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
 
         const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
         const cardsUrl = isGuestDeck
-            ? `/api/guest/decks/${currentDeckId}/cards`
+            ? `/api/v1/guest/decks/${currentDeckId}/cards`
             : `/api/v1/decks/${currentDeckId}/cards`;
 
         const response = await fetch(cardsUrl, {

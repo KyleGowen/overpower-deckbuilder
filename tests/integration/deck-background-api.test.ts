@@ -76,8 +76,8 @@ describe('Deck Background API Integration Tests', () => {
         .get('/api/v1/dbv/deck-backgrounds')
         .expect(401);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Authentication required');
+      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(response.body.data).toBeNull();
     });
 
     it('should allow ADMIN users to access background list', async () => {

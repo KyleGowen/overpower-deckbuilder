@@ -45,16 +45,10 @@ async function loadUserDecks() {
             return;
         }
         const isGuest = currentUser.role === 'GUEST';
-        const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
+        const url = isGuest ? '/api/v1/guest/decks' : '/api/v1/decks';
         const response = await fetch(url, { credentials: 'include' });
         const json = await response.json();
-        if (isGuest) {
-            if (json.success) {
-                userDecks = json.data;
-            } else {
-                console.error('Failed to load decks:', json.error);
-            }
-        } else if (typeof deckListPayload === 'function') {
+        if (typeof deckListPayload === 'function') {
             const parsed = deckListPayload(response, json);
             if (parsed.ok) {
                 userDecks = parsed.decks;
@@ -228,7 +222,7 @@ async function addCardToDeckFromSelection(deckId, cardType, cardId, cardName) {
     }
     const requestBody = { cardType, cardId, quantity: 1 };
     const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const url = isGuestDeck ? `/api/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
+    const url = isGuestDeck ? `/api/v1/guest/decks/${deckId}/cards` : `/api/v1/decks/${deckId}/cards`;
     try {
         const response = await fetch(url, {
             method: 'POST',

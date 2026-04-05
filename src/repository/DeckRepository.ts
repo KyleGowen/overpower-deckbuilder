@@ -33,5 +33,7 @@ export interface DeckRepository {
   
   // Authorization
   userOwnsDeck(deckId: string, userId: string): Promise<boolean>;
-  
+
+  /** Optional: in-memory cache clear (e.g. PostgreSQL implementation; admin debug). */
+  clearCache?(): void;
 }

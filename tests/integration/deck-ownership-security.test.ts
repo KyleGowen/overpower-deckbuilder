@@ -421,7 +421,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         .get(`/api/v1/decks/${testDeckId}`);
 
       expect(unauthenticatedResponse.status).toBe(401);
-      expect(unauthenticatedResponse.body.success).toBe(false);
+      expect(unauthenticatedResponse.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(unauthenticatedResponse.body.data).toBeNull();
       
       console.log('✅ Unauthenticated access properly blocked');
     });
@@ -434,7 +435,8 @@ describe('Deck Ownership Security Integration Tests', () => {
         .set('Cookie', 'invalid-session-cookie');
 
       expect(invalidSessionResponse.status).toBe(401);
-      expect(invalidSessionResponse.body.success).toBe(false);
+      expect(invalidSessionResponse.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+      expect(invalidSessionResponse.body.data).toBeNull();
       
       console.log('✅ Invalid session properly handled');
     });

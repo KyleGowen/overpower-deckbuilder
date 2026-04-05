@@ -66,7 +66,7 @@ describe('Create User Integration Tests', () => {
         if (regularUser?.id) await cleanupTestUser(regularUser.id);
     });
 
-    describe('POST /api/users', () => {
+    describe('POST /api/v1/admin/users', () => {
         describe('Authorization', () => {
             it('should allow ADMIN users to create new users', async () => {
                 let createdUserId: string | null = null;
@@ -77,20 +77,19 @@ describe('Create User Integration Tests', () => {
                     };
 
                     const response = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
                     expect(response.status).toBe(201);
                     createdUserId = response.body.data.id;
-                    expect(response.body.success).toBe(true);
+                    expect(response.body.errors).toEqual([]);
                     expect(response.body.data).toMatchObject({
                         name: 'new-test-user',
                         email: 'new-test-user@example.com',
                         role: 'USER'
                     });
                     expect(response.body.data).not.toHaveProperty('password_hash');
-                    expect(response.body.message).toBe('User "new-test-user" created successfully');
                 } finally {
                     if (createdUserId) await cleanupTestUser(createdUserId);
                 }
@@ -103,13 +102,12 @@ describe('Create User Integration Tests', () => {
                 };
 
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', userAuthToken)
                     .send(newUserData);
 
                 expect(response.status).toBe(403);
-                expect(response.body.success).toBe(false);
-                expect(response.body.error).toBe('Only ADMIN users can access this endpoint');
+                expect(response.body.errors?.[0]?.code).toBe('ADMIN_REQUIRED');
             });
 
             it('should reject unauthenticated requests', async () => {
@@ -119,7 +117,7 @@ describe('Create User Integration Tests', () => {
                 };
 
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .send(newUserData);
 
                 expect([401, 403]).toContain(response.status);
@@ -129,39 +127,36 @@ describe('Create User Integration Tests', () => {
         describe('Input Validation', () => {
             it('should require username', async () => {
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .send({
                         password: 'test-password'
                     });
 
                 expect(response.status).toBe(400);
-                expect(response.body.success).toBe(false);
-                expect(response.body.error).toBe('Username and password are required');
+                expect(response.body.errors?.[0]?.message).toContain('Username and password are required');
             });
 
             it('should require password', async () => {
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .send({
                         username: 'test-username'
                     });
 
                 expect(response.status).toBe(400);
-                expect(response.body.success).toBe(false);
-                expect(response.body.error).toBe('Username and password are required');
+                expect(response.body.errors?.[0]?.message).toContain('Username and password are required');
             });
 
             it('should require both username and password', async () => {
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .send({});
 
                 expect(response.status).toBe(400);
-                expect(response.body.success).toBe(false);
-                expect(response.body.error).toBe('Username and password are required');
+                expect(response.body.errors?.[0]?.message).toContain('Username and password are required');
             });
         });
 
@@ -175,7 +170,7 @@ describe('Create User Integration Tests', () => {
                     };
 
                     const response = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -197,7 +192,7 @@ describe('Create User Integration Tests', () => {
                     };
 
                     const response = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -218,7 +213,7 @@ describe('Create User Integration Tests', () => {
                     };
 
                     const response = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -246,7 +241,7 @@ describe('Create User Integration Tests', () => {
 
                     // Create first user
                     const firstResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -255,13 +250,12 @@ describe('Create User Integration Tests', () => {
 
                     // Try to create second user with same username
                     const secondResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
                     expect(secondResponse.status).toBe(409);
-                    expect(secondResponse.body.success).toBe(false);
-                    expect(secondResponse.body.error).toBe('Username already exists');
+                    expect(secondResponse.body.errors?.[0]?.code).toBe('USERNAME_EXISTS');
                 } finally {
                     if (createdUserId) await cleanupTestUser(createdUserId);
                 }
@@ -283,7 +277,7 @@ describe('Create User Integration Tests', () => {
 
                     // Create first user
                     const firstResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(firstUserData);
 
@@ -292,7 +286,7 @@ describe('Create User Integration Tests', () => {
 
                     // Create second user with different username
                     const secondResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(secondUserData);
 
@@ -317,7 +311,7 @@ describe('Create User Integration Tests', () => {
 
                     // Create user
                     const createResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -350,7 +344,7 @@ describe('Create User Integration Tests', () => {
 
                     // Create user
                     const createResponse = await request(app)
-                        .post('/api/users')
+                        .post('/api/v1/admin/users')
                         .set('Cookie', adminAuthToken)
                         .send(newUserData);
 
@@ -376,7 +370,7 @@ describe('Create User Integration Tests', () => {
         describe('Error Handling', () => {
             it('should handle malformed JSON gracefully', async () => {
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .set('Content-Type', 'application/json')
                     .send('invalid json');
@@ -386,7 +380,7 @@ describe('Create User Integration Tests', () => {
 
             it('should handle missing Content-Type header', async () => {
                 const response = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .send('username=test&password=test');
 
@@ -395,19 +389,19 @@ describe('Create User Integration Tests', () => {
         });
     });
 
-    describe('GET /api/users', () => {
+    describe('GET /api/v1/admin/users', () => {
         it('should require authentication', async () => {
-            const response = await request(app).get('/api/users');
+            const response = await request(app).get('/api/v1/admin/users');
             expect(response.status).toBe(401);
         });
 
         it('should allow ADMIN to list users', async () => {
             const response = await request(app)
-                .get('/api/users')
+                .get('/api/v1/admin/users')
                 .set('Cookie', adminAuthToken);
 
             expect(response.status).toBe(200);
-            expect(response.body.success).toBe(true);
+            expect(response.body.errors).toEqual([]);
             expect(Array.isArray(response.body.data)).toBe(true);
         });
 
@@ -422,7 +416,7 @@ describe('Create User Integration Tests', () => {
 
                 // Create user
                 const createResponse = await request(app)
-                    .post('/api/users')
+                    .post('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken)
                     .send(newUserData);
 
@@ -431,11 +425,11 @@ describe('Create User Integration Tests', () => {
 
                 // Get users list
                 const listResponse = await request(app)
-                    .get('/api/users')
+                    .get('/api/v1/admin/users')
                     .set('Cookie', adminAuthToken);
 
                 expect(listResponse.status).toBe(200);
-                expect(listResponse.body.success).toBe(true);
+                expect(listResponse.body.errors).toEqual([]);
 
                 // Check if created user is in the list
                 const userInList = listResponse.body.data.find((user: any) => user.id === createdUserId);

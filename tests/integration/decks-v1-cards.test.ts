@@ -12,7 +12,8 @@ describe('GET/POST/PUT/DELETE /api/v1/decks/:id/cards', () => {
 
   it('returns 401 without session for GET cards', async () => {
     const res = await request(app).get('/api/v1/decks/00000000-0000-0000-0000-000000000001/cards').expect(401);
-    expect(res.body.success).toBe(false);
+    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(res.body.data).toBeNull();
   });
 
   it('GET empty, POST add, GET list, DELETE card, PUT replace, GET, DELETE card, DELETE deck', async () => {

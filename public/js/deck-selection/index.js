@@ -53,27 +53,45 @@
 
             const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             const isGuest = currentUser && currentUser.role === 'GUEST';
-            const url = isGuest ? '/api/guest/decks' : '/api/v1/decks';
+            const url = isGuest ? '/api/v1/guest/decks' : '/api/v1/decks';
             const response = await fetch(url, { credentials: 'include' });
             const json = await response.json();
+            // Guest and logged-in list endpoints both use the v1 envelope (`{ data, meta, errors }`).
+            // Do not use `json.success` for guests — it is undefined and left the skeleton up forever.
             let decks = null;
-            if (isGuest) {
-                if (json.success) {
-                    decks = json.data;
-                }
-            } else if (typeof deckListPayload === 'function') {
+            if (typeof deckListPayload === 'function') {
                 const parsed = deckListPayload(response, json);
                 if (parsed.ok) {
                     decks = parsed.decks;
                 }
+            } else if (response.ok && Array.isArray(json.data)) {
+                decks = json.data;
             }
-            if (decks) {
+            const deckListEl = document.getElementById('deck-list');
+            if (decks != null) {
                 saveSkeletonCount(decks);
                 if (typeof setUserDecks === 'function') {
                     setUserDecks(decks);
                 }
                 await window.DeckSelection.displayDecks(decks);
                 updateDeckStats();
+            } else if (deckListEl) {
+                const msg =
+                    (json.errors && json.errors[0] && json.errors[0].message) ||
+                    (json.error ? String(json.error) : '') ||
+                    (response.status === 401 || response.status === 403
+                        ? 'Sign in to load your decks.'
+                        : 'Failed to load decks.');
+                console.warn('loadDecks: no deck list in response', {
+                    url,
+                    status: response.status,
+                    isGuest,
+                    hasDeckListPayload: typeof deckListPayload === 'function'
+                });
+                deckListEl.innerHTML =
+                    '<div class="error" role="alert">' +
+                    msg.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                    '</div>';
             }
         } catch (error) {
             console.error('Error loading decks:', error);

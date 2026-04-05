@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import type { DeckData } from '../types';
 
 // ----- Read-only mode -----
 
@@ -87,26 +86,6 @@ export function requireGuestSession(req: Request, res: Response): string | null 
     return null;
   }
   return sessionId;
-}
-
-export function transformGuestDeckToListItem(deckData: DeckData) {
-  return {
-    metadata: {
-      id: deckData.metadata.id,
-      name: deckData.metadata.name,
-      description: deckData.metadata.description,
-      created: deckData.metadata.created,
-      lastModified: deckData.metadata.lastModified,
-      cardCount: deckData.metadata.cardCount ?? deckData.cards?.length ?? 0,
-      threat: 0,
-      is_valid: false,
-      userId: deckData.metadata.userId,
-      uiPreferences: deckData.metadata.uiPreferences,
-      is_limited: false,
-      background_image_path: null
-    },
-    cards: deckData.cards || []
-  };
 }
 
 // ----- Collection card types (shared with v1 collections HTTP) -----

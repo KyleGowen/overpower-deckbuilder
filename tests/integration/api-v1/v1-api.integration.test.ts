@@ -119,5 +119,26 @@ describe('API v1 integration', () => {
       expect(me.body.data.username).toBe(username);
       expect(me.body.data.role).toBe('USER');
     });
+
+    it('POST /api/v1/auth/logout returns v1 envelope with Bearer token', async () => {
+      const login = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ username, password })
+        .expect(200);
+      const token = login.body.data.accessToken as string;
+
+      const out = await request(app)
+        .post('/api/v1/auth/logout')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      expect(out.body.errors).toEqual([]);
+      expect(out.body.data).toEqual({ loggedOut: true });
+    });
+
+    it('POST /api/v1/auth/logout without token still returns 200 (idempotent)', async () => {
+      const out = await request(app).post('/api/v1/auth/logout').expect(200);
+      expect(out.body.errors).toEqual([]);
+      expect(out.body.data).toEqual({ loggedOut: true });
+    });
   });
 });

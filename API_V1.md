@@ -12,6 +12,7 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 
 - **Bearer JWT:** `Authorization: Bearer <access_token>` for protected v1 routes.
 - **Login:** `POST /api/v1/auth/login` with JSON body `{ "username", "password" }` returns an access token. Password verification uses the **same** server stack as `POST /api/auth/login` (no separate hashing implementation).
+- **Session cookie (`sessionId`):** Routes that use session auth (e.g. decks, collections, guest decks, admin, DBV backgrounds) accept the same cookie as legacy `/api/*`. If the session is missing or invalid, the server responds with **`401`** and the standard v1 envelope: `data: null`, `errors: [{ "code": "UNAUTHORIZED", "message": "..." }]` (e.g. `Authentication required`, `Invalid or expired session`, `User not found`).
 
 ### JSON envelope
 
@@ -52,7 +53,9 @@ All v1 JSON responses use:
 6. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
 7. [User decks (cards)](#user-decks-cards)
 8. [User decks (UI preferences)](#user-decks-ui-preferences)
-9. [Collections (current user)](#collections-current-user)
+9. [Guest decks (session memory)](#guest-decks-session-memory)
+10. [Collections (current user)](#collections-current-user)
+11. [Admin](#admin)
 
 ---
 
@@ -544,6 +547,56 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 ---
 
+## Guest decks (session memory)
+
+Session-scoped decks for **GUEST** users: stored **in memory** keyed by **`sessionId`** cookie (not persisted to PostgreSQL). **GET list** merges DB decks for the guest user (`getDecksByUserId` + `transformDeckList`) with session guest decks (same list shape as **`GET /api/v1/decks`** entries).
+
+**Auth:** Valid **session cookie** (`authenticateUser`) **and** **`GUEST`** role **and** **`sessionId`** cookie. Unauthenticated requests may receive **401** with the **legacy** session middleware shape. Wrong role → **403** v1 envelope, code **`GUEST_ONLY`**. Missing **`sessionId`** → **401**, code **`SESSION_REQUIRED`**.
+
+**Implementation:** [`GuestDeckService`](src/api/services/guestDeckService.ts) · HTTP [`guest-decks.http.ts`](src/api/http/guest-decks.http.ts)
+
+### `POST /api/v1/guest/decks`
+
+**Body (optional):** `{ "name"?, "description"? }` — defaults **`name`** `"New Deck"`, **`description`** `""`. Request model: [`CreateGuestDeckBody.ts`](src/api/http/models/guest-decks/CreateGuestDeckBody.ts)
+
+**Response 201:** v1 envelope; **`data`** = `{ "id", "name", "description", "created_at", "updated_at" }`.
+
+### `GET /api/v1/guest/decks`
+
+**Response 200:** v1 envelope; **`data`** = merged array (DB + session guest decks).
+
+### `GET /api/v1/guest/decks/:id`
+
+**Response 200:** v1 envelope; **`data`** = `{ "metadata": { ..., "isOwner": true }, "cards": [...] }`.
+
+**Response 404:** **`DECK_NOT_FOUND`**.
+
+### `PUT /api/v1/guest/decks/:id`
+
+**Body:** optional **`name`**, **`description`** — [`UpdateGuestDeckBody.ts`](src/api/http/models/guest-decks/UpdateGuestDeckBody.ts)
+
+**Response 200:** v1 envelope; **`data`** = list-item shape (same as merged list entries).
+
+### `PUT /api/v1/guest/decks/:id/cards`
+
+Replace all cards (max **100** entries; per-entry **`quantity`** 1–100). **Body:** `{ "cards": [ { "cardType", "cardId", "quantity"?, "exclude_from_draw"? }, ... ] }` — [`GuestDeckCardsPutBody.ts`](src/api/http/models/guest-decks/GuestDeckCardsPutBody.ts)
+
+**Response 200:** v1 envelope; **`data`** = full guest deck `{ "metadata", "cards" }`.
+
+### `POST /api/v1/guest/decks/:id/cards`
+
+Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc.). **Body:** **`cardType`**, **`cardId`**, optional **`quantity`**.
+
+**Response 200:** v1 envelope; **`data`** = full guest deck.
+
+### `DELETE /api/v1/guest/decks/:id`
+
+**Response 200:** v1 envelope; **`data`** = `{}` (empty object).
+
+**Response 404:** **`DECK_NOT_FOUND`**.
+
+---
+
 ## Collections (current user)
 
 ### `GET /api/v1/collections/me`
@@ -565,6 +618,20 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 **Response 200:** v1 envelope; **`data`** is an array of collection rows (same shape as legacy `GET /api/collections/me/cards` payload): snake_case fields including `card_id`, `card_type`, `quantity`, `image_path`, plus joined card metadata when present.
 
 **Response 500:** `errors` with code **`COLLECTION_CARDS_FETCH_ERROR`**.
+
+### `GET /api/v1/collections/me/history`
+
+**Auth:** Session cookie (`authenticateUser`). Unauthenticated → **401** (legacy `{ success, error }` from session middleware).
+
+**Query:** optional **`limit`** — must be a **positive integer** when present (same rule as removed legacy **`GET /api/collections/me/history`**). Omit **`limit`** to return all history (service default).
+
+**Response 200:** v1 envelope; **`data`** is an array of history rows: `id`, `collection_id`, `card_id`, `action` (`ADD` \| `REMOVE`), `new_quantity`, `created_at`, ordered by **`created_at` DESC** (most recent first).
+
+**Response 400:** **`VALIDATION_ERROR`** — `limit` not a positive integer.
+
+**Response 500:** **`COLLECTION_HISTORY_ERROR`**.
+
+**Implementation:** [`CollectionService.getCollectionHistory`](src/services/collectionService.ts) · HTTP [`collections.http.ts`](src/api/http/collections.http.ts)
 
 ### `POST /api/v1/collections/me/cards`
 
@@ -618,6 +685,50 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 
 ---
 
+## Admin
+
+**Auth:** Valid **session cookie** (`authenticateUser`) **and** **`ADMIN`** role. Unauthenticated requests may receive **401** with the **legacy** session middleware shape (`{ "success": false, "error": "..." }`), consistent with other session-backed v1 routes. Non-admin → **403** v1 envelope, code **`ADMIN_REQUIRED`**.
+
+**Implementation:** [`AdminService`](src/api/services/adminService.ts) · HTTP [`admin.http.ts`](src/api/http/admin.http.ts)
+
+### `GET /api/v1/admin/users`
+
+**Response 200:** v1 envelope; **`data`** = array of `{ "id", "name", "email", "role", "lastLoginAt" }` (no password hash).
+
+**Response 500:** **`ADMIN_USERS_LIST_ERROR`**.
+
+### `POST /api/v1/admin/users`
+
+**Body:** `{ "username", "password" }` — request validation: [`CreateAdminUserBody.ts`](src/api/http/models/admin/CreateAdminUserBody.ts)
+
+**Response 201:** v1 envelope; **`data`** = created user (same shape as list entries).
+
+**Response 400:** validation — e.g. missing **`username`** / **`password`** (`VALIDATION_ERROR`).
+
+**Response 409:** **`USERNAME_EXISTS`**.
+
+**Response 500:** **`ADMIN_USER_CREATE_ERROR`**.
+
+### `GET /api/v1/admin/debug/clear-cache`
+
+Clears deck repository cache (in-memory).
+
+**Response 200:** v1 envelope; **`data`** = `{ "message": "Deck cache cleared" }`.
+
+### `GET /api/v1/admin/debug/clear-card-cache`
+
+Clears card repository caches.
+
+**Response 200:** v1 envelope; **`data`** = `{ "message": "Card repository cache cleared" }`.
+
+### `GET /api/v1/admin/database/status`
+
+**Response 200:** v1 envelope; **`data`** = `{ "status": "OK", "database": { "valid", "upToDate", "migrations" } }` (same semantics as former legacy **`GET /api/database/status`** payload, wrapped in **`data`**).
+
+**Response 500:** **`ADMIN_DATABASE_STATUS_ERROR`**.
+
+---
+
 ## Route index (v1)
 
 | Method | Path | Router module |
@@ -654,9 +765,33 @@ Deck card CRUD for a database-backed deck. **Legacy** **`/api/decks/:id/cards`**
 | GET | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | PUT | /api/v1/decks/:id/ui-preferences | decks.http.ts |
 | DELETE | /api/v1/decks/:id | decks.http.ts |
+| GET | /api/v1/guest/decks | guest-decks.http.ts |
+| POST | /api/v1/guest/decks | guest-decks.http.ts |
+| GET | /api/v1/guest/decks/:id | guest-decks.http.ts |
+| PUT | /api/v1/guest/decks/:id | guest-decks.http.ts |
+| DELETE | /api/v1/guest/decks/:id | guest-decks.http.ts |
+| PUT | /api/v1/guest/decks/:id/cards | guest-decks.http.ts |
+| POST | /api/v1/guest/decks/:id/cards | guest-decks.http.ts |
 | GET | /api/v1/collections/me | collections.http.ts |
 | GET | /api/v1/collections/me/cards | collections.http.ts |
+| GET | /api/v1/collections/me/history | collections.http.ts |
 | POST | /api/v1/collections/me/cards | collections.http.ts |
 | POST | /api/v1/collections/me/cards/remove-one | collections.http.ts |
 | PUT | /api/v1/collections/me/cards/:cardId | collections.http.ts |
 | DELETE | /api/v1/collections/me/cards/:cardId | collections.http.ts |
+| GET | /api/v1/admin/users | admin.http.ts |
+| POST | /api/v1/admin/users | admin.http.ts |
+| GET | /api/v1/admin/debug/clear-cache | admin.http.ts |
+| GET | /api/v1/admin/debug/clear-card-cache | admin.http.ts |
+| GET | /api/v1/admin/database/status | admin.http.ts |
+
+---
+
+## Non-v1 surfaces
+
+These endpoints are **intentionally not** under **`/api/v1`**:
+
+- **`GET /health`** — operations and monitoring; JSON shape is health-specific, not the v1 catalog envelope.
+- **Static assets** and **HTML shell** routes (e.g. **`/users/...`** deck pages, **`/data`**) — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+
+**Legacy** JSON that remains outside v1 (e.g. **`POST /api/users/change-password`**) is documented only in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).

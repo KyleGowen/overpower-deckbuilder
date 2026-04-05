@@ -11,7 +11,11 @@ import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
 import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
 import { registerDecksV1HttpRoutes } from './decks.http';
 import { registerCollectionsV1HttpRoutes } from './collections.http';
+import { registerGuestDecksV1HttpRoutes } from './guest-decks.http';
+import { registerAdminV1HttpRoutes } from './admin.http';
+import type { AdminService } from '../services/adminService';
 import type { CollectionService } from '../../services/collectionService';
+import type { GuestDeckService } from '../services/guestDeckService';
 import type { DeckListService } from '../services/deckListService';
 import type { DeckStatsService } from '../services/deckStatsService';
 import type { DeckWriteService } from '../services/deckWriteService';
@@ -40,6 +44,8 @@ export interface RegisterApiV1Deps {
   deckCardsService: DeckCardsService;
   deckUIPreferencesService: DeckUIPreferencesService;
   collectionService: CollectionService;
+  guestDeckService: GuestDeckService;
+  adminService: AdminService;
 }
 
 /**
@@ -79,6 +85,16 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
 
   registerCollectionsV1HttpRoutes(router, {
     collectionService: deps.collectionService,
+    authenticateUser: deps.authenticateUser
+  });
+
+  registerGuestDecksV1HttpRoutes(router, {
+    guestDeckService: deps.guestDeckService,
+    authenticateUser: deps.authenticateUser
+  });
+
+  registerAdminV1HttpRoutes(router, {
+    adminService: deps.adminService,
     authenticateUser: deps.authenticateUser
   });
 

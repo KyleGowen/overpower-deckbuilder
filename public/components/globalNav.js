@@ -126,24 +126,27 @@ function createNewDeck() {
 async function createNewDeckForGuest() {
     isCreatingNewDeck = true;
     try {
-        const res = await fetch('/api/guest/decks', {
+        const res = await fetch('/api/v1/guest/decks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ name: 'New Deck', description: '' })
         });
         const data = await res.json();
-        if (!res.ok || !data.success) {
+        const pl = typeof v1DataPayload === 'function' ? v1DataPayload(res, data) : null;
+        if (!pl || !pl.ok || !pl.data || !pl.data.id) {
+            const msg =
+                (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Failed to create guest deck';
             if (typeof showNotification === 'function') {
-                showNotification(data.error || 'Failed to create guest deck', 'error');
+                showNotification(msg, 'error');
             } else {
-                alert(data.error || 'Failed to create guest deck');
+                alert(msg);
             }
             return;
         }
-        const deckId = data.data.id;
-        const created = data.data.created_at;
-        const updated = data.data.updated_at;
+        const deckId = pl.data.id;
+        const created = pl.data.created_at;
+        const updated = pl.data.updated_at;
 
         if (typeof isReadOnlyMode !== 'undefined') {
             isReadOnlyMode = false;
@@ -595,7 +598,7 @@ async function createUser(event) {
     }
     
     try {
-        const response = await fetch('/api/users', {
+        const response = await fetch('/api/v1/admin/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -608,12 +611,15 @@ async function createUser(event) {
         });
         
         const data = await response.json();
+        const ok = typeof v1ResponseOk === 'function' ? v1ResponseOk(response, data) : response.ok && !data.errors?.length;
         
-        if (response.ok && data.success) {
+        if (ok) {
             alert(`User "${username}" created successfully!`);
             closeCreateUserDropdown();
         } else {
-            alert(`Error creating user: ${data.error || 'Unknown error'}`);
+            const msg =
+                (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Unknown error';
+            alert(`Error creating user: ${msg}`);
         }
     } catch (error) {
         console.error('Error creating user:', error);

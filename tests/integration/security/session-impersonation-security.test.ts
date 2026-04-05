@@ -24,7 +24,8 @@ describe('Session Impersonation Security Integration Tests', () => {
   it('rejects missing session cookie on authenticated endpoints (401)', async () => {
     const response = await request(app).get('/api/v1/decks');
     expect(response.status).toBe(401);
-    expect(response.body.success).toBe(false);
+    expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(response.body.data).toBeNull();
   });
 
   it('rejects tampered sessionId cookies (401)', async () => {
@@ -52,7 +53,8 @@ describe('Session Impersonation Security Integration Tests', () => {
       .set('Cookie', `sessionId=${tampered}`);
 
     expect(response.status).toBe(401);
-    expect(response.body.success).toBe(false);
+    expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(response.body.data).toBeNull();
   });
 
   it('invalidates the session after logout (cannot reuse old cookie)', async () => {
@@ -81,7 +83,8 @@ describe('Session Impersonation Security Integration Tests', () => {
       .set('Cookie', cookie);
 
     expect(after.status).toBe(401);
-    expect(after.body.success).toBe(false);
+    expect(after.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(after.body.data).toBeNull();
   });
 
   it('rejects sessions whose user no longer exists (401)', async () => {

@@ -11,7 +11,8 @@ describe('GET /api/v1/decks', () => {
 
   it('returns 401 without session', async () => {
     const res = await request(app).get('/api/v1/decks').expect(401);
-    expect(res.body.success).toBe(false);
+    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    expect(res.body.data).toBeNull();
   });
 
   it('returns v1 envelope with deck array when authenticated', async () => {
