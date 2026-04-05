@@ -24,19 +24,18 @@ describe('Special Character Threat Display Integration Tests', () => {
             password: 'password'
         });
 
-        // Get character IDs for the three special characters
+        // One row per canonical name (DB may contain duplicate name rows across sets)
         const characterResult = await pool.query(`
-            SELECT id, name, threat_level 
-            FROM characters 
-            WHERE name IN ('Carson of Venus', 'Morgan le Fay', 'Victory Harben') 
-            ORDER BY name
+            SELECT DISTINCT ON (name) id, name, threat_level
+            FROM characters
+            WHERE name IN ('Carson of Venus', 'Morgan le Fay', 'Victory Harben')
+            ORDER BY name, id
         `);
-        
+
         expect(characterResult.rows).toHaveLength(3);
-        
-        // Map character names to their IDs
+
         specialCharacterIds = {};
-        characterResult.rows.forEach(row => {
+        characterResult.rows.forEach((row) => {
             specialCharacterIds[row.name] = row.id;
         });
     });
@@ -91,7 +90,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 19 in deck editor and summary when Carson of Venus IS reserve character', async () => {
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -117,8 +116,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(19); // Carson adjusted from 18 to 19 when reserve
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(19); // Carson adjusted from 18 to 19 when reserve
 
             // Verify the deck has the correct reserve character
             expect(getResponse.body.data.metadata.reserve_character).toBe(specialCharacterIds['Carson of Venus']);
@@ -138,7 +137,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 18 in deck editor and summary when Carson of Venus is NOT reserve character', async () => {
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -164,8 +163,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(18); // Carson normal threat level
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(18); // Carson normal threat level
 
             // Verify no reserve character is set
             expect(getResponse.body.data.metadata.reserve_character).toBeNull();
@@ -187,7 +186,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 20 in deck editor and summary when Morgan le Fay IS reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -213,8 +212,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(20); // Morgan adjusted from 19 to 20 when reserve
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(20); // Morgan adjusted from 19 to 20 when reserve
 
             // Verify the deck has the correct reserve character
             expect(getResponse.body.data.metadata.reserve_character).toBe(specialCharacterIds['Morgan le Fay']);
@@ -234,7 +233,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 19 in deck editor and summary when Morgan le Fay is NOT reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -260,8 +259,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(19); // Morgan normal threat level
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(19); // Morgan normal threat level
 
             // Verify no reserve character is set
             expect(getResponse.body.data.metadata.reserve_character).toBeNull();
@@ -283,7 +282,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 20 in deck editor and summary when Victory Harben IS reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -309,8 +308,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(20); // Victory adjusted from 18 to 20 when reserve
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(20); // Victory adjusted from 18 to 20 when reserve
 
             // Verify the deck has the correct reserve character
             expect(getResponse.body.data.metadata.reserve_character).toBe(specialCharacterIds['Victory Harben']);
@@ -330,7 +329,7 @@ describe('Special Character Threat Display Integration Tests', () => {
         it('should display threat level 18 in deck editor and summary when Victory Harben is NOT reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -356,8 +355,8 @@ describe('Special Character Threat Display Integration Tests', () => {
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .expect(200);
 
-            expect(getResponse.body.success).toBe(true);
-            expect(getResponse.body.data.threat).toBe(18); // Victory normal threat level
+            expect(getResponse.body.errors).toEqual([]);
+            expect(getResponse.body.data.metadata.threat).toBe(18); // Victory normal threat level
 
             // Verify no reserve character is set
             expect(getResponse.body.data.metadata.reserve_character).toBeNull();
@@ -429,7 +428,7 @@ describe('Special Character Threat Display Integration Tests', () => {
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .expect(200);
 
-                expect(deckResponse.body.data.threat).toBe(scenario.expectedThreat);
+                expect(deckResponse.body.data.metadata.threat).toBe(scenario.expectedThreat);
 
                 // Verify deck summary threat (via deck list API)
                 const deckListResponse = await request(app)
@@ -442,7 +441,7 @@ describe('Special Character Threat Display Integration Tests', () => {
                 expect(deckInList.metadata.threat).toBe(scenario.expectedThreat);
 
                 // Verify consistency between both displays
-                expect(deckResponse.body.data.threat).toBe(deckInList.metadata.threat);
+                expect(deckResponse.body.data.metadata.threat).toBe(deckInList.metadata.threat);
             }
         });
     });

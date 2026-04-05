@@ -63,7 +63,7 @@ describe('Reserve Character Loading Integration Tests', () => {
         // Add characters to deck
         for (let i = 0; i < 3; i++) {
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -234,7 +234,7 @@ describe('Reserve Character Loading Integration Tests', () => {
 
             // Add a power card
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'power',
@@ -269,7 +269,7 @@ describe('Reserve Character Loading Integration Tests', () => {
 
             // Remove a character card (not the reserve character)
             await request(app)
-                .delete(`/api/v1/decks/${testDeckId}/cards`)
+                .delete(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',

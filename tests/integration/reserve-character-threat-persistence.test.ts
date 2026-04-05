@@ -17,15 +17,14 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
             password: 'password'
         });
 
-        // Get character IDs for the three special characters
         const characterResult = await pool.query(`
-            SELECT id, name, threat_level 
-            FROM characters 
-            WHERE name IN ('Carson of Venus', 'Morgan le Fay', 'Victory Harben') 
-            ORDER BY name
+            SELECT DISTINCT ON (name) id, name, threat_level
+            FROM characters
+            WHERE name IN ('Carson of Venus', 'Morgan le Fay', 'Victory Harben')
+            ORDER BY name, id
         `);
-        
-        testCharacterIds = characterResult.rows.map(row => row.id);
+
+        testCharacterIds = characterResult.rows.map((row) => row.id);
         expect(testCharacterIds).toHaveLength(3);
     });
 
@@ -84,7 +83,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
 
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -119,7 +118,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
         it('should persist threat level 18 when Carson of Venus is not reserve character', async () => {
             // Add Carson of Venus to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -156,7 +155,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
         it('should persist threat level 20 when Morgan le Fay is reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -191,7 +190,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
         it('should persist threat level 19 when Morgan le Fay is not reserve character', async () => {
             // Add Morgan le Fay to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -228,7 +227,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
         it('should persist threat level 20 when Victory Harben is reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -263,7 +262,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
         it('should persist threat level 18 when Victory Harben is not reserve character', async () => {
             // Add Victory Harben to deck
             await request(app)
-                .post(`/api/v1/decks/${testDeckId}/cards`)
+                .post(`/api/v1/decks/${testDeck.id}/cards`)
                 .set('Cookie', `sessionId=${testUser.sessionId}`)
                 .send({
                     cardType: 'character',
@@ -301,7 +300,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
             // Add all three special characters to deck
             for (const characterId of testCharacterIds) {
                 await request(app)
-                    .post(`/api/v1/decks/${testDeckId}/cards`)
+                    .post(`/api/v1/decks/${testDeck.id}/cards`)
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .send({
                         cardType: 'character',
@@ -339,7 +338,7 @@ describe('Reserve Character Threat Persistence Integration Tests', () => {
             // Add all three special characters to deck
             for (const characterId of testCharacterIds) {
                 await request(app)
-                    .post(`/api/v1/decks/${testDeckId}/cards`)
+                    .post(`/api/v1/decks/${testDeck.id}/cards`)
                     .set('Cookie', `sessionId=${testUser.sessionId}`)
                     .send({
                         cardType: 'character',

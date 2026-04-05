@@ -407,7 +407,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Request model:** none (path param **`id`** = deck UUID).
 
-**Response 200:** v1 envelope; **`data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc.).
+**Response 200:** v1 envelope; **`data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `threat`, `is_valid`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc. — **`metadata.threat` / `metadata.is_valid`** align with list rows from `transformDeckListItem`).
 
 **Response 404:** v1 envelope — `errors` with code **`DECK_NOT_FOUND`**.
 

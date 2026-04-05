@@ -35,7 +35,7 @@ else
   fail "Authentication middleware not found in AuthenticationService"
 fi
 
-if grep -q 'authenticateUser' src/index.ts 2>/dev/null || grep -rq 'authenticateUser' src/routes/ --include='*.ts' 2>/dev/null; then
+if grep -q 'authenticateUser' src/index.ts 2>/dev/null || grep -rq 'authenticateUser' src/routes/ --include='*.ts' 2>/dev/null || grep -rq 'authenticateUser' "$API_HTTP_DIR" --include='*.ts' 2>/dev/null; then
   pass "Authentication middleware is wired into route handlers"
 else
   fail "Authentication middleware not applied to routes"
@@ -153,22 +153,22 @@ else
   fail "Insufficient input validation ($INPUT_VALIDATION_COUNT checks found, need ≥5)"
 fi
 
-# Check: Rate limiting is implemented (may be in helpers or route modules)
-if grep -q 'checkRateLimit\|rateLimit\|rate.limit' src/index.ts 2>/dev/null || grep -rq 'checkRateLimit\|rateLimit\|rate\.limit' src/routes/ --include="*.ts" 2>/dev/null; then
+# Check: Rate limiting is implemented (may be in helpers, route modules, or v1 HTTP routers)
+if grep -q 'checkRateLimit\|rateLimit\|rate.limit' src/index.ts 2>/dev/null || grep -rq 'checkRateLimit\|rateLimit\|rate\.limit' src/routes/ --include="*.ts" 2>/dev/null || grep -rq 'checkRateLimit\|rateLimit\|rate\.limit' "$API_HTTP_DIR" --include="*.ts" 2>/dev/null; then
   pass "Rate limiting is implemented"
 else
   fail "No rate limiting found"
 fi
 
-# Check: Guest mutation blocking (may be in route modules)
-if grep -q 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/index.ts 2>/dev/null || grep -rq 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/routes/ --include="*.ts" 2>/dev/null; then
+# Check: Guest mutation blocking (may be in route modules or v1 HTTP routers)
+if grep -q 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/index.ts 2>/dev/null || grep -rq 'blockGuestMutation\|GUEST.*may not\|guest.*cannot' src/routes/ --include="*.ts" 2>/dev/null || grep -rq 'blockGuestMutation\|sendGuestForbiddenV1\|GUEST.*may not\|guest.*cannot' "$API_HTTP_DIR" --include="*.ts" 2>/dev/null; then
   pass "Guest user mutation blocking is enforced"
 else
   fail "No guest mutation blocking found"
 fi
 
-# Check: Deck ownership enforcement on write endpoints (in index or route modules)
-OWNERSHIP_CHECKS=$(grep -rE 'requireDeckOwner|userOwnsDeck|user_id.*req\.user\.id' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+# Check: Deck ownership enforcement on write endpoints (index, route modules, or v1 HTTP)
+OWNERSHIP_CHECKS=$(grep -rE 'requireDeckOwner|userOwnsDeck|user_id.*req\.user\.id' src/index.ts src/routes/ "$API_HTTP_DIR" --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
 OWNERSHIP_CHECKS=${OWNERSHIP_CHECKS:-0}
 if [ "$OWNERSHIP_CHECKS" -ge 3 ]; then
   pass "Resource ownership enforced on write endpoints ($OWNERSHIP_CHECKS checks)"
@@ -176,8 +176,8 @@ else
   fail "Insufficient ownership enforcement ($OWNERSHIP_CHECKS checks, need ≥3)"
 fi
 
-# Check: Error responses don't leak stack traces to clients (index or route modules)
-STACK_LEAKS=$(grep -rn 'res\.\(json\|send\|status\).*stack' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | head -5 || true)
+# Check: Error responses don't leak stack traces to clients (index, routes, or v1 HTTP)
+STACK_LEAKS=$(grep -rn 'res\.\(json\|send\|status\).*stack' src/index.ts src/routes/ "$API_HTTP_DIR" --include="*.ts" 2>/dev/null | head -5 || true)
 if [ -z "$STACK_LEAKS" ]; then
   pass "No stack traces leaked in HTTP responses"
 else
@@ -189,8 +189,8 @@ fi
 echo ""
 echo "━━━ CC7.1: Monitoring and Detection ━━━"
 
-# Check: Security events are logged (may be in helpers or route modules)
-SECURITY_LOGS=$(grep -r 'SECURITY' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+# Check: Security events are logged (helpers, route modules, or v1 HTTP)
+SECURITY_LOGS=$(grep -r 'SECURITY' src/index.ts src/routes/ "$API_HTTP_DIR" --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
 SECURITY_LOGS=${SECURITY_LOGS:-0}
 if [ "$SECURITY_LOGS" -ge 3 ]; then
   pass "Security event logging present ($SECURITY_LOGS log statements)"
@@ -205,8 +205,8 @@ else
   fail "Authentication failures may not be logged"
 fi
 
-# Check: Health check endpoint exists for availability monitoring (index or route modules)
-if grep -q "'/health'" src/index.ts 2>/dev/null || grep -rq "'/health'" src/routes/ --include="*.ts" 2>/dev/null; then
+# Check: Health check endpoint exists for availability monitoring (index, routes, or v1 HTTP)
+if grep -q "'/health'" src/index.ts 2>/dev/null || grep -rq "'/health'" src/routes/ --include="*.ts" 2>/dev/null || grep -rq "'/health'" "$API_HTTP_DIR" --include="*.ts" 2>/dev/null; then
   pass "Health check endpoint exists for availability monitoring"
 else
   fail "No health check endpoint found"
@@ -258,8 +258,8 @@ else
   fail "No session invalidation on logout"
 fi
 
-# Check: Read-only mode support (operational safety; may be in helpers or route modules)
-if grep -q 'readOnly\|read\.only\|readonly' src/index.ts 2>/dev/null || grep -rq 'readOnly\|read\.only\|readonly' src/routes/ --include="*.ts" 2>/dev/null; then
+# Check: Read-only mode support (operational safety; may be in helpers, routes, or v1 HTTP)
+if grep -q 'readOnly\|read\.only\|readonly' src/index.ts 2>/dev/null || grep -rq 'readOnly\|read\.only\|readonly' src/routes/ --include="*.ts" 2>/dev/null || grep -rq 'readOnly\|read\.only\|readonly\|blockInReadOnlyMode' "$API_HTTP_DIR" --include="*.ts" 2>/dev/null; then
   pass "Read-only mode support exists for operational safety"
 else
   warn "No read-only mode support found"

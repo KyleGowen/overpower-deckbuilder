@@ -151,6 +151,9 @@ src/resources/cards/images/characters/thumb/
 src/resources/cards/images/missions/thumb/
 src/resources/cards/images/locations/thumb/
 
+# Local ship gate: last successful unit/integration test fingerprint (see scripts/ship-conditional-test.sh)
+.ship-test-cache
+
 # Backup files
 *_backup_*/
 BACKUP_*/

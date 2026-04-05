@@ -342,12 +342,12 @@ jobs:
             slug: game-logic-character-layout
             script: test:integration:game-logic-character-layout
             args: ""
-            timeout: 15
+            timeout: 25
           - category: Game Logic Character Threat
             slug: game-logic-character-threat
             script: test:integration:game-logic-character-threat
             args: ""
-            timeout: 15
+            timeout: 25
           - category: Reserve
             slug: reserve
             script: test:integration

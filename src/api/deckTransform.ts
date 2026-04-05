@@ -59,6 +59,8 @@ export function transformDeckDetail(deck: Deck, viewerUserId: string) {
       created: deck.created_at,
       lastModified: deck.updated_at,
       cardCount: deck.cards?.length || 0,
+      threat: deck.threat ?? 0,
+      is_valid: deck.is_valid ?? false,
       userId: deck.user_id,
       uiPreferences: deck.ui_preferences,
       isOwner,

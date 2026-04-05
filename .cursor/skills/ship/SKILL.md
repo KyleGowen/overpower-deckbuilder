@@ -1,11 +1,12 @@
 ---
 name: ship
 description: >-
-  Runs lint, unit tests, conditional SOC 2 compliance checks when HTTP endpoint
-  code changes, optional daily npm audit, removes debug logging, then stages,
-  commits, and pushes. Prefers spawning parallel Task subagents for independent
-  checks to minimize wall-clock time. Use when the user says "ship", "ship it",
-  or asks to commit and push after checks; also for the Excelsior release gate.
+  Runs lint, conditional unit tests (and optional conditional integration tests)
+  via scripts/ship-conditional-test.sh so suites re-run only after working-tree
+  changes, SOC 2 when HTTP paths change, optional daily npm audit, removes debug
+  logging, then stages, commits, and pushes. Prefers parallel Task subagents for
+  independent checks. Use when the user says "ship", "ship it", or asks to commit
+  and push after checks; also for the Excelsior release gate.
 ---
 
 # Ship (commit and push)
@@ -25,7 +26,8 @@ When the user says **"ship"**, it means: **commit and push everything to git** a
 1. **Quick triage first** (main agent is fine): determine whether SOC 2 applies (endpoint path diff — see §3) and whether `npm audit` is required today (see §4). These are cheap; do not spawn agents just for this unless remote-heavy.
 2. **Run independent gates concurrently:** In **one assistant turn**, start **multiple `Task` subagents** (typically `subagent_type: "shell"`) in **parallel** — one per command — for every check that applies, for example:
    - `npx eslint src --ext .ts --max-warnings 0`
-   - `npm run test:unit`
+   - `bash scripts/ship-conditional-test.sh unit` (re-runs `npm run test:unit` only if the working tree changed since the last successful unit run — see **§2**)
+   - `bash scripts/ship-conditional-test.sh integration` (only when integration tests are in scope for this ship — same skip logic)
    - `bash scripts/soc2-compliance-checks.sh` (only if §3 triggered)
    - `npm audit` (only if §4 required)
 3. **Collect results** after all parallel tasks finish. **All must pass** before proceeding. If several fail, fix issues, then **re-run only what failed** (again in parallel if multiple reruns).
@@ -40,7 +42,8 @@ Copy and track progress:
 ```
 Ship progress:
 - [ ] 1. ESLint clean
-- [ ] 2. Unit tests pass
+- [ ] 2. Unit tests pass (`bash scripts/ship-conditional-test.sh unit` — ok if skipped when tree unchanged)
+- [ ] 2b. Integration tests (only if in scope — `bash scripts/ship-conditional-test.sh integration`)
 - [ ] 3. SOC 2 script (when endpoint paths changed — see below)
 - [ ] 4. npm audit (when required — see below)
 - [ ] 5. No debug statements
@@ -53,11 +56,19 @@ Ship progress:
 - Fix every warning and error before continuing
 - **Do not commit** if lint is not clean (matches CI zero-warning policy)
 
-### 2. Unit tests
+### 2. Unit tests (conditional re-run)
 
-- Run: `npm run test:unit`
-- Fix failures before continuing
-- **Never commit** if unit tests fail
+- Run from repo root: `bash scripts/ship-conditional-test.sh unit`
+- This invokes `npm run test:unit` **only when** the repo fingerprint changed since the last **successful** unit run (HEAD + staged/unstaged diffs + untracked files and their hashes). If nothing relevant changed, the script exits **0** and prints a skip line — treat that as **pass** for ship.
+- To **always** run unit tests regardless of cache: `SHIP_TESTS_FORCE=1 bash scripts/ship-conditional-test.sh unit`
+- Fix failures before continuing; **never commit** if unit tests fail
+- For an unconditional run outside ship (e.g. explicit “run all unit tests”), use `npm run test:unit` directly
+
+### 2b. Integration tests (when included in this ship)
+
+- When [.cursorrules](.cursorrules) or the user implies integration tests before push: `bash scripts/ship-conditional-test.sh integration` (same fingerprint/skip behavior vs. last successful IT run)
+- `SHIP_TESTS_FORCE=1` forces a full `npm run test:integration`
+- Skip message + exit 0 counts as pass for ship
 
 ### 3. SOC 2 compliance checks (conditional)
 
@@ -107,7 +118,8 @@ Per [`.cursor/rules/git-subagent.mdc`](.cursor/rules/git-subagent.mdc): **do not
 | Condition | Action |
 |-----------|--------|
 | ESLint warnings/errors | Fix and re-run step 1 (can parallel with other reruns) |
-| Unit test failures | Fix and re-run step 2 (can parallel with other reruns) |
+| Unit test failures | Fix and re-run step 2 (can parallel with other reruns). Same tree after a failed run: use `SHIP_TESTS_FORCE=1` so tests run again |
+| Integration test failures (when step 2b applies) | Fix and re-run `bash scripts/ship-conditional-test.sh integration`; use `SHIP_TESTS_FORCE=1` if the fingerprint is unchanged |
 | Endpoint diff and SOC 2 script exits non-zero | Fix or update checks, re-run step 3 |
 | Audit required and vulnerabilities with fixes remain | Fix or stop and notify the user |
 | Debug noise left in diff | Remove and re-check step 5 |

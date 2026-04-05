@@ -4,7 +4,7 @@
 
 Before making changes:
 
-1. **Read [.cursorrules](.cursorrules)** — ship command, testing, lint, GUEST behavior, style guide, infra rules, and **Flyway migrations (local dev)** (`npm run migrate` + restart `npm run dev` after adding/editing `migrations/*.sql`).
+1. **Read [.cursorrules](.cursorrules)** — ship command (unit/integration gates use [`scripts/ship-conditional-test.sh`](scripts/ship-conditional-test.sh) so tests re-run only after working-tree changes; `SHIP_TESTS_FORCE=1` to always run), testing, lint, GUEST behavior, style guide, infra rules, and **Flyway migrations (local dev)** (`npm run migrate` + restart `npm run dev` after adding/editing `migrations/*.sql`).
 2. **Read [DEAD_CODE_POLICY.md](DEAD_CODE_POLICY.md)** — how to identify and remove unused code (Knip, frontend manifest).
 
 Key docs:

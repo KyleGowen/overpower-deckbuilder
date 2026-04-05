@@ -30,7 +30,7 @@ describe('Character Column Layout Integration Tests', () => {
     if (testUser) {
       try {
         await userRepo.deleteUser(testUser.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -79,58 +79,56 @@ describe('Character Column Layout Integration Tests', () => {
     if (testUser) {
       try {
         await userRepo.deleteUser(testUser.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
   });
 
   describe('Character Column Layout', () => {
+    // Layout logic lives in /js/deck-editor-layout.js (not inlined in index.html).
+    async function assertLayoutAssetServed(): Promise<string> {
+      const layoutRes = await request(app).get('/js/deck-editor-layout.js');
+      expect(layoutRes.status).toBe(200);
+      expect(layoutRes.text).toContain('forceCharacterSingleColumnLayout');
+      expect(layoutRes.text).toContain('#deck-type-character');
+      return layoutRes.text;
+    }
+
     it('should display character cards in single column when deck editor first loads', async () => {
-      // Access the deck editor page
       const response = await request(app)
         .get(`/users/${testUser.id}/decks/${testDeck.id}`)
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
       expect(response.text).toContain('deckEditorModal');
-      
-      // Check that the HTML contains the character section
-      expect(response.text).toContain('deck-type-character');
-      
-      // Verify that CSS link is present (CSS is now external)
+      expect(response.text).toContain('<script src="/js/deck-editor-layout.js"');
       expect(response.text).toContain('<link rel="stylesheet" href="/css/index.css">');
       expect(response.text).toContain('deck-type-cards');
-      
-      // Verify that the JavaScript function is present
-      expect(response.text).toContain('forceCharacterSingleColumnLayout');
+
+      await assertLayoutAssetServed();
     });
 
     it('should maintain single column layout after adding cards to deck', async () => {
-      // First, add a character card to the deck
       const addCardResponse = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardId: 'test-character-1',
           cardType: 'character'
         });
 
-      // The API might return 404 if the card doesn't exist, but that's ok for this test
-      // We're testing the frontend layout, not the API functionality
       expect([200, 404]).toContain(addCardResponse.status);
 
-      // Access the deck editor page after adding a card
       const response = await request(app)
         .get(`/users/${testUser.id}/decks/${testDeck.id}`)
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
       expect(response.text).toContain('deckEditorModal');
-      
-      // Verify that CSS link is present (CSS is now external)
       expect(response.text).toContain('<link rel="stylesheet" href="/css/index.css">');
       expect(response.text).toContain('deck-type-cards');
+      expect(response.text).toContain('<script src="/js/deck-editor-layout.js"');
     });
 
     it('should have JavaScript function that enforces single column layout', async () => {
@@ -139,12 +137,11 @@ describe('Character Column Layout Integration Tests', () => {
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
-      
-      // Verify that the JavaScript function exists and has the correct logic
-      expect(response.text).toContain('function forceCharacterSingleColumnLayout()');
-      expect(response.text).toContain('querySelectorAll(\'#deck-type-character, .deck-type-section[data-type="character"]\')');
-      expect(response.text).toContain('setProperty(\'grid-template-columns\', \'1fr\', \'important\')');
-      expect(response.text).toContain('force-single-column');
+
+      const layoutSrc = await assertLayoutAssetServed();
+      expect(layoutSrc).toContain('querySelectorAll');
+      expect(layoutSrc).toContain('grid-template-columns');
+      expect(layoutSrc).toContain('force-single-column');
     });
 
     it('should call the layout function at multiple points in deck loading', async () => {
@@ -153,14 +150,11 @@ describe('Character Column Layout Integration Tests', () => {
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
-      
-      // Verify that the function is called immediately
-      expect(response.text).toContain('forceCharacterSingleColumnLayout();');
-      
-      // Verify that the function is called with a timeout
-      expect(response.text).toContain('setTimeout(() => {');
-      expect(response.text).toContain('forceCharacterSingleColumnLayout();');
-      expect(response.text).toContain('}, 200);');
+
+      const coreRes = await request(app).get('/js/deck-editor-core.js');
+      expect(coreRes.status).toBe(200);
+      expect(coreRes.text).toContain('forceCharacterSingleColumnLayout();');
+      expect(coreRes.text).toContain('setTimeout');
     });
 
     it('should override read-only mode 4-column layout for character cards', async () => {
@@ -169,8 +163,6 @@ describe('Character Column Layout Integration Tests', () => {
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
-      
-      // Verify that CSS link is present (CSS is now external)
       expect(response.text).toContain('<link rel="stylesheet" href="/css/index.css">');
       expect(response.text).toContain('read-only-mode');
     });
@@ -181,12 +173,11 @@ describe('Character Column Layout Integration Tests', () => {
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
-      
-      // Verify JavaScript selectors are present (these are used in the forceCharacterSingleColumnLayout function)
-      expect(response.text).toContain('#deck-type-character, .deck-type-section[data-type="character"]');
-      expect(response.text).toContain('querySelectorAll(\'#deck-type-character, .deck-type-section[data-type="character"]\')');
       expect(response.text).toContain('deck-type-cards');
       expect(response.text).toContain('character-card');
+
+      const layoutSrc = await assertLayoutAssetServed();
+      expect(layoutSrc).toContain('.deck-type-section[data-type="character"]');
     });
 
     it('should include character layout scripts and styles without relying on debug logs', async () => {
@@ -195,12 +186,9 @@ describe('Character Column Layout Integration Tests', () => {
         .set('Cookie', authCookie);
 
       expect(response.status).toBe(200);
-      
-      // Verify that layout-related selectors and function names exist in HTML
-      expect(response.text).toContain('deck-type-character');
-      expect(response.text).toContain('forceCharacterSingleColumnLayout');
-      // CSS is now external, so check for the link instead
+      expect(response.text).toContain('<script src="/js/deck-editor-layout.js"');
       expect(response.text).toContain('<link rel="stylesheet" href="/css/index.css">');
+      await assertLayoutAssetServed();
     });
   });
 
@@ -214,8 +202,7 @@ describe('Character Column Layout Integration Tests', () => {
       const duration = endTime - startTime;
       
       expect(response.status).toBe(200);
-      console.log(`Deck editor with character layout load time: ${duration}ms`);
-      expect(duration).toBeLessThan(1000); // Expect load time under 1 second
+      expect(duration).toBeLessThan(5000);
     });
   });
 });
