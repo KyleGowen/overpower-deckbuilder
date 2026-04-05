@@ -15,8 +15,10 @@ PASS=0
 FAIL=0
 WARN=0
 
-# Route logic may live in index.ts or in src/routes/ (domain modules)
+# Route logic may live in index.ts, src/routes/, or src/api/http/ (v1 + admin)
 ROUTE_SRCS="src/index.ts src/routes/"
+API_HTTP_DIR="src/api/http"
+ALL_ROUTE_GREP_PATHS="$ROUTE_SRCS $API_HTTP_DIR"
 
 pass() { echo "  ✅ PASS: $1"; PASS=$((PASS + 1)); }
 fail() { echo "  ❌ FAIL: $1"; FAIL=$((FAIL + 1)); }
@@ -56,13 +58,20 @@ else
   fail "Centralized authorization helpers module missing"
 fi
 
-# Check: Admin-only endpoints are protected (routes may be in index or src/routes/)
-ADMIN_ENDPOINTS=("/api/users" "/api/debug/clear-cache" "/api/debug/clear-card-cache" "/api/database/status")
+# Check: Admin-only endpoints are protected (legacy /api/... and v1 /admin/... in src/api/http/)
+ADMIN_ENDPOINTS=(
+  "/api/users"
+  "/api/debug/clear-cache"
+  "/api/debug/clear-card-cache"
+  "/api/database/status"
+  "/admin/users"
+  "/admin/debug/clear-cache"
+  "/admin/debug/clear-card-cache"
+  "/admin/database/status"
+)
 ADMIN_PROTECTED=0
 for endpoint in "${ADMIN_ENDPOINTS[@]}"; do
-  if grep -A8 "'${endpoint}'" src/index.ts 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
-    ADMIN_PROTECTED=$((ADMIN_PROTECTED + 1))
-  elif grep -rA8 "'${endpoint}'" src/routes/ --include="*.ts" 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
+  if grep -rA8 "'${endpoint}'" $ALL_ROUTE_GREP_PATHS --include="*.ts" 2>/dev/null | grep -q 'requireAdmin\|ADMIN'; then
     ADMIN_PROTECTED=$((ADMIN_PROTECTED + 1))
   fi
 done
@@ -135,8 +144,8 @@ fi
 echo ""
 echo "━━━ CC6.8: Software Security ━━━"
 
-# Check: Input validation exists on mutation endpoints (in index or route modules)
-INPUT_VALIDATION_COUNT=$(grep -r 'status(400)' src/index.ts src/routes/ --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
+# Check: Input validation exists on mutation endpoints (legacy res.status(400) and v1 sendV1Json(res, 400, ...))
+INPUT_VALIDATION_COUNT=$(grep -rE 'status\(400\)|sendV1Json\(res, 400' src/index.ts src/routes/ "$API_HTTP_DIR" --include="*.ts" 2>/dev/null | wc -l | tr -d ' ')
 INPUT_VALIDATION_COUNT=${INPUT_VALIDATION_COUNT:-0}
 if [ "$INPUT_VALIDATION_COUNT" -ge 5 ]; then
   pass "Input validation present on endpoints ($INPUT_VALIDATION_COUNT validation responses)"
