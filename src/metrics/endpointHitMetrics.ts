@@ -131,16 +131,30 @@ DO UPDATE SET
   last_hit_at = CURRENT_TIMESTAMP
 `;
 
+function isUndefinedTableError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && (err as { code: string }).code === '42P01';
+}
+
 export async function seedEndpointHitCounts(pool: Pool, keys: string[]): Promise<void> {
   if (keys.length === 0) {
     return;
   }
-  await pool.query(
-    `INSERT INTO endpoint_hit_counts (endpoint_key, hit_count, last_hit_at)
-     SELECT unnest($1::text[]), 0, NULL
-     ON CONFLICT (endpoint_key) DO NOTHING`,
-    [keys]
-  );
+  try {
+    await pool.query(
+      `INSERT INTO endpoint_hit_counts (endpoint_key, hit_count, last_hit_at)
+       SELECT unnest($1::text[]), 0, NULL
+       ON CONFLICT (endpoint_key) DO NOTHING`,
+      [keys]
+    );
+  } catch (err: unknown) {
+    if (isUndefinedTableError(err)) {
+      console.warn(
+        '⚠️ endpoint_hit_counts table missing (migrations not applied yet); skipping seed. Apply Flyway migrations, then restart.'
+      );
+      return;
+    }
+    throw err;
+  }
 }
 
 const PRUNE_STALE_SQL = `
@@ -157,12 +171,20 @@ export async function pruneStaleEndpointHitCounts(pool: Pool, keys: string[]): P
   if (keys.length === 0) {
     return;
   }
-  const result = await pool.query(PRUNE_STALE_SQL, [keys]);
-  const n = result.rowCount ?? 0;
-  if (n > 0) {
-    console.log(
-      `🧹 endpoint_hit_counts: removed ${n} stale row(s) for routes no longer registered in Express`
-    );
+  try {
+    const result = await pool.query(PRUNE_STALE_SQL, [keys]);
+    const n = result.rowCount ?? 0;
+    if (n > 0) {
+      console.log(
+        `🧹 endpoint_hit_counts: removed ${n} stale row(s) for routes no longer registered in Express`
+      );
+    }
+  } catch (err: unknown) {
+    if (isUndefinedTableError(err)) {
+      console.warn('⚠️ endpoint_hit_counts table missing; skipping prune.');
+      return;
+    }
+    throw err;
   }
 }
 

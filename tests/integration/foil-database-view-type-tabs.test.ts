@@ -8,16 +8,21 @@
 import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 describe('Foil Database View Type Tabs Integration Tests', () => {
+  let catalogAuthCookie: string;
+
   beforeAll(async () => {
     await integrationTestUtils.ensureGuestUser();
     await initializeTestServer();
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
   });
 
   it('should return both base and foil rows from character API', async () => {
-    const response = await request(app)
-      .get('/api/v1/catalog/characters')
+    const response = await request(app)      .get('/api/v1/catalog/characters')
+
+      .set('Cookie', catalogAuthCookie)
       .expect(200);
 
     expect(response.body.errors ?? []).toEqual([]);
@@ -32,8 +37,9 @@ describe('Foil Database View Type Tabs Integration Tests', () => {
   });
 
   it('should have API return foil rows so frontend groupCardsByVariant can filter them', async () => {
-    const response = await request(app)
-      .get('/api/v1/catalog/power-cards')
+    const response = await request(app)      .get('/api/v1/catalog/power-cards')
+
+      .set('Cookie', catalogAuthCookie)
       .expect(200);
 
     expect(response.body.errors ?? []).toEqual([]);

@@ -6,7 +6,7 @@ import {
 } from '../../../../src/api/http/dbv-support.http';
 import type { DbvSupportService } from '../../../../src/api/services/dbvSupportService';
 
-const passAuth: RequestHandler = (_req, _res, next) => {
+const passCatalogAuth: RequestHandler = (_req, _res, next) => {
   next();
 };
 
@@ -34,7 +34,7 @@ describe('dbv-support.http', () => {
     } as unknown as DbvSupportService;
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService,
-      authenticateUser: passAuth,
+      catalogAuth: passCatalogAuth,
       deckBackgroundService: emptyBackgrounds
     };
     const res = await request(buildApp(deps)).get('/dbv/sets').expect(200);
@@ -49,7 +49,7 @@ describe('dbv-support.http', () => {
     } as unknown as DbvSupportService;
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService,
-      authenticateUser: passAuth,
+      catalogAuth: passCatalogAuth,
       deckBackgroundService: emptyBackgrounds
     };
     const res = await request(buildApp(deps)).get('/dbv/sets').expect(500);
@@ -66,7 +66,7 @@ describe('dbv-support.http', () => {
     };
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService: emptySetsService,
-      authenticateUser: passAuth,
+      catalogAuth: passCatalogAuth,
       deckBackgroundService
     };
     const res = await request(buildApp(deps)).get('/dbv/deck-backgrounds').expect(200);
@@ -81,7 +81,7 @@ describe('dbv-support.http', () => {
     };
     const deps: DbvSupportV1HttpDeps = {
       dbvSupportService: emptySetsService,
-      authenticateUser: passAuth,
+      catalogAuth: passCatalogAuth,
       deckBackgroundService
     };
     const res = await request(buildApp(deps)).get('/dbv/deck-backgrounds').expect(500);

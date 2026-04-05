@@ -35,6 +35,11 @@ export class ApiClient {
     return response.body;
   }
 
+  /** `sessionId=…` from login; use with `request(app).get(…).set('Cookie', …)` for catalog GETs. */
+  getSessionCookieHeader(): string {
+    return this.cookies[0] ?? '';
+  }
+
   async getCurrentUser() {
     return request(this.app)
       .get('/api/auth/me')

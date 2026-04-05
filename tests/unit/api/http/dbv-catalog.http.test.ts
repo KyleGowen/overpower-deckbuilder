@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type RequestHandler } from 'express';
 import request from 'supertest';
 import { registerDbvCatalogV1HttpRoutes } from '../../../../src/api/http/dbv-catalog.http';
 import type { CatalogCardRepository } from '../../../../src/api/services/catalogService';
@@ -6,10 +6,14 @@ import { CatalogService } from '../../../../src/api/services/catalogService';
 
 const foilStub = () => ({ getFoilCardMap: jest.fn().mockResolvedValue([]) });
 
+const passCatalogAuth: RequestHandler = (_req, _res, next) => {
+  next();
+};
+
 function buildApp(catalogService: CatalogService): express.Application {
   const app = express();
   const router = express.Router();
-  registerDbvCatalogV1HttpRoutes(router, { catalogService });
+  registerDbvCatalogV1HttpRoutes(router, { catalogService, catalogAuth: passCatalogAuth });
   app.use(router);
   return app;
 }

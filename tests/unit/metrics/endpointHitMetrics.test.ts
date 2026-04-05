@@ -3,7 +3,8 @@ import {
   buildEndpointMetricKey,
   enumerateExpressRoutes,
   normalizeEndpointPath,
-  pruneStaleEndpointHitCounts
+  pruneStaleEndpointHitCounts,
+  seedEndpointHitCounts
 } from '../../../src/metrics/endpointHitMetrics';
 
 describe('endpointHitMetrics', () => {
@@ -52,6 +53,30 @@ describe('endpointHitMetrics', () => {
     });
   });
 
+  describe('seedEndpointHitCounts', () => {
+    it('inserts keys when table exists', async () => {
+      const pool = { query: jest.fn().mockResolvedValue({ rowCount: 0 }) };
+      await seedEndpointHitCounts(pool as never, ['GET /a']);
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      expect(pool.query.mock.calls[0][0]).toContain('INSERT INTO endpoint_hit_counts');
+    });
+
+    it('swallows undefined_table when migrations not applied yet', async () => {
+      const pool = {
+        query: jest.fn().mockRejectedValue(Object.assign(new Error('relation does not exist'), { code: '42P01' }))
+      };
+      await expect(seedEndpointHitCounts(pool as never, ['GET /a'])).resolves.toBeUndefined();
+      expect(pool.query).toHaveBeenCalledTimes(1);
+    });
+
+    it('rethrows non-table errors', async () => {
+      const pool = {
+        query: jest.fn().mockRejectedValue(Object.assign(new Error('syntax'), { code: '42601' }))
+      };
+      await expect(seedEndpointHitCounts(pool as never, ['GET /a'])).rejects.toThrow('syntax');
+    });
+  });
+
   describe('pruneStaleEndpointHitCounts', () => {
     it('runs DELETE with current route keys', async () => {
       const pool = {
@@ -67,6 +92,14 @@ describe('endpointHitMetrics', () => {
       const pool = { query: jest.fn() };
       await pruneStaleEndpointHitCounts(pool as never, []);
       expect(pool.query).not.toHaveBeenCalled();
+    });
+
+    it('swallows undefined_table when migrations not applied yet', async () => {
+      const pool = {
+        query: jest.fn().mockRejectedValue(Object.assign(new Error('relation does not exist'), { code: '42P01' }))
+      };
+      await expect(pruneStaleEndpointHitCounts(pool as never, ['GET /a'])).resolves.toBeUndefined();
+      expect(pool.query).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -9,6 +9,7 @@
 
 import request from 'supertest';
 import { app, integrationTestUtils } from '../setup-integration';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 const TEST_GUEST_ID = '00000000-0000-0000-0000-000000000002';
 
@@ -24,8 +25,10 @@ describe('Deck Save Security - Simple Integration Tests', () => {
   const nonExistentDeckId = '00000000-0000-0000-0000-000000000000';
   let charId: string;
   let powerId: string;
+  let catalogAuthCookie: string;
 
   beforeAll(async () => {
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
     const adminUser = await integrationTestUtils.createTestUser({
       name: 'dss-admin',
       email: 'dss-admin@test.com',
@@ -41,13 +44,13 @@ describe('Deck Save Security - Simple Integration Tests', () => {
     adminUserId = adminUser.id;
     regularUserId = regularUser.id;
 
-    const chars = await request(app).get('/api/v1/catalog/characters').expect(200);
+    const chars = await request(app).get('/api/v1/catalog/characters').set('Cookie', catalogAuthCookie).expect(200);
     expect(chars.body.errors).toEqual([]);
     const charList = chars.body.data as Array<{ id: string }>;
     expect(charList.length).toBeGreaterThan(0);
     charId = charList[0].id;
 
-    const powers = await request(app).get('/api/v1/catalog/power-cards').expect(200);
+    const powers = await request(app).get('/api/v1/catalog/power-cards').set('Cookie', catalogAuthCookie).expect(200);
     expect(powers.body.errors).toEqual([]);
     const powerList = powers.body.data as Array<{ id: string }>;
     expect(powerList.length).toBeGreaterThan(0);

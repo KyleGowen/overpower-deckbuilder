@@ -1,13 +1,15 @@
-import type { Router } from 'express';
+import type { RequestHandler, Router } from 'express';
 import { CatalogService } from '../services/catalogService';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 
 export interface DbvCatalogV1HttpDeps {
   catalogService: CatalogService;
+  /** Session cookie and/or Bearer JWT (see `createV1SessionOrBearerAuthMiddleware`). */
+  catalogAuth: RequestHandler;
 }
 
 export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV1HttpDeps): void {
-  router.get('/catalog/characters', async (_req, res) => {
+  router.get('/catalog/characters', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllCharacters();
       sendV1Success(res, data);
@@ -19,7 +21,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/locations', async (_req, res) => {
+  router.get('/catalog/locations', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllLocations();
       sendV1Success(res, data);
@@ -31,7 +33,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/special-cards', async (_req, res) => {
+  router.get('/catalog/special-cards', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllSpecialCards();
       sendV1Success(res, data);
@@ -43,7 +45,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/missions', async (_req, res) => {
+  router.get('/catalog/missions', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllMissions();
       sendV1Success(res, data);
@@ -55,7 +57,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/events', async (_req, res) => {
+  router.get('/catalog/events', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllEvents();
       sendV1Success(res, data);
@@ -67,7 +69,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/aspects', async (_req, res) => {
+  router.get('/catalog/aspects', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllAspects();
       sendV1Success(res, data);
@@ -79,7 +81,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/advanced-universe', async (_req, res) => {
+  router.get('/catalog/advanced-universe', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllAdvancedUniverse();
       sendV1Success(res, data);
@@ -91,7 +93,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/teamwork', async (_req, res) => {
+  router.get('/catalog/teamwork', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllTeamwork();
       sendV1Success(res, data);
@@ -103,7 +105,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/ally-universe', async (_req, res) => {
+  router.get('/catalog/ally-universe', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllAllyUniverse();
       sendV1Success(res, data);
@@ -115,7 +117,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/training', async (_req, res) => {
+  router.get('/catalog/training', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllTraining();
       sendV1Success(res, data);
@@ -127,7 +129,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/basic-universe', async (_req, res) => {
+  router.get('/catalog/basic-universe', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllBasicUniverse();
       sendV1Success(res, data);
@@ -139,7 +141,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/power-cards', async (_req, res) => {
+  router.get('/catalog/power-cards', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getAllPowerCards();
       sendV1Success(res, data);
@@ -151,7 +153,7 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
     }
   });
 
-  router.get('/catalog/foil-card-map', async (_req, res) => {
+  router.get('/catalog/foil-card-map', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.catalogService.getFoilCardMap();
       sendV1Success(res, data);

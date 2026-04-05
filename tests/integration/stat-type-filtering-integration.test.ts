@@ -4,6 +4,8 @@
  */
 
 import { integrationTestUtils } from '../setup-integration';
+import { app } from '../../src/test-server';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 function expectV1CatalogList(response: Response, data: any): void {
   expect(response.ok).toBe(true);
@@ -17,6 +19,13 @@ function expectLegacyCatalogList(data: any): void {
 }
 
 describe('Stat Type Filtering Integration Tests', () => {
+  let catalogAuthCookie: string;
+  const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
+
+  beforeAll(async () => {
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
+  });
+
   beforeEach(async () => {
     // Clean up any previous test data
     await integrationTestUtils.cleanupAllTestData();
@@ -29,7 +38,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
   describe('Energy Stat Type Filtering', () => {
     it('should filter ally cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -55,7 +64,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter training cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -81,7 +90,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -106,7 +115,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
   describe('Combat Stat Type Filtering', () => {
     it('should filter ally cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -132,7 +141,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter training cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -158,7 +167,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -183,7 +192,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
   describe('Brute Force Stat Type Filtering', () => {
     it('should filter ally cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -209,7 +218,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter training cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -235,7 +244,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -260,7 +269,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
   describe('Intelligence Stat Type Filtering', () => {
     it('should filter ally cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -286,7 +295,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter training cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -312,7 +321,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should filter basic universe cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -339,9 +348,9 @@ describe('Stat Type Filtering Integration Tests', () => {
     it('should find Energy cards across all card types', async () => {
       // Get all card types
       const [allyResponse, trainingResponse, basicResponse] = await Promise.all([
-        fetch('http://localhost:3000/api/v1/catalog/ally-universe'),
-        fetch('http://localhost:3000/api/v1/catalog/training'),
-        fetch('http://localhost:3000/api/v1/catalog/basic-universe')
+        fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } }),
+        fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } }),
+        fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } })
       ]);
 
       const [allyData, trainingData, basicData] = await Promise.all([
@@ -382,15 +391,15 @@ describe('Stat Type Filtering Integration Tests', () => {
     it('should find all 4 stat types across all card types', async () => {
       const statTypes = ['energy', 'combat', 'brute force', 'intelligence'];
       const cardTypes = [
-        { name: 'ally', endpoint: 'http://localhost:3000/api/v1/catalog/ally-universe', filter: (card: any, stat: string) => 
+        { name: 'ally', endpoint: `${API_BASE}/api/v1/catalog/ally-universe`, filter: (card: any, stat: string) => 
           (card.stat_type_to_use && card.stat_type_to_use.toLowerCase().includes(stat)) ||
           (card.attack_type && card.attack_type.toLowerCase().includes(stat))
         },
-        { name: 'training', endpoint: 'http://localhost:3000/api/v1/catalog/training', filter: (card: any, stat: string) => 
+        { name: 'training', endpoint: `${API_BASE}/api/v1/catalog/training`, filter: (card: any, stat: string) => 
           (card.type_1 && card.type_1.toLowerCase().includes(stat)) ||
           (card.type_2 && card.type_2.toLowerCase().includes(stat))
         },
-        { name: 'basic', endpoint: 'http://localhost:3000/api/v1/catalog/basic-universe', filter: (card: any, stat: string) => 
+        { name: 'basic', endpoint: `${API_BASE}/api/v1/catalog/basic-universe`, filter: (card: any, stat: string) => 
           card.type && card.type.toLowerCase().includes(stat)
         }
       ];
@@ -401,7 +410,7 @@ describe('Stat Type Filtering Integration Tests', () => {
         results[statType] = {};
         
         for (const cardType of cardTypes) {
-          const response = await fetch(cardType.endpoint);
+          const response = await fetch(cardType.endpoint, { headers: { Cookie: catalogAuthCookie } });
           const data = await response.json();
           
           if (cardType.endpoint.includes('/api/v1/')) {
@@ -434,7 +443,7 @@ describe('Stat Type Filtering Integration Tests', () => {
 
   describe('Stat Type Filtering Edge Cases', () => {
     it('should handle case-insensitive stat type filtering', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -459,7 +468,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should handle partial stat type matches', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -483,7 +492,7 @@ describe('Stat Type Filtering Integration Tests', () => {
     });
 
     it('should handle non-existent stat type searches', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);

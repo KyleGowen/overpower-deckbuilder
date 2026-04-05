@@ -3,14 +3,18 @@
  */
 import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 describe('GET /api/v1/dbv/sets', () => {
+  let catalogAuthCookie: string;
+
   beforeAll(async () => {
     await initializeTestServer();
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
   });
 
   it('returns v1 envelope with code/name rows from sets table', async () => {
-    const res = await request(app).get('/api/v1/dbv/sets').expect(200);
+    const res = await request(app).get('/api/v1/dbv/sets').set('Cookie', catalogAuthCookie).expect(200);
     expect(res.body.meta).toEqual({});
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);

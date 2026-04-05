@@ -18,6 +18,7 @@ describe('All Tab Integration Tests', () => {
   let regularUser: any;
   let regularAuthCookie: string;
   let regularUsername: string;
+  let guestAuthCookie: string;
 
   beforeAll(async () => {
     await integrationTestUtils.ensureGuestUser();
@@ -66,6 +67,12 @@ describe('All Tab Integration Tests', () => {
         password: 'userpass123'
       });
     regularAuthCookie = userLoginResponse.headers['set-cookie'][0].split(';')[0];
+
+    const guestLoginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'Test-Guest', password: 'test-guest' });
+    expect(guestLoginResponse.status).toBe(200);
+    guestAuthCookie = guestLoginResponse.headers['set-cookie']![0].split(';')[0];
   });
 
   afterAll(async () => {
@@ -90,8 +97,9 @@ describe('All Tab Integration Tests', () => {
       ];
 
       for (const cardType of cardTypes) {
-        const response = await request(app)
-          .get(cardType.endpoint)
+        const response = await request(app)          .get(cardType.endpoint)
+
+          .set('Cookie', adminAuthCookie)
           .expect(200);
 
         expectOkCatalogList(response);
@@ -113,9 +121,9 @@ describe('All Tab Integration Tests', () => {
     it('should return cards sorted by set then set_number when loaded', async () => {
       // Get cards from multiple types
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
-        request(app).get('/api/v1/catalog/characters'),
-        request(app).get('/api/v1/catalog/special-cards'),
-        request(app).get('/api/v1/catalog/power-cards')
+        request(app).get('/api/v1/catalog/characters').set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/special-cards').set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/power-cards').set('Cookie', adminAuthCookie)
       ]);
 
       const allCards = [
@@ -176,8 +184,9 @@ describe('All Tab Integration Tests', () => {
       ];
 
       for (const endpoint of endpoints) {
-        const response = await request(app)
-          .get(endpoint)
+        const response = await request(app)          .get(endpoint)
+
+          .set('Cookie', adminAuthCookie)
           .expect(200);
 
         expectOkCatalogList(response);
@@ -197,9 +206,9 @@ describe('All Tab Integration Tests', () => {
   describe('Card Name Extraction', () => {
     it('should extract correct names for different card types', async () => {
       const [charactersRes, powerRes, aspectRes] = await Promise.all([
-        request(app).get('/api/v1/catalog/characters').query({ limit: 1 }),
-        request(app).get('/api/v1/catalog/power-cards').query({ limit: 1 }),
-        request(app).get('/api/v1/catalog/aspects').query({ limit: 1 })
+        request(app).get('/api/v1/catalog/characters').query({ limit: 1 }).set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/power-cards').query({ limit: 1 }).set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/aspects').query({ limit: 1 }).set('Cookie', adminAuthCookie)
       ]);
 
       // Characters should have 'name'
@@ -226,9 +235,9 @@ describe('All Tab Integration Tests', () => {
     it('should filter cards by card type correctly', async () => {
       // Get all cards
       const [charactersRes, specialsRes, powerRes] = await Promise.all([
-        request(app).get('/api/v1/catalog/characters'),
-        request(app).get('/api/v1/catalog/special-cards'),
-        request(app).get('/api/v1/catalog/power-cards')
+        request(app).get('/api/v1/catalog/characters').set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/special-cards').set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/power-cards').set('Cookie', adminAuthCookie)
       ]);
 
       const allCards = [
@@ -251,8 +260,9 @@ describe('All Tab Integration Tests', () => {
 
   describe('Guest User Restrictions', () => {
     it('should allow guest users to view all cards', async () => {
-      const response = await request(app)
-        .get('/api/v1/catalog/characters')
+      const response = await request(app)        .get('/api/v1/catalog/characters')
+
+        .set('Cookie', guestAuthCookie)
         .expect(200);
 
       expectOkCatalogList(response);
@@ -279,8 +289,9 @@ describe('All Tab Integration Tests', () => {
   describe('ADMIN Collection Feature', () => {
     it('should allow ADMIN users to add cards to collection', async () => {
       // Get a card to add
-      const charactersRes = await request(app)
-        .get('/api/v1/catalog/characters')
+      const charactersRes = await request(app)        .get('/api/v1/catalog/characters')
+
+        .set('Cookie', adminAuthCookie)
         .expect(200);
 
       if (charactersRes.body.data.length > 0) {
@@ -307,8 +318,9 @@ describe('All Tab Integration Tests', () => {
 
     it('should allow all authenticated users to access collection endpoints', async () => {
       // Collection feature is now available to all authenticated users (USER, ADMIN, GUEST)
-      const charactersRes = await request(app)
-        .get('/api/v1/catalog/characters')
+      const charactersRes = await request(app)        .get('/api/v1/catalog/characters')
+
+        .set('Cookie', regularAuthCookie)
         .expect(200);
 
       if (charactersRes.body.data.length > 0) {
@@ -349,7 +361,7 @@ describe('All Tab Integration Tests', () => {
       ];
 
       const responses = await Promise.all(
-        endpoints.map(endpoint => request(app).get(endpoint))
+        endpoints.map(endpoint => request(app).get(endpoint).set('Cookie', adminAuthCookie))
       );
 
       const endTime = Date.now();
@@ -371,8 +383,8 @@ describe('All Tab Integration Tests', () => {
 
     it('should return consistent card counts across requests', async () => {
       const [firstRes, secondRes] = await Promise.all([
-        request(app).get('/api/v1/catalog/characters'),
-        request(app).get('/api/v1/catalog/characters')
+        request(app).get('/api/v1/catalog/characters').set('Cookie', adminAuthCookie),
+        request(app).get('/api/v1/catalog/characters').set('Cookie', adminAuthCookie)
       ]);
 
       expect(firstRes.body.data.length).toBe(secondRes.body.data.length);
@@ -440,8 +452,9 @@ describe('All Tab Integration Tests', () => {
       ];
 
       for (const { endpoint } of endpoints) {
-        const response = await request(app)
-          .get(endpoint)
+        const response = await request(app)          .get(endpoint)
+
+          .set('Cookie', adminAuthCookie)
           .expect(200);
 
         if (response.body.data.length > 0) {

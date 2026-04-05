@@ -4,8 +4,17 @@
  */
 
 import { integrationTestUtils } from '../setup-integration';
+import { app } from '../../src/test-server';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 describe('Ally Search Integration Tests', () => {
+  let catalogAuthCookie: string;
+  const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
+
+  beforeAll(async () => {
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
+  });
+
   beforeEach(async () => {
     // Clean up any previous test data
     await integrationTestUtils.cleanupAllTestData();
@@ -18,7 +27,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Card Name', () => {
     it('should search for Allan Quatermain by name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -36,7 +45,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should search for Hera by name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -52,7 +61,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should search for Guy of Gisborne by name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -70,7 +79,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Stat Type', () => {
     it('should filter ally cards by Energy stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -93,7 +102,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Combat stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -116,7 +125,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Brute Force stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -139,7 +148,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by Intelligence stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -164,7 +173,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Attack Value', () => {
     it('should filter ally cards by attack value 2', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -184,7 +193,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by attack value 3', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -206,7 +215,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search by Card Text', () => {
     it('should filter ally cards by card text containing "Special"', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -226,7 +235,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should filter ally cards by card text containing "Teammate"', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -248,7 +257,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Case Insensitivity', () => {
     it('should handle case-insensitive search for card names', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -276,7 +285,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle case-insensitive search for stat types', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -309,7 +318,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Edge Cases', () => {
     it('should handle empty search term gracefully', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -324,7 +333,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle search terms that match no cards', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -339,7 +348,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle partial matches correctly', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -362,7 +371,7 @@ describe('Ally Search Integration Tests', () => {
 
   describe('Ally Search Data Integrity', () => {
     it('should return cards with all required fields', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);
@@ -382,7 +391,7 @@ describe('Ally Search Integration Tests', () => {
     });
 
     it('should handle numeric attack values correctly', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expect(response.ok).toBe(true);

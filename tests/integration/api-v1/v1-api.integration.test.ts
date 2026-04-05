@@ -21,85 +21,115 @@ describe('API v1 integration', () => {
   });
 
   describe('dbv-catalog.http', () => {
+    it('GET /api/v1/catalog/characters returns 401 without session or bearer', async () => {
+      const res = await request(app).get('/api/v1/catalog/characters').expect(401);
+      expect(res.body.data).toBeNull();
+      expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    });
+
     it('GET /api/v1/catalog/characters returns v1 envelope and character rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/characters').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/characters').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/locations returns v1 envelope and location rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/locations').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/locations').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/special-cards returns v1 envelope and special card rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/special-cards').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/special-cards').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/missions returns v1 envelope and mission rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/missions').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/missions').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/events returns v1 envelope and event rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/events').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/events').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/aspects returns v1 envelope and aspect rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/aspects').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/aspects').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/advanced-universe returns v1 envelope and advanced universe rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/advanced-universe').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/advanced-universe').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/teamwork returns v1 envelope and teamwork rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/teamwork').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/teamwork').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/ally-universe returns v1 envelope and ally universe rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/ally-universe').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/ally-universe').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/training returns v1 envelope and training rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/training').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/training').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/basic-universe returns v1 envelope and basic universe rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/basic-universe').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/basic-universe').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it('GET /api/v1/catalog/power-cards returns v1 envelope and power card rows', async () => {
-      const res = await request(app).get('/api/v1/catalog/power-cards').expect(200);
+      const login = await request(app).post('/api/auth/login').send({ username, password }).expect(200);
+      const cookie = login.headers['set-cookie']![0].split(';')[0];
+      const res = await request(app).get('/api/v1/catalog/power-cards').set('Cookie', cookie).expect(200);
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);

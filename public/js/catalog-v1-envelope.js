@@ -35,7 +35,7 @@
      */
     async function fetchCatalogList(url) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'include' });
             const json = await response.json();
             return catalogListPayload(response, json);
         } catch {

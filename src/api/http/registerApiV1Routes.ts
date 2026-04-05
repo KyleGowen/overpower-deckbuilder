@@ -9,6 +9,7 @@ import { DbvSupportService } from '../services/dbvSupportService';
 import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
 import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
+import { createV1SessionOrBearerAuthMiddleware } from './middleware/v1SessionOrBearerAuth';
 import { registerDecksV1HttpRoutes } from './decks.http';
 import { registerCollectionsV1HttpRoutes } from './collections.http';
 import { registerGuestDecksV1HttpRoutes } from './guest-decks.http';
@@ -56,6 +57,15 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
   const jwtTokenService = new V1JwtTokenService(jwtConfig);
   const router = express.Router();
 
+  const catalogAuth = createV1SessionOrBearerAuthMiddleware({
+    jwtTokenService,
+    getUserById: async (id: string) => {
+      const u = await deps.userRepository.getUserById(id);
+      return u ?? null;
+    },
+    authenticateUser: deps.authenticateUser
+  });
+
   registerAuthV1HttpRoutes(router, {
     authenticationService: deps.authenticationService,
     userRepository: deps.userRepository,
@@ -63,12 +73,13 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
   });
 
   registerDbvCatalogV1HttpRoutes(router, {
-    catalogService: deps.catalogService
+    catalogService: deps.catalogService,
+    catalogAuth
   });
 
   registerDbvSupportV1HttpRoutes(router, {
     dbvSupportService: deps.dbvSupportService,
-    authenticateUser: deps.authenticateUser,
+    catalogAuth,
     deckBackgroundService: deps.deckBackgroundService
   });
 

@@ -138,9 +138,13 @@ All v1 JSON responses use:
 
 ## DBV catalog
 
+**Authentication (all paths in this section):** Valid **session cookie** (`sessionId` after `POST /api/auth/login`) **or** **`Authorization: Bearer <accessToken>`** (after `POST /api/v1/auth/login`). The main web app should send cookies (`credentials: 'include'` in `fetch` when needed). **GUEST**, **USER**, and **ADMIN** all receive full catalog data; only anonymous/unauthenticated clients are denied.
+
+**Response 401:** Missing, invalid, or expired session; missing/invalid Bearer token; or user record missing. Body: `{ "data": null, "meta": {}, "errors": [{ "code": "UNAUTHORIZED", "message": "..." }] }`.
+
 ### `GET /api/v1/catalog/characters`
 
-**Auth:** None (same as legacy `GET /api/characters`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none (no body; no query contract file required for this GET).
 
@@ -152,7 +156,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/locations`
 
-**Auth:** None (same as legacy `GET /api/locations`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none (no body; no query contract file required for this GET).
 
@@ -164,7 +168,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/special-cards`
 
-**Auth:** None (same as removed legacy `GET /api/special-cards`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -176,7 +180,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/missions`
 
-**Auth:** None (same as removed legacy `GET /api/missions`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -188,7 +192,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/events`
 
-**Auth:** None (same as removed legacy `GET /api/events`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -200,7 +204,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/aspects`
 
-**Auth:** None (same as removed legacy `GET /api/aspects`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -212,7 +216,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/advanced-universe`
 
-**Auth:** None (same as removed legacy `GET /api/advanced-universe`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -224,7 +228,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/teamwork`
 
-**Auth:** None (same as removed legacy `GET /api/teamwork`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -236,7 +240,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/ally-universe`
 
-**Auth:** None (same as removed legacy `GET /api/ally-universe`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -248,7 +252,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/training`
 
-**Auth:** None (same as removed legacy `GET /api/training`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -260,7 +264,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/basic-universe`
 
-**Auth:** None (same as removed legacy `GET /api/basic-universe`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -272,7 +276,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/power-cards`
 
-**Auth:** None (same as removed legacy `GET /api/power-cards` list).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -284,7 +288,7 @@ All v1 JSON responses use:
 
 ### `GET /api/v1/catalog/foil-card-map`
 
-**Auth:** None (same as removed legacy `GET /api/foil-card-map`).
+**Auth:** Session cookie or Bearer JWT (see introduction above).
 
 **Request model:** none.
 
@@ -302,7 +306,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `GET /api/v1/dbv/sets`
 
-**Auth:** None (same as removed legacy `GET /api/sets`).
+**Auth:** Session cookie or Bearer JWT (same rules as **DBV catalog** introduction).
 
 **Request model:** none.
 
@@ -314,7 +318,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `GET /api/v1/dbv/deck-backgrounds`
 
-**Auth:** Valid **session cookie** (same **`authenticateUser`** middleware as legacy `GET /api/deck-backgrounds`). The main web app does not attach a Bearer token here; unauthenticated requests receive **401** with the **legacy** JSON shape `{ "success": false, "error": "..." }` from session middleware.
+**Auth:** Session cookie or Bearer JWT (same rules as **DBV catalog** introduction). Unauthenticated requests receive **401** with the **v1** envelope (`errors` with **`UNAUTHORIZED`**).
 
 **Request model:** none.
 

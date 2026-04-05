@@ -9,12 +9,13 @@ export interface DeckBackgroundListReader {
 
 export interface DbvSupportV1HttpDeps {
   dbvSupportService: DbvSupportService;
-  authenticateUser: RequestHandler;
+  /** Session cookie and/or Bearer JWT (same as catalog; see `createV1SessionOrBearerAuthMiddleware`). */
+  catalogAuth: RequestHandler;
   deckBackgroundService: DeckBackgroundListReader;
 }
 
 export function registerDbvSupportV1HttpRoutes(router: Router, deps: DbvSupportV1HttpDeps): void {
-  router.get('/dbv/sets', async (_req, res) => {
+  router.get('/dbv/sets', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.dbvSupportService.getAllSets();
       sendV1Success(res, data);
@@ -24,7 +25,7 @@ export function registerDbvSupportV1HttpRoutes(router: Router, deps: DbvSupportV
     }
   });
 
-  router.get('/dbv/deck-backgrounds', deps.authenticateUser, async (_req, res) => {
+  router.get('/dbv/deck-backgrounds', deps.catalogAuth, async (_req, res) => {
     try {
       const data = await deps.deckBackgroundService.getAvailableBackgrounds();
       sendV1Success(res, data);

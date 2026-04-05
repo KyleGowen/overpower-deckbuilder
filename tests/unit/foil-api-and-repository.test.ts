@@ -20,6 +20,16 @@ import request from 'supertest';
 import { app } from '../../src/test-server';
 
 describe('Foil API and Repository', () => {
+  let catalogCookie: string;
+
+  beforeAll(async () => {
+    const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
+    expect(login.status).toBe(200);
+    const raw = login.headers['set-cookie'];
+    expect(raw).toBeDefined();
+    catalogCookie = (Array.isArray(raw) ? raw[0] : raw).split(';')[0];
+  });
+
   beforeEach(() => {
     mockGetFoilCardMap.mockClear();
     mockGetFoilCardMap.mockResolvedValue([
@@ -30,8 +40,9 @@ describe('Foil API and Repository', () => {
 
   describe('GET /api/v1/catalog/foil-card-map', () => {
     it('should return v1 envelope with data array (foilCardId, baseCardId, cardType)', async () => {
-      const response = await request(app)
-        .get('/api/v1/catalog/foil-card-map')
+      const response = await request(app)        .get('/api/v1/catalog/foil-card-map')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors).toEqual([]);
@@ -46,8 +57,9 @@ describe('Foil API and Repository', () => {
     });
 
     it('should return entries with correct structure', async () => {
-      const response = await request(app)
-        .get('/api/v1/catalog/foil-card-map')
+      const response = await request(app)        .get('/api/v1/catalog/foil-card-map')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors).toEqual([]);

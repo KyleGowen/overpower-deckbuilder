@@ -118,6 +118,7 @@ async function login(username, password) {
     if (result.success) {
         currentUser = result.data;
         if (typeof window !== 'undefined') window.currentUser = currentUser;
+        if (typeof window !== 'undefined') window.__catalogAuth401Notified = false;
 
         if (typeof updateUserWelcome === 'function') {
             updateUserWelcome();
@@ -143,6 +144,7 @@ async function signup(credentials) {
     if (result.success) {
         currentUser = result.data;
         if (typeof window !== 'undefined') window.currentUser = currentUser;
+        if (typeof window !== 'undefined') window.__catalogAuth401Notified = false;
 
         if (typeof updateUserWelcome === 'function') {
             updateUserWelcome();
@@ -164,6 +166,7 @@ async function signup(credentials) {
 async function logout() {
     await window.authService.logout();
     currentUser = null;
+    if (typeof window !== 'undefined') window.__catalogAuth401Notified = false;
     // Hide main UI immediately to prevent flash before redirect
     const mainContainer = document.getElementById('mainContainer');
     if (mainContainer) mainContainer.style.display = 'none';

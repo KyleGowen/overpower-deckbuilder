@@ -209,31 +209,10 @@ All elevated operations must live under `/api/v1/admin/...` (no client “admin�
 
 ---
 
-## P7 — Policy follow-ups
+## P7 — Catalog + DBV support auth (implemented)
 
-Catalog routes under `/api/v1/catalog/...` are **public read-only** today (no Bearer JWT), matching legacy public DBV backing GETs. Putting catalog **behind auth** (or tightening exposure) is a **product change**, not a migration default. If you pursue it, treat the items below as deliverables.
+**Status:** **`GET /api/v1/catalog/*`**, **`GET /api/v1/dbv/sets`**, and **`GET /api/v1/dbv/deck-backgrounds`** require authentication. Clients send **session cookie** (`POST /api/auth/login`) **or** **`Authorization: Bearer`** (`POST /api/v1/auth/login`). Middleware: `createV1SessionOrBearerAuthMiddleware` in [`src/api/http/middleware/v1SessionOrBearerAuth.ts`](src/api/http/middleware/v1SessionOrBearerAuth.ts), wired from [`registerApiV1Routes.ts`](src/api/http/registerApiV1Routes.ts). **GUEST** and **USER** both receive catalog data after login; unauthenticated requests get **401** (`UNAUTHORIZED`).
 
-**Decisions (before implementation)**
+**Docs / tooling:** [API_V1.md](API_V1.md), [API_DOCUMENTATION.md](API_DOCUMENTATION.md), Postman “Card catalog” folder description, [`public/js/catalog-legacy-fetch-rewrite.js`](public/js/catalog-legacy-fetch-rewrite.js) (`credentials: 'include'` + one-shot **401** → `showLoginModal`), [`public/js/catalog-v1-envelope.js`](public/js/catalog-v1-envelope.js). Integration helper: [`tests/integration/helpers/integrationSessionAuth.ts`](tests/integration/helpers/integrationSessionAuth.ts).
 
-- **Audience / access:** **GUEST** accounts **log in with username/password like any other user**; **role does not gate catalog** for now. **When catalog is secured** (session or Bearer on v1), **non-authenticated clients must not** read the card catalog on those routes—**401** with no card payload until they log in. **Do not** allow anonymous or invalid-session access alongside “authenticated-only” catalog on the same secured endpoints. Use the **normal** v1 login/refresh flow for everyone; do not invent a separate “guest catalog” credential path unless product later requires it. *(Today catalog is still public until you implement this change.)*
-- **Credential:** Bearer JWT on v1 only vs also supporting session-cookie callers for the same JSON (today much of the app uses legacy session routes for DBV).
-- **Scope:** All `/api/v1/catalog/*` uniformly vs exceptions (e.g. a minimal public subset).
-- **Rate limiting:** If the goal is abuse control, decide **per-IP**, **per-user/JWT**, or edge/CDN rules—and whether auth is required for that policy.
-
-**Implementation deliverables**
-
-| Deliverable | Notes |
-|-------------|-------|
-| HTTP middleware | Apply v1 bearer (or agreed auth) to the relevant `router.get` handlers in `src/api/http/dbv-catalog.http.ts` (or a shared `Router` with middleware); return **401** with the v1 error envelope when required credentials are missing or invalid. |
-| `API_V1.md` | For each affected path: **Auth** line, required headers, and example error body; remove or qualify any “Auth: None” wording. |
-| `API_DOCUMENTATION.md` | If legacy public GETs remain, state clearly how they relate to the new v1 policy (deprecated, unchanged, or aligned). |
-| App / DBV callers | Callers must send the agreed credential; handle **401** with login (or token refresh). Once v1 catalog is secured, **do not** treat anonymous users as entitled to card catalog JSON on those routes (avoid “fall back to public legacy catalog” for unauthenticated sessions if that undermines the policy). |
-| Postman / Insomnia | Update collections and environment notes so catalog requests are not “no auth” by accident. |
-| HTTP unit tests | Cover success with valid token (and failure without), matching patterns in other `*.http.ts` modules. |
-| Integration tests | When catalog is secured: **401** without valid auth; **GUEST** and non-GUEST both succeed **after** login (role is not a gate for now). |
-| Checklist rows | When done, add a short note in **P0** (or here) so future readers know catalog auth is intentional, not an oversight. |
-
-**Optional (only if needed for the chosen policy)**
-
-- **Docs for operators:** Rate-limit keys, logging, and monitoring for catalog traffic.
-- **Deprecation / comms:** If external API consumers relied on public catalog, document a cutover date or version note.
+**Optional later:** Per-IP or CDN rate limits for catalog traffic; token denylist for JWT.

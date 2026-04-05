@@ -10,10 +10,21 @@ import { app } from '../../src/test-server';
 import { mockCharacters, mockPowerCards } from '../mocks/DatabaseMocks';
 
 describe('Card APIs is_foil structure', () => {
+  let catalogCookie: string;
+
+  beforeAll(async () => {
+    const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
+    expect(login.status).toBe(200);
+    const raw = login.headers['set-cookie'];
+    expect(raw).toBeDefined();
+    catalogCookie = (Array.isArray(raw) ? raw[0] : raw).split(';')[0];
+  });
+
   describe('GET /api/v1/catalog/characters', () => {
     it('should include is_foil in response structure', async () => {
-      const response = await request(app)
-        .get('/api/v1/catalog/characters')
+      const response = await request(app)        .get('/api/v1/catalog/characters')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors ?? []).toEqual([]);
@@ -28,8 +39,9 @@ describe('Card APIs is_foil structure', () => {
       const hasFoil = mockCharacters.some((c) => c.is_foil === true);
       expect(hasFoil).toBe(true);
 
-      const response = await request(app)
-        .get('/api/v1/catalog/characters')
+      const response = await request(app)        .get('/api/v1/catalog/characters')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors ?? []).toEqual([]);
@@ -40,8 +52,9 @@ describe('Card APIs is_foil structure', () => {
 
   describe('GET /api/v1/catalog/power-cards', () => {
     it('should include is_foil in response structure', async () => {
-      const response = await request(app)
-        .get('/api/v1/catalog/power-cards')
+      const response = await request(app)        .get('/api/v1/catalog/power-cards')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors ?? []).toEqual([]);
@@ -56,8 +69,9 @@ describe('Card APIs is_foil structure', () => {
       const hasFoil = mockPowerCards.some((c) => c.is_foil === true);
       expect(hasFoil).toBe(true);
 
-      const response = await request(app)
-        .get('/api/v1/catalog/power-cards')
+      const response = await request(app)        .get('/api/v1/catalog/power-cards')
+
+        .set('Cookie', catalogCookie)
         .expect(200);
 
       expect(response.body.errors ?? []).toEqual([]);

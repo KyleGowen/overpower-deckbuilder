@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Excelsior Deckbuilder (Local)",
-    "description": "Local API collection for Excelsior / Overpower Deckbuilder.\n\nSetup: Run npm run dev (default port 8085).\n\nAuth: Run \"POST /api/auth/login\" first; Postman stores the sessionId cookie for localhost:8085. Local admin test user: kyle / test (see project conventions).\n\nVariables: Set deckId, cardId, guestDeckId, userId from API responses after creating resources. Guest deck routes require a GUEST session (log in as guest in the app or use a guest session), not USER.",
+    "description": "Local API collection for Excelsior / Overpower Deckbuilder.\n\nSetup: Run npm run dev (default port 8085).\n\nAuth: Run \"POST /api/auth/login\" first; Postman stores the sessionId cookie for localhost:8085. Local admin test user: kyle / test (see project conventions). **Card catalog** (`GET /api/v1/catalog/*`) and **DBV support** (`GET /api/v1/dbv/sets`, `GET /api/v1/dbv/deck-backgrounds`) require that session cookie **or** `Authorization: Bearer` from `POST /api/v1/auth/login`.\n\nVariables: Set deckId, cardId, guestDeckId, userId from API responses after creating resources. Guest deck routes require a GUEST session (log in as guest in the app or use a guest session), not USER.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_postman_id": "excelsior-local-api"
   },
@@ -148,6 +148,7 @@
     },
     {
       "name": "Card catalog",
+      "description": "Requires session cookie (run Auth login first) or Bearer token from POST /api/v1/auth/login. Unauthenticated requests return 401 v1 envelope.",
       "item": [
         {
           "name": "GET /api/v1/catalog/characters",
@@ -260,7 +261,7 @@
             "header": [],
             "url": "{{baseUrl}}/api/v1/dbv/deck-backgrounds"
           },
-          "description": "Requires session cookie login (same as legacy). v1 envelope: { data, meta, errors }."
+          "description": "Session cookie or Bearer JWT (same as catalog). v1 envelope: { data, meta, errors }."
         }
       ]
     },
@@ -721,6 +722,7 @@
     },
     {
       "name": "Sets",
+      "description": "GET /api/v1/dbv/sets requires session cookie or Bearer (same as Card catalog).",
       "item": [
         {
           "name": "GET /api/v1/dbv/sets",

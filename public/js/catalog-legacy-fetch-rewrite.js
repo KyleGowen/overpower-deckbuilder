@@ -1,7 +1,8 @@
 /**
  * Rewrite removed legacy catalog list URLs to /api/v1/catalog/* before any deferred scripts run.
  * Loaded synchronously from index.html <head> (no defer) so fetch() is patched early.
- * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe removed
+ * @see API_V1.md — legacy GET /api/characters, /locations, /special-cards, /missions, /events, /aspects, /advanced-universe removed.
+ * v1 catalog + dbv/sets + deck-backgrounds: adds credentials: 'include' and surfaces login once on 401 (P7).
  */
 (function () {
     'use strict';
@@ -28,6 +29,35 @@
 
     function lookupV1CatalogPath(pathname) {
         return LEGACY_TO_V1[canonicalPathname(pathname)] || null;
+    }
+
+    function resolvedPathnameForProtectedCheck(input) {
+        try {
+            if (typeof input === 'string') {
+                if (input.indexOf('http') === 0) {
+                    return new URL(input).pathname;
+                }
+                var pathOnly = input.split('?')[0];
+                return canonicalPathname(pathOnly) || pathOnly;
+            }
+            if (typeof URL !== 'undefined' && input instanceof URL) {
+                return input.pathname;
+            }
+            if (typeof Request !== 'undefined' && input instanceof Request) {
+                return new URL(input.url).pathname;
+            }
+        } catch (_ePath) { /* keep empty */ }
+        return '';
+    }
+
+    function isV1CatalogOrDbvProtectedPath(pathname) {
+        if (!pathname) {
+            return false;
+        }
+        if (pathname.indexOf('/api/v1/catalog/') === 0) {
+            return true;
+        }
+        return pathname === '/api/v1/dbv/sets' || pathname === '/api/v1/dbv/deck-backgrounds';
     }
 
     function rewriteLegacyCatalogListFetchInput(input) {
@@ -75,6 +105,29 @@
         if (args[0] !== undefined && args[0] !== null) {
             args[0] = rewriteLegacyCatalogListFetchInput(args[0]);
         }
-        return nativeFetch.apply(window, args);
+        var pathnameAfter = resolvedPathnameForProtectedCheck(args[0]);
+        if (isV1CatalogOrDbvProtectedPath(pathnameAfter)) {
+            args[1] = Object.assign({}, args[1] || {}, { credentials: 'include' });
+        }
+        var pending = nativeFetch.apply(window, args);
+        if (!isV1CatalogOrDbvProtectedPath(pathnameAfter)) {
+            return pending;
+        }
+        return pending.then(function (response) {
+            if (response && response.status === 401) {
+                if (!window.__catalogAuth401Notified) {
+                    window.__catalogAuth401Notified = true;
+                    try {
+                        if (typeof window.showLoginModal === 'function') {
+                            var r = window.showLoginModal();
+                            if (r && typeof r.then === 'function') {
+                                r.catch(function () {});
+                            }
+                        }
+                    } catch (_e401) { /* ignore */ }
+                }
+            }
+            return response;
+        });
     };
 })();

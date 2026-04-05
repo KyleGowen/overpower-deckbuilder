@@ -4,6 +4,8 @@
  */
 
 import { integrationTestUtils } from '../setup-integration';
+import { app } from '../../src/test-server';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 function expectV1CatalogList(response: Response, data: any): void {
   expect(response.ok).toBe(true);
@@ -17,6 +19,13 @@ function expectLegacyCatalogList(data: any): void {
 }
 
 describe('Search Functionality Integration Tests', () => {
+  let catalogAuthCookie: string;
+  const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
+
+  beforeAll(async () => {
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
+  });
+
   beforeEach(async () => {
     // Clean up any previous test data
     await integrationTestUtils.cleanupAllTestData();
@@ -29,7 +38,7 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Ally Universe Search', () => {
     it('should search ally cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -52,7 +61,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by stat type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -85,7 +94,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by attack value (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -112,7 +121,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search ally cards by card text', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -129,7 +138,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle case-insensitive search', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -153,7 +162,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle null/undefined properties gracefully', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -174,7 +183,7 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Training Search', () => {
     it('should search training cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -188,7 +197,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search training cards by type_1 and type_2', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -208,7 +217,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search training cards by value_to_use and bonus (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/training');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -239,7 +248,7 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Basic Universe Search', () => {
     it('should search basic universe cards by card name', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -257,7 +266,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search basic universe cards by type', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -274,7 +283,7 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should search basic universe cards by value_to_use and bonus (numeric)', async () => {
-      const response = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);
@@ -309,7 +318,7 @@ describe('Search Functionality Integration Tests', () => {
       
       for (const statType of statTypes) {
         // Test ally cards
-        const allyResponse = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+        const allyResponse = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
         const allyData = await allyResponse.json();
         expectV1CatalogList(allyResponse, allyData);
 
@@ -319,7 +328,7 @@ describe('Search Functionality Integration Tests', () => {
         );
         
         // Test training cards
-        const trainingResponse = await fetch('http://localhost:3000/api/v1/catalog/training');
+        const trainingResponse = await fetch(`${API_BASE}/api/v1/catalog/training`, { headers: { Cookie: catalogAuthCookie } });
         const trainingData = await trainingResponse.json();
         expectV1CatalogList(trainingResponse, trainingData);
 
@@ -329,7 +338,7 @@ describe('Search Functionality Integration Tests', () => {
         );
         
         // Test basic universe cards
-        const basicResponse = await fetch('http://localhost:3000/api/v1/catalog/basic-universe');
+        const basicResponse = await fetch(`${API_BASE}/api/v1/catalog/basic-universe`, { headers: { Cookie: catalogAuthCookie } });
         const basicData = await basicResponse.json();
         expectV1CatalogList(basicResponse, basicData);
 
@@ -347,10 +356,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle empty search terms gracefully', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/v1/catalog/basic-universe'];
+      const endpoints = [`${API_BASE}/api/v1/catalog/ally-universe`, `${API_BASE}/api/v1/catalog/training`, `${API_BASE}/api/v1/catalog/basic-universe`];
       
       for (const endpoint of endpoints) {
-        const response = await fetch(endpoint);
+        const response = await fetch(endpoint, { headers: { Cookie: catalogAuthCookie } });
         const data = await response.json();
         expectV1CatalogList(response, data);
         
@@ -364,10 +373,10 @@ describe('Search Functionality Integration Tests', () => {
     });
 
     it('should handle non-existent search terms', async () => {
-      const endpoints = ['http://localhost:3000/api/v1/catalog/ally-universe', 'http://localhost:3000/api/v1/catalog/training', 'http://localhost:3000/api/v1/catalog/basic-universe'];
+      const endpoints = [`${API_BASE}/api/v1/catalog/ally-universe`, `${API_BASE}/api/v1/catalog/training`, `${API_BASE}/api/v1/catalog/basic-universe`];
       
       for (const endpoint of endpoints) {
-        const response = await fetch(endpoint);
+        const response = await fetch(endpoint, { headers: { Cookie: catalogAuthCookie } });
         const data = await response.json();
         expectV1CatalogList(response, data);
         
@@ -383,10 +392,10 @@ describe('Search Functionality Integration Tests', () => {
 
   describe('Search Performance and Data Integrity', () => {
     it('should return consistent results across multiple calls', async () => {
-      const response1 = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response1 = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data1 = await response1.json();
       
-      const response2 = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response2 = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data2 = await response2.json();
       
       expectV1CatalogList(response1, data1);
@@ -408,7 +417,7 @@ describe('Search Functionality Integration Tests', () => {
     it('should return cards with all required fields', async () => {
       const endpoints = [
         {
-          url: 'http://localhost:3000/api/v1/catalog/ally-universe',
+          url: `${API_BASE}/api/v1/catalog/ally-universe`,
           requiredFields: [
             'id',
             'card_name',
@@ -419,12 +428,12 @@ describe('Search Functionality Integration Tests', () => {
             'card_text',
           ],
         },
-        { url: 'http://localhost:3000/api/v1/catalog/training', requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
-        { url: 'http://localhost:3000/api/v1/catalog/basic-universe', requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
+        { url: `${API_BASE}/api/v1/catalog/training`, requiredFields: ['id', 'card_name', 'type_1', 'type_2', 'value_to_use', 'bonus'] },
+        { url: `${API_BASE}/api/v1/catalog/basic-universe`, requiredFields: ['id', 'card_name', 'type', 'value_to_use', 'bonus'] }
       ];
       
       for (const endpoint of endpoints) {
-        const response = await fetch(endpoint.url);
+        const response = await fetch(endpoint.url, { headers: { Cookie: catalogAuthCookie } });
         const data = await response.json();
         if (endpoint.url.includes('/api/v1/')) {
           expectV1CatalogList(response, data);
@@ -445,7 +454,7 @@ describe('Search Functionality Integration Tests', () => {
     it('should handle large datasets efficiently', async () => {
       const startTime = Date.now();
       
-      const response = await fetch('http://localhost:3000/api/v1/catalog/ally-universe');
+      const response = await fetch(`${API_BASE}/api/v1/catalog/ally-universe`, { headers: { Cookie: catalogAuthCookie } });
       const data = await response.json();
       
       expectV1CatalogList(response, data);

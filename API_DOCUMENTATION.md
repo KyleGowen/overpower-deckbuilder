@@ -277,17 +277,13 @@ Catalog **list** and **foil map** reads are **`/api/v1/catalog/*`** only ([`src/
 
 **Removed:** diagnostic **`GET /test`** (counts/stats JSON). **Removed:** **`GET /api/characters`**, **`GET /api/locations`**, **`GET /api/special-cards`**, **`GET /api/missions`**, **`GET /api/events`**, **`GET /api/aspects`**, **`GET /api/advanced-universe`**, **`GET /api/teamwork`**, **`GET /api/ally-universe`**, **`GET /api/training`**, **`GET /api/basic-universe`**, **`GET /api/power-cards`** (list), **`GET /api/foil-card-map`** — use **`GET /api/v1/catalog/...`** counterparts ([API_V1.md](API_V1.md)); those legacy URLs are **not** registered (expect **404**).
 
-**Removed:** **`GET /api/deck-backgrounds`** — use **`GET /api/v1/dbv/deck-backgrounds`** ([API_V1.md](API_V1.md)); requires session auth like legacy.
+**Removed:** **`GET /api/deck-backgrounds`** — use **`GET /api/v1/dbv/deck-backgrounds`** ([API_V1.md](API_V1.md)).
 
-Unless noted, these are **GET**, unauthenticated, and return:
+**Authentication (v1 only):** All **`GET /api/v1/catalog/*`**, **`GET /api/v1/dbv/sets`**, and **`GET /api/v1/dbv/deck-backgrounds`** require a **valid session** (`Cookie: sessionId=...` after `POST /api/auth/login`) **or** a **Bearer access token** (`Authorization: Bearer …` after `POST /api/v1/auth/login`). Unauthenticated requests receive **401** with the v1 envelope `{ "data": null, "meta": {}, "errors": [{ "code": "UNAUTHORIZED", "message": "..." }] }`. **GUEST** and **USER** (and other roles) all receive catalog JSON once authenticated; role does not gate catalog reads.
 
-```json
-{ "success": true, "data": [ /* array of card records from DB */ ] }
-```
+Responses use the **v1** envelope — see [API_V1.md](API_V1.md) **DBV catalog** and **DBV support**.
 
-**500** on failure: `{ "success": false, "error": "..." }`.
-
-**Sample** (legacy envelope for any remaining legacy card JSON; catalog **lists** and **foil map** are v1-only — see [API_V1.md](API_V1.md)).
+**Sample** (legacy `{ success, data }` applies only to remaining legacy card JSON elsewhere; catalog lists and foil map are v1-only — see [API_V1.md](API_V1.md)).
 
 ### `GET /api/advanced-universe` (removed)
 

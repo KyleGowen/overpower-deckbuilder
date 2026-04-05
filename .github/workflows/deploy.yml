@@ -1023,6 +1023,8 @@ jobs:
             \"docker pull $ECR_URI:$IMAGE_TAG\",
             \"echo 'Image pulled.'\",
             \"docker image inspect $ECR_URI:$IMAGE_TAG --format '{{index .RepoDigests 0}}' || true\",
+            \"echo '--- Step 1b: Apply DB migrations before new app boot (SKIP_MIGRATIONS on app) ---'\",
+            \"docker run --rm --env-file /opt/app/.env --entrypoint /usr/local/bin/flyway $ECR_URI:$IMAGE_TAG -url=jdbc:postgresql://op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com:5432/overpower?sslmode=require -user=postgres -password=TempPassword123! -locations=filesystem:/app/migrations migrate\",
             \"echo '--- Step 2: Start new container on idle port ---'\",
             \"docker stop overpower-app-new || true\",
             \"docker rm overpower-app-new || true\",

@@ -21,7 +21,7 @@ describe('GET/POST/PUT/DELETE /api/v1/decks/:id/cards', () => {
     expect(login.status).toBe(200);
     const cookie = login.headers['set-cookie'][0].split(';')[0];
 
-    const cat = await request(app).get('/api/v1/catalog/characters').expect(200);
+    const cat = await request(app).get('/api/v1/catalog/characters').set('Cookie', cookie).expect(200);
     expect(cat.body.errors).toEqual([]);
     const chars = cat.body.data as Array<{ id: string }>;
     expect(chars.length).toBeGreaterThan(0);

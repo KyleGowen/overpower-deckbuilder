@@ -94,8 +94,9 @@ describe('Foil Deck Editor Tile View Integration Tests', () => {
   });
 
   it('should return foil-card-map with mappings', async () => {
-    const foilResponse = await request(app)
-      .get('/api/v1/catalog/foil-card-map')
+    const foilResponse = await request(app)      .get('/api/v1/catalog/foil-card-map')
+
+      .set('Cookie', authCookie)
       .expect(200);
 
     expect(foilResponse.body.errors).toEqual([]);

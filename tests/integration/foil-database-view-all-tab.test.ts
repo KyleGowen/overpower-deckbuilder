@@ -8,17 +8,21 @@
 import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { getKyleSessionCookieHeader } from './helpers/integrationSessionAuth';
 
 describe('Foil Database View All Tab Integration Tests', () => {
+  let catalogAuthCookie: string;
+
   beforeAll(async () => {
     await integrationTestUtils.ensureGuestUser();
     await initializeTestServer();
+    catalogAuthCookie = await getKyleSessionCookieHeader(app);
   });
 
   it('should return cards with is_foil when DB has foil rows', async () => {
     const [charactersRes, powerRes] = await Promise.all([
-      request(app).get('/api/v1/catalog/characters'),
-      request(app).get('/api/v1/catalog/power-cards'),
+      request(app).get('/api/v1/catalog/characters').set('Cookie', catalogAuthCookie),
+      request(app).get('/api/v1/catalog/power-cards').set('Cookie', catalogAuthCookie),
     ]);
 
     const allCards = [
