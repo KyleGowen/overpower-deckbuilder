@@ -3,6 +3,11 @@
 
 // ===== initializeDeckEditorSearch through addCardToDeckFromSearch =====
 
+function getDeckEditorSearchResultsContainer() {
+    const useMobile = typeof window.isLayoutMobile === 'function' && window.isLayoutMobile();
+    return document.getElementById(useMobile ? 'devMobileDeckSearchResults' : 'deckEditorSearchResults');
+}
+
 function initializeDeckEditorSearch() {
     if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.unmount === 'function') {
         try {
@@ -27,6 +32,7 @@ function initializeDeckEditorSearch() {
             results: searchResults,
             maxResults: 72,
             clearInputOnSelect: !useMobile,
+            blurHideDelayMs: useMobile ? 600 : undefined,
             clickInsideRootSelectors: clickRoots,
             searchService: new window.CardSearchService({ maxResults: 72 }),
             onSelect: (payload) => {
@@ -52,7 +58,11 @@ function initializeDeckEditorSearch() {
 
     // Fallback to legacy wiring if component is unavailable
     searchInput.addEventListener('input', handleDeckEditorSearch);
-    searchInput.addEventListener('blur', () => { setTimeout(() => { hideDeckEditorSearchResults(); }, 200); });
+    searchInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            hideDeckEditorSearchResults();
+        }, 600);
+    });
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.deck-editor-search-container') && !e.target.closest('.dev-mobile-deck-search-container')) {
             hideDeckEditorSearchResults();
@@ -62,8 +72,7 @@ function initializeDeckEditorSearch() {
 // Handle search input
 async function handleDeckEditorSearch(e) {
     const searchTerm = e.target.value.trim().toLowerCase();
-    const searchResults = document.getElementById('deckEditorSearchResults');
-    
+
     if (searchTerm.length < 2) {
         hideDeckEditorSearchResults();
         return;
@@ -196,8 +205,11 @@ async function searchAllCards(searchTerm) {
 
 // Display search results
 function displayDeckEditorSearchResults(results) {
-    const searchResults = document.getElementById('deckEditorSearchResults');
-    
+    const searchResults = getDeckEditorSearchResultsContainer();
+    if (!searchResults) {
+        return;
+    }
+
     if (results.length === 0) {
         searchResults.innerHTML = '<div class="deck-editor-search-result">No cards found</div>';
     } else {
@@ -256,7 +268,7 @@ function displayDeckEditorSearchResults(results) {
 
 // Show search results
 function showDeckEditorSearchResults() {
-    const searchResults = document.getElementById('deckEditorSearchResults');
+    const searchResults = getDeckEditorSearchResultsContainer();
     if (searchResults) {
         searchResults.style.display = 'block';
     } else {
@@ -266,7 +278,7 @@ function showDeckEditorSearchResults() {
 
 // Hide search results
 function hideDeckEditorSearchResults() {
-    const searchResults = document.getElementById('deckEditorSearchResults');
+    const searchResults = getDeckEditorSearchResultsContainer();
     if (searchResults) {
         searchResults.style.display = 'none';
     }

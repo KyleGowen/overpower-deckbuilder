@@ -207,7 +207,11 @@
                 else if (type === 'special' && (name.includes(term) || charName.includes(term) || charName === term || term === 'special')) match = true;
                 else if (type === 'mission' && ((card.card_name || '').toLowerCase().includes(term) || (card.mission_set || '').toLowerCase().includes(term) || term === 'mission' || term === 'missions')) match = true;
                 else if (type === 'event' && (name.includes(term) || (card.mission_set || '').toLowerCase().includes(term) || term === 'event' || term === 'events')) match = true;
-                else if (type === 'aspect' && (card.card_name || '').toLowerCase().includes(term)) match = true;
+                else if (
+                    type === 'aspect' &&
+                    ((card.card_name || '').toLowerCase().includes(term) || term === 'aspect' || term === 'aspects')
+                )
+                    match = true;
                 else if (type === 'advanced-universe' && (name.includes(term) || charName.includes(term) || charName === term || term === 'advanced')) match = true;
                 else if (type === 'teamwork' && CardSearchService.teamworkCardMatchesSearchTerm(card, term)) match = true;
                 else if (type === 'ally-universe' && ((card.card_name || '').toLowerCase().includes(term) || term === 'ally')) match = true;
@@ -375,7 +379,9 @@
 
                 if (aspects.ok) {
                     aspects.rows.forEach(aspect => {
-                        if (aspect.card_name && aspect.card_name.toLowerCase().includes(searchTerm)) {
+                        const nameMatch = aspect.card_name && aspect.card_name.toLowerCase().includes(searchTerm);
+                        const typeMatch = searchTerm === 'aspect' || searchTerm === 'aspects';
+                        if (nameMatch || typeMatch) {
                             const urls = this._getSearchImageUrls(aspect, 'aspect');
                             results.push({
                                 id: aspect.id,

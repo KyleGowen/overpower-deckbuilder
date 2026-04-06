@@ -499,6 +499,49 @@ describe('CardSearchService', () => {
             });
         });
 
+        it('should match all aspects when search term is aspect or aspects (fetch path)', async () => {
+            for (let i = 0; i < 4; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        { id: 'a1', card_name: 'Cosmic Shift', image: 'a1.jpg' },
+                        { id: 'a2', card_name: 'Dark Pact', image: 'a2.jpg' }
+                    ]
+                })
+            });
+            for (let i = 0; i < 7; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            const results = await service.search('aspect');
+            const aspects = results.filter((r: any) => r.type === 'aspect');
+            expect(aspects).toHaveLength(2);
+            expect(aspects.map((r: any) => r.id).sort()).toEqual(['a1', 'a2']);
+        });
+
+        it('should match all aspects when search term is aspect (availableCardsMap path)', async () => {
+            (window as any).availableCardsMap = new Map();
+            (window as any).availableCardsMap.set('asp1', {
+                id: 'asp1',
+                cardType: 'aspect',
+                card_name: 'Ion Storm',
+                image: 'x.jpg'
+            });
+            service = new CardSearchService({ maxResults: 20 });
+            const results = await service.search('aspect');
+            expect(results.filter((r: any) => r.type === 'aspect')).toHaveLength(1);
+            expect(results[0]).toMatchObject({ id: 'asp1', name: 'Ion Storm', type: 'aspect' });
+            delete (window as any).availableCardsMap;
+            expect(mockFetch).not.toHaveBeenCalled();
+        });
+
         it('should search advanced universe cards by name', async () => {
             // Mock first five endpoints
             for (let i = 0; i < 5; i++) {

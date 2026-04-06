@@ -31,6 +31,9 @@
      *     Collection View, or ['.dev-mobile-deck-search-container'] for DEV in MV.
      *   - clearInputOnSelect: boolean — if false (e.g. DEV MV), keep the query after picking a
      *     result and refetch on focus when the field already has minChars. Default: true.
+     *   - blurHideDelayMs: ms before hiding the dropdown after input blur (default 200 desktop,
+     *     500 when (pointer: coarse) matches). MV / touch: use >= debounceMs so results are not
+     *     hidden immediately after async search completes.
      *
      * Rendering contract:
      *   - The component writes item markup into `results` and toggles its display.
@@ -63,8 +66,16 @@
                 ? roots
                 : ['.deck-editor-search-container'];
             this._timeout = null;
+            this._blurHideTimeout = null;
             this._bound = false;
             this.clearInputOnSelect = options.clearInputOnSelect !== false;
+            const coarsePointer =
+                typeof global.matchMedia === 'function' && global.matchMedia('(pointer: coarse)').matches;
+            if (options.blurHideDelayMs != null) {
+                this.blurHideDelayMs = options.blurHideDelayMs;
+            } else {
+                this.blurHideDelayMs = coarsePointer ? 500 : 200;
+            }
         }
 
         _isClickInsideSearchUi(target) {
@@ -92,6 +103,10 @@
         unmount() {
             if (!this._bound) return;
             this._bound = false;
+            if (this._blurHideTimeout) {
+                clearTimeout(this._blurHideTimeout);
+                this._blurHideTimeout = null;
+            }
             this.input.removeEventListener('input', this._handleInput);
             this.input.removeEventListener('blur', this._handleBlur);
             if (!this.clearInputOnSelect) {
@@ -143,7 +158,11 @@
         };
 
         _handleBlur = () => {
-            setTimeout(() => this.hideResults(), 200);
+            if (this._blurHideTimeout) clearTimeout(this._blurHideTimeout);
+            this._blurHideTimeout = setTimeout(() => {
+                this._blurHideTimeout = null;
+                this.hideResults();
+            }, this.blurHideDelayMs);
         };
 
         _handleDocClick = (e) => {

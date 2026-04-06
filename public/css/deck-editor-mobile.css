@@ -6,6 +6,13 @@
 /* Less dead space above the header (index.css uses 20px modal margin + 20px header padding-top) */
 .layout-mobile #deckEditorModal .modal-content.deck-editor-modal {
     margin: 8px auto 8px auto;
+    /* .modal sets overflow:hidden — allow MV header search dropdown to extend over modal-body */
+    overflow: visible !important;
+}
+
+/* #deckEditorModal uses global .modal (overflow:hidden); MV search results sit in header and paint downward */
+.layout-mobile #deckEditorModal.modal {
+    overflow: visible !important;
 }
 
 .layout-mobile body.deck-editor-active {
