@@ -232,7 +232,7 @@ describe('KO Feature Dimming Integration Tests', () => {
    */
   async function addCardToDeck(deckId: string, cardType: string, cardId: string, quantity: number = 1) {
     const response = await request(app)
-      .post(`/api/v1/decks/${testDeckId}/cards`)
+      .post(`/api/v1/decks/${deckId}/cards`)
       .set('Cookie', authCookie)
       .send({
         cardType,
@@ -241,7 +241,8 @@ describe('KO Feature Dimming Integration Tests', () => {
       });
 
     expect(response.status).toBe(200);
-    expect(response.body.success).toBe(true);
+    expect(response.body.errors).toEqual([]);
+    expect(response.body.data).toBeDefined();
   }
 
   describe('KO Feature - Character Card Dimming', () => {

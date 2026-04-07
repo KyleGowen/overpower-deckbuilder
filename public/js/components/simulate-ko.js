@@ -127,351 +127,315 @@
         };
     }
 
+    /** Normalize DOM/deck `data-type` and `card.type` aliases to one key per handler. */
+    function normalizeKoCardType(cardType) {
+        if (!cardType) return cardType;
+        const t = String(cardType);
+        if (t === 'advanced_universe') return 'advanced-universe';
+        if (t === 'basic_universe') return 'basic-universe';
+        if (t === 'ally_universe') return 'ally-universe';
+        return t;
+    }
+
+    /**
+     * Dim specials/AU tied to a character who is KO'd and not among active names.
+     * @param {Object} ctx - KO dimming context from buildKoDimmingContext
+     * @param {string} characterName - printed character name on the card
+     */
+    function shouldDimNamedCharacterCard(ctx, characterName) {
+        if (!characterName || characterName === 'Any Character') {
+            return false;
+        }
+        const { deckCards, availableCardsMap, activeCharacterNames } = ctx;
+        const belongsToKOdCharacter = deckCards.some(deckCard => {
+            if (deckCard.type !== 'character') return false;
+            if (!koCharacters.has(deckCard.cardId)) return false;
+
+            const charData = availableCardsMap.get(deckCard.cardId);
+            const charName = charData ? (charData.name || charData.card_name) : null;
+            return charName === characterName;
+        });
+        return belongsToKOdCharacter && !activeCharacterNames.includes(characterName);
+    }
+
+    function statFromAvailableRow(availableChar, statTypeToUse) {
+        switch (statTypeToUse) {
+            case 'Energy': return availableChar.energy || 0;
+            case 'Combat': return availableChar.combat || 0;
+            case 'Brute Force': return availableChar.brute_force || 0;
+            case 'Intelligence': return availableChar.intelligence || 0;
+            default: return 0;
+        }
+    }
+
+    /** John Carter / Time Traveler overrides — shared by training + power dimming. */
+    function effectiveStatsForPowerTraining(char) {
+        const nameLower = (char.name || '').toLowerCase();
+        return {
+            energy: char.energy || 0,
+            combat: char.combat || 0,
+            brute_force: Math.max(char.brute_force || 0, nameLower.includes('john carter') ? 8 : 0),
+            intelligence: Math.max(char.intelligence || 0, nameLower.includes('time traveler') ? 8 : 0)
+        };
+    }
+
+    function statFromEffectiveStats(eff, statLabel) {
+        switch (statLabel) {
+            case 'Energy': return eff.energy;
+            case 'Combat': return eff.combat;
+            case 'Brute Force': return eff.brute_force;
+            case 'Intelligence': return eff.intelligence;
+            default: return 0;
+        }
+    }
+
+    function maxTeamStatForTeamwork(teamStats, requiredType) {
+        if (requiredType === 'Any-Power') {
+            return Math.max(
+                teamStats.maxEnergy,
+                teamStats.maxCombat,
+                teamStats.maxBruteForce,
+                teamStats.maxIntelligence
+            );
+        }
+        switch (requiredType) {
+            case 'Energy': return teamStats.maxEnergy;
+            case 'Combat': return teamStats.maxCombat;
+            case 'Brute Force': return teamStats.maxBruteForce;
+            case 'Intelligence': return teamStats.maxIntelligence;
+            default: return 0;
+        }
+    }
+
+    function dimTeamworkCard(cardId, cardData, ctx, verboseLogs) {
+        const { teamStats, shouldDimTeamworkAndAllyForSingleCharacter } = ctx;
+        if (shouldDimTeamworkAndAllyForSingleCharacter) {
+            if (verboseLogs) {
+                console.log('🎯 Dimming teamwork card (special rule):', cardId, cardData.name || cardData.card_name || cardData.card_type);
+            }
+            return true;
+        }
+        const toUse = cardData.to_use || '';
+        const toUseMatch = toUse.match(/(\d+)\s+(Energy|Combat|Brute Force|Intelligence|Any-Power)/);
+        if (!toUseMatch) {
+            if (verboseLogs) {
+                console.warn('⚠️ Could not parse teamwork card to_use:', toUse, 'for card:', cardId);
+            }
+            return false;
+        }
+        const requiredValue = parseInt(toUseMatch[1], 10);
+        const requiredType = toUseMatch[2];
+        const maxStat = maxTeamStatForTeamwork(teamStats, requiredType);
+        const canUse = maxStat >= requiredValue;
+        if (verboseLogs) {
+            console.log('🎯 Teamwork card check:', {
+                cardId,
+                cardName: cardData.name || cardData.card_name || cardData.card_type,
+                toUse,
+                requiredType,
+                requiredValue,
+                canUse,
+                teamStats: {
+                    maxIntelligence: teamStats.maxIntelligence,
+                    maxEnergy: teamStats.maxEnergy,
+                    maxCombat: teamStats.maxCombat,
+                    maxBruteForce: teamStats.maxBruteForce
+                }
+            });
+        }
+        return !canUse;
+    }
+
+    function dimAllyCard(cardId, cardData, ctx, verboseLogs) {
+        const { activeCharacters, availableCardsMap, shouldDimTeamworkAndAllyForSingleCharacter } = ctx;
+        if (shouldDimTeamworkAndAllyForSingleCharacter) {
+            if (verboseLogs) {
+                console.log('🎯 Dimming ally card (special rule):', cardId, cardData.name || cardData.card_name || cardData.card_type);
+            }
+            return true;
+        }
+        const statToUse = cardData.stat_to_use || '';
+        const statTypeToUse = cardData.stat_type_to_use || '';
+        const valueMatch = statToUse.match(/(\d+) or (less|higher)/);
+        if (!valueMatch || !statTypeToUse) {
+            if (verboseLogs) {
+                console.warn('⚠️ Could not parse ally card stat_to_use:', statToUse, 'or stat_type_to_use:', statTypeToUse, 'for card:', cardId);
+            }
+            return false;
+        }
+        const requiredValue = parseInt(valueMatch[1], 10);
+        const isLessThan = valueMatch[2] === 'less';
+        let canUse = false;
+        activeCharacters.forEach(char => {
+            if (canUse) return;
+            const availableChar = availableCardsMap.get(char.cardId);
+            if (!availableChar) return;
+            const characterStat = statFromAvailableRow(availableChar, statTypeToUse);
+            const usable = isLessThan ? characterStat <= requiredValue : characterStat >= requiredValue;
+            if (usable) {
+                canUse = true;
+            }
+        });
+        if (verboseLogs) {
+            console.log('🎯 Ally card check:', {
+                cardId,
+                cardName: cardData.name || cardData.card_name || cardData.card_type,
+                statToUse,
+                statTypeToUse,
+                requiredValue,
+                isLessThan,
+                canUse,
+                activeCharactersCount: activeCharacters.length
+            });
+        }
+        return !canUse;
+    }
+
+    function dimTrainingCard(cardData, ctx) {
+        const trainingType1 = cardData.type_1;
+        const trainingType2 = cardData.type_2;
+        const trainingValue = parseInt(cardData.value_to_use, 10) || 0;
+        if (!trainingType1 || !trainingType2 || trainingValue <= 0) {
+            return false;
+        }
+        let canUse = false;
+        const { activeCharacters } = ctx;
+        activeCharacters.forEach(char => {
+            const eff = effectiveStatsForPowerTraining(char);
+            const type1Stat = statFromEffectiveStats(eff, trainingType1);
+            const type2Stat = statFromEffectiveStats(eff, trainingType2);
+            if (type1Stat <= trainingValue || type2Stat <= trainingValue) {
+                canUse = true;
+            }
+        });
+        return !canUse;
+    }
+
+    function dimBasicUniverseCard(cardData, ctx) {
+        const buType = cardData.type;
+        const buValueMatch = (cardData.value_to_use || '').match(/(\d+) or greater/);
+        const buRequiredValue = buValueMatch ? parseInt(buValueMatch[1], 10) : 0;
+        if (!buType || buRequiredValue <= 0) {
+            return false;
+        }
+        let canUse = false;
+        ctx.activeCharacters.forEach(char => {
+            let characterStat = 0;
+            switch (buType) {
+                case 'Energy':
+                    characterStat = char.energy || 0;
+                    break;
+                case 'Combat':
+                    characterStat = char.combat || 0;
+                    break;
+                case 'Brute Force':
+                    characterStat = char.brute_force || 0;
+                    break;
+                case 'Intelligence':
+                    characterStat = char.intelligence || 0;
+                    break;
+                default:
+                    break;
+            }
+            if (characterStat >= buRequiredValue) {
+                canUse = true;
+            }
+        });
+        return !canUse;
+    }
+
+    function dimPowerCard(cardData, ctx) {
+        const powerValue = parseInt(cardData.value, 10) || 0;
+        const powerType = cardData.power_type;
+        if (!powerType || powerValue <= 0) {
+            return false;
+        }
+        let canUse = false;
+        ctx.activeCharacters.forEach(char => {
+            const eff = effectiveStatsForPowerTraining(char);
+            let characterStat = 0;
+            switch (powerType) {
+                case 'Energy':
+                    characterStat = eff.energy;
+                    break;
+                case 'Combat':
+                    characterStat = eff.combat;
+                    break;
+                case 'Brute Force':
+                    characterStat = eff.brute_force;
+                    break;
+                case 'Intelligence':
+                    characterStat = eff.intelligence;
+                    break;
+                case 'Any-Power':
+                    characterStat = Math.max(eff.energy, eff.combat, eff.brute_force, eff.intelligence);
+                    break;
+                case 'Multi-Power':
+                case 'Multi Power': {
+                    const stats = [eff.energy, eff.combat, eff.brute_force, eff.intelligence].sort((a, b) => b - a);
+                    characterStat = (stats[0] || 0) + (stats[1] || 0);
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (characterStat >= powerValue) {
+                canUse = true;
+            }
+        });
+        return !canUse;
+    }
+
+    /**
+     * Registry: normalized card type → (cardId, cardData, ctx, verboseLogs) → dim?
+     * Single dispatch for applyDimming + shouldDimCard.
+     */
+    const KO_DIM_NON_CHARACTER_HANDLERS = {
+        special(cardId, cardData, ctx, _verboseLogs) {
+            const characterName = cardData.character || cardData.character_name;
+            const characters = cardData.characters || [];
+            const isAnyCharacter = characterName === 'Any Character' ||
+                characters.includes('Any Character');
+            if (isAnyCharacter || !characterName) {
+                return false;
+            }
+            return shouldDimNamedCharacterCard(ctx, characterName);
+        },
+        'advanced-universe'(_cardId, cardData, ctx, _verboseLogs) {
+            const auCharacterName = cardData.character;
+            if (!auCharacterName || auCharacterName === 'Any Character') {
+                return false;
+            }
+            return shouldDimNamedCharacterCard(ctx, auCharacterName);
+        },
+        teamwork(cardId, cardData, ctx, verboseLogs) {
+            return dimTeamworkCard(cardId, cardData, ctx, verboseLogs);
+        },
+        'ally-universe'(cardId, cardData, ctx, verboseLogs) {
+            return dimAllyCard(cardId, cardData, ctx, verboseLogs);
+        },
+        training(_cardId, cardData, ctx, _verboseLogs) {
+            return dimTrainingCard(cardData, ctx);
+        },
+        'basic-universe'(_cardId, cardData, ctx, _verboseLogs) {
+            return dimBasicUniverseCard(cardData, ctx);
+        },
+        power(_cardId, cardData, ctx, _verboseLogs) {
+            return dimPowerCard(cardData, ctx);
+        }
+    };
+
     /**
      * Shared KO dimming rules for non-character cards (DOM apply + shouldDimCard).
      * @param {boolean} verboseLogs - console output for applyDimming pass only
      */
     function shouldDimNonCharacterByType(cardType, cardId, cardData, ctx, verboseLogs) {
-        const {
-            activeCharacters,
-            activeCharacterNames,
-            teamStats,
-            shouldDimTeamworkAndAllyForSingleCharacter,
-            deckCards,
-            availableCardsMap
-        } = ctx;
-
-        let shouldDim = false;
-
-        switch (cardType) {
-            case 'special': {
-                const characterName = cardData.character || cardData.character_name;
-                const characters = cardData.characters || [];
-                const isAnyCharacter = characterName === 'Any Character' ||
-                    characters.includes('Any Character');
-
-                if (!isAnyCharacter && characterName) {
-                    const belongsToKOdCharacter = deckCards.some(deckCard => {
-                        if (deckCard.type !== 'character') return false;
-                        if (!koCharacters.has(deckCard.cardId)) return false;
-
-                        const charData = availableCardsMap.get(deckCard.cardId);
-                        const charName = charData ? (charData.name || charData.card_name) : null;
-                        return charName === characterName;
-                    });
-
-                    if (belongsToKOdCharacter && !activeCharacterNames.includes(characterName)) {
-                        shouldDim = true;
-                    }
-                }
-                break;
-            }
-
-            case 'advanced-universe':
-            case 'advanced_universe': {
-                const auCharacterName = cardData.character;
-                if (auCharacterName && auCharacterName !== 'Any Character') {
-                    const belongsToKOdCharacter = deckCards.some(deckCard => {
-                        if (deckCard.type !== 'character') return false;
-                        if (!koCharacters.has(deckCard.cardId)) return false;
-
-                        const charData = availableCardsMap.get(deckCard.cardId);
-                        const charName = charData ? (charData.name || charData.card_name) : null;
-                        return charName === auCharacterName;
-                    });
-
-                    if (belongsToKOdCharacter && !activeCharacterNames.includes(auCharacterName)) {
-                        shouldDim = true;
-                    }
-                }
-                break;
-            }
-
-            case 'teamwork': {
-                if (shouldDimTeamworkAndAllyForSingleCharacter) {
-                    if (verboseLogs) {
-                        console.log('🎯 Dimming teamwork card (special rule):', cardId, cardData.name || cardData.card_name || cardData.card_type);
-                    }
-                    shouldDim = true;
-                } else {
-                    const toUse = cardData.to_use || '';
-                    const toUseMatch = toUse.match(/(\d+)\s+(Energy|Combat|Brute Force|Intelligence|Any-Power)/);
-
-                    if (toUseMatch) {
-                        const requiredValue = parseInt(toUseMatch[1], 10);
-                        const requiredType = toUseMatch[2];
-                        let canUse = false;
-
-                        if (requiredType === 'Any-Power') {
-                            const maxPower = Math.max(
-                                teamStats.maxEnergy,
-                                teamStats.maxCombat,
-                                teamStats.maxBruteForce,
-                                teamStats.maxIntelligence
-                            );
-                            canUse = maxPower >= requiredValue;
-                        } else {
-                            switch (requiredType) {
-                                case 'Energy':
-                                    canUse = teamStats.maxEnergy >= requiredValue;
-                                    break;
-                                case 'Combat':
-                                    canUse = teamStats.maxCombat >= requiredValue;
-                                    break;
-                                case 'Brute Force':
-                                    canUse = teamStats.maxBruteForce >= requiredValue;
-                                    break;
-                                case 'Intelligence':
-                                    canUse = teamStats.maxIntelligence >= requiredValue;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        if (verboseLogs) {
-                            console.log('🎯 Teamwork card check:', {
-                                cardId,
-                                cardName: cardData.name || cardData.card_name || cardData.card_type,
-                                toUse,
-                                requiredType,
-                                requiredValue,
-                                canUse,
-                                teamStats: {
-                                    maxIntelligence: teamStats.maxIntelligence,
-                                    maxEnergy: teamStats.maxEnergy,
-                                    maxCombat: teamStats.maxCombat,
-                                    maxBruteForce: teamStats.maxBruteForce
-                                }
-                            });
-                        }
-
-                        if (!canUse) {
-                            shouldDim = true;
-                        }
-                    } else if (verboseLogs) {
-                        console.warn('⚠️ Could not parse teamwork card to_use:', toUse, 'for card:', cardId);
-                    }
-                }
-                break;
-            }
-
-            case 'ally-universe':
-            case 'ally_universe': {
-                if (shouldDimTeamworkAndAllyForSingleCharacter) {
-                    if (verboseLogs) {
-                        console.log('🎯 Dimming ally card (special rule):', cardId, cardData.name || cardData.card_name || cardData.card_type);
-                    }
-                    shouldDim = true;
-                } else {
-                    const statToUse = cardData.stat_to_use || '';
-                    const statTypeToUse = cardData.stat_type_to_use || '';
-                    const valueMatch = statToUse.match(/(\d+) or (less|higher)/);
-
-                    if (valueMatch && statTypeToUse) {
-                        const requiredValue = parseInt(valueMatch[1], 10);
-                        const isLessThan = valueMatch[2] === 'less';
-                        let canUse = false;
-
-                        activeCharacters.forEach(char => {
-                            if (canUse) return;
-
-                            const availableChar = availableCardsMap.get(char.cardId);
-                            if (!availableChar) return;
-
-                            let characterStat = 0;
-                            switch (statTypeToUse) {
-                                case 'Energy':
-                                    characterStat = availableChar.energy || 0;
-                                    break;
-                                case 'Combat':
-                                    characterStat = availableChar.combat || 0;
-                                    break;
-                                case 'Brute Force':
-                                    characterStat = availableChar.brute_force || 0;
-                                    break;
-                                case 'Intelligence':
-                                    characterStat = availableChar.intelligence || 0;
-                                    break;
-                                default:
-                                    break;
-                            }
-
-                            const usable = isLessThan ? characterStat <= requiredValue : characterStat >= requiredValue;
-                            if (usable) {
-                                canUse = true;
-                            }
-                        });
-
-                        if (verboseLogs) {
-                            console.log('🎯 Ally card check:', {
-                                cardId,
-                                cardName: cardData.name || cardData.card_name || cardData.card_type,
-                                statToUse,
-                                statTypeToUse,
-                                requiredValue,
-                                isLessThan,
-                                canUse,
-                                activeCharactersCount: activeCharacters.length
-                            });
-                        }
-
-                        if (!canUse) {
-                            shouldDim = true;
-                        }
-                    } else if (verboseLogs) {
-                        console.warn('⚠️ Could not parse ally card stat_to_use:', statToUse, 'or stat_type_to_use:', statTypeToUse, 'for card:', cardId);
-                    }
-                }
-                break;
-            }
-
-            case 'training': {
-                const trainingType1 = cardData.type_1;
-                const trainingType2 = cardData.type_2;
-                const trainingValue = parseInt(cardData.value_to_use, 10) || 0;
-
-                if (trainingType1 && trainingType2 && trainingValue > 0) {
-                    let canUse = false;
-
-                    activeCharacters.forEach(char => {
-                        const nameLower = (char.name || '').toLowerCase();
-                        const effectiveEnergy = char.energy || 0;
-                        const effectiveCombat = char.combat || 0;
-                        const effectiveBrute = Math.max(char.brute_force || 0, nameLower.includes('john carter') ? 8 : 0);
-                        const effectiveIntel = Math.max(char.intelligence || 0, nameLower.includes('time traveler') ? 8 : 0);
-
-                        let type1Stat = 0;
-                        let type2Stat = 0;
-
-                        switch (trainingType1) {
-                            case 'Energy': type1Stat = effectiveEnergy; break;
-                            case 'Combat': type1Stat = effectiveCombat; break;
-                            case 'Brute Force': type1Stat = effectiveBrute; break;
-                            case 'Intelligence': type1Stat = effectiveIntel; break;
-                            default: break;
-                        }
-
-                        switch (trainingType2) {
-                            case 'Energy': type2Stat = effectiveEnergy; break;
-                            case 'Combat': type2Stat = effectiveCombat; break;
-                            case 'Brute Force': type2Stat = effectiveBrute; break;
-                            case 'Intelligence': type2Stat = effectiveIntel; break;
-                            default: break;
-                        }
-
-                        if (type1Stat <= trainingValue || type2Stat <= trainingValue) {
-                            canUse = true;
-                        }
-                    });
-
-                    if (!canUse) {
-                        shouldDim = true;
-                    }
-                }
-                break;
-            }
-
-            case 'basic-universe':
-            case 'basic_universe': {
-                const buType = cardData.type;
-                const buValueMatch = (cardData.value_to_use || '').match(/(\d+) or greater/);
-                const buRequiredValue = buValueMatch ? parseInt(buValueMatch[1], 10) : 0;
-
-                if (buType && buRequiredValue > 0) {
-                    let canUse = false;
-
-                    activeCharacters.forEach(char => {
-                        let characterStat = 0;
-
-                        switch (buType) {
-                            case 'Energy':
-                                characterStat = char.energy || 0;
-                                break;
-                            case 'Combat':
-                                characterStat = char.combat || 0;
-                                break;
-                            case 'Brute Force':
-                                characterStat = char.brute_force || 0;
-                                break;
-                            case 'Intelligence':
-                                characterStat = char.intelligence || 0;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        if (characterStat >= buRequiredValue) {
-                            canUse = true;
-                        }
-                    });
-
-                    if (!canUse) {
-                        shouldDim = true;
-                    }
-                }
-                break;
-            }
-
-            case 'power': {
-                const powerValue = parseInt(cardData.value, 10) || 0;
-                const powerType = cardData.power_type;
-
-                if (powerType && powerValue > 0) {
-                    let canUse = false;
-
-                    activeCharacters.forEach(char => {
-                        const nameLower = (char.name || '').toLowerCase();
-                        const effectiveEnergy = char.energy || 0;
-                        const effectiveCombat = char.combat || 0;
-                        const effectiveBrute = Math.max(char.brute_force || 0, nameLower.includes('john carter') ? 8 : 0);
-                        const effectiveIntel = Math.max(char.intelligence || 0, nameLower.includes('time traveler') ? 8 : 0);
-
-                        let characterStat = 0;
-
-                        switch (powerType) {
-                            case 'Energy':
-                                characterStat = effectiveEnergy;
-                                break;
-                            case 'Combat':
-                                characterStat = effectiveCombat;
-                                break;
-                            case 'Brute Force':
-                                characterStat = effectiveBrute;
-                                break;
-                            case 'Intelligence':
-                                characterStat = effectiveIntel;
-                                break;
-                            case 'Any-Power':
-                                characterStat = Math.max(effectiveEnergy, effectiveCombat, effectiveBrute, effectiveIntel);
-                                break;
-                            case 'Multi-Power':
-                            case 'Multi Power': {
-                                const stats = [effectiveEnergy, effectiveCombat, effectiveBrute, effectiveIntel].sort((a, b) => b - a);
-                                characterStat = (stats[0] || 0) + (stats[1] || 0);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-
-                        if (characterStat >= powerValue) {
-                            canUse = true;
-                        }
-                    });
-
-                    if (!canUse) {
-                        shouldDim = true;
-                    }
-                }
-                break;
-            }
-
-            default:
-                break;
+        const normalized = normalizeKoCardType(cardType);
+        const handler = KO_DIM_NON_CHARACTER_HANDLERS[normalized];
+        if (!handler) {
+            return false;
         }
-
-        return shouldDim;
+        return handler(cardId, cardData, ctx, verboseLogs);
     }
 
     /**
