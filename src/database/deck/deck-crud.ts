@@ -30,6 +30,16 @@ interface DeckListRow extends DeckRow {
   mission_1_default_image?: string;
 }
 
+/** First mission preview in deck list (from LATERAL subquery aliases). */
+const MISSION_LIST_SLOTS = [
+  {
+    idField: 'mission_1_id',
+    nameField: 'mission_1_name',
+    imageField: 'mission_1_default_image',
+    syntheticIdPrefix: 'mission1',
+  },
+] as const;
+
 interface DeckCardRow {
   id: string;
   card_type: string;
@@ -40,34 +50,54 @@ interface DeckCardRow {
 
 const CHARACTER_LIST_SLOTS = [
   {
+    sqlAlias: 'c1',
     idField: 'character_1_id',
     nameField: 'character_1_name',
     imageField: 'character_1_default_image',
     foilField: 'character_1_is_foil',
-    syntheticSuffix: '1'
+    syntheticSuffix: '1',
   },
   {
+    sqlAlias: 'c2',
     idField: 'character_2_id',
     nameField: 'character_2_name',
     imageField: 'character_2_default_image',
     foilField: 'character_2_is_foil',
-    syntheticSuffix: '2'
+    syntheticSuffix: '2',
   },
   {
+    sqlAlias: 'c3',
     idField: 'character_3_id',
     nameField: 'character_3_name',
     imageField: 'character_3_default_image',
     foilField: 'character_3_is_foil',
-    syntheticSuffix: '3'
+    syntheticSuffix: '3',
   },
   {
+    sqlAlias: 'c4',
     idField: 'character_4_id',
     nameField: 'character_4_name',
     imageField: 'character_4_default_image',
     foilField: 'character_4_is_foil',
-    syntheticSuffix: '4'
-  }
+    syntheticSuffix: '4',
+  },
 ] as const;
+
+function buildCharacterListSqlFragments(): { selectFragment: string; joinFragment: string } {
+  const selectParts = CHARACTER_LIST_SLOTS.map(
+    (s) =>
+      `${s.sqlAlias}.name as ${s.nameField},
+          ${s.sqlAlias}.image_path as ${s.imageField},
+          ${s.sqlAlias}.is_foil as ${s.foilField}`,
+  );
+  const joinParts = CHARACTER_LIST_SLOTS.map(
+    (s) => `LEFT JOIN characters ${s.sqlAlias} ON d.${s.idField} = ${s.sqlAlias}.id`,
+  );
+  return {
+    selectFragment: selectParts.join(',\n          '),
+    joinFragment: joinParts.map((j) => `        ${j}`).join('\n'),
+  };
+}
 
 function pushCharacterPreviewCards(cards: DeckCard[], deckRow: DeckListRow): void {
   const deckId = deckRow.id as string;
@@ -82,10 +112,30 @@ function pushCharacterPreviewCards(cards: DeckCard[], deckRow: DeckListRow): voi
       cardId,
       quantity: 1,
       ...(deckRow[slot.imageField] !== undefined && {
-        defaultImage: deckRow[slot.imageField]
+        defaultImage: deckRow[slot.imageField],
       }),
       ...(deckRow[slot.nameField] !== undefined && { name: deckRow[slot.nameField] }),
-      is_foil: deckRow[slot.foilField] ?? false
+      is_foil: deckRow[slot.foilField] ?? false,
+    });
+  }
+}
+
+function pushMissionPreviewCards(cards: DeckCard[], deckRow: DeckListRow): void {
+  const deckId = deckRow.id as string;
+  for (const slot of MISSION_LIST_SLOTS) {
+    const cardId = deckRow[slot.idField];
+    if (!cardId) {
+      continue;
+    }
+    cards.push({
+      id: `${slot.syntheticIdPrefix}_${deckId}`,
+      type: 'mission',
+      cardId,
+      quantity: 1,
+      ...(deckRow[slot.imageField] !== undefined && {
+        defaultImage: deckRow[slot.imageField],
+      }),
+      ...(deckRow[slot.nameField] !== undefined && { name: deckRow[slot.nameField] }),
     });
   }
 }
@@ -134,18 +184,7 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
       ...(deckRow.location_name !== undefined && { name: deckRow.location_name }),
     });
   }
-  if (deckRow.mission_1_id) {
-    cards.push({
-      id: `mission1_${deckRow.id}`,
-      type: 'mission',
-      cardId: deckRow.mission_1_id,
-      quantity: 1,
-      ...(deckRow.mission_1_default_image !== undefined && {
-        defaultImage: deckRow.mission_1_default_image,
-      }),
-      ...(deckRow.mission_1_name !== undefined && { name: deckRow.mission_1_name }),
-    });
-  }
+  pushMissionPreviewCards(cards, deckRow);
 
   const desc = deckRow.description as string | undefined;
   const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
@@ -326,32 +365,20 @@ export async function getDecksByUserId(
 
   const client = await ctx.pool.connect();
   try {
+    const { selectFragment: characterSelectSql, joinFragment: characterJoinSql } =
+      buildCharacterListSqlFragments();
     const deckResult = await client.query(
       `
         SELECT 
           d.*,
-          c1.name as character_1_name,
-          c1.image_path as character_1_default_image,
-          c1.is_foil as character_1_is_foil,
-          c2.name as character_2_name,
-          c2.image_path as character_2_default_image,
-          c2.is_foil as character_2_is_foil,
-          c3.name as character_3_name,
-          c3.image_path as character_3_default_image,
-          c3.is_foil as character_3_is_foil,
-          c4.name as character_4_name,
-          c4.image_path as character_4_default_image,
-          c4.is_foil as character_4_is_foil,
+          ${characterSelectSql},
           l.name as location_name,
           l.image_path as location_default_image,
           dm1.mission_id as mission_1_id,
           dm1.mission_name as mission_1_name,
           dm1.mission_image_path as mission_1_default_image
         FROM decks d
-        LEFT JOIN characters c1 ON d.character_1_id = c1.id
-        LEFT JOIN characters c2 ON d.character_2_id = c2.id
-        LEFT JOIN characters c3 ON d.character_3_id = c3.id
-        LEFT JOIN characters c4 ON d.character_4_id = c4.id
+${characterJoinSql}
         LEFT JOIN locations l ON d.location_id = l.id
         LEFT JOIN LATERAL (
           SELECT 
