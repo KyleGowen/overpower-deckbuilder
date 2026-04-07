@@ -225,6 +225,30 @@
     gap: 6px;
 }
 
+/* Legality / warning reasons: no hover on phones; list under meta row, matches badge colors */
+.layout-mobile #deckEditorModal .deck-validation-reasons-mv:not([hidden]) {
+    display: block !important;
+    list-style: disc;
+    margin: 4px 0 0;
+    padding: 0 0 0 1.15rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 0.65rem;
+    line-height: 1.35;
+    font-weight: 500;
+    color: #ff4444;
+}
+
+.layout-mobile #deckEditorModal .deck-validation-reasons-mv[data-variant="warning"]:not([hidden]) {
+    color: #ffd93d;
+}
+
+.layout-mobile #deckEditorModal .deck-validation-reasons-mv li {
+    margin: 0 0 2px;
+    padding: 0;
+}
+
 /* MV: hide " / {min}" after card count — legality badge still shows deck status; saves header space */
 .layout-mobile #deckEditorModal #deckHeaderCardMinPart {
     display: none !important;

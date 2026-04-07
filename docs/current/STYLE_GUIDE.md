@@ -681,6 +681,7 @@ See also [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile) u
 - **Layout**: Badges are **left-aligned on a second line** under the deck title to keep the title width stable when toggling read-only mode.
 - **Badges**:
   - **Limited/Legality badge**: `#deckTitleValidationBadge`
+  - **Mobile legality reasons** (`html.layout-mobile` only): `#deckTitleValidationReasonsMv` — `<ul class="deck-validation-reasons-mv">` under the title meta row; small disc list, `#ff4444` for errors (`data-variant="error"`), `#ffd93d` for warnings (`data-variant="warning"`); populated by `setDeckTitleValidationReasonsMv` in `validation-calculation-functions.js` (desktop keeps the badge `title` tooltip only).
   - **Read-Only badge**: `#readOnlyBadge`
 - **Container**: `.deck-title-with-validation` uses `flex-direction: column` and left alignment
 - **Badges row**: `.deck-title-badges` with `display: flex`, `gap: 10px`, `flex-wrap: nowrap`

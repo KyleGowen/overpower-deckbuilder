@@ -1,6 +1,11 @@
 /* ========================================
  * PHASE 10B: VALIDATION AND CALCULATION FUNCTIONS
  * ========================================
+ *
+ * Client deck legality mirrors server DeckValidationService unusable rules
+ * (specials, events, powers, teamwork/basic/training/ally/advanced universe, aspects)
+ * so the Legal / Not Legal badge aligns with API persistence (is_valid).
+ * ========================================
  * 
  * This file contains deck validation and calculation functions extracted from
  * index.html during Phase 10B of the refactoring project.
@@ -24,6 +29,42 @@ let isDeckLimited = false;
 /** When true, skip recomputing tournament legality and omit persisting is_valid. */
 function isDeckLegalityEvaluationSkipped() {
     return isDeckLimited;
+}
+
+/** Align hyphenated editor types with server map prefixes (basic-universe → basic_universe). */
+function deckTypeCanonClient(type) {
+    return String(type || '').replace(/-/g, '_');
+}
+
+function statForPowerGridClient(char, powerType) {
+    switch (powerType) {
+        case 'Energy':
+            return char.energy;
+        case 'Combat':
+            return char.combat;
+        case 'Brute Force':
+            return char.brute_force;
+        case 'Intelligence':
+            return char.intelligence;
+        case 'Any-Power':
+            return Math.max(char.energy, char.combat, char.brute_force, char.intelligence);
+        default:
+            return 0;
+    }
+}
+
+function specialLinkedCharacterNameClient(ac) {
+    const primary = (ac.character || ac.character_name || '').trim();
+    if (primary) return primary;
+    if (Array.isArray(ac.characters) && ac.characters.length > 0) {
+        return String(ac.characters[0]).trim();
+    }
+    return '';
+}
+
+function teamHasSpecialCharacterClient(characterNames, linkedName, extras) {
+    if (characterNames.includes(linkedName)) return true;
+    return extras.some((e) => characterNames.includes(e));
 }
 
 // Function to validate deck according to Overpower rules
@@ -58,7 +99,7 @@ function validateDeck(deckCards) {
         // Track "One Per Deck" cards
         // Direct lookup using UUID
         const availableCard = availableCardsMap.get(card.cardId);
-        if (availableCard && availableCard.one_per_deck) {
+        if (availableCard && (availableCard.one_per_deck || availableCard.is_one_per_deck)) {
             const cardKey = `${card.type}_${card.cardId}`;
             onePerDeckCards[cardKey] = (onePerDeckCards[cardKey] || 0) + 1;
         }
@@ -176,50 +217,207 @@ function validateDeck(deckCards) {
     deckCards.forEach(card => {
         const availableCard = availableCardsMap.get(card.cardId);
         if (!availableCard) return;
-        
+
         const cardName = availableCard.name || availableCard.card_name || 'Unknown';
-        
-        // Check for unusable cards based on character requirements
+
         if (availableCard.unusable_with) {
             const unusableWith = availableCard.unusable_with.split(',').map(name => name.trim());
-            const hasUnusableCharacter = unusableWith.some(unusableName => 
-                characterNamesForUnusable.some(charName => 
+            const hasUnusableCharacter = unusableWith.some(unusableName =>
+                characterNamesForUnusable.some(charName =>
                     charName.toLowerCase().includes(unusableName.toLowerCase())
                 )
             );
-            
+
             if (hasUnusableCharacter) {
                 errors.push(`"${cardName}" cannot be used with ${unusableWith.join(', ')}`);
             }
         }
-        
-        // Check for power/universe card requirements
-        if (['power', 'advanced-universe', 'ally-universe', 'basic-universe', 'training', 'teamwork'].includes(card.type)) {
-            if (availableCard.requires_energy || availableCard.requires_combat || 
-                availableCard.requires_brute_force || availableCard.requires_intelligence) {
-                
-                const requiredValue = availableCard.requires_energy || availableCard.requires_combat || 
-                                    availableCard.requires_brute_force || availableCard.requires_intelligence;
-                const powerType = availableCard.requires_energy ? 'Energy' : 
-                                availableCard.requires_combat ? 'Combat' :
-                                availableCard.requires_brute_force ? 'Brute Force' : 'Intelligence';
-                
-                const canUse = characterStats.some(character => {
-                    const characterStat = availableCard.requires_energy ? character.energy :
-                                        availableCard.requires_combat ? character.combat :
-                                        availableCard.requires_brute_force ? character.brute_force :
-                                        character.intelligence;
-                    
-                    return characterStat >= requiredValue;
+    });
+
+    const angryMobCharacterNames = characterNamesForUnusable.filter(n => n.startsWith('Angry Mob'));
+
+    deckCards.filter(c => c.type === 'special').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.name || ac.card_name || 'Unknown';
+        const linked = specialLinkedCharacterNameClient(ac);
+        const extras = Array.isArray(ac.characters) ? ac.characters : [];
+        if (!linked || linked === 'Any Character') return;
+
+        if (linked.startsWith('Angry Mob')) {
+            if (angryMobCharacterNames.length === 0) {
+                errors.push(`"${displayName}" requires an "Angry Mob" character in your team`);
+                return;
+            }
+            const hasVariantQualifier = linked.includes(':') || linked.includes(' - ');
+            if (hasVariantQualifier) {
+                const separator = linked.includes(':') ? ':' : ' - ';
+                const specialVariant = linked.split(separator)[1].trim();
+                const normalizeVariant = (v) =>
+                    v.toLowerCase().replace(/\s+/g, ' ').trim().replace(/s$/, '');
+                const normalizedSpecialVariant = normalizeVariant(specialVariant);
+                const hasMatchingVariant = angryMobCharacterNames.some(charName => {
+                    const variantMatch = charName.match(/\(([^)]+)\)/);
+                    if (!variantMatch) return false;
+                    return normalizeVariant(variantMatch[1]) === normalizedSpecialVariant;
                 });
-                
-                if (!canUse) {
-                    errors.push(`"${cardName}" (Universe Card) requires a character with ${requiredValue}+ ${powerType}`);
+                if (!hasMatchingVariant) {
+                    errors.push(
+                        `"${displayName}" requires an "Angry Mob (${specialVariant})" character in your team`
+                    );
                 }
             }
+            return;
+        }
+
+        if (!teamHasSpecialCharacterClient(characterNamesForUnusable, linked, extras)) {
+            errors.push(`"${displayName}" requires character "${linked}" in your team`);
         }
     });
-    
+
+    deckCards.filter(c => c.type === 'event').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.name || ac.card_name || 'Unknown';
+        const ms = ac.mission_set;
+        if (ms && ms !== 'Any-Mission' && missionSets.size > 0 && !missionSets.has(ms)) {
+            errors.push(`"${displayName}" requires mission set "${ms}" in your deck`);
+        }
+    });
+
+    deckCards.filter(c => c.type === 'power').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.name || ac.card_name || 'Unknown';
+        const powerType = ac.power_type;
+        const value = parseInt(ac.value, 10);
+        if (!powerType || Number.isNaN(value)) return;
+        const canUse = characterStats.some(char => statForPowerGridClient(char, powerType) >= value);
+        if (!canUse) {
+            errors.push(`"${displayName}" (Power Card) requires a character with ${value}+ ${powerType}`);
+        }
+    });
+
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'teamwork').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.name || ac.card_name || 'Unknown';
+        const toUse = ac.to_use || '';
+        const toUseMatch = toUse.match(/(\d+)\s+(Energy|Combat|Brute Force|Intelligence|Any-Power)/);
+        if (!toUseMatch) return;
+        const requiredValue = parseInt(toUseMatch[1], 10);
+        const pType = toUseMatch[2];
+        const canUse = characterStats.some(char => statForPowerGridClient(char, pType) >= requiredValue);
+        if (!canUse) {
+            errors.push(
+                `"${displayName}" (Universe Card) requires a character with ${requiredValue}+ ${pType}`
+            );
+        }
+    });
+
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'basic_universe').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.card_name || ac.name || 'Unknown';
+        const buType = ac.type || '';
+        const buMatch = String(ac.value_to_use || '').match(/(\d+)\s*or\s*greater/i);
+        const requiredValue = buMatch ? parseInt(buMatch[1], 10) : 0;
+        if (!buType || requiredValue <= 0) return;
+        const canUse = characterStats.some(char => statForPowerGridClient(char, buType) >= requiredValue);
+        if (!canUse) {
+            errors.push(
+                `"${displayName}" (Universe Card) requires a character with ${requiredValue}+ ${buType}`
+            );
+        }
+    });
+
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'training').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.card_name || ac.name || 'Unknown';
+        const type1 = ac.type_1 || '';
+        const type2 = ac.type_2 || '';
+        const valueMatch = String(ac.value_to_use || '').match(/(\d+)/);
+        const cap = valueMatch ? parseInt(valueMatch[1], 10) : 0;
+        if (!type1 || !type2 || cap <= 0) return;
+        const canUse = characterStats.some(char => {
+            const s1 = statForPowerGridClient(char, type1);
+            const s2 = statForPowerGridClient(char, type2);
+            return s1 <= cap || s2 <= cap;
+        });
+        if (!canUse) {
+            errors.push(
+                `"${displayName}" (Training) requires a character with ${type1} or ${type2} at ${cap} or less`
+            );
+        }
+    });
+
+    const singleCharacterRowTeam = characterCards.length === 1;
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'ally_universe').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.card_name || ac.name || 'Unknown';
+        if (singleCharacterRowTeam) {
+            errors.push(
+                `"${displayName}" (Ally Universe) requires at least two characters on your team`
+            );
+            return;
+        }
+        const statToUse = String(ac.stat_to_use || '');
+        const statTypeToUse = String(ac.stat_type_to_use || '');
+        const valueMatch = statToUse.match(/(\d+)\s+or\s+(less|higher)/i);
+        if (!valueMatch || !statTypeToUse) return;
+        const requiredValue = parseInt(valueMatch[1], 10);
+        const isLessThan = valueMatch[2].toLowerCase() === 'less';
+        const canUse = characterStats.some(char => {
+            const characterStat = statForPowerGridClient(char, statTypeToUse);
+            return isLessThan ? characterStat <= requiredValue : characterStat >= requiredValue;
+        });
+        if (!canUse) {
+            const detail = isLessThan
+                ? `${statTypeToUse} at ${requiredValue} or less`
+                : `${requiredValue}+ ${statTypeToUse}`;
+            errors.push(`"${displayName}" (Ally Universe) requires a character with ${detail}`);
+        }
+    });
+
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'advanced_universe').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.name || ac.card_name || 'Unknown';
+        const auChar = String(ac.character || '').trim();
+        if (auChar && auChar !== 'Any Character' && !characterNamesForUnusable.includes(auChar)) {
+            errors.push(
+                `"${displayName}" (Advanced Universe) requires character "${auChar}" in your team`
+            );
+        }
+    });
+
+    const firstLocationCard = deckCards.find(c => c.type === 'location');
+    const locationAvailable = firstLocationCard ? availableCardsMap.get(firstLocationCard.cardId) : null;
+    const homebaseName = String(
+        (locationAvailable && (locationAvailable.name || locationAvailable.card_name)) || ''
+    ).trim();
+
+    deckCards.filter(c => deckTypeCanonClient(c.type) === 'aspect').forEach(card => {
+        const ac = availableCardsMap.get(card.cardId);
+        if (!ac) return;
+        const displayName = ac.card_name || ac.name || 'Unknown';
+        const locField = String(ac.location || '').trim();
+
+        if (!firstLocationCard) {
+            errors.push(`"${displayName}" (Aspect) requires a Homebase in your deck`);
+            return;
+        }
+        if (!locField) return;
+        const anyHomebase =
+            /^any\s*homebase$/i.test(locField) || locField.toLowerCase().includes('any homebase');
+        if (anyHomebase) return;
+        if (!homebaseName || locField.toLowerCase() !== homebaseName.toLowerCase()) {
+            errors.push(`"${displayName}" (Aspect) requires Homebase "${locField}"`);
+        }
+    });
+
     return { errors, warnings, isValid: errors.length === 0 };
 }
 
@@ -286,6 +484,27 @@ function calculateTotalThreat(deckCards) {
     return totalThreat;
 }
 
+/** DEV MV: visible bullet list under legality badge (desktop keeps native title tooltip). */
+function setDeckTitleValidationReasonsMv(messages, variant) {
+    const ul = document.getElementById('deckTitleValidationReasonsMv');
+    if (!ul) return;
+    ul.textContent = '';
+    ul.removeAttribute('data-variant');
+    if (!messages || messages.length === 0) {
+        ul.setAttribute('hidden', '');
+        return;
+    }
+    ul.removeAttribute('hidden');
+    if (variant) {
+        ul.setAttribute('data-variant', variant);
+    }
+    messages.forEach((msg) => {
+        const li = document.createElement('li');
+        li.textContent = msg;
+        ul.appendChild(li);
+    });
+}
+
 // Function to update deck title validation badge
 function updateDeckTitleValidation(deckCards) {
     const validationBadge = document.getElementById('deckTitleValidationBadge');
@@ -296,6 +515,7 @@ function updateDeckTitleValidation(deckCards) {
         validationBadge.className = 'deck-validation-badge';
         validationBadge.removeAttribute('title');
         validationBadge.onclick = null;
+        setDeckTitleValidationReasonsMv(null, null);
         return;
     }
 
@@ -305,6 +525,7 @@ function updateDeckTitleValidation(deckCards) {
         validationBadge.className = 'deck-validation-badge limited';
         validationBadge.removeAttribute('title');
         validationBadge.onclick = toggleLimitedState;
+        setDeckTitleValidationReasonsMv(null, null);
         return;
     }
 
@@ -317,6 +538,7 @@ function updateDeckTitleValidation(deckCards) {
         const tooltipText = validation.errors.join('\n');
         validationBadge.setAttribute('title', tooltipText);
         validationBadge.onclick = toggleLimitedState;
+        setDeckTitleValidationReasonsMv(validation.errors, 'error');
     } else if (validation.warnings.length > 0) {
         validationBadge.textContent = 'Has Warnings';
         validationBadge.className = 'deck-validation-badge warning';
@@ -324,11 +546,13 @@ function updateDeckTitleValidation(deckCards) {
         const tooltipText = validation.warnings.join('\n');
         validationBadge.setAttribute('title', tooltipText);
         validationBadge.onclick = toggleLimitedState;
+        setDeckTitleValidationReasonsMv(validation.warnings, 'warning');
     } else {
         validationBadge.textContent = 'Legal';
         validationBadge.className = 'deck-validation-badge success';
         validationBadge.removeAttribute('title');
         validationBadge.onclick = toggleLimitedState;
+        setDeckTitleValidationReasonsMv(null, null);
     }
 }
 

@@ -5670,6 +5670,11 @@
             white-space: nowrap;
         }
 
+        /* Hidden on desktop; `.layout-mobile` overrides in deck-editor-mobile.css */
+        #deckEditorModal .deck-validation-reasons-mv {
+            display: none !important;
+        }
+
         .card-item {
             padding: 8px 12px;
             margin: 4px 0;
