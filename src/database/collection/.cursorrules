@@ -7,6 +7,6 @@ Collection persistence is split by domain. The public entry point is `Collection
 - **collection-crud.ts** — getOrCreateCollection (collections table).
 - **collection-cards.ts** — getCollectionCards, addCardToCollection, updateCardQuantity, getQuantity, removeCardFromCollection (collection_cards table).
 - **collection-history.ts** — getCollectionHistory (collection_history table).
-- **card-lookup.ts** — getCardImagePath, verifyCardExists, fetchCardDataForCollectionCard (card-type → table lookups; resolves set display via `../setsLookup`).
+- **card-lookup.ts** — catalogCardExistsInTable (shared UUID/text id existence check with deck validation), getCardImagePath, verifyCardExists, fetchCardDataForCollectionCard (card-type → table via `../card/catalog-card-tables`; set display via `../setsLookup`).
 
 Do not add raw SQL in route handlers; keep queries here or in other `src/database/` modules.

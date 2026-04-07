@@ -1,8 +1,5 @@
 import { PoolClient } from 'pg';
-import {
-  catalogTableUsesIdTextFallback,
-  resolveCatalogTable
-} from '../card/catalog-card-tables';
+import { catalogCardExistsInTable } from '../collection/card-lookup';
 import { DeckCard } from '../../types';
 import type { DeckRepositoryContext } from './context';
 
@@ -16,8 +13,8 @@ export async function cardExistsInCardTable(
   cardId: string,
   allowUnknown = false
 ): Promise<boolean> {
-  const table = resolveCatalogTable(cardType);
-  if (!table) {
+  const exists = await catalogCardExistsInTable(client, cardType, cardId);
+  if (exists === null) {
     if (allowUnknown) {
       console.warn(`Unknown card type: ${cardType}, skipping validation`);
       return true;
@@ -25,25 +22,7 @@ export async function cardExistsInCardTable(
     console.error(`Unknown card type: ${cardType}`);
     return false;
   }
-
-  const runQuery = async (sql: string, params: string[]): Promise<boolean> => {
-    const result = await client.query(sql, params);
-    return result.rows.length > 0;
-  };
-
-  // `table` is from resolveCatalogTable allowlist only.
-  const uuidMatchSql = `SELECT id FROM ${table} WHERE id::text = $1 OR id = $1::uuid`; // nosemgrep: pg-sql-template-interpolation
-  const textOnlySql = `SELECT id FROM ${table} WHERE id::text = $1`; // nosemgrep: pg-sql-template-interpolation
-
-  if (catalogTableUsesIdTextFallback(table)) {
-    try {
-      return await runQuery(uuidMatchSql, [cardId]);
-    } catch {
-      return await runQuery(textOnlySql, [String(cardId)]);
-    }
-  }
-
-  return await runQuery(uuidMatchSql, [cardId]);
+  return exists;
 }
 
 export async function addCardToDeck(

@@ -1,15 +1,51 @@
 import { PoolClient } from 'pg';
-import { CATALOG_CARD_TABLE } from '../card/catalog-card-tables';
+import {
+  CATALOG_CARD_TABLE,
+  catalogTableUsesIdTextFallback,
+  resolveCatalogTable
+} from '../card/catalog-card-tables';
 import { resolveSetDisplayName } from '../setsLookup';
 
 // Pre-built query strings (table names from allowlist only; no interpolation at query call site).
 const QUERY_IMAGE_PATH: Record<string, string> = {};
-const QUERY_EXISTS: Record<string, string> = {};
 const QUERY_FETCH_CARD: Record<string, string> = {};
 for (const [type, table] of Object.entries(CATALOG_CARD_TABLE)) {
   QUERY_IMAGE_PATH[type] = `SELECT image_path FROM ${table} WHERE id = $1`;
-  QUERY_EXISTS[type] = `SELECT 1 FROM ${table} WHERE id = $1`;
   QUERY_FETCH_CARD[type] = `SELECT * FROM ${table} WHERE id = $1`;
+}
+
+/**
+ * Whether a row exists for this catalog card id/type.
+ * Uses the same UUID / text id matching as deck validation (`deck-cards.cardExistsInCardTable`).
+ * @returns true/false when the type resolves to a catalog table; null when cardType is unknown.
+ */
+export async function catalogCardExistsInTable(
+  client: PoolClient,
+  cardType: string,
+  cardId: string
+): Promise<boolean | null> {
+  const table = resolveCatalogTable(cardType);
+  if (!table) {
+    return null;
+  }
+
+  const runQuery = async (sql: string, params: string[]): Promise<boolean> => {
+    const result = await client.query(sql, params);
+    return result.rows.length > 0;
+  };
+
+  const uuidMatchSql = `SELECT id FROM ${table} WHERE id::text = $1 OR id = $1::uuid`; // nosemgrep: pg-sql-template-interpolation
+  const textOnlySql = `SELECT id FROM ${table} WHERE id::text = $1`; // nosemgrep: pg-sql-template-interpolation
+
+  if (catalogTableUsesIdTextFallback(table)) {
+    try {
+      return await runQuery(uuidMatchSql, [cardId]);
+    } catch {
+      return await runQuery(textOnlySql, [String(cardId)]);
+    }
+  }
+
+  return await runQuery(uuidMatchSql, [cardId]);
 }
 
 /**
@@ -63,12 +99,8 @@ export async function verifyCardExists(
   cardId: string,
   cardType: string
 ): Promise<boolean> {
-  const query = QUERY_EXISTS[cardType];
-  if (!query) {
-    return false;
-  }
-  const result = await client.query(query, [cardId]);
-  return result.rows.length > 0;
+  const exists = await catalogCardExistsInTable(client, cardType, cardId);
+  return exists === true;
 }
 
 export interface FetchCardDataResult {
