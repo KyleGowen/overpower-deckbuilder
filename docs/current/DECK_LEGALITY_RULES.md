@@ -31,7 +31,7 @@ When the PDFs are added, update this doc with **PDF page numbers** beside these 
 
 | Format | Rulebook role | Excelsior validation |
 |--------|----------------|----------------------|
-| **Standard (Venture)** | Normal constructed: full mission deck (7 objectives per player in deck), events allowed, venture win conditions. | **Yes** — [`DeckValidationService`](../../src/services/deckValidationService.ts), incremental add in [`validateCardAddition`](../../src/index.ts), client [`validateDeck`](../../public/js/validation-calculation-functions.js) (with gaps below). |
+| **Standard (Venture)** | Normal constructed: full mission deck (7 objectives per player in deck), events allowed, venture win conditions. | **Yes** — [`DeckValidationService`](../../src/services/deckValidationService.ts) orchestrates an ordered [`DeckValidationRuleList`](../../src/services/deck-validation/deck-validation-rule-list.ts) of rules under [`src/services/deck-validation/`](../../src/services/deck-validation/); incremental add in [`validateCardAddition`](../../src/index.ts); client [`validateDeck`](../../public/js/validation-calculation-functions.js). |
 | **Skirmish** | Remove **events** from decks; **5, 7, or 9** shared objectives placed in **Astral Plane**; special concede / majority / KO rules (~L151–L157 in learn-to-play txt). | **No** — no Skirmish deck mode; validators still assume **Venture-shaped** decks (7 missions in deck, events allowed by rules). |
 | **Brawl** | Remove venture/objective-related cards from decks; no mission, no events, no concede; KO-only win (~L149). | **No** — not modeled as a separate validator. |
 | **Limited (rulebook)** | Draft / Sealed construction from restricted pool (~L159+). | **Not implemented** as a full rule matrix. |
@@ -41,7 +41,7 @@ When the PDFs are added, update this doc with **PDF page numbers** beside these 
 
 ## 3. Standard (Venture) — rulebook ↔ code
 
-Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** [`deckValidationService.ts`](../../src/services/deckValidationService.ts) | **Incremental add** [`validateCardAddition`](../../src/index.ts) | **Main client** [`validation-calculation-functions.js`](../../public/js/validation-calculation-functions.js) |
+Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** ([`deckValidationService.ts`](../../src/services/deckValidationService.ts) + [`deck-validation/rules/`](../../src/services/deck-validation/rules/)) | **Incremental add** [`validateCardAddition`](../../src/index.ts) | **Main client** [`validation-calculation-functions.js`](../../public/js/validation-calculation-functions.js) |
 
 | Rule | Rulebook | Server (`rule` id) | `validateCardAddition` | Client `validateDeck` |
 |------|----------|-------------------|------------------------|------------------------|
@@ -53,17 +53,20 @@ Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** [`deckValidati
 | Location count | At most **1** homebase (~L57–L59) | `location_count` — sum of quantities ≤ 1 | Blocks second location row | Rule 4 — ≤ 1 location row |
 | Threat | **≤ 76** characters + homebase (~L53, ~L59) | `threat_level` — sums character **`threat` only** (locations **not** added) | Not checked | Rule 5 — characters + locations use **`threat_level`** per row (no `quantity` multiply); reserve display tweaks live in `calculateTotalThreat` only |
 | Draw pile / deck size | Min **51**, or **56** if using events (~L39, ~L135) | `deck_size` — **total** card count (all types) ≥ 51 or ≥ 56 if **any event row** exists | Not checked | Rule 6 — count **excludes** mission, character, location rows (draw pile only) |
-| Specials usable | Specials only for characters on team; Angry Mob rules (~L102–L111, ~L139) | `unusable_special` (+ Angry Mob variant logic) | Not checked | Rule 7 in part (no full parity with server Angry Mob parsing) |
-| Events vs mission set | Events align with mission set | `unusable_event` | Not checked | Uses mission sets from mission rows for checks in Rule 7 branch (with client mission cap mismatch) |
+| Specials usable | Specials only for characters on team; Angry Mob rules (~L102–L111, ~L139) | `unusable_special` (+ Angry Mob variant logic); uses `character` or `character_name` from catalog | Not checked | **Aligned:** client `validateDeck` mirrors server (incl. `characters[]` extras) |
+| Events vs mission set | Events align with mission set | `unusable_event` | Not checked | **Aligned:** client checks when mission rows supply sets (same gate as server: no error if no missions in deck) |
 | One per deck | Single copy (~L138) | `one_per_deck_violation` | Rule 4 block + row checks | `one_per_deck` flag (does not check `is_one_per_deck` alias) |
-| Power cards usable | Grid / type (~L65–L71) | `unusable_power` — uses DB `power_type` / `value`; Any-Power / Multi-Power use max grid | Not checked | Rule 7 — uses `requires_*` fields + hyphen types (`advanced-universe`, …); **not** identical to server |
-| Universe cards usable | To Use text (~L51) | `unusable_universe` — parses `to_use` regex; types: basic/advanced/teamwork/ally/training (**not** aspects) | Not checked | Overlaps Rule 7 for listed types; aspects largely out of this path |
+| Power cards usable | Grid / type (~L65–L71) | `unusable_power` — DB `power_type` / `value`; Any-Power / Multi-Power / Multi Power use max grid | Not checked | **Aligned:** client uses `power_type` + `value` |
+| Universe cards usable | To Use / grid text; Training cap (~L51, Training NOTE) | `unusable_universe` — **teamwork:** `to_use` regex; **basic:** `value_to_use` + skill type (map keeps `basic_skill_type`); **training:** `type_1`/`type_2` + `value_to_use`; **ally:** `stat_to_use` / `stat_type_to_use` + ≥2 character rows; **advanced:** `character` gate | Not checked | **Aligned:** same split as server for editor `validateDeck` |
+| Aspects vs Homebase | Aspects played by Homebase; some require a specific Homebase | `unusable_aspect` — needs a location row if aspect has a `location` constraint; `Any Homebase` / substring match skips mismatch | Not checked | **Aligned:** client same rules |
 | Cataclysm | (Card-type restriction) | **Not** in `DeckValidationService` | At most **1** cataclysm special | Not in `validateDeck` |
 | Assist / Ambush | (Card-type restriction) | **Not** in `DeckValidationService` | At most **1** each (special flags) | Not in `validateDeck` |
 | Fortification | (Aspect restriction) | **Not** in `DeckValidationService` | At most **1** fortification aspect | Not in `validateDeck` |
 | Duplicate character | — | Allowed only if quantities on one row (server sums to 4) | **One row per character id** | Not explicit (relies on editor behavior) |
 
-**Persistence snapshot:** [`computeDeckIsValidForPersistence`](../../public/js/validation-calculation-functions.js) returns whether `validateDeck` has zero errors (warnings allowed). Used when updating `metadata.is_valid` from [`deck-editor-core.js`](../../public/js/deck-editor-core.js) unless Limited skip applies.
+**Deck card `type` strings:** API/editor rows use hyphens (e.g. `basic-universe`). Server validation normalizes to underscore map keys via `deckCardTypeKeyPrefix` in [`deckValidationService.ts`](../../src/services/deckValidationService.ts) so lookups match catalog rows.
+
+**Persistence snapshot:** [`computeDeckIsValidForPersistence`](../../public/js/validation-calculation-functions.js) returns whether `validateDeck` has zero errors (warnings allowed). Used when updating `metadata.is_valid` from [`deck-editor-core.js`](../../public/js/deck-editor-core.js) unless Limited skip applies. Client unusable rules are kept in sync with `DeckValidationService` so the Legal / Not Legal badge matches API `is_valid` for the same deck content.
 
 ---
 
@@ -108,11 +111,11 @@ This is **not** validation of rulebook Limited format—only a **bypass** for pe
 
 1. **Client vs server — missions and events:** Server requires **7** mission **copies** and allows multiple events subject to rules; main client `validateDeck` is written for **at most one mission row** and **at most one event row** when `DECK_RULES.MAX_MISSIONS` / `MAX_EVENTS` are defined (unit tests set `1`). [`public/index.html`](../../public/index.html) `DECK_RULES` **does not** define `MAX_MISSIONS` / `MAX_EVENTS`, so those checks may be ineffective at runtime unless another script supplies them.
 2. **Deck size definition:** Server counts **all** cards; client counts **draw pile** only (excludes character, mission, location rows).
-3. **Threat:** Server sums **characters only** (`threat` field); rulebook includes **homebase**. Client `validateDeck` adds location `threat_level` but does not multiply by `quantity` and does not apply reserve adjustments (those exist in `calculateTotalThreat` for display).
-4. **Cataclysm / Assist / Ambush / Fortification:** Enforced only in **`validateCardAddition`**, not in `DeckValidationService` or client `validateDeck`.
+3. **Threat:** Rulebook 76 cap includes **homebase**. Server `threat_level` sums **characters only** (uses `threat` or `threat_level` per character row). Client `validateDeck` adds location `threat_level` per row but does not multiply by `quantity` and does not apply reserve adjustments (those exist in `calculateTotalThreat` for display).
+4. **Cataclysm / Assist / Ambush / Fortification:** Enforced only in **`validateCardAddition`**, not in `DeckValidationService` or client `validateDeck` (aspect **usability** vs Homebase is now in `DeckValidationService` + client; fortification **count** cap remains add-path only).
 5. **Character rows vs quantities:** Incremental validator uses **row counts** for mission/character caps; server uses **quantities** for characters and missions.
-6. **Aspects:** Universe usability in `DeckValidationService` excludes `aspect` type; fortification limit is only on add path.
-7. **Skirmish / Brawl:** No deck `format` flag—single Venture-oriented path.
+6. **Skirmish / Brawl:** No deck `format` flag—single Venture-oriented path.
+7. **Artifacts:** Not a `DeckCard` type in the app schema; no deck-level unusable check yet.
 
 ---
 
@@ -128,7 +131,7 @@ These may duplicate or override rules; treat as **secondary** to `DeckValidation
 
 ## 9. Tests (behavioral specs)
 
-- Server: `tests/unit/deckValidationService*.test.ts`, `tests/unit/limitedDeckFunctionality.test.ts`
+- Server: `tests/unit/deckValidationService*.test.ts`, `tests/unit/deck-validation-rule-list.test.ts`, `tests/unit/limitedDeckFunctionality.test.ts`
 - Client sandbox: `tests/unit/validation-calculation-functions.angrymob.test.ts`
 - Broader client rules mock: `tests/unit/deckValidationRules.test.ts` (may not mirror production `validateDeck` exactly)
 
@@ -139,3 +142,5 @@ These may duplicate or override rules; treat as **secondary** to `DeckValidation
 | Date | Change |
 |------|--------|
 | 2026-04 | Initial catalog from code + `overpower-learn-to-play-rules.txt`; PDF page cites pending files under `src/resources/rules/`. |
+| 2026-04 | Client `validateDeck` parity for unusable specials/events/powers/universe/aspects; server map-key hyphen fix, `character` on specials, basic/training/ally/advanced/aspect rules, `basic_skill_type` for Basic Universe map entries. |
+| 2026-04 | Server: `DeckValidationService` delegates to `src/services/deck-validation/` — `DeckValidationRuleList`, per-rule modules, shared `deck-validation-messages.ts`, `buildAvailableCardsMap`. |

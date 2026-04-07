@@ -534,4 +534,210 @@ describe('DeckValidationService - Missing Coverage Tests', () => {
             expect(unusableUniverseErrors[0].message).toContain('requires a character with 5+ Energy');
         });
     });
+
+    describe('Special linked character uses character field (mapper shape)', () => {
+        it('should flag unusable special when only character is set (no character_name)', async () => {
+            const mockCharacter: Character = {
+                id: 'char1',
+                name: 'Jane Porter',
+                energy: 5,
+                combat: 5,
+                brute_force: 5,
+                intelligence: 5,
+                threat_level: 5,
+                special_abilities: '',
+                image: 'char1.jpg'
+            };
+
+            const mockSpecial: SpecialCard = {
+                id: 'spWrong',
+                name: 'Thunderbolt',
+                card_type: 'Special',
+                character: 'Mr. Hyde',
+                card_effect: 'Test',
+                image: 'sp.jpg',
+                is_cataclysm: false,
+                is_assist: false,
+                is_ambush: false,
+                one_per_deck: false
+            };
+
+            const mockMission: Mission = {
+                id: 'mission1',
+                mission_set: 'Test Set',
+                card_name: 'Mission 1',
+                image: 'mission1.jpg'
+            };
+
+            const mockPowerFill: PowerCard = {
+                id: 'powerFill',
+                name: '1 - Energy',
+                power_type: 'Energy',
+                value: 1,
+                image: 'p.jpg',
+                one_per_deck: false
+            };
+
+            mockCardRepository.getAllCharacters.mockResolvedValue([mockCharacter]);
+            mockCardRepository.getAllSpecialCards.mockResolvedValue([mockSpecial]);
+            mockCardRepository.getAllPowerCards.mockResolvedValue([mockPowerFill]);
+            mockCardRepository.getAllMissions.mockResolvedValue([mockMission]);
+            mockCardRepository.getAllEvents.mockResolvedValue([]);
+            mockCardRepository.getAllLocations.mockResolvedValue([]);
+            mockCardRepository.getAllAspects.mockResolvedValue([]);
+            mockCardRepository.getAllAdvancedUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTeamwork.mockResolvedValue([]);
+            mockCardRepository.getAllAllyUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTraining.mockResolvedValue([]);
+            mockCardRepository.getAllBasicUniverse.mockResolvedValue([]);
+
+            const deckCards: DeckCard[] = [
+                { id: 'd1', type: 'character', cardId: 'char1', quantity: 4 },
+                { id: 'd2', type: 'mission', cardId: 'mission1', quantity: 7 },
+                { id: 'd3', type: 'special', cardId: 'spWrong', quantity: 1 },
+                { id: 'd4', type: 'power', cardId: 'powerFill', quantity: 39 }
+            ];
+
+            const errors = await validationService.validateDeck(deckCards);
+            const unusableSpecial = errors.filter(e => e.rule === 'unusable_special');
+            expect(unusableSpecial.length).toBeGreaterThanOrEqual(1);
+            expect(unusableSpecial[0].message).toContain('Mr. Hyde');
+        });
+    });
+
+    describe('Hyphenated deck type basic-universe resolves in map', () => {
+        it('should validate basic universe when deck row type uses hyphens', async () => {
+            const mockCharacter: Character = {
+                id: 'char1',
+                name: 'Character 1',
+                energy: 4,
+                combat: 4,
+                brute_force: 4,
+                intelligence: 4,
+                threat_level: 5,
+                special_abilities: '',
+                image: 'char1.jpg'
+            };
+
+            const mockBasic: BasicUniverse = {
+                id: 'basicHigh',
+                card_name: 'Ray Gun',
+                type: 'Energy',
+                value_to_use: '8 or greater',
+                bonus: '+2',
+                image: 'b.jpg',
+                one_per_deck: false
+            };
+
+            const mockMission: Mission = {
+                id: 'mission1',
+                mission_set: 'Test Set',
+                card_name: 'Mission 1',
+                image: 'mission1.jpg'
+            };
+
+            const mockPowerFill: PowerCard = {
+                id: 'powerFill',
+                name: '1 - Energy',
+                power_type: 'Energy',
+                value: 1,
+                image: 'p.jpg',
+                one_per_deck: false
+            };
+
+            mockCardRepository.getAllCharacters.mockResolvedValue([mockCharacter]);
+            mockCardRepository.getAllSpecialCards.mockResolvedValue([]);
+            mockCardRepository.getAllPowerCards.mockResolvedValue([mockPowerFill]);
+            mockCardRepository.getAllMissions.mockResolvedValue([mockMission]);
+            mockCardRepository.getAllEvents.mockResolvedValue([]);
+            mockCardRepository.getAllLocations.mockResolvedValue([]);
+            mockCardRepository.getAllAspects.mockResolvedValue([]);
+            mockCardRepository.getAllAdvancedUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTeamwork.mockResolvedValue([]);
+            mockCardRepository.getAllAllyUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTraining.mockResolvedValue([]);
+            mockCardRepository.getAllBasicUniverse.mockResolvedValue([mockBasic]);
+
+            const deckCards = [
+                { id: 'd1', type: 'character', cardId: 'char1', quantity: 4 },
+                { id: 'd2', type: 'mission', cardId: 'mission1', quantity: 7 },
+                { id: 'd3', type: 'basic-universe', cardId: 'basicHigh', quantity: 1 },
+                { id: 'd4', type: 'power', cardId: 'powerFill', quantity: 39 }
+            ] as DeckCard[];
+
+            const errors = await validationService.validateDeck(deckCards);
+            const uu = errors.filter(e => e.rule === 'unusable_universe');
+            expect(uu).toHaveLength(1);
+            expect(uu[0].message).toContain('8+');
+            expect(uu[0].message).toContain('Energy');
+        });
+    });
+
+    describe('Aspect requires Homebase when location field is set', () => {
+        it('should flag unusable_aspect when aspect needs a homebase but deck has none', async () => {
+            const mockCharacter: Character = {
+                id: 'char1',
+                name: 'Character 1',
+                energy: 5,
+                combat: 5,
+                brute_force: 5,
+                intelligence: 5,
+                threat_level: 5,
+                special_abilities: '',
+                image: 'char1.jpg'
+            };
+
+            const mockMission: Mission = {
+                id: 'mission1',
+                mission_set: 'Test Set',
+                card_name: 'Mission 1',
+                image: 'mission1.jpg'
+            };
+
+            const mockAspect: Aspect = {
+                id: 'asp1',
+                card_name: 'Fortification',
+                card_type: 'Aspect',
+                location: 'The Batcave',
+                card_effect: 'Effect',
+                image: 'a.jpg',
+                is_fortification: true,
+                is_one_per_deck: false
+            };
+
+            const mockPowerFill: PowerCard = {
+                id: 'powerFill',
+                name: '1 - Energy',
+                power_type: 'Energy',
+                value: 1,
+                image: 'p.jpg',
+                one_per_deck: false
+            };
+
+            mockCardRepository.getAllCharacters.mockResolvedValue([mockCharacter]);
+            mockCardRepository.getAllSpecialCards.mockResolvedValue([]);
+            mockCardRepository.getAllPowerCards.mockResolvedValue([mockPowerFill]);
+            mockCardRepository.getAllMissions.mockResolvedValue([mockMission]);
+            mockCardRepository.getAllEvents.mockResolvedValue([]);
+            mockCardRepository.getAllLocations.mockResolvedValue([]);
+            mockCardRepository.getAllAspects.mockResolvedValue([mockAspect]);
+            mockCardRepository.getAllAdvancedUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTeamwork.mockResolvedValue([]);
+            mockCardRepository.getAllAllyUniverse.mockResolvedValue([]);
+            mockCardRepository.getAllTraining.mockResolvedValue([]);
+            mockCardRepository.getAllBasicUniverse.mockResolvedValue([]);
+
+            const deckCards: DeckCard[] = [
+                { id: 'd1', type: 'character', cardId: 'char1', quantity: 4 },
+                { id: 'd2', type: 'mission', cardId: 'mission1', quantity: 7 },
+                { id: 'd3', type: 'aspect', cardId: 'asp1', quantity: 1 },
+                { id: 'd4', type: 'power', cardId: 'powerFill', quantity: 39 }
+            ];
+
+            const errors = await validationService.validateDeck(deckCards);
+            const ua = errors.filter(e => e.rule === 'unusable_aspect');
+            expect(ua).toHaveLength(1);
+            expect(ua[0].message).toContain('requires a Homebase');
+        });
+    });
 });

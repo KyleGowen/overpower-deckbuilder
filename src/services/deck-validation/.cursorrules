@@ -1,0 +1,20 @@
+# Deck validation (`src/services/deck-validation/`)
+
+**Purpose:** Server-side Venture deck legality. `DeckValidationService` loads catalog data, builds `availableCardsMap` + `DeckValidationContext`, then runs an immutable **`DeckValidationRuleList`** in **fixed order**.
+
+## Adding a rule
+
+1. Add `rules/<name>.rule.ts` implementing `DeckValidationRule` from `deck-validation-rule.ts`.
+2. Append **`new YourRule()`** to `defaultDeckValidationRuleList()` in `rules/index.ts` (end of list unless product requires a specific position).
+3. Reuse strings from `deck-validation-messages.ts` when the message shape matches an existing helper.
+
+## Rule `id` (naming)
+
+- `snake_case`, lowercase ASCII.
+- If the class emits **one** distinct `ValidationError.rule`, use the **same** string for `id` and `rule`.
+- If the class emits **multiple** API `rule` values (e.g. `mission_count` + `mission_set`), use a class `id` like `mission_deck` (not equal to either error `rule`).
+- Several classes may emit `rule: 'unusable_universe'`; give each class a **unique** `id` such as `unusable_universe_teamwork`, `unusable_universe_basic`, etc.
+
+## Ordered list
+
+Use only `DeckValidationRuleList.of(...)` for the default chain. Do not expose mutable arrays on the service.
