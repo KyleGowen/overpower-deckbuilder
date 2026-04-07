@@ -227,6 +227,7 @@
 - **TW** = "Universe: Teamwork" - Teamwork Universe card category
 - **Ally** = "Universe: Ally" - Ally Universe card category
 - **Training** = "Universe: Training" - Training Universe card category
+- **Any-Power** — not a fifth stat type on the character grid; it always refers to the four primaries (Energy, Combat, Brute Force, Intelligence). **Deck validation:** on **Power** and **Teamwork**, `Any-Power` compares the printed threshold to the **max** of those four stats (**≥**). On **Training** (`type_1` / `type_2` with “N or less”), `Any-Power` is satisfied if **any** of the four is **≤ N**. See [`docs/current/DECK_LEGALITY_RULES.md`](docs/current/DECK_LEGALITY_RULES.md) §3.1.
 
 ## Image Pipeline
 

@@ -1,7 +1,7 @@
 import type { DeckValidationRule } from '../deck-validation-rule';
 import type { ValidationError } from '../validation-error';
 import type { DeckValidationContext } from '../deck-validation-context';
-import { deckCardMapKey, deckCardTypeKeyPrefix, statForPowerType } from '../deck-validation-utils';
+import { deckCardMapKey, deckCardTypeKeyPrefix, trainingTypeAtOrBelowCap } from '../deck-validation-utils';
 import { deckValidationMessages } from '../deck-validation-messages';
 
 export class UnusableTrainingRule implements DeckValidationRule {
@@ -24,9 +24,7 @@ export class UnusableTrainingRule implements DeckValidationRule {
             if (!type1 || !type2 || cap <= 0) continue;
 
             const canUse = ctx.characterStats.some(char => {
-                const s1 = statForPowerType(char, type1);
-                const s2 = statForPowerType(char, type2);
-                return s1 <= cap || s2 <= cap;
+                return trainingTypeAtOrBelowCap(char, type1, cap) || trainingTypeAtOrBelowCap(char, type2, cap);
             });
 
             if (!canUse) {

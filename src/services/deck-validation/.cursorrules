@@ -18,3 +18,12 @@
 ## Ordered list
 
 Use only `DeckValidationRuleList.of(...)` for the default chain. Do not expose mutable arrays on the service.
+
+## Any-Power (validation)
+
+**Not a fifth grid column** — only Energy, Combat, Brute Force, Intelligence.
+
+- **Power** (`unusable_power`) and **Teamwork** (`to_use`): [`statForPowerType`](deck-validation-utils.ts) treats `Any-Power` as **max** of the four stats for **≥** thresholds.
+- **Training** ([`rules/unusable-training.rule.ts`](rules/unusable-training.rule.ts)): use [`trainingTypeAtOrBelowCap`](deck-validation-utils.ts) — **any** primary **≤** cap from `value_to_use` when the slot is `Any-Power`.
+
+Full table and rulebook mapping: [`docs/current/DECK_LEGALITY_RULES.md`](../../../docs/current/DECK_LEGALITY_RULES.md) §3.1. Client mirror: `trainingTypeAtOrBelowCapClient` in [`public/js/validation-calculation-functions.js`](../../../public/js/validation-calculation-functions.js).

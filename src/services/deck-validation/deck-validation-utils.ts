@@ -39,6 +39,30 @@ export function statForPowerType(
     }
 }
 
+type CharacterStatGrid = {
+    energy: number;
+    combat: number;
+    brute_force: number;
+    intelligence: number;
+};
+
+/**
+ * Training cards use type_1 / type_2 with "N or less" from value_to_use.
+ * For Any-Power, that means at least one of Energy / Combat / Brute Force / Intelligence is at or below the cap
+ * (not the highest stat — Power/Teamwork "Any-Power" still use {@link statForPowerType} = max for at-least checks).
+ */
+export function trainingTypeAtOrBelowCap(char: CharacterStatGrid, powerType: string, cap: number): boolean {
+    if (powerType === 'Any-Power') {
+        return (
+            char.energy <= cap ||
+            char.combat <= cap ||
+            char.brute_force <= cap ||
+            char.intelligence <= cap
+        );
+    }
+    return statForPowerType(char, powerType) <= cap;
+}
+
 export function specialLinkedCharacterName(special: {
     character?: string;
     character_name?: string;

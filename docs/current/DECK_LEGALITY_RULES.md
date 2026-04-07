@@ -57,7 +57,7 @@ Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** ([`deckValidat
 | Events vs mission set | Events align with mission set | `unusable_event` | Not checked | **Aligned:** client checks when mission rows supply sets (same gate as server: no error if no missions in deck) |
 | One per deck | Single copy (~L138) | `one_per_deck_violation` | Rule 4 block + row checks | `one_per_deck` flag (does not check `is_one_per_deck` alias) |
 | Power cards usable | Grid / type (~L65–L71) | `unusable_power` — DB `power_type` / `value`; **Energy / Combat / Brute Force / Intelligence** vs matching stat; **Any-Power** uses max of the four; **Multi Power** and **Multi-Power** are **not** gated by character stats (usable in any Venture deck) | Not checked | **Aligned:** client skips grid check for Multi Power / Multi-Power |
-| Universe cards usable | To Use / grid text; Training cap (~L51, Training NOTE) | `unusable_universe` — **teamwork:** `to_use` regex; **basic:** `value_to_use` + skill type (map keeps `basic_skill_type`); **training:** `type_1`/`type_2` + `value_to_use`; **ally:** `stat_to_use` / `stat_type_to_use` + ≥2 character rows; **advanced:** `character` gate | Not checked | **Aligned:** same split as server for editor `validateDeck` |
+| Universe cards usable | To Use / grid text; Training cap (~L51, Training NOTE) | `unusable_universe` — **teamwork:** `to_use` regex (**Any-Power** = **max** of four primaries for **≥**); **basic:** `value_to_use` + skill type (map keeps `basic_skill_type`); **training:** `type_1`/`type_2` + cap from `value_to_use` (**Any-Power** = **any** primary **≤** cap — [§3.1](#31-any-power-semantics)); **ally:** `stat_to_use` / `stat_type_to_use` + ≥2 character rows; **advanced:** `character` gate | Not checked | **Aligned:** same split as server for editor `validateDeck` |
 | Aspects vs Homebase | Aspects played by Homebase; some require a specific Homebase | `unusable_aspect` — needs a location row if aspect has a `location` constraint; `Any Homebase` / substring match skips mismatch | Not checked | **Aligned:** client same rules |
 | Cataclysm | (Card-type restriction) | **Not** in `DeckValidationService` | At most **1** cataclysm special | Not in `validateDeck` |
 | Assist / Ambush | (Card-type restriction) | **Not** in `DeckValidationService` | At most **1** each (special flags) | Not in `validateDeck` |
@@ -69,6 +69,20 @@ Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** ([`deckValidat
 **Deck card `type` strings:** API/editor rows use hyphens (e.g. `basic-universe`). Server validation normalizes to underscore map keys via `deckCardTypeKeyPrefix` in [`deckValidationService.ts`](../../src/services/deckValidationService.ts) so lookups match catalog rows.
 
 **Persistence snapshot:** [`computeDeckIsValidForPersistence`](../../public/js/validation-calculation-functions.js) returns whether `validateDeck` has zero errors (warnings allowed). Used when updating `metadata.is_valid` from [`deck-editor-core.js`](../../public/js/deck-editor-core.js) unless Limited skip applies. Client unusable rules are kept in sync with `DeckValidationService` so the Legal / Not Legal badge matches API `is_valid` for the same deck content.
+
+### 3.1 Any-Power semantics
+
+**Any-Power is not a fifth stat on the character grid** — it always refers to the four primaries: Energy, Combat, Brute Force, and Intelligence. Deck construction uses **different math** for Training than for Power / Teamwork:
+
+| Card class | Server rule | Threshold | How `Any-Power` is evaluated |
+|------------|-------------|-----------|------------------------------|
+| **Power** | `unusable_power` | **≥** printed `value` | [`statForPowerType`](../../src/services/deck-validation/deck-validation-utils.ts) — **maximum** of the four stats (character must meet the value in their **best** primary). |
+| **Teamwork** | `unusable_universe` (teamwork path) | **≥** from `to_use` | Same helper: **maximum** of the four. |
+| **Training** | `unusable_universe` ([`UnusableTrainingRule`](../../src/services/deck-validation/rules/unusable-training.rule.ts)) | **≤** cap (first integer in `value_to_use`) | [`trainingTypeAtOrBelowCap`](../../src/services/deck-validation/deck-validation-utils.ts) — **true if any** of the four stats is **≤ cap** (e.g. a character with 8 / 6 / 8 / 5 satisfies cap **5** because Intelligence is 5). |
+
+**Client parity:** [`statForPowerGridClient`](../../public/js/validation-calculation-functions.js) vs [`trainingTypeAtOrBelowCapClient`](../../public/js/validation-calculation-functions.js) in the same file.
+
+**Icon / summary UI:** [`deck-validation.js`](../../public/js/deck-validation.js) may omit Any-Power from four-stat icon totals; that is separate from unusable checks above.
 
 ---
 
@@ -133,7 +147,7 @@ These may duplicate or override rules; treat as **secondary** to `DeckValidation
 
 ## 9. Tests (behavioral specs)
 
-- Server: `tests/unit/deckValidationService*.test.ts`, `tests/unit/deck-validation-rule-list.test.ts`, `tests/unit/limitedDeckFunctionality.test.ts`
+- Server: `tests/unit/deckValidationService*.test.ts`, `tests/unit/deck-validation-rule-list.test.ts`, `tests/unit/unusable-training-rule.test.ts` (Training + Any-Power caps), `tests/unit/limitedDeckFunctionality.test.ts`
 - Client sandbox: `tests/unit/validation-calculation-functions.angrymob.test.ts`
 - Broader client rules mock: `tests/unit/deckValidationRules.test.ts` (may not mirror production `validateDeck` exactly)
 
@@ -147,3 +161,4 @@ These may duplicate or override rules; treat as **secondary** to `DeckValidation
 | 2026-04 | Client `validateDeck` parity for unusable specials/events/powers/universe/aspects; server map-key hyphen fix, `character` on specials, basic/training/ally/advanced/aspect rules, `basic_skill_type` for Basic Universe map entries. |
 | 2026-04 | Server: `DeckValidationService` delegates to `src/services/deck-validation/` — `DeckValidationRuleList`, per-rule modules, shared `deck-validation-messages.ts`, `buildAvailableCardsMap`. |
 | 2026-04 | **Multi Power / Multi-Power** power cards: no character-stat grid check in `unusable_power` + client `validateDeck` (Excelsior policy; not “max stat” or “all stats” gate). |
+| 2026-04-07 | **Training `Any-Power`:** cap checks use **any** primary stat ≤ cap (`trainingTypeAtOrBelowCap`); Power / Teamwork **Any-Power** unchanged (**max** for ≥). Documented in §3.1. |

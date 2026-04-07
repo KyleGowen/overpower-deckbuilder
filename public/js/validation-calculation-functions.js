@@ -53,6 +53,19 @@ function statForPowerGridClient(char, powerType) {
     }
 }
 
+/** Training "N or less": Any-Power = any primary stat at or below cap (not max of the four). */
+function trainingTypeAtOrBelowCapClient(char, powerType, cap) {
+    if (powerType === 'Any-Power') {
+        return (
+            char.energy <= cap ||
+            char.combat <= cap ||
+            char.brute_force <= cap ||
+            char.intelligence <= cap
+        );
+    }
+    return statForPowerGridClient(char, powerType) <= cap;
+}
+
 function specialLinkedCharacterNameClient(ac) {
     const primary = (ac.character || ac.character_name || '').trim();
     if (primary) return primary;
@@ -343,9 +356,7 @@ function validateDeck(deckCards) {
         const cap = valueMatch ? parseInt(valueMatch[1], 10) : 0;
         if (!type1 || !type2 || cap <= 0) return;
         const canUse = characterStats.some(char => {
-            const s1 = statForPowerGridClient(char, type1);
-            const s2 = statForPowerGridClient(char, type2);
-            return s1 <= cap || s2 <= cap;
+            return trainingTypeAtOrBelowCapClient(char, type1, cap) || trainingTypeAtOrBelowCapClient(char, type2, cap);
         });
         if (!canUse) {
             errors.push(
