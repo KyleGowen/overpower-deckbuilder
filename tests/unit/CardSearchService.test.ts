@@ -767,6 +767,107 @@ describe('CardSearchService', () => {
             });
         });
 
+        it('should dedupe fetch path when the same power id appears twice in catalog data', async () => {
+            for (let i = 0; i < 10; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        { id: 'dup-power', power_type: 'Energy', value: 5, image: 'power.jpg' },
+                        { id: 'dup-power', power_type: 'Energy', value: 5, image: 'power.jpg' }
+                    ]
+                })
+            });
+
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+
+            const results = await service.search('energy');
+
+            expect(results.filter((r: any) => r.type === 'power' && r.id === 'dup-power')).toHaveLength(1);
+        });
+
+        it('should dedupe power rows that share the same display name but different ids (duplicate catalog rows)', async () => {
+            for (let i = 0; i < 10; i++) {
+                mockFetch.mockResolvedValueOnce({
+                    json: jest.fn().mockResolvedValue({ success: true, data: [] })
+                });
+            }
+
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({
+                    success: true,
+                    data: [
+                        { id: 'power-row-a', power_type: 'Multi Power', value: 3, image: 'a.jpg' },
+                        { id: 'power-row-b', power_type: 'Multi Power', value: 3, image: 'a.jpg' }
+                    ]
+                })
+            });
+
+            mockFetch.mockResolvedValueOnce({
+                json: jest.fn().mockResolvedValue({ success: true, data: [] })
+            });
+
+            const results = await service.search('multi');
+            const multi = results.filter((r: any) => r.type === 'power' && r.name === '3 Multi Power');
+            expect(multi).toHaveLength(1);
+        });
+
+        it('should dedupe map path when numeric id and string id refer to separate map entries for the same power card', async () => {
+            (window as any).availableCardsMap = new Map();
+            (window as any).availableCardsMap.set('numeric-key', {
+                id: 42,
+                cardType: 'power',
+                power_type: 'Energy',
+                value: 5,
+                image: 'power.jpg'
+            });
+            (window as any).availableCardsMap.set('string-key', {
+                id: '42',
+                cardType: 'power',
+                power_type: 'Energy',
+                value: 5,
+                image: 'power.jpg'
+            });
+            service = new CardSearchService({ maxResults: 20 });
+            const results = await service.search('energy');
+            delete (window as any).availableCardsMap;
+            expect(mockFetch).not.toHaveBeenCalled();
+            expect(results.filter((r: any) => r.type === 'power')).toHaveLength(1);
+            expect(results[0]).toMatchObject({ name: '5 Energy', type: 'power' });
+        });
+
+        it('should return two power rows when two different ids both match the term', async () => {
+            (window as any).availableCardsMap = new Map();
+            (window as any).availableCardsMap.set('p1', {
+                id: 'power-a',
+                cardType: 'power',
+                power_type: 'Energy',
+                value: 3,
+                image: 'a.jpg'
+            });
+            (window as any).availableCardsMap.set('p2', {
+                id: 'power-b',
+                cardType: 'power',
+                power_type: 'Energy',
+                value: 7,
+                image: 'b.jpg'
+            });
+            service = new CardSearchService({ maxResults: 20 });
+            const results = await service.search('energy');
+            delete (window as any).availableCardsMap;
+            expect(mockFetch).not.toHaveBeenCalled();
+            const powerHits = results.filter((r: any) => r.type === 'power');
+            expect(powerHits).toHaveLength(2);
+            expect(powerHits.map((r: any) => r.name).sort()).toEqual(['3 Energy', '7 Energy']);
+        });
+
         it('should search locations by name', async () => {
             // Mock all endpoints except locations
             for (let i = 0; i < 11; i++) {

@@ -133,15 +133,29 @@
         }
 
         _finalizeSearchResults(termLower, rawResults) {
-            return rawResults
+            const sorted = rawResults
                 .filter(r => r.name && r.name.trim())
                 .sort((a, b) => {
                     const pa = this._searchResultTier(termLower, a);
                     const pb = this._searchResultTier(termLower, b);
                     if (pa !== pb) return pa - pb;
                     return (a.name || '').localeCompare(b.name || '');
-                })
-                .slice(0, this.maxResults);
+                });
+            const seenId = new Set();
+            /** Same deck-editor label can appear on multiple DB rows (duplicate catalog rows); collapse for search UI. */
+            const seenPowerLabel = new Set();
+            return sorted.filter(r => {
+                const idKey = `${String(r.type)}:${String(r.id)}`;
+                if (seenId.has(idKey)) return false;
+                let powerLabelKey = null;
+                if (r.type === 'power') {
+                    powerLabelKey = String(r.name || '').toLowerCase().trim();
+                    if (powerLabelKey && seenPowerLabel.has(powerLabelKey)) return false;
+                }
+                seenId.add(idKey);
+                if (powerLabelKey) seenPowerLabel.add(powerLabelKey);
+                return true;
+            }).slice(0, this.maxResults);
         }
 
         /**
@@ -194,7 +208,10 @@
             if (!map || map.size === 0) return null;
             const byId = new Map();
             for (const c of map.values()) {
-                if (c && c.id) byId.set(c.id, c);
+                if (!c || c.id == null || c.id === '') continue;
+                const idKey = String(c.id).trim();
+                if (!idKey) continue;
+                byId.set(idKey, c);
             }
             const results = [];
             const term = searchTerm.toLowerCase();
