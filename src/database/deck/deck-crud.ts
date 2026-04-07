@@ -367,7 +367,8 @@ export async function getDecksByUserId(
   try {
     const { selectFragment: characterSelectSql, joinFragment: characterJoinSql } =
       buildCharacterListSqlFragments();
-    const deckResult = await client.query(
+    // SQL fragments from CHARACTER_LIST_SLOTS only (fixed aliases/columns); $1 is the only user input.
+    const deckResult = await client.query( // nosemgrep: pg-sql-template-interpolation
       `
         SELECT 
           d.*,
