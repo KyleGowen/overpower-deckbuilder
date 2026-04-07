@@ -105,11 +105,16 @@ function switchToDeckBuilder() {
     const totalDecksEl = document.getElementById('total-decks') || document.getElementById('db-total-decks');
     const needsDeckLoad = !totalDecksEl || totalDecksEl.textContent === '-';
 
-    if (!isCreatingNewDeckCheck && needsDeckLoad) {
-        if (typeof loadDeckBuilderData === 'function') {
-            loadDeckBuilderData();
+    if (!isCreatingNewDeckCheck) {
+        if (needsDeckLoad) {
+            if (typeof loadDeckBuilderData === 'function') {
+                loadDeckBuilderData();
+            } else if (typeof loadDecks === 'function') {
+                loadDecks();
+            }
         } else if (typeof loadDecks === 'function') {
-            loadDecks();
+            // Stats already populated — still refetch so tile legality (is_valid) matches the server
+            void loadDecks({ skipSkeleton: true });
         }
     }
 }

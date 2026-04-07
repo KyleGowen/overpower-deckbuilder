@@ -944,6 +944,29 @@ function buildDeckCardsDataForApi() {
     return cardsData;
 }
 
+/** Debounced soft refresh so deck tiles (legality badge, previews) match server after inline edits. */
+let deckListRefreshAfterSyncTimer = null;
+function scheduleDeckListSoftRefresh() {
+    if (typeof loadDecks !== 'function') {
+        return;
+    }
+    const run = () => {
+        deckListRefreshAfterSyncTimer = null;
+        if (typeof loadDecks === 'function') {
+            void loadDecks({ skipSkeleton: true });
+        }
+    };
+    if (deckListRefreshAfterSyncTimer && typeof clearTimeout === 'function') {
+        clearTimeout(deckListRefreshAfterSyncTimer);
+    }
+    deckListRefreshAfterSyncTimer = null;
+    if (typeof setTimeout === 'function') {
+        deckListRefreshAfterSyncTimer = setTimeout(run, 400);
+    } else {
+        run();
+    }
+}
+
 /**
  * Push current editor cards to the server so single-card POST (e.g. search add) matches the UI.
  * Used after remove/remove-one on persisted DB or guest session decks.
@@ -999,6 +1022,7 @@ async function syncPersistedDeckCardsFromEditor() {
                 currentDeckData.metadata.is_valid = isValidSnapshot;
             }
         }
+        scheduleDeckListSoftRefresh();
         return true;
     } catch (e) {
         console.error('syncPersistedDeckCardsFromEditor', e);
@@ -1345,8 +1369,10 @@ async function saveDeckChanges() {
             showNotification('Deck saved with validation errors - not legal for tournament play', 'warning');
         }
         
-        // Don't close the editor - just refresh the deck list
-        loadDecks();
+        // Don't close the editor — refresh deck tiles (legality, previews) without skeleton flash
+        if (typeof loadDecks === 'function') {
+            void loadDecks({ skipSkeleton: true });
+        }
         
     } catch (error) {
         console.error('Error saving deck changes:', error);
@@ -1412,6 +1438,11 @@ async function closeDeckEditor() {
     // Only do DOM work if not already in deck builder (avoids redundant DOM updates and flash)
     if (!isAlreadyInDeckBuilder && typeof switchToDeckBuilder === 'function') {
         switchToDeckBuilder();
+    }
+
+    // Tile legality/previews come from GET /api/v1/decks; switchToDeckBuilder only loads when stats are empty.
+    if (typeof getCurrentUser === 'function' && getCurrentUser() && typeof loadDecks === 'function') {
+        void loadDecks({ skipSkeleton: true });
     }
 }
 

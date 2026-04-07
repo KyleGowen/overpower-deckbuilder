@@ -340,7 +340,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Response 200:** v1 envelope; **`data`** is the transformed deck list (array of `{ "metadata", "cards" }` rows from `transformDeckList` — same shapes the legacy list returned inside `{ success, data }`).
 
-**Caching:** `Cache-Control: private, max-age=30`, `Vary: Cookie`, **`ETag`** over the full v1 JSON body (`SHA-1` of `{"data":...,"meta":{},"errors":[]}`). If request header **`If-None-Match`** matches **`ETag`**, responds **304** with an **empty** body.
+**Caching:** `Cache-Control: private, max-age=0, must-revalidate`, `Vary: Cookie`, **`ETag`** over the full v1 JSON body (`SHA-1` of `{"data":...,"meta":{},"errors":[]}`). Clients revalidate each use; if request header **`If-None-Match`** matches **`ETag`**, responds **304** with an **empty** body. (No long freshness window — deck metadata such as **`is_valid`** changes frequently after saves.)
 
 **Response 500:** v1 envelope — `errors` with code **`DECK_LIST_ERROR`**; `data` may be `null`.
 

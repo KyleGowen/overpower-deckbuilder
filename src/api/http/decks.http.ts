@@ -75,7 +75,8 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
       const body = stableV1DeckListBody(list);
       const etag = `"${crypto.createHash('sha1').update(body).digest('hex')}"`;
 
-      res.set('Cache-Control', 'private, max-age=30');
+      // Mutable per-user list: avoid browser freshness cache (was max-age=30; tiles showed stale is_valid after save).
+      res.set('Cache-Control', 'private, max-age=0, must-revalidate');
       res.set('Vary', 'Cookie');
       res.set('ETag', etag);
 

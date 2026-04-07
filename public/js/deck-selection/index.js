@@ -43,18 +43,25 @@
         ).join('');
     }
 
-    window.DeckSelection.loadDecks = async function loadDecks() {
+    /**
+     * @param {{ skipSkeleton?: boolean }} [options]
+     *        skipSkeleton: refetch and re-render tiles without clearing the list (avoids flash when refreshing in place).
+     */
+    window.DeckSelection.loadDecks = async function loadDecks(options) {
         try {
             if (typeof loadAvailableCardsData === 'function') {
                 loadAvailableCardsData().catch(() => {});
             }
 
-            showSkeletonTiles(getSkeletonCount());
+            const opts = options && typeof options === 'object' ? options : {};
+            if (!opts.skipSkeleton) {
+                showSkeletonTiles(getSkeletonCount());
+            }
 
             const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
             const isGuest = currentUser && currentUser.role === 'GUEST';
             const url = isGuest ? '/api/v1/guest/decks' : '/api/v1/decks';
-            const response = await fetch(url, { credentials: 'include' });
+            const response = await fetch(url, { credentials: 'include', cache: 'no-store' });
             const json = await response.json();
             // Guest and logged-in list endpoints both use the v1 envelope (`{ data, meta, errors }`).
             // Do not use `json.success` for guests — it is undefined and left the skeleton up forever.

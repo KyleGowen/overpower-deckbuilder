@@ -109,7 +109,7 @@ describe('decks.http', () => {
     expect(res.body.errors).toEqual([]);
     expect(res.body.meta).toEqual({});
     expect(res.body.data).toEqual(sampleList);
-    expect(res.headers['cache-control']).toBe('private, max-age=30');
+      expect(res.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
     expect(res.headers.vary).toBe('Cookie');
     expect(res.headers.etag).toMatch(/^"[a-f0-9]{40}"$/);
     expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith('user-1');
