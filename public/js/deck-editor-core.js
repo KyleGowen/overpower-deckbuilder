@@ -585,9 +585,6 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             // Update modal title
             document.getElementById('deckEditorTitle').textContent = currentDeckData.metadata.name;
             
-            // Update deck title validation
-            updateDeckTitleValidation(currentDeckData.cards || []);
-            
             // Load available cards first, then display deck cards
             if (typeof loadAvailableCards === 'function') {
                 try {
@@ -830,6 +827,21 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             // Update card count
             updateDeckEditorCardCount();
             revealDeckEditorExportImportButtons();
+
+            // Refresh summary + legality badge from final normalized editor cards (after alternate-art merge)
+            if (typeof showDeckValidation === 'function') {
+                await showDeckValidation(window.deckEditorCards);
+            }
+            if (
+                currentDeckData?.metadata &&
+                !(typeof isDeckLegalityEvaluationSkipped === 'function' && isDeckLegalityEvaluationSkipped())
+            ) {
+                const validSnap =
+                    typeof computeDeckIsValidForPersistence === 'function'
+                        ? computeDeckIsValidForPersistence(window.deckEditorCards)
+                        : validateDeck(window.deckEditorCards).errors.length === 0;
+                currentDeckData.metadata.is_valid = validSnap;
+            }
             
             // Auto-activate special cards character filter if deck has characters
             const hasCharacters = window.deckEditorCards.some(card => card.type === 'character');
@@ -959,6 +971,33 @@ async function syncPersistedDeckCardsFromEditor() {
                 'Failed to sync deck to server';
             showNotification(msg, 'error');
             return false;
+        }
+        // Keep decks.is_valid in sync after card-only PUT (skip for Limited / guest)
+        const skipLegality =
+            typeof isDeckLegalityEvaluationSkipped === 'function' && isDeckLegalityEvaluationSkipped();
+        if (!isGuest && !skipLegality && window.deckEditorCards) {
+            const isValidSnapshot =
+                typeof computeDeckIsValidForPersistence === 'function'
+                    ? computeDeckIsValidForPersistence(window.deckEditorCards)
+                    : validateDeck(window.deckEditorCards).errors.length === 0;
+            const metaRes = await fetch(`/api/v1/decks/${deckId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ is_valid: isValidSnapshot })
+            });
+            const metaJson = await metaRes.json().catch(() => ({}));
+            if (!metaRes.ok || (typeof v1ResponseOk === 'function' && !v1ResponseOk(metaRes, metaJson))) {
+                const metaMsg =
+                    (metaJson.errors && metaJson.errors[0] && metaJson.errors[0].message) ||
+                    metaJson.error ||
+                    'Failed to update deck legality on server';
+                showNotification(metaMsg, 'error');
+                return false;
+            }
+            if (currentDeckData?.metadata) {
+                currentDeckData.metadata.is_valid = isValidSnapshot;
+            }
         }
         return true;
     } catch (e) {
@@ -1150,9 +1189,18 @@ async function saveDeckChanges() {
             throw new Error(saveErrorMessage);
         }
         
-        // Check validation status before saving
-        const validation = validateDeck(window.deckEditorCards);
-        const isDeckValid = validation.errors.length === 0;
+        const skipLegalityEval =
+            typeof isDeckLegalityEvaluationSkipped === 'function' && isDeckLegalityEvaluationSkipped();
+        let isDeckValid = true;
+        if (!skipLegalityEval) {
+            isDeckValid =
+                typeof computeDeckIsValidForPersistence === 'function'
+                    ? computeDeckIsValidForPersistence(window.deckEditorCards)
+                    : validateDeck(window.deckEditorCards).errors.length === 0;
+            if (currentDeckData.metadata) {
+                currentDeckData.metadata.is_valid = isDeckValid;
+            }
+        }
         
         // Update reserve_character to use alternate card ID if the reserved character has alternate art selected
         let reserveCharacterToSave = currentDeckData.metadata.reserve_character;
@@ -1240,21 +1288,24 @@ async function saveDeckChanges() {
         console.log('currentDeckId:', currentDeckId);
         console.log('💾 [saveDeckChanges] Saving reserve_character:', reserveCharacterToSave);
         
+        const metadataPayload = {
+            name: currentDeckData.metadata.name,
+            description: '',
+            is_limited: isDeckLimited,
+            reserve_character: reserveCharacterToSave,
+            display_mission_card_id: currentDeckData.metadata.display_mission_card_id || null,
+            background_image_path: backgroundPath
+        };
+        if (!skipLegalityEval) {
+            metadataPayload.is_valid = isDeckValid;
+        }
         const updateResponse = await fetch(`/api/v1/decks/${currentDeckId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({
-                name: currentDeckData.metadata.name,
-                description: '',
-                is_limited: isDeckLimited,
-                is_valid: isDeckValid,
-                reserve_character: reserveCharacterToSave,
-                display_mission_card_id: currentDeckData.metadata.display_mission_card_id || null,
-                background_image_path: backgroundPath
-            })
+            body: JSON.stringify(metadataPayload)
         });
         
         if (!updateResponse.ok) {
@@ -1286,7 +1337,9 @@ async function saveDeckChanges() {
         await saveUIPreferences(currentDeckId, preferences);
         
         // Show appropriate notification based on validation status
-        if (isDeckValid) {
+        if (skipLegalityEval) {
+            showNotification('Deck changes saved successfully!', 'success');
+        } else if (isDeckValid) {
             showNotification('Deck changes saved successfully!', 'success');
         } else {
             showNotification('Deck saved with validation errors - not legal for tournament play', 'warning');
@@ -1556,5 +1609,9 @@ window.toggleFoilForCard = function toggleFoilForCard(cardId, index, instanceInd
         renderDeckCardsListView();
     } else if (typeof displayDeckCardsForEditing === 'function') {
         displayDeckCardsForEditing();
+    }
+
+    if (typeof showDeckValidation === 'function') {
+        void showDeckValidation(window.deckEditorCards);
     }
 };

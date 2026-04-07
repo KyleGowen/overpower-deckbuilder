@@ -13,11 +13,18 @@
  *   - calculateTotalThreat() - Threat level calculations
  *   - updateDeckTitleValidation() - Title validation updates
  *   - toggleLimitedState() - Limited deck state management
+ *   - isDeckLegalityEvaluationSkipped() - true when Limited (skip tournament validity / DB writes)
+ *   - computeDeckIsValidForPersistence() - boolean for decks.is_valid (errors only)
  * 
  * ======================================== */
 
 // Global variable to track limited state
 let isDeckLimited = false;
+
+/** When true, skip recomputing tournament legality and omit persisting is_valid. */
+function isDeckLegalityEvaluationSkipped() {
+    return isDeckLimited;
+}
 
 // Function to validate deck according to Overpower rules
 function validateDeck(deckCards) {
@@ -71,25 +78,14 @@ function validateDeck(deckCards) {
         }
     });
     
-    // Rule 1.6: Angry Mob character restrictions
+    // Rule 1.6: at most one character whose display name starts with "Angry Mob"
     const angryMobCharacters = characterCards.filter(card => {
         const availableCard = availableCardsMap.get(card.cardId);
         return availableCard && isAngryMobCharacter(availableCard);
     });
-    
-    if (angryMobCharacters.length > 0) {
-        const otherCharacters = characterCards.filter(card => {
-            const availableCard = availableCardsMap.get(card.cardId);
-            return availableCard && !isAngryMobCharacter(availableCard);
-        });
-        
-        if (angryMobCharacters.length > 1) {
-            errors.push('Only one Angry Mob character variant is allowed');
-        }
 
-        if (otherCharacters.length > 0) {
-            errors.push('Angry Mob cannot be used with other characters');
-        }
+    if (angryMobCharacters.length > 1) {
+        errors.push('Only one Angry Mob character variant is allowed');
     }
     
     // Rule 2: Exactly 0 or 1 mission may be selected
@@ -227,6 +223,11 @@ function validateDeck(deckCards) {
     return { errors, warnings, isValid: errors.length === 0 };
 }
 
+/** Snapshot for decks.is_valid: legal iff validateDeck reports zero errors (warnings allowed). */
+function computeDeckIsValidForPersistence(deckCards) {
+    return validateDeck(deckCards).errors.length === 0;
+}
+
 // Shared function to calculate total card count (excluding mission, character, and location cards)
 function calculateTotalCardCount(deckCards) {
     return deckCards
@@ -335,4 +336,9 @@ function updateDeckTitleValidation(deckCards) {
 function toggleLimitedState() {
     isDeckLimited = !isDeckLimited;
     updateDeckTitleValidation(deckEditorCards);
+}
+
+if (typeof window !== 'undefined') {
+    window.isDeckLegalityEvaluationSkipped = isDeckLegalityEvaluationSkipped;
+    window.computeDeckIsValidForPersistence = computeDeckIsValidForPersistence;
 }

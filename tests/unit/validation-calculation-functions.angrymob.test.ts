@@ -57,6 +57,33 @@ describe('validation-calculation-functions Angry Mob legality', () => {
 
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Only one Angry Mob character variant is allowed');
-    expect(result.errors).toContain('Angry Mob cannot be used with other characters');
+    expect(result.errors).not.toContain('Angry Mob cannot be used with other characters');
+  });
+
+  it('allows one Angry Mob variant with other characters', () => {
+    const sandbox = loadValidatorSandbox();
+    const availableCardsMap = sandbox.availableCardsMap as Map<string, any>;
+    const validateDeck = sandbox.validateDeck as (cards: Array<{ type: string; cardId: string; quantity: number }>) => {
+      errors: string[];
+      warnings: string[];
+      isValid: boolean;
+    };
+
+    availableCardsMap.set('char-angry-mob-middle', { name: 'Angry Mob (Middle Ages)', threat_level: 10 });
+    availableCardsMap.set('char-robin', { name: 'Robin Hood', threat_level: 15 });
+    availableCardsMap.set('char-cthulhu', { name: 'Cthulhu', threat_level: 15 });
+    availableCardsMap.set('char-musketeers', { name: 'The Three Musketeers', threat_level: 15 });
+    availableCardsMap.set('power-energy-1', { name: '1 - Energy' });
+
+    const result = validateDeck([
+      { type: 'character', cardId: 'char-angry-mob-middle', quantity: 1 },
+      { type: 'character', cardId: 'char-robin', quantity: 1 },
+      { type: 'character', cardId: 'char-cthulhu', quantity: 1 },
+      { type: 'character', cardId: 'char-musketeers', quantity: 1 },
+      { type: 'power', cardId: 'power-energy-1', quantity: 51 }
+    ]);
+
+    expect(result.errors.filter((e) => e.includes('Angry Mob'))).toEqual([]);
+    expect(result.isValid).toBe(true);
   });
 });
