@@ -38,6 +38,58 @@ interface DeckCardRow {
   exclude_from_draw?: boolean;
 }
 
+const CHARACTER_LIST_SLOTS = [
+  {
+    idField: 'character_1_id',
+    nameField: 'character_1_name',
+    imageField: 'character_1_default_image',
+    foilField: 'character_1_is_foil',
+    syntheticSuffix: '1'
+  },
+  {
+    idField: 'character_2_id',
+    nameField: 'character_2_name',
+    imageField: 'character_2_default_image',
+    foilField: 'character_2_is_foil',
+    syntheticSuffix: '2'
+  },
+  {
+    idField: 'character_3_id',
+    nameField: 'character_3_name',
+    imageField: 'character_3_default_image',
+    foilField: 'character_3_is_foil',
+    syntheticSuffix: '3'
+  },
+  {
+    idField: 'character_4_id',
+    nameField: 'character_4_name',
+    imageField: 'character_4_default_image',
+    foilField: 'character_4_is_foil',
+    syntheticSuffix: '4'
+  }
+] as const;
+
+function pushCharacterPreviewCards(cards: DeckCard[], deckRow: DeckListRow): void {
+  const deckId = deckRow.id as string;
+  for (const slot of CHARACTER_LIST_SLOTS) {
+    const cardId = deckRow[slot.idField];
+    if (!cardId) {
+      continue;
+    }
+    cards.push({
+      id: `char${slot.syntheticSuffix}_${deckId}`,
+      type: 'character',
+      cardId,
+      quantity: 1,
+      ...(deckRow[slot.imageField] !== undefined && {
+        defaultImage: deckRow[slot.imageField]
+      }),
+      ...(deckRow[slot.nameField] !== undefined && { name: deckRow[slot.nameField] }),
+      is_foil: deckRow[slot.foilField] ?? false
+    });
+  }
+}
+
 export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
   const desc = deckRow.description as string | undefined;
   const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
@@ -68,58 +120,8 @@ export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
 export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
   const cards: DeckCard[] = [];
 
-  if (deckRow.character_1_id) {
-    cards.push({
-      id: `char1_${deckRow.id}`,
-      type: 'character',
-      cardId: deckRow.character_1_id,
-      quantity: 1,
-      ...(deckRow.character_1_default_image !== undefined && {
-        defaultImage: deckRow.character_1_default_image,
-      }),
-      ...(deckRow.character_1_name !== undefined && { name: deckRow.character_1_name }),
-      is_foil: deckRow.character_1_is_foil ?? false,
-    });
-  }
-  if (deckRow.character_2_id) {
-    cards.push({
-      id: `char2_${deckRow.id}`,
-      type: 'character',
-      cardId: deckRow.character_2_id,
-      quantity: 1,
-      ...(deckRow.character_2_default_image !== undefined && {
-        defaultImage: deckRow.character_2_default_image,
-      }),
-      ...(deckRow.character_2_name !== undefined && { name: deckRow.character_2_name }),
-      is_foil: deckRow.character_2_is_foil ?? false,
-    });
-  }
-  if (deckRow.character_3_id) {
-    cards.push({
-      id: `char3_${deckRow.id}`,
-      type: 'character',
-      cardId: deckRow.character_3_id,
-      quantity: 1,
-      ...(deckRow.character_3_default_image !== undefined && {
-        defaultImage: deckRow.character_3_default_image,
-      }),
-      ...(deckRow.character_3_name !== undefined && { name: deckRow.character_3_name }),
-      is_foil: deckRow.character_3_is_foil ?? false,
-    });
-  }
-  if (deckRow.character_4_id) {
-    cards.push({
-      id: `char4_${deckRow.id}`,
-      type: 'character',
-      cardId: deckRow.character_4_id,
-      quantity: 1,
-      ...(deckRow.character_4_default_image !== undefined && {
-        defaultImage: deckRow.character_4_default_image,
-      }),
-      ...(deckRow.character_4_name !== undefined && { name: deckRow.character_4_name }),
-      is_foil: deckRow.character_4_is_foil ?? false,
-    });
-  }
+  pushCharacterPreviewCards(cards, deckRow);
+
   if (deckRow.location_id) {
     cards.push({
       id: `loc_${deckRow.id}`,

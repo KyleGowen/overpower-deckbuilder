@@ -1,0 +1,3 @@
+# deck-add-validation
+
+Single-card and incremental deck add checks used by `DeckCardsService`, `GuestDeckService`, and legacy routes. Entry: `createDeckAddValidation(cardRepository)` in `deck-add-validation.ts` returns `validateCardAddition` and `checkIfCardIs*` helpers. Re-exported from `src/index.ts` for tests and route wiring.

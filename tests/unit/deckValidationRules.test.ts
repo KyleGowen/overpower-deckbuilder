@@ -289,7 +289,10 @@ describe('Deck Validation Rules', () => {
         if (availableCard.power_type && availableCard.value) {
           const requiredValue = availableCard.value;
           const powerType = availableCard.power_type;
-          
+          // Multi Power / Multi-Power: no character grid requirement (matches server unusable_power).
+          if (powerType === 'Multi Power' || powerType === 'Multi-Power') {
+            return;
+          }
           // Check if any character can use this power card
           const canUse = characterStats.some(char => {
             if (!char) return false;
@@ -309,8 +312,6 @@ describe('Deck Validation Rules', () => {
                 characterStat = char.intelligence;
                 break;
               case 'Any-Power':
-              case 'Multi-Power':
-              case 'Multi Power':
                 characterStat = Math.max(char.energy, char.combat, char.brute_force, char.intelligence);
                 break;
             }

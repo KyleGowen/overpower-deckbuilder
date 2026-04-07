@@ -14,6 +14,11 @@ export function characterThreatValue(availableCard: { threat?: number; threat_le
     return typeof t === 'number' ? t : 0;
 }
 
+/** Multi Power cards are legal in any Venture deck; no character-stat grid gate. DB uses `Multi Power` or legacy `Multi-Power`. */
+export function isMultiPowerPowerCardType(powerType: string): boolean {
+    return powerType === 'Multi Power' || powerType === 'Multi-Power';
+}
+
 export function statForPowerType(
     char: { energy: number; combat: number; brute_force: number; intelligence: number },
     powerType: string

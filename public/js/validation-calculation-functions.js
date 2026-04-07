@@ -292,6 +292,8 @@ function validateDeck(deckCards) {
         const powerType = ac.power_type;
         const value = parseInt(ac.value, 10);
         if (!powerType || Number.isNaN(value)) return;
+        // Multi Power / Multi-Power: no character grid requirement (any Venture deck).
+        if (powerType === 'Multi Power' || powerType === 'Multi-Power') return;
         const canUse = characterStats.some(char => statForPowerGridClient(char, powerType) >= value);
         if (!canUse) {
             errors.push(`"${displayName}" (Power Card) requires a character with ${value}+ ${powerType}`);

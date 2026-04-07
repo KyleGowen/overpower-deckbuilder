@@ -1,4 +1,8 @@
 import { PoolClient } from 'pg';
+import {
+  catalogTableUsesIdTextFallback,
+  resolveCatalogTable
+} from '../card/catalog-card-tables';
 import { DeckCard } from '../../types';
 import type { DeckRepositoryContext } from './context';
 
@@ -12,110 +16,34 @@ export async function cardExistsInCardTable(
   cardId: string,
   allowUnknown = false
 ): Promise<boolean> {
+  const table = resolveCatalogTable(cardType);
+  if (!table) {
+    if (allowUnknown) {
+      console.warn(`Unknown card type: ${cardType}, skipping validation`);
+      return true;
+    }
+    console.error(`Unknown card type: ${cardType}`);
+    return false;
+  }
+
   const runQuery = async (sql: string, params: string[]): Promise<boolean> => {
     const result = await client.query(sql, params);
     return result.rows.length > 0;
   };
 
-  switch (cardType) {
-    case 'character': {
-      try {
-        return await runQuery(
-          'SELECT id FROM characters WHERE id::text = $1 OR id = $1::uuid',
-          [cardId]
-        );
-      } catch {
-        return await runQuery('SELECT id FROM characters WHERE id::text = $1', [
-          String(cardId),
-        ]);
-      }
+  // `table` is from resolveCatalogTable allowlist only.
+  const uuidMatchSql = `SELECT id FROM ${table} WHERE id::text = $1 OR id = $1::uuid`; // nosemgrep: pg-sql-template-interpolation
+  const textOnlySql = `SELECT id FROM ${table} WHERE id::text = $1`; // nosemgrep: pg-sql-template-interpolation
+
+  if (catalogTableUsesIdTextFallback(table)) {
+    try {
+      return await runQuery(uuidMatchSql, [cardId]);
+    } catch {
+      return await runQuery(textOnlySql, [String(cardId)]);
     }
-    case 'special': {
-      try {
-        return await runQuery(
-          'SELECT id FROM special_cards WHERE id::text = $1 OR id = $1::uuid',
-          [cardId]
-        );
-      } catch {
-        return await runQuery('SELECT id FROM special_cards WHERE id::text = $1', [
-          String(cardId),
-        ]);
-      }
-    }
-    case 'power': {
-      try {
-        return await runQuery(
-          'SELECT id FROM power_cards WHERE id::text = $1 OR id = $1::uuid',
-          [cardId]
-        );
-      } catch {
-        return await runQuery('SELECT id FROM power_cards WHERE id::text = $1', [
-          String(cardId),
-        ]);
-      }
-    }
-    case 'mission': {
-      return await runQuery(
-        'SELECT id FROM missions WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'event': {
-      return await runQuery(
-        'SELECT id FROM events WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'aspect': {
-      return await runQuery(
-        'SELECT id FROM aspects WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'location': {
-      return await runQuery(
-        'SELECT id FROM locations WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'teamwork': {
-      return await runQuery(
-        'SELECT id FROM teamwork_cards WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'ally-universe': {
-      return await runQuery(
-        'SELECT id FROM ally_universe_cards WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'training': {
-      return await runQuery(
-        'SELECT id FROM training_cards WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'basic-universe': {
-      return await runQuery(
-        'SELECT id FROM basic_universe_cards WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    case 'advanced-universe': {
-      return await runQuery(
-        'SELECT id FROM advanced_universe_cards WHERE id::text = $1 OR id = $1::uuid',
-        [cardId]
-      );
-    }
-    default:
-      if (allowUnknown) {
-        console.warn(`Unknown card type: ${cardType}, skipping validation`);
-        return true;
-      }
-      console.error(`Unknown card type: ${cardType}`);
-      return false;
   }
+
+  return await runQuery(uuidMatchSql, [cardId]);
 }
 
 export async function addCardToDeck(

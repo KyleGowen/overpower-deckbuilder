@@ -11,5 +11,6 @@ Card persistence is split by domain. The public entry point is `PostgreSQLCardRe
 - **aspect.ts** — Aspect: getAspectById, getAllAspects.
 - **universe.ts** — AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse: getById, getAll for each.
 - **stats.ts** — getCardStats (UNION ALL over all card tables, cached).
+- **catalog-card-tables.ts** — `CATALOG_CARD_TABLE` + `resolveCatalogTable` (hyphen/underscore); shared by `collection/card-lookup.ts` and `deck/deck-cards.ts` for table name allowlists.
 
 Do not add raw SQL in route handlers; keep queries here or in other `src/database/` modules.

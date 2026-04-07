@@ -3,7 +3,7 @@
 Deck persistence is split by domain. The public entry point is `PostgreSQLDeckRepository` in `src/database/PostgreSQLDeckRepository.ts`, which delegates to modules in this directory.
 
 - **context.ts** — Shared context: pool, cache, cache TTL, and `invalidateDeck(deckId)`. Used by all deck modules.
-- **deck-crud.ts** — Deck CRUD: createDeck, getDeckById, getDecksByUserId, getDeckSummaryWithAllCards, getAllDecks, updateDeck, deleteDeck. Includes row mappers: mapDeckRowWithCards, mapDeckRowToListDeck, mapDeckRowBasic.
+- **deck-crud.ts** — Deck CRUD: createDeck, getDeckById, getDecksByUserId, getDeckSummaryWithAllCards, getAllDecks, updateDeck, deleteDeck. Includes row mappers: mapDeckRowWithCards, mapDeckRowToListDeck, mapDeckRowBasic. List preview characters use `CHARACTER_LIST_SLOTS` + `pushCharacterPreviewCards` (slot descriptors) to avoid four-way copy-paste.
 - **deck-cards.ts** — Deck card operations: addCardToDeck, removeCardFromDeck, updateCardInDeck, removeAllCardsFromDeck, replaceAllCardsInDeck, getDeckCards, doesCardExistInDeck. Shared helper: cardExistsInCardTable (validates card exists in the appropriate card table).
 - **deck-metadata.ts** — UI preferences, stats, auth: updateUIPreferences, getUIPreferences, getDeckStats, userOwnsDeck.
 

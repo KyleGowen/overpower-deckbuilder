@@ -1,26 +1,12 @@
 import { PoolClient } from 'pg';
+import { CATALOG_CARD_TABLE } from '../card/catalog-card-tables';
 import { resolveSetDisplayName } from '../setsLookup';
-
-const CARD_TABLE_BY_TYPE: Record<string, string> = {
-  character: 'characters',
-  special: 'special_cards',
-  power: 'power_cards',
-  location: 'locations',
-  mission: 'missions',
-  event: 'events',
-  aspect: 'aspects',
-  advanced_universe: 'advanced_universe_cards',
-  teamwork: 'teamwork_cards',
-  ally_universe: 'ally_universe_cards',
-  training: 'training_cards',
-  basic_universe: 'basic_universe_cards',
-};
 
 // Pre-built query strings (table names from allowlist only; no interpolation at query call site).
 const QUERY_IMAGE_PATH: Record<string, string> = {};
 const QUERY_EXISTS: Record<string, string> = {};
 const QUERY_FETCH_CARD: Record<string, string> = {};
-for (const [type, table] of Object.entries(CARD_TABLE_BY_TYPE)) {
+for (const [type, table] of Object.entries(CATALOG_CARD_TABLE)) {
   QUERY_IMAGE_PATH[type] = `SELECT image_path FROM ${table} WHERE id = $1`;
   QUERY_EXISTS[type] = `SELECT 1 FROM ${table} WHERE id = $1`;
   QUERY_FETCH_CARD[type] = `SELECT * FROM ${table} WHERE id = $1`;

@@ -1,7 +1,7 @@
 import type { DeckValidationRule } from '../deck-validation-rule';
 import type { ValidationError } from '../validation-error';
 import type { DeckValidationContext } from '../deck-validation-context';
-import { deckCardMapKey, statForPowerType } from '../deck-validation-utils';
+import { deckCardMapKey, isMultiPowerPowerCardType, statForPowerType } from '../deck-validation-utils';
 import { deckValidationMessages } from '../deck-validation-messages';
 
 export class UnusablePowerRule implements DeckValidationRule {
@@ -19,6 +19,9 @@ export class UnusablePowerRule implements DeckValidationRule {
             const value = availableCard.value as number | undefined;
 
             if (powerType && value != null) {
+                if (isMultiPowerPowerCardType(powerType)) {
+                    continue;
+                }
                 const canUse = ctx.characterStats.some(char => {
                     const characterStat = statForPowerType(char, powerType);
                     return characterStat >= value;
