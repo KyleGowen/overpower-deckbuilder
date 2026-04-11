@@ -6,6 +6,7 @@ import { sendV1Unauthorized } from '../api/http/v1Envelope';
 import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdmin';
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
 import { NewUserSampleDeckService } from './newUserSampleDeckService';
+import { type ISessionRepository, SESSION_TTL_MS } from '../database/sessionRepository';
 
 export interface LoginCredentials {
   username: string;
@@ -21,21 +22,18 @@ export interface LoginResponse {
   error?: string;
 }
 
-export interface SessionData {
-  userId: string;
-  expiresAt: number;
-}
-
 export class AuthenticationService {
   private userRepository: UserRepository;
-  private sessions: Map<string, SessionData> = new Map();
+  private sessionRepository: ISessionRepository;
   private newUserSampleDeckService: NewUserSampleDeckService | null;
 
   constructor(
     userRepository: UserRepository,
+    sessionRepository: ISessionRepository,
     newUserSampleDeckService?: NewUserSampleDeckService
   ) {
     this.userRepository = userRepository;
+    this.sessionRepository = sessionRepository;
     this.newUserSampleDeckService = newUserSampleDeckService ?? null;
     initializeFirebaseAdmin();
   }
@@ -56,43 +54,41 @@ export class AuthenticationService {
   }
 
   /**
-   * Create a new session for the user
+   * Create a new session for the user (persisted in Postgres).
    */
-  public createSession(user: User): string {
+  public async createSession(user: User): Promise<string> {
     const sessionId = this.generateSessionId();
-    const expiresAt = Date.now() + (2 * 60 * 60 * 1000); // 2 hours
-
-    this.sessions.set(sessionId, {
-      userId: user.id,
-      expiresAt
-    });
-
+    const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+    await this.sessionRepository.insert(user.id, sessionId, expiresAt);
     return sessionId;
   }
 
   /**
-   * Validate a session and return user if valid
+   * Validate a session and return user if valid; slides expiry on success.
    */
-  public validateSession(sessionId: string): { userId: string } | null {
-    const session = this.sessions.get(sessionId);
-    
-    if (!session) {
+  public async validateSession(sessionId: string): Promise<{ userId: string } | null> {
+    try {
+      const newExpiresAt = new Date(Date.now() + SESSION_TTL_MS);
+      const userId = await this.sessionRepository.validateAndSlideExpiry(sessionId, newExpiresAt);
+      if (!userId) {
+        return null;
+      }
+      return { userId };
+    } catch (error) {
+      console.error('Session validation error:', error);
       return null;
     }
-
-    if (Date.now() > session.expiresAt) {
-      this.sessions.delete(sessionId);
-      return null;
-    }
-
-    return { userId: session.userId };
   }
 
   /**
    * Destroy a session
    */
-  public destroySession(sessionId: string): void {
-    this.sessions.delete(sessionId);
+  public async destroySession(sessionId: string): Promise<void> {
+    try {
+      await this.sessionRepository.deleteByToken(sessionId);
+    } catch (error) {
+      console.error('Session destroy error:', error);
+    }
   }
 
   /**
@@ -115,21 +111,21 @@ export class AuthenticationService {
   public async handleLogin(req: Request, res: Response): Promise<void> {
     try {
       const { username, password } = req.body;
-      
+
       if (!username || !password) {
         res.status(400).json({ success: false, error: 'Username and password are required' });
         return;
       }
 
       const user = await this.authenticateUser({ username, password });
-      
+
       if (user) {
-        const sessionId = this.createSession(user);
-        
+        const sessionId = await this.createSession(user);
+
         res.cookie('sessionId', sessionId, {
           httpOnly: true,
           secure: process.env.COOKIE_SECURE === 'true',
-          maxAge: 2 * 60 * 60 * 1000,
+          maxAge: SESSION_TTL_MS,
           sameSite: 'lax'
         });
         // Update last_login_at on successful login/session creation
@@ -139,14 +135,14 @@ export class AuthenticationService {
           // Do not fail login if timestamp update fails; log and continue
           console.error('Warning: failed to update last_login_at:', e);
         }
-        
-        res.json({ 
-          success: true, 
-          data: { 
-            userId: user.id, 
+
+        res.json({
+          success: true,
+          data: {
+            userId: user.id,
             username: user.name,
             role: user.role
-          } 
+          }
         });
       } else {
         res.status(401).json({ success: false, error: 'Invalid username or password' });
@@ -160,14 +156,14 @@ export class AuthenticationService {
   /**
    * Handle logout request
    */
-  public handleLogout(req: Request, res: Response): void {
+  public async handleLogout(req: Request, res: Response): Promise<void> {
     try {
       const sessionId = req.cookies?.sessionId;
-      
+
       if (sessionId) {
-        this.destroySession(sessionId);
+        await this.destroySession(sessionId);
       }
-      
+
       res.clearCookie('sessionId');
       res.json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
@@ -237,11 +233,11 @@ export class AuthenticationService {
         }
       }
 
-      const sessionId = this.createSession(user);
+      const sessionId = await this.createSession(user);
       res.cookie('sessionId', sessionId, {
         httpOnly: true,
         secure: process.env.COOKIE_SECURE === 'true',
-        maxAge: 2 * 60 * 60 * 1000,
+        maxAge: SESSION_TTL_MS,
         sameSite: 'lax'
       });
 
@@ -322,11 +318,11 @@ export class AuthenticationService {
         }
       }
 
-      const sessionId = this.createSession(user);
+      const sessionId = await this.createSession(user);
       res.cookie('sessionId', sessionId, {
         httpOnly: true,
         secure: process.env.COOKIE_SECURE === 'true',
-        maxAge: 2 * 60 * 60 * 1000,
+        maxAge: SESSION_TTL_MS,
         sameSite: 'lax'
       });
 
@@ -352,14 +348,14 @@ export class AuthenticationService {
   public async handleSessionValidation(req: Request, res: Response): Promise<void> {
     try {
       const sessionId = req.cookies?.sessionId;
-      
+
       if (!sessionId) {
         res.status(401).json({ success: false, error: 'No session found' });
         return;
       }
 
-      const session = this.validateSession(sessionId);
-      
+      const session = await this.validateSession(sessionId);
+
       if (!session) {
         res.status(401).json({ success: false, error: 'Invalid or expired session' });
         return;
@@ -367,15 +363,15 @@ export class AuthenticationService {
 
       // Get the full user object
       const user = await this.getUserById(session.userId);
-      
+
       if (!user) {
         res.status(401).json({ success: false, error: 'User not found' });
         return;
       }
 
-      res.json({ 
-        success: true, 
-        data: user 
+      res.json({
+        success: true,
+        data: user
       });
     } catch (error) {
       console.error('Session validation error:', error);
@@ -390,7 +386,7 @@ export class AuthenticationService {
     return async (req: Request, res: Response, next: NextFunction) => {
       const sessionId = req.cookies?.sessionId;
       const { userId } = req.params;
-      
+
       // Special handling for guest routes - allow access without session for any user with GUEST role
       if (userId === 'guest') {
         // Find any user with GUEST role
@@ -401,7 +397,7 @@ export class AuthenticationService {
           return next();
         }
       }
-      
+
       if (!sessionId) {
         // Return JSON error for API calls, redirect for page requests
         if (req.originalUrl.startsWith('/api/v1')) {
@@ -413,7 +409,7 @@ export class AuthenticationService {
         return res.redirect('/');
       }
 
-      const session = this.validateSession(sessionId);
+      const session = await this.validateSession(sessionId);
 
       if (!session) {
         if (req.originalUrl.startsWith('/api/v1')) {
@@ -436,7 +432,7 @@ export class AuthenticationService {
         }
         return res.redirect('/');
       }
-      
+
       (req as unknown as Record<string, unknown>).user = user;
       next();
     };
@@ -450,4 +446,3 @@ export class AuthenticationService {
     return crypto.randomBytes(32).toString('hex');
   }
 }
-

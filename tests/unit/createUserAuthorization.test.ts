@@ -24,8 +24,14 @@ describe('Create User Authorization Security Tests', () => {
             createUser: jest.fn()
         } as any;
 
+        const mockSessionRepository = {
+            insert: jest.fn().mockResolvedValue(undefined),
+            validateAndSlideExpiry: jest.fn().mockResolvedValue(null),
+            deleteByToken: jest.fn().mockResolvedValue(undefined)
+        };
+
         // Create auth service with mocked repository
-        authService = new AuthenticationService(mockUserRepository);
+        authService = new AuthenticationService(mockUserRepository, mockSessionRepository as any);
 
         // Mock request and response objects
         mockRequest = {

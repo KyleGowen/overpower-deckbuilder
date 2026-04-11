@@ -1,6 +1,5 @@
 import request from 'supertest';
 import { UserPersistenceService } from '../../src/persistence/userPersistence';
-import { AuthenticationService } from '../../src/services/AuthenticationService';
 import { User, UserRole } from '../../src/types';
 import { app, integrationTestUtils } from '../setup-integration';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
@@ -9,7 +8,6 @@ describe('Authentication Scenarios Integration Tests', () => {
   let userPersistence: UserPersistenceService;
   let userRepository: any;
   let server: any;
-  let authService: AuthenticationService;
   let testUser: User | undefined;
 
   beforeAll(async () => {
@@ -19,8 +17,6 @@ describe('Authentication Scenarios Integration Tests', () => {
     
     // Use the same userPersistence instance as the test server
     userPersistence = new UserPersistenceService();
-    // Create authService for session validation
-    authService = new AuthenticationService(userRepository);
 
     // Start the server on a different port for tests
     const PORT = process.env.TEST_PORT || 3002;

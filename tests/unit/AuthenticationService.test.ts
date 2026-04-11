@@ -1,15 +1,27 @@
 import { AuthenticationService } from '../../src/services/AuthenticationService';
 import { UserRepository } from '../../src/repository/UserRepository';
-import { UserPersistenceService } from '../../src/persistence/userPersistence';
 import { NewUserSampleDeckService } from '../../src/services/newUserSampleDeckService';
 import { User, UserRole } from '../../src/types';
 import { Request, Response, NextFunction } from 'express';
 import { getFirebaseAdmin } from '../../src/config/firebaseAdmin';
 import { checkLimit, recordCreation } from '../../src/middleware/newAccountRateLimiter';
+import { SESSION_TTL_MS } from '../../src/database/sessionRepository';
+
+function createMockSessionRepository() {
+  const tokenToUser = new Map<string, string>();
+  return {
+    insert: jest.fn(async (userId: string, token: string) => {
+      tokenToUser.set(token, userId);
+    }),
+    validateAndSlideExpiry: jest.fn(async (token: string) => tokenToUser.get(token) ?? null),
+    deleteByToken: jest.fn(async (token: string) => {
+      tokenToUser.delete(token);
+    })
+  };
+}
 
 // Mock dependencies
 jest.mock('../../src/repository/UserRepository');
-jest.mock('../../src/persistence/userPersistence');
 jest.mock('../../src/config/firebaseAdmin', () => ({
   getFirebaseAdmin: jest.fn(),
   initializeFirebaseAdmin: jest.fn()
@@ -22,7 +34,7 @@ jest.mock('../../src/middleware/newAccountRateLimiter', () => ({
 describe('AuthenticationService', () => {
   let authService: AuthenticationService;
   let mockUserRepository: jest.Mocked<UserRepository>;
-  let mockUserPersistence: jest.Mocked<UserPersistenceService>;
+  let mockSessionRepository: ReturnType<typeof createMockSessionRepository>;
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
@@ -50,25 +62,10 @@ describe('AuthenticationService', () => {
       initialize: jest.fn()
     } as jest.Mocked<UserRepository>;
 
-    mockUserPersistence = {
-      authenticateUser: jest.fn(),
-      createSession: jest.fn(),
-      validateSession: jest.fn(),
-      logout: jest.fn(),
-      loadUsers: jest.fn(),
-      loadSessions: jest.fn(),
-      saveUsers: jest.fn(),
-      saveSessions: jest.fn(),
-      getUserById: jest.fn(),
-      getUserByUsername: jest.fn(),
-      getAllUsers: jest.fn(),
-      getActiveSessions: jest.fn(),
-      cleanupExpiredSessions: jest.fn(),
-      initialize: jest.fn()
-    } as any;
+    mockSessionRepository = createMockSessionRepository();
 
     // Create service instance
-    authService = new AuthenticationService(mockUserRepository);
+    authService = new AuthenticationService(mockUserRepository, mockSessionRepository as any);
 
     // Setup mock request/response
     mockRequest = {
@@ -171,7 +168,7 @@ describe('AuthenticationService', () => {
         email: 'test@example.com',
         role: 'USER' as UserRole
       };
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       
       mockRequest.cookies = { sessionId };
       mockRequest.originalUrl = '/users/123/decks';
@@ -192,7 +189,7 @@ describe('AuthenticationService', () => {
         email: 'test@example.com',
         role: 'USER' as UserRole
       };
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       
       mockRequest.cookies = { sessionId };
       mockRequest.originalUrl = '/api/decks';
@@ -218,7 +215,7 @@ describe('AuthenticationService', () => {
       };
 
       // Create a valid session in the service
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       mockRequest.cookies = { sessionId };
       mockUserRepository.getUserById.mockResolvedValue(user);
 
@@ -288,7 +285,7 @@ describe('AuthenticationService', () => {
       expect(mockResponse.cookie).toHaveBeenCalledWith('sessionId', expect.any(String), {
         httpOnly: true,
         secure: false,
-        maxAge: 2 * 60 * 60 * 1000,
+        maxAge: SESSION_TTL_MS,
         sameSite: 'lax'
       });
       expect(mockResponse.json).toHaveBeenCalledWith({
@@ -326,11 +323,12 @@ describe('AuthenticationService', () => {
         email: 'test@example.com',
         role: 'USER' as UserRole
       };
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       mockRequest.cookies = { sessionId };
 
       await authService.handleLogout(mockRequest as Request, mockResponse as Response);
 
+      expect(mockSessionRepository.deleteByToken).toHaveBeenCalledWith(sessionId);
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('sessionId');
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
@@ -343,7 +341,7 @@ describe('AuthenticationService', () => {
 
       await authService.handleLogout(mockRequest as Request, mockResponse as Response);
 
-      expect(mockUserPersistence.logout).not.toHaveBeenCalled();
+      expect(mockSessionRepository.deleteByToken).not.toHaveBeenCalled();
       expect(mockResponse.clearCookie).toHaveBeenCalledWith('sessionId');
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
@@ -378,7 +376,7 @@ describe('AuthenticationService', () => {
       };
 
       // Create a session and set up the request properly
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       mockRequest.cookies = { sessionId };
       mockUserRepository.getUserById.mockResolvedValue(user);
 
@@ -410,7 +408,7 @@ describe('AuthenticationService', () => {
         email: 'test@example.com',
         role: 'USER' as UserRole
       };
-      const sessionId = authService.createSession(user);
+      const sessionId = await authService.createSession(user);
       mockRequest.cookies = { sessionId };
       mockUserRepository.getUserById.mockRejectedValue(new Error('Database error'));
 
@@ -685,7 +683,11 @@ describe('AuthenticationService', () => {
       const mockSampleDeckService = {
         copyRandomGuestDeckForUser: jest.fn().mockResolvedValue('deck-id')
       } as unknown as NewUserSampleDeckService;
-      const authWithSampleDeck = new AuthenticationService(mockUserRepository, mockSampleDeckService);
+      const authWithSampleDeck = new AuthenticationService(
+        mockUserRepository,
+        createMockSessionRepository() as any,
+        mockSampleDeckService
+      );
 
       const newUser: User = {
         id: 'new-google-id',

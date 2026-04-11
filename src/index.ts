@@ -8,6 +8,7 @@ import { AuthenticationService } from './services/AuthenticationService';
 import { NewUserSampleDeckService } from './services/newUserSampleDeckService';
 import { DeckValidationService } from './services/deckValidationService';
 import { CollectionsRepository } from './database/collectionsRepository';
+import { createSessionRepositoryFromDataSource } from './database/sessionRepository';
 import { CollectionService } from './services/collectionService';
 import { DeckBackgroundService } from './services/deckBackgroundService';
 import { GuestDeckPersistenceService } from './services/guestDeckPersistence';
@@ -66,7 +67,8 @@ const deckBusinessService = new DeckService(deckRepository);
 
 // Initialize authentication service
 const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository);
-const authService = new AuthenticationService(userRepository, newUserSampleDeckService);
+const sessionRepository = createSessionRepositoryFromDataSource(dataSource);
+const authService = new AuthenticationService(userRepository, sessionRepository, newUserSampleDeckService);
 
 // Initialize collection repository and service
 const collectionsRepository = new CollectionsRepository(dataSource.getPool());

@@ -9,13 +9,17 @@ const HTML_POPUP_FRIENDLY_HEADERS = {
 
 export function registerPageRoutes(app: express.Application, deps: PageRoutesDeps): void {
   // GET /logout - clears session and redirects to home (for testing/browser automation)
-  app.get('/logout', (req, res) => {
-    const sessionId = req.cookies?.sessionId;
-    if (sessionId) {
-      deps.authService.destroySession(sessionId);
+  app.get('/logout', async (req, res, next) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        await deps.authService.destroySession(sessionId);
+      }
+      res.clearCookie('sessionId');
+      res.redirect('/');
+    } catch (err) {
+      next(err);
     }
-    res.clearCookie('sessionId');
-    res.redirect('/');
   });
   
   // Main page route - displays characters table

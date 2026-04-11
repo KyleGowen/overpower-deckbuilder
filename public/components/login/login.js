@@ -126,13 +126,16 @@ function createFallbackLoginModal() {
  * Sets up event listeners for login form and guest login button
  */
 function initializeLoginComponent() {
-    // Wait for DOM to be ready
+    const afterTemplate = () => {
+        void attemptGoogleRedirectCompletion();
+    };
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', async () => {
             await loadLoginTemplate();
+            afterTemplate();
         });
     } else {
-        loadLoginTemplate();
+        void loadLoginTemplate().then(afterTemplate);
     }
 }
 
@@ -304,6 +307,53 @@ async function handleGuestLogin() {
 }
 
 /**
+ * Finish Google sign-in after we have a Firebase ID token (popup or redirect return).
+ */
+async function finalizeGoogleSessionWithIdToken(idToken) {
+    const result2 = await window.authService.loginWithGoogle(idToken);
+    if (result2.success) {
+        const user = result2.data;
+        if (typeof currentUser !== 'undefined') currentUser = user;
+        if (typeof window !== 'undefined') window.currentUser = user;
+        if (typeof updateUserWelcome === 'function') updateUserWelcome();
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) mainContainer.style.display = 'grid';
+        if (typeof showMainApp === 'function') showMainApp();
+    } else if (typeof window.showLoginError === 'function') {
+        window.showLoginError(result2.error || 'Google sign-in failed');
+    }
+}
+
+/**
+ * After returning from signInWithRedirect, exchange Firebase user for app session.
+ */
+async function attemptGoogleRedirectCompletion() {
+    try {
+        const auth = await (typeof initializeFirebase === 'function' ? initializeFirebase() : null);
+        if (!auth || typeof auth.getRedirectResult !== 'function') {
+            return;
+        }
+        const result = await auth.getRedirectResult();
+        if (!result || !result.user) {
+            return;
+        }
+        const idToken = await result.user.getIdToken();
+        if (!idToken) {
+            if (typeof window.showLoginError === 'function') {
+                window.showLoginError('Could not get Google credentials');
+            }
+            return;
+        }
+        await finalizeGoogleSessionWithIdToken(idToken);
+    } catch (err) {
+        console.error('Google redirect completion error:', err);
+        if (typeof window.showLoginError === 'function') {
+            window.showLoginError(err.message || 'Google sign-in failed');
+        }
+    }
+}
+
+/**
  * Handle Google login button click
  */
 async function handleGoogleLogin() {
@@ -319,6 +369,11 @@ async function handleGoogleLogin() {
             return;
         }
         const provider = new firebase.auth.GoogleAuthProvider();
+        // HTTP origins are not "secure" in the browser; popup COOP breaks window.closed / close.
+        if (typeof window.isSecureContext === 'boolean' && !window.isSecureContext) {
+            await auth.signInWithRedirect(provider);
+            return;
+        }
         const result = await auth.signInWithPopup(provider);
         const idToken = result.user ? await result.user.getIdToken() : null;
         if (!idToken) {
@@ -327,20 +382,7 @@ async function handleGoogleLogin() {
             }
             return;
         }
-        const result2 = await window.authService.loginWithGoogle(idToken);
-        if (result2.success) {
-            const user = result2.data;
-            if (typeof currentUser !== 'undefined') currentUser = user;
-            if (typeof window !== 'undefined') window.currentUser = user;
-            if (typeof updateUserWelcome === 'function') updateUserWelcome();
-            const mainContainer = document.getElementById('mainContainer');
-            if (mainContainer) mainContainer.style.display = 'grid';
-            if (typeof showMainApp === 'function') showMainApp();
-        } else {
-            if (typeof window.showLoginError === 'function') {
-                window.showLoginError(result2.error || 'Google sign-in failed');
-            }
-        }
+        await finalizeGoogleSessionWithIdToken(idToken);
     } catch (err) {
         console.error('Google login error:', err);
         if (typeof window.showLoginError === 'function') {

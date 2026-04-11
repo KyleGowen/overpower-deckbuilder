@@ -51,6 +51,10 @@ npm run dev
 
 By default the server listens on `http://localhost:8085` (override with `PORT`).
 
+### Session cookie and HTTP
+
+Login sets an httpOnly `sessionId` cookie backed by PostgreSQL. For plain **HTTP** deployments, leave **`COOKIE_SECURE` unset or `false`** so browsers will store and send the cookie. Set **`COOKIE_SECURE=true`** only when users reach the app over **HTTPS**.
+
 ### Run tests (unit + integration)
 
 ```bash

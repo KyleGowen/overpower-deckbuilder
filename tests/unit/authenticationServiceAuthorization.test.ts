@@ -24,8 +24,14 @@ describe('AuthenticationService Authorization Security Tests', () => {
             createUser: jest.fn()
         } as any;
 
+        const mockSessionRepository = {
+            insert: jest.fn().mockResolvedValue(undefined),
+            validateAndSlideExpiry: jest.fn().mockResolvedValue(null),
+            deleteByToken: jest.fn().mockResolvedValue(undefined)
+        };
+
         // Create auth service with mocked repository
-        authService = new AuthenticationService(mockUserRepository);
+        authService = new AuthenticationService(mockUserRepository, mockSessionRepository as any);
 
         // Mock request and response objects
         mockRequest = {
@@ -86,17 +92,14 @@ describe('AuthenticationService Authorization Security Tests', () => {
             expect(result).toEqual(expiredSession);
         });
 
-        it('should handle session validation errors gracefully', () => {
-            // Mock validateSession to throw an error
-            jest.spyOn(authService as any, 'validateSession').mockImplementation(() => {
-                throw new Error('Session validation failed');
-            });
+        it('should handle session validation errors gracefully', async () => {
+            jest.spyOn(authService as any, 'validateSession').mockImplementation(() =>
+                Promise.reject(new Error('Session validation failed'))
+            );
 
-            const sessionId = 'error-session';
-            
-            expect(() => {
-                (authService as any).validateSession(sessionId);
-            }).toThrow('Session validation failed');
+            await expect((authService as any).validateSession('error-session')).rejects.toThrow(
+                'Session validation failed'
+            );
         });
     });
 
