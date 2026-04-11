@@ -1,5 +1,32 @@
 import { Pool } from 'pg';
 
+/** Fixed SQL per table — no `${}` in pool.query (Semgrep pg-sql-template-interpolation). */
+type CardTable = 'characters' | 'locations' | 'power_cards';
+
+const CARD_TABLE_QUERIES: Record<
+  CardTable,
+  { ids: string; emptyNames: string; sample: string; count: string }
+> = {
+  characters: {
+    ids: 'SELECT id FROM characters',
+    emptyNames: "SELECT id, name FROM characters WHERE name IS NULL OR name = ''",
+    sample: 'SELECT * FROM characters LIMIT 5',
+    count: 'SELECT COUNT(*) FROM characters'
+  },
+  locations: {
+    ids: 'SELECT id FROM locations',
+    emptyNames: "SELECT id, name FROM locations WHERE name IS NULL OR name = ''",
+    sample: 'SELECT * FROM locations LIMIT 5',
+    count: 'SELECT COUNT(*) FROM locations'
+  },
+  power_cards: {
+    ids: 'SELECT id FROM power_cards',
+    emptyNames: "SELECT id, name FROM power_cards WHERE name IS NULL OR name = ''",
+    sample: 'SELECT * FROM power_cards LIMIT 5',
+    count: 'SELECT COUNT(*) FROM power_cards'
+  }
+};
+
 describe('Database View Integration Tests', () => {
   let pool: Pool;
 
@@ -227,35 +254,35 @@ describe('Database View Integration Tests', () => {
 
   describe('Card Data Integrity', () => {
     it('should verify all cards have unique IDs', async () => {
-      const tables = ['characters', 'locations', 'power_cards'];
-      
+      const tables: CardTable[] = ['characters', 'locations', 'power_cards'];
+
       for (const table of tables) {
-        const result = await pool.query(`SELECT id FROM ${table}`);
+        const result = await pool.query(CARD_TABLE_QUERIES[table].ids);
         const ids = result.rows.map(row => row.id);
         const uniqueIds = new Set(ids);
-        
+
         expect(uniqueIds.size).toBe(ids.length);
         console.log(`✅ ${table} unique IDs verified:`, ids.length, 'cards');
       }
     });
 
     it('should verify all cards have non-empty names', async () => {
-      const tables = ['characters', 'locations', 'power_cards'];
-      
+      const tables: CardTable[] = ['characters', 'locations', 'power_cards'];
+
       for (const table of tables) {
-        const result = await pool.query(`SELECT id, name FROM ${table} WHERE name IS NULL OR name = ''`);
-        
+        const result = await pool.query(CARD_TABLE_QUERIES[table].emptyNames);
+
         expect(result.rows).toHaveLength(0);
         console.log(`✅ ${table} non-empty names verified`);
       }
     });
 
     it('should verify card data consistency', async () => {
-      const tables = ['characters', 'locations', 'power_cards'];
-      
+      const tables: CardTable[] = ['characters', 'locations', 'power_cards'];
+
       for (const table of tables) {
-        const result = await pool.query(`SELECT * FROM ${table} LIMIT 5`);
-        
+        const result = await pool.query(CARD_TABLE_QUERIES[table].sample);
+
         expect(result.rows.length).toBeGreaterThan(0);
         
         result.rows.forEach(card => {
@@ -275,11 +302,11 @@ describe('Database View Integration Tests', () => {
   describe('Database Performance Verification', () => {
     it('should verify card queries perform within reasonable time', async () => {
       const startTime = Date.now();
-      
-      const tables = ['characters', 'locations', 'power_cards'];
-      
+
+      const tables: CardTable[] = ['characters', 'locations', 'power_cards'];
+
       for (const table of tables) {
-        const result = await pool.query(`SELECT COUNT(*) FROM ${table}`);
+        const result = await pool.query(CARD_TABLE_QUERIES[table].count);
         expect(result.rows).toHaveLength(1);
       }
       
