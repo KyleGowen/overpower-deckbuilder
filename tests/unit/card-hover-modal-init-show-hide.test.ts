@@ -232,17 +232,17 @@ describe('Card Hover Modal - Init and Show/Hide', () => {
             expect(mockModal.style.top).not.toBe('0px');
         });
 
-        it('should handle strict mode limitations gracefully', () => {
-            // In strict mode, arguments.callee.caller is not accessible
-            // This test verifies that when window.event is not set,
-            // the function will throw an error (expected behavior in strict mode)
+        it('does not throw when no hover event is available (strict mode; no arguments.callee)', () => {
             (window as any).event = undefined;
-            
-            // In strict mode, this will throw because arguments.callee.caller is not accessible
-            // This is expected behavior - the function requires window.event to be set
+            try {
+                (globalThis as unknown as { event?: undefined }).event = undefined;
+            } catch {
+                /* ignore */
+            }
+
             expect(() => {
                 window.showCardHoverModal!('test.webp', 'Test');
-            }).toThrow();
+            }).not.toThrow();
         });
     });
 

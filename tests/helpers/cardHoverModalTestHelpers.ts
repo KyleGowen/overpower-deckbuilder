@@ -29,6 +29,13 @@ export function createMockMouseEvent(clientX: number, clientY: number, target?: 
         writable: false
     });
 
+    (window as unknown as { event?: MouseEvent }).event = event;
+    try {
+        (globalThis as unknown as { event?: MouseEvent }).event = event;
+    } catch {
+        /* ignore */
+    }
+
     if (target) {
         (target as HTMLElement & { closest: (s: string) => Element | null }).closest = jest.fn((selector: string) => {
             if (selector.includes(target.className)) {
@@ -146,4 +153,11 @@ export function teardownCardHoverModalMocks(win: Window & typeof globalThis): vo
         delete w[key];
     }
     w.event = undefined;
+    try {
+        if (typeof globalThis !== 'undefined') {
+            (globalThis as unknown as { event?: unknown }).event = undefined;
+        }
+    } catch {
+        /* ignore */
+    }
 }

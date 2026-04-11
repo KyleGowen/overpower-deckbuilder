@@ -17,6 +17,15 @@ import {
     createMockMouseEvent
 } from '../helpers/cardHoverModalTestHelpers';
 
+/** MouseEvent with target; native closest() so collection rows resolve in jsdom. */
+function collectionHoverMouseEvent(clientX: number, clientY: number, target: HTMLElement): MouseEvent {
+    const e = new MouseEvent('mousemove', { bubbles: true, clientX, clientY });
+    Object.defineProperty(e, 'target', { value: target, writable: false });
+    (window as unknown as { event: MouseEvent }).event = e;
+    (globalThis as unknown as { event: MouseEvent }).event = e;
+    return e;
+}
+
 describe('Card Hover Modal - Positioning', () => {
     let mockModal: HTMLElement;
     let mockWindow: Window & typeof globalThis;
@@ -159,25 +168,59 @@ describe('Card Hover Modal - Positioning', () => {
     });
 
     describe('Positioning Algorithm - Collection Card Button Avoidance', () => {
-        it('should avoid collection card buttons', () => {
+        it('should keep modal clear of the full collection quantity strip', () => {
             const cardElement = document.createElement('div');
             cardElement.className = 'collection-card-item';
+            const actions = document.createElement('div');
+            actions.className = 'collection-card-actions';
+            const wrap = document.createElement('div');
+            wrap.className = 'collection-quantity-control';
             const button = document.createElement('button');
             button.className = 'collection-quantity-btn';
-            cardElement.appendChild(button);
+            wrap.appendChild(button);
+            actions.appendChild(wrap);
+            cardElement.appendChild(actions);
             document.body.appendChild(cardElement);
 
-            const buttonRect = { left: 200, right: 250, top: 200, bottom: 250 };
-            jest.spyOn(button, 'getBoundingClientRect').mockReturnValue(buttonRect as DOMRect);
-            jest.spyOn(cardElement, 'querySelectorAll').mockReturnValue([button] as any);
+            const controlRect = {
+                left: 200,
+                right: 400,
+                top: 200,
+                bottom: 240,
+                width: 200,
+                height: 40,
+                x: 200,
+                y: 200,
+                toJSON: () => ({})
+            };
+            jest.spyOn(actions, 'getBoundingClientRect').mockReturnValue(controlRect as DOMRect);
+            jest.spyOn(cardElement, 'getBoundingClientRect').mockReturnValue({
+                left: 0,
+                right: 500,
+                top: 190,
+                bottom: 270,
+                width: 500,
+                height: 80,
+                x: 0,
+                y: 190,
+                toJSON: () => ({})
+            } as DOMRect);
 
-            const mockEvent = createMockMouseEvent(225, 225, button);
+            // Target the row so closest('.collection-card-item') resolves reliably in jsdom
+            const mockEvent = collectionHoverMouseEvent(260, 150, cardElement);
             window.event = mockEvent;
 
-            window.showCardHoverModal!('test.webp', 'Test');
+            // character uses landscape hover box (503×365) per card-hover-modal.js
+            const modalWidth = 503;
+            window.showCardHoverModal!('test.webp', 'Test', 'c1', 'character');
 
-            const left = parseInt(mockModal.style.left);
-            expect(left).not.toBe(225 + 80);
+            const left = parseInt(mockModal.style.left, 10);
+            const right = left + modalWidth;
+            const inflatedLeft = controlRect.left - 14;
+            const inflatedRight = controlRect.right + 14;
+            const clearToTheLeft = right <= inflatedLeft + 2;
+            const clearToTheRight = left >= inflatedRight - 2;
+            expect(clearToTheLeft || clearToTheRight).toBe(true);
         });
 
         it('should handle collection card actions container', () => {
@@ -188,16 +231,80 @@ describe('Card Hover Modal - Positioning', () => {
             cardElement.appendChild(actionsContainer);
             document.body.appendChild(cardElement);
 
-            const containerRect = { left: 200, right: 300, top: 200, bottom: 250 };
+            const containerRect = {
+                left: 200,
+                right: 300,
+                top: 200,
+                bottom: 250,
+                width: 100,
+                height: 50,
+                x: 200,
+                y: 200,
+                toJSON: () => ({})
+            };
             jest.spyOn(actionsContainer, 'getBoundingClientRect').mockReturnValue(containerRect as DOMRect);
-            jest.spyOn(cardElement, 'querySelector').mockReturnValue(actionsContainer);
 
             const mockEvent = createMockMouseEvent(250, 225, actionsContainer);
             (window as any).event = mockEvent;
 
             expect(() => {
-                window.showCardHoverModal!('test.webp', 'Test');
+                window.showCardHoverModal!('test.webp', 'Test', 'c1', 'character');
             }).not.toThrow();
+        });
+
+        it('positions preview clear of controls when pointer is on name column (table row)', () => {
+            Object.defineProperty(mockWindow, 'innerWidth', { value: 1200, writable: true });
+            Object.defineProperty(mockWindow, 'innerHeight', { value: 800, writable: true });
+
+            const row = document.createElement('tr');
+            row.className = 'collection-card-item';
+            const nameTd = document.createElement('td');
+            nameTd.className = 'collection-card-name';
+            const actionsTd = document.createElement('td');
+            actionsTd.className = 'collection-card-actions';
+            const qty = document.createElement('div');
+            qty.className = 'collection-quantity-control';
+            actionsTd.appendChild(qty);
+            row.appendChild(nameTd);
+            row.appendChild(actionsTd);
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            tbody.appendChild(row);
+            table.appendChild(tbody);
+            document.body.appendChild(table);
+
+            jest.spyOn(actionsTd, 'getBoundingClientRect').mockReturnValue({
+                left: 900,
+                right: 1100,
+                top: 200,
+                bottom: 240,
+                width: 200,
+                height: 40,
+                x: 900,
+                y: 200,
+                toJSON: () => ({})
+            } as DOMRect);
+            jest.spyOn(row, 'getBoundingClientRect').mockReturnValue({
+                left: 0,
+                right: 1200,
+                top: 195,
+                bottom: 265,
+                width: 1200,
+                height: 70,
+                x: 0,
+                y: 195,
+                toJSON: () => ({})
+            } as DOMRect);
+
+            const mockEvent = collectionHoverMouseEvent(500, 150, row);
+            (window as any).event = mockEvent;
+
+            const modalWidth = 503;
+            window.showCardHoverModal!('test.webp', 'Test', 'c1', 'character');
+
+            const left = parseInt(mockModal.style.left, 10);
+            const avoidLeft = 900 - 14;
+            expect(left + modalWidth).toBeLessThanOrEqual(avoidLeft + 2);
         });
     });
 

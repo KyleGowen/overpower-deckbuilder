@@ -9,14 +9,129 @@
 (function() {
     'use strict';
     
+    /** Inflated rect around collection row quantity strip (− / + / Set). */
+    const COLLECTION_CONTROLS_MARGIN = 14;
+    const COLLECTION_MODAL_GAP = 16;
+
+    /**
+     * Full bounds of collection quantity controls (desktop td, mobile actions strip, or inner control).
+     * @param {HTMLElement} cardElement - .collection-card-item (tr or li)
+     * @returns {{left:number,right:number,top:number,bottom:number}|null}
+     */
+    function getCollectionControlsInflatedRect(cardElement) {
+        if (!cardElement || typeof cardElement.querySelector !== 'function') return null;
+        const el = cardElement.querySelector(
+            '.collection-card-actions, .collection-mobile-row-actions, .collection-quantity-control'
+        );
+        if (!el) return null;
+        const cr = el.getBoundingClientRect();
+        if (cr.width < 1 && cr.height < 1) return null;
+        const m = COLLECTION_CONTROLS_MARGIN;
+        const rowRect = cardElement.getBoundingClientRect();
+        const rowOk = rowRect.height >= 1 && rowRect.width >= 1;
+        // Use the full collection row band vertically so a tall preview that lines up with the row
+        // horizontally still counts as overlapping the controls, even if clientY+offset sits slightly
+        // below the short actions box.
+        const top = (rowOk ? Math.min(cr.top, rowRect.top) : cr.top) - m;
+        const bottom = (rowOk ? Math.max(cr.bottom, rowRect.bottom) : cr.bottom) + m;
+        return {
+            left: cr.left - m,
+            right: cr.right + m,
+            top: top,
+            bottom: bottom
+        };
+    }
+
+    function modalIntersectsAvoidRect(x, y, modalWidth, modalHeight, ar) {
+        if (!ar) return false;
+        return (
+            x < ar.right &&
+            x + modalWidth > ar.left &&
+            y < ar.bottom &&
+            y + modalHeight > ar.top
+        );
+    }
+
+    /**
+     * If the modal box overlaps the collection controls rect, try left / right / below / above.
+     */
+    function resolveCollectionModalAgainstControls(x, y, modalWidth, modalHeight, avoidRect, event) {
+        if (!avoidRect || !modalIntersectsAvoidRect(x, y, modalWidth, modalHeight, avoidRect)) {
+            return { x: x, y: y };
+        }
+        const gap = COLLECTION_MODAL_GAP;
+        const pad = 10;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const tryPositions = [
+            { x: avoidRect.left - modalWidth - gap, y: event.clientY - modalHeight / 2 },
+            { x: avoidRect.right + gap, y: event.clientY - modalHeight / 2 },
+            { x: event.clientX - modalWidth / 2, y: avoidRect.bottom + gap },
+            { x: event.clientX - modalWidth / 2, y: avoidRect.top - modalHeight - gap }
+        ];
+
+        for (let i = 0; i < tryPositions.length; i++) {
+            let nx = tryPositions[i].x;
+            let ny = tryPositions[i].y;
+            if (nx < pad) nx = pad;
+            if (ny < pad) ny = pad;
+            if (nx + modalWidth > vw - pad) nx = vw - modalWidth - pad;
+            if (ny + modalHeight > vh - pad) ny = vh - modalHeight - pad;
+            if (!modalIntersectsAvoidRect(nx, ny, modalWidth, modalHeight, avoidRect)) {
+                return { x: nx, y: ny };
+            }
+        }
+
+        let nx = avoidRect.left - modalWidth - gap;
+        let ny = Math.min(Math.max(pad, event.clientY - modalHeight / 2), vh - modalHeight - pad);
+        nx = Math.max(pad, Math.min(nx, vw - modalWidth - pad));
+        return { x: nx, y: ny };
+    }
+
+    /**
+     * Min-distance nudge that does not shove the modal back over collection controls.
+     */
+    function applyMinDistanceFromCursorGuardCollection(
+        x,
+        y,
+        event,
+        minDist,
+        modalWidth,
+        modalHeight,
+        avoidRect
+    ) {
+        let nx = x;
+        let ny = y;
+        if (Math.abs(nx - event.clientX) < minDist) {
+            const right = event.clientX + minDist;
+            const left = event.clientX - minDist - modalWidth;
+            if (!avoidRect || !modalIntersectsAvoidRect(right, ny, modalWidth, modalHeight, avoidRect)) {
+                nx = right;
+            } else if (left >= 10 && (!avoidRect || !modalIntersectsAvoidRect(left, ny, modalWidth, modalHeight, avoidRect))) {
+                nx = left;
+            }
+        }
+        if (Math.abs(ny - event.clientY) < minDist) {
+            const down = event.clientY + minDist;
+            const up = event.clientY - minDist - modalHeight;
+            if (!avoidRect || !modalIntersectsAvoidRect(nx, down, modalWidth, modalHeight, avoidRect)) {
+                ny = down;
+            } else if (up >= 10 && (!avoidRect || !modalIntersectsAvoidRect(nx, up, modalWidth, modalHeight, avoidRect))) {
+                ny = up;
+            }
+        }
+        return { x: nx, y: ny };
+    }
+
     /**
      * Positions the modal based on mouse position and button avoidance logic.
      * 
      * Algorithm:
      * 1. Start with mouse position + 80px offset
      * 2. Detect nearby buttons and reposition to avoid them
-     * 3. Ensure minimum 100px distance from cursor
-     * 4. Constrain to viewport boundaries
+     * 3. Collection view: keep preview clear of the full quantity strip (incl. Set)
+     * 4. Ensure minimum 100px distance from cursor (collection-aware)
+     * 5. Constrain to viewport boundaries
      * 
      * Button avoidance priority:
      * - Left of button → Below button → Above button → Right of button
@@ -26,6 +141,8 @@
      * @private
      */
     function positionModal(event, modal, cardType) {
+        let collectionControlsAvoidRect = null;
+
         let x = event.clientX + 80;  // Larger offset to avoid cursor area
         let y = event.clientY + 80;  // Larger offset to avoid cursor area
         
@@ -49,87 +166,6 @@
         const target = event.target;
         const cardElement = target.closest('.deck-card-editor-item, .card-item, .collection-card-item');
         if (cardElement) {
-            // Handle collection view cards
-            if (cardElement.classList.contains('collection-card-item')) {
-                // Check for actions container first (similar to deck editor)
-                const actionsContainer = cardElement.querySelector('.collection-card-actions, .collection-quantity-control');
-                if (actionsContainer) {
-                    const rect = actionsContainer.getBoundingClientRect();
-                    
-                    // If mouse is near the actions area, position modal to avoid it
-                    if (event.clientX > rect.left - 100 && event.clientY > rect.top - 100) {
-                        // Try positioning to the left first with larger offset
-                        x = event.clientX - modalWidth - 80;
-                        y = event.clientY + 50;
-                        
-                        // If that would go off screen, try positioning below and to the right
-                        if (x < 10) {
-                            x = event.clientX + 80;
-                            y = event.clientY + modalHeight + 50;
-                        }
-                    }
-                }
-                
-                // Check for quantity buttons in collection view
-                const buttons = cardElement.querySelectorAll('.collection-quantity-btn');
-                let buttonAvoided = false;
-                
-                buttons.forEach(button => {
-                    const buttonRect = button.getBoundingClientRect();
-                    
-                    // Check if mouse is near the button area (larger detection zone)
-                    const buffer = 120; // Larger buffer zone for detection
-                    if (event.clientX > buttonRect.left - buffer && event.clientX < buttonRect.right + buffer &&
-                        event.clientY > buttonRect.top - buffer && event.clientY < buttonRect.bottom + buffer) {
-                        
-                        // Position modal to the left of the button with large offset
-                        x = buttonRect.left - modalWidth - 80;
-                        y = buttonRect.top - modalHeight / 2;
-                        
-                        // If that goes off screen, try positioning below with large offset
-                        if (x < 10) {
-                            x = buttonRect.right + 80;
-                            y = buttonRect.top - modalHeight / 2;
-                        }
-                        
-                        // If still off screen, try positioning above
-                        if (y < 10) {
-                            x = buttonRect.left - modalWidth / 2;
-                            y = buttonRect.top - modalHeight - 80;
-                        }
-                        
-                        // If still off screen, try positioning to the right
-                        if (x + modalWidth > window.innerWidth - 10) {
-                            x = buttonRect.left - modalWidth - 80;
-                            y = buttonRect.bottom + 80;
-                        }
-                        
-                        buttonAvoided = true;
-                    }
-                });
-                
-                // If no button was avoided, use default positioning but check for overlap
-                if (!buttonAvoided) {
-                    buttons.forEach(button => {
-                        const buttonRect = button.getBoundingClientRect();
-                        
-                        // If modal would overlap with button, move it away
-                        if (x < buttonRect.right + 20 && x + modalWidth > buttonRect.left - 20 &&
-                            y < buttonRect.bottom + 20 && y + modalHeight > buttonRect.top - 20) {
-                            // Try positioning to the left of the button with larger offset
-                            x = buttonRect.left - modalWidth - 80;
-                            y = buttonRect.top - modalHeight / 2;
-                            
-                            // If that goes off screen, try positioning below with larger offset
-                            if (x < 10) {
-                                x = buttonRect.right + 80;
-                                y = buttonRect.bottom + 80;
-                            }
-                        }
-                    });
-                }
-            }
-            
             // Handle deck editor cards
             if (cardElement.classList.contains('deck-card-editor-item')) {
                 // Check for any buttons in the deck editor card element first
@@ -222,15 +258,47 @@
                 }
             }
         }
+
+        // Collection: always keep hover preview clear of the full quantity strip (incl. Set), even when
+        // the pointer is on name/set columns and the default (cursor+80) box would span the controls.
+        if (cardElement && cardElement.classList.contains('collection-card-item')) {
+            collectionControlsAvoidRect = getCollectionControlsInflatedRect(cardElement);
+            if (collectionControlsAvoidRect) {
+                const resolved = resolveCollectionModalAgainstControls(
+                    x,
+                    y,
+                    modalWidth,
+                    modalHeight,
+                    collectionControlsAvoidRect,
+                    event
+                );
+                x = resolved.x;
+                y = resolved.y;
+            }
+        }
         
         // Minimum Distance Check:
         // Ensures modal maintains at least 100px distance from cursor to avoid blocking view
         const minDistanceFromCursor = 100; // Increased distance
-        if (Math.abs(x - event.clientX) < minDistanceFromCursor) {
-            x = event.clientX + minDistanceFromCursor;
-        }
-        if (Math.abs(y - event.clientY) < minDistanceFromCursor) {
-            y = event.clientY + minDistanceFromCursor;
+        if (collectionControlsAvoidRect) {
+            const nudged = applyMinDistanceFromCursorGuardCollection(
+                x,
+                y,
+                event,
+                minDistanceFromCursor,
+                modalWidth,
+                modalHeight,
+                collectionControlsAvoidRect
+            );
+            x = nudged.x;
+            y = nudged.y;
+        } else {
+            if (Math.abs(x - event.clientX) < minDistanceFromCursor) {
+                x = event.clientX + minDistanceFromCursor;
+            }
+            if (Math.abs(y - event.clientY) < minDistanceFromCursor) {
+                y = event.clientY + minDistanceFromCursor;
+            }
         }
         
         // Viewport Boundary Constraints:
@@ -243,6 +311,30 @@
         }
         if (y + modalHeight > window.innerHeight - 10) {
             y = window.innerHeight - modalHeight - 10;
+        }
+
+        if (
+            collectionControlsAvoidRect &&
+            modalIntersectsAvoidRect(x, y, modalWidth, modalHeight, collectionControlsAvoidRect)
+        ) {
+            const again = resolveCollectionModalAgainstControls(
+                x,
+                y,
+                modalWidth,
+                modalHeight,
+                collectionControlsAvoidRect,
+                event
+            );
+            x = again.x;
+            y = again.y;
+            if (x < 10) x = 10;
+            if (y < 10) y = 10;
+            if (x + modalWidth > window.innerWidth - 10) {
+                x = window.innerWidth - modalWidth - 10;
+            }
+            if (y + modalHeight > window.innerHeight - 10) {
+                y = window.innerHeight - modalHeight - 10;
+            }
         }
         
         modal.style.left = x + 'px';
@@ -924,10 +1016,24 @@
             
             
             // Initial Positioning:
-            // Uses the triggering mouse event to position modal initially
-            const event = window.event || arguments.callee.caller.arguments[0];
-            if (event) {
-                positionModal(event, modal, cardType);
+            // Uses the triggering mouse event to position modal initially.
+            // Prefer window.event (legacy inline handlers); also globalThis.event for tests/jsdom
+            // where window.event is not populated. Do not use arguments.callee (strict mode).
+            let hoverEvent = null;
+            try {
+                if (typeof window !== 'undefined' && window.event) {
+                    hoverEvent = window.event;
+                }
+            } catch (e1) { /* ignore */ }
+            if (!hoverEvent && typeof globalThis !== 'undefined') {
+                try {
+                    if (globalThis.event) {
+                        hoverEvent = globalThis.event;
+                    }
+                } catch (e2) { /* ignore */ }
+            }
+            if (hoverEvent) {
+                positionModal(hoverEvent, modal, cardType);
             }
             
             // Mouse Tracking:
