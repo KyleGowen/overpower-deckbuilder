@@ -65,6 +65,10 @@ async function showSignupModal() {
  */
 function showLoginError(message) {
     const errorDiv = document.getElementById('loginError');
+    if (!errorDiv) {
+        console.error('Login error (no #loginError in DOM):', message);
+        return;
+    }
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
 }

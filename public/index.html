@@ -1859,6 +1859,23 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // OAuth redirect return: finish Firebase + /api/auth/google before /api/auth/me
+                // so sessionId exists when checkAuthentication runs (see login.js).
+                try {
+                    if (typeof loadLoginTemplate === 'function') {
+                        await loadLoginTemplate();
+                    }
+                } catch (e) {
+                    console.error('loadLoginTemplate before OAuth completion:', e);
+                }
+                try {
+                    if (typeof window.attemptGoogleRedirectCompletion === 'function') {
+                        await window.attemptGoogleRedirectCompletion();
+                    }
+                } catch (e) {
+                    console.error('Google redirect completion:', e);
+                }
+
                 // Load global navigation first
                 await loadGlobalNav();
                 

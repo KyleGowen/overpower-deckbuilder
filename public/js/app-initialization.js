@@ -19,7 +19,8 @@ async function loadGlobalNav() {
 function showMainApp() {
     const mainContainer = document.getElementById('mainContainer');
     if (mainContainer) mainContainer.style.display = 'block';
-    document.getElementById('loginModal').style.display = 'none';
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) loginModal.style.display = 'none';
     // Display "Guest" with capital G for guest users, otherwise use the username/name
     const displayName = (currentUser.role === 'GUEST') 
         ? 'Guest' 

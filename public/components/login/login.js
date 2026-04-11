@@ -307,7 +307,7 @@ async function handleGuestLogin() {
 }
 
 /**
- * Finish Google sign-in after we have a Firebase ID token (popup or redirect return).
+ * Finish Google sign-in after we have a Firebase ID token (redirect return).
  */
 async function finalizeGoogleSessionWithIdToken(idToken) {
     const result2 = await window.authService.loginWithGoogle(idToken);
@@ -353,6 +353,9 @@ async function attemptGoogleRedirectCompletion() {
     }
 }
 
+/** Called from index.html before checkAuthentication so OAuth return wins the race. */
+window.attemptGoogleRedirectCompletion = attemptGoogleRedirectCompletion;
+
 /**
  * Handle Google login button click
  */
@@ -369,20 +372,8 @@ async function handleGoogleLogin() {
             return;
         }
         const provider = new firebase.auth.GoogleAuthProvider();
-        // HTTP origins are not "secure" in the browser; popup COOP breaks window.closed / close.
-        if (typeof window.isSecureContext === 'boolean' && !window.isSecureContext) {
-            await auth.signInWithRedirect(provider);
-            return;
-        }
-        const result = await auth.signInWithPopup(provider);
-        const idToken = result.user ? await result.user.getIdToken() : null;
-        if (!idToken) {
-            if (typeof window.showLoginError === 'function') {
-                window.showLoginError('Could not get Google credentials');
-            }
-            return;
-        }
-        await finalizeGoogleSessionWithIdToken(idToken);
+        // Always redirect: avoids COOP / window.closed issues (especially on HTTP).
+        await auth.signInWithRedirect(provider);
     } catch (err) {
         console.error('Google login error:', err);
         if (typeof window.showLoginError === 'function') {
