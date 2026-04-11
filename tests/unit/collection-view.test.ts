@@ -72,6 +72,8 @@ function loadModule() {
             addCardToCollection,
             sortMergedCollectionCards,
             handleCollectionMobileDetailQuantityClick,
+            handleCollectionQuantitySetClick,
+            handleCollectionMobileDetailQuantitySetClick,
             onCollectionViewMobileActivate,
             onCollectionMobileDetailKeydown
         })
@@ -269,6 +271,10 @@ describe('displayCollectionCards()', () => {
         (localStorageMock.getItem as jest.Mock).mockReturnValue(null);
     });
 
+    afterEach(() => {
+        mockCurrentUser = null;
+    });
+
     it('renders an owned card row without the unowned class', () => {
         const cards = [Object.assign(makeOwned('card-1', 'character'), { inCollection: true })];
         fns.displayCollectionCards(cards);
@@ -311,15 +317,33 @@ describe('displayCollectionCards()', () => {
         expect(buttons).toHaveLength(2);
         expect(buttons[0].textContent).toBe('-');
         expect(buttons[1].textContent).toBe('+');
+        expect(document.querySelectorAll('.collection-qty-set-input').length).toBe(1);
+        expect(document.querySelectorAll('.collection-qty-set-btn').length).toBe(1);
     });
 
-    it('unowned row has only one + button', () => {
+    it('owned row with quantity 0 renders disabled minus', () => {
+        const cards = [
+            Object.assign(makeOwned('card-1', 'character', 0), { inCollection: true }),
+        ];
+        fns.displayCollectionCards(cards);
+
+        const minus = document.querySelector('.collection-quantity-btn') as HTMLButtonElement;
+        expect(minus.textContent).toBe('-');
+        expect(minus.disabled).toBe(true);
+    });
+
+    it('unowned row has disabled minus, + add, and set controls', () => {
         const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'special')]);
         fns.displayCollectionCards(merged);
 
         const buttons = document.querySelectorAll('.collection-quantity-btn');
-        expect(buttons).toHaveLength(1);
-        expect(buttons[0].textContent).toBe('+');
+        expect(buttons).toHaveLength(2);
+        expect((buttons[0] as HTMLButtonElement).disabled).toBe(true);
+        expect(buttons[0].textContent).toBe('-');
+        expect(buttons[1].textContent).toBe('+');
+        expect(document.querySelectorAll('.collection-add-btn').length).toBe(1);
+        expect(document.querySelectorAll('.collection-qty-set-input').length).toBe(1);
+        expect(document.querySelectorAll('.collection-qty-set-btn').length).toBe(1);
     });
 
     it('unowned + button carries correct data attributes on its row', () => {
@@ -329,6 +353,7 @@ describe('displayCollectionCards()', () => {
         const row = document.querySelector('.collection-card-unowned') as HTMLElement;
         expect(row.getAttribute('data-card-id')).toBe('card-99');
         expect(row.getAttribute('data-card-type')).toBe('event');
+        expect(row.getAttribute('data-in-collection')).toBe('false');
     });
 
     it('renders the empty state when no owned cards and toggle is off', () => {
@@ -433,6 +458,62 @@ describe('displayCollectionCards()', () => {
             expect(nameCell?.textContent).not.toContain('(Alternate Art)');
         }
     });
+
+    it('handleCollectionQuantitySetClick on owned row sends PUT with absolute quantity', async () => {
+        mockCurrentUser = { role: 'USER', id: 'user-1' };
+        (global.fetch as jest.Mock).mockReset();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ errors: [], meta: {}, data: {} }),
+        });
+
+        const cards = [Object.assign(makeOwned('card-1', 'character', 2), { inCollection: true })];
+        fns.displayCollectionCards(cards);
+
+        const input = document.querySelector('.collection-qty-set-input') as HTMLInputElement;
+        const setBtn = document.querySelector('.collection-qty-set-btn') as HTMLButtonElement;
+        input.value = '7';
+        fns.handleCollectionQuantitySetClick(setBtn);
+
+        await new Promise<void>(r => setTimeout(r, 40));
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            '/api/v1/collections/me/cards/card-1',
+            expect.objectContaining({
+                method: 'PUT',
+                body: expect.stringContaining('"quantity":7'),
+            })
+        );
+    });
+
+    it('handleCollectionQuantitySetClick on unowned row sends POST with quantity', async () => {
+        mockCurrentUser = { role: 'USER', id: 'user-1' };
+        (global.fetch as jest.Mock).mockReset();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ errors: [], meta: {}, data: {} }),
+        });
+
+        const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('card-1', 'character', '001')]);
+        fns.displayCollectionCards(merged);
+
+        const input = document.querySelector('.collection-qty-set-input') as HTMLInputElement;
+        const setBtn = document.querySelector('.collection-qty-set-btn') as HTMLButtonElement;
+        input.value = '4';
+        fns.handleCollectionQuantitySetClick(setBtn);
+
+        await new Promise<void>(r => setTimeout(r, 40));
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            '/api/v1/collections/me/cards',
+            expect.objectContaining({
+                method: 'POST',
+                body: expect.stringContaining('"quantity":4'),
+            })
+        );
+    });
 });
 
 // ─── displayCollectionCards() mobile layout ──────────────────────────────────
@@ -452,6 +533,7 @@ describe('displayCollectionCards() mobile layout', () => {
 
     afterEach(() => {
         delete (window as any).isLayoutMobile;
+        mockCurrentUser = null;
     });
 
     it('renders mobile list instead of table', () => {
@@ -508,7 +590,7 @@ describe('displayCollectionCards() mobile layout', () => {
         expect(setNums).toEqual(['005', '050']);
     });
 
-    it('mobile owned row has − / qty / +; unowned row has single +', () => {
+    it('mobile owned row has − / qty / +; unowned row has disabled − and +', () => {
         const owned = [makeOwned('o', 'character')];
         const all = [makeAllCard('o', 'character', '001'), makeAllCard('u', 'special', '002')];
         const merged = fns.mergeCollectionWithAllCards(owned, all);
@@ -517,7 +599,12 @@ describe('displayCollectionCards() mobile layout', () => {
         const rows = document.querySelectorAll('.collection-mobile-row');
         expect(rows.length).toBe(2);
         expect(rows[0].querySelectorAll('.collection-quantity-btn').length).toBe(2);
+        expect(rows[0].querySelectorAll('.collection-qty-set-input').length).toBe(1);
         expect(rows[1].classList.contains('collection-card-unowned')).toBe(true);
+        expect(rows[1].querySelectorAll('.collection-quantity-btn').length).toBe(2);
+        expect((rows[1].querySelector('.collection-quantity-btn') as HTMLButtonElement).disabled).toBe(
+            true
+        );
         expect(rows[1].querySelectorAll('.collection-add-btn').length).toBe(1);
     });
 
@@ -535,9 +622,10 @@ describe('displayCollectionCards() mobile layout', () => {
         expect(lines).toMatch(/Type/i);
         expect(lines).toMatch(/Set #/i);
         expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-quantity-btn').length).toBe(2);
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-qty-set-input').length).toBe(1);
     });
 
-    it('openCollectionMobileDetail for unowned row shows add-only control', () => {
+    it('openCollectionMobileDetail for unowned row shows disabled minus, add, and set', () => {
         const merged = fns.mergeCollectionWithAllCards([], [makeAllCard('u1', 'mission', '099')]);
         fns.displayCollectionCards(merged);
         const row = document.querySelector('.collection-mobile-row.collection-card-unowned') as HTMLElement;
@@ -545,7 +633,13 @@ describe('displayCollectionCards() mobile layout', () => {
         (window as any).openCollectionMobileDetail(row);
 
         expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-add-btn').length).toBe(1);
-        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-quantity-btn').length).toBe(1);
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-quantity-btn').length).toBe(2);
+        expect(
+            (document.querySelector(
+                '.collection-mobile-detail-stepper .collection-quantity-btn'
+            ) as HTMLButtonElement).disabled
+        ).toBe(true);
+        expect(document.querySelectorAll('.collection-mobile-detail-stepper .collection-qty-set-input').length).toBe(1);
     });
 
     it('Escape closes mobile detail when keydown fires on document', () => {
@@ -606,6 +700,44 @@ describe('displayCollectionCards() mobile layout', () => {
             expect.objectContaining({
                 method: 'PUT',
                 body: expect.stringContaining('"quantity":3')
+            })
+        );
+    });
+
+    it('handleCollectionMobileDetailQuantitySetClick sends PUT with quantity from panel input', async () => {
+        mockCurrentUser = { role: 'USER', id: 'user-1' };
+        (global.fetch as jest.Mock).mockReset();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ errors: [], meta: {}, data: {} }),
+        });
+        mockFetchSetsOkOnce();
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ errors: [], meta: {}, data: [] }),
+        });
+
+        const merged = fns.mergeCollectionWithAllCards(
+            [makeOwned('c1', 'character', 1)],
+            [makeAllCard('c1', 'character', '042')]
+        );
+        fns.displayCollectionCards(merged);
+        const row = document.querySelector('.collection-mobile-row') as HTMLElement;
+        (window as any).openCollectionMobileDetail(row);
+
+        const input = document.querySelector('.collection-mobile-detail-stepper .collection-qty-set-input') as HTMLInputElement;
+        input.value = '9';
+        fns.handleCollectionMobileDetailQuantitySetClick();
+
+        await new Promise<void>(r => setTimeout(r, 40));
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            '/api/v1/collections/me/cards/c1',
+            expect.objectContaining({
+                method: 'PUT',
+                body: expect.stringContaining('"quantity":9'),
             })
         );
     });

@@ -829,6 +829,8 @@ function openCollectionMobileDetail(rowEl) {
     panel.dataset.cardId = cardId;
     panel.dataset.cardType = cardType;
     panel.dataset.imagePath = imagePath;
+    panel.dataset.inCollection =
+        owned && !Number.isNaN(qty) && qty >= 0 ? 'true' : 'false';
 
     const img = panel.querySelector('.collection-mobile-detail-image');
     const h2 = panel.querySelector('#collectionMobileDetailTitle');
@@ -856,8 +858,10 @@ function openCollectionMobileDetail(rowEl) {
         if (!owned || Number.isNaN(qty) || qty < 0) {
             actions.innerHTML = `
                 <div class="collection-quantity-control collection-mobile-detail-stepper">
+                    <button type="button" class="collection-quantity-btn" disabled aria-disabled="true">-</button>
                     <button type="button" class="collection-quantity-btn collection-add-btn"
                         onclick="event.stopPropagation(); addCardToCollection('${escapedId}', '${escapedType}', '${escapedImg}')">+</button>
+                    ${collectionQuantitySetClusterHtml('', { stopPropagation: true, detailPanel: true })}
                 </div>
             `;
         } else {
@@ -869,6 +873,7 @@ function openCollectionMobileDetail(rowEl) {
                     <span class="collection-mobile-detail-qty-num">${qty}</span>
                     <button type="button" class="collection-quantity-btn"
                         onclick="event.stopPropagation(); handleCollectionMobileDetailQuantityClick(${qty + 1})">+</button>
+                    ${collectionQuantitySetClusterHtml(qty, { stopPropagation: true, detailPanel: true })}
                 </div>
             `;
         }
@@ -891,6 +896,129 @@ function escapeHtmlCollection(s) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+/** Escape for double-quoted HTML attributes (e.g. input value="…"). */
+function escapeHtmlAttrDouble(val) {
+    if (val == null || val === '') return '';
+    return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Markup for numeric field + Set button in collection quantity controls.
+ * @param {number|string} qtyValue - initial value; use '' for blank (unowned).
+ * @param {{ stopPropagation?: boolean, detailPanel?: boolean }} [options]
+ */
+function collectionQuantitySetClusterHtml(qtyValue, options) {
+    const opts = options || {};
+    const stopPropagation = !!opts.stopPropagation;
+    const detailPanel = !!opts.detailPanel;
+    const prefix = stopPropagation ? 'event.stopPropagation(); ' : '';
+    const setCall = detailPanel ? 'handleCollectionMobileDetailQuantitySetClick()' : 'handleCollectionQuantitySetClick(this)';
+    const val =
+        qtyValue === '' || qtyValue === null || qtyValue === undefined ? '' : String(qtyValue);
+    const valAttr = escapeHtmlAttrDouble(val);
+    const inputClick = stopPropagation ? ' onclick="event.stopPropagation();"' : '';
+    return (
+        '<span class="collection-qty-set-group">' +
+        '<input type="number" min="0" step="1" inputmode="numeric" class="collection-qty-set-input" value="' +
+        valAttr +
+        '" aria-label="Set quantity"' +
+        inputClick +
+        ' />' +
+        '<button type="button" class="collection-qty-set-btn" onclick="' +
+        prefix +
+        setCall +
+        '">Set</button>' +
+        '</span>'
+    );
+}
+
+/**
+ * Parse quantity from Set input; non-negative integer or null if invalid.
+ * @param {string} raw
+ * @returns {number|null}
+ */
+function parseCollectionSetQuantityInput(raw) {
+    const s = String(raw == null ? '' : raw).trim();
+    if (s === '') return null;
+    const n = Math.floor(Number(s));
+    if (!Number.isFinite(n) || Number.isNaN(n)) return null;
+    return Math.max(0, n);
+}
+
+function handleCollectionQuantitySetClick(buttonElement) {
+    if (!buttonElement) return;
+    const control = buttonElement.closest('.collection-quantity-control');
+    const row = buttonElement.closest('.collection-card-item');
+    const input = control && control.querySelector('.collection-qty-set-input');
+    const n = parseCollectionSetQuantityInput(input && input.value);
+    if (n === null) {
+        if (typeof showNotification === 'function') {
+            showNotification('Enter a valid quantity', 'error');
+        }
+        return;
+    }
+    if (!row) return;
+    const owned = row.getAttribute('data-in-collection') !== 'false';
+    const cardId = row.getAttribute('data-card-id');
+    const cardType = row.getAttribute('data-card-type');
+    const imagePath = row.getAttribute('data-image-path');
+    if (!imagePath) {
+        console.error('Missing image_path attribute on collection card row');
+        return;
+    }
+    if (owned) {
+        updateCollectionQuantity(cardId, cardType, n, imagePath);
+        return;
+    }
+    if (n === 0) {
+        if (typeof showNotification === 'function') {
+            showNotification('Enter a quantity greater than 0 to add this card', 'info');
+        }
+        return;
+    }
+    if (isGuestUser()) {
+        updateCollectionQuantity(cardId, cardType, n, imagePath);
+        return;
+    }
+    addCardToCollection(cardId, cardType, imagePath, n);
+}
+
+function handleCollectionMobileDetailQuantitySetClick() {
+    const panel = document.getElementById('collectionMobileDetailPanel');
+    if (!panel) return;
+    const input = panel.querySelector('.collection-qty-set-input');
+    const n = parseCollectionSetQuantityInput(input && input.value);
+    if (n === null) {
+        if (typeof showNotification === 'function') {
+            showNotification('Enter a valid quantity', 'error');
+        }
+        return;
+    }
+    const owned = panel.dataset.inCollection === 'true';
+    const cardId = panel.dataset.cardId;
+    const cardType = panel.dataset.cardType;
+    const imagePath = panel.dataset.imagePath;
+    if (!imagePath) {
+        console.error('Missing image_path on collection mobile detail panel');
+        return;
+    }
+    if (owned) {
+        updateCollectionQuantity(cardId, cardType, n, imagePath);
+        return;
+    }
+    if (n === 0) {
+        if (typeof showNotification === 'function') {
+            showNotification('Enter a quantity greater than 0 to add this card', 'info');
+        }
+        return;
+    }
+    if (isGuestUser()) {
+        updateCollectionQuantity(cardId, cardType, n, imagePath);
+        return;
+    }
+    addCardToCollection(cardId, cardType, imagePath, n);
 }
 
 function handleCollectionMobileDetailQuantityClick(newQuantity) {
@@ -1018,8 +1146,10 @@ function displayCollectionCards(cards) {
                         </div>
                         <div class="collection-mobile-row-actions">
                             <div class="collection-quantity-control">
+                                <button type="button" class="collection-quantity-btn" disabled aria-disabled="true">-</button>
                                 <button type="button" class="collection-quantity-btn collection-add-btn"
                                     onclick="event.stopPropagation(); addCardToCollection('${String(card.card_id).replace(/'/g, "\\'")}', '${String(card.card_type).replace(/'/g, "\\'")}', '${escapedImageForAdd}')">+</button>
+                                ${collectionQuantitySetClusterHtml('', { stopPropagation: true })}
                             </div>
                         </div>
                     </li>
@@ -1056,6 +1186,7 @@ function displayCollectionCards(cards) {
                                 <span class="collection-mobile-row-qty" aria-label="Quantity">${q}</span>
                                 <button type="button" class="collection-quantity-btn"
                                     onclick="event.stopPropagation(); handleCollectionQuantityClick(this, ${q + 1})">+</button>
+                                ${collectionQuantitySetClusterHtml(q, { stopPropagation: true })}
                             </div>
                         </div>
                     </li>
@@ -1146,6 +1277,7 @@ function displayCollectionCards(cards) {
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
+                    data-in-collection="false"
                     onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity"></td>
@@ -1155,8 +1287,10 @@ function displayCollectionCards(cards) {
                     <td class="collection-card-set">${cardSet}</td>
                     <td class="collection-card-actions">
                         <div class="collection-quantity-control">
+                            <button type="button" class="collection-quantity-btn" disabled aria-disabled="true">-</button>
                             <button class="collection-quantity-btn collection-add-btn"
                                 onclick="addCardToCollection('${escapedCardId}', '${escapedCardType}', '${escapedImageForAdd}')">+</button>
+                            ${collectionQuantitySetClusterHtml('')}
                         </div>
                     </td>
                 </tr>
@@ -1174,6 +1308,7 @@ function displayCollectionCards(cards) {
                     data-is-foil="${isFoil}"
                     data-card-name="${escapedDisplayName}"
                     data-card-set="${cardSet.replace(/"/g, '&quot;')}"
+                    data-in-collection="true"
                     onmouseenter="showCardHoverModal('${escapedImagePath}', '${escapedDisplayNameSingle}', '${escapedCardIdHover}', '${escapedCardTypeHover}', ${isFoil})"
                     onmouseleave="hideCardHoverModal()">
                     <td class="collection-card-quantity">${card.quantity}</td>
@@ -1183,11 +1318,12 @@ function displayCollectionCards(cards) {
                     <td class="collection-card-set">${cardSet}</td>
                     <td class="collection-card-actions">
                         <div class="collection-quantity-control">
-                            <button class="collection-quantity-btn"
+                            <button type="button" class="collection-quantity-btn"
                                 onclick="handleCollectionQuantityClick(this, ${card.quantity - 1})"
                                     ${card.quantity <= 0 ? 'disabled' : ''}>-</button>
                             <button class="collection-quantity-btn"
                                 onclick="handleCollectionQuantityClick(this, ${card.quantity + 1})">+</button>
+                            ${collectionQuantitySetClusterHtml(card.quantity)}
                         </div>
                     </td>
                 </tr>
@@ -1374,8 +1510,10 @@ async function addCardToCollectionFromDatabase(cardId, cardType, imagePath = nul
 
 /**
  * Add card to collection
+ * @param {string|null} [imagePath]
+ * @param {number} [explicitQuantity] - If set, used as POST quantity (auth) or initial quantity (guest new row). Omit for +1 stepper behavior.
  */
-async function addCardToCollection(cardId, cardType, imagePath = null) {
+async function addCardToCollection(cardId, cardType, imagePath = null, explicitQuantity = undefined) {
     try {
         const resolvedType = normalizeCollectionCardTypeForApi(cardType);
         // For GUEST users, store in localStorage (key by card_id, card_type, image_path for foil/alt art)
@@ -1388,13 +1526,24 @@ async function addCardToCollection(cardId, cardType, imagePath = null) {
             );
 
             if (existingIndex >= 0) {
-                guestCards[existingIndex].quantity = (guestCards[existingIndex].quantity || 1) + 1;
+                if (explicitQuantity !== undefined) {
+                    const pq = Math.max(0, Math.floor(Number(explicitQuantity)));
+                    if (pq < 1) return;
+                    guestCards[existingIndex].quantity = pq;
+                } else {
+                    guestCards[existingIndex].quantity = (guestCards[existingIndex].quantity || 1) + 1;
+                }
             } else {
+                const qNew =
+                    explicitQuantity !== undefined
+                        ? Math.max(0, Math.floor(Number(explicitQuantity)))
+                        : 1;
+                if (qNew < 1) return;
                 guestCards.push({
                     card_id: cardId,
                     card_type: resolvedType,
                     image_path: imagePath || null,
-                    quantity: 1
+                    quantity: qNew
                 });
             }
             
@@ -1419,10 +1568,17 @@ saveGuestCollectionToStorage(guestCards);
         }
 
         // For authenticated users (USER/ADMIN), use API
+        const postQty =
+            explicitQuantity !== undefined
+                ? Math.max(0, Math.floor(Number(explicitQuantity)))
+                : 1;
+        if (postQty < 1) {
+            return;
+        }
         const requestBody = {
             cardId: cardId,
             cardType: resolvedType,
-            quantity: 1
+            quantity: postQty
         };
         
         // Include imagePath if provided (required for collection cards)
@@ -2098,6 +2254,8 @@ window.addCardToCollectionFromDatabase = addCardToCollectionFromDatabase;
 window.handleCollectionSearchResultClick = handleCollectionSearchResultClick;
 window.toggleUnownedCards = toggleUnownedCards;
 window.handleCollectionMobileDetailQuantityClick = handleCollectionMobileDetailQuantityClick;
+window.handleCollectionQuantitySetClick = handleCollectionQuantitySetClick;
+window.handleCollectionMobileDetailQuantitySetClick = handleCollectionMobileDetailQuantitySetClick;
 window.sortMergedCollectionCards = sortMergedCollectionCards;
 window.closeCollectionMobileDetail = closeCollectionMobileDetail;
 window.openCollectionMobileDetail = openCollectionMobileDetail;

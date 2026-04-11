@@ -244,9 +244,10 @@
 }
 
 .collection-category-table .collection-col-actions {
-    width: 120px;
-    min-width: 100px;
-    max-width: 200px;
+    /* Room for [−][+][qty input][Set] without clipping (table-layout: fixed) */
+    width: 220px;
+    min-width: 200px;
+    max-width: 280px;
     text-align: center;
 }
 
@@ -304,26 +305,34 @@
 
 .collection-card-actions {
     text-align: center;
+    overflow: visible;
 }
 
 .collection-quantity-control {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    justify-content: center;
 }
 
 .collection-quantity-btn {
+    box-sizing: border-box;
     background: rgba(78, 205, 196, 0.2);
     border: 1px solid rgba(78, 205, 196, 0.4);
     color: #4ecdc4;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0;
     border-radius: 4px;
     font-size: 0.9rem;
     font-weight: 600;
+    line-height: 1;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -342,6 +351,74 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+}
+
+.collection-qty-set-group {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 0;
+    height: 30px;
+}
+
+.collection-qty-set-input {
+    width: 3rem;
+    min-width: 2.75rem;
+    height: 30px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    border: 1px solid rgba(78, 205, 196, 0.45);
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #e8f4f3;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1;
+    vertical-align: middle;
+    -moz-appearance: textfield;
+}
+
+.collection-qty-set-input::-webkit-outer-spin-button,
+.collection-qty-set-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.collection-qty-set-input:focus {
+    outline: none;
+    border-color: rgba(78, 205, 196, 0.65);
+    box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.25);
+}
+
+.collection-qty-set-btn {
+    box-sizing: border-box;
+    height: 30px;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgba(78, 205, 196, 0.45);
+    border-radius: 0 4px 4px 0;
+    background: rgba(78, 205, 196, 0.28);
+    color: #f0fffd;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.collection-qty-set-btn:hover {
+    background: rgba(78, 205, 196, 0.32);
+    border-color: rgba(78, 205, 196, 0.55);
+}
+
+.collection-qty-set-btn:active {
+    background: rgba(78, 205, 196, 0.2);
 }
 
 .collection-remove-btn {
@@ -378,9 +455,10 @@
     background: rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Add-only button for unowned rows */
+/* Add-only button for unowned rows — same footprint as other stepper buttons */
 .collection-add-btn {
-    min-width: 32px;
+    min-width: 30px;
+    width: 30px;
 }
 
 /* Collection controls bar (toggle, filters) */
@@ -661,10 +739,14 @@ html.layout-mobile .collection-mobile-row-subtitle {
 
 html.layout-mobile .collection-mobile-row-actions {
     flex-shrink: 0;
+    min-width: 0;
 }
 
 html.layout-mobile .collection-mobile-row .collection-quantity-control {
     gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
 }
 
 html.layout-mobile .collection-mobile-row .collection-quantity-btn {
@@ -674,6 +756,19 @@ html.layout-mobile .collection-mobile-row .collection-quantity-btn {
     width: calc(29px * 0.9);
     height: calc(29px * 0.9);
     font-size: calc(0.75rem * 0.9);
+}
+
+html.layout-mobile .collection-mobile-row .collection-qty-set-group {
+    height: calc(29px * 0.9);
+}
+
+html.layout-mobile .collection-mobile-row .collection-qty-set-input {
+    height: calc(29px * 0.9);
+}
+
+html.layout-mobile .collection-mobile-row .collection-qty-set-btn {
+    height: calc(29px * 0.9);
+    min-height: calc(29px * 0.9);
 }
 
 html.layout-mobile .collection-mobile-row-qty {
@@ -770,6 +865,33 @@ html.layout-mobile .collection-mobile-detail-k {
 html.layout-mobile .collection-mobile-detail-stepper {
     justify-content: center;
     gap: 12px;
+    flex-wrap: wrap;
+}
+
+html.layout-mobile .collection-mobile-detail-stepper .collection-qty-set-group {
+    margin-left: 0;
+    margin-top: 4px;
+    width: 100%;
+    justify-content: center;
+}
+
+html.layout-mobile .collection-mobile-detail-stepper .collection-qty-set-input {
+    flex: 1 1 auto;
+    max-width: 5rem;
+}
+
+html.layout-mobile .collection-mobile-detail-stepper .collection-qty-set-btn {
+    flex-shrink: 0;
+    height: calc(32px * 0.9);
+    min-height: calc(32px * 0.9);
+}
+
+html.layout-mobile .collection-mobile-detail-stepper .collection-qty-set-group {
+    height: calc(32px * 0.9);
+}
+
+html.layout-mobile .collection-mobile-detail-stepper .collection-qty-set-input {
+    height: calc(32px * 0.9);
 }
 
 html.layout-mobile .collection-mobile-detail-stepper .collection-quantity-btn {
