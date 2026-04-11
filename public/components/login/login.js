@@ -126,16 +126,12 @@ function createFallbackLoginModal() {
  * Sets up event listeners for login form and guest login button
  */
 function initializeLoginComponent() {
-    const afterTemplate = () => {
-        void attemptGoogleRedirectCompletion();
-    };
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadLoginTemplate();
-            afterTemplate();
+        document.addEventListener('DOMContentLoaded', () => {
+            void loadLoginTemplate();
         });
     } else {
-        void loadLoginTemplate().then(afterTemplate);
+        void loadLoginTemplate();
     }
 }
 
