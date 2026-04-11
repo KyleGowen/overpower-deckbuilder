@@ -2216,11 +2216,39 @@ function toggleUnownedCards() {
     displayCollectionCards(mergedCollectionData);
 }
 
+function scrollCollectionViewToTop() {
+    const el = document.getElementById('collection-view');
+    if (!el) return;
+    const startY = window.scrollY;
+    const targetY = el.getBoundingClientRect().top + startY;
+    const delta = targetY - startY;
+    if (Math.abs(delta) < 1) return;
+
+    // Custom animation so duration can be ~half of typical smooth scrollIntoView.
+    const nominalMs = Math.max(80, Math.min(500, Math.abs(delta) * 0.2));
+    const durationMs = nominalMs * 0.5;
+    const t0 = performance.now();
+    function easeOutQuad(t) {
+        return 1 - (1 - t) * (1 - t);
+    }
+    function frame(now) {
+        const u = Math.min(1, (now - t0) / durationMs);
+        window.scrollTo(0, startY + delta * easeOutQuad(u));
+        if (u < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
 /**
  * Initialize collection view
  */
 function initializeCollectionView() {
     initializeCollectionSearch();
+    const backToTopBtn = document.getElementById('collectionBackToTop');
+    if (backToTopBtn && !backToTopBtn.dataset.collectionBackToTopBound) {
+        backToTopBtn.dataset.collectionBackToTopBound = '1';
+        backToTopBtn.addEventListener('click', scrollCollectionViewToTop);
+    }
     const cv = document.getElementById('collection-view');
     if (cv && !cv.dataset.collectionMobileDelegateBound) {
         cv.dataset.collectionMobileDelegateBound = '1';
@@ -2250,6 +2278,7 @@ window.removeOneFromCollection = removeOneFromCollection;
 window.getDatabaseViewCollectionQuantity = getDatabaseViewCollectionQuantity;
 window.refreshDatabaseViewCollectionButtons = refreshDatabaseViewCollectionButtons;
 window.initializeCollectionView = initializeCollectionView;
+window.scrollCollectionViewToTop = scrollCollectionViewToTop;
 window.addCardToCollectionFromDatabase = addCardToCollectionFromDatabase;
 window.handleCollectionSearchResultClick = handleCollectionSearchResultClick;
 window.toggleUnownedCards = toggleUnownedCards;
