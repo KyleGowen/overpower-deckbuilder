@@ -368,8 +368,15 @@ async function handleGoogleLogin() {
             return;
         }
         const provider = new firebase.auth.GoogleAuthProvider();
-        // Always redirect: avoids COOP / window.closed issues (especially on HTTP).
-        await auth.signInWithRedirect(provider);
+        const result = await auth.signInWithPopup(provider);
+        const idToken = result && result.user ? await result.user.getIdToken() : null;
+        if (!idToken) {
+            if (typeof window.showLoginError === 'function') {
+                window.showLoginError('Could not get Google credentials');
+            }
+            return;
+        }
+        await finalizeGoogleSessionWithIdToken(idToken);
     } catch (err) {
         console.error('Google login error:', err);
         if (typeof window.showLoginError === 'function') {
