@@ -32,6 +32,12 @@ already protected.
 - **`Cross-Origin-Embedder-Policy`.** We need to keep the mixed `<img>` +
   third-party font setup functional; helmet defaults apply (i.e., not
   emitted).
+- **`Origin-Agent-Cluster`.** Helmet v8 emits `Origin-Agent-Cluster: ?1` by
+  default, but nothing on this origin relies on origin-keyed agent clusters.
+  Emitting it inconsistently (e.g. on some responses but not others, or
+  after the browser has already placed the origin in a site-keyed cluster)
+  produces a console warning. The middleware sets `originAgentCluster: false`
+  to keep headers uniform across the origin.
 
 ## Kill switch
 

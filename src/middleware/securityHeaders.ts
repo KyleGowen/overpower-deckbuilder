@@ -16,6 +16,12 @@ import type { RequestHandler } from 'express';
  * CSP is intentionally disabled — the current HTML shell uses inline scripts
  * and setting CSP would break the app. Tracked as a future item.
  *
+ * `Origin-Agent-Cluster` is intentionally disabled. Helmet v8 sends `?1` by
+ * default, but nothing on this origin relies on origin-keyed agent clusters,
+ * and emitting it inconsistently (e.g. across pages a browser has already
+ * placed in a site-keyed cluster) produces a console warning. Turning it off
+ * is the cleanest way to keep headers uniform across the origin.
+ *
  * Kill switch: `DISABLE_HELMET=1` short-circuits to a no-op.
  */
 export function createSecurityHeadersMiddleware(): RequestHandler {
@@ -33,5 +39,6 @@ export function createSecurityHeadersMiddleware(): RequestHandler {
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     frameguard: { action: 'deny' },
     xContentTypeOptions: true,
+    originAgentCluster: false,
   });
 }
