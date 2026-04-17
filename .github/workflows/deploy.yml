@@ -195,6 +195,7 @@ jobs:
       uses: gitleaks/gitleaks-action@v2
       continue-on-error: false
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITLEAKS_LICENSE: ''
 
     - name: Run SOC 2 technical compliance checks
