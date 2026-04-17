@@ -1,0 +1,17 @@
+# docs/insomnia
+
+Insomnia REST client exports for testing **excelsior.cards** production HTTP APIs.
+
+- **Import:** `excelsior.cards-prod.insomnia.json` (Insomnia → **Import** from file).
+- **Regenerate** after route changes: from repo root run `node scripts/generate-excelsior-insomnia-export.mjs`.
+
+Source of truth for endpoints: `src/routes/` (legacy), `src/api/http/*.http.ts` + `registerApiV1Routes.ts` (`/api/v1`).
+
+## Phase 2 flow (refresh tokens)
+
+When adding or editing requests that hit `/auth/login`, `/auth/refresh`, or `/auth/logout`, follow the contract in [`../current/API_V1_AUTH_REFRESH.md`](../current/API_V1_AUTH_REFRESH.md). The regenerated export includes a "Phase 2 smoke" folder that chains login → refresh → reuse → logout to exercise the rotation + reuse-detection semantics.
+
+## Phase 3 flow (catalog caching + conditional GET)
+
+The regenerated export includes a "Phase 3 smoke" folder that GETs a catalog endpoint twice — the second request echoes the first response's `ETag` via `If-None-Match` to exercise the 304 path, and also demonstrates `?since_version=<n>`. Cache-header contract lives in [`../current/API_V1_CATALOG_CACHING.md`](../current/API_V1_CATALOG_CACHING.md).
+

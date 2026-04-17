@@ -51,9 +51,16 @@ npm run dev
 
 By default the server listens on `http://localhost:8085` (override with `PORT`).
 
-### Session cookie and HTTP
+### Session cookie and HTTPS
 
-Login sets an httpOnly `sessionId` cookie backed by PostgreSQL. For plain **HTTP** deployments, leave **`COOKIE_SECURE` unset or `false`** so browsers will store and send the cookie. Set **`COOKIE_SECURE=true`** only when users reach the app over **HTTPS**.
+Login sets an httpOnly `sessionId` cookie backed by PostgreSQL. In production
+the site is served over HTTPS (CloudFront + ACM — see
+[`docs/current/OPS_TLS_AND_HTTPS.md`](docs/current/OPS_TLS_AND_HTTPS.md)) and
+[`src/services/authCookieOptions.ts`](src/services/authCookieOptions.ts)
+automatically emits `Secure; HttpOnly; SameSite=Strict` whenever `req.secure`
+is true or `NODE_ENV=production`. For plain **HTTP local dev**, no env var is
+needed — the cookie falls back to `SameSite=Lax` / `Secure=false`. Emergency
+rollback: set `DISABLE_SECURE_COOKIES=1` to revert to the pre-Phase-0 shape.
 
 ### Run tests (unit + integration)
 

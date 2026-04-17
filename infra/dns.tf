@@ -16,22 +16,48 @@ data "aws_route53_zone" "main" {
   depends_on   = [aws_route53_zone.main]
 }
 
-# A record pointing to the EC2 instance
+# Phase 0 (see docs/current/OPS_TLS_AND_HTTPS.md):
+#
+# - Apex `excelsior.cards` is an ALIAS A record targeting the CloudFront
+#   distribution so viewer traffic terminates TLS at CloudFront.
+# - `www.excelsior.cards` is an ALIAS CNAME-equivalent targeting the same
+#   CloudFront distribution.
+# - `origin.excelsior.cards` is a direct A record to the EC2 EIP so CloudFront
+#   can reach the origin without looping through the apex alias (which would
+#   be a "CloudFront → CloudFront" loop).
+
 resource "aws_route53_record" "main" {
   zone_id = data.aws_route53_zone.main.zone_id
-  name    = "excelsior.cards"
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.card_images.domain_name
+    zone_id                = aws_cloudfront_distribution.card_images.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.card_images.domain_name
+    zone_id                = aws_cloudfront_distribution.card_images.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Origin hostname for CloudFront → EC2. Never aliased — must stay pointed at
+# the raw EIP so CloudFront can resolve it outside the CloudFront graph.
+resource "aws_route53_record" "origin" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "origin.${var.domain_name}"
   type    = "A"
   ttl     = 300
   records = [aws_eip.app_eip.public_ip]
-}
-
-# CNAME record for www subdomain
-resource "aws_route53_record" "www" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = "www.excelsior.cards"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["excelsior.cards"]
 }
 
 # Email forwarding DNS records for Amazon SES

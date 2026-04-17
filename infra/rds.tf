@@ -14,24 +14,50 @@ data "aws_subnets" "default" {
   }
 }
 
-# Security group for RDS - allows PostgreSQL access from anywhere
-# WARNING: This allows access from the internet. In production, restrict this!
+# RDS security group — Phase 1 restricted inbound to the EC2 app SG plus a
+# small allowlist of CI / ops CIDRs. See docs/current/OPS_RDS_SECURITY_GROUP.md
+# for how to add a runner CIDR.
+#
+# The old `0.0.0.0/0` rule is intentionally preserved as a comment for 30 days
+# as a reference point in case rollback is needed; git revert of this commit
+# restores it.
 resource "aws_security_group" "rds_sg" {
   name_prefix = "${var.project_name}-rds-"
   description = "Security group for RDS PostgreSQL database"
   vpc_id      = data.aws_vpc.default.id
 
-  # Allow PostgreSQL access from anywhere (0.0.0.0/0)
-  # In production, restrict this to specific IP ranges or security groups
+  # Primary: EC2 app security group (normal app traffic).
   ingress {
-    from_port   = var.db_port
-    to_port     = var.db_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "PostgreSQL access from internet"
+    from_port       = var.db_port
+    to_port         = var.db_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app_sg.id]
+    description     = "PostgreSQL access from the app EC2 SG"
   }
 
-  # Allow all outbound traffic
+  # Ops / CI allowlist. CIDRs configured via var.rds_admin_cidrs. Default empty
+  # — integration tests run from within the EC2 SG in the CI runner. Add a
+  # runner CIDR when a new GitHub Actions network range is needed.
+  dynamic "ingress" {
+    for_each = length(var.rds_admin_cidrs) > 0 ? [1] : []
+    content {
+      from_port   = var.db_port
+      to_port     = var.db_port
+      protocol    = "tcp"
+      cidr_blocks = var.rds_admin_cidrs
+      description = "PostgreSQL admin/CI allowlist"
+    }
+  }
+
+  # Pre-Phase-1 rule for reference (DO NOT re-enable without explicit ask):
+  # ingress {
+  #   from_port   = var.db_port
+  #   to_port     = var.db_port
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  #   description = "PostgreSQL access from internet"
+  # }
+
   egress {
     from_port   = 0
     to_port     = 0

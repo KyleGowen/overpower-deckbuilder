@@ -40,6 +40,22 @@ provider "aws" {
   }
 }
 
+# Secondary AWS provider pinned to us-east-1.
+# CloudFront viewer certificates (ACM) MUST live in us-east-1 regardless of
+# where the rest of the infrastructure runs. See docs/current/OPS_TLS_AND_HTTPS.md.
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  }
+}
+
 # Data sources for current AWS account and region info
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}

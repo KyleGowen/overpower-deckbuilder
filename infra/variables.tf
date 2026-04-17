@@ -56,6 +56,16 @@ variable "db_port" {
   default     = 5432
 }
 
+# Phase 1: explicit allowlist of IPv4 CIDRs permitted to reach RDS on the DB
+# port in addition to the app EC2 SG. Empty by default — add a CIDR here when
+# a CI runner or trusted admin tool needs direct access. Documented in
+# docs/current/OPS_RDS_SECURITY_GROUP.md.
+variable "rds_admin_cidrs" {
+  description = "Additional IPv4 CIDRs allowed to connect to RDS (in addition to the app EC2 SG)."
+  type        = list(string)
+  default     = []
+}
+
 # EC2 Configuration
 variable "ec2_instance_type" {
   description = "EC2 instance type"

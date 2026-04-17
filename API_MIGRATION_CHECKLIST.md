@@ -68,6 +68,8 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 
 **v1 prefix:** `/api/v1/decks…`.
 
+**Auth (Phase 2, 2026-04):** accepts **session cookie OR Bearer JWT** via `createV1SessionOrBearerAuthMiddleware`. Kill switch `DISABLE_BEARER_DECKS_COLLECTIONS=1` restores session-only. See [`docs/current/API_V1_AUTH_REFRESH.md`](docs/current/API_V1_AUTH_REFRESH.md).
+
 ### P2a — Deck list (ETag)
 
 | Legacy path     | v1 path (proposed) | Migrated | API module | HTTP unit | ≥1 int | API_V1.md |
@@ -120,6 +122,8 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 **Scope:** Authenticated collection + card rows + history. **Source:** `API_DOCUMENTATION.md` (Collections), [`collections.http.ts`](src/api/http/collections.http.ts).
 
 **v1 prefix:** `/api/v1/collections/me…`
+
+**Auth (Phase 2, 2026-04):** accepts **session cookie OR Bearer JWT** via `createV1SessionOrBearerAuthMiddleware`. Kill switch `DISABLE_BEARER_DECKS_COLLECTIONS=1` restores session-only.
 
 ### P3a — Collection record
 

@@ -41,8 +41,12 @@ import { createDeckAddValidation } from './services/deck-add-validation/deck-add
 export const app = express();
 const PORT = process.env.PORT || 8085;
 
-// Trust proxy for correct req.ip when behind nginx/load balancer (see src/middleware/README.md)
-app.set('trust proxy', 1);
+// Trust proxy for correct req.ip / req.secure / req.protocol when terminating
+// TLS at CloudFront + nginx (see docs/current/OPS_TLS_AND_HTTPS.md).
+// Kill switch: DISABLE_TRUST_PROXY=1 reverts to the Node default (direct socket).
+if (process.env.DISABLE_TRUST_PROXY !== '1') {
+  app.set('trust proxy', 1);
+}
 
 // Initialize services
 new DeckPersistenceService();
@@ -276,7 +280,8 @@ registerApiV1Routes(app, {
   deckUIPreferencesService,
   collectionService,
   guestDeckService,
-  adminService
+  adminService,
+  pool: dataSource.getPool()
 });
 
 registerLegacyDeckReadCompatRoutes(app, {

@@ -26,7 +26,9 @@ describe('GET /api/v1/decks', () => {
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
-    expect(res.headers.vary).toBe('Cookie');
+    // Phase 3 (compression middleware) appends Accept-Encoding to Vary;
+    // the route still owns the Cookie portion.
+    expect(res.headers.vary).toMatch(/\bCookie\b/);
     expect(res.headers.etag).toMatch(/^"[a-f0-9]{40}"$/);
   });
 });

@@ -2,6 +2,8 @@ import type { Response } from 'express';
 
 export interface V1Meta {
   requestId?: string;
+  catalogDataVersion?: number;
+  catalogLastUpdated?: string;
 }
 
 export interface V1ErrorBody {

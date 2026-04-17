@@ -1,4 +1,14 @@
 # Middleware
 
-- App-wide middleware lives here. **setup.ts** configures body parsing, cookie parsing, and static image mounts (called from index).
+- App-wide middleware lives here. **setup.ts** wires the full request pipeline in order: request-id → pino logging → CORS → helmet → body parsing → cookie parsing → static mounts. Called from index (composition root).
+
+## External API hardening (Phase 1)
+
+- **[`requestId.ts`](requestId.ts)** — `createRequestIdMiddleware` assigns `req.id` (UUIDv4 or preserved `X-Request-Id` if safe) and echoes on the response. See [`docs/current/API_V1_LOGGING.md`](../../docs/current/API_V1_LOGGING.md).
+- **[`logging.ts`](logging.ts)** — `createRequestLoggerMiddleware` (pino + pino-http) emits one JSON line per request with `request_id`; redacts `Authorization`, cookies, `password`, `idToken`. Kill switch `DISABLE_PINO=1`. See [`docs/current/API_V1_LOGGING.md`](../../docs/current/API_V1_LOGGING.md).
+- **[`corsAllowlist.ts`](corsAllowlist.ts)** — `createCorsMiddleware` reads `ALLOWED_ORIGINS` env var (comma-separated). Kill switch `DISABLE_CORS=1`. See [`docs/current/API_V1_CORS.md`](../../docs/current/API_V1_CORS.md).
+- **[`securityHeaders.ts`](securityHeaders.ts)** — `createSecurityHeadersMiddleware` applies helmet: HSTS (1yr, includeSubDomains), nosniff, referrer-policy, X-Frame-Options: DENY. CSP intentionally disabled. Kill switch `DISABLE_HELMET=1`. See [`docs/current/API_V1_SECURITY_HEADERS.md`](../../docs/current/API_V1_SECURITY_HEADERS.md).
+
+## Other middleware
+
 - **authorizationHelpers.ts** and **newAccountRateLimiter.ts** provide auth and rate-limit helpers for route handlers.

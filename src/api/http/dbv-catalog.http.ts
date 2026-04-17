@@ -1,6 +1,11 @@
-import type { RequestHandler, Router } from 'express';
+import type { Request, RequestHandler, Response, Router } from 'express';
 import { CatalogService } from '../services/catalogService';
-import { sendV1Json, sendV1Success } from './v1Envelope';
+import {
+  parseSinceVersionQuery,
+  getCatalogDataVersion,
+  sendCachedCatalogResponse
+} from './catalogCache';
+import { sendV1Json } from './v1Envelope';
 
 export interface DbvCatalogV1HttpDeps {
   catalogService: CatalogService;
@@ -8,155 +13,147 @@ export interface DbvCatalogV1HttpDeps {
   catalogAuth: RequestHandler;
 }
 
+/**
+ * Wrap a catalog loader with conditional-GET + cache headers + `?since_version`.
+ * Keeps the per-route handler readable (no try/catch duplication).
+ */
+function registerCachedCatalogGet<T>(
+  router: Router,
+  path: string,
+  catalogAuth: RequestHandler,
+  loader: () => Promise<T[]>,
+  errorCode = 'CATALOG_ERROR',
+  errorMessage = 'Failed to fetch catalog data'
+): void {
+  router.get(path, catalogAuth, async (req: Request, res: Response) => {
+    try {
+      const sinceVersion = parseSinceVersionQuery(req);
+      const currentVersion = getCatalogDataVersion();
+      const payload =
+        sinceVersion !== null && sinceVersion >= currentVersion
+          ? ([] as T[])
+          : await loader();
+      sendCachedCatalogResponse(req, res, payload);
+    } catch (error) {
+      console.error(`v1 ${path} error:`, error);
+      sendV1Json(res, 500, null, [{ code: errorCode, message: errorMessage }]);
+    }
+  });
+}
+
 export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV1HttpDeps): void {
-  router.get('/catalog/characters', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllCharacters();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/characters error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch characters' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/characters',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllCharacters(),
+    'CATALOG_ERROR',
+    'Failed to fetch characters'
+  );
 
-  router.get('/catalog/locations', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllLocations();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/locations error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch locations' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/locations',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllLocations(),
+    'CATALOG_ERROR',
+    'Failed to fetch locations'
+  );
 
-  router.get('/catalog/special-cards', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllSpecialCards();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/special-cards error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch special cards' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/special-cards',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllSpecialCards(),
+    'CATALOG_ERROR',
+    'Failed to fetch special cards'
+  );
 
-  router.get('/catalog/missions', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllMissions();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/missions error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch missions' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/missions',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllMissions(),
+    'CATALOG_ERROR',
+    'Failed to fetch missions'
+  );
 
-  router.get('/catalog/events', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllEvents();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/events error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch events' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/events',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllEvents(),
+    'CATALOG_ERROR',
+    'Failed to fetch events'
+  );
 
-  router.get('/catalog/aspects', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllAspects();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/aspects error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch aspects' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/aspects',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllAspects(),
+    'CATALOG_ERROR',
+    'Failed to fetch aspects'
+  );
 
-  router.get('/catalog/advanced-universe', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllAdvancedUniverse();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/advanced-universe error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch advanced universe' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/advanced-universe',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllAdvancedUniverse(),
+    'CATALOG_ERROR',
+    'Failed to fetch advanced universe'
+  );
 
-  router.get('/catalog/teamwork', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllTeamwork();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/teamwork error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch teamwork' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/teamwork',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllTeamwork(),
+    'CATALOG_ERROR',
+    'Failed to fetch teamwork'
+  );
 
-  router.get('/catalog/ally-universe', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllAllyUniverse();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/ally-universe error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch ally universe' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/ally-universe',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllAllyUniverse(),
+    'CATALOG_ERROR',
+    'Failed to fetch ally universe'
+  );
 
-  router.get('/catalog/training', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllTraining();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/training error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch training cards' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/training',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllTraining(),
+    'CATALOG_ERROR',
+    'Failed to fetch training cards'
+  );
 
-  router.get('/catalog/basic-universe', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllBasicUniverse();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/basic-universe error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch basic universe cards' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/basic-universe',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllBasicUniverse(),
+    'CATALOG_ERROR',
+    'Failed to fetch basic universe cards'
+  );
 
-  router.get('/catalog/power-cards', deps.catalogAuth, async (_req, res) => {
-    try {
-      const data = await deps.catalogService.getAllPowerCards();
-      sendV1Success(res, data);
-    } catch (error) {
-      console.error('v1 /catalog/power-cards error:', error);
-      sendV1Json(res, 500, null, [
-        { code: 'CATALOG_ERROR', message: 'Failed to fetch power cards' }
-      ]);
-    }
-  });
+  registerCachedCatalogGet(
+    router,
+    '/catalog/power-cards',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllPowerCards(),
+    'CATALOG_ERROR',
+    'Failed to fetch power cards'
+  );
 
-  router.get('/catalog/foil-card-map', deps.catalogAuth, async (_req, res) => {
+  router.get('/catalog/foil-card-map', deps.catalogAuth, async (req, res) => {
     try {
       const data = await deps.catalogService.getFoilCardMap();
-      sendV1Success(res, data);
+      sendCachedCatalogResponse(req, res, data);
     } catch (error) {
       console.error('v1 /catalog/foil-card-map error:', error);
       sendV1Json(res, 500, null, [

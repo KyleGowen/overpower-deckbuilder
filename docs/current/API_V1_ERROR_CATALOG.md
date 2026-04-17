@@ -1,0 +1,68 @@
+# API v1 — error catalog
+
+Every `/api/v1` response uses the envelope `{ data, meta, errors }`. On any
+non-2xx, `data` is `null` and `errors` is a non-empty array of
+`{ code, message, field? }`. This table is authoritative for the stable
+`code` values. **Any new `/api/v1` route MUST add its error codes here (and
+to [`docs/openapi.yaml`](../openapi.yaml)) in the same PR.**
+
+## Conventions
+
+- `code` is uppercase snake_case, stable across versions.
+- `message` is human-readable and may change freely.
+- `field` is set only for `VALIDATION_ERROR` on body validation failures.
+- `meta.requestId` is always present; include it when reporting issues.
+
+## Table
+
+| Code                          | HTTP | Meaning                                                                 | Typical remediation                                                                 |
+| ----------------------------- | ---- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `UNAUTHORIZED`                | 401  | Missing/expired/invalid access token.                                   | Call `/api/v1/auth/refresh`; if that also 401s, re-login.                           |
+| `INVALID_CREDENTIALS`         | 401  | Login failed.                                                            | Verify username/password.                                                           |
+| `REFRESH_INVALID`             | 401  | Supplied refresh token is malformed or unknown.                          | Re-login.                                                                            |
+| `REFRESH_EXPIRED`             | 401  | Refresh token past `refresh_tokens.expires_at`.                          | Re-login.                                                                            |
+| `REFRESH_REUSED`              | 401  | Refresh token was already rotated; entire family revoked.                | Re-login. Investigate possible token theft.                                          |
+| `REFRESH_DISABLED`            | 503  | `DISABLE_AUTH_REFRESH=1` kill switch is on.                              | Wait for operator; legacy login still works.                                         |
+| `ADMIN_REQUIRED`              | 403  | Route is ADMIN-only.                                                     | Log in as an ADMIN account.                                                          |
+| `GUEST_ONLY`                  | 403  | Route is only for GUEST sessions.                                        | Use a guest session cookie.                                                          |
+| `GUEST_FORBIDDEN`             | 403  | GUESTs may not perform this operation.                                   | Log in as a persistent user.                                                         |
+| `SESSION_REQUIRED`            | 401  | Guest deck APIs need a session cookie.                                   | Allow cookies or call `/api/auth/...` first.                                         |
+| `VALIDATION_ERROR`            | 400  | Body/params/query failed validation (zod).                               | Fix the field listed in `errors[].field` and retry.                                  |
+| `RATE_LIMITED`                | 429  | Too many requests per window.                                            | Honor `X-RateLimit-Reset`; retry after.                                              |
+| `CATALOG_ERROR`               | 500  | Upstream catalog query failed.                                           | Retry; report `requestId` if persistent.                                             |
+| `DBV_SUPPORT_ERROR`           | 500  | DBV support lookup failed.                                               | Retry; report `requestId` if persistent.                                             |
+| `DECK_LIST_ERROR`             | 500  | Listing decks failed.                                                    | Retry.                                                                                |
+| `DECK_STATS_ERROR`            | 500  | Aggregating deck stats failed.                                           | Retry.                                                                                |
+| `DECK_VALIDATION_FAILED`      | 400  | Deck failed legality rules.                                              | Fix deck per the message.                                                            |
+| `DECK_VALIDATE_ERROR`         | 500  | Deck validator threw.                                                    | Retry.                                                                                |
+| `DECK_CREATE_ERROR`           | 500  | Creating a deck failed.                                                  | Retry.                                                                                |
+| `DECK_CARDS_FETCH_ERROR`      | 500  | Reading a deck's cards failed.                                           | Retry.                                                                                |
+| `DECK_CARD_ADD_ERROR`         | 500  | Adding a card failed.                                                    | Retry.                                                                                |
+| `DECK_CARDS_REPLACE_ERROR`    | 500  | Replacing cards failed.                                                  | Retry.                                                                                |
+| `DECK_CARDS_REPLACE_FAILED`   | varies | Deck-card replace rejected with structured status.                     | Inspect status + message.                                                            |
+| `DECK_CARD_REMOVE_ERROR`      | 500  | Removing a card failed.                                                  | Retry.                                                                                |
+| `DECK_FETCH_ERROR`            | 500  | Fetching a deck failed.                                                  | Retry.                                                                                |
+| `DECK_NOT_FOUND`              | 404  | Deck id does not exist or is not visible to you.                         | Verify ID or ownership.                                                              |
+| `DECK_ACCESS_DENIED`          | 403  | You do not own this deck.                                                | Use your own deck.                                                                   |
+| `DECK_UPDATE_ERROR`           | 500  | Updating the deck failed.                                                | Retry.                                                                                |
+| `DECK_DELETE_ERROR`           | 500  | Deleting the deck failed.                                                | Retry.                                                                                |
+| `INVALID_BACKGROUND`          | 400  | Supplied deck background path is not in the allowlist.                   | Use a path from `GET /api/v1/dbv/deck-backgrounds`.                                  |
+| `UI_PREFERENCES_FETCH_ERROR`  | 500  | Reading deck UI preferences failed.                                      | Retry.                                                                                |
+| `UI_PREFERENCES_UPDATE_ERROR` | 500  | Updating deck UI preferences failed.                                     | Retry.                                                                                |
+| `USERNAME_EXISTS`             | 409  | Admin tried to create a user with a taken username.                      | Choose a different username.                                                         |
+| `ADMIN_USERS_LIST_ERROR`      | 500  | Admin user listing failed.                                               | Retry.                                                                                |
+| `ADMIN_USER_CREATE_ERROR`     | 500  | Admin user creation failed.                                              | Retry.                                                                                |
+| `ADMIN_DEBUG_ERROR`           | 500  | Admin debug action failed.                                               | Retry.                                                                                |
+| `ADMIN_DATABASE_STATUS_ERROR` | 500  | Admin DB status call failed.                                             | Retry.                                                                                |
+| `NOT_IMPLEMENTED`             | 501  | Route intentionally unimplemented.                                       | Use documented alternative.                                                          |
+| `INTERNAL_ERROR`              | 500  | Catch-all unexpected failure.                                            | Retry; report `requestId`.                                                           |
+
+## Related docs
+
+- [`API_V1.md`](../../API_V1.md) — envelope + endpoint details.
+- [`API_V1_VALIDATION.md`](API_V1_VALIDATION.md) — how `VALIDATION_ERROR`
+  is produced (`parseV1Body` + zod).
+- [`API_V1_RATE_LIMITS.md`](API_V1_RATE_LIMITS.md) — how `RATE_LIMITED` is
+  computed and which headers accompany it.
+- [`API_V1_AUTH_REFRESH.md`](API_V1_AUTH_REFRESH.md) — refresh token flow
+  and the `REFRESH_*` codes.

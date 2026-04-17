@@ -43,14 +43,23 @@ locals {
 
     # Create nginx configuration for excelsior.cards
     cat > /etc/nginx/conf.d/excelsior.cards.conf << 'NGINX_EOF'
+    # Phase 0 HTTPS rollout (docs/current/OPS_TLS_AND_HTTPS.md):
+    # CloudFront terminates TLS for the apex + www and forwards to
+    # origin.excelsior.cards on HTTP/80. Anyone hitting the public apex names
+    # over HTTP directly (bypassing CloudFront) is 301-redirected to HTTPS so
+    # the browser re-requests via CloudFront. The origin hostname continues to
+    # accept HTTP because that is how CloudFront talks to us.
     server {
         listen 80;
         server_name excelsior.cards www.excelsior.cards;
+        return 301 https://$host$request_uri;
+    }
 
-        # Redirect HTTP to HTTPS (optional, uncomment if you have SSL)
-        # return 301 https://$server_name$request_uri;
+    server {
+        listen 80 default_server;
+        server_name origin.excelsior.cards _;
 
-        # For now, proxy to HTTP (port 3000)
+        # Proxy to the app on HTTP (port 3000); CloudFront handles TLS.
         location / {
             proxy_pass http://localhost:3000;
             proxy_http_version 1.1;

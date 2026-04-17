@@ -17,22 +17,25 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 | `ec2.tf` | EC2 app instance (t2.micro), Elastic IP, IAM role/policies for EC2 (SSM + ECR access) |
 | `rds.tf` | RDS PostgreSQL instance (db.t4g.micro) |
 | `ecr.tf` | ECR Docker image repository (`op-deckbuilder-repo`) |
-| `cloudfront.tf` | CloudFront CDN distribution — EC2 origin (default) + S3 origin (card images) |
+| `cloudfront.tf` | CloudFront CDN distribution — **apex alias** for excelsior.cards + www (Phase 0), EC2 origin via `origin.excelsior.cards`, S3 origin for card images. Min TLS `TLSv1.2_2021`; viewer_protocol_policy = `redirect-to-https`. |
 | `s3.tf` | S3 bucket for static card image assets; OAC-only access (no public access) |
 | `ssm.tf` | SSM Parameter Store — DB credentials, app env, Firebase config, CDN base URL. **`/…/app/jwt_secret`** for v1 JWT is documented in `docs/current/DEPLOYMENT.md` and is **not** a Terraform resource here—create it manually in Parameter Store when reviving infra. |
-| `dns.tf` | Route 53 hosted zone + A/CNAME/MX/DKIM records |
-| `ssl.tf` | ACM SSL/TLS certificate |
+| `dns.tf` | Route 53 hosted zone + records. Phase 0: apex and www are **ALIAS** records → CloudFront; `origin.excelsior.cards` is a direct A record to the EC2 EIP for CloudFront's origin. |
+| `ssl.tf` | ACM cert for `excelsior.cards` + `www` in **us-east-1** (CloudFront requirement) via the `aws.us_east_1` provider alias; DNS-validated in the main hosted zone. See [`docs/current/OPS_TLS_AND_HTTPS.md`](../docs/current/OPS_TLS_AND_HTTPS.md). |
 | `ses.tf` | SES email sending config for `excelsior.cards` |
 | `nginx.tf` | Nginx reverse-proxy config deployed to EC2 via SSM/user-data |
 | `iam.tf` | IAM policy granting CI user S3 write access to the assets bucket |
 
 ## Key Architecture Facts
 
-- **`excelsior.cards` A record → EC2 Elastic IP directly** — NOT to CloudFront. The domain bypasses CloudFront entirely for normal app requests.
-- **CloudFront** is only reachable at its auto-generated `*.cloudfront.net` domain. The server injects this as `CDN_BASE_URL` (SSM parameter) at container startup → `window.APP_CDN_BASE` in the frontend.
+- **Phase 0 rewrote the transport story — read [`docs/current/OPS_TLS_AND_HTTPS.md`](../docs/current/OPS_TLS_AND_HTTPS.md) first.**
+- **`excelsior.cards` + `www.excelsior.cards` → CloudFront (ALIAS A records).** CloudFront terminates TLS with the ACM cert from `ssl.tf` and forwards to the EC2 origin over HTTP.
+- **`origin.excelsior.cards` → EC2 Elastic IP directly.** This hostname is what CloudFront uses as its origin; it must NEVER be aliased to CloudFront or it creates a loop.
+- **Two providers in `main.tf`**: default `us-west-2` (most resources) and `aws.us_east_1` for the ACM cert (CloudFront requirement).
 - **CloudFront origins:**
-  - Default behavior → EC2 (all app traffic)
+  - Default behavior → EC2 via `origin.excelsior.cards` (all app traffic)
   - Ordered behavior `/src/resources/cards/images/*` → S3 bucket (card images only)
+- **CloudFront** is also still reachable at its auto-generated `*.cloudfront.net` domain. The server injects this as `CDN_BASE_URL` (SSM parameter) at container startup → `window.APP_CDN_BASE` in the frontend. After Phase 0 this is optional — the apex alias also covers card image paths.
 - **S3 bucket** (`excelsior-cards-assets-dev`) is fully private; only CloudFront can read from it via OAC (Origin Access Control). Direct public HTTP access returns 403.
 - **OAC not OAI** — always use `aws_cloudfront_origin_access_control` for new S3 origins. OAI is legacy and deprecated.
 
@@ -63,6 +66,13 @@ terraform output -raw cloudfront_domain_name
 ## IAM for CI (GitHub Actions)
 
 The CI pipeline uses `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` stored as GitHub Actions secrets. These belong to an IAM user whose username is tracked in `var.ci_iam_username`. The `iam.tf` file defines the S3 write policy and attaches it to this user.
+
+## External API hardening docs
+
+- [`../docs/current/OPS_TLS_AND_HTTPS.md`](../docs/current/OPS_TLS_AND_HTTPS.md) — Phase 0 HTTPS rollout, cert issuance, cookie flags, kill switches, rollback.
+- [`../docs/current/OPS_RDS_SECURITY_GROUP.md`](../docs/current/OPS_RDS_SECURITY_GROUP.md) — Phase 1 RDS SG lockdown ([`rds.tf`](rds.tf), `var.rds_admin_cidrs`).
+- [`../docs/current/OPS_SSM_SECRETS.md`](../docs/current/OPS_SSM_SECRETS.md) — Phase 1 SSM parameter naming for app secrets.
+- [`../docs/current/API_V1_CATALOG_CACHING.md`](../docs/current/API_V1_CATALOG_CACHING.md) — Phase 3 CloudFront ordered cache behaviors for `/api/v1/catalog/*` and `/api/v1/dbv/sets` in [`cloudfront.tf`](cloudfront.tf).
 
 ## Infrastructure Spend Lock
 

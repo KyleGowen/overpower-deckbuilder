@@ -3,14 +3,24 @@
  */
 export interface JwtConfig {
   secret: string;
-  /** jsonwebtoken `expiresIn` string, e.g. `2h`, `15m` */
+  /** jsonwebtoken `expiresIn` string, e.g. `15m`, `2h` */
   expiresIn: string;
+  /**
+   * Refresh token TTL in seconds (Phase 2 §6.1.2, default 30 days).
+   * Optional so callers that only use the access-token side of the service
+   * (e.g. `V1JwtTokenService` tests) do not need to specify it.
+   */
+  refreshTtlSeconds?: number;
 }
 
 const DEV_FALLBACK_SECRET = 'dev-only-jwt-secret-do-not-use-in-production';
+const DEFAULT_ACCESS_TTL = '15m';
+const DEFAULT_REFRESH_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
 /**
  * Resolve JWT config. In production, JWT_SECRET is required.
+ * `JWT_ACCESS_TTL` controls access TTL (default 15m). `JWT_REFRESH_TTL_SECONDS` controls refresh TTL.
+ * Legacy `JWT_EXPIRES_IN` is still read as a fallback for `JWT_ACCESS_TTL`.
  */
 export function resolveJwtConfig(): JwtConfig {
   const isProd = process.env.NODE_ENV === 'production';
@@ -18,9 +28,16 @@ export function resolveJwtConfig(): JwtConfig {
   if (isProd && !secret) {
     throw new Error('JWT_SECRET is required when NODE_ENV=production');
   }
+  const accessTtl =
+    (process.env.JWT_ACCESS_TTL ?? process.env.JWT_EXPIRES_IN ?? DEFAULT_ACCESS_TTL).trim() ||
+    DEFAULT_ACCESS_TTL;
+  const refreshRaw = (process.env.JWT_REFRESH_TTL_SECONDS ?? '').trim();
+  const refreshTtlSeconds =
+    refreshRaw && /^\d+$/.test(refreshRaw) ? parseInt(refreshRaw, 10) : DEFAULT_REFRESH_TTL_SECONDS;
   return {
     secret: secret || DEV_FALLBACK_SECRET,
-    expiresIn: (process.env.JWT_EXPIRES_IN ?? '2h').trim() || '2h'
+    expiresIn: accessTtl,
+    refreshTtlSeconds
   };
 }
 

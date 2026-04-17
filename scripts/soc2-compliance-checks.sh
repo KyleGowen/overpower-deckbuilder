@@ -100,22 +100,29 @@ else
   fail "Session IDs may not use crypto-grade randomness"
 fi
 
+# Session cookie hardening lives in src/services/authCookieOptions.ts (Phase 0
+# of the external-API hardening plan — see docs/current/OPS_TLS_AND_HTTPS.md).
+# AuthenticationService calls buildSessionCookieOptions(req, maxAge), so the
+# flags are set in the helper rather than inline.
+COOKIE_OPTS_FILE="src/services/authCookieOptions.ts"
+
 # Check: Session cookie has httpOnly flag
-if grep -q 'httpOnly: true' src/services/AuthenticationService.ts 2>/dev/null; then
+if grep -q 'httpOnly: true' "$COOKIE_OPTS_FILE" 2>/dev/null; then
   pass "Session cookie has httpOnly flag"
 else
   fail "Session cookie missing httpOnly flag"
 fi
 
 # Check: Session cookie secure flag is environment-aware
-if grep -q "secure.*NODE_ENV.*production\|secure.*process\.env" src/services/AuthenticationService.ts 2>/dev/null; then
+# (helper hardens when NODE_ENV=production or req.secure is true)
+if grep -qE "process\.env\.NODE_ENV.*=== *'production'|req\.secure" "$COOKIE_OPTS_FILE" 2>/dev/null; then
   pass "Session cookie secure flag is environment-aware (HTTPS in production)"
 else
   fail "Session cookie secure flag is not tied to production environment"
 fi
 
 # Check: Session cookie has sameSite policy
-if grep -q "sameSite" src/services/AuthenticationService.ts 2>/dev/null; then
+if grep -q "sameSite" "$COOKIE_OPTS_FILE" 2>/dev/null; then
   pass "Session cookie has sameSite policy set"
 else
   fail "Session cookie missing sameSite policy"

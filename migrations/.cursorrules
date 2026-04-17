@@ -1,0 +1,20 @@
+# `migrations/` — Flyway SQL migrations
+
+## Rules
+
+- Files are named `V<NNN>__<snake_case_description>.sql`, version monotonically increasing, never edited after a merge reaches any shared env.
+- **Additive only by default.** `DROP`, `ALTER TYPE`, or column rename requires explicit approval and a reversible partner migration checked in under `migrations/reversible/` but NOT auto-applied.
+- After adding or editing any file here, run `npm run migrate` locally and restart `npm run dev` per [`.cursorrules`](../.cursorrules) Flyway rule.
+
+## Retention / audit-log contract
+
+- **`api_access_log`** (V276) — 90-day retention. The nightly purge job contract is documented in [`docs/current/API_V1_AUDIT_LOG.md`](../docs/current/API_V1_AUDIT_LOG.md). Do not add the purge as a Flyway migration; it's a scheduled job.
+- **`refresh_tokens`** (V275) — no automatic purge. Expired rows are harmless for audit; a future sweeper job may compact them. See [`docs/current/API_V1_AUTH_REFRESH.md`](../docs/current/API_V1_AUTH_REFRESH.md).
+- **`endpoint_hit_counts`** — seeded + pruned on app startup, not via a Flyway migration per route. See [`docs/current/ENDPOINT_HIT_METRICS.md`](../docs/current/ENDPOINT_HIT_METRICS.md).
+
+## Local dev workflow
+
+1. Add/edit SQL under `migrations/`.
+2. Run `npm run migrate`.
+3. Restart `npm run dev` (caches held in-process are only refreshed on restart).
+4. Update the relevant `docs/current/*.md` and `AGENTS.md` / `.cursorrules` in the same PR if the schema is user-visible.

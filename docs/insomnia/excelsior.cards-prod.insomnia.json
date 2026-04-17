@@ -1,0 +1,2617 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-04-17T05:08:28.304Z",
+  "__export_source": "excelsior-deckbuilder:scripts/generate-excelsior-insomnia-export.mjs",
+  "resources": [
+    {
+      "_id": "wrk_excelsior_prod",
+      "parentId": null,
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "Excelsior.cards — Production API",
+      "description": "## Production API (excelsior.cards)\n\n**Base URL** is `{{ base_url }}` (default https://excelsior.cards).\n\n### Bearer JWT (preferred for DBV + v1 /auth/me)\n1. Run **POST /api/v1/auth/login** with `username` / `password` in the environment.\n2. Copy `data.accessToken` from the JSON response into environment variable **jwt_access_token**.\n3. Use Bearer-backed folders: Auth (me), DBV Catalog, DBV Support.\n\n### Session cookie (decks, collections, guest, admin, legacy)\nMost **/api/v1/decks/**, **/api/v1/collections/**, **/api/v1/guest/**, **/api/v1/admin/**, and **legacy /api/auth/** routes expect the **sessionId** cookie.\nRun **Legacy — POST /api/auth/login** first (cookies enabled), then session-backed requests in the same workspace.\n\n### Legacy deck read compat\n`GET /api/decks/:id` and `GET /api/decks/:id/full` use the v1-style envelope but live under legacy paths; they require session auth.\n",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_excelsior_prod",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "Production",
+      "data": {
+        "base_url": "https://excelsior.cards",
+        "username": "",
+        "password": "",
+        "jwt_access_token": "",
+        "jwt_refresh_token": "",
+        "catalog_etag": "",
+        "catalog_data_version": "0",
+        "deck_id": "REPLACE_DECK_ID",
+        "card_id": "REPLACE_CARD_ID"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "username",
+          "password",
+          "jwt_access_token",
+          "jwt_refresh_token",
+          "catalog_etag",
+          "catalog_data_version",
+          "deck_id",
+          "card_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": -1776402508304,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_health",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "01 — Health & diagnostics",
+      "description": "Server health (no auth).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508305,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_health",
+      "parentId": "fld_health",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/health",
+      "name": "GET /health",
+      "description": "Status, uptime, DB probe, git + migration info.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508306,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_legacy_auth",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "02 — Legacy auth & config",
+      "description": "Session-based JSON API and client config. Run Login first for cookie-backed v1 deck/collection calls.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508307,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_legacy_login",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/auth/login",
+      "name": "POST /api/auth/login",
+      "description": "Sets session cookie (legacy envelope).",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"{{ username }}\",\n  \"password\": \"{{ password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508308,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_signup",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/auth/signup",
+      "name": "POST /api/auth/signup",
+      "description": "Adjust body fields to match AuthenticationService contract.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"newuser\",\n  \"password\": \"password\",\n  \"email\": \"user@example.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508309,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_google",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/auth/google",
+      "name": "POST /api/auth/google",
+      "description": "Google sign-in token payload (see server handler).",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508310,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_logout",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/auth/logout",
+      "name": "POST /api/auth/logout",
+      "description": "",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508311,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_me",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/auth/me",
+      "name": "GET /api/auth/me",
+      "description": "Session validation (send cookies after login).",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508312,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_firebase",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/config/firebase",
+      "name": "GET /api/config/firebase",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508313,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_app_config_js",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/js/app-config.js",
+      "name": "GET /js/app-config.js",
+      "description": "Returns JavaScript (not JSON): window.APP_CDN_BASE = ...",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "*/*",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508314,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_change_password",
+      "parentId": "fld_legacy_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/users/change-password",
+      "name": "POST /api/users/change-password",
+      "description": "Requires authenticated USER or ADMIN session.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"newPassword\": \"new-secure-password\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508315,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_legacy_deck_compat",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "03 — Legacy deck read (v1 envelope)",
+      "description": "GET deck detail under legacy paths; session cookie required. Response uses v1-style envelope.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508316,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_legacy_deck_get",
+      "parentId": "fld_legacy_deck_compat",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/decks/{{ deck_id }}",
+      "name": "GET /api/decks/:id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508317,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_legacy_deck_full",
+      "parentId": "fld_legacy_deck_compat",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/decks/{{ deck_id }}/full",
+      "name": "GET /api/decks/:id/full",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508318,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_auth",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "04 — v1 Auth (Bearer)",
+      "description": "Login is unauthenticated. /auth/me requires Bearer JWT (set jwt_access_token after login).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508319,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_login",
+      "parentId": "fld_v1_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/login",
+      "name": "POST /api/v1/auth/login",
+      "description": "Returns accessToken in data; copy to jwt_access_token.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"{{ username }}\",\n  \"password\": \"{{ password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508320,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_me",
+      "parentId": "fld_v1_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/me",
+      "name": "GET /api/v1/auth/me",
+      "description": "Bearer JWT only.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508321,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_logout",
+      "parentId": "fld_v1_auth",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/logout",
+      "name": "POST /api/v1/auth/logout",
+      "description": "No-op token revoke; informational.",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508322,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_dbv_catalog",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "05 — v1 DBV catalog",
+      "description": "GET card catalog payloads. Auth: Bearer JWT **or** session cookie (catalogAuth).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508323,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_cat_char",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/characters",
+      "name": "GET /api/v1/catalog/characters",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508324,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_loc",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/locations",
+      "name": "GET /api/v1/catalog/locations",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508325,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_spec",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/special-cards",
+      "name": "GET /api/v1/catalog/special-cards",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508326,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_miss",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/missions",
+      "name": "GET /api/v1/catalog/missions",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508327,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_evt",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/events",
+      "name": "GET /api/v1/catalog/events",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508328,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_asp",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/aspects",
+      "name": "GET /api/v1/catalog/aspects",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508329,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_adv",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/advanced-universe",
+      "name": "GET /api/v1/catalog/advanced-universe",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508330,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_tw",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/teamwork",
+      "name": "GET /api/v1/catalog/teamwork",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508331,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_ally",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/ally-universe",
+      "name": "GET /api/v1/catalog/ally-universe",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508332,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_train",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/training",
+      "name": "GET /api/v1/catalog/training",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508333,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_basic",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/basic-universe",
+      "name": "GET /api/v1/catalog/basic-universe",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508334,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_power",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/power-cards",
+      "name": "GET /api/v1/catalog/power-cards",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508335,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_cat_foil",
+      "parentId": "fld_v1_dbv_catalog",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/foil-card-map",
+      "name": "GET /api/v1/catalog/foil-card-map",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508336,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_dbv_support",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "06 — v1 DBV support",
+      "description": "Mission sets and deck backgrounds. Auth: Bearer **or** session.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508324,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_dbv_sets",
+      "parentId": "fld_v1_dbv_support",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/dbv/sets",
+      "name": "GET /api/v1/dbv/sets",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508325,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_dbv_bg",
+      "parentId": "fld_v1_dbv_support",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/dbv/deck-backgrounds",
+      "name": "GET /api/v1/dbv/deck-backgrounds",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508326,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_decks",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "07 — v1 Decks",
+      "description": "**Session cookie** (authenticateUser). Run Legacy or v1 login is NOT enough unless server also sets cookie — use **Legacy POST /api/auth/login** for cookie. GUEST cannot mutate most deck endpoints.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508327,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_decks_list",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks",
+      "name": "GET /api/v1/decks",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508328,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_stats",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/stats",
+      "name": "GET /api/v1/decks/stats",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508329,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_validate",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/validate",
+      "name": "POST /api/v1/decks/validate",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"example\",\n      \"quantity\": 1\n    }\n  ]\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508330,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_create",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks",
+      "name": "POST /api/v1/decks",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"New Deck\",\n  \"description\": \"\",\n  \"characters\": []\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508331,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_cards_get",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/cards",
+      "name": "GET /api/v1/decks/:id/cards",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508332,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_cards_post",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/cards",
+      "name": "POST /api/v1/decks/:id/cards",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"example-id\",\n  \"quantity\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508333,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_cards_put",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/cards",
+      "name": "PUT /api/v1/decks/:id/cards",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cards\": [\n    {\n      \"cardType\": \"character\",\n      \"cardId\": \"example-id\",\n      \"quantity\": 1,\n      \"exclude_from_draw\": false\n    }\n  ]\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508334,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_cards_del",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/cards",
+      "name": "DELETE /api/v1/decks/:id/cards",
+      "description": "",
+      "method": "DELETE",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"example-id\",\n  \"quantity\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508335,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_full",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/full",
+      "name": "GET /api/v1/decks/:id/full",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508336,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_get",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}",
+      "name": "GET /api/v1/decks/:id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508337,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_put",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}",
+      "name": "PUT /api/v1/decks/:id",
+      "description": "All fields optional; send only fields to change.",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Updated name\",\n  \"description\": null,\n  \"is_limited\": false,\n  \"is_valid\": true,\n  \"reserve_character\": null,\n  \"display_mission_card_id\": null,\n  \"background_image_path\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508338,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_ui_get",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/ui-preferences",
+      "name": "GET /api/v1/decks/:id/ui-preferences",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508339,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_ui_put",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}/ui-preferences",
+      "name": "PUT /api/v1/decks/:id/ui-preferences",
+      "description": "Opaque JSON per DeckUIPreferencesService.",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardViewMode\": \"list\",\n  \"sortOrder\": \"name\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508340,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_decks_delete",
+      "parentId": "fld_v1_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/decks/{{ deck_id }}",
+      "name": "DELETE /api/v1/decks/:id",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508341,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_collections",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "08 — v1 Collections",
+      "description": "**Session cookie** required. Paths under /api/v1/collections/me.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508342,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_coll_me",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me",
+      "name": "GET /api/v1/collections/me",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508343,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_cards",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/cards",
+      "name": "GET /api/v1/collections/me/cards",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508344,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_hist",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/history",
+      "name": "GET /api/v1/collections/me/history",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "limit",
+          "value": "50",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508345,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_cards_post",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/cards",
+      "name": "POST /api/v1/collections/me/cards",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardId\": \"example\",\n  \"cardType\": \"character\",\n  \"quantity\": 1,\n  \"imagePath\": \"/src/resources/cards/images/characters/example.png\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508346,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_remove_one",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/cards/remove-one",
+      "name": "POST /api/v1/collections/me/cards/remove-one",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardId\": \"example\",\n  \"cardType\": \"character\",\n  \"imagePath\": \"/src/resources/cards/images/characters/example.png\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508347,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_put_card",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/cards/{{ card_id }}",
+      "name": "PUT /api/v1/collections/me/cards/:cardId",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"quantity\": 2,\n  \"cardType\": \"character\",\n  \"imagePath\": \"/src/resources/cards/images/characters/example.png\",\n  \"oldImagePath\": \"\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508348,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_coll_del_card",
+      "parentId": "fld_v1_collections",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/collections/me/cards/{{ card_id }}",
+      "name": "DELETE /api/v1/collections/me/cards/:cardId",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [
+        {
+          "name": "cardType",
+          "value": "character",
+          "disabled": false
+        }
+      ],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508349,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_guest_decks",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "09 — v1 Guest decks",
+      "description": "**GUEST role + sessionId cookie** only. In-memory guest decks.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508350,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_guest_decks_post",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks",
+      "name": "POST /api/v1/guest/decks",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Guest Deck\",\n  \"description\": \"\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508351,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_decks_list",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks",
+      "name": "GET /api/v1/guest/decks",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508352,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_deck_get",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks/{{ deck_id }}",
+      "name": "GET /api/v1/guest/decks/:id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508353,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_deck_put",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks/{{ deck_id }}",
+      "name": "PUT /api/v1/guest/decks/:id",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Renamed\",\n  \"description\": null\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508354,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_cards_put",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks/{{ deck_id }}/cards",
+      "name": "PUT /api/v1/guest/decks/:id/cards",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cards\": []\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508355,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_cards_post",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks/{{ deck_id }}/cards",
+      "name": "POST /api/v1/guest/decks/:id/cards",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"cardType\": \"character\",\n  \"cardId\": \"x\",\n  \"quantity\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508356,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_guest_deck_del",
+      "parentId": "fld_v1_guest_decks",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/guest/decks/{{ deck_id }}",
+      "name": "DELETE /api/v1/guest/decks/:id",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508357,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_v1_admin",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "10 — v1 Admin",
+      "description": "**ADMIN session** required (cookie after admin legacy login).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508358,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_v1_admin_users",
+      "parentId": "fld_v1_admin",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/admin/users",
+      "name": "GET /api/v1/admin/users",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508359,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_admin_users_post",
+      "parentId": "fld_v1_admin",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/admin/users",
+      "name": "POST /api/v1/admin/users",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"newadmin\",\n  \"password\": \"secure-password\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508360,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_admin_clear_cache",
+      "parentId": "fld_v1_admin",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/admin/debug/clear-cache",
+      "name": "GET /api/v1/admin/debug/clear-cache",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508361,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_admin_clear_card",
+      "parentId": "fld_v1_admin",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/admin/debug/clear-card-cache",
+      "name": "GET /api/v1/admin/debug/clear-card-cache",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508362,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_v1_admin_db_status",
+      "parentId": "fld_v1_admin",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/admin/database/status",
+      "name": "GET /api/v1/admin/database/status",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508363,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_phase2_smoke",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "11 — Phase 2 smoke (refresh + audit)",
+      "description": "Exercises the refresh-token rotation + reuse-detection flow.\n1. Run **POST /api/v1/auth/login** (this folder). Copy `data.accessToken` to `jwt_access_token` and `data.refreshToken` to `jwt_refresh_token`.\n2. Run **POST /api/v1/auth/refresh**. Copy the new `accessToken` + `refreshToken` values.\n3. Run **POST /api/v1/auth/refresh (reuse old)** — should 401 with `REFRESH_REUSED`.\n4. Run **POST /api/v1/auth/logout** — revokes the current refresh token.\nSee docs/current/API_V1_AUTH_REFRESH.md and docs/current/API_V1_AUDIT_LOG.md.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508364,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_phase2_login",
+      "parentId": "fld_phase2_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/login",
+      "name": "1) POST /api/v1/auth/login",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"{{ username }}\",\n  \"password\": \"{{ password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508365,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_phase2_refresh",
+      "parentId": "fld_phase2_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/refresh",
+      "name": "2) POST /api/v1/auth/refresh",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ jwt_refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508366,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_phase2_refresh_reuse",
+      "parentId": "fld_phase2_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/refresh",
+      "name": "3) POST /api/v1/auth/refresh (reuse should 401)",
+      "description": "Sending the previously-rotated refresh token again revokes the family.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ jwt_refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508367,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_phase2_logout",
+      "parentId": "fld_phase2_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/auth/logout",
+      "name": "4) POST /api/v1/auth/logout",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ jwt_refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "none"
+      },
+      "metaSortKey": -1776402508368,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_phase3_smoke",
+      "parentId": "wrk_excelsior_prod",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "name": "12 — Phase 3 smoke (cache + compression)",
+      "description": "Exercises Phase 3 caching and conditional GET.\n1. Run **GET /api/v1/catalog/characters** — copy the response `ETag` header into `catalog_etag` and `meta.catalogDataVersion` into `catalog_data_version`.\n2. Run **GET ... (conditional)** — should return **304 Not Modified**.\n3. Run **GET ... (since_version)** — demonstrates the `?since_version` query; response includes the current `meta.catalogDataVersion`.\nSee docs/current/API_V1_CATALOG_CACHING.md. Compression (gzip/br) is auto-negotiated by Insomnia.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1776402508369,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_phase3_catalog_first",
+      "parentId": "fld_phase3_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/characters",
+      "name": "1) GET /api/v1/catalog/characters",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Accept-Encoding",
+          "value": "br, gzip",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508370,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_phase3_catalog_conditional",
+      "parentId": "fld_phase3_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/characters",
+      "name": "2) GET /api/v1/catalog/characters (If-None-Match → 304)",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "If-None-Match",
+          "value": "{{ catalog_etag }}",
+          "disabled": false
+        },
+        {
+          "name": "Accept-Encoding",
+          "value": "br, gzip",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508371,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_phase3_catalog_since",
+      "parentId": "fld_phase3_smoke",
+      "modified": 1776402508304,
+      "created": 1776402508304,
+      "url": "{{ base_url }}/api/v1/catalog/characters?since_version={{ catalog_data_version }}",
+      "name": "3) GET /api/v1/catalog/characters?since_version={{ catalog_data_version }}",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Accept",
+          "value": "application/json",
+          "disabled": false
+        },
+        {
+          "name": "Accept-Encoding",
+          "value": "br, gzip",
+          "disabled": false
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ jwt_access_token }}",
+        "prefix": "Bearer",
+        "disabled": false
+      },
+      "metaSortKey": -1776402508372,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestUrl": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}

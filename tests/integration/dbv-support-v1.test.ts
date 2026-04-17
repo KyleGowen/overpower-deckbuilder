@@ -15,7 +15,11 @@ describe('GET /api/v1/dbv/sets', () => {
 
   it('returns v1 envelope with code/name rows from sets table', async () => {
     const res = await request(app).get('/api/v1/dbv/sets').set('Cookie', catalogAuthCookie).expect(200);
-    expect(res.body.meta).toEqual({});
+    // Phase 3 (catalog cache) adds catalogDataVersion/catalogLastUpdated to meta;
+    // see docs/current/API_V1_CATALOG_CACHING.md.
+    expect(res.body.meta).toEqual(
+      expect.objectContaining({ catalogDataVersion: expect.any(Number) })
+    );
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.data.length).toBeGreaterThan(0);

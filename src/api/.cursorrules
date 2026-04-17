@@ -41,7 +41,15 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 ## Security
 
 - Cross-cutting: middleware (Bearer JWT, rate limits, role checks), not duplicated ad hoc in every handler.
-- **JWT:** `JWT_SECRET` required when `NODE_ENV=production`. See [MIGRATION_ARCHITECTURE.md](../../MIGRATION_ARCHITECTURE.md).
+- **JWT:** `JWT_SECRET` required when `NODE_ENV=production`. `JWT_ACCESS_TTL` (default `15m`) and `JWT_REFRESH_TTL_SECONDS` (default 30 days) from Phase 2. See [MIGRATION_ARCHITECTURE.md](../../MIGRATION_ARCHITECTURE.md) and [docs/current/API_V1_AUTH_REFRESH.md](../../docs/current/API_V1_AUTH_REFRESH.md).
+- **Refresh tokens:** issued/rotated/revoked by [`services/refreshTokenService.ts`](services/refreshTokenService.ts); backed by `refresh_tokens` table ([`migrations/V275__Create_refresh_tokens.sql`](../../migrations/V275__Create_refresh_tokens.sql)). Kill switch `DISABLE_AUTH_REFRESH=1` ([docs/current/API_V1_AUTH_REFRESH.md](../../docs/current/API_V1_AUTH_REFRESH.md)).
+- **Audit log:** every `/api/v1/*` request async-writes a row into `api_access_log` via [`http/middleware/apiAccessLog.ts`](http/middleware/apiAccessLog.ts); 90-day retention ([docs/current/API_V1_AUDIT_LOG.md](../../docs/current/API_V1_AUDIT_LOG.md)). Kill switch `DISABLE_API_ACCESS_LOG=1`.
+- **Rate limits:** consolidated in [`http/middleware/v1RateLimit.ts`](http/middleware/v1RateLimit.ts); `X-RateLimit-*` headers + 429 with `RATE_LIMITED` ([docs/current/API_V1_RATE_LIMITS.md](../../docs/current/API_V1_RATE_LIMITS.md)). Kill switches `DISABLE_V1_RATE_LIMIT=1` / `LEGACY_RATE_LIMITS=1`.
+- **Body validation:** every `*.http.ts` mutation body goes through [`parseV1Body`](http/parseV1Body.ts) (zod) ([docs/current/API_V1_VALIDATION.md](../../docs/current/API_V1_VALIDATION.md)). Kill switch `DISABLE_ZOD_V1=1`.
+- **Decks + collections auth:** session cookie OR Bearer JWT via `createV1SessionOrBearerAuthMiddleware`. Kill switch `DISABLE_BEARER_DECKS_COLLECTIONS=1` restores session-only (pre-Phase-2).
+- **Catalog caching:** `/api/v1/catalog/*` and `/api/v1/dbv/sets` go through [`http/catalogCache.ts`](http/catalogCache.ts) which emits `Cache-Control`, strong `ETag`, and `meta.catalogDataVersion`; honors `If-None-Match`; optional `?since_version=<n>`. CloudFront ordered cache behaviors in [`infra/cloudfront.tf`](../../infra/cloudfront.tf). Kill switches `DISABLE_CATALOG_CACHE_HEADERS=1` / `DISABLE_SINCE_SYNC=1` ([docs/current/API_V1_CATALOG_CACHING.md](../../docs/current/API_V1_CATALOG_CACHING.md)).
+- **Error catalog + OpenAPI (contract):** any new `/api/v1` route MUST add an entry in [docs/current/API_V1_ERROR_CATALOG.md](../../docs/current/API_V1_ERROR_CATALOG.md), a path in [docs/openapi.yaml](../../docs/openapi.yaml), and a line in [docs/current/API_V1_CHANGELOG.md](../../docs/current/API_V1_CHANGELOG.md) — all in the same PR as the route.
+- **Image URL contract:** external clients consume images from `APP_CDN_BASE` via the paths defined in [docs/current/API_V1_IMAGE_CONTRACT.md](../../docs/current/API_V1_IMAGE_CONTRACT.md). Do not introduce new image path shapes without updating that doc.
 
 ## Testing (mandatory)
 

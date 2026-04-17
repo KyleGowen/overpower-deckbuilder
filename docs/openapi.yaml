@@ -1,0 +1,430 @@
+openapi: 3.0.3
+info:
+  title: Excelsior Deckbuilder API v1
+  description: |
+    External HTTP API for the Excelsior Overpower card database and deck builder.
+
+    Stability: this is a stub spec. Paths and payloads are authoritative from
+    [`API_V1.md`](../API_V1.md); this document is maintained alongside it so
+    external clients can generate SDKs. Any new `/api/v1` route must add an
+    entry here, an error-catalog entry, and a changelog entry in the same PR.
+
+    Contract highlights:
+
+      - Responses use the v1 envelope `{ data, meta, errors }`.
+      - Authentication is `Bearer <accessToken>` JWT (see `/auth/login`).
+      - Refresh tokens rotate on `/auth/refresh`; reuse revokes the family.
+      - Rate limits are per-user (or per-IP for unauthenticated calls). See
+        `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
+      - Catalog endpoints are edge-cached with `Cache-Control` + `ETag`; clients
+        SHOULD send `If-None-Match` to get `304 Not Modified`.
+      - Images are served from `APP_CDN_BASE` over HTTPS. See
+        [`API_V1_IMAGE_CONTRACT.md`](current/API_V1_IMAGE_CONTRACT.md).
+  version: 1.0.0
+  contact:
+    name: Excelsior
+    url: https://excelsior.cards
+
+servers:
+  - url: https://excelsior.cards
+    description: Production
+  - url: http://localhost:8085
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Login, refresh, logout, and current user.
+  - name: Catalog
+    description: Global-GET card catalog endpoints. Edge-cached.
+  - name: DBV Support
+    description: Sets, deck backgrounds, and other DBV lookup data.
+  - name: Decks
+    description: User deck CRUD. Accepts session cookie OR Bearer JWT.
+  - name: Collections
+    description: User card collections. Accepts session cookie OR Bearer JWT.
+  - name: Admin
+    description: ADMIN-only operations.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        data:
+          nullable: true
+        meta:
+          $ref: '#/components/schemas/Meta'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorBody'
+      required: [data, meta, errors]
+    Meta:
+      type: object
+      properties:
+        requestId:
+          type: string
+        catalogDataVersion:
+          type: integer
+          minimum: 0
+          description: Monotonic version for all catalog/DBV responses. Bumps on re-ingest.
+        catalogLastUpdated:
+          type: string
+          format: date-time
+    ErrorBody:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Stable error code. See API_V1_ERROR_CATALOG.md.
+        message:
+          type: string
+        field:
+          type: string
+          description: Present for VALIDATION_ERROR.
+    LoginRequest:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          description: Username or email.
+        password:
+          type: string
+    LoginSuccess:
+      type: object
+      required: [accessToken, expiresInSeconds, user]
+      properties:
+        accessToken:
+          type: string
+        expiresInSeconds:
+          type: integer
+        refreshToken:
+          type: string
+        refreshExpiresInSeconds:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    LogoutRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, USER, GUEST]
+    Deck:
+      type: object
+      additionalProperties: true
+    Card:
+      type: object
+      additionalProperties: true
+  parameters:
+    SinceVersion:
+      in: query
+      name: since_version
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: |
+        If supplied, the server MAY return only rows changed after this
+        `catalogDataVersion`. Response `meta.catalogDataVersion` is always the
+        current server value.
+    IfNoneMatch:
+      in: header
+      name: If-None-Match
+      required: false
+      schema:
+        type: string
+      description: |
+        Standard HTTP conditional GET. If the client's ETag matches the current
+        catalog ETag, the server returns `304 Not Modified`.
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in and obtain access + refresh tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login success.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginSuccess'
+        '401':
+          description: Invalid credentials.
+        '429':
+          description: Rate limited.
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate the refresh token and receive a new access+refresh pair.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Rotation success.
+        '401':
+          description: Refresh token invalid, expired, or revoked.
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the provided refresh token (if any).
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: Logout acknowledged.
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user.
+      responses:
+        '200':
+          description: User envelope.
+        '401':
+          description: Not authenticated.
+  /api/v1/catalog/characters:
+    get:
+      tags: [Catalog]
+      summary: All characters.
+      parameters:
+        - $ref: '#/components/parameters/SinceVersion'
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        '200': { description: OK }
+        '304': { description: Not Modified }
+  /api/v1/catalog/locations:
+    get:
+      tags: [Catalog]
+      summary: All locations.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/special-cards:
+    get:
+      tags: [Catalog]
+      summary: All special cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/missions:
+    get:
+      tags: [Catalog]
+      summary: All missions.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/events:
+    get:
+      tags: [Catalog]
+      summary: All events.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/aspects:
+    get:
+      tags: [Catalog]
+      summary: All aspects.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/advanced-universe:
+    get:
+      tags: [Catalog]
+      summary: Advanced Universe cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/teamwork:
+    get:
+      tags: [Catalog]
+      summary: Teamwork cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/ally-universe:
+    get:
+      tags: [Catalog]
+      summary: Ally Universe cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/training:
+    get:
+      tags: [Catalog]
+      summary: Training cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/basic-universe:
+    get:
+      tags: [Catalog]
+      summary: Basic Universe cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/power-cards:
+    get:
+      tags: [Catalog]
+      summary: Power cards.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/catalog/foil-card-map:
+    get:
+      tags: [Catalog]
+      summary: Map of foil card IDs to base card IDs.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/dbv/sets:
+    get:
+      tags: [DBV Support]
+      summary: All sets.
+      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+  /api/v1/dbv/deck-backgrounds:
+    get:
+      tags: [DBV Support]
+      summary: Available deck background image paths.
+      responses: { '200': { description: OK } }
+  /api/v1/decks:
+    get:
+      tags: [Decks]
+      summary: List my decks.
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Decks]
+      summary: Create a deck.
+      responses: { '200': { description: OK }, '400': { description: Validation error } }
+  /api/v1/decks/stats:
+    get:
+      tags: [Decks]
+      summary: Summary stats for my decks.
+      responses: { '200': { description: OK } }
+  /api/v1/decks/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Decks]
+      summary: Get a single deck.
+      responses: { '200': { description: OK }, '404': { description: Not found } }
+    put:
+      tags: [Decks]
+      summary: Update a deck.
+      responses: { '200': { description: OK }, '400': { description: Validation error } }
+    delete:
+      tags: [Decks]
+      summary: Delete a deck.
+      responses: { '200': { description: OK } }
+  /api/v1/decks/{id}/cards:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Decks]
+      summary: Cards in a deck.
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Decks]
+      summary: Add cards to a deck.
+      responses: { '200': { description: OK } }
+    put:
+      tags: [Decks]
+      summary: Replace cards in a deck.
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Decks]
+      summary: Remove a card from a deck.
+      responses: { '200': { description: OK } }
+  /api/v1/decks/{id}/full:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Decks]
+      summary: Deck with cards and UI preferences.
+      responses: { '200': { description: OK } }
+  /api/v1/decks/{id}/ui-preferences:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Decks]
+      summary: Get UI preferences for a deck.
+      responses: { '200': { description: OK } }
+    put:
+      tags: [Decks]
+      summary: Update UI preferences for a deck.
+      responses: { '200': { description: OK } }
+  /api/v1/collections/me:
+    get:
+      tags: [Collections]
+      summary: My collection summary.
+      responses: { '200': { description: OK } }
+  /api/v1/collections/me/cards:
+    get:
+      tags: [Collections]
+      summary: All cards in my collection.
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Collections]
+      summary: Add a card to my collection.
+      responses: { '200': { description: OK } }
+  /api/v1/collections/me/history:
+    get:
+      tags: [Collections]
+      summary: Collection change history.
+      responses: { '200': { description: OK } }
+  /api/v1/collections/me/cards/remove-one:
+    post:
+      tags: [Collections]
+      summary: Remove one copy of a card.
+      responses: { '200': { description: OK } }
+  /api/v1/collections/me/cards/{cardId}:
+    parameters:
+      - in: path
+        name: cardId
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Collections]
+      summary: Replace the row for a card.
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Collections]
+      summary: Remove all copies of a card.
+      responses: { '200': { description: OK } }
+
+# NOTE: keep this file updated whenever /api/v1 endpoints change.

@@ -7,6 +7,7 @@ import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdm
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
 import { NewUserSampleDeckService } from './newUserSampleDeckService';
 import { type ISessionRepository, SESSION_TTL_MS } from '../database/sessionRepository';
+import { buildSessionCookieOptions } from './authCookieOptions';
 
 export interface LoginCredentials {
   username: string;
@@ -122,12 +123,7 @@ export class AuthenticationService {
       if (user) {
         const sessionId = await this.createSession(user);
 
-        res.cookie('sessionId', sessionId, {
-          httpOnly: true,
-          secure: process.env.COOKIE_SECURE === 'true',
-          maxAge: SESSION_TTL_MS,
-          sameSite: 'lax'
-        });
+        res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
         // Update last_login_at on successful login/session creation
         try {
           await this.userRepository.updateLastLoginAt(user.id);
@@ -234,12 +230,7 @@ export class AuthenticationService {
       }
 
       const sessionId = await this.createSession(user);
-      res.cookie('sessionId', sessionId, {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        maxAge: SESSION_TTL_MS,
-        sameSite: 'lax'
-      });
+      res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
 
       try {
         await this.userRepository.updateLastLoginAt(user.id);
@@ -319,12 +310,7 @@ export class AuthenticationService {
       }
 
       const sessionId = await this.createSession(user);
-      res.cookie('sessionId', sessionId, {
-        httpOnly: true,
-        secure: process.env.COOKIE_SECURE === 'true',
-        maxAge: SESSION_TTL_MS,
-        sameSite: 'lax'
-      });
+      res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
 
       try {
         await this.userRepository.updateLastLoginAt(user.id);

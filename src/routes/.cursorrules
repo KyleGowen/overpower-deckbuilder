@@ -18,3 +18,10 @@
 - Serves `window.APP_CDN_BASE = "<CDN_BASE_URL>";` from `process.env.CDN_BASE_URL`.
 - This route is public (no auth) and cached 5 minutes (`Cache-Control: public, max-age=300`).
 - In production `CDN_BASE_URL` must be set in the container's `.env`; in local dev it is empty and card images are served from disk via Express static.
+
+## Health endpoints (static-health.routes.ts)
+- **Phase 1** split the legacy `/health` into three routes. See [`docs/current/API_V1_HEALTH_ENDPOINTS.md`](../../docs/current/API_V1_HEALTH_ENDPOINTS.md).
+  - `GET /health/live` — public, minimal, never hits DB.
+  - `GET /health/deep` — ADMIN only, full payload including DB, migrations, memory.
+  - `GET /health` — back-compat; deep for sessions, live for anon callers.
+- Both emit `Cache-Control: no-store`. Kill switch `DISABLE_HEALTH_SPLIT=1` reverts to the combined payload.

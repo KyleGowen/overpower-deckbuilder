@@ -1,0 +1,24 @@
+# `src/api/http/` — HTTP adapters for `/api/v1`
+
+This directory holds every `*.http.ts` file that registers routes under `/api/v1`, plus shared envelope/middleware helpers. Keep handlers thin: validate, call one service, map the v1 envelope.
+
+## Hard rules
+
+- **Every mutation body MUST go through `parseV1Body` (zod).** See [`parseV1Body.ts`](parseV1Body.ts) and [docs/current/API_V1_VALIDATION.md](../../../docs/current/API_V1_VALIDATION.md). No ad-hoc `req.body as Record<string, unknown>` parsing in new code. Kill switch: `DISABLE_ZOD_V1=1`.
+- **Rate limits come from `createV1RateLimit`.** Every mutation route (and every auth route) must declare a `routeKey` and rely on the consolidated middleware in [`middleware/v1RateLimit.ts`](middleware/v1RateLimit.ts). New budgets go in the `DEFAULT_BUDGETS` table there, not inline. See [docs/current/API_V1_RATE_LIMITS.md](../../../docs/current/API_V1_RATE_LIMITS.md).
+- **Auth middleware:** decks/collections use `createV1SessionOrBearerAuthMiddleware` unless `DISABLE_BEARER_DECKS_COLLECTIONS=1` (kill switch). Catalog/DBV use the same. Admin still uses `authenticateUser` only.
+- **Audit log:** [`middleware/apiAccessLog.ts`](middleware/apiAccessLog.ts) is mounted automatically at the top of the `/api/v1` router. Do not add a per-route audit write. Kill switch: `DISABLE_API_ACCESS_LOG=1`. See [docs/current/API_V1_AUDIT_LOG.md](../../../docs/current/API_V1_AUDIT_LOG.md).
+- **Refresh tokens:** `/auth/login`, `/auth/refresh`, `/auth/logout` go through [`auth.http.ts`](auth.http.ts) and `RefreshTokenService`. See [docs/current/API_V1_AUTH_REFRESH.md](../../../docs/current/API_V1_AUTH_REFRESH.md).
+
+## Response envelope
+
+Always `{ data, meta, errors }` — use `sendV1Success` / `sendV1Json` / `sendV1Unauthorized` from [`v1Envelope.ts`](v1Envelope.ts). Never call `res.json(...)` directly.
+
+## New-route checklist
+
+1. Register in a `*.http.ts` file and wire through [`registerApiV1Routes.ts`](registerApiV1Routes.ts).
+2. Add a zod schema under [`models/<area>/`](models/) and call `parseV1Body` for any body.
+3. Pick an auth middleware (session-or-Bearer vs session-only vs admin) and a rate-limit `routeKey`.
+4. Add the route to the enumerated list in [`src/api/.cursorrules`](../.cursorrules) if it introduces a new group.
+5. Add a unit test for the handler and an integration test for the user-visible behavior.
+6. Update `API_V1.md` with the new contract and the error-catalog entry (Phase 3 will formalize).

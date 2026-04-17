@@ -39,7 +39,7 @@ describe('dbv-support.http', () => {
     };
     const res = await request(buildApp(deps)).get('/dbv/sets').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ code: 'ERB', name: 'Edgar Rice Burroughs…' }]);
   });
 

@@ -46,7 +46,7 @@ describe('Foil API and Repository', () => {
         .expect(200);
 
       expect(response.body.errors).toEqual([]);
-      expect(response.body.meta).toEqual({});
+      expect(response.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThanOrEqual(1);
 

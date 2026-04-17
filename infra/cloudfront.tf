@@ -14,11 +14,16 @@ resource "aws_cloudfront_distribution" "card_images" {
   comment     = "Card images CDN for excelsior.cards"
   price_class = "PriceClass_100" # US, Canada, Europe only — lowest cost tier
 
-  # Origin 1: EC2 instance (app traffic and any non-image paths)
+  # Phase 0 (see docs/current/OPS_TLS_AND_HTTPS.md) aliases the apex + www to
+  # this distribution, so the ACM cert must carry those names.
+  aliases = [var.domain_name, "www.${var.domain_name}"]
+
+  # Origin 1: EC2 instance (app traffic and any non-image paths).
+  # Uses a dedicated subdomain (origin.excelsior.cards) that A-records to the
+  # EIP so the origin does not loop through CloudFront once the apex alias
+  # points at this distribution.
   origin {
-    # CloudFront requires a DNS hostname — raw IP addresses are not accepted.
-    # excelsior.cards resolves to the EC2 EIP via Route53, so this is equivalent.
-    domain_name = var.domain_name
+    domain_name = "origin.${var.domain_name}"
     origin_id   = "ec2-origin"
 
     custom_origin_config {
@@ -59,6 +64,53 @@ resource "aws_cloudfront_distribution" "card_images" {
     max_ttl     = 31536000 # 1 year maximum
   }
 
+  # Phase 3 (see docs/current/API_V1_CATALOG_CACHING.md) — global-GET catalog.
+  # These responses are identical for every client (no cookies, no Authorization
+  # variance), so we cache at the edge for 5 minutes and let the origin's
+  # Cache-Control / ETag drive revalidation. 304s on conditional GETs are also
+  # cached.
+  ordered_cache_behavior {
+    path_pattern           = "/api/v1/catalog/*"
+    target_origin_id       = "ec2-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    forwarded_values {
+      query_string = true
+      headers      = ["If-None-Match", "If-Modified-Since"]
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 300
+    max_ttl     = 3600
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/api/v1/dbv/sets"
+    target_origin_id       = "ec2-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    forwarded_values {
+      query_string = true
+      headers      = ["If-None-Match", "If-Modified-Since"]
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 300
+    max_ttl     = 3600
+  }
+
   # Default behavior: all other traffic proxied to EC2
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
@@ -85,9 +137,13 @@ resource "aws_cloudfront_distribution" "card_images" {
     }
   }
 
-  # Use CloudFront's default *.cloudfront.net certificate (free)
+  # Attach the ACM cert issued in us-east-1 (see ssl.tf). Minimum TLS protocol
+  # is pinned to TLSv1.2_2021 — older browsers that only support TLS 1.0/1.1
+  # cannot connect, which is the desired behavior for a hardened external API.
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate_validation.main.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   tags = var.common_tags

@@ -26,7 +26,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/characters').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'c1', name: 'Hero' }]);
     expect(res.headers['content-type']).toMatch(/application\/json/);
   });
@@ -49,7 +49,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/locations').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'l1', name: 'Gotham' }]);
     expect(res.headers['content-type']).toMatch(/application\/json/);
   });
@@ -72,7 +72,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/special-cards').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 's1', name: 'Ancient Wisdom' }]);
   });
 
@@ -94,7 +94,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/missions').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'm1', card_name: 'Test Mission' }]);
   });
 
@@ -116,7 +116,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/events').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'e1', name: 'Test Event' }]);
   });
 
@@ -138,7 +138,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/aspects').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'a1', card_name: 'Test Aspect' }]);
   });
 
@@ -160,7 +160,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/advanced-universe').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'au1', name: 'Test UA' }]);
   });
 
@@ -182,7 +182,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/teamwork').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'tw1', card_type: '6 Combat' }]);
   });
 
@@ -204,7 +204,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/ally-universe').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'a1', card_name: 'Test Ally' }]);
   });
 
@@ -226,7 +226,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/training').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 't1', card_name: 'Training Card' }]);
   });
 
@@ -248,7 +248,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/basic-universe').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'bu1', card_name: 'Basic Card' }]);
   });
 
@@ -270,7 +270,7 @@ describe('dbv-catalog.http', () => {
     const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
     const res = await request(buildApp(catalogService)).get('/catalog/power-cards').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual([{ id: 'p1', power_type: '6 Combat', value: 6 }]);
   });
 
@@ -295,7 +295,7 @@ describe('dbv-catalog.http', () => {
     });
     const res = await request(buildApp(catalogService)).get('/catalog/foil-card-map').expect(200);
     expect(res.body.errors).toEqual([]);
-    expect(res.body.meta).toEqual({});
+    expect(res.body.meta).toEqual(expect.objectContaining({ catalogDataVersion: expect.any(Number) }));
     expect(res.body.data).toEqual(foilRows);
   });
 
