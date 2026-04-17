@@ -27,9 +27,35 @@ describe('buildSessionCookieOptions', () => {
     });
   });
 
-  it('returns hardened options when NODE_ENV=production even on HTTP request', () => {
+  it('returns legacy options when NODE_ENV=production but the request is HTTP (no TLS at edge yet)', () => {
     process.env.NODE_ENV = 'production';
     delete process.env.COOKIE_SECURE;
+    delete process.env.DISABLE_SECURE_COOKIES;
+    const opts = buildSessionCookieOptions(mockReq(false), MAX_AGE);
+    expect(opts).toEqual({
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: MAX_AGE,
+    });
+  });
+
+  it('returns hardened options when NODE_ENV=production AND request is HTTPS', () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.COOKIE_SECURE;
+    delete process.env.DISABLE_SECURE_COOKIES;
+    const opts = buildSessionCookieOptions(mockReq(true), MAX_AGE);
+    expect(opts).toEqual({
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: MAX_AGE,
+    });
+  });
+
+  it('hardens when COOKIE_SECURE=true even on HTTP (explicit operator opt-in)', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.COOKIE_SECURE = 'true';
     delete process.env.DISABLE_SECURE_COOKIES;
     const opts = buildSessionCookieOptions(mockReq(false), MAX_AGE);
     expect(opts).toEqual({
