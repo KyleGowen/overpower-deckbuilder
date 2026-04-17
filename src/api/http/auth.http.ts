@@ -1,13 +1,24 @@
 import type { Router } from 'express';
+import { z } from 'zod';
 import type { AuthenticationService } from '../../services/AuthenticationService';
 import { V1JwtTokenService } from '../services/v1JwtTokenService';
 import { RefreshTokenService } from '../services/refreshTokenService';
 import { LoginRequestBody } from './models/auth/LoginRequestBody';
 import { sendV1Json, sendV1Success } from './v1Envelope';
+import { parseV1Body } from './parseV1Body';
 import { v1LoginRateLimit } from './middleware/v1LoginRateLimit';
 import { createV1BearerAuthMiddleware } from './middleware/v1BearerAuth';
 import type { LoginSuccessDataDto } from '../dto/v1/LoginSuccessDataDto';
 import type { AuthMeDataDto } from '../dto/v1/AuthMeDataDto';
+
+// Phase 2 §6.1.7 — zod schema for POST /api/v1/auth/refresh bodies.
+// Parsed via parseV1Body so validation errors emit the standard
+// { code: 'VALIDATION_ERROR', field: 'refreshToken', ... } envelope.
+const RefreshRequestSchema = z.object({
+  refreshToken: z
+    .string({ error: 'refreshToken is required' })
+    .min(1, 'refreshToken is required'),
+});
 
 export interface AuthV1HttpDeps {
   authenticationService: AuthenticationService;
@@ -98,14 +109,9 @@ export function registerAuthV1HttpRoutes(router: Router, deps: AuthV1HttpDeps): 
       ]);
       return;
     }
-    const body = (req.body ?? {}) as Record<string, unknown>;
-    const raw = body.refreshToken;
-    if (typeof raw !== 'string' || raw.length === 0) {
-      sendV1Json(res, 400, null, [
-        { code: 'VALIDATION_ERROR', message: 'refreshToken is required', field: 'refreshToken' }
-      ]);
-      return;
-    }
+    const parsed = parseV1Body(RefreshRequestSchema, req.body, res);
+    if (!parsed) return;
+    const raw = parsed.value.refreshToken;
     try {
       const { row } = await deps.refreshTokenService.verify(raw);
       const full = await deps.userRepository.getUserById(row.userId);
