@@ -15,7 +15,7 @@ and emits a fixed set of security-related response headers on every route.
 | `Referrer-Policy`                   | `strict-origin-when-cross-origin`               | Balances observability and privacy; does not leak paths to third parties.                                          |
 | `X-Frame-Options`                   | `DENY`                                          | Prevents the app being embedded as an iframe.                                                                      |
 | `Cross-Origin-Opener-Policy`        | helmet default (`same-origin`)                  | Isolates browsing contexts.                                                                                        |
-| `Cross-Origin-Resource-Policy`      | helmet default (`same-origin`)                  | Limits cross-origin fetches of app resources.                                                                      |
+| `Cross-Origin-Resource-Policy`      | `cross-origin` (explicit override)              | Overrides helmet's `same-origin` default. Required because deck-tile CSS `background-image` URLs load from the CloudFront asset host (`d6vp4hrkfkf5v.cloudfront.net`) while the HTML app is served from `excelsior.cards`; `same-origin` CORP blocks those loads with `ERR_BLOCKED_BY_RESPONSE.NotSameOrigin`. |
 
 ## HTTPS dependency
 
