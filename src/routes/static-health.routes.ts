@@ -199,21 +199,12 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     res.status(httpStatus).json(data);
   });
 
-  // Back-compat `/health` — returns deep for ADMIN sessions, live otherwise.
-  app.get('/health', async (req, res) => {
+  // Back-compat /health — always returns the deep payload so the EC2 blue/green
+  // deploy gate, nginx LB probes, and external uptime monitors keep seeing
+  // `.database.status`. New callers that want the lean public payload use
+  // /health/live; ADMIN-only deep tooling uses /health/deep.
+  app.get('/health', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
-    const sessionId = (req as express.Request & { cookies?: Record<string, string> }).cookies?.sessionId;
-
-    if (!splitDisabled && !sessionId) {
-      const payload = await buildLivePayload(deps);
-      res.status(200).json(payload);
-      return;
-    }
-
-    // Legacy callers with a session cookie (and admin tooling) get the deep
-    // payload, matching pre-Phase-1 behavior. For non-admin sessions the
-    // payload is still returned (uptime monitors, ops scripts), but with
-    // `Cache-Control: no-store` so nothing caches DB stats.
     const startTime = Date.now();
     const { data, httpStatus } = await buildDeepPayload(deps, startTime);
     res.status(httpStatus).json(data);

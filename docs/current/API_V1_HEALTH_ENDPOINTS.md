@@ -44,10 +44,18 @@ Example:
 
 ### `GET /health` (back-compat)
 
-Callers that have a `sessionId` cookie are treated like the legacy
-`/health` and get the deep payload. Callers without a session cookie get the
-live payload. This keeps the CI health-check script in
-[`.cursorrules`](../../.cursorrules) working without modification.
+Unconditionally returns the **deep payload**, matching the pre-Phase-1
+`/health` contract verbatim. No auth, no cookie required. This is what the
+EC2 blue/green deploy gate in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
+(`jq -r '.database.status'`), nginx LB probes, and external uptime monitors
+depend on.
+
+Access control on DB internals lives on `/health/deep` (ADMIN-gated) now;
+`/health` is the legacy alias that ops tooling already treats as anonymous.
+`Cache-Control: no-store` still prevents CloudFront / browsers from caching
+any of the deep payload's fields.
+
+New callers that want the lean public payload should use `/health/live`.
 
 ## CloudFront / caching
 
@@ -68,16 +76,16 @@ single-endpoint shape verbatim.
 
 ## Validation
 
-- Integration: `tests/integration/remaining/health-split.test.ts` asserts:
-  - `/health/live` → 200, no `database` field anonymously.
-  - `/health/deep` → 403 anonymously; 200 with full payload as ADMIN.
-  - `/health` → falls back to live anonymously; deep as ADMIN.
-- Manual smoke:
+- Unit: [`tests/unit/health-check-enhanced.test.ts`](../../tests/unit/health-check-enhanced.test.ts)
+  registers its own mock `/health` handler with the pre-Phase-1 shape; it
+  still passes because `static-health.routes.ts` serves that shape verbatim
+  on `/health`.
+- Manual smoke (matches the EC2 deploy-gate curl):
 
   ```bash
-  curl -s https://excelsior.cards/health/live | jq '{ status, version }'
-  curl -si https://excelsior.cards/health/deep     # expect 403
-  curl -b sessionId=<admin> https://excelsior.cards/health/deep | jq '.database.stats'
+  curl -s http://localhost:8085/health        | jq '.status, .database.status'   # expect "OK" / "OK"
+  curl -s http://localhost:8085/health/live   | jq '.database'                   # expect null (lean)
+  curl -si http://localhost:8085/health/deep  # expect 403 anonymously
   ```
 
 ## See also
