@@ -189,6 +189,7 @@ The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetPart
 - List/row rules are scoped under **`.layout-mobile #deckEditorModal`** where needed to beat DTV **`!important`** from **`index.css`** / **`deck-cards-editor.css`**.
 - **`.dev-mobile-deck-qty-btn`**, **`.dev-mobile-deck-overflow-btn`** — 30×30 with teal outline (overflow uses neutral border).
 - Flyout compact tokens: smaller padding/gaps, **36px** min row height, **18px** icons, teal label/icon color **`#4ecdc4`** to match the deck hamburger menu.
+- **Typography** uses the shared mobile token scale **`--font-3xs..2xl`** and **`--icon-sm/md/lg`** defined on **`html.layout-mobile`** in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css). Header title is **`--font-xl`**, modal **`h3`** is **`--font-lg`**, meta row / validation badges / utility buttons are **`--font-xs`**, header card/threat values and row names are **`--font-sm`**, section headers are **`--font-md`**, validation icon and collapse carets are **`--icon-sm`**, draw-hand close is **`--icon-lg`**, card-view category toggle is **`--icon-md`**, draw-training pill and card-view add/remove buttons are **`--font-2xs`**. Do **not** add literal `font-size` in this file — always reference a token. Full scale and rules: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).
 
 ---
 

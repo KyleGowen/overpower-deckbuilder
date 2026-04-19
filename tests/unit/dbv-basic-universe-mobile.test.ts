@@ -36,10 +36,10 @@ describe('mobile-layout.css (DBV Basic Universe tab)', () => {
             /\.layout-mobile\s+#basic-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption--basic-universe[\s\S]*?display:\s*flex/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#basic-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__basic-universe-name[\s\S]*?font-size:\s*1\.35rem/
+            /\.layout-mobile\s+#basic-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__basic-universe-name[\s\S]*?font-size:\s*var\(--font-lg\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#basic-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__basic-universe-set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#basic-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__basic-universe-set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 

@@ -55,7 +55,9 @@
 /* MV: header is a grid so title row, stats, then search toolbar; hamburger stays visible when collapsed */
 .layout-mobile #deckEditorModal .modal-header {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    /* minmax(0, 1fr) so the title column can shrink below its min-content width and */
+    /* allow the title's overflow:hidden + ellipsis to kick in on long deck names.    */
+    grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-rows: auto auto auto;
     column-gap: 8px;
     row-gap: 2px;
@@ -214,11 +216,16 @@
 /* Summary hidden on MV: let title use remaining width so meta row is not clipped by .deck-editor-modal overflow */
 .layout-mobile #deckEditorModal .modal-header .deck-editor-title-section,
 .layout-mobile #deckEditorModal .deck-editor-title-section {
-    max-width: none;
-    flex: 1 1 auto;
+    /* width: 100% + min-width: 0 so the title section follows its minmax(0,1fr) grid    */
+    /* track width instead of growing to its intrinsic (nowrap) content width and        */
+    /* pushing the deck title past the hamburger / off the modal.                        */
+    max-width: 100%;
+    width: 100%;
     min-width: 0;
+    flex: 1 1 auto;
     margin-right: 10px;
     padding: 4px 0 6px 2px;
+    overflow: hidden;
 }
 
 .layout-mobile #deckEditorModal .deck-title-with-validation {
@@ -234,7 +241,7 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    font-size: 0.65rem;
+    font-size: var(--font-2xs);
     line-height: 1.35;
     font-weight: 500;
     color: #ff4444;
@@ -338,7 +345,7 @@
 }
 
 .dev-mobile-stat-label {
-    font-size: 0.5rem;
+    font-size: var(--font-3xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #94a3b8;
@@ -346,7 +353,7 @@
 }
 
 .dev-mobile-stat-value {
-    font-size: 0.85rem;
+    font-size: var(--font-sm);
     font-weight: 400;
     color: #4ecdc4;
     margin-top: 2px;
@@ -381,7 +388,7 @@
     border-radius: 25px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-    font-size: 14px;
+    font-size: var(--font-sm);
 }
 
 .layout-mobile #deckEditorModal .dev-mobile-deck-search-input:focus {
@@ -448,7 +455,7 @@
     border-radius: 8px;
     background: rgba(78, 205, 196, 0.1);
     color: #4ecdc4;
-    font-size: 0.95rem;
+    font-size: var(--font-md);
     font-weight: 600;
     text-align: left;
     cursor: pointer;
@@ -464,14 +471,14 @@
 }
 
 .dev-mobile-deck-type-count {
-    font-size: 0.8rem;
+    font-size: var(--font-xs);
     color: #bdc3c7;
     font-weight: 500;
 }
 
 .dev-mobile-deck-type-toggle {
     color: #4ecdc4;
-    font-size: 0.75rem;
+    font-size: var(--font-2xs);
     font-weight: bold;
 }
 
@@ -519,7 +526,7 @@
 .dev-mobile-deck-row-name {
     flex: 1;
     min-width: 0;
-    font-size: 0.9rem;
+    font-size: var(--font-sm);
     font-weight: 400;
     color: #f8fafc;
     line-height: 1.35;
@@ -549,7 +556,7 @@
     border: 1px solid rgba(78, 205, 196, 0.65);
     background: rgba(15, 45, 50, 0.85);
     color: #e0fffb;
-    font-size: 0.94rem;
+    font-size: var(--font-sm);
     line-height: 1;
     cursor: pointer;
 }
@@ -562,7 +569,7 @@
     border: 1px solid rgba(148, 163, 184, 0.45);
     background: rgba(30, 41, 59, 0.9);
     color: #e2e8f0;
-    font-size: 0.83rem;
+    font-size: var(--font-xs);
     line-height: 1;
     cursor: pointer;
 }
@@ -637,7 +644,7 @@
     height: auto !important;
     padding: 6px 10px !important;
     gap: 8px !important;
-    font-size: 0.8125rem !important;
+    font-size: var(--font-sm) !important;
     font-weight: 600 !important;
     color: #4ecdc4 !important;
     border: 1px solid rgba(78, 205, 196, 0.45) !important;
@@ -686,7 +693,7 @@
 
 .dev-mobile-deck-row-menu-empty {
     color: #94a3b8;
-    font-size: 0.8125rem;
+    font-size: var(--font-sm);
     margin: 0;
     padding: 6px 4px;
     text-align: center;
@@ -850,6 +857,106 @@
 }
 
 .layout-mobile #deckEditorModal.draw-hand-active .draw-hand-redraw-btn {
-    font-size: 0.75rem;
+    font-size: var(--font-sm);
     padding: 6px 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile header typography overrides (apply tokens to shared deck editor    */
+/* header rules in index.css; desktop values are preserved there).           */
+/* See html.layout-mobile tokens in public/css/mobile-layout.css.            */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #deckEditorModal .deck-title-with-validation .deck-editor-deck-name.editable-title {
+    font-size: var(--font-xl);
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.layout-mobile #deckEditorModal .deck-title-with-validation {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.layout-mobile #deckEditorModal .modal-header h3 {
+    font-size: var(--font-lg);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-title-meta-row {
+    font-size: var(--font-xs);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-header-cards-label-text {
+    font-size: var(--font-xs);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-header-cards-value,
+.layout-mobile #deckEditorModal .deck-editor-header-cards-min,
+.layout-mobile #deckEditorModal .deck-editor-header-threat-value {
+    font-size: var(--font-sm);
+}
+
+.layout-mobile #deckEditorModal .deck-validation-badge {
+    font-size: var(--font-xs);
+}
+
+.layout-mobile #deckEditorModal .validation-icon {
+    font-size: var(--icon-sm);
+}
+
+/* Mobile-only override of the fixed 12px utility button from index.css */
+.layout-mobile #deckEditorModal .deck-editor-utility-actions .remove-all-btn {
+    font-size: var(--font-xs);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Draw Hand: mobile-scoped typography overrides (desktop rules in draw-hand.css)
+/* -------------------------------------------------------------------------- */
+.layout-mobile #deckEditorModal.draw-hand-active .draw-hand-close {
+    font-size: var(--icon-lg);
+}
+
+.layout-mobile #deckEditorModal.draw-hand-active .draw-training-btn {
+    font-size: var(--font-2xs);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Deck Editor Card View: mobile-scoped typography overrides                  */
+/* (desktop rules live in deck-editor-card-view.css)                          */
+/* -------------------------------------------------------------------------- */
+.layout-mobile #deckEditorModal .card-view-btn {
+    font-size: var(--font-3xs);
+}
+
+.layout-mobile #deckEditorModal .card-view-btn.alternate-art-btn {
+    font-size: var(--font-3xs);
+}
+
+.layout-mobile #deckEditorModal .card-view-btn.remove-one-btn,
+.layout-mobile #deckEditorModal .card-view-btn.add-one-btn,
+.layout-mobile #deckEditorModal .card-view-btn.quantity-btn {
+    font-size: var(--font-2xs);
+}
+
+.layout-mobile #deckEditorModal .card-view-remove-unusables-btn {
+    font-size: var(--font-3xs);
+}
+
+.layout-mobile #deckEditorModal .card-view-category-toggle {
+    font-size: var(--icon-md) !important;
+}
+
+.layout-mobile #deckEditorModal .card-view-category-name {
+    font-size: var(--font-sm);
+}
+
+.layout-mobile #deckEditorModal .collapse-icon {
+    font-size: var(--icon-sm);
 }

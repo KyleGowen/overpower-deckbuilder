@@ -23,3 +23,7 @@ The Training tab uses the same mobile DBV pattern as Ally: stat-type icon toggle
 | Desktop chrome | `public/css/database-view.css` |
 | Mobile + 900px mirror | `public/css/mobile-layout.css` |
 | Contract tests | `tests/unit/dbv-training-mobile.test.ts` |
+
+## Typography
+
+Type toggles, card-name input, `td[data-label]::before` labels, and caption lines use the shared mobile token scale on `html.layout-mobile` in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css). Do not use literal `rem` font sizes — always reference a token. Full scale: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).

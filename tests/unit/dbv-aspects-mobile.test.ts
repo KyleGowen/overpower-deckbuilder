@@ -96,7 +96,7 @@ describe('mobile-layout.css (DBV Aspects tab)', () => {
             /\.layout-mobile\s+#aspects-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?max-width:\s*min\(\s*666px\s*,\s*100%\s*\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#aspects-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*1\.0625rem/
+            /\.layout-mobile\s+#aspects-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*var\(--font-md\)/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#aspects-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__fortification[\s\S]*?font-weight:\s*700/

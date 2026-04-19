@@ -68,3 +68,7 @@ Run: `npm run test:unit -- tests/unit/dbv-missions-mobile.test.ts`
 | Render | [`public/js/card-display-functions.js`](../../public/js/card-display-functions.js) (`displayMissions`, `missionUseMobileListArt`) |
 | Set line helper | [`public/js/card-display.js`](../../public/js/card-display.js) (`dbvSetCaptionLineFromCard` on **`window`**) |
 | Filters + load | [`public/js/search-filter-functions.js`](../../public/js/search-filter-functions.js), [`public/js/card-data-display.js`](../../public/js/card-data-display.js), [`public/js/filter-functions.js`](../../public/js/filter-functions.js) (`clearMissionsFilters`) |
+
+## Typography
+
+Mission-set `<select>`, card name input, `td[data-label]::before` row labels, and caption lines use the shared mobile token scale on `html.layout-mobile` in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css). Do not introduce literal `rem` font sizes — reference a token from the scale. Full scale: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).

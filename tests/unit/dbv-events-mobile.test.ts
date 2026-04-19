@@ -50,10 +50,10 @@ describe('mobile-layout.css (DBV Events tab)', () => {
 
     it('styles Events caption: mission set + game effect 1rem, half-line gap, centered 20% flavor divider + italic', () => {
         expect(css).toMatch(
-            /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set\s*\{[\s\S]*?font-size:\s*1rem/
+            /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set\s*\{[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__game-effect\s*\{[\s\S]*?margin-top:\s*calc\(0\.5\s*\*\s*1\.35em\)[\s\S]*?font-size:\s*1rem/
+            /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__game-effect\s*\{[\s\S]*?margin-top:\s*calc\(0\.5\s*\*\s*1\.35em\)[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
         expect(css).toMatch(
             /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__flavor::before[\s\S]*?width:\s*20%[\s\S]*?margin:\s*0\s+auto\s+10px[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/
@@ -62,7 +62,7 @@ describe('mobile-layout.css (DBV Events tab)', () => {
             /\.layout-mobile\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line::before[\s\S]*?width:\s*20%[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/
         );
         expect(css).toMatch(
-            /#database-view\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__game-effect[\s\S]*?font-size:\s*1rem[\s\S]*?margin-top:\s*calc\(0\.5\s*\*\s*1\.35em\)/
+            /#database-view\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__game-effect[\s\S]*?font-size:\s*var\(--font-sm\)[\s\S]*?margin-top:\s*calc\(0\.5\s*\*\s*1\.35em\)/
         );
         expect(css).toMatch(
             /#database-view\s+#events-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line::before[\s\S]*?width:\s*20%[\s\S]*?border-top:\s*1px\s+solid\s+rgba\(78,\s*205,\s*196,\s*0\.35\)/

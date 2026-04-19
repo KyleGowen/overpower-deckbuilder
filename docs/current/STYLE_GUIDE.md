@@ -152,6 +152,33 @@ The Overpower Deckbuilder follows a dark, modern design aesthetic with a focus o
 - **Medium**: `500` - Used for secondary headings
 - **Regular**: `400` - Used for body text
 
+### Mobile fluid typography tokens (`html.layout-mobile`)
+
+Under `html.layout-mobile` (see [`public/css/mobile-layout.css`](/public/css/mobile-layout.css)) all mobile font sizes come from an 8-step text scale plus a 3-step icon scale. Each token is `clamp(MIN_rem, rem + vw, MAX_rem)` — fluid with viewport width, responsive to OS text zoom, clamped on both ends for accessibility (WCAG 1.4.4) and layout safety.
+
+| Token | Px range | Intended use |
+| --- | --- | --- |
+| `--font-3xs` | ~9–11 | Tiny uppercase labels, stat labels, empty placeholders |
+| `--font-2xs` | ~11–13 | Chips, toggles, qty buttons, draw-training pill |
+| `--font-xs`  | ~12–14 | Nav tabs, badges, meta row, subtitles |
+| `--font-sm`  | ~13–15 | Row names, body text, search inputs, menu items |
+| `--font-md`  | ~15–17 | Section headers, caption name, tile stat value |
+| `--font-lg`  | ~17–20 | Collection subtitle, select controls, modal h3 |
+| `--font-xl`  | ~19–26 | Deck title, deck-tile title |
+| `--font-2xl` | ~24–36 | Collection / login titles |
+| `--icon-sm`  | ~14–16 | Small inline glyphs (collapse caret, validation icon) |
+| `--icon-md`  | ~18–22 | `⋯` overflow, sandbox warning, card-view category toggle |
+| `--icon-lg`  | ~22–26 | `×` close (draw-hand modal) |
+
+**Rules:**
+
+1. Never add a literal `font-size` under a `.layout-mobile` selector — always reference a token.
+2. Never use fixed `px` for mobile font-sizes (ignores OS scaling / browser zoom).
+3. If a shared desktop stylesheet sets a `font-size`, add a mobile-scoped override in [`public/css/mobile-layout.css`](/public/css/mobile-layout.css) or the relevant mobile file (e.g. [`public/css/deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)) — do not modify the desktop rule.
+4. Icon-sized controls should use `--icon-*` tokens so glyphs track consistent sizes.
+
+Full rationale, per-surface map, and deprecation rules: [MOBILE_DESIGN.md §10.8](/MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).
+
 ## UI Components
 
 ### Buttons

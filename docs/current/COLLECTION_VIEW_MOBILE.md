@@ -40,6 +40,8 @@ Desktop Collection (**DTV**) keeps the wide sortable table (`#collection-table`)
 
 Mobile Collection rules live in [`public/css/collection-view.css`](../../public/css/collection-view.css) under **`html.layout-mobile`** (list grid, row thumb, detail overlay **`z-index: 10000`**, guest banner MV tweaks). Global shell remains in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css) where shared with other views.
 
+**Typography:** all font sizes in mobile Collection markup use the shared token scale (**`--font-3xs..2xl`**, **`--icon-sm/md/lg`**) defined on **`html.layout-mobile`** in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css). Page title is **`--font-2xl`**, subtitle is **`--font-lg`**, search input is **`--font-sm`**, row title is **`--font-md`** with **`--font-xs`** subtitle, qty steppers are **`--font-2xs`**, detail heading is **`--font-md`** with **`--font-sm`** body, sandbox banner glyph is **`--icon-md`**. Do **not** add literal `font-size` to mobile rules — always reference a token. Scale and rules: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).
+
 ## GUEST
 
 **`details#guestSandboxBanner`:** collapsed summary on MV, expanded copy + signup link; DTV stays an always-visible row. See **Collection view — mobile** in [`STYLE_GUIDE.md`](STYLE_GUIDE.md).
