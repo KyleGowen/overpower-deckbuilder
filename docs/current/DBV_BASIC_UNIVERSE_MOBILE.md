@@ -19,9 +19,13 @@ Desktop keeps a separate filter row (`basic-universe-desktop-filter-row`) with c
 
 ## Caption (under card art)
 
-1. **Name** — `.characters-mobile-card-caption__basic-universe-name` (bold, 1.35rem)
+1. **Name** — `.characters-mobile-card-caption__basic-universe-name` (bold, `--font-lg` token)
 2. **Type icon + value + bonus** — `.characters-mobile-card-caption__basic-universe-stat-line`
 3. **Set line** — `dbvSetCaptionLineFromCard(card)` → `.characters-mobile-card-caption__basic-universe-set-line`
+
+## Typography
+
+Stat-type toggles, to-use / bonus strips, card-name input, `td[data-label]::before` labels, checkbox label (`.checkbox-group label` — mobile-scoped `!important` override from [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css)), and caption lines all use the shared mobile token scale defined on `html.layout-mobile` in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css). Do not introduce literal `rem` font sizes — reference a token from the scale. Full scale: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).
 
 ## Image sizing
 

@@ -39,10 +39,10 @@ describe('mobile-layout.css (DBV Ally tab)', () => {
             /\.layout-mobile\s+#ally-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption--ally[\s\S]*?display:\s*flex/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#ally-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ally-name[\s\S]*?font-size:\s*1\.125rem/
+            /\.layout-mobile\s+#ally-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ally-name[\s\S]*?font-size:\s*var\(--font-md\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#ally-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ally-set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#ally-universe-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ally-set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 

@@ -333,13 +333,13 @@ describe('mobile-layout.css (DBV Characters tab)', () => {
             /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?flex-direction:\s*column[\s\S]*?max-width:\s*min\(\s*444px\s*,\s*100%\s*\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*1\.0625rem/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*var\(--font-md\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ability[\s\S]*?font-size:\s*0\.875rem[\s\S]*?word-break:\s*break-word/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__ability[\s\S]*?font-size:\s*var\(--font-sm\)[\s\S]*?word-break:\s*break-word/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set[\s\S]*?font-size:\s*0\.8125rem/
+            /\.layout-mobile\s+#characters-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set[\s\S]*?font-size:\s*var\(--font-xs\)/
         );
     });
 
@@ -458,13 +458,13 @@ describe('mobile-layout.css (DBV Special Cards tab)', () => {
             /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption[\s\S]*?flex-direction:\s*column/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*1\.0625rem/
+            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__name[\s\S]*?font-size:\s*var\(--font-md\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__character[\s\S]*?font-size:\s*1rem/
+            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__character[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__opd[\s\S]*?font-size:\s*0\.8125rem/
+            /\.layout-mobile\s+#special-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__opd[\s\S]*?font-size:\s*var\(--font-xs\)/
         );
     });
 

@@ -302,4 +302,44 @@ Use this section as **agent context** for what shipped after the base M1/M2c mil
 
 **M4:** **`collectionIsLayoutMobile()`** (`**window.isLayoutMobile()**`) chooses markup in **`displayCollectionCards`** — **DTV** unchanged (table + header sort + resize). **MV:** **`#collection-mobile-list`** of **`li.collection-mobile-row`** (grid: **56px** thumb, text, actions); row qty **`−`/`+`** **`calc(29px × 0.9)`** (~26px, 10% under prior 29px); detail sheet steppers **`calc(32px × 0.9)`** (~29px, 10% under prior 32px); subtitle **`Type · #… · Set`**. **GUEST sandbox:** **`details#guestSandboxBanner`** — muted SVG warning icon + collapsed one-line summary + chevron; expand for full copy + **Create an account** (DTV stays always-open flex row). **Search to add cards** is only **`#collectionSearchInput`** (**`CardSearchService`**); no duplicate filter inside the panel. **List order:** **`set_number` ascending** via **`sortMergedCollectionCards`** and **`COLLECTION_MOBILE_LIST_SORT_FIELD` / `COLLECTION_MOBILE_LIST_SORT_DIR`** in **`collection-view.js`**; **no** **`#collectionMobileListFilter`** or **`#collectionMobileSort`** in the DOM. **Detail:** **`#collectionMobileDetail`** appended under **`#collection-view`** — scrim + **`#collectionMobileDetailPanel`** ( **`role="dialog"`** ), **Back** / **Escape** / scrim close; **`openCollectionMobileDetail`** / **`closeCollectionMobileDetail`** on **`window`** for tests. **`#collection-view`** delegate **`onCollectionViewMobileActivate`**: tap **`.collection-mobile-row-main`** opens detail; **`closest('.collection-quantity-control')`** or **`button`** → no open. **`layout-mode-change`** → **`onCollectionLayoutModeChange`** closes detail, syncs guest banner, re-renders from **`mergedCollectionData`** when the tab is visible. **CSS:** **`html.layout-mobile`** rules in **`collection-view.css`** (list, **`z-index: 10000`** overlay). **Unit:** **`tests/unit/collection-view.test.ts`** (`**displayCollectionCards() mobile layout**`, **`sortMergedCollectionCards`**); **`eval`** load — see **`docs/current/COLLECTION_VIEW_MOBILE.md`** for coverage limits. **Full map:** [`docs/current/COLLECTION_VIEW_MOBILE.md`](docs/current/COLLECTION_VIEW_MOBILE.md).
 
+### 10.8 Mobile fluid typography tokens (`html.layout-mobile`) — **done**
+
+**Why:** Before this work, mobile font sizes were a sprawl of ~25–35 distinct values across 9+ CSS files mixing `rem`, fixed `px`, `em`, `calc()`, and a few ad-hoc `clamp()` rules. Uncapped `rem` blew up when the user raised OS text scaling (Android "Font size: Large/Largest", iOS Dynamic Type), and fixed `px` ignored both viewport width and OS/browser scaling (failing **WCAG 1.4.4** resize-text). Different devices rendered the same deck-editor header, DBV captions, and collection rows at visibly different sizes.
+
+**Token scale (all defined on `html.layout-mobile` in [`public/css/mobile-layout.css`](public/css/mobile-layout.css)):**
+
+All tokens are `clamp(MIN_rem, rem-based_preferred + vw, MAX_rem)` — fluid with viewport width, responsive to user text-zoom, and clamped on both ends so nothing gets too small or runs off the screen.
+
+| Token | Clamp | Px range | Intended use |
+| --- | --- | --- | --- |
+| `--font-3xs` | `clamp(0.5625rem, 0.50rem + 0.20vw, 0.6875rem)` | ~9–11 | Tiny uppercase labels (stat labels, empty tile placeholder) |
+| `--font-2xs` | `clamp(0.6875rem, 0.625rem + 0.20vw, 0.8125rem)` | ~11–13 | Chips, toggles, draw-training pill, qty buttons |
+| `--font-xs`  | `clamp(0.75rem, 0.70rem + 0.25vw, 0.875rem)` | ~12–14 | Nav tabs, badges, meta row, subtitles, validation icon labels |
+| `--font-sm`  | `clamp(0.8125rem, 0.75rem + 0.30vw, 0.9375rem)` | ~13–15 | Row names, body text, search inputs, menu items, detail lines |
+| `--font-md`  | `clamp(0.9375rem, 0.85rem + 0.40vw, 1.0625rem)` | ~15–17 | Section headers, caption card name, tile stat value |
+| `--font-lg`  | `clamp(1.0625rem, 0.95rem + 0.50vw, 1.25rem)` | ~17–20 | Collection subtitle, select controls, modal header h3 |
+| `--font-xl`  | `clamp(1.20rem, 0.90rem + 1.20vw, 1.60rem)` | ~19–26 | Deck title, deck-tile title |
+| `--font-2xl` | `clamp(1.50rem, 1.10rem + 1.80vw, 2.25rem)` | ~24–36 | Collection/login screen titles |
+| `--icon-sm`  | `clamp(0.875rem, 0.80rem + 0.35vw, 1.00rem)` | ~14–16 | Small inline icons (collapse caret, validation icon) |
+| `--icon-md`  | `clamp(1.125rem, 1.00rem + 0.60vw, 1.375rem)` | ~18–22 | `⋯` overflow, sandbox-banner warning, card-view category toggle |
+| `--icon-lg`  | `clamp(1.375rem, 1.20rem + 0.80vw, 1.625rem)` | ~22–26 | `×` close (draw hand) |
+
+**Application surfaces:**
+
+- **Deck editor modal (DEV):** [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css) — header title/meta, validation badge + icon, stats, search input, section headers, rows, row menu, utility actions, draw-hand close + training pill, card-view buttons + category toggle/name + collapse icon.
+- **Global nav (mobile header):** [`public/css/mobile-layout.css`](public/css/mobile-layout.css) — `.app-tab-button`, `.new-deck-btn`, user menu, create-user form.
+- **Deck selection tiles:** [`public/css/mobile-layout.css`](public/css/mobile-layout.css) — tile title (`--font-xl`), empty slot placeholder, side label/value, menu button (`--icon-md`), menu items.
+- **DBV tabs:** unified caption ladder across All / Special / Aspects / Missions / Training / Basic Universe / Ally / Power / Teamwork / Events — see [`public/css/mobile-layout.css`](public/css/mobile-layout.css). All power-type filter labels, `td[data-label]::before`, and mission-set `<select>` use the tokens.
+- **Collection view:** [`public/css/collection-view.css`](public/css/collection-view.css) — sandbox banner + copy, row title/subtitle, qty buttons, detail heading/lines/qty, plus mobile-scoped overrides for the shared `.collection-title` / `.collection-subtitle` / `.collection-search-input`.
+- **Card-tables checkbox `!important` rule** for Basic Universe is overridden from [`public/css/mobile-layout.css`](public/css/mobile-layout.css) with its own `!important` to avoid touching the desktop `card-tables.css` rule.
+
+**Rules for future mobile CSS:**
+
+1. **Never** add a literal `font-size` on a `.layout-mobile` rule. Use a token from the scale above.
+2. **Never** add a fixed `px` font size under `.layout-mobile`. `px` ignores OS accessibility scaling and fails WCAG 1.4.4.
+3. If a shared (desktop) stylesheet sets a `font-size`, add a mobile-scoped override in [`public/css/mobile-layout.css`](public/css/mobile-layout.css) or the relevant mobile file (e.g. [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css)), not in the shared file.
+4. If you truly need a new size outside the existing tokens, add it to the scale in [`public/css/mobile-layout.css`](public/css/mobile-layout.css) using the same `clamp(MIN_rem, rem + vw, MAX_rem)` pattern and document it here.
+5. Icon-sized controls (close, overflow, toggles rendered as glyphs) should use the `--icon-*` tokens, not the text tokens, so they track glyph metrics.
+
+**Unit tests** that assert CSS `font-size` values expect the `var(--font-*)` syntax (see `tests/unit/dbv-*-mobile.test.ts`, `tests/unit/layout-mode-and-viewport.test.ts`). When adjusting a token, update the relevant regex in the test.
 

@@ -55,10 +55,10 @@ describe('mobile-layout.css (DBV Missions tab)', () => {
 
     it('styles mobile caption lines for mission set and product set + number', () => {
         expect(css).toMatch(
-            /\.layout-mobile\s+#missions-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__mission-set[\s\S]*?font-size:\s*1rem/
+            /\.layout-mobile\s+#missions-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__mission-set[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#missions-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#missions-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 

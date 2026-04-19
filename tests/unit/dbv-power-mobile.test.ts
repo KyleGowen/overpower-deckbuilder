@@ -36,10 +36,10 @@ describe('mobile-layout.css (DBV Power Cards tab)', () => {
             /\.layout-mobile\s+#power-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption--power[\s\S]*?display:\s*flex/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#power-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__power-type-value-line[\s\S]*?font-size:\s*1\.05rem/
+            /\.layout-mobile\s+#power-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__power-type-value-line[\s\S]*?font-size:\s*var\(--font-md\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#power-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__power-set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#power-cards-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__power-set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 

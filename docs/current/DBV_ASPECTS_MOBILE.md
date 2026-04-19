@@ -72,3 +72,7 @@ Run: `npm run test:unit -- tests/unit/dbv-aspects-mobile.test.ts`
 | Desktop / shared | [`public/css/database-view.css`](../../public/css/database-view.css) (`#aspects-table`) |
 | Render | [`public/js/card-display-functions.js`](../../public/js/card-display-functions.js) (`displayAspects`, `aspectUseMobileListArt`, `aspectMobileCaptionOptionalLine`) |
 | Layout helpers | [`public/js/card-display.js`](../../public/js/card-display.js) (`isLayoutMobileForCardDisplay`, `isNarrowViewportDbvBand`, caption plain text) |
+
+## Typography
+
+Filter labels, value/ban toggles, `td[data-label]::before` row labels, and caption lines all pull from the shared mobile token scale defined on `html.layout-mobile` in [`public/css/mobile-layout.css`](../../public/css/mobile-layout.css). Unify any new label/caption with the existing tokens rather than introducing a literal `rem` value. Full scale: [`MOBILE_DESIGN.md §10.8`](../../MOBILE_DESIGN.md#108-mobile-fluid-typography-tokens-htmllayout-mobile--done).

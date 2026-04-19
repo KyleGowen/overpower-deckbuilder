@@ -39,7 +39,7 @@ describe('mobile-layout.css (DBV Teamwork tab)', () => {
             /\.layout-mobile\s+#teamwork-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__teamwork-line1[\s\S]*?justify-content:\s*center/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#teamwork-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__teamwork-set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#teamwork-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__teamwork-set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 

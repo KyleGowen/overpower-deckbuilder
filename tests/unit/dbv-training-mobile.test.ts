@@ -42,10 +42,10 @@ describe('mobile-layout.css (DBV Training tab)', () => {
             /\.layout-mobile\s+#training-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption--training[\s\S]*?display:\s*flex/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#training-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__training-name[\s\S]*?font-size:\s*1\.25rem/
+            /\.layout-mobile\s+#training-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__training-name[\s\S]*?font-size:\s*var\(--font-lg\)/
         );
         expect(css).toMatch(
-            /\.layout-mobile\s+#training-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__training-set-line[\s\S]*?font-size:\s*0\.875rem/
+            /\.layout-mobile\s+#training-table\s+tbody\s+td:first-child\s+\.characters-mobile-card-caption__training-set-line[\s\S]*?font-size:\s*var\(--font-sm\)/
         );
     });
 
