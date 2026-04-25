@@ -16,15 +16,47 @@ export interface V1Envelope<T> {
   data: T | null;
   meta: V1Meta;
   errors: V1ErrorBody[];
+  /** Back-compat bridge for legacy integration tests and older session clients. */
+  success: boolean;
+  error?: string;
+  message?: string;
 }
 
-export function sendV1Json<T>(res: Response, status: number, data: T | null, errors: V1ErrorBody[] = []): void {
-  const body: V1Envelope<T> = { data, meta: {}, errors };
+function messageFromData(data: unknown): string | undefined {
+  if (data && typeof data === 'object' && 'message' in data) {
+    const message = (data as { message?: unknown }).message;
+    return typeof message === 'string' ? message : undefined;
+  }
+  return undefined;
+}
+
+export function sendV1Json<T>(
+  res: Response,
+  status: number,
+  data: T | null,
+  errors: V1ErrorBody[] = [],
+  message?: string
+): void {
+  const success = errors.length === 0 && status >= 200 && status < 300;
+  const firstError = errors[0]?.message;
+  const legacyMessage = message || messageFromData(data);
+  const body: V1Envelope<T> = {
+    data,
+    meta: {},
+    errors,
+    success,
+  };
+  if (!success) {
+    body.error = firstError || 'Request failed';
+  }
+  if (legacyMessage) {
+    body.message = legacyMessage;
+  }
   res.status(status).type('application/json').json(body);
 }
 
-export function sendV1Success<T>(res: Response, data: T, status = 200): void {
-  sendV1Json(res, status, data, []);
+export function sendV1Success<T>(res: Response, data: T, status = 200, message?: string): void {
+  sendV1Json(res, status, data, [], message);
 }
 
 /** Session/Bearer missing or invalid for `/api/v1` routes (per v1 contract). */

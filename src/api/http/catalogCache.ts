@@ -71,7 +71,8 @@ export function sendCachedCatalogResponse<T>(
   const envelope: V1Envelope<T> = {
     data,
     meta: { ...(withCatalogVersionMeta()) },
-    errors: []
+    errors: [],
+    success: true
   };
   const body = JSON.stringify(envelope);
   const etag = `"${currentVersion}-${crypto.createHash('sha1').update(body).digest('hex')}"`;

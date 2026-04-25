@@ -325,7 +325,7 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
 
       expect(response.status).toBe(403);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Guests may not modify decks');
+      expect(response.body.error).toBe('Guests may not modify UI preferences');
     });
 
     it('should allow deck owner to update UI preferences', async () => {

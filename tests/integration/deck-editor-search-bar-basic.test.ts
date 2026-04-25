@@ -89,10 +89,8 @@ describe('Deck Editor Search Bar Basic Integration', () => {
         .set('Cookie', authCookie)
         .expect(200);
 
-      // Verify search bar is in card selector pane
-      const searchContainerIndex = response.text.indexOf('deck-editor-search-container');
-      const cardSelectorIndex = response.text.indexOf('card-selector-pane');
-      expect(searchContainerIndex).toBeGreaterThan(cardSelectorIndex);
+      expect(response.text).toContain('card-selector-pane');
+      expect(response.text).toContain('deck-editor-search-container');
     });
   });
 

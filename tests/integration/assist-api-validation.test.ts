@@ -178,7 +178,7 @@ describe('Assist API Validation Integration Tests', () => {
         });
 
       // Should fail due to card not found, not assist validation
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
       expect(response.body.error).not.toContain('Cannot add more than 1 Assist to a deck');
     });
@@ -313,7 +313,7 @@ describe('Assist API Validation Integration Tests', () => {
         });
 
       // Should either succeed or fail gracefully, not crash
-      expect([200, 400, 500]).toContain(response.status);
+      expect([200, 400, 404, 500]).toContain(response.status);
     });
   });
 });

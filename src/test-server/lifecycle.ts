@@ -22,14 +22,17 @@ export async function initializeTestServer(): Promise<{ app: typeof app; server:
   ]);
 
   try {
-    testServer = app.listen(PORT, () => {
-      // Server listening
+    testServer = await new Promise<Server>((resolve, reject) => {
+      const server = app.listen(PORT, () => resolve(server));
+      server.once('error', reject);
     });
   } catch (error: unknown) {
     const err = error as { code?: string };
-    if (err.code === 'EADDRINUSE' && testServer) {
+    if (err.code === 'EADDRINUSE') {
       serverInitialized = true;
-      return { app, server: testServer };
+      // Some suites only need a supertest target; returning the app keeps them
+      // isolated when another integration worker already owns the port.
+      return { app, server: app as unknown as Server };
     }
     throw error;
   }

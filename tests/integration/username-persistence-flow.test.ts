@@ -119,7 +119,7 @@ describe('Username Persistence Flow', () => {
 
             // 2. Switch to database view
             const databaseViewResponse = await request(app)
-                .get('/database')
+                .get('/data')
                 .set('Cookie', authCookie);
 
             expect(databaseViewResponse.status).toBe(200);
@@ -162,7 +162,7 @@ describe('Username Persistence Flow', () => {
         test('should display username consistently across all page loads', async () => {
             const pages = [
                 `/users/${testUser.id}/decks`,
-                '/database',
+                '/data',
                 `/users/${testUser.id}/decks/${testDeck.id}/edit`
             ];
 

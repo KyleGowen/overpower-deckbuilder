@@ -77,6 +77,11 @@ export function transformDeckDetail(deck: Deck, viewerUserId: string) {
 export function transformDeckAfterMetadataUpdate(deck: Deck, viewerUserId: string) {
   const isOwner = deck.user_id === viewerUserId;
   return {
+    // Back-compat aliases for older clients/tests that read updated deck fields
+    // directly from `data` instead of `data.metadata`.
+    id: deck.id,
+    name: deck.name,
+    description: deck.description,
     metadata: {
       id: deck.id,
       name: deck.name,
