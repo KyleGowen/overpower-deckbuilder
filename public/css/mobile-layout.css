@@ -213,6 +213,27 @@ html.layout-mobile {
     grid-template-columns: minmax(0, 1fr);
 }
 
+/* All tab filter+search bar: keep the 12 type checkboxes wrapped tightly so
+   they take ~3 rows max, and use a 16px search field so iOS doesn't auto-zoom. */
+.layout-mobile #database-view #all-cards-filter-container {
+    padding: 8px;
+    gap: 6px;
+}
+
+.layout-mobile #database-view .all-cards-search-input {
+    min-height: 40px;
+    font-size: 16px;
+}
+
+.layout-mobile #database-view #all-cards-type-filters {
+    gap: 4px 6px;
+}
+
+.layout-mobile #database-view .card-type-filter {
+    padding: 5px 7px;
+    font-size: 11px;
+}
+
 /* All tab cell actions: row 1 = +Deck full width; row 2 = -Collection | +Collection (visual order). */
 .layout-mobile #database-view #all-cards-grid-container .all-cards-cell .card-content-bottom {
     display: grid;

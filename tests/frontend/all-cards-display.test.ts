@@ -403,104 +403,14 @@ describe('All Cards Display Functions', () => {
     });
   });
 
-  describe('filterAllCardsByType', () => {
-    beforeEach(() => {
-      allCardsData = [
-        { id: '1', name: 'Card 1', cardType: 'character', set: 'ERB', set_number: '001' },
-        { id: '2', name: 'Card 2', cardType: 'special', set: 'ERB', set_number: '002' },
-        { id: '3', name: 'Card 3', cardType: 'power', set: 'ERB', set_number: '003' }
-      ];
-    });
-
-    it('should filter cards by active filter buttons', () => {
-      const mockActiveButton = {
-        ...mockFilterButton,
-        getAttribute: jest.fn((_attr: string): 'character' | null => 'character')
-      };
-      
-      mockQuerySelectorAll.mockImplementation((selector: string) => {
-        if (selector === '.card-type-filter-btn.active') {
-          return [mockActiveButton];
-        }
-        return [];
-      });
-
-      filterAllCardsByType();
-
-      expect(allCardsFiltered.length).toBe(1);
-      expect(allCardsFiltered[0].cardType).toBe('character');
-    });
-
-    it('should show all cards when no filters are active', () => {
-      mockQuerySelectorAll.mockReturnValue([]);
-
-      filterAllCardsByType();
-
-      expect(allCardsFiltered).toEqual(allCardsData);
-    });
-
-    it('should load filter state from localStorage', () => {
-      localStorageMock.setItem('all-cards-filter-state', JSON.stringify({ character: true, special: false }));
-      const mockActiveButton = {
-        ...mockFilterButton,
-        getAttribute: jest.fn((_attr: string): 'character' | null => 'character')
-      };
-      
-      mockQuerySelectorAll.mockImplementation((selector: string) => {
-        if (selector === '.card-type-filter-btn.active') {
-          return [mockActiveButton];
-        }
-        return [];
-      });
-
-      filterAllCardsByType();
-
-      expect(allCardsFiltered.length).toBe(1);
-    });
-  });
-
-  describe('initializeAllCardsFilters', () => {
-    it('should initialize filter buttons from localStorage', () => {
-      localStorageMock.setItem('all-cards-filter-state', JSON.stringify({ character: true, special: false }));
-
-      initializeAllCardsFilters();
-
-      expect(mockQuerySelectorAll).toHaveBeenCalledWith('.card-type-filter-btn');
-      expect(mockFilterButton.classList.add).toHaveBeenCalled();
-    });
-
-    it('should add click handlers to filter buttons', () => {
-      initializeAllCardsFilters();
-
-      expect(mockFilterButton.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
-    });
-
-    it('should save filter state to localStorage on button click', () => {
-      initializeAllCardsFilters();
-
-      // Simulate button click
-      const clickHandler = mockFilterButton.addEventListener.mock.calls[0][1];
-      clickHandler.call(mockFilterButton);
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'all-cards-filter-state',
-        expect.any(String)
-      );
-    });
-
-    it('should toggle filter button active state on click', () => {
-      mockFilterButton.classList.contains.mockReturnValue(true);
-      initializeAllCardsFilters();
-
-      const clickHandler = mockFilterButton.addEventListener.mock.calls[0][1];
-      clickHandler.call(mockFilterButton);
-
-      expect(mockFilterButton.classList.remove).toHaveBeenCalledWith('active');
-    });
-  });
+  // The All-tab's checkbox + text-search filter behavior is exercised end-to-end
+  // (against the real public/js/all-cards-display.js source) in
+  // tests/unit/all-cards-filter-search.test.ts. That suite covers
+  // applyAllCardsFilters, cardMatchesQuery, initializeAllCardsFilters
+  // (checkbox rendering / localStorage / debounce), and persistAllCardsFilterState.
 
   describe('loadAndDisplayAllCards', () => {
-    it('should load cards, filter, and initialize filters', async () => {
+    it('should load cards before initializing filters', async () => {
       (global.fetch as jest.Mock).mockImplementation(() => {
         return Promise.resolve({
           ok: true,
@@ -511,7 +421,6 @@ describe('All Cards Display Functions', () => {
       await loadAndDisplayAllCards();
 
       expect(global.fetch).toHaveBeenCalled();
-      expect(mockQuerySelectorAll).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', async () => {
@@ -851,76 +760,9 @@ function displayAllCards(cards: any[] | null = null): void {
   console.log(`Displayed ${sortedCards.length} cards in All tab`);
 }
 
-function filterAllCardsByType(): void {
-  const filterState = JSON.parse(localStorageMock.getItem('all-cards-filter-state') || '{}');
-  
-  const enabledTypes = new Set<string>();
-  testDom.querySelectorAll('.card-type-filter-btn.active').forEach((btn: any) => {
-    enabledTypes.add(btn.getAttribute('data-card-type'));
-  });
-  
-  if (enabledTypes.size === 0) {
-    allCardsFiltered = allCardsData;
-    displayAllCards();
-    return;
-  }
-  
-  allCardsFiltered = allCardsData.filter((card: any) => {
-    return enabledTypes.has(card.cardType);
-  });
-  
-  displayAllCards();
-}
-
-function initializeAllCardsFilters(): void {
-  const filterState = JSON.parse(localStorageMock.getItem('all-cards-filter-state') || '{}');
-  
-  testDom.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
-    const cardType = btn.getAttribute('data-card-type');
-    const isEnabled = filterState[cardType] !== false;
-    
-    if (isEnabled) {
-      btn.classList.add('active');
-      btn.style.background = '';
-      btn.style.color = '';
-    } else {
-      btn.classList.remove('active');
-      btn.style.background = '';
-      btn.style.color = '';
-    }
-  });
-  
-  testDom.querySelectorAll('.card-type-filter-btn').forEach((btn: any) => {
-    btn.addEventListener('click', function(this: any) {
-      const cardType = this.getAttribute('data-card-type');
-      const isActive = this.classList.contains('active');
-      
-      if (isActive) {
-        this.classList.remove('active');
-        this.style.background = '';
-        this.style.color = '';
-      } else {
-        this.classList.add('active');
-        this.style.background = '';
-        this.style.color = '';
-      }
-      
-      const filterState: { [key: string]: boolean } = {};
-      testDom.querySelectorAll('.card-type-filter-btn').forEach((b: any) => {
-        filterState[b.getAttribute('data-card-type')] = b.classList.contains('active');
-      });
-      localStorageMock.setItem('all-cards-filter-state', JSON.stringify(filterState));
-      
-      filterAllCardsByType();
-    });
-  });
-}
-
 async function loadAndDisplayAllCards(): Promise<void> {
   try {
     await loadAllCards();
-    filterAllCardsByType();
-    initializeAllCardsFilters();
   } catch (error) {
     console.error('Error loading all cards:', error);
     const container = testDom.getElementById('all-cards-grid-container');

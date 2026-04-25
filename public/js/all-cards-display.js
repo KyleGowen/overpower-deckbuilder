@@ -63,6 +63,43 @@ const CACHE_KEY_MAP = {
     'power': 'power-cards'
 };
 
+/** Display labels for each cardType (used for both filter checkboxes and text-search type matching) */
+const CARD_TYPE_LABELS = {
+    'character': 'Characters',
+    'special': 'Special Cards',
+    'advanced-universe': 'Universe: Advanced',
+    'location': 'Locations',
+    'aspect': 'Aspects',
+    'mission': 'Missions',
+    'event': 'Events',
+    'teamwork': 'Universe: Teamwork',
+    'ally-universe': 'Universe: Ally',
+    'training': 'Universe: Training',
+    'basic-universe': 'Universe: Basic',
+    'power': 'Power Cards'
+};
+
+/** Order in which checkboxes are rendered (matches the database tab strip order). */
+const CARD_TYPE_ORDER = [
+    'character', 'special', 'advanced-universe', 'location', 'aspect', 'mission',
+    'event', 'teamwork', 'ally-universe', 'training', 'basic-universe', 'power'
+];
+
+/** Text-ish fields scanned by the All-tab text search (free-form prose / abilities). */
+const TEXT_SEARCH_FIELDS = [
+    'special_abilities', 'special_ability', 'card_effect', 'card_text',
+    'card_description', 'aspect_description', 'game_effect', 'flavor_text',
+    'bonus', 'to_use', 'acts_as', 'followup_attack_types',
+    'first_attack_bonus', 'second_attack_bonus',
+    'character', 'character_name'
+];
+
+/** Sub-type / categorical fields scanned for "type" matching alongside the high-level type label. */
+const SUBTYPE_SEARCH_FIELDS = [
+    'card_type', 'power_type', 'type', 'type_1', 'type_2',
+    'mission_set', 'stat_to_use', 'stat_type_to_use', 'attack_type'
+];
+
 /** Number of cards to render per batch (progressive loading) */
 const BATCH_SIZE = 25;
 
@@ -462,89 +499,120 @@ function displayAllCards(cards = null) {
 }
 
 /**
- * Filter cards by enabled card types
+ * Test whether a card matches the free-text search query.
+ * Matches against the card's display name, free-form text fields, the high-level
+ * type slug + label, and sub-type fields. Empty/blank query matches every card.
  */
-function filterAllCardsByType() {
-    // Get filter state from localStorage or default to all enabled
-    const filterState = JSON.parse(localStorage.getItem('all-cards-filter-state') || '{}');
-    
-    // Get enabled card types from filter buttons
-    const enabledTypes = new Set();
-    document.querySelectorAll('.card-type-filter-btn.active').forEach(btn => {
-        enabledTypes.add(btn.getAttribute('data-card-type'));
-    });
-    
-    // If no types enabled, show all (shouldn't happen, but safety check)
-    if (enabledTypes.size === 0) {
-        allCardsFiltered = allCardsData;
-        displayAllCards();
-        return;
+function cardMatchesQuery(card, query) {
+    if (!query) return true;
+    if (!card) return false;
+
+    const name = (typeof getCardName === 'function') ? getCardName(card) : (card.name || '');
+    if (String(name).toLowerCase().includes(query)) return true;
+
+    for (const field of TEXT_SEARCH_FIELDS) {
+        const v = card[field];
+        if (v && String(v).toLowerCase().includes(query)) return true;
     }
-    
-    // Filter cards
-    allCardsFiltered = allCardsData.filter(card => {
-        return enabledTypes.has(card.cardType);
-    });
-    
-    // Update display
-    displayAllCards();
+
+    const cardType = card.cardType || '';
+    if (cardType && cardType.toLowerCase().includes(query)) return true;
+    const label = CARD_TYPE_LABELS[cardType];
+    if (label && label.toLowerCase().includes(query)) return true;
+
+    for (const field of SUBTYPE_SEARCH_FIELDS) {
+        const v = card[field];
+        if (v && String(v).toLowerCase().includes(query)) return true;
+    }
+
+    return false;
 }
 
 /**
- * Initialize filter buttons
+ * Filter cards by enabled card types AND the current text-search query.
+ */
+function applyAllCardsFilters() {
+    const checkboxes = document.querySelectorAll('.card-type-filter-cb');
+    const enabledTypes = new Set();
+    checkboxes.forEach(cb => {
+        if (cb.checked) enabledTypes.add(cb.getAttribute('data-card-type'));
+    });
+
+    const searchInput = document.getElementById('all-cards-search-input');
+    const query = (searchInput?.value || '').trim().toLowerCase();
+
+    allCardsFiltered = allCardsData.filter(card =>
+        enabledTypes.has(card.cardType) && cardMatchesQuery(card, query)
+    );
+
+    displayAllCards();
+}
+
+// Backwards-compatible alias for any existing callers.
+const filterAllCardsByType = applyAllCardsFilters;
+
+/**
+ * Persist current checkbox state to localStorage.
+ */
+function persistAllCardsFilterState() {
+    const state = {};
+    document.querySelectorAll('.card-type-filter-cb').forEach(cb => {
+        state[cb.getAttribute('data-card-type')] = cb.checked;
+    });
+    try {
+        localStorage.setItem('all-cards-filter-state', JSON.stringify(state));
+    } catch (e) {
+        console.warn('Could not persist all-cards filter state:', e);
+    }
+}
+
+/**
+ * Render the type-filter checkboxes into #all-cards-type-filters and wire all
+ * filter UI events (checkbox change + debounced search input).
+ *
+ * Idempotent: safe to call multiple times; the second call rewires fresh DOM.
  */
 function initializeAllCardsFilters() {
-    // Load filter state from localStorage
-    const filterState = JSON.parse(localStorage.getItem('all-cards-filter-state') || '{}');
-    
-    // Set initial button states
-    document.querySelectorAll('.card-type-filter-btn').forEach(btn => {
-        const cardType = btn.getAttribute('data-card-type');
-        const isEnabled = filterState[cardType] !== false; // Default to true if not set
-        
-        if (isEnabled) {
-            btn.classList.add('active');
-            // Remove inline styles to let CSS handle styling
-            btn.style.background = '';
-            btn.style.color = '';
-        } else {
-            btn.classList.remove('active');
-            // Remove inline styles to let CSS handle styling
-            btn.style.background = '';
-            btn.style.color = '';
-        }
-    });
-    
-    // Add click handlers
-    document.querySelectorAll('.card-type-filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cardType = this.getAttribute('data-card-type');
-            const isActive = this.classList.contains('active');
-            
-            // Toggle state
-            if (isActive) {
-                this.classList.remove('active');
-                // Remove inline styles to let CSS handle styling
-                this.style.background = '';
-                this.style.color = '';
-            } else {
-                this.classList.add('active');
-                // Remove inline styles to let CSS handle styling
-                this.style.background = '';
-                this.style.color = '';
-            }
-            
-            // Save filter state to localStorage
-            const filterState = {};
-            document.querySelectorAll('.card-type-filter-btn').forEach(b => {
-                filterState[b.getAttribute('data-card-type')] = b.classList.contains('active');
-            });
-            localStorage.setItem('all-cards-filter-state', JSON.stringify(filterState));
-            
-            // Re-filter and re-display
-            filterAllCardsByType();
+    const container = document.getElementById('all-cards-type-filters');
+    if (!container) return;
+
+    let filterState = {};
+    try {
+        filterState = JSON.parse(localStorage.getItem('all-cards-filter-state') || '{}');
+    } catch (e) {
+        filterState = {};
+    }
+
+    const html = CARD_TYPE_ORDER.map(cardType => {
+        const label = CARD_TYPE_LABELS[cardType] || cardType;
+        const checked = filterState[cardType] !== false ? 'checked' : '';
+        return `
+            <label class="card-type-filter">
+                <input type="checkbox" class="card-type-filter-cb" data-card-type="${cardType}" ${checked}>
+                <span>${label}</span>
+            </label>
+        `;
+    }).join('');
+    container.innerHTML = html;
+
+    container.querySelectorAll('.card-type-filter-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+            persistAllCardsFilterState();
+            applyAllCardsFilters();
         });
     });
+
+    const searchInput = document.getElementById('all-cards-search-input');
+    if (searchInput && !searchInput.dataset.allCardsSearchBound) {
+        let debounceTimer = null;
+        searchInput.addEventListener('input', () => {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                applyAllCardsFilters();
+            }, 150);
+        });
+        searchInput.dataset.allCardsSearchBound = '1';
+    }
 }
 
 /**
@@ -553,8 +621,8 @@ function initializeAllCardsFilters() {
 async function loadAndDisplayAllCards() {
     try {
         await loadAllCards();
-        filterAllCardsByType();
         initializeAllCardsFilters();
+        applyAllCardsFilters();
     } catch (error) {
         console.error('Error loading all cards:', error);
         const container = document.getElementById('all-cards-grid-container');
@@ -568,6 +636,7 @@ async function loadAndDisplayAllCards() {
 window.loadAllCards = loadAllCards;
 window.displayAllCards = displayAllCards;
 window.filterAllCardsByType = filterAllCardsByType;
+window.applyAllCardsFilters = applyAllCardsFilters;
 window.initializeAllCardsFilters = initializeAllCardsFilters;
 window.loadAndDisplayAllCards = loadAndDisplayAllCards;
 window.getCardName = getCardName;

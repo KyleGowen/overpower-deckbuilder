@@ -2774,48 +2774,67 @@ table {
 }
 
 #all-cards-filter-container {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+.all-cards-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    outline: none;
+}
+
+.all-cards-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.all-cards-search-input:focus {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.25);
 }
 
 #all-cards-type-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
+    gap: 6px 8px;
 }
 
-.card-type-filter-btn {
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.card-type-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1.2;
     color: #ffffff;
-    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.1px;
+    user-select: none;
 }
 
-.card-type-filter-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
+.card-type-filter:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
-.card-type-filter-btn.active {
-    background: #4ecdc4;
-    border-color: #4ecdc4;
-    color: #1a1a2e;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.card-type-filter-btn.active:hover {
-    background: #4ecdc4;
-    border-color: #4ecdc4;
+.card-type-filter input {
+    margin: 0;
+    accent-color: #4ecdc4;
+    cursor: pointer;
 }
 
 #all-cards-grid-container {
