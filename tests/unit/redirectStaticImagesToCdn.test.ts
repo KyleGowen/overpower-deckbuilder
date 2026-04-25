@@ -23,30 +23,83 @@ function buildImageStaticApp() {
   return app;
 }
 
-describe('shouldSkipCdnImageRedirect', () => {
-  const mk = (hostname: string): express.Request => ({ hostname } as express.Request);
+function mkReq(
+  hostname: string,
+  options?: { forwardedHost?: string; hostHeader?: string; originalUrl?: string }
+): express.Request {
+  const hostVal = options?.hostHeader ?? hostname;
+  return {
+    hostname,
+    originalUrl: options?.originalUrl ?? '/src/resources/images/icons/energy.png',
+    get(name: string) {
+      if (name === 'host') return hostVal;
+      if (name === 'x-forwarded-host') return options?.forwardedHost;
+      return undefined;
+    },
+  } as express.Request;
+}
 
+describe('shouldSkipCdnImageRedirect', () => {
   it('returns true for origin.* hostnames (CloudFront custom origin)', () => {
-    expect(shouldSkipCdnImageRedirect(mk('origin.excelsior.cards'))).toBe(true);
-    expect(shouldSkipCdnImageRedirect(mk('origin.example.com'))).toBe(true);
+    expect(shouldSkipCdnImageRedirect(mkReq('origin.excelsior.cards'))).toBe(true);
+    expect(shouldSkipCdnImageRedirect(mkReq('origin.example.com'))).toBe(true);
   });
 
   it('returns false for public site hostnames (redirect to CDN is ok)', () => {
-    expect(shouldSkipCdnImageRedirect(mk('excelsior.cards'))).toBe(false);
-    expect(shouldSkipCdnImageRedirect(mk('www.excelsior.cards'))).toBe(false);
+    expect(shouldSkipCdnImageRedirect(mkReq('excelsior.cards'))).toBe(false);
+    expect(shouldSkipCdnImageRedirect(mkReq('www.excelsior.cards'))).toBe(false);
   });
 
   it('returns true for localhost and loopback', () => {
-    expect(shouldSkipCdnImageRedirect(mk('localhost'))).toBe(true);
-    expect(shouldSkipCdnImageRedirect(mk('127.0.0.1'))).toBe(true);
-    expect(shouldSkipCdnImageRedirect(mk('[::1]'))).toBe(true);
+    expect(shouldSkipCdnImageRedirect(mkReq('localhost'))).toBe(true);
+    expect(shouldSkipCdnImageRedirect(mkReq('127.0.0.1'))).toBe(true);
+    expect(shouldSkipCdnImageRedirect(mkReq('[::1]'))).toBe(true);
   });
 
   it('returns true when Host matches the hostname of CDN_BASE_URL (no self-redirect)', () => {
     const prev = process.env.CDN_BASE_URL;
     process.env.CDN_BASE_URL = 'https://d6vp4hrkfkf5v.cloudfront.net';
     try {
-      expect(shouldSkipCdnImageRedirect(mk('d6vp4hrkfkf5v.cloudfront.net'))).toBe(true);
+      expect(shouldSkipCdnImageRedirect(mkReq('d6vp4hrkfkf5v.cloudfront.net'))).toBe(true);
+    } finally {
+      if (prev === undefined) {
+        delete process.env.CDN_BASE_URL;
+      } else {
+        process.env.CDN_BASE_URL = prev;
+      }
+    }
+  });
+
+  it('returns true when X-Forwarded-Host is the CDN hostname (proxy chain)', () => {
+    const prev = process.env.CDN_BASE_URL;
+    process.env.CDN_BASE_URL = 'https://d6vp4hrkfkf5v.cloudfront.net';
+    try {
+      expect(
+        shouldSkipCdnImageRedirect(
+          mkReq('nginx.internal', { forwardedHost: 'd6vp4hrkfkf5v.cloudfront.net' })
+        )
+      ).toBe(true);
+    } finally {
+      if (prev === undefined) {
+        delete process.env.CDN_BASE_URL;
+      } else {
+        process.env.CDN_BASE_URL = prev;
+      }
+    }
+  });
+
+  it('returns true when the request is already the CDN URL for the path (same-URL guard)', () => {
+    const prev = process.env.CDN_BASE_URL;
+    process.env.CDN_BASE_URL = 'https://d6vp4hrkfkf5v.cloudfront.net';
+    const url = '/src/resources/images/icons/energy.png';
+    try {
+      expect(
+        shouldSkipCdnImageRedirect(
+          mkReq('d6vp4hrkfkf5v.cloudfront.net', { originalUrl: url }),
+          'https://d6vp4hrkfkf5v.cloudfront.net',
+          url
+        )
+      ).toBe(true);
     } finally {
       if (prev === undefined) {
         delete process.env.CDN_BASE_URL;
@@ -60,7 +113,7 @@ describe('shouldSkipCdnImageRedirect', () => {
     const prev = process.env.STATIC_IMAGE_CDN_REDIRECT;
     process.env.STATIC_IMAGE_CDN_REDIRECT = '0';
     try {
-      expect(shouldSkipCdnImageRedirect(mk('api.example.com'))).toBe(true);
+      expect(shouldSkipCdnImageRedirect(mkReq('api.example.com'))).toBe(true);
     } finally {
       if (prev === undefined) {
         delete process.env.STATIC_IMAGE_CDN_REDIRECT;
@@ -112,6 +165,16 @@ describe('redirectStaticImagesToCdn middleware', () => {
     const res = await request(buildImageStaticApp())
       .get(testPath)
       .set('Host', 'd6vp4hrkfkf5v.cloudfront.net');
+    expect(res.status).toBe(200);
+    expect(res.headers.location).toBeUndefined();
+  });
+
+  it('serves 200 from disk when only X-Forwarded-Host is the CloudFront domain', async () => {
+    process.env.CDN_BASE_URL = cdn;
+    const res = await request(buildImageStaticApp())
+      .get(testPath)
+      .set('Host', '10.0.0.2:3000')
+      .set('X-Forwarded-Host', 'd6vp4hrkfkf5v.cloudfront.net');
     expect(res.status).toBe(200);
     expect(res.headers.location).toBeUndefined();
   });

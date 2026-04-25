@@ -236,9 +236,13 @@ custom origin hostname (`origin.<domain>`; see `infra/cloudfront.tf`). If the
 app responded with `302` to the same CloudFront URL the viewer already requested,
 the edge could refetch the origin in a loop (`ERR_TOO_MANY_REDIRECTS`). For that
 reason, `redirectStaticImagesToCdn` does **not** emit a CDN redirect when
-`Host` is an `origin.*` hostname, `localhost` / loopback, or when
-`STATIC_IMAGE_CDN_REDIRECT=0` (kill switch). Those requests are served 200 from
-`express.static` on EC2 so CloudFront can cache the object normally.
+`Host` or `X-Forwarded-Host` matches the hostname of `CDN_BASE_URL`, `Host` is
+an `origin.*` hostname, `localhost` / loopback, the request is already the CDN
+URL for that path, or `STATIC_IMAGE_CDN_REDIRECT=0` (kill switch). Those requests
+are served 200 from `express.static` on EC2 so the edge can cache the object
+normally. **Apply Terraform** so the live distribution’s ordered behavior routes
+`/src/resources/images/*` to S3 (see `infra/cloudfront.tf`); until then, the
+origin may still be nginx/Node for that path.
 
 ### `card-image-utils.js` (deck editor and card database)
 
