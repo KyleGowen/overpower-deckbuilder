@@ -5196,7 +5196,7 @@ html.layout-mobile {
     font-size: var(--font-sm);
 }
 
-/* Character cards: full-width fill using flex */
+/* Character cards: 2x2 grid on mobile so each card shows its full art */
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-tile-previews {
     display: block; /* block so .deck-tile-characters takes full width naturally */
     width: 100%;
@@ -5216,30 +5216,44 @@ html.layout-mobile {
 }
 
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: auto;
+    gap: 8px;
     width: 100%;
-    height: 180px;
-    overflow: hidden;
-    align-items: flex-end;
-    justify-content: flex-start;
+    height: auto;          /* was 180px flex row */
+    overflow: visible;     /* was hidden */
+    align-items: stretch;
+    justify-content: stretch;
     perspective: none;
-    /* Cancel desktop-only padding-left: 26px; match .deck-tile-header horizontal inset */
+    /* Match .deck-tile-header horizontal inset */
     padding-left: 14px;
     padding-right: 14px;
     box-sizing: border-box;
 }
 
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display {
-    flex: 1 1 0;
+    width: 100% !important;
     min-width: 0;
-    width: auto !important;
-    height: 180px;
-    margin-left: -4px;
+    height: auto;
+    /* Matches PRESET_CHARACTER (380x280) so the full thumbnail fits with no crop */
+    aspect-ratio: 380 / 280;
+    margin: 0;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
     border-radius: 10px;
     border-width: 1px;
     border-color: rgba(78, 205, 196, 0.2);
     transition: none;
     cursor: default;
     -webkit-tap-highlight-color: transparent;
+}
+
+.layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Remove all 3D rotations — flat fill on mobile */
@@ -5251,7 +5265,7 @@ html.layout-mobile {
 }
 
 .layout-mobile .deck-card.deck-tile.deck-tile--compact .deck-character-card-display:first-child {
-    margin-left: 0;
+    margin: 0;
 }
 
 /* MV: no hover / touch “lift” — desktop row hover rules must not apply */
