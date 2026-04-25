@@ -1139,7 +1139,8 @@ jobs:
         LAST_HEALTH=""
         for i in $(seq 1 20); do
           CACHE_BUSTER=$(date +%s%N)
-          HEALTH_URL="http://excelsior.cards/health?cb=$CACHE_BUSTER"
+          # Apex is behind CloudFront (HTTP → 301 to HTTPS); use HTTPS for JSON health
+          HEALTH_URL="https://excelsior.cards/health?cb=$CACHE_BUSTER"
           HEALTH=$(curl -s --max-time 15 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$HEALTH_URL" 2>/dev/null || echo "")
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$HEALTH_URL" 2>/dev/null || echo "000")
           DEPLOYED_COMMIT=$(echo "$HEALTH" | jq -r '.git.commit // ""' 2>/dev/null || echo "")
@@ -1189,7 +1190,7 @@ jobs:
     - name: Deployment success notification
       run: |
         echo "Deployment completed and verified!"
-        echo "Application URL: http://excelsior.cards"
+        echo "Application URL: https://excelsior.cards"
         echo "Deployed commit: ${{ github.sha }}"
 
   post-production:
@@ -1221,7 +1222,7 @@ jobs:
           fi
           
           echo "🔎 Health check attempt $((ATTEMPT+1))..."
-          HEALTH_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 10 "http://excelsior.cards/health" || echo "HTTP_STATUS:000")
+          HEALTH_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 10 "https://excelsior.cards/health" || echo "HTTP_STATUS:000")
           
           # Extract HTTP status code
           HTTP_STATUS=$(echo "$HEALTH_RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
@@ -1265,7 +1266,7 @@ jobs:
         else
           echo "❌ Health check FAILED after $((MAX_RETRIES+1)) attempts"
           echo "💡 Troubleshooting tips:"
-          echo "   - Check if server is running: curl -I http://excelsior.cards"
+          echo "   - Check if server is running: curl -I https://excelsior.cards"
           echo "   - Check server logs on EC2 instance"
           echo "   - Verify database connectivity"
           echo "   - Check DNS resolution for excelsior.cards"
