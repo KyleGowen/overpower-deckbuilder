@@ -136,13 +136,28 @@ Output example:
 
 ---
 
+## UI Icon Size Budget
+
+Repeated UI chrome icons under `src/resources/images/icons/` are intentionally
+small source PNGs. They render at 18-32px in most views and up to roughly 50px
+inside mobile filter controls, so the root stat/threat icons are capped at a
+128px maximum edge and 60 KiB per file. The budget is enforced by
+`tests/unit/image-asset-budgets.test.ts`.
+
+If a root icon needs to change, resize it with a 128px max edge and preserve
+transparent PNG output unless the consuming code is updated to reference a new
+format. Function icons under `src/resources/images/icons/function/` are already
+small and keep their native dimensions.
+
+---
+
 ## Deck editor card view
 
 The deck editor’s **card view** (cards in the deck with “Change Art”, etc.) uses **thumbnail-first + progressive full-res** for all card types that have `thumb/` assets (via `thumbImageSubdirForCardType` + `toThumbnailPathForType`) so the panel fills quickly instead of waiting on full-resolution images.
 
-- **Initial load**: For character/location/mission, the visible `<img>` `src` is set to the thumbnail URL (via `toThumbnailPath` / `toThumbnailPathForType`). Other types (special, power, event, aspect, teamwork, ally-universe, etc.) have no thumbnails and use full-res only.
+- **Initial load**: For any card type mapped by `thumbImageSubdirForCardType`, the visible `<img>` `src` is set to the thumbnail URL (via `toThumbnailPath` / `toThumbnailPathForType`). The helpers support both local site-relative paths and production CDN-prefixed paths.
 - **Progressive load (two-layer, no flash)**: After the card-view HTML is in the DOM, `initDeckEditorCardViewProgressiveLoad()` in `public/js/deck-editor-rendering.js` finds each `.card-view-image-full[data-full-res]`. It preloads the full-res image, then sets that layer’s `src` and adds `card-view-image-full--loaded` so the full-res fades in over the thumbnail. The thumbnail layer’s `src` is never changed. Same two-layer fade pattern is used in the card hover modal.
 - **Helpers**: `getDeckEditorCardViewInitialImagePath(fullResPath, cardType)` returns the thumbnail URL for char/loc/mission, or the full-res path for other types.
 - **Aspect alignment**: Card view uses **type-specific** dimensions for character, location, and event so the display box matches the same aspect ratio as the thumb config and deck selection (see Thumbnail Dimensions table). That way thumb and full-res use the same crop box and there is no visible sizing shift when full-res loads.
 
-Deck selection uses thumbnails (and in production, CDN) for list tiles. The deck editor uses thumbnails + progressive load from origin; the hover modal uses the same progressive pattern (thumbnail first, then full-res when loaded) for character, location, and mission. The hover modal's full-res layer uses `object-fit: cover` (and `object-position: center top`) so it fully covers the thumbnail and the low-res image is never visible behind it.
+Deck selection uses thumbnails (and in production, CDN) for list tiles. The deck editor uses thumbnails + progressive full-res loading; the hover modal uses the same progressive pattern (thumbnail first, then full-res when loaded) where thumbnail assets exist. The hover modal's full-res layer uses `object-fit: cover` (and `object-position: center top`) so it fully covers the thumbnail and the low-res image is never visible behind it.

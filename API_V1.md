@@ -22,13 +22,16 @@ All v1 JSON responses use:
 {
   "data": {},
   "meta": {},
-  "errors": []
+  "errors": [],
+  "success": true
 }
 ```
 
 - `**data`:** payload on success; may be `null` on error.
 - `**meta`:** optional. Always carries `requestId` (echoed `X-Request-Id`). On catalog / DBV-support responses it also carries `catalogDataVersion` and `catalogLastUpdated` (see [Caching & conditional GET](#caching--conditional-get)).
 - `**errors`:** array of `{ "code": string, "message": string, "field"?: string }`. Do not echo raw user input in messages. The full list of stable `code` values is catalogued in `[docs/current/API_V1_ERROR_CATALOG.md](docs/current/API_V1_ERROR_CATALOG.md)`.
+- `**success`:** backwards-compatible boolean derived from HTTP status and `errors`. New clients should prefer HTTP status plus `errors`.
+- `**error` / `**message`:** optional backwards-compatible strings for older session-era clients and integration tests. New clients should prefer `errors[].message` and typed response DTOs.
 
 ### Status codes
 

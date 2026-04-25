@@ -28,13 +28,14 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 
 ## Key Architecture Facts
 
-- **Phase 0 rewrote the transport story — read [`docs/current/OPS_TLS_AND_HTTPS.md`](../docs/current/OPS_TLS_AND_HTTPS.md) first.**
-- **`excelsior.cards` + `www.excelsior.cards` → CloudFront (ALIAS A records).** CloudFront terminates TLS with the ACM cert from `ssl.tf` and forwards to the EC2 origin over HTTP.
+- **Current production entry point is HTTP.** HTTPS/Phase 0 files remain from an incomplete rollout; do not treat HTTPS as the working baseline unless Kyle explicitly revives it.
+- **`excelsior.cards` + `www.excelsior.cards` Terraform aliases may not reflect the live HTTP baseline.** Verify current DNS before applying transport-related changes.
 - **`origin.excelsior.cards` → EC2 Elastic IP directly.** This hostname is what CloudFront uses as its origin; it must NEVER be aliased to CloudFront or it creates a loop.
 - **Two providers in `main.tf`**: default `us-west-2` (most resources) and `aws.us_east_1` for the ACM cert (CloudFront requirement).
 - **CloudFront origins:**
   - Default behavior → EC2 via `origin.excelsior.cards` (all app traffic)
-  - Ordered behavior `/src/resources/cards/images/*` → S3 bucket (card images only)
+  - Ordered behavior `/src/resources/cards/images/*` → S3 bucket (card images)
+  - Ordered behavior `/src/resources/images/*` → S3 bucket (UI icons and deck backgrounds)
 - **CloudFront** is also still reachable at its auto-generated `*.cloudfront.net` domain. The server injects this as `CDN_BASE_URL` (SSM parameter) at container startup → `window.APP_CDN_BASE` in the frontend. After Phase 0 this is optional — the apex alias also covers card image paths.
 - **S3 bucket** (`excelsior-cards-assets-dev`) is fully private; only CloudFront can read from it via OAC (Origin Access Control). Direct public HTTP access returns 403.
 - **OAC not OAI** — always use `aws_cloudfront_origin_access_control` for new S3 origins. OAI is legacy and deprecated.
@@ -42,7 +43,7 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 ## CDN / Card Image Gotchas (Lessons Learned)
 
 - **Thumbnails are not in git** — `src/resources/cards/images/characters/thumb/`, `missions/thumb/`, and `locations/thumb/` are in `.gitignore`. The `sync-images` CI job **must** run `npm run generate:thumbnails` before `aws s3 sync`, or S3 will never have thumbnails.
-- **Background images ARE in git** — `src/resources/images/backgrounds/landscape/*.png` are tracked. The `sync-images` job runs `aws s3 sync src/resources/images/backgrounds/` so they reach S3/CloudFront and will load even if thumbnails are broken.
+- **UI images ARE in git** — `src/resources/images/**/*.png` is tracked. The `sync-images` job runs `aws s3 sync src/resources/images/` so icons/backgrounds reach S3/CloudFront and can be served without EC2 image bytes.
 - **Docker image has no card images** — `.dockerignore` excludes `src/resources/cards/images/`. In production, card images can only come from CloudFront/S3. Local dev uses Express static because `CDN_BASE_URL` is empty.
 - **`CDN_BASE` is captured at module init time** — `public/js/deck-selection/deckTileImages.js` captures `window.APP_CDN_BASE` into a constant `CDN_BASE` when the IIFE runs. If `app-config.js` somehow hasn't executed yet, `CDN_BASE` will be `''` for the entire page load even if `window.APP_CDN_BASE` is set later. `app-config.js` must stay as a synchronous `<script>` tag before other deck-selection scripts.
 - **AWS_S3_ASSETS_BUCKET secret must match Terraform output** — verify with `cd infra && terraform output -raw assets_bucket_name`. A mismatch means sync-images writes to a different bucket than CloudFront reads from.

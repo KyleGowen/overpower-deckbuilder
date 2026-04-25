@@ -18,6 +18,7 @@ declare global {
         mapImagePathToActualFile?: (imagePath: string) => string;
         getCardImagePath?: (card: any, cardType: string, options?: { useThumbnail?: boolean }) => string;
         toThumbnailPath?: (fullPath: string) => string;
+        toThumbnailPathForType?: (fullPath: string, type: string) => string;
         mapDatabaseIdToDeckCardId?: (databaseId: string, cardType: string) => string;
         mapCardIdToDatabaseId?: (cardId: string, cardType: string) => string;
         thumbImageSubdirForCardType?: (cardType: string) => string | null;
@@ -88,9 +89,27 @@ describe('Card Image Utilities', () => {
             expect(result).toBe(alreadyThumb);
         });
 
+        it('should convert CDN-prefixed character paths to CDN-prefixed thumbnail paths', () => {
+            const fullPath = 'https://d6vp4hrkfkf5v.cloudfront.net/src/resources/cards/images/characters/alternate/bar.png';
+            const result = window.toThumbnailPath!(fullPath);
+            expect(result).toBe('https://d6vp4hrkfkf5v.cloudfront.net/src/resources/cards/images/characters/thumb/alternate/bar.webp');
+        });
+
         it('should return path unchanged for non-character paths', () => {
             const fullPath = '/src/resources/cards/images/specials/foo.webp';
             const result = window.toThumbnailPath!(fullPath);
+            expect(result).toBe(fullPath);
+        });
+
+        it('should convert CDN-prefixed typed paths to typed thumbnail paths', () => {
+            const fullPath = 'https://d6vp4hrkfkf5v.cloudfront.net/src/resources/cards/images/missions/set/foo.png';
+            const result = window.toThumbnailPathForType!(fullPath, 'missions');
+            expect(result).toBe('https://d6vp4hrkfkf5v.cloudfront.net/src/resources/cards/images/missions/thumb/set/foo.webp');
+        });
+
+        it('should leave non-card CDN URLs unchanged', () => {
+            const fullPath = 'https://assets.example.test/src/resources/images/icons/energy.png';
+            const result = window.toThumbnailPathForType!(fullPath, 'characters');
             expect(result).toBe(fullPath);
         });
     });

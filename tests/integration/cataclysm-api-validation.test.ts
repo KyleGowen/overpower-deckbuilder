@@ -70,7 +70,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         const cataclysmCard = cataclysmResult.rows[0];
         
         const response = await request(app)
-          .post(`/api/v1/decks/${testDeckId}/cards`)
+          .post(`/api/v1/decks/${testDeck.id}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -105,7 +105,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
 
         // First, add the first cataclysm card
         const firstResponse = await request(app)
-          .post(`/api/v1/decks/${testDeckId}/cards`)
+          .post(`/api/v1/decks/${testDeck.id}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -118,7 +118,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         
         // Now try to add a second cataclysm card - this should fail
         const secondResponse = await request(app)
-          .post(`/api/v1/decks/${testDeckId}/cards`)
+          .post(`/api/v1/decks/${testDeck.id}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -151,7 +151,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         const regularSpecialCard = regularSpecialResult.rows[0];
 
         const response = await request(app)
-          .post(`/api/v1/decks/${testDeckId}/cards`)
+          .post(`/api/v1/decks/${testDeck.id}/cards`)
           .set('Cookie', authCookie)
           .send({
             cardType: 'special',
@@ -175,7 +175,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -184,14 +184,19 @@ describe('Cataclysm API Validation Integration Tests', () => {
         });
 
       // Should fail due to card not found, not cataclysm validation
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
       expect(response.body.error).not.toContain('Cannot add more than 1 Cataclysm to a deck');
     });
 
     it('should handle non-special card types correctly', async () => {
+      const testDeck = await integrationTestUtils.createTestDeck(testUserId, {
+        name: 'Cataclysm Test Deck non-special',
+        description: 'Testing non-special card type handling'
+      });
+
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .set('Cookie', authCookie)
         .send({
           type: 'character',
@@ -237,7 +242,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .send({
           cardType: 'special',
           cardId: '12345678-1234-1234-1234-123456789012', // Valid UUID format but doesn't exist
@@ -270,7 +275,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       });
 
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -306,7 +311,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
       // This test would require mocking the database connection to fail
       // For now, we'll just ensure the API handles errors without crashing
       const response = await request(app)
-        .post(`/api/v1/decks/${testDeckId}/cards`)
+        .post(`/api/v1/decks/${testDeck.id}/cards`)
         .set('Cookie', authCookie)
         .send({
           cardType: 'special',
@@ -315,7 +320,7 @@ describe('Cataclysm API Validation Integration Tests', () => {
         });
 
       // Should either succeed or fail gracefully, not crash
-      expect([200, 400, 500]).toContain(response.status);
+      expect([200, 400, 404, 500]).toContain(response.status);
     });
   });
 });

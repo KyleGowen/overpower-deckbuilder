@@ -161,7 +161,7 @@ describe('decks.http', () => {
       authenticateUser: passAuth
     };
     const res = await request(buildApp(deps)).get('/decks').expect(200);
-    const expectedBody = JSON.stringify({ data: sampleList, meta: {}, errors: [] });
+    const expectedBody = JSON.stringify({ data: sampleList, meta: {}, errors: [], success: true });
     const expectedEtag = `"${crypto.createHash('sha1').update(expectedBody).digest('hex')}"`;
     expect(res.headers.etag).toBe(expectedEtag);
   });

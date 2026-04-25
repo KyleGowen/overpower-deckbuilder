@@ -17,7 +17,7 @@
 ## /js/app-config.js (auth.routes.ts)
 - Serves `window.APP_CDN_BASE = "<CDN_BASE_URL>";` from `process.env.CDN_BASE_URL`.
 - This route is public (no auth) and cached 5 minutes (`Cache-Control: public, max-age=300`).
-- In production `CDN_BASE_URL` must be set in the container's `.env`; in local dev it is empty and card images are served from disk via Express static.
+- In production `CDN_BASE_URL` must be set in the container's `.env`; in local dev it is empty and card/UI images are served from disk via Express static. The current production entry point is HTTP; do not infer a working HTTPS path from old docs/comments.
 
 ## Health endpoints (static-health.routes.ts)
 - **Phase 1** split the legacy `/health` into three routes. See [`docs/current/API_V1_HEALTH_ENDPOINTS.md`](../../docs/current/API_V1_HEALTH_ENDPOINTS.md).

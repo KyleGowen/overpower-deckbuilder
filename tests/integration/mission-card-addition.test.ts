@@ -203,7 +203,7 @@ describe('Mission Card Addition Integration Tests', () => {
       expect(deckCardsResult.rows[0].quantity).toBe(1);
     });
 
-    it('should return 400 when trying to add a non-existent mission card via API', async () => {
+    it('should return 404 when trying to add a non-existent mission card via API', async () => {
       const response = await request(app)
         .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
@@ -213,8 +213,7 @@ describe('Mission Card Addition Integration Tests', () => {
           quantity: 1
         });
 
-      // Should return 400 because the deck repository returns false when card doesn't exist
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
     });
 

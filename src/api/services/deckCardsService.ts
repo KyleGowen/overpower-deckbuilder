@@ -78,13 +78,12 @@ export class DeckCardsService {
     | { ok: false; kind: 'bad_request' | 'forbidden' | 'not_found' | 'server_error'; message: string }
   > {
     try {
-      if (!(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
-        return { ok: false, kind: 'forbidden', message: 'Access denied. You do not own this deck.' };
-      }
-
       const currentDeck = (await this.repo.getDeckById(deckId)) as Deck | undefined;
       if (!currentDeck) {
         return { ok: false, kind: 'not_found', message: 'Deck not found' };
+      }
+      if (currentDeck.user_id !== ownerUserId && !(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
+        return { ok: false, kind: 'forbidden', message: 'Access denied. You do not own this deck.' };
       }
 
       const currentCards = (currentDeck.cards || []) as CardRow[];
@@ -188,7 +187,11 @@ export class DeckCardsService {
     | { ok: false; kind: 'server_error'; message: string }
   > {
     try {
-      if (!(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
+      const currentDeck = await this.repo.getDeckById(deckId);
+      if (!currentDeck) {
+        return { ok: false, kind: 'replace_failed', status: 400, message: 'Deck not found' };
+      }
+      if (currentDeck.user_id !== ownerUserId && !(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
         return { ok: false, kind: 'forbidden', message: 'Access denied. You do not own this deck.' };
       }
 
@@ -229,11 +232,15 @@ export class DeckCardsService {
     | { ok: false; kind: 'bad_request' | 'forbidden' | 'not_found' | 'server_error'; message: string }
   > {
     try {
-      if (!(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
+      let success: boolean;
+      const currentDeck = await this.repo.getDeckById(deckId);
+      if (!currentDeck) {
+        return { ok: false, kind: 'not_found', message: 'Deck not found' };
+      }
+      if (currentDeck.user_id !== ownerUserId && !(await this.repo.userOwnsDeck(deckId, ownerUserId))) {
         return { ok: false, kind: 'forbidden', message: 'Access denied. You do not own this deck.' };
       }
 
-      let success: boolean;
       if (cardType === 'all' && cardId === 'all') {
         success = await this.repo.removeAllCardsFromDeck(deckId);
       } else {

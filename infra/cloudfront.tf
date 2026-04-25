@@ -64,6 +64,29 @@ resource "aws_cloudfront_distribution" "card_images" {
     max_ttl     = 31536000 # 1 year maximum
   }
 
+  # Ordered behavior: UI image assets (icons, deck backgrounds) are served
+  # from the same S3 assets bucket. These files are synced by CI with immutable
+  # cache headers so repeated DBV/deck chrome image loads do not hit EC2.
+  ordered_cache_behavior {
+    path_pattern           = "/src/resources/images/*"
+    target_origin_id       = "s3-assets-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 86400    # 1 day default
+    max_ttl     = 31536000 # 1 year maximum
+  }
+
   # Phase 3 (see docs/current/API_V1_CATALOG_CACHING.md) — global-GET catalog.
   # These responses are identical for every client (no cookies, no Authorization
   # variance), so we cache at the edge for 5 minutes and let the origin's

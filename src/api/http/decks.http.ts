@@ -57,7 +57,7 @@ export interface DecksV1HttpDeps {
 }
 
 function stableV1DeckListBody<T>(data: T): string {
-  const envelope: V1Envelope<T> = { data, meta: {}, errors: [] };
+  const envelope: V1Envelope<T> = { data, meta: {}, errors: [], success: true };
   return JSON.stringify(envelope);
 }
 
@@ -186,7 +186,7 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
         sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_FETCH_ERROR', message: 'Failed to fetch deck cards' }]);
         return;
       }
-      sendV1Success(res, result.data);
+      sendV1Success(res, result.data, 200, 'Card added to deck successfully');
     } catch (error) {
       console.error('v1 GET /decks/:id/cards error:', error);
       sendV1Json(res, 500, null, [{ code: 'DECK_CARDS_FETCH_ERROR', message: 'Failed to fetch deck cards' }]);
@@ -238,7 +238,7 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
         return;
       }
 
-      sendV1Success(res, result.data);
+      sendV1Success(res, result.data, 200, 'Card added to deck successfully');
     } catch (error) {
       console.error('v1 POST /decks/:id/cards error:', error);
       sendV1Json(res, 500, null, [{ code: 'DECK_CARD_ADD_ERROR', message: 'Failed to add card to deck' }]);

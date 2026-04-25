@@ -88,6 +88,13 @@ COPY src/resources /app/src/resources
 COPY migrations /app/migrations
 ```
 
+Card art is excluded from the production Docker image by `.dockerignore`; UI
+images under `src/resources/images/` remain in the image for local server
+validation and fallback behavior. The deploy workflow separately syncs both
+`src/resources/cards/images/` and `src/resources/images/` to the S3 assets
+bucket with immutable cache headers so production image traffic can be served by
+CloudFront/S3 instead of EC2.
+
 ### Build Process Features
 
 #### No-Cache Build Strategy

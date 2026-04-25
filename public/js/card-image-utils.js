@@ -8,6 +8,21 @@
 // Card images are served from S3 via CloudFront in production and from local disk in dev.
 const _CARD_IMAGE_CDN_BASE = (typeof window !== 'undefined' && window.APP_CDN_BASE || '').replace(/\/$/, '');
 
+function splitCardImageUrl(fullPath) {
+    if (!fullPath || typeof fullPath !== 'string') return { prefix: '', pathname: fullPath };
+    if (fullPath.startsWith('/')) return { prefix: '', pathname: fullPath };
+    try {
+        const url = new URL(fullPath);
+        return { prefix: url.origin, pathname: url.pathname };
+    } catch (error) {
+        return { prefix: '', pathname: fullPath };
+    }
+}
+
+function joinCardImageUrl(prefix, pathname) {
+    return prefix ? prefix + pathname : pathname;
+}
+
 function mapDatabaseIdToDeckCardId(databaseId, cardType) {
     // This function is deprecated after UUID migration
     // We'll use a different approach based on card names or other attributes
@@ -49,26 +64,28 @@ function mapImagePathToActualFile(imagePath) {
 // e.g. .../missions/setname/card.webp → .../missions/thumb/setname/card.webp
 function toThumbnailPath(fullPath) {
     if (!fullPath || typeof fullPath !== 'string') return fullPath;
+    const parsed = splitCardImageUrl(fullPath);
     const base = '/src/resources/cards/images/characters/';
-    if (!fullPath.startsWith(base) || fullPath.includes('/thumb/')) return fullPath;
-    const afterChars = fullPath.slice(base.length);
+    if (!parsed.pathname.startsWith(base) || parsed.pathname.includes('/thumb/')) return fullPath;
+    const afterChars = parsed.pathname.slice(base.length);
     const lastSlash = afterChars.lastIndexOf('/');
     const dir = lastSlash >= 0 ? afterChars.slice(0, lastSlash + 1) : '';
     const filename = lastSlash >= 0 ? afterChars.slice(lastSlash + 1) : afterChars;
     const baseName = filename.replace(/\.[^.]+$/, '');
-    return base + 'thumb/' + dir + baseName + '.webp';
+    return joinCardImageUrl(parsed.prefix, base + 'thumb/' + dir + baseName + '.webp');
 }
 
 function toThumbnailPathForType(fullPath, type) {
     if (!fullPath || typeof fullPath !== 'string') return fullPath;
+    const parsed = splitCardImageUrl(fullPath);
     const base = '/src/resources/cards/images/' + type + '/';
-    if (!fullPath.startsWith(base) || fullPath.includes('/thumb/')) return fullPath;
-    const afterBase = fullPath.slice(base.length);
+    if (!parsed.pathname.startsWith(base) || parsed.pathname.includes('/thumb/')) return fullPath;
+    const afterBase = parsed.pathname.slice(base.length);
     const lastSlash = afterBase.lastIndexOf('/');
     const dir = lastSlash >= 0 ? afterBase.slice(0, lastSlash + 1) : '';
     const filename = lastSlash >= 0 ? afterBase.slice(lastSlash + 1) : afterBase;
     const baseName = filename.replace(/\.[^.]+$/, '');
-    return base + 'thumb/' + dir + baseName + '.webp';
+    return joinCardImageUrl(parsed.prefix, base + 'thumb/' + dir + baseName + '.webp');
 }
 
 // Ensure location alternate paths include locations/ folder (fixes /images/alternate/ -> /images/locations/alternate/)

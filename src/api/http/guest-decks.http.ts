@@ -126,6 +126,6 @@ export function registerGuestDecksV1HttpRoutes(router: Router, deps: GuestDecksV
       sendV1Json(res, result.status, null, [{ code: result.code, message: result.message }]);
       return;
     }
-    sendV1Success(res, result.data);
+    sendV1Success(res, result.data, 200, 'Deck deleted successfully');
   });
 }

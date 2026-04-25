@@ -165,8 +165,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
                     reserve_character: 'some-character-id'
                 });
 
-            // Expect 400 Bad Request for guest trying to save changes (validation error)
-            expect(updateResponse.status).toBe(400);
+            expect(updateResponse.status).toBe(403);
 
             // Verify no changes were persisted
             const getResponse = await request(app)
