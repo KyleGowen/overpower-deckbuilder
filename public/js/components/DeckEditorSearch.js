@@ -34,6 +34,9 @@
      *   - blurHideDelayMs: ms before hiding the dropdown after input blur (default 200 desktop,
      *     500 when (pointer: coarse) matches). MV / touch: use >= debounceMs so results are not
      *     hidden immediately after async search completes.
+     *   - enableMultiSelect: boolean — opt-in checkbox selection for mobile batch add.
+     *   - onBatchSelect: function(payload[]) invoked when the batch action is tapped.
+     *   - batchActionLabel: function(count) or string for the batch action label.
      *
      * Rendering contract:
      *   - The component writes item markup into `results` and toggles its display.
@@ -68,7 +71,11 @@
             this._timeout = null;
             this._blurHideTimeout = null;
             this._bound = false;
+            this._selectedResults = new Map();
             this.clearInputOnSelect = options.clearInputOnSelect !== false;
+            this.enableMultiSelect = options.enableMultiSelect === true;
+            this.onBatchSelect = typeof options.onBatchSelect === 'function' ? options.onBatchSelect : function() {};
+            this.batchActionLabel = options.batchActionLabel || ((count) => `Add selected (${count})`);
             const coarsePointer =
                 typeof global.matchMedia === 'function' && global.matchMedia('(pointer: coarse)').matches;
             if (options.blurHideDelayMs != null) {
@@ -85,6 +92,11 @@
                 if (sel && target.closest(sel)) return true;
             }
             return false;
+        }
+
+        _isFocusInsideRenderedResults() {
+            if (!this.resultsEl || !document.activeElement) return false;
+            return this.resultsEl.contains(document.activeElement);
         }
 
         mount() {
@@ -117,12 +129,123 @@
 
         clear() {
             if (this.input) this.input.value = '';
+            this._clearSelectedResults();
             this.hideResults();
         }
 
         dismissAfterSelection() {
             if (this.clearInputOnSelect && this.input) this.input.value = '';
+            this._clearSelectedResults();
             this.hideResults();
+        }
+
+        _clearSelectedResults() {
+            this._selectedResults.clear();
+            this._updateBatchAction();
+        }
+
+        _getBatchActionLabel(count) {
+            if (typeof this.batchActionLabel === 'function') {
+                return this.batchActionLabel(count);
+            }
+            return String(this.batchActionLabel).replace('{count}', String(count));
+        }
+
+        _getResultKey(card) {
+            return [
+                String(card.type || ''),
+                String(card.id || ''),
+                String(card.name || '')
+            ].join(':');
+        }
+
+        _payloadFromResultElement(el) {
+            const id = el.getAttribute('data-id');
+            const type = el.getAttribute('data-type');
+            const name = el.getAttribute('data-name');
+            const imagePathAttr = el.getAttribute('data-image-path') || null;
+            let missionBulkIds;
+            const bulkRaw = el.getAttribute('data-bulk-mission-ids');
+            if (bulkRaw) {
+                try {
+                    missionBulkIds = JSON.parse(decodeURIComponent(bulkRaw));
+                } catch {
+                    missionBulkIds = [];
+                }
+            }
+            const payload = {
+                id,
+                type,
+                name,
+                imagePath: imagePathAttr && imagePathAttr.length > 0 ? imagePathAttr : null
+            };
+            if (type === 'mission-set' && Array.isArray(missionBulkIds)) {
+                payload.missionBulkIds = missionBulkIds;
+                payload.missionSetName = name;
+            }
+            return payload;
+        }
+
+        _renderBatchAction() {
+            if (!this.enableMultiSelect) return '';
+            return `
+                <div class="deck-editor-search-batch-action" data-deck-search-batch-action>
+                    <button type="button"
+                            class="deck-editor-search-batch-add-btn"
+                            data-deck-search-batch-add
+                            disabled>
+                        ${this._getBatchActionLabel(0)}
+                    </button>
+                </div>
+            `;
+        }
+
+        _updateBatchAction() {
+            if (!this.resultsEl || !this.enableMultiSelect) return;
+            const count = this._selectedResults.size;
+            const action = this.resultsEl.querySelector('[data-deck-search-batch-action]');
+            const button = this.resultsEl.querySelector('[data-deck-search-batch-add]');
+            if (!action || !button) return;
+            action.classList.toggle('is-visible', count > 0);
+            button.disabled = count === 0;
+            button.textContent = this._getBatchActionLabel(count);
+        }
+
+        _handleResultCheckboxChange(input, row) {
+            const key = row.getAttribute('data-search-key');
+            if (!key) return;
+            if (input.checked) {
+                this._selectedResults.set(key, this._payloadFromResultElement(row));
+                row.classList.add('is-selected');
+            } else {
+                this._selectedResults.delete(key);
+                row.classList.remove('is-selected');
+            }
+            this._updateBatchAction();
+        }
+
+        _bindBatchAction() {
+            if (!this.resultsEl || !this.enableMultiSelect) return;
+            const button = this.resultsEl.querySelector('[data-deck-search-batch-add]');
+            if (!button) return;
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const payloads = Array.from(this._selectedResults.values());
+                if (payloads.length === 0) return;
+                button.disabled = true;
+                try {
+                    const result = await this.onBatchSelect(payloads);
+                    if (result !== false) {
+                        this.dismissAfterSelection();
+                    } else {
+                        button.disabled = false;
+                    }
+                } catch (err) {
+                    button.disabled = false;
+                    throw err;
+                }
+            });
         }
 
         _runDebouncedSearchFromInput() {
@@ -161,6 +284,9 @@
             if (this._blurHideTimeout) clearTimeout(this._blurHideTimeout);
             this._blurHideTimeout = setTimeout(() => {
                 this._blurHideTimeout = null;
+                if (this._isFocusInsideRenderedResults()) {
+                    return;
+                }
                 this.hideResults();
             }, this.blurHideDelayMs);
         };
@@ -178,11 +304,13 @@
         };
 
         hideResults = () => {
+            this._clearSelectedResults();
             if (this.resultsEl) this.resultsEl.style.display = 'none';
         };
 
         render(results) {
             if (!this.resultsEl) return;
+            this._clearSelectedResults();
             if (!Array.isArray(results) || results.length === 0) {
                 this.resultsEl.innerHTML = '<div class="deck-editor-search-result">No cards found</div>';
                 this.showResults();
@@ -204,8 +332,17 @@
                     card.type === 'mission-set' && Array.isArray(card.missionBulkIds)
                         ? ` data-bulk-mission-ids="${encodeURIComponent(JSON.stringify(card.missionBulkIds))}"`
                         : '';
+                const resultKey = this._getResultKey(card).replace(/"/g, '&quot;');
+                const checkbox = this.enableMultiSelect
+                    ? `
+                    <label class="deck-editor-search-result-check" aria-label="Select ${String(card.name || '').replace(/"/g, '&quot;')} for batch add">
+                        <input type="checkbox" data-deck-search-result-check>
+                        <span class="deck-editor-search-result-check-box" aria-hidden="true"></span>
+                    </label>`
+                    : '';
                 return `
                 <div class="deck-editor-search-result"
+                     data-search-key="${resultKey}"
                      data-id="${String(card.id || '').replace(/"/g, '&quot;')}"
                      data-type="${String(card.type || '').replace(/"/g, '&quot;')}"
                      data-name="${(card.name || '').replace(/"/g, '&quot;').replace(/'/g, "\\'")}"
@@ -216,40 +353,34 @@
                         <div class="deck-editor-search-result-type">${typeLine}</div>
                         ${card.character ? `<div class="deck-editor-search-result-character">${card.character}</div>` : ''}
                     </div>
+                    ${checkbox}
                 </div>
             `;
-            }).join('');
+            }).join('') + this._renderBatchAction();
 
             this.resultsEl.innerHTML = html;
             this.resultsEl.querySelectorAll('.deck-editor-search-result').forEach(el => {
-                el.addEventListener('click', () => {
-                    const id = el.getAttribute('data-id');
-                    const type = el.getAttribute('data-type');
-                    const name = el.getAttribute('data-name');
-                    const imagePathAttr = el.getAttribute('data-image-path') || null;
-                    let missionBulkIds;
-                    const bulkRaw = el.getAttribute('data-bulk-mission-ids');
-                    if (bulkRaw) {
-                        try {
-                            missionBulkIds = JSON.parse(decodeURIComponent(bulkRaw));
-                        } catch {
-                            missionBulkIds = [];
-                        }
+                const checkbox = el.querySelector('[data-deck-search-result-check]');
+                const checkboxControl = el.querySelector('.deck-editor-search-result-check');
+                if (checkboxControl && checkbox) {
+                    checkboxControl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                    checkbox.addEventListener('change', () => {
+                        this._handleResultCheckboxChange(checkbox, el);
+                    });
+                }
+                el.addEventListener('click', (e) => {
+                    if (e.target && e.target.closest && e.target.closest('.deck-editor-search-result-check')) {
+                        return;
                     }
-                    const payload = {
-                        id,
-                        type,
-                        name,
-                        imagePath: imagePathAttr && imagePathAttr.length > 0 ? imagePathAttr : null
-                    };
-                    if (type === 'mission-set' && Array.isArray(missionBulkIds)) {
-                        payload.missionBulkIds = missionBulkIds;
-                        payload.missionSetName = name;
-                    }
+                    const payload = this._payloadFromResultElement(el);
                     this.onSelect(payload);
                     this.dismissAfterSelection();
                 });
             });
+            this._bindBatchAction();
+            this._updateBatchAction();
             this.showResults();
         }
     }
