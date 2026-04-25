@@ -48,6 +48,17 @@ export function setStaticAssetCacheHeaders(res: Response, filePath: string): voi
   }
 }
 
+function cdnHostnameFromBaseUrl(cdnBaseUrl: string): string | null {
+  if (!cdnBaseUrl) {
+    return null;
+  }
+  try {
+    return new URL(cdnBaseUrl).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 export function buildStaticImageCdnRedirectUrl(originalUrl: string, cdnBaseUrl = process.env.CDN_BASE_URL || ''): string | null {
   const cdnBase = cdnBaseUrl.replace(/\/$/, '');
   if (!cdnBase || !originalUrl.startsWith('/src/resources/images/')) {
@@ -57,11 +68,14 @@ export function buildStaticImageCdnRedirectUrl(originalUrl: string, cdnBaseUrl =
 }
 
 /**
- * When CloudFront fetches the Node custom origin, `Host` is the origin FQDN
- * (e.g. origin.excelsior.cards; see `infra/cloudfront.tf`). A 302 to
- * `CDN_BASE_URL` + path points at the same CloudFront URL the viewer is
- * resolving, so the edge re-fetches the origin in a loop (ERR_TOO_MANY_REDIRECTS).
- * Fall through to `express.static` for those requests instead.
+ * When `Host` matches a case where a 302 to `CDN_BASE_URL` + path would be
+ * self-referential, the browser or edge sees ERR_TOO_MANY_REDIRECTS. Fall through
+ * to `express.static` instead:
+ *
+ * - CloudFront custom origin: `Host` is the origin FQDN (e.g. origin.excelsior.cards;
+ *   see `infra/cloudfront.tf`).
+ * - Same host as `CDN_BASE_URL` (e.g. d6vp4hrkfkf5v.cloudfront.net when the request
+ *   hits the app with that Host while `CDN_BASE_URL` points at the same distribution).
  *
  * `STATIC_IMAGE_CDN_REDIRECT=0` — emergency kill switch: never 302, always static.
  */
@@ -74,6 +88,10 @@ export function shouldSkipCdnImageRedirect(req: Request): boolean {
     return true;
   }
   if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') {
+    return true;
+  }
+  const cdnHost = cdnHostnameFromBaseUrl(process.env.CDN_BASE_URL || '');
+  if (cdnHost && h === cdnHost) {
     return true;
   }
   return false;
