@@ -305,6 +305,25 @@ class DeckBackgroundManager {
   }
 
   /**
+   * Resolves a stored/API background path to a full image URL.
+   * Same rules as applyBackground: when window.APP_CDN_BASE is set (from /js/app-config.js),
+   * use CDN; otherwise root-relative (Express static or dev).
+   * @param {string|null|undefined} imagePath
+   * @returns {string}
+   */
+  getBackgroundImageUrl(imagePath) {
+    if (imagePath == null || imagePath === '') {
+      return '';
+    }
+    const cdnBase = (typeof window !== 'undefined' && window.APP_CDN_BASE || '').replace(/\/$/, '');
+    const pathNorm = String(imagePath).replace(/^\//, '');
+    if (!pathNorm) {
+      return '';
+    }
+    return cdnBase ? `${cdnBase}/${pathNorm}` : `/${pathNorm}`;
+  }
+
+  /**
    * Create a background option element
    */
   createBackgroundOption(imagePath, label, isNone) {
@@ -328,7 +347,7 @@ class DeckBackgroundManager {
     } else {
       // Create image
       const img = document.createElement('img');
-      img.src = `/${imagePath}`;
+      img.src = this.getBackgroundImageUrl(imagePath);
       img.alt = label;
       img.onerror = () => {
         img.style.display = 'none';
@@ -410,15 +429,15 @@ class DeckBackgroundManager {
       // Apply background image to modal-content so it covers draw-hand-section and modal-body
       // Header and stats bar have solid backgrounds so they won't show the image
       if (modalContent) {
-        const cdnBase = (window.APP_CDN_BASE || '').replace(/\/$/, '');
-        const pathNorm = String(this.selectedBackground).replace(/^\//, '');
-        const imageUrl = pathNorm ? (cdnBase ? `${cdnBase}/${pathNorm}` : `/${pathNorm}`) : this.selectedBackground;
-        modalContent.style.backgroundImage = `url(${imageUrl})`;
-        modalContent.style.backgroundSize = 'cover';
-        modalContent.style.backgroundPosition = 'center';
-        modalContent.style.backgroundRepeat = 'no-repeat';
-        modalContent.style.backgroundAttachment = 'scroll'; // Changed from 'fixed' to 'scroll' for proper positioning
-        modalContent.style.backgroundColor = 'transparent'; // Ensure no background color conflicts
+        const imageUrl = this.getBackgroundImageUrl(this.selectedBackground);
+        if (imageUrl) {
+          modalContent.style.backgroundImage = `url(${imageUrl})`;
+          modalContent.style.backgroundSize = 'cover';
+          modalContent.style.backgroundPosition = 'center';
+          modalContent.style.backgroundRepeat = 'no-repeat';
+          modalContent.style.backgroundAttachment = 'scroll'; // Changed from 'fixed' to 'scroll' for proper positioning
+          modalContent.style.backgroundColor = 'transparent'; // Ensure no background color conflicts
+        }
       }
     } else {
       // Default black background

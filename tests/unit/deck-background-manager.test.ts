@@ -77,6 +77,7 @@ const mockDocument: any = {
   getCurrentUser: null,
   deckManager: null,
   authService: null,
+  APP_CDN_BASE: '',
   deckDetailPayload(response: { ok: boolean }, json: Record<string, unknown>) {
     if (!response?.ok || !json) return { ok: false, deck: null };
     const errs = json.errors as unknown[] | undefined;
@@ -101,6 +102,7 @@ describe('DeckBackgroundManager', () => {
     (global as any).window.currentUser = null;
     (global as any).window.deckManager = null;
     (global as any).window.authService = null;
+    (global as any).window.APP_CDN_BASE = '';
     // Clear global getCurrentUser function
     delete (global as any).getCurrentUser;
     
@@ -509,6 +511,39 @@ describe('DeckBackgroundManager', () => {
       // loadBackgrounds is NOT called when no user is found
       expect(manager.loadBackgrounds).not.toHaveBeenCalled();
       expect(manager.createBackgroundButton).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getBackgroundImageUrl', () => {
+    it('returns root-relative URL when APP_CDN_BASE is empty', () => {
+      expect(manager.getBackgroundImageUrl('src/resources/images/backgrounds/landscape/x.png')).toBe(
+        '/src/resources/images/backgrounds/landscape/x.png'
+      );
+    });
+
+    it('strips leading slash from path before joining', () => {
+      expect(manager.getBackgroundImageUrl('/src/resources/images/backgrounds/landscape/x.png')).toBe(
+        '/src/resources/images/backgrounds/landscape/x.png'
+      );
+    });
+
+    it('returns CDN URL when APP_CDN_BASE is set', () => {
+      (global as any).window.APP_CDN_BASE = 'https://d.example.cloudfront.net';
+      expect(manager.getBackgroundImageUrl('src/resources/images/backgrounds/landscape/x.png')).toBe(
+        'https://d.example.cloudfront.net/src/resources/images/backgrounds/landscape/x.png'
+      );
+    });
+
+    it('strips trailing slash from APP_CDN_BASE', () => {
+      (global as any).window.APP_CDN_BASE = 'https://d.example.cloudfront.net/';
+      expect(manager.getBackgroundImageUrl('src/resources/images/backgrounds/landscape/x.png')).toBe(
+        'https://d.example.cloudfront.net/src/resources/images/backgrounds/landscape/x.png'
+      );
+    });
+
+    it('returns empty string for null or empty path', () => {
+      expect(manager.getBackgroundImageUrl(null)).toBe('');
+      expect(manager.getBackgroundImageUrl('')).toBe('');
     });
   });
 
