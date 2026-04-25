@@ -5,6 +5,7 @@ import { createCorsMiddleware } from './corsAllowlist';
 import { createSecurityHeadersMiddleware } from './securityHeaders';
 import { createRequestLoggerMiddleware } from './logging';
 import { createCompressionMiddleware } from './compressionMiddleware';
+import { redirectStaticImagesToCdn, setStaticAssetCacheHeaders } from './staticAssetCache';
 
 /**
  * Applies the first block of app-wide middleware: request-id, structured
@@ -40,7 +41,11 @@ export function setupMiddleware(app: express.Application): void {
     next();
   });
 
-  app.use('/src/resources/cards/images', express.static(path.join(process.cwd(), 'src/resources/cards/images')));
+  app.use('/src/resources/cards/images', express.static(path.join(process.cwd(), 'src/resources/cards/images'), {
+    setHeaders: setStaticAssetCacheHeaders,
+  }));
 
-  app.use('/src/resources/images', express.static(path.join(process.cwd(), 'src/resources/images')));
+  app.use('/src/resources/images', redirectStaticImagesToCdn, express.static(path.join(process.cwd(), 'src/resources/images'), {
+    setHeaders: setStaticAssetCacheHeaders,
+  }));
 }

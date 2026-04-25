@@ -6,10 +6,12 @@ card payload without extra API calls.
 
 ## 1. Base URL
 
-- **Production:** `https://cdn.excelsior.cards` (set via `APP_CDN_BASE`).
-Resolves to the CloudFront distribution defined in
-`[infra/cloudfront.tf](../../infra/cloudfront.tf)`. Always HTTPS after
-Phase 0 (see `[OPS_TLS_AND_HTTPS.md](OPS_TLS_AND_HTTPS.md)`).
+- **Production app entry point:** the supported browser entry point is currently
+`http://excelsior.cards`. HTTPS references are leftovers from an incomplete
+rollout unless Kyle explicitly revives that work.
+- **Production image base:** `APP_CDN_BASE` is set from `/js/app-config.js`
+and currently points at the CloudFront distribution defined in
+`[infra/cloudfront.tf](../../infra/cloudfront.tf)`.
 - **Local dev:** images are served by the Express static middleware under
 `/src/resources/...`. `APP_CDN_BASE` is empty; clients should read
 `window.APP_CDN_BASE` or `/js/app-config.js` to pick the right base.
@@ -70,9 +72,12 @@ filename in the catalog payload.
 
 ## 5. Background images
 
-Background images are NOT gitignored. They ship with the code and are synced
-to S3 by the deploy workflow (`aws s3 sync src/resources/images/backgrounds/`).
-Paths are returned by `GET /api/v1/dbv/deck-backgrounds`.
+Background images and UI icons are NOT gitignored. They ship with the code and
+are synced to S3 by the deploy workflow (`aws s3 sync src/resources/images/`).
+Paths are returned by `GET /api/v1/dbv/deck-backgrounds` or referenced directly
+from frontend chrome. In production, origin requests for `/src/resources/images/*`
+redirect to `APP_CDN_BASE` so repeated icon/background loads do not consume EC2
+bandwidth.
 
 ## 6. Missing / 404
 

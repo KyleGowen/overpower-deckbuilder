@@ -2,7 +2,9 @@
 
 ## Overview
 
-Card images are offloaded from the EC2 instance to AWS. A private S3 bucket holds the canonical image files; a CloudFront distribution serves them globally from edge locations. The EC2 instance (`t2.micro`) handles only application traffic — API requests, page rendering, auth — and never serves a card image in production.
+Card images and UI image assets are offloaded from the EC2 instance to AWS. A private S3 bucket holds the canonical image files; a CloudFront distribution serves them globally from edge locations. The EC2 instance (`t2.micro`) handles only application traffic — API requests, page rendering, auth, and short-cache JS/CSS/template files — and should not serve image bytes in production.
+
+The current production site entry point is `http://excelsior.cards`. HTTPS references in older docs and Terraform comments are leftovers from an incomplete HTTPS rollout and should not be treated as the working production baseline unless Kyle explicitly revives that work.
 
 **Why this matters:**
 - The EC2 free-tier instance has a very limited CPU and network budget. Before this architecture, every image request competed with API requests on the same machine.
@@ -46,6 +48,7 @@ User Browser
 | Path pattern | Origin | Use |
 |---|---|---|
 | `/src/resources/cards/images/*` | S3 bucket | All card images (source + thumbnails) |
+| `/src/resources/images/*` | S3 bucket | UI images, stat/function icons, deck backgrounds |
 | `/*` (default) | EC2 instance | Everything else (API, pages, static JS/CSS) |
 
 ---
@@ -87,7 +90,7 @@ The bucket is **completely private**. Direct `https://` requests to the bucket U
 | Default certificate | `*.cloudfront.net` (free) | No custom domain needed for CDN |
 | Geo restriction | none | Serve worldwide |
 
-**Cache TTL for card images (`/src/resources/cards/images/*`):**
+**Cache TTL for image assets (`/src/resources/cards/images/*` and `/src/resources/images/*`):**
 
 | Setting | Value | Effect |
 |---|---|---|
@@ -139,11 +142,16 @@ SSM parameter path: `/{project_name}/{environment}/app/cdn_base_url`
 
 ### CI: `sync-images` job (`.github/workflows/deploy.yml`)
 
-On every push to `main` (after all quality gates pass), the pipeline syncs the local `src/resources/cards/images/` directory to S3:
+On every push to `main` (after all quality gates pass), the pipeline syncs the local card-art tree and UI image tree to S3:
 
 ```yaml
 aws s3 sync src/resources/cards/images/ \
   s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/cards/images/ \
+  --delete \
+  --cache-control "public, max-age=31536000, immutable"
+
+aws s3 sync src/resources/images/ \
+  s3://${{ secrets.AWS_S3_ASSETS_BUCKET }}/src/resources/images/ \
   --delete \
   --cache-control "public, max-age=31536000, immutable"
 ```
@@ -214,6 +222,15 @@ function getDeckCardImagePath(card) {
 
 Used for all card images on the deck selection screen tiles (characters, locations, missions).
 
+### `/src/resources/images/*` UI image redirects
+
+Some legacy HTML and JS still reference UI images such as stat icons and deck
+backgrounds with app-relative URLs (`/src/resources/images/...`). In production,
+`setupMiddleware()` redirects those requests to `CDN_BASE_URL + originalUrl`.
+CloudFront then serves `/src/resources/images/*` from S3. When `CDN_BASE_URL` is
+empty in local dev, the redirect is skipped and Express static serves the files
+from disk.
+
 ### `card-image-utils.js` (deck editor and card database)
 
 ```javascript
@@ -240,7 +257,7 @@ window.APP_CDN_BASE = "";
 
 All image path functions return relative paths like `/src/resources/cards/images/characters/spider_man.webp`. Express static middleware serves these directly from `src/resources/cards/images/` on disk. **Local development behavior is completely unchanged.**
 
-The `.dockerignore` excludes `src/resources/cards/images` from the Docker build context so production images stay small. **Deck backgrounds** live under `src/resources/images/backgrounds/landscape/` (not under `cards/images`) and are **included** in the image so the server can list deck backgrounds (`GET /api/v1/dbv/deck-backgrounds`) and validate paths on save. The `sync-images` job syncs `src/resources/images/backgrounds/` to S3 alongside card images. Card art and thumbnails remain CDN-only under `src/resources/cards/images/`. This only affects the Docker build — it does not affect `npm run dev` (which runs directly from the host filesystem).
+The `.dockerignore` excludes `src/resources/cards/images` from the Docker build context so production images stay small. **Deck backgrounds and UI icons** live under `src/resources/images/` (not under `cards/images`) and are **included** in the image so the server can list deck backgrounds (`GET /api/v1/dbv/deck-backgrounds`) and validate paths on save. The `sync-images` job syncs all of `src/resources/images/` to S3 alongside card images so production browsers fetch those immutable image assets from CloudFront instead of EC2. This only affects the Docker build — it does not affect `npm run dev` (which runs directly from the host filesystem).
 
 ---
 
@@ -264,6 +281,11 @@ aws cloudfront create-invalidation \
 aws cloudfront create-invalidation \
   --distribution-id "$DIST_ID" \
   --paths "/src/resources/cards/images/*"
+
+# Invalidate all UI image assets at once
+aws cloudfront create-invalidation \
+  --distribution-id "$DIST_ID" \
+  --paths "/src/resources/images/*"
 ```
 
 **Free tier:** 1,000 invalidation paths/month. Avoid `/*` (root wildcard) unless truly necessary.
@@ -319,7 +341,7 @@ Check order:
    ```
 2. Confirm the app container received the variable:
    ```bash
-   curl -s https://excelsior.cards/js/app-config.js
+  curl -s http://excelsior.cards/js/app-config.js
    # Should print: window.APP_CDN_BASE = "https://xxxx.cloudfront.net";
    # Empty string means CDN_BASE_URL was not injected → images fall back to EC2 (not S3)
    ```

@@ -21,20 +21,21 @@ class TemplateLoader {
         if (this.loaded) return;
 
         try {
-            // Load deck editor template
-            const deckEditorResponse = await fetch('/templates/deck-editor-template.html');
-            const deckEditorHtml = await deckEditorResponse.text();
-            this.templates.set('deck-editor', deckEditorHtml);
+            const templateRequests = [
+                ['deck-editor', '/templates/deck-editor-template.html'],
+                ['modals', '/templates/modal-templates.html'],
+                ['database-view', '/templates/database-view-complete.html'],
+            ];
 
-            // Load modal templates
-            const modalResponse = await fetch('/templates/modal-templates.html');
-            const modalHtml = await modalResponse.text();
-            this.templates.set('modals', modalHtml);
+            const templateEntries = await Promise.all(templateRequests.map(async ([name, url]) => {
+                const response = await fetch(url);
+                const html = await response.text();
+                return [name, html];
+            }));
 
-            // Load database view template (use complete version instead of template version)
-            const dbViewResponse = await fetch('/templates/database-view-complete.html');
-            const dbViewHtml = await dbViewResponse.text();
-            this.templates.set('database-view', dbViewHtml);
+            templateEntries.forEach(([name, html]) => {
+                this.templates.set(name, html);
+            });
 
             this.loaded = true;
         } catch (error) {

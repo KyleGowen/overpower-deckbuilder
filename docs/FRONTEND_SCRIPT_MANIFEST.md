@@ -50,7 +50,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/layout-drag-drop-functions.js
 - /js/validation-calculation-functions.js
 - /js/remaining-utility-functions.js
-- /js/template-loader.js
+- /js/template-loader.js (defer; fetches deck editor, modal, and DBV templates in parallel after DOMContentLoaded, then re-inits DBV template components)
 - /js/event-binder.js
 - /js/filter-functions.js
 - /js/card-filter-toggles.js

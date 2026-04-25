@@ -1,5 +1,6 @@
 import express from 'express';
 import type { StaticHealthRoutesDeps } from './types';
+import { setStaticAssetCacheHeaders } from '../middleware/staticAssetCache';
 
 /**
  * Phase 1 split the single `/health` into:
@@ -159,17 +160,15 @@ async function buildDeepPayload(deps: StaticHealthRoutesDeps, startTime: number)
 }
 
 export function registerStaticAndHealthRoutes(app: express.Application, deps: StaticHealthRoutesDeps): void {
-  app.use('/public', express.static('public'));
-  app.use(express.static('public', {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.js')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-      }
-    },
+  app.use('/public', express.static('public', {
+    setHeaders: setStaticAssetCacheHeaders,
   }));
-  app.use('/src/resources', express.static('src/resources'));
+  app.use(express.static('public', {
+    setHeaders: setStaticAssetCacheHeaders,
+  }));
+  app.use('/src/resources', express.static('src/resources', {
+    setHeaders: setStaticAssetCacheHeaders,
+  }));
 
   const splitDisabled = process.env.DISABLE_HEALTH_SPLIT === '1';
 
