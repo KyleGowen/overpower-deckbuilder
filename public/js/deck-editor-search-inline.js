@@ -35,6 +35,11 @@ function initializeDeckEditorSearch() {
             blurHideDelayMs: useMobile ? 600 : undefined,
             clickInsideRootSelectors: clickRoots,
             searchService: new window.CardSearchService({ maxResults: 72 }),
+            enableMultiSelect: useMobile,
+            batchActionLabel: (count) => `Add selected (${count})`,
+            onBatchSelect: useMobile && typeof addSelectedCardsToDeckFromSearch === 'function'
+                ? (payloads) => addSelectedCardsToDeckFromSearch(payloads)
+                : undefined,
             onSelect: (payload) => {
                 const t = payload && payload.type;
                 if (
@@ -466,6 +471,223 @@ function syncGuestCurrentDeckIdFromUrl() {
     }
 }
 
+function dismissDeckEditorSearchUi() {
+    if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.dismissAfterSelection === 'function') {
+        window.deckEditorSearchComponent.dismissAfterSelection();
+    } else {
+        const searchInput = document.getElementById('deckEditorSearchInput');
+        const mIn = document.getElementById('devMobileDeckSearchInput');
+        if (searchInput) searchInput.value = '';
+        if (mIn) mIn.value = '';
+        hideDeckEditorSearchResults();
+    }
+}
+
+function resolveDeckEditorSearchCardName(cardId, cardName) {
+    if (cardName) {
+        return cardName;
+    }
+    const cardData = window.availableCardsMap && window.availableCardsMap.get(cardId);
+    return cardData ? cardData.card_name || cardData.name || 'Unknown Card' : 'Unknown Card';
+}
+
+function getDeckEditorSearchCardsUrl() {
+    const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
+    return isGuestDeck
+        ? `/api/v1/guest/decks/${currentDeckId}/cards`
+        : `/api/v1/decks/${currentDeckId}/cards`;
+}
+
+function notifyDeckEditorSearchError(message) {
+    if (typeof showNotification === 'function') {
+        showNotification(message, 'error');
+    } else {
+        showToast(message, 'error');
+    }
+}
+
+function createDeckEditorSearchAddState() {
+    const state = {
+        characterIds: new Set(),
+        hasLocation: false
+    };
+    if (!Array.isArray(window.deckEditorCards)) {
+        return state;
+    }
+    window.deckEditorCards.forEach((card) => {
+        if (!card || (card.quantity ?? 1) <= 0) {
+            return;
+        }
+        const cardId = String(card.cardId ?? '').trim();
+        if (card.type === 'character' && cardId) {
+            state.characterIds.add(cardId);
+        }
+        if (card.type === 'location') {
+            state.hasLocation = true;
+        }
+    });
+    return state;
+}
+
+function getDeckEditorSearchBlockMessage(cardId, cardType, addState) {
+    const normId = String(cardId ?? '').trim();
+    if (cardType === 'character' && addState.characterIds.has(normId)) {
+        return 'This character is already in your deck';
+    }
+    if (cardType === 'location' && addState.hasLocation) {
+        return 'Cannot add more than 1 location to a deck';
+    }
+    return null;
+}
+
+function markDeckEditorSearchAddState(cardId, cardType, addState) {
+    const normId = String(cardId ?? '').trim();
+    if (cardType === 'character' && normId) {
+        addState.characterIds.add(normId);
+    }
+    if (cardType === 'location') {
+        addState.hasLocation = true;
+    }
+}
+
+async function postDeckEditorSearchCard(cardsUrl, cardId, cardType) {
+    return fetch(cardsUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            cardId: cardId,
+            cardType: cardType,
+            quantity: 1
+        })
+    });
+}
+
+async function parseDeckEditorSearchAddError(response) {
+    try {
+        const error = await response.json();
+        return (
+            (error.errors && error.errors[0] && error.errors[0].message) ||
+            error.error ||
+            'Failed to add card to deck'
+        );
+    } catch {
+        return 'Failed to add card to deck';
+    }
+}
+
+async function addSelectedCardsToDeckFromSearch(payloads) {
+    syncGuestCurrentDeckIdFromUrl();
+    const selected = Array.isArray(payloads) ? payloads.filter(Boolean) : [];
+    if (selected.length === 0) {
+        showToast('Select at least one card', 'info');
+        return false;
+    }
+
+    const normalCards = selected.filter((payload) => payload.type !== 'mission-set');
+    const missionSets = selected.filter((payload) => payload.type === 'mission-set');
+    let ok = 0;
+    let bad = 0;
+
+    for (let i = 0; i < missionSets.length; i++) {
+        const payload = missionSets[i];
+        if (payload.missionBulkIds && payload.missionBulkIds.length > 0) {
+            await addMissionSetToDeckFromSearch(payload.missionSetName || payload.name, payload.missionBulkIds);
+            ok++;
+        } else {
+            bad++;
+            showToast('No missions in this set', 'info');
+        }
+    }
+
+    if (normalCards.length === 0) {
+        return ok > 0;
+    }
+
+    const addState = createDeckEditorSearchAddState();
+
+    if (!currentDeckId) {
+        if (typeof addCardToEditor !== 'function') {
+            showToast('addCardToEditor function not found', 'error');
+            return false;
+        }
+        for (let i = 0; i < normalCards.length; i++) {
+            const payload = normalCards[i];
+            const blockMessage = getDeckEditorSearchBlockMessage(payload.id, payload.type, addState);
+            if (blockMessage) {
+                bad++;
+                notifyDeckEditorSearchError(blockMessage);
+                continue;
+            }
+            try {
+                await addCardToEditor(payload.type, payload.id, resolveDeckEditorSearchCardName(payload.id, payload.name));
+                markDeckEditorSearchAddState(payload.id, payload.type, addState);
+                ok++;
+            } catch (error) {
+                bad++;
+                console.error('Batch addCardToEditor failed:', error);
+                showToast('Failed to add card to deck: ' + error.message, 'error');
+            }
+        }
+        if (ok > 0) {
+            dismissDeckEditorSearchUi();
+        }
+        if (ok > 0 && bad === 0) {
+            showToast(`Added ${ok} card(s) to deck!`, 'success');
+        } else if (ok > 0) {
+            showToast(`Added ${ok} card(s); ${bad} failed`, 'error');
+        }
+        return ok > 0;
+    }
+
+    const cardsUrl = getDeckEditorSearchCardsUrl();
+    for (let i = 0; i < normalCards.length; i++) {
+        const payload = normalCards[i];
+        const blockMessage = getDeckEditorSearchBlockMessage(payload.id, payload.type, addState);
+        if (blockMessage) {
+            bad++;
+            notifyDeckEditorSearchError(blockMessage);
+            continue;
+        }
+        try {
+            const response = await postDeckEditorSearchCard(cardsUrl, payload.id, payload.type);
+            if (response.ok) {
+                markDeckEditorSearchAddState(payload.id, payload.type, addState);
+                ok++;
+            } else {
+                bad++;
+                showToast(await parseDeckEditorSearchAddError(response), 'error');
+            }
+        } catch (error) {
+            bad++;
+            console.error('Batch add card to deck failed:', error);
+            showToast('Failed to add card to deck', 'error');
+        }
+    }
+
+    if (ok > 0) {
+        await loadDeckForEditing(currentDeckId);
+        setTimeout(() => {
+            if (typeof forceCharacterSingleColumnLayout === 'function') {
+                forceCharacterSingleColumnLayout();
+            }
+        }, 100);
+        dismissDeckEditorSearchUi();
+    }
+
+    if (ok > 0 && bad === 0) {
+        showToast(`Added ${ok} card(s) to deck!`, 'success');
+    } else if (ok > 0) {
+        showToast(`Added ${ok} card(s); ${bad} failed`, 'error');
+    } else if (bad > 0) {
+        showToast('Could not add selected cards', 'error');
+    }
+
+    return ok > 0;
+}
+
 // Add card to deck from search
 async function addCardToDeckFromSearch(cardId, cardType, cardName) {
     // Read-only mode removed - now handled by backend flag
@@ -477,14 +699,7 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         // Adding card to new deck via addCardToEditor
         
         // Use the card name passed as parameter, or fallback to availableCardsMap
-        let finalCardName = cardName;
-        if (!finalCardName && availableCardsMap) {
-            const cardData = window.availableCardsMap.get(cardId);
-            finalCardName = cardData ? cardData.name : 'Unknown Card';
-        }
-        if (!finalCardName) {
-            finalCardName = 'Unknown Card';
-        }
+        const finalCardName = resolveDeckEditorSearchCardName(cardId, cardName);
         
         // Check if addCardToEditor function exists
         if (typeof addCardToEditor === 'function') {
@@ -501,82 +716,24 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
             return;
         }
         
-        if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.dismissAfterSelection === 'function') {
-            window.deckEditorSearchComponent.dismissAfterSelection();
-        } else {
-            const searchInput = document.getElementById('deckEditorSearchInput');
-            const mIn = document.getElementById('devMobileDeckSearchInput');
-            if (searchInput) searchInput.value = '';
-            if (mIn) mIn.value = '';
-            hideDeckEditorSearchResults();
-        }
+        dismissDeckEditorSearchUi();
 
         // Show success message
         showToast('Card added to deck!', 'success');
         return;
     }
 
-    const normDeckCardId = (id) => String(id ?? '').trim();
-    if (cardType === 'character' && Array.isArray(window.deckEditorCards)) {
-        const dup = window.deckEditorCards.some(
-            c => c.type === 'character' &&
-                normDeckCardId(c.cardId) === normDeckCardId(cardId) &&
-                (c.quantity ?? 1) > 0
-        );
-        if (dup) {
-            if (typeof showNotification === 'function') {
-                showNotification('This character is already in your deck', 'error');
-            } else {
-                showToast('This character is already in your deck', 'error');
-            }
-            return;
-        }
-    }
-    if (cardType === 'location' && Array.isArray(window.deckEditorCards)) {
-        const hasLoc = window.deckEditorCards.some(
-            c => c.type === 'location' && (c.quantity ?? 1) > 0
-        );
-        if (hasLoc) {
-            if (typeof showNotification === 'function') {
-                showNotification('Cannot add more than 1 location to a deck', 'error');
-            } else {
-                showToast('Cannot add more than 1 location to a deck', 'error');
-            }
-            return;
-        }
+    const blockMessage = getDeckEditorSearchBlockMessage(cardId, cardType, createDeckEditorSearchAddState());
+    if (blockMessage) {
+        notifyDeckEditorSearchError(blockMessage);
+        return;
     }
 
     try {
-        const requestBody = {
-            cardId: cardId,
-            cardType: cardType,
-            quantity: 1
-        };
-
-        const isGuestDeck = typeof currentDeckId === 'string' && currentDeckId.startsWith('guest_');
-        const cardsUrl = isGuestDeck
-            ? `/api/v1/guest/decks/${currentDeckId}/cards`
-            : `/api/v1/decks/${currentDeckId}/cards`;
-
-        const response = await fetch(cardsUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestBody)
-        });
+        const response = await postDeckEditorSearchCard(getDeckEditorSearchCardsUrl(), cardId, cardType);
 
         if (response.ok) {
-            if (window.deckEditorSearchComponent && typeof window.deckEditorSearchComponent.dismissAfterSelection === 'function') {
-                window.deckEditorSearchComponent.dismissAfterSelection();
-            } else {
-                const searchInput = document.getElementById('deckEditorSearchInput');
-                const mIn = document.getElementById('devMobileDeckSearchInput');
-                if (searchInput) searchInput.value = '';
-                if (mIn) mIn.value = '';
-                hideDeckEditorSearchResults();
-            }
+            dismissDeckEditorSearchUi();
 
             // Reload deck cards
             await loadDeckForEditing(currentDeckId);
@@ -590,9 +747,7 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
             showToast('Card added to deck!', 'success');
         } else {
             console.error('🔍 API Error Response:', response.status, response.statusText);
-            const error = await response.json();
-            console.error('🔍 API Error Details:', error);
-            showToast(error.error || 'Failed to add card to deck', 'error');
+            showToast(await parseDeckEditorSearchAddError(response), 'error');
         }
     } catch (error) {
         console.error('Error adding card to deck:', error);
@@ -610,3 +765,4 @@ window.showDeckEditorSearchResults = showDeckEditorSearchResults;
 window.hideDeckEditorSearchResults = hideDeckEditorSearchResults;
 window.addCardToDeckFromSearch = addCardToDeckFromSearch;
 window.addMissionSetToDeckFromSearch = addMissionSetToDeckFromSearch;
+window.addSelectedCardsToDeckFromSearch = addSelectedCardsToDeckFromSearch;
