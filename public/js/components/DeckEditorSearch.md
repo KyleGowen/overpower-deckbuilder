@@ -46,6 +46,10 @@ API
   - `maxResults` (number, default 20): maximum results shown
   - `searchService` (object, optional): must expose `search(term:string): Promise<Result[]>`
   - `clickInsideRootSelectors` (string[], optional): CSS selectors for click-outside detection; clicks inside any match keep the dropdown open. Default `['.deck-editor-search-container']`. Use `['.collection-search-container']` on the Collection tab and `['.dev-mobile-deck-search-container']` for DEV in MV (that class should wrap the MV search input + results).
+  - `clearInputOnSelect` (boolean, default true): when false, selection hides results but keeps the query in the input.
+  - `enableMultiSelect` (boolean, default false): renders a right-side checkbox on each result plus a batch action.
+  - `onBatchSelect` (function, optional): called with an array of selected result payloads when the batch action is tapped.
+  - `batchActionLabel` (function or string, optional): label for the batch button; default is `Add selected (N)`.
 
 - Methods
   - `mount()`: attach listeners (idempotent)
@@ -60,7 +64,11 @@ type Result = {
   name: string;
   type: string;          // 'character' | 'special' | 'mission' | ...
   image: string;         // URL path
+  imagePath?: string;    // full-size URL path when available
+  typeCaption?: string;  // optional display subtitle override
   character?: string;    // optional character association
+  missionBulkIds?: string[];
+  missionSetName?: string;
 }
 ```
 
@@ -70,6 +78,7 @@ Styling and positioning
   - Parents must not clip:
     - `.card-selector-pane { overflow: visible !important; }`
     - `.card-selector-pane .deck-editor-search-container { overflow: visible !important; }`
+- Mobile DEV batch add uses `.deck-editor-search-result-check`, `.deck-editor-search-batch-action`, and `.deck-editor-search-batch-add-btn`. Checkbox clicks do not bubble to row selection; tapping the rest of the row still calls `onSelect`.
 - See `public/css/deck-editor-search.css` for canonical rules and `tests/unit/deck-editor-search-css-rules.test.ts` for safeguards.
 
 Service behavior

@@ -408,6 +408,90 @@
     overflow-y: auto;
 }
 
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-results .deck-editor-search-result {
+    gap: 0;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-search-results .deck-editor-search-result.is-selected {
+    background: rgba(78, 205, 196, 0.16);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    margin-left: 4px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check-box {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(78, 205, 196, 0.75);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    position: relative;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check input:focus-visible + .deck-editor-search-result-check-box {
+    outline: 2px solid rgba(78, 205, 196, 0.55);
+    outline-offset: 3px;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check input:checked + .deck-editor-search-result-check-box {
+    background: linear-gradient(135deg, #4ecdc4, #2cb1a6);
+    border-color: #4ecdc4;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-result-check input:checked + .deck-editor-search-result-check-box::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 11px;
+    border: solid #0b1418;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-batch-action {
+    position: sticky;
+    bottom: 0;
+    padding: 8px;
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.72), rgba(20, 20, 20, 0.98) 42%);
+    border-top: 1px solid rgba(78, 205, 196, 0.24);
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-batch-add-btn {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(78, 205, 196, 0.5);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4ecdc4, #2cb1a6);
+    color: #0b1418;
+    font-size: var(--font-sm);
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.layout-mobile #deckEditorModal .deck-editor-search-batch-add-btn:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
 /* Card list — same outer chrome as DTV .deck-type-section */
 .layout-mobile #deckEditorModal .deck-pane {
     border: 1px solid rgba(255, 255, 255, 0.1);

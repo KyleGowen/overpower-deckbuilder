@@ -558,6 +558,36 @@ describe('DeckEditorSearch Component', () => {
 
             expect(mockResults.style.display).toBe('none');
         });
+
+        it('should keep results open when blur moves focus into a multi-select checkbox', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                enableMultiSelect: true
+            });
+
+            component.mount();
+            component.render([
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                }
+            ]);
+            mockResults.style.display = 'block';
+
+            mockInput.focus();
+            mockInput.dispatchEvent(new Event('blur'));
+            const checkbox = mockResults.querySelector('[data-deck-search-result-check]') as HTMLInputElement;
+            checkbox.focus();
+
+            jest.advanceTimersByTime(200);
+
+            expect(document.activeElement).toBe(checkbox);
+            expect(mockResults.style.display).toBe('block');
+        });
     });
 
     describe('_handleDocClick()', () => {
@@ -820,6 +850,160 @@ describe('DeckEditorSearch Component', () => {
 
             expect(mockInput.value).toBe('zeus');
             expect(mockResults.style.display).toBe('none');
+        });
+
+        it('should toggle checkbox selection without calling onSelect when multi-select is enabled', () => {
+            const results = [
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                }
+            ];
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                enableMultiSelect: true
+            });
+
+            component.render(results);
+
+            const row = mockResults.querySelector('.deck-editor-search-result');
+            const checkbox = mockResults.querySelector('[data-deck-search-result-check]') as HTMLInputElement;
+            expect(row).toBeTruthy();
+            expect(checkbox).toBeTruthy();
+
+            checkbox.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+
+            expect(mockOnSelect).not.toHaveBeenCalled();
+            expect(row!.classList.contains('is-selected')).toBe(true);
+        });
+
+        it('should keep row click single-select active when multi-select is enabled', () => {
+            const results = [
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                }
+            ];
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                enableMultiSelect: true
+            });
+
+            component.render(results);
+
+            const row = mockResults.querySelector('.deck-editor-search-result');
+            row!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+            expect(mockOnSelect).toHaveBeenCalledWith({
+                id: '1',
+                type: 'character',
+                name: 'Test Card',
+                imagePath: '/test.jpg'
+            });
+        });
+
+        it('should update batch button count and pass selected payloads to onBatchSelect', async () => {
+            const onBatchSelect = jest.fn().mockResolvedValue(true);
+            const results = [
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                },
+                {
+                    id: '2',
+                    name: 'Test Special',
+                    type: 'special',
+                    image: '/special.jpg',
+                    character: 'Test Character'
+                }
+            ];
+
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                enableMultiSelect: true,
+                onBatchSelect
+            });
+
+            component.render(results);
+
+            const checkbox = mockResults.querySelector('[data-deck-search-result-check]') as HTMLInputElement;
+            const button = mockResults.querySelector('[data-deck-search-batch-add]') as HTMLButtonElement;
+            expect(button.disabled).toBe(true);
+            expect(button.textContent).toBe('Add selected (0)');
+
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+
+            expect(button.disabled).toBe(false);
+            expect(button.textContent).toBe('Add selected (1)');
+
+            button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            await Promise.resolve();
+
+            expect(onBatchSelect).toHaveBeenCalledWith([
+                {
+                    id: '1',
+                    type: 'character',
+                    name: 'Test Card',
+                    imagePath: '/test.jpg'
+                }
+            ]);
+            expect(mockResults.style.display).toBe('none');
+        });
+
+        it('should clear selected rows when results are re-rendered', () => {
+            component = new DeckEditorSearch({
+                input: mockInput,
+                results: mockResults,
+                onSelect: mockOnSelect,
+                enableMultiSelect: true
+            });
+
+            component.render([
+                {
+                    id: '1',
+                    name: 'Test Card',
+                    type: 'character',
+                    image: '/test.jpg'
+                }
+            ]);
+
+            let checkbox = mockResults.querySelector('[data-deck-search-result-check]') as HTMLInputElement;
+            let button = mockResults.querySelector('[data-deck-search-batch-add]') as HTMLButtonElement;
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            expect(button.disabled).toBe(false);
+
+            component.render([
+                {
+                    id: '2',
+                    name: 'Other Card',
+                    type: 'special',
+                    image: '/special.jpg'
+                }
+            ]);
+
+            checkbox = mockResults.querySelector('[data-deck-search-result-check]') as HTMLInputElement;
+            button = mockResults.querySelector('[data-deck-search-batch-add]') as HTMLButtonElement;
+            expect(checkbox.checked).toBe(false);
+            expect(button.disabled).toBe(true);
+            expect(button.textContent).toBe('Add selected (0)');
         });
 
         it('should handle null imagePath', () => {

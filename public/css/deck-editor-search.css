@@ -40,4 +40,17 @@
     margin-right: 10px;
 }
 
+.deck-editor-search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.deck-editor-search-batch-action {
+    display: none;
+}
+
+.deck-editor-search-batch-action.is-visible {
+    display: block;
+}
+
 
