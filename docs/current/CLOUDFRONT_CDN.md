@@ -231,6 +231,15 @@ CloudFront then serves `/src/resources/images/*` from S3. When `CDN_BASE_URL` is
 empty in local dev, the redirect is skipped and Express static serves the files
 from disk.
 
+**Custom origin and redirect loops:** CloudFront fetches the Node app using the
+custom origin hostname (`origin.<domain>`; see `infra/cloudfront.tf`). If the
+app responded with `302` to the same CloudFront URL the viewer already requested,
+the edge could refetch the origin in a loop (`ERR_TOO_MANY_REDIRECTS`). For that
+reason, `redirectStaticImagesToCdn` does **not** emit a CDN redirect when
+`Host` is an `origin.*` hostname, `localhost` / loopback, or when
+`STATIC_IMAGE_CDN_REDIRECT=0` (kill switch). Those requests are served 200 from
+`express.static` on EC2 so CloudFront can cache the object normally.
+
 ### `card-image-utils.js` (deck editor and card database)
 
 ```javascript

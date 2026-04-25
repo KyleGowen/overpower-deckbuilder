@@ -8,7 +8,7 @@
 - **[`logging.ts`](logging.ts)** — `createRequestLoggerMiddleware` (pino + pino-http) emits one JSON line per request with `request_id`; redacts `Authorization`, cookies, `password`, `idToken`. Kill switch `DISABLE_PINO=1`. See [`docs/current/API_V1_LOGGING.md`](../../docs/current/API_V1_LOGGING.md).
 - **[`corsAllowlist.ts`](corsAllowlist.ts)** — `createCorsMiddleware` reads `ALLOWED_ORIGINS` env var (comma-separated). Kill switch `DISABLE_CORS=1`. See [`docs/current/API_V1_CORS.md`](../../docs/current/API_V1_CORS.md).
 - **[`securityHeaders.ts`](securityHeaders.ts)** — `createSecurityHeadersMiddleware` applies helmet: HSTS (1yr, includeSubDomains), nosniff, referrer-policy, X-Frame-Options: DENY. CSP intentionally disabled. Kill switch `DISABLE_HELMET=1`. See [`docs/current/API_V1_SECURITY_HEADERS.md`](../../docs/current/API_V1_SECURITY_HEADERS.md).
-- **[`staticAssetCache.ts`](staticAssetCache.ts)** — shared cache headers for Express static mounts. App-shell HTML stays `no-store`; JS/CSS/templates/resource images get a short public cache. In production, `/src/resources/images/*` redirects to `CDN_BASE_URL + originalUrl` so UI icons/backgrounds are served from CloudFront/S3 when the CDN base is configured.
+- **[`staticAssetCache.ts`](staticAssetCache.ts)** — shared cache headers for Express static mounts. App-shell HTML stays `no-store`; JS/CSS/templates/resource images get a short public cache. In production, `/src/resources/images/*` may redirect to `CDN_BASE_URL + originalUrl` unless `shouldSkipCdnImageRedirect` applies (`Host` is `origin.*` for CloudFront custom origin, localhost, or `STATIC_IMAGE_CDN_REDIRECT=0`), in which case `express.static` serves 200 to avoid redirect loops to the same CloudFront URL.
 
 ## Other middleware
 
