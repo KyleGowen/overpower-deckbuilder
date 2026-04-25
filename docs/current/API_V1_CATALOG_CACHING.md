@@ -67,17 +67,24 @@ to return only deltas when row-level versioning is added.
 [`infra/cloudfront.tf`](../../infra/cloudfront.tf) defines two ordered cache
 behaviors:
 
-- `/api/v1/catalog/*` — caches GET and HEAD, no cookies, forwards `If-None-Match`
-  and `If-Modified-Since`, TTLs `default_ttl=300` / `max_ttl=3600`.
+- `/api/v1/catalog/*` — GET and HEAD, TTLs `default_ttl=300` / `max_ttl=3600`.
 - `/api/v1/dbv/sets` — same.
 
-Both behaviors inherit the Phase 0 `viewer_protocol_policy = "redirect-to-https"`
-(so the edge only serves these over TLS) and enable `compress = true` at the
-edge as a backstop when the origin's own `compression` middleware is bypassed.
+Both forward **`If-None-Match`**, **`If-Modified-Since`**, and **`Authorization`**
+(Phase 2 Bearer). Cookie forwarding uses a **whitelist of `sessionId` only**,
+because the origin runs [`createV1SessionOrBearerAuthMiddleware`](../../src/api/http/middleware/v1SessionOrBearerAuth.ts)
+on these routes. Without that cookie/header at the app, clients get **401**
+even though the payload is “global” catalog JSON.
 
-Authorization is NOT forwarded to the origin on these paths. The responses
-are global-GET (same for every client) so this is safe and guarantees a very
-high cache-hit ratio.
+**Implication:** The edge **cache key** can vary by `sessionId` and Bearer
+token, so a single shared cached object for the whole world (what Phase 3
+text originally assumed) does **not** apply while catalog GETs stay
+auth-gated. Hit ratio is still high for repeat requests from the same
+authenticated session. To restore one global object per URL, the product would
+need unauthenticated catalog GETs (a separate API change).
+
+Both behaviors inherit the Phase 0 `viewer_protocol_policy = "redirect-to-https"`
+and `compress = true` at the edge.
 
 ## 6. Bumping catalog_data_version
 

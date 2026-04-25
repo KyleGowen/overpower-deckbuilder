@@ -36,6 +36,7 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
   - Default behavior → EC2 via `origin.excelsior.cards` (all app traffic)
   - Ordered behavior `/src/resources/cards/images/*` → S3 bucket (card images)
   - Ordered behavior `/src/resources/images/*` → S3 bucket (UI icons and deck backgrounds)
+  - Ordered behaviors `/api/v1/catalog/*` and `/api/v1/dbv/sets` → EC2 with **whitelist cookie `sessionId`** and **`Authorization`** forwarded; `cookies=none` here caused **401** on catalog GETs (origin uses session-or-Bearer auth).
 - **CloudFront** is also still reachable at its auto-generated `*.cloudfront.net` domain. The server injects this as `CDN_BASE_URL` (SSM parameter) at container startup → `window.APP_CDN_BASE` in the frontend. After Phase 0 this is optional — the apex alias also covers card image paths.
 - **S3 bucket** (`excelsior-cards-assets-dev`) is fully private; only CloudFront can read from it via OAC (Origin Access Control). Direct public HTTP access returns 403.
 - **OAC not OAI** — always use `aws_cloudfront_origin_access_control` for new S3 origins. OAI is legacy and deprecated.

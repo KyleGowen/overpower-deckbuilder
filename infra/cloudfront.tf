@@ -87,11 +87,10 @@ resource "aws_cloudfront_distribution" "card_images" {
     max_ttl     = 31536000 # 1 year maximum
   }
 
-  # Phase 3 (see docs/current/API_V1_CATALOG_CACHING.md) — global-GET catalog.
-  # These responses are identical for every client (no cookies, no Authorization
-  # variance), so we cache at the edge for 5 minutes and let the origin's
-  # Cache-Control / ETag drive revalidation. 304s on conditional GETs are also
-  # cached.
+  # Phase 3 (see docs/current/API_V1_CATALOG_CACHING.md) — catalog GET cache at edge.
+  # Origin enforces createV1SessionOrBearerAuthMiddleware: sessionId cookie and/or
+  # Authorization Bearer. Must forward those or CloudFront strips them → 401.
+  # Whitelist (not "all") keeps cache key noise lower than default behavior.
   ordered_cache_behavior {
     path_pattern           = "/api/v1/catalog/*"
     target_origin_id       = "ec2-origin"
@@ -102,9 +101,10 @@ resource "aws_cloudfront_distribution" "card_images" {
 
     forwarded_values {
       query_string = true
-      headers      = ["If-None-Match", "If-Modified-Since"]
+      headers      = ["If-None-Match", "If-Modified-Since", "Authorization"]
       cookies {
-        forward = "none"
+        forward           = "whitelist"
+        whitelisted_names = ["sessionId"]
       }
     }
 
@@ -123,9 +123,10 @@ resource "aws_cloudfront_distribution" "card_images" {
 
     forwarded_values {
       query_string = true
-      headers      = ["If-None-Match", "If-Modified-Since"]
+      headers      = ["If-None-Match", "If-Modified-Since", "Authorization"]
       cookies {
-        forward = "none"
+        forward           = "whitelist"
+        whitelisted_names = ["sessionId"]
       }
     }
 
