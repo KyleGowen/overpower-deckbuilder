@@ -17,7 +17,7 @@ State is **local** (no remote backend). Coordinate with Kyle before applying to 
 | `ec2.tf` | EC2 app instance (t2.micro), Elastic IP, IAM role/policies for EC2 (SSM + ECR access) |
 | `rds.tf` | RDS PostgreSQL instance (db.t4g.micro) |
 | `ecr.tf` | ECR Docker image repository (`op-deckbuilder-repo`) |
-| `cloudfront.tf` | CloudFront CDN distribution — **apex alias** for excelsior.cards + www (Phase 0), EC2 origin via `origin.excelsior.cards`, S3 origin for card images. Min TLS `TLSv1.2_2021`; viewer_protocol_policy = `redirect-to-https`. |
+| `cloudfront.tf` | CloudFront CDN distribution — **apex alias** for excelsior.cards + www (Phase 0), EC2 origin via `origin.excelsior.cards`, S3 origin for card images. Min TLS `TLSv1.2_2021`; viewer_protocol_policy = `redirect-to-https`. **Default behavior** must allow `POST`/`OPTIONS`/etc. and forward cookies to EC2 or login returns **403** at the edge. |
 | `s3.tf` | S3 bucket for static card image assets; OAC-only access (no public access) |
 | `ssm.tf` | SSM Parameter Store — DB credentials, app env, Firebase config, CDN base URL. **`/…/app/jwt_secret`** for v1 JWT is documented in `docs/current/DEPLOYMENT.md` and is **not** a Terraform resource here—create it manually in Parameter Store when reviving infra. |
 | `dns.tf` | Route 53 hosted zone + records. Phase 0: apex and www are **ALIAS** records → CloudFront; `origin.excelsior.cards` is a direct A record to the EC2 EIP for CloudFront's origin. |

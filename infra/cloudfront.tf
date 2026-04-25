@@ -134,23 +134,43 @@ resource "aws_cloudfront_distribution" "card_images" {
     max_ttl     = 3600
   }
 
-  # Default behavior: all other traffic proxied to EC2
+  # Default behavior: all other traffic proxied to EC2 (HTML, /api/*, sessions).
+  # MUST allow POST/OPTIONS/etc.; GET-only behaviors return 403 for login and
+  # other mutations. Forward cookies + CORS headers so sessionId and preflight
+  # reach the Node origin (see docs/current/CLOUDFRONT_CDN.md).
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
+    allowed_methods = [
+      "DELETE",
+      "GET",
+      "HEAD",
+      "OPTIONS",
+      "PATCH",
+      "POST",
+      "PUT",
+    ]
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "ec2-origin"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 
     forwarded_values {
-      query_string = false
+      query_string = true
+      headers = [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers",
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "X-Requested-With",
+      ]
       cookies {
-        forward = "none"
+        forward = "all"
       }
     }
 
     min_ttl     = 0
-    default_ttl = 86400    # 1 day default
+    default_ttl = 86400    # 1 day default (origin Cache-Control still governs when set)
     max_ttl     = 31536000 # 1 year maximum
   }
 

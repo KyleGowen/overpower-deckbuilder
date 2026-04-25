@@ -51,6 +51,8 @@ User Browser
 | `/src/resources/images/*` | S3 bucket | UI images, stat/function icons, deck backgrounds |
 | `/*` (default) | EC2 instance | Everything else (API, pages, static JS/CSS) |
 
+**Default behavior must allow non-GET traffic:** the Terraform `default_cache_behavior` for this distribution must list `POST`, `OPTIONS`, and other methods the app uses, and must **forward cookies** (e.g. `sessionId`) and common CORS headers to the origin. A GET-only default causes **403** from the edge for `POST /api/auth/*` and breaks login. Image/cache behaviors stay GET/HEAD-only.
+
 ---
 
 ## AWS Resources
