@@ -150,57 +150,13 @@ async function createNewDeckForGuest() {
             return;
         }
         const deckId = pl.data.id;
-        const created = pl.data.created_at;
-        const updated = pl.data.updated_at;
 
         if (typeof isReadOnlyMode !== 'undefined') {
             isReadOnlyMode = false;
             document.body.classList.remove('read-only-mode');
         }
-        const defaultUIPreferences = {
-            viewMode: 'tile',
-            expansionState: {
-                event: true, power: true, aspect: true, mission: true, special: true,
-                location: true, teamwork: true, training: true, character: true,
-                ally_universe: true, basic_universe: true, advanced_universe: true
-            },
-            dividerPosition: 65,
-            powerCardsSortMode: 'type',
-            characterGroupExpansionState: {}
-        };
-        if (typeof currentDeckId !== 'undefined') currentDeckId = deckId;
-        if (typeof currentDeckData !== 'undefined') {
-            currentDeckData = {
-                metadata: {
-                    id: deckId,
-                    name: 'New Deck',
-                    description: '',
-                    created: created || new Date().toISOString(),
-                    lastModified: updated || new Date().toISOString(),
-                    cardCount: 0,
-                    userId: getCurrentUser() ? (getCurrentUser().userId || getCurrentUser().id) : 'guest',
-                    ui_preferences: defaultUIPreferences
-                },
-                cards: []
-            };
-        }
-        if (typeof window.deckEditorCards !== 'undefined') window.deckEditorCards = [];
-
         const userId = getCurrentUser() ? (getCurrentUser().userId || getCurrentUser().id) : 'guest';
-        window.history.pushState({ deckId, userId, view: 'deckbuilder' }, '', `/users/${userId}/decks/${deckId}`);
-
-        if (typeof showDeckEditor === 'function') {
-            const deckCardsContainer = document.getElementById('deckCardsContainer');
-            if (deckCardsContainer) deckCardsContainer.innerHTML = '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>';
-            const deckCardsEditor = document.getElementById('deckCardsEditor');
-            if (deckCardsEditor) deckCardsEditor.innerHTML = '<div class="empty-deck-message"><p>No cards in this deck yet.</p><p>Drag cards from the right panel to add them!</p></div>';
-            showDeckEditor();
-            const titleElement = document.getElementById('deckEditorTitle');
-            if (titleElement) titleElement.textContent = currentDeckData.metadata.name;
-            if (typeof loadAvailableCards === 'function') loadAvailableCards();
-            if (typeof updateDeckCardCount === 'function') updateDeckCardCount();
-            if (typeof updateDeckSummary === 'function') updateDeckSummary(window.deckEditorCards);
-        }
+        window.location.assign(`/users/${userId}/decks/${deckId}`);
     } finally {
         setTimeout(() => { isCreatingNewDeck = false; }, 1000);
     }
@@ -208,62 +164,13 @@ async function createNewDeckForGuest() {
 
 function createNewDeckForUser() {
     isCreatingNewDeck = true;
-
     if (typeof isReadOnlyMode !== 'undefined') {
         isReadOnlyMode = false;
         document.body.classList.remove('read-only-mode');
     }
-    const defaultUIPreferences = {
-        viewMode: 'tile',
-        expansionState: {
-            event: true, power: true, aspect: true, mission: true, special: true,
-            location: true, teamwork: true, training: true, character: true,
-            ally_universe: true, basic_universe: true, advanced_universe: true
-        },
-        dividerPosition: 65,
-        powerCardsSortMode: 'type',
-        characterGroupExpansionState: {}
-    };
-
-    if (typeof currentDeckId !== 'undefined') currentDeckId = null;
-    if (typeof currentDeckData !== 'undefined') {
-        const currentUser = getCurrentUser();
-        currentDeckData = {
-            metadata: {
-                id: null,
-                name: 'New Deck',
-                description: '',
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString(),
-                cardCount: 0,
-                userId: currentUser ? (currentUser.userId || currentUser.id) : 'guest',
-                ui_preferences: defaultUIPreferences
-            },
-            cards: []
-        };
-    }
-    if (typeof window.deckEditorCards !== 'undefined') window.deckEditorCards = [];
-
     const currentUser = getCurrentUser();
     const userId = currentUser ? (currentUser.userId || currentUser.id) : 'guest';
-    window.history.pushState({ newDeck: true, userId, view: 'deckbuilder' }, '', `/users/${userId}/decks/new`);
-
-    if (typeof showDeckEditor === 'function') {
-        const deckCardsContainer = document.getElementById('deckCardsContainer');
-        if (deckCardsContainer) deckCardsContainer.innerHTML = '<div class="no-cards-message">No cards in this deck yet. Drag cards from the right panel to add them!</div>';
-        const deckCardsEditor = document.getElementById('deckCardsEditor');
-        if (deckCardsEditor) deckCardsEditor.innerHTML = '<div class="empty-deck-message"><p>No cards in this deck yet.</p><p>Drag cards from the right panel to add them!</p></div>';
-        showDeckEditor();
-        const titleElement = document.getElementById('deckEditorTitle');
-        if (titleElement) titleElement.textContent = currentDeckData.metadata.name;
-        if (typeof loadAvailableCards === 'function') loadAvailableCards();
-        if (typeof updateDeckCardCount === 'function') updateDeckCardCount();
-        if (typeof updateDeckSummary === 'function') updateDeckSummary(window.deckEditorCards);
-        setTimeout(() => { isCreatingNewDeck = false; }, 1000);
-    } else {
-        isCreatingNewDeck = false;
-        console.error('showDeckEditor function not found');
-    }
+    window.location.assign(`/users/${userId}/decks/new`);
 }
 
 // Client-side navigation function for Collection view

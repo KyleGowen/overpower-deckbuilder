@@ -49,6 +49,9 @@
      */
     window.DeckSelection.loadDecks = async function loadDecks(options) {
         try {
+            if (!document.getElementById('deck-list')) {
+                return;
+            }
             if (typeof loadAvailableCardsData === 'function') {
                 loadAvailableCardsData().catch(() => {});
             }
@@ -102,7 +105,10 @@
             }
         } catch (error) {
             console.error('Error loading decks:', error);
-            document.getElementById('deck-list').innerHTML = '<div class="error">Failed to load decks</div>';
+            const deckListErr = document.getElementById('deck-list');
+            if (deckListErr) {
+                deckListErr.innerHTML = '<div class="error">Failed to load decks</div>';
+            }
         }
     };
 

@@ -154,8 +154,10 @@ function hideDeckEditorExportImportButtons() {
 
 // Show deck editor modal
 function showDeckEditor() {
-    const mc = document.getElementById('mainContainer');
-    if (mc) mc.style.display = 'block';
+    if (window.__EXCELSIOR_PAGE__ !== 'deck-editor') {
+        const mc = document.getElementById('mainContainer');
+        if (mc) mc.style.display = 'block';
+    }
     try {
         const modal = document.getElementById('deckEditorModal');
         if (!modal) {
@@ -1410,6 +1412,22 @@ async function closeDeckEditor() {
     if (currentDeckId) {
         const preferences = getCurrentUIPreferences();
         await saveUIPreferences(currentDeckId, preferences);
+    }
+
+    const isDeckEditorPage =
+        window.__EXCELSIOR_PAGE__ === 'deck-editor' ||
+        (typeof document !== 'undefined' &&
+            document.documentElement &&
+            document.documentElement.getAttribute('data-excelsior-page') === 'deck-editor');
+    if (isDeckEditorPage) {
+        const closingUser = getCurrentUser();
+        const closingUserId = closingUser ? (closingUser.userId || closingUser.id) : 'guest';
+        currentDeckId = null;
+        currentDeckData = null;
+        window.deckEditorCards = [];
+        document.body.classList.remove('deck-editor-active');
+        window.location.replace(`/users/${closingUserId}/decks`);
+        return;
     }
     
     const modal = document.getElementById('deckEditorModal');

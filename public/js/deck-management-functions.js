@@ -52,42 +52,14 @@ function removeCharacterFromDeck(characterId) {
 }
 
 function editDeck(deckId) {
-    
-    // Get current user to determine read-only mode
     const currentUser = getCurrentUser();
-    const isReadOnly = false; // User is editing their own deck
-    
     // Hide login modal immediately to prevent flash
     const loginModal = document.getElementById('loginModal');
     if (loginModal) {
         loginModal.style.display = 'none';
     }
-    
-    // Show main container if it's hidden
-    const mainContainer = document.getElementById('mainContainer');
-    if (mainContainer) {
-        mainContainer.style.display = 'grid';
-    }
-    
-    // Update URL to include the deck ID for sharing
     const userId = currentUser ? (currentUser.userId || currentUser.id || 'guest') : 'guest';
-    const newUrl = `/users/${userId}/decks/${deckId}`;
-    window.history.pushState({ deckId, userId }, '', newUrl);
-    
-    // Load and show the deck editor directly without page reload
-    loadDeckForEditing(deckId, userId, isReadOnly)
-        .then(() => {
-            showDeckEditor();
-        })
-        .catch(error => {
-            console.error('Error loading deck for editing:', error);
-            // Fallback to URL navigation if direct loading fails
-            if (currentUser) {
-                window.location.href = `/users/${currentUser.userId}/decks/${deckId}`;
-            } else {
-                window.location.href = `/users/guest/decks/${deckId}`;
-            }
-        });
+    window.location.assign(`/users/${userId}/decks/${deckId}`);
 }
 
 function viewDeck(deckId) {

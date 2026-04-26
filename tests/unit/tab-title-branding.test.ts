@@ -9,6 +9,7 @@ import path from 'path';
 describe('Tab Title Branding Tests', () => {
   const htmlFiles = [
     'public/index.html',
+    'public/deck-editor.html',
     'public/deck-builder.html', 
     'public/database-view.html'
   ];

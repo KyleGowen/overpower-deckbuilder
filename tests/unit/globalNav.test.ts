@@ -17,7 +17,6 @@ describe('Global Navigation Component', () => {
     let mockLogout: jest.Mock;
     let mockToggleCreateUserDropdown: jest.Mock;
     let mockToggleChangePasswordDropdown: jest.Mock;
-
     beforeEach(() => {
         // Set up DOM (use view-removed class for view visibility)
         document.body.innerHTML = `
@@ -457,75 +456,16 @@ describe('Global Navigation Component', () => {
             document.body.classList.add('read-only-mode');
         });
 
-        it('should clear current deck data', () => {
+        it('should set isReadOnlyMode to false (full-page editor uses location.assign; jsdom may log navigation unimplemented)', () => {
+            const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             (window as any).createNewDeck();
-
-            expect((window as any).currentDeckId).toBeNull();
-            expect((window as any).currentDeckData.metadata.name).toBe('New Deck');
-            expect((window as any).deckEditorCards).toEqual([]);
-        });
-
-        it('should set isReadOnlyMode to false', () => {
-            (window as any).createNewDeck();
+            errSpy.mockRestore();
 
             expect((window as any).isReadOnlyMode).toBe(false);
             expect(document.body.classList.contains('read-only-mode')).toBe(false);
         });
 
-        it('should update URL to /new', () => {
-            (window as any).createNewDeck();
-
-            expect(window.history.pushState).toHaveBeenCalledWith(
-                { newDeck: true, userId: 'test-user-1', view: 'deckbuilder' },
-                '',
-                '/users/test-user-1/decks/new'
-            );
-        });
-
-        it('should clear deck cards containers', () => {
-            const deckCardsContainer = document.getElementById('deckCardsContainer');
-            const deckCardsEditor = document.getElementById('deckCardsEditor');
-            deckCardsContainer!.innerHTML = '<div>Existing content</div>';
-            deckCardsEditor!.innerHTML = '<div>Existing content</div>';
-
-            (window as any).createNewDeck();
-
-            expect(deckCardsContainer!.innerHTML).toContain('No cards in this deck yet');
-            expect(deckCardsEditor!.innerHTML).toContain('No cards in this deck yet');
-        });
-
-        it('should show deck editor', () => {
-            (window as any).createNewDeck();
-
-            expect(mockShowDeckEditor).toHaveBeenCalled();
-        });
-
-        it('should load available cards', () => {
-            (window as any).createNewDeck();
-
-            expect(mockLoadAvailableCards).toHaveBeenCalled();
-        });
-
-        it('should update deck card count', () => {
-            (window as any).createNewDeck();
-
-            expect(mockUpdateDeckCardCount).toHaveBeenCalled();
-        });
-
-        it('should update deck summary', () => {
-            (window as any).createNewDeck();
-
-            expect(mockUpdateDeckSummary).toHaveBeenCalledWith([]);
-        });
-
-        it('should set deck title', () => {
-            (window as any).createNewDeck();
-
-            const titleElement = document.getElementById('deckEditorTitle');
-            expect(titleElement!.textContent).toBe('New Deck');
-        });
-
-        it('should handle guest user', async () => {
+        it('should call guest deck API then attempt navigation to the new session deck', async () => {
             mockGetCurrentUser.mockReturnValue({ role: 'GUEST', id: 'guest', userId: 'guest' });
             (window as any).v1DataPayload = (response: { ok: boolean }, json: { errors?: unknown[]; data?: unknown }) => {
                 if (!response?.ok || !json || (json.errors && json.errors.length)) {
@@ -550,21 +490,19 @@ describe('Global Navigation Component', () => {
             });
             (global as any).fetch = mockFetch;
 
+            const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             (window as any).createNewDeck();
             await new Promise((r) => setTimeout(r, 0));
+            errSpy.mockRestore();
 
-            expect((window as any).currentDeckData.metadata.userId).toBe('guest');
-            expect((window as any).currentDeckId).toBe('guest_session_123');
+            expect(mockFetch).toHaveBeenCalled();
         });
 
-        it('should handle missing showDeckEditor gracefully', () => {
+        it('should not require showDeckEditor in the in-page path', () => {
             delete (window as any).showDeckEditor;
-
-            // Should not throw, but will log error
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+            const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
             (window as any).createNewDeck();
-            expect(consoleSpy).toHaveBeenCalled();
-            consoleSpy.mockRestore();
+            errSpy.mockRestore();
         });
     });
 

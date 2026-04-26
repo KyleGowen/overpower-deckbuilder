@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { app } from '../setup-integration';
 import { Pool } from 'pg';
+import fs from 'fs';
+import path from 'path';
 
 // Simple UUID v4 generator for tests
 function generateUUID(): string {
@@ -305,23 +307,28 @@ describe('Deck Editability Browser Tests', () => {
 
       const html = response.text;
 
-      // Check that the editability logic is efficient
-      const scripts = html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '';
-      
-      // Should use efficient DOM queries
-      expect(scripts).toContain('getElementById(\'deckEditorTitle\')');
-      // deckEditorDescription may be referenced in external JavaScript files not included in HTML
-      // The HTML element exists (verified in other tests), so we check for it in scripts if present
-      const hasDescReference = scripts.includes('getElementById(\'deckEditorDescription\')') || 
-                               scripts.includes('deckEditorDescription');
-      // If not found in inline scripts, that's OK - it may be in external files
+      // Inline <script> bodies plus key deck-editor client modules (stand-alone page serves
+      // deck-editor.html with external src= bundles; getElementById is no longer in inline HTML only).
+      const publicRoot = path.join(__dirname, '../../public');
+      const readJs = (rel: string) =>
+        fs.readFileSync(path.join(publicRoot, rel), 'utf8');
+      const scripts =
+        (html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '') +
+        readJs('js/deck-editor-core.js') +
+        readJs('js/index-page.js') +
+        readJs('js/ui-utility-functions.js') +
+        readJs('js/components/deck-export.js');
 
-      // Should not have inefficient loops or repeated queries
+      expect(scripts).toContain("getElementById('deckEditorTitle')");
+      const descPaths =
+        scripts.includes("getElementById('deckEditorDescription')") ||
+        scripts.includes('deckEditorDescription');
+      expect(descPaths).toBe(true);
+
       const titleQueryCount = (scripts.match(/getElementById\('deckEditorTitle'\)/g) || []).length;
-      const descQueryCount = (scripts.match(/getElementById\('deckEditorDescription'\)/g) || []).length;
-      
-      expect(titleQueryCount).toBeLessThanOrEqual(10); // Allow for reasonable number of queries
-      // Description queries may be in external files, so we don't enforce a strict limit here
+      const descQueryCount = (scripts.match(/getElementById\('deckEditorDescription'\)/g) || [])
+        .length;
+      expect(titleQueryCount).toBeLessThanOrEqual(10);
       if (descQueryCount > 0) {
         expect(descQueryCount).toBeLessThanOrEqual(10);
       }

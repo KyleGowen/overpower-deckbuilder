@@ -4,6 +4,7 @@
  */
 import express, { Request } from 'express';
 import path from 'path';
+import { pathToDeckEditorHtml } from '../routes/deckEditorPagePath';
 
 export interface TestOnlyRoutesDeps {
   deckRepository: { getDeckById: (id: string) => Promise<unknown> };
@@ -23,11 +24,11 @@ export function registerTestOnlyRoutes(app: express.Application, deps: TestOnlyR
   });
   app.get('/users/:userId/decks/:deckId/edit', (req, res) => {
     res.set({ ...noCache, 'Last-Modified': new Date().toUTCString(), 'ETag': `"${Date.now()}"` });
-    res.sendFile(path.join(process.cwd(), 'public/index.html'));
+    res.sendFile(pathToDeckEditorHtml());
   });
   app.get('/users/:userId/decks/:deckId', (_req, res) => {
     res.set({ ...noCache, 'Last-Modified': new Date().toUTCString(), 'ETag': `"${Date.now()}"` });
-    res.sendFile(path.join(process.cwd(), 'public/index.html'));
+    res.sendFile(pathToDeckEditorHtml());
   });
 
   app.get('/deck-editor/:deckId', deps.authenticateUser, async (req: Request, res) => {

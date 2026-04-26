@@ -1,6 +1,7 @@
 import express, { Request } from 'express';
 import path from 'path';
 import type { PageRoutesDeps } from './types';
+import { pathToDeckEditorHtml } from './deckEditorPagePath';
 
 /** Lets Firebase (and other) OAuth popups communicate with the opener; avoids COOP blocking `window.closed`. */
 const HTML_POPUP_FRIENDLY_HEADERS = {
@@ -73,7 +74,7 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
       ...HTML_POPUP_FRIENDLY_HEADERS
     });
     
-    res.sendFile(path.join(process.cwd(), 'public/index.html'));
+    res.sendFile(pathToDeckEditorHtml());
   });
   
   // Collection View route - serve collection view for specific user

@@ -8,12 +8,14 @@ import { join } from 'path';
 
 describe('Basic Universe Type Filter - Simple', () => {
     let indexHtmlContent: string;
+    let indexPageJsContent: string;
     let cardDataDisplayContent: string;
     let cardFilterTogglesContent: string;
 
     beforeEach(() => {
         // Read the main index.html and external JS files where functions were extracted
         indexHtmlContent = readFileSync(join(__dirname, '../../public/index.html'), 'utf-8');
+        indexPageJsContent = readFileSync(join(__dirname, '../../public/js/index-page.js'), 'utf-8');
         cardDataDisplayContent = readFileSync(join(__dirname, '../../public/js/card-data-display.js'), 'utf-8');
         cardFilterTogglesContent = readFileSync(join(__dirname, '../../public/js/card-filter-toggles.js'), 'utf-8');
     });
@@ -32,8 +34,8 @@ describe('Basic Universe Type Filter - Simple', () => {
         });
 
         it('should reference clearBasicUniverseFilters function', () => {
-            // clearBasicUniverseFilters is referenced in index.html or filter-functions.js
-            const allContent = indexHtmlContent + cardFilterTogglesContent + cardDataDisplayContent;
+            // clearBasicUniverseFilters is referenced in index page bundle or filter-functions.js
+            const allContent = indexHtmlContent + indexPageJsContent + cardFilterTogglesContent + cardDataDisplayContent;
             expect(allContent).toContain('clearBasicUniverseFilters');
         });
     });
@@ -120,8 +122,8 @@ describe('Basic Universe Type Filter - Simple', () => {
 
     describe('Tab Integration', () => {
         it('should be called when tab is switched', () => {
-            expect(indexHtmlContent).toContain('setupBasicUniverseSearch()');
-            expect(indexHtmlContent).toContain('loadBasicUniverse()');
+            expect(indexPageJsContent).toContain('setupBasicUniverseSearch()');
+            expect(indexPageJsContent).toContain('loadBasicUniverse()');
         });
     });
 

@@ -8,6 +8,7 @@ import { join } from 'path';
 
 describe('Basic Universe Type Filter', () => {
     let indexHtmlContent: string;
+    let indexPageJsContent: string;
     let cardDataDisplayContent: string;
     let cardFilterTogglesContent: string;
     let mockDocument: any;
@@ -17,6 +18,7 @@ describe('Basic Universe Type Filter', () => {
     beforeEach(() => {
         // Read the main index.html and external JS files where functions were extracted
         indexHtmlContent = readFileSync(join(__dirname, '../../public/index.html'), 'utf-8');
+        indexPageJsContent = readFileSync(join(__dirname, '../../public/js/index-page.js'), 'utf-8');
         cardDataDisplayContent = readFileSync(join(__dirname, '../../public/js/card-data-display.js'), 'utf-8');
         cardFilterTogglesContent = readFileSync(join(__dirname, '../../public/js/card-filter-toggles.js'), 'utf-8');
 
@@ -188,8 +190,8 @@ describe('Basic Universe Type Filter', () => {
         });
 
         it('should have proper tab switching integration', () => {
-            expect(indexHtmlContent).toContain('setupBasicUniverseSearch()');
-            expect(indexHtmlContent).toContain('loadBasicUniverse()');
+            expect(indexPageJsContent).toContain('setupBasicUniverseSearch()');
+            expect(indexPageJsContent).toContain('loadBasicUniverse()');
         });
     });
 

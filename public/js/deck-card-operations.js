@@ -1997,8 +1997,8 @@ async function addCardToEditor(cardType, cardId, cardName) {
 
 
 // Export all functions to window for backward compatibility
+// removeCardFromDeck is defined in index-page.js (not in this file)
 window.changeCardQuantity = changeCardQuantity;
-window.removeCardFromDeck = removeCardFromDeck;
 window.addCardToDeck = addCardToDeck;
 window.addAllMissionSetCards = addAllMissionSetCards;
 window.addAllPowerCards = addAllPowerCards;

@@ -1,5 +1,7 @@
 import request from 'supertest';
 import { app } from '../setup-integration';
+import fs from 'fs';
+import path from 'path';
 
 describe('Deck Editability HTML Tests', () => {
 
@@ -194,20 +196,24 @@ describe('Deck Editability HTML Tests', () => {
 
       const html = response.text;
 
-      // Check for efficient DOM queries
-      expect(html).toContain('getElementById(\'deckEditorTitle\')');
-      // deckEditorDescription may be referenced in external JavaScript files
-      // Check that the HTML element exists (which we verified earlier)
       expect(html).toContain('id="deckEditorDescription"');
 
-      // Should not have inefficient repeated queries
-      const titleQueryCount = (html.match(/getElementById\('deckEditorTitle'\)/g) || []).length;
-      const descQueryCount = (html.match(/getElementById\('deckEditorDescription'\)/g) || []).length;
+      // DOM edit logic lives in external modules on stand-alone deck-editor.html, not in inline HTML
+      const publicRoot = path.join(__dirname, '../../public');
+      const readJs = (rel: string) =>
+        fs.readFileSync(path.join(publicRoot, rel), 'utf8');
+      const scripts =
+        (html.match(/<script[^>]*>(.*?)<\/script>/gs)?.join('\n') || '') +
+        readJs('js/deck-editor-core.js') +
+        readJs('js/index-page.js') +
+        readJs('js/ui-utility-functions.js') +
+        readJs('js/components/deck-export.js');
 
-      // The current implementation has more DOM queries than originally expected
-      // This is acceptable as long as the queries are necessary for functionality
-      expect(titleQueryCount).toBeLessThanOrEqual(10); // Updated threshold
-      // Description queries may be in external files, so we don't enforce a strict limit here
+      expect(scripts).toContain("getElementById('deckEditorTitle')");
+      const titleQueryCount = (scripts.match(/getElementById\('deckEditorTitle'\)/g) || []).length;
+      const descQueryCount = (scripts.match(/getElementById\('deckEditorDescription'\)/g) || [])
+        .length;
+      expect(titleQueryCount).toBeLessThanOrEqual(10);
       if (descQueryCount > 0) {
         expect(descQueryCount).toBeLessThanOrEqual(10);
       }
