@@ -562,7 +562,30 @@
             }
             global.closeDevMobileDeckActionsSheet();
             var ed = document.getElementById('deckCardsEditor');
-            if (ed && ed.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
+            /* Leaving MV: if #deckCardsEditor still has DEV mobile markup, default to DTV card view (not list/tile). */
+            var fromMobile =
+                ed &&
+                ed.querySelector('.dev-mobile-deck-list-root, .dev-mobile-empty-deck');
+            if (fromMobile) {
+                var usedVm = false;
+                try {
+                    if (typeof viewManager !== 'undefined' && viewManager && typeof viewManager.switchToCardView === 'function') {
+                        void viewManager.switchToCardView();
+                        usedVm = true;
+                    }
+                } catch (e) {
+                    usedVm = false;
+                }
+                if (!usedVm && ed) {
+                    ed.classList.remove('list-view', 'two-column');
+                    ed.classList.add('card-view');
+                    var lvb = document.getElementById('listViewBtn');
+                    if (lvb) lvb.textContent = 'List View';
+                    if (typeof renderDeckCardsCardView === 'function') {
+                        renderDeckCardsCardView();
+                    }
+                }
+            } else if (ed && ed.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
                 renderDeckCardsCardView();
             } else if (ed && ed.classList.contains('list-view') && typeof renderDeckCardsListView === 'function') {
                 renderDeckCardsListView();
@@ -572,7 +595,7 @@
         }
     };
 
-    document.addEventListener('layout-mode-change', function () {
+    window.addEventListener('layout-mode-change', function () {
         if (typeof global.refreshDeckEditorLayoutMode === 'function') {
             global.refreshDeckEditorLayoutMode();
         }
