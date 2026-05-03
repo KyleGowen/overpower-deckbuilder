@@ -158,6 +158,9 @@ src/resources/cards/images/locations/thumb/
 *_backup_*/
 BACKUP_*/
 
+# Local IAM policy for SSM DB tunnel (filled ARNs); committed sample is docs/examples/*.sample
+/ssm-prod-db-tunnel-policy.json
+
 # Terraform plan files (can contain secrets; e.g. terraform plan -out=tfplan)
 infra/tfplan
 

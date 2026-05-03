@@ -1,0 +1,3 @@
+# docs/examples/
+
+Non-executable samples for operators (placeholders only). Do not put live credentials or filled IAM ARNs here. SSM tunnel policy: `ssm-prod-db-tunnel-policy.json.sample` — see [docs/current/DEPLOYMENT.md](../current/DEPLOYMENT.md) (“Production database access (SSM port forwarding)”).
