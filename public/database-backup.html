@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excelsior Deckbuilder - Characters Database</title>
     <script src="/js/catalog-v1-envelope.js"></script>
+    <script src="/js/bulk-add-banned-guard.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -7200,6 +7201,7 @@
             }
             
             let addedCount = 0;
+            let bannedSkipped = 0;
             
             cards.forEach(card => {
                 // Check if card is already in deck
@@ -7213,14 +7215,26 @@
                     return;
                 }
                 
-                if (!existingCard) {
-                    addCardToEditor('mission', card.id, card.card_name || card.name);
-                    addedCount++;
+                if (existingCard) {
+                    return;
                 }
+                if (typeof window.isCatalogCardBannedForBulkAdd === 'function' &&
+                    window.isCatalogCardBannedForBulkAdd(card.id, 'mission', card)) {
+                    bannedSkipped++;
+                    return;
+                }
+                addCardToEditor('mission', card.id, card.card_name || card.name);
+                addedCount++;
             });
             
             if (addedCount > 0) {
-                showNotification(`Added ${addedCount} cards from ${missionSetName}`, 'success');
+                const extra = bannedSkipped > 0 ? ` (skipped ${bannedSkipped} banned)` : '';
+                showNotification(`Added ${addedCount} cards from ${missionSetName}${extra}`, 'success');
+            } else if (bannedSkipped > 0) {
+                showNotification(
+                    `No cards added from ${missionSetName} (${bannedSkipped} banned; others may already be in the deck)`,
+                    'info'
+                );
             } else {
                 showNotification(`All cards from ${missionSetName} are already in the deck`, 'info');
             }
@@ -7230,6 +7244,7 @@
             console.log(`Adding all ${powerType} power cards:`, cards);
             
             let addedCount = 0;
+            let bannedSkipped = 0;
             
             cards.forEach(card => {
                 // Check if card is already in deck
@@ -7237,14 +7252,26 @@
                     deckCard.type === 'power' && deckCard.cardId === card.id
                 );
                 
-                if (!existingCard) {
-                    addCardToEditor('power', card.id, `${card.value} - ${card.power_type}`);
-                    addedCount++;
+                if (existingCard) {
+                    return;
                 }
+                if (typeof window.isCatalogCardBannedForBulkAdd === 'function' &&
+                    window.isCatalogCardBannedForBulkAdd(card.id, 'power', card)) {
+                    bannedSkipped++;
+                    return;
+                }
+                addCardToEditor('power', card.id, `${card.value} - ${card.power_type}`);
+                addedCount++;
             });
             
             if (addedCount > 0) {
-                showNotification(`Added ${addedCount} ${powerType} power cards to deck`, 'success');
+                const extra = bannedSkipped > 0 ? ` (skipped ${bannedSkipped} banned)` : '';
+                showNotification(`Added ${addedCount} ${powerType} power cards to deck${extra}`, 'success');
+            } else if (bannedSkipped > 0) {
+                showNotification(
+                    `No ${powerType} power cards added (${bannedSkipped} banned; others may already be in the deck)`,
+                    'info'
+                );
             } else {
                 showNotification(`All ${powerType} power cards are already in the deck`, 'info');
             }
@@ -9856,6 +9883,7 @@
                     }
                     
                     let addedCount = 0;
+                    let bannedSkipped = 0;
                     
                     characterCards.forEach(card => {
                         // Check if card is already in deck
@@ -9863,16 +9891,28 @@
                             deckCard.type === 'special' && deckCard.cardId === card.id
                         );
                         
-                        if (!existingCard) {
-                            addCardToEditor('special', card.id, card.name || card.card_name);
-                            addedCount++;
+                        if (existingCard) {
+                            return;
                         }
+                        if (typeof window.isCatalogCardBannedForBulkAdd === 'function' &&
+                            window.isCatalogCardBannedForBulkAdd(card.id, 'special', card)) {
+                            bannedSkipped++;
+                            return;
+                        }
+                        addCardToEditor('special', card.id, card.name || card.card_name);
+                        addedCount++;
                     });
                     
-                    if (addedCount === 0) {
-                        showNotification(`All special cards for ${characterName} are already in the deck`, 'info');
+                    if (addedCount > 0) {
+                        const extra = bannedSkipped > 0 ? ` (skipped ${bannedSkipped} banned)` : '';
+                        showNotification(`Added ${addedCount} special cards for ${characterName} to deck${extra}`, 'success');
+                    } else if (bannedSkipped > 0) {
+                        showNotification(
+                            `No special cards added for ${characterName} (${bannedSkipped} banned; others may already be in the deck)`,
+                            'info'
+                        );
                     } else {
-                        showNotification(`Added ${addedCount} special cards for ${characterName} to deck`, 'success');
+                        showNotification(`All special cards for ${characterName} are already in the deck`, 'info');
                     }
                 })
                 .catch(error => {
@@ -9903,6 +9943,7 @@
                     }
                     
                     let addedCount = 0;
+                    let bannedSkipped = 0;
                     
                     characterCards.forEach(card => {
                         // Check if card is already in deck
@@ -9910,16 +9951,28 @@
                             deckCard.type === 'advanced-universe' && deckCard.cardId === card.id
                         );
                         
-                        if (!existingCard) {
-                            addCardToEditor('advanced-universe', card.id, card.name || card.card_name);
-                            addedCount++;
+                        if (existingCard) {
+                            return;
                         }
+                        if (typeof window.isCatalogCardBannedForBulkAdd === 'function' &&
+                            window.isCatalogCardBannedForBulkAdd(card.id, 'advanced-universe', card)) {
+                            bannedSkipped++;
+                            return;
+                        }
+                        addCardToEditor('advanced-universe', card.id, card.name || card.card_name);
+                        addedCount++;
                     });
                     
-                    if (addedCount === 0) {
-                        showNotification(`All advanced universe cards for ${characterName} are already in the deck`, 'info');
+                    if (addedCount > 0) {
+                        const extra = bannedSkipped > 0 ? ` (skipped ${bannedSkipped} banned)` : '';
+                        showNotification(`Added ${addedCount} advanced universe cards for ${characterName} to deck${extra}`, 'success');
+                    } else if (bannedSkipped > 0) {
+                        showNotification(
+                            `No advanced universe cards added for ${characterName} (${bannedSkipped} banned; others may already be in the deck)`,
+                            'info'
+                        );
                     } else {
-                        showNotification(`Added ${addedCount} advanced universe cards for ${characterName} to deck`, 'success');
+                        showNotification(`All advanced universe cards for ${characterName} are already in the deck`, 'info');
                     }
                 })
                 .catch(error => {

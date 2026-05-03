@@ -58,6 +58,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/card-data-display.js
 - /js/deck-editor-rendering.js
 - /js/deck-editor-mobile-view.js
+- /js/bulk-add-banned-guard.js (defer, immediately before deck-card-operations.js — `window.isCatalogCardBannedForBulkAdd` for deck editor "Add All" bulk adds; skips `banned === true` cards)
 - /js/deck-card-operations.js
 - /js/deck-validation.js
 - /js/deck-editor-layout.js
@@ -76,8 +77,15 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 ## public/deck-builder.html (embedded DBV subset)
 
 - /js/layout-mode.js (after viewport meta, sync)
+- /js/catalog-v1-envelope.js (sync)
+- /js/bulk-add-banned-guard.js (sync after catalog-v1-envelope — must run before mid-body inline scripts; same `isCatalogCardBannedForBulkAdd` as SPA)
 - /css/mobile-layout.css (with database-view.css)
 - /js/characters-stat-filter-tabs.js (before card-image-utils.js)
+
+## public/database-backup.html (legacy snapshot)
+
+- /js/catalog-v1-envelope.js (sync)
+- /js/bulk-add-banned-guard.js (sync — before mid-body inline scripts)
 
 ## Orphaned (never loaded by any HTML)
 

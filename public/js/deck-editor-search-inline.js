@@ -347,9 +347,33 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
         }
     });
 
-    const idsToAdd = missionBulkIds.map(normId).filter((id) => id && !existing.has(id));
+    let idsToAdd = missionBulkIds.map(normId).filter((id) => id && !existing.has(id));
     if (idsToAdd.length === 0) {
         showToast('Already have all missions in this set', 'info');
+        return;
+    }
+
+    let bannedSkippedSearch = 0;
+    idsToAdd = idsToAdd.filter((id) => {
+        if (
+            typeof window.isCatalogCardBannedForBulkAdd === 'function' &&
+            window.isCatalogCardBannedForBulkAdd(id, 'mission', null)
+        ) {
+            bannedSkippedSearch++;
+            return false;
+        }
+        return true;
+    });
+    if (idsToAdd.length === 0) {
+        const msg =
+            bannedSkippedSearch > 0
+                ? `No missions added (${bannedSkippedSearch} banned)`
+                : 'Already have all missions in this set';
+        if (typeof showNotification === 'function') {
+            showNotification(msg, 'info');
+        } else {
+            showToast(msg, 'info');
+        }
         return;
     }
 
@@ -385,7 +409,8 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
         }
         dismissSearchUi();
         if (fail === 0) {
-            showToast(`Added ${idsToAdd.length} mission(s) from set`, 'success');
+            const extra = bannedSkippedSearch > 0 ? ` (skipped ${bannedSkippedSearch} banned)` : '';
+            showToast(`Added ${idsToAdd.length} mission(s) from set${extra}`, 'success');
         } else if (fail < idsToAdd.length) {
             showToast(`Added ${idsToAdd.length - fail} mission(s); ${fail} failed`, 'error');
         }
@@ -464,7 +489,8 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
 
     if (ok > 0 && bad === 0) {
         if (missionEditorRefreshOk) {
-            showToast(`Added ${ok} mission(s) from set`, 'success');
+            const extra = bannedSkippedSearch > 0 ? ` (skipped ${bannedSkippedSearch} banned)` : '';
+            showToast(`Added ${ok} mission(s) from set${extra}`, 'success');
         }
     } else if (ok > 0 && bad > 0) {
         showToast(`Added ${ok} mission(s); ${bad} failed`, 'error');
