@@ -298,6 +298,78 @@ function showDeckEditor() {
     }
 }
 
+/**
+ * Normalize API deck card rows to editor format (underscore universe types → hyphens; clamp character/location qty).
+ * @param {Array<{type?: string, cardId?: string, quantity?: number, [k: string]: unknown}>} cards
+ * @returns {Array<unknown>}
+ */
+function normalizeDeckEditorCardsFromApi(cards) {
+    if (!Array.isArray(cards)) {
+        return [];
+    }
+    return cards.map(card => {
+        let convertedType = card.type;
+        if (card.type === 'ally_universe') {
+            convertedType = 'ally-universe';
+        } else if (card.type === 'basic_universe') {
+            convertedType = 'basic-universe';
+        } else if (card.type === 'advanced_universe') {
+            convertedType = 'advanced-universe';
+        }
+        const convertedCard = { ...card, type: convertedType };
+        if (
+            (convertedType === 'character' || convertedType === 'location') &&
+            (convertedCard.quantity ?? 1) > 1
+        ) {
+            convertedCard.quantity = 1;
+        }
+        return convertedCard;
+    });
+}
+
+/**
+ * Apply a v1 deck detail payload ({ metadata, cards }) without a full GET reload.
+ * Merges metadata into existing currentDeckData when present (preserves fields like isOwner).
+ * @param {{ metadata: Record<string, unknown>, cards?: unknown[] }} loadedDeck
+ * @returns {Promise<boolean>}
+ */
+async function applyDeckSnapshotToEditor(loadedDeck) {
+    if (!loadedDeck || !loadedDeck.metadata || typeof loadedDeck.metadata !== 'object') {
+        return false;
+    }
+    const mergedMeta = {
+        ...((currentDeckData && currentDeckData.metadata) || {}),
+        ...loadedDeck.metadata
+    };
+    currentDeckData = {
+        ...(currentDeckData && typeof currentDeckData === 'object' ? currentDeckData : {}),
+        metadata: mergedMeta,
+        cards: loadedDeck.cards || []
+    };
+    window.currentDeckData = currentDeckData;
+    window.deckEditorCards = normalizeDeckEditorCardsFromApi(loadedDeck.cards || []);
+    const titleEl = document.getElementById('deckEditorTitle');
+    if (titleEl && mergedMeta.name) {
+        titleEl.textContent = mergedMeta.name;
+    }
+    if (typeof updateDeckEditorCardCount === 'function') {
+        updateDeckEditorCardCount();
+    }
+    if (typeof showDeckValidation === 'function') {
+        await showDeckValidation(window.deckEditorCards);
+    }
+    if (typeof viewManager !== 'undefined' && viewManager && typeof viewManager.applyInitialView === 'function') {
+        await viewManager.applyInitialView();
+    }
+    if (typeof forceCharacterSingleColumnLayout === 'function') {
+        forceCharacterSingleColumnLayout();
+    }
+    return true;
+}
+
+window.normalizeDeckEditorCardsFromApi = normalizeDeckEditorCardsFromApi;
+window.applyDeckSnapshotToEditor = applyDeckSnapshotToEditor;
+
 // Load deck for editing
 async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) {
     // Note: Read-only mode is now determined by API response and ownership checks below
@@ -380,7 +452,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             });
         });
         
-        return;
+        return { ok: true };
     }
 
     // GUEST opening a database deck: clone to a session deck so edits never persist to DB
@@ -397,7 +469,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 json = raw ? JSON.parse(raw) : null;
             } catch (_parseErr) {
                 showNotification('Could not load deck: server returned a non-JSON response', 'error');
-                return;
+                return { ok: false, message: 'Could not load deck: server returned a non-JSON response' };
             }
             const guestClonePayload =
                 typeof deckDetailPayload === 'function' ? deckDetailPayload(res, json) : null;
@@ -407,7 +479,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     json.error ||
                     'Unknown error';
                 showNotification('Could not load deck: ' + msg, 'error');
-                return;
+                return { ok: false, message: msg };
             }
             const deck = guestClonePayload.deck;
             const createRes = await fetch('/api/v1/guest/decks', {
@@ -428,7 +500,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     createData.error ||
                     'Unknown error';
                 showNotification('Could not create session copy: ' + msg, 'error');
-                return;
+                return { ok: false, message: msg };
             }
             const guestDeckId = createPayload.data.id;
             const cards = (deck.cards || []).map(function (c, i) {
@@ -453,22 +525,37 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                         putJson.error ||
                         'Unknown error';
                     showNotification('Could not copy deck cards: ' + msg, 'error');
-                    return;
+                    return { ok: false, message: msg };
                 }
             }
             const userId = currentUser.userId || currentUser.id || 'guest';
             window.location.replace(`/users/${userId}/decks/${guestDeckId}`);
-            return;
+            return { ok: true, navigated: true };
         } catch (err) {
             console.error('Error cloning deck to session for guest:', err);
             showNotification('Failed to open deck for editing', 'error');
-            return;
+            return { ok: false, message: 'Failed to open deck for editing' };
         }
     }
 
-    currentDeckId = deckId;
-    const isGuestDeck = typeof deckId === 'string' && deckId.startsWith('guest_');
-    const deckUrl = isGuestDeck ? `/api/v1/guest/decks/${deckId}` : `/api/v1/decks/${deckId}`;
+    let resolvedDeckId = deckId;
+    if (typeof resolvedDeckId === 'string' && resolvedDeckId.startsWith('guest_')) {
+        try {
+            const m = window.location.pathname.match(/\/users\/[^/]+\/decks\/([^/?#]+)/);
+            if (m) {
+                const urlDeckId = decodeURIComponent(m[1]);
+                if (urlDeckId.startsWith('guest_')) {
+                    resolvedDeckId = urlDeckId;
+                }
+            }
+        } catch (_e) {
+            /* keep resolvedDeckId */
+        }
+    }
+
+    currentDeckId = resolvedDeckId;
+    const isGuestDeck = typeof resolvedDeckId === 'string' && resolvedDeckId.startsWith('guest_');
+    const deckUrl = isGuestDeck ? `/api/v1/guest/decks/${resolvedDeckId}` : `/api/v1/decks/${resolvedDeckId}`;
     try {
         const response = await fetch(deckUrl, {
             credentials: 'include'
@@ -494,29 +581,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             
             // Convert database type format to frontend format
             // Also detect if cardId is an alternate art and set selectedAlternateCardId accordingly
-            window.deckEditorCards = window.deckEditorCards.map(card => {
-                let convertedType = card.type;
-                if (card.type === 'ally_universe') {
-                    convertedType = 'ally-universe';
-                } else if (card.type === 'basic_universe') {
-                    convertedType = 'basic-universe';
-                } else if (card.type === 'advanced_universe') {
-                    convertedType = 'advanced-universe';
-                }
-                
-                const convertedCard = { ...card, type: convertedType };
-                if (
-                    (convertedType === 'character' || convertedType === 'location') &&
-                    (convertedCard.quantity ?? 1) > 1
-                ) {
-                    convertedCard.quantity = 1;
-                }
-
-                // Note: We'll process alternate art detection after availableCardsMap is loaded
-                // This will be done in a separate step after loadAvailableCards completes
-
-                return convertedCard;
-            });
+            window.deckEditorCards = normalizeDeckEditorCardsFromApi(window.deckEditorCards);
             
             // Determine read-only mode based on URL parameter and ownership
             const urlParams = new URLSearchParams(window.location.search);
@@ -797,7 +862,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
             
             // Use UI preferences from deck metadata when present (avoids redundant fetch)
             const existingPrefs = currentDeckData?.metadata?.uiPreferences;
-            const uiPreferences = existingPrefs !== undefined ? (existingPrefs ?? {}) : await loadUIPreferences(deckId);
+            const uiPreferences = existingPrefs !== undefined ? (existingPrefs ?? {}) : await loadUIPreferences(resolvedDeckId);
             applyUIPreferences(uiPreferences ?? {});
             
             // Force character cards to single column layout after paint
@@ -868,6 +933,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     }
                 });
             });
+            return { ok: true };
         } else {
             const errMsg =
                 (data.errors && data.errors[0] && data.errors[0].message) || data.error || 'Unknown error';
@@ -885,7 +951,7 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                     window.location.href = '/';
                 }, 2000);
             }
-            return;
+            return { ok: false, message: errMsg };
         }
     } catch (error) {
         console.error('❌ Error loading deck for editing:', error);
@@ -902,7 +968,10 @@ async function loadDeckForEditing(deckId, urlUserId = null, isReadOnly = false) 
                 window.location.href = '/';
             }, 2000);
         }
-        return;
+        return {
+            ok: false,
+            message: error && error.message ? error.message : 'Failed to load deck for editing'
+        };
     }
 }
 

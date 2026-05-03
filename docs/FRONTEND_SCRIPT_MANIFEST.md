@@ -34,6 +34,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/data-loading.js
 - /js/deck-background.js
 - /js/deck-editor-core.js
+- /js/deck-editor-post-cards-sync.js
 - /js/components/deck-export.js
 - /js/components/deck-import.js
 - /js/services/CardSearchService.js

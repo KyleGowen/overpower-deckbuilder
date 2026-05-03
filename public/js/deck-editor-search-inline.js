@@ -399,6 +399,8 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
 
     let ok = 0;
     let bad = 0;
+    /** @type {Record<string, unknown>|null} */
+    let lastOkSnapshot = null;
     for (let k = 0; k < idsToAdd.length; k++) {
         const mid = idsToAdd[k];
         try {
@@ -410,6 +412,14 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
             });
             if (response.ok) {
                 ok++;
+                try {
+                    const j = await response.json();
+                    if (typeof v1ResponseOk === 'function' && v1ResponseOk(response, j) && j.data && j.data.metadata) {
+                        lastOkSnapshot = j.data;
+                    }
+                } catch (_parse) {
+                    /* ignore */
+                }
             } else {
                 bad++;
                 try {
@@ -429,8 +439,20 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
         }
     }
 
+    let missionEditorRefreshOk = false;
     if (ok > 0) {
-        await loadDeckForEditing(currentDeckId);
+        const syncResult =
+            typeof window.syncDeckEditorFromV1DeckDataOrReload === 'function'
+                ? await window.syncDeckEditorFromV1DeckDataOrReload(lastOkSnapshot)
+                : { ok: false, message: 'Deck sync not loaded' };
+        missionEditorRefreshOk = !!(syncResult && syncResult.ok);
+        if (!missionEditorRefreshOk) {
+            if (typeof showNotification === 'function') {
+                showNotification('Missions may have been added but the editor failed to refresh.', 'error');
+            } else {
+                showToast('Missions may have been added but the editor failed to refresh.', 'error');
+            }
+        }
         setTimeout(() => {
             if (typeof forceCharacterSingleColumnLayout === 'function') {
                 forceCharacterSingleColumnLayout();
@@ -441,10 +463,12 @@ async function addMissionSetToDeckFromSearch(missionSetName, missionBulkIds) {
     dismissSearchUi();
 
     if (ok > 0 && bad === 0) {
-        showToast(`Added ${ok} mission(s) from set`, 'success');
+        if (missionEditorRefreshOk) {
+            showToast(`Added ${ok} mission(s) from set`, 'success');
+        }
     } else if (ok > 0 && bad > 0) {
         showToast(`Added ${ok} mission(s); ${bad} failed`, 'error');
-    } else {
+    } else if (ok === 0) {
         showToast('Could not add missions from set', 'error');
     }
 }
@@ -643,6 +667,8 @@ async function addSelectedCardsToDeckFromSearch(payloads) {
     }
 
     const cardsUrl = getDeckEditorSearchCardsUrl();
+    /** @type {Record<string, unknown>|null} */
+    let lastOkSnapshot = null;
     for (let i = 0; i < normalCards.length; i++) {
         const payload = normalCards[i];
         const blockMessage = getDeckEditorSearchBlockMessage(payload.id, payload.type, addState);
@@ -656,6 +682,14 @@ async function addSelectedCardsToDeckFromSearch(payloads) {
             if (response.ok) {
                 markDeckEditorSearchAddState(payload.id, payload.type, addState);
                 ok++;
+                try {
+                    const j = await response.json();
+                    if (typeof v1ResponseOk === 'function' && v1ResponseOk(response, j) && j.data && j.data.metadata) {
+                        lastOkSnapshot = j.data;
+                    }
+                } catch (_parse) {
+                    /* ignore */
+                }
             } else {
                 bad++;
                 showToast(await parseDeckEditorSearchAddError(response), 'error');
@@ -667,8 +701,16 @@ async function addSelectedCardsToDeckFromSearch(payloads) {
         }
     }
 
+    let batchEditorRefreshOk = false;
     if (ok > 0) {
-        await loadDeckForEditing(currentDeckId);
+        const syncResult =
+            typeof window.syncDeckEditorFromV1DeckDataOrReload === 'function'
+                ? await window.syncDeckEditorFromV1DeckDataOrReload(lastOkSnapshot)
+                : { ok: false, message: 'Deck sync not loaded' };
+        batchEditorRefreshOk = !!(syncResult && syncResult.ok);
+        if (!batchEditorRefreshOk) {
+            notifyDeckEditorSearchError('Cards may have been added but the editor failed to refresh.');
+        }
         setTimeout(() => {
             if (typeof forceCharacterSingleColumnLayout === 'function') {
                 forceCharacterSingleColumnLayout();
@@ -678,7 +720,9 @@ async function addSelectedCardsToDeckFromSearch(payloads) {
     }
 
     if (ok > 0 && bad === 0) {
-        showToast(`Added ${ok} card(s) to deck!`, 'success');
+        if (batchEditorRefreshOk) {
+            showToast(`Added ${ok} card(s) to deck!`, 'success');
+        }
     } else if (ok > 0) {
         showToast(`Added ${ok} card(s); ${bad} failed`, 'error');
     } else if (bad > 0) {
@@ -733,18 +777,22 @@ async function addCardToDeckFromSearch(cardId, cardType, cardName) {
         const response = await postDeckEditorSearchCard(getDeckEditorSearchCardsUrl(), cardId, cardType);
 
         if (response.ok) {
-            dismissDeckEditorSearchUi();
-
-            // Reload deck cards
-            await loadDeckForEditing(currentDeckId);
-            
-            // Force character single column layout after reload
-            setTimeout(() => {
-                forceCharacterSingleColumnLayout();
-            }, 100);
-            
-            // Show success message
-            showToast('Card added to deck!', 'success');
+            const syncFn = window.syncDeckEditorAfterSuccessfulCardsPostResponse;
+            const refresh =
+                typeof syncFn === 'function' ? await syncFn(response) : { ok: false, message: 'Deck sync not loaded' };
+            if (refresh.ok) {
+                dismissDeckEditorSearchUi();
+                setTimeout(() => {
+                    if (typeof forceCharacterSingleColumnLayout === 'function') {
+                        forceCharacterSingleColumnLayout();
+                    }
+                }, 100);
+                showToast('Card added to deck!', 'success');
+            } else {
+                notifyDeckEditorSearchError(
+                    refresh.message || 'Card may have been added but the editor failed to refresh.'
+                );
+            }
         } else {
             console.error('🔍 API Error Response:', response.status, response.statusText);
             showToast(await parseDeckEditorSearchAddError(response), 'error');
