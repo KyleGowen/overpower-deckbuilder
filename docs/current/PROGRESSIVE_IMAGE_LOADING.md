@@ -64,6 +64,6 @@ Entry points:
 ## References
 
 - [MDN: HTMLImageElement.decode()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode)
-- [docs/plans/seamless-thumb-to-full-res.plan.md](../plans/seamless-thumb-to-full-res.plan.md) — original two-layer plan
-- [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md) — deck-editor-specific paths and markup
+- `public/js/deck-editor-rendering.js` — `initDeckEditorCardViewProgressiveLoad()` (deck editor card-view)
+- `public/js/card-hover-modal.js` — same two-layer + fade for hover modal
 - [IMAGE_PIPELINE.md](IMAGE_PIPELINE.md) — thumbnail generation and pipeline

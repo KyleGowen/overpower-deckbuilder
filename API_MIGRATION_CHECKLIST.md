@@ -8,6 +8,7 @@ Track migration from legacy Express routes (`API_DOCUMENTATION.md`) to the encap
 - [API_V1.md](API_V1.md) — versioned contract (`{ data, meta, errors }`, Bearer JWT).
 - [MIGRATION_ARCHITECTURE.md](MIGRATION_ARCHITECTURE.md) — layers, `/admin` rules, testing.
 - Agent workflow: [.cursor/skills/api-layer-migration/SKILL.md](.cursor/skills/api-layer-migration/SKILL.md)
+- **Integration test coverage:** [`tests/integration/api-v1/MIGRATED_ROUTES_COVERAGE.md`](tests/integration/api-v1/MIGRATED_ROUTES_COVERAGE.md) — one row per `/api/v1` route with a test reference. Keep in sync: when you tick a route as migrated here, add a row there too.
 
 **Per-route columns**
 

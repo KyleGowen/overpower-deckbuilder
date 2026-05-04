@@ -80,11 +80,4 @@ The CI pipeline uses `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` stored as Git
 
 > ⛔ **NEVER add or upgrade paid AWS resources without explicit instruction from Kyle.**
 
-See [`docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md`](../docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md) for upgrade options with cost estimates. All options are documented there — do NOT implement anything from it unless explicitly directed.
-
-Locked actions (require explicit Kyle approval):
-- Upgrading EC2 instance type
-- Upgrading RDS instance class
-- Adding Redis / ElastiCache
-- Adding any new paid AWS service (load balancer, NAT gateway, etc.)
-- Changes to `infra/` that increase the AWS bill
+See root [`.cursorrules`](../.cursorrules) **Infrastructure Spend Lock** for the full locked-actions list and cost options doc.

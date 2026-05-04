@@ -1,5 +1,7 @@
 # CDN Infrastructure — CloudFront + S3
 
+> **Scope:** Runtime CDN/CloudFront + S3 architecture, Terraform configuration, and production image-serving rules. For build-time thumbnail generation, see [`IMAGE_PIPELINE.md`](IMAGE_PIPELINE.md). For HTTP cache headers on API responses (`GET /api/v1/decks` ETag/304 behavior), see the [HTTP Caching](#http-caching--api-responses) section at the bottom of this file.
+
 ## Overview
 
 Card images and UI image assets are offloaded from the EC2 instance to AWS. A private S3 bucket holds the canonical image files; a CloudFront distribution serves them globally from edge locations. The EC2 instance (`t2.micro`) handles only application traffic — API requests, page rendering, auth, and short-cache JS/CSS/template files — and should not serve image bytes in production.
@@ -434,3 +436,31 @@ The `PriceClass_100` setting restricts edge locations to US, Canada, and Europe 
 - [`docs/current/DEPLOYMENT.md`](DEPLOYMENT.md) — full deployment workflow
 - [`infra/.cursorrules`](../../infra/.cursorrules) — Terraform conventions and infrastructure spend lock
 - [`DEAD_CODE_POLICY.md`](../../DEAD_CODE_POLICY.md) — removing unused assets
+
+---
+
+## HTTP Caching — API Responses
+
+> Content from `HTTP_CACHING.md` merged here to keep caching concerns in one place.
+
+### `GET /api/v1/decks` — ETag + 304
+
+The deck list API uses **`Vary: Cookie`**, **`Cache-Control: private, max-age=0, must-revalidate`**, and **`ETag`** so clients always revalidate while still allowing 304 when nothing changed.
+
+**File:** `src/api/http/decks.http.ts`
+
+| Header | Purpose |
+|--------|---------|
+| `Vary: Cookie` | Session cookie value in cache key — prevents cross-user cache sharing |
+| `Cache-Control: private, max-age=0, must-revalidate` | Per-user only (never CDN); always revalidates; avoids stale legality after saves |
+| `ETag: "<sha1>"` | SHA-1 of the serialised v1 response body; enables 304 on unchanged data |
+
+On revalidation the server queries the DB, computes a new ETag, and compares with `If-None-Match`. Match → 304 (no body). Mismatch → 200 with updated body.
+
+ETag is computed with Node `crypto` (no extra dependency). The full response is serialised once and reused for both the ETag hash and the write. Cache invalidation is automatic — any change to the deck list produces a different ETag.
+
+This is **per-user** (the `private` directive) and complements the server-side in-memory cache in `PostgreSQLDeckRepository` (2-minute TTL); both layers work independently.
+
+### Catalog caching (`/api/v1/catalog/*`)
+
+See [`API_V1_CATALOG_CACHING.md`](API_V1_CATALOG_CACHING.md) for `Cache-Control` + strong `ETag` + `catalogDataVersion` on catalog routes and the CloudFront ordered cache behaviors in `infra/cloudfront.tf`.

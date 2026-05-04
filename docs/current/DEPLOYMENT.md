@@ -1,6 +1,60 @@
-# OverPower Deck Builder - Production Deployment Guide
+# Production Deployment — Excelsior Deckbuilder
 
-This guide explains how to deploy the OverPower Deck Builder application to AWS production environment.
+**This is the single combined reference for CI/CD pipeline strategy AND the operational runbook.** `DEPLOYMENT_STRATEGY.md` has been merged here; it is now a pointer to this file.
+
+**Table of contents:**
+- [CI/CD Pipeline Overview](#cicd-pipeline-overview) — GitHub Actions, Docker, blue-green deploy, SSM timing
+- [Quick Deployment](#quick-deployment) — script or manual deploy commands
+- [Infrastructure Overview](#infrastructure-overview) — EC2, RDS, ECR, domain
+- [Production Database Access (SSM Tunnel)](#production-database-access-ssm-port-forwarding) — laptop access runbook
+- [Environment Variables & Secrets](#environment-variables) — JWT, Firebase, SSM params
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## CI/CD Pipeline Overview
+
+```
+GitHub (main branch push)
+    → GitHub Actions: build → unit tests → integration tests → docker build → migrations → deploy → verify
+    → Docker image (linux/amd64, no-cache) pushed to ECR with :$GITHUB_SHA + :latest
+    → Blue-green deploy via SSM AWS-RunShellScript on EC2
+    → nginx upstream switch after health gate passes
+    → External /health poll confirms .git.commit matches $GITHUB_SHA
+```
+
+**Key CI invariants:**
+- Deployment uses `:$GITHUB_SHA` tag only (never `:latest`) — correctness tied to SHA
+- `CMD_ID` must be non-empty after `send-command`; empty = deploy never sent → fail immediately
+- `DEPLOY_DONE` loop exits only on `"Success"`; loop exhaustion → fail (never fall-through as success)
+
+**SSM timing budget** (Blue-Green Deploy step, `--timeout-seconds 540`):
+- ECR pull: ~1–2 min; container startup + health gate: ~3.5 min; nginx switch: ~15 s
+- GitHub Actions polls 90 × 5 s = 450 s max
+
+**Docker image build:**
+- Multi-stage: `node:20-alpine` build stage → slim runtime stage with Flyway + `dumb-init`
+- Card images excluded via `.dockerignore`; UI images (`src/resources/images/`) are included as local dev fallback
+- `sync-images` CI job runs `npm run generate:thumbnails` then `aws s3 sync` to push card art + UI images to S3
+
+**Blue-green deployment:**
+```bash
+docker pull $ECR_URI:$GITHUB_SHA
+docker run -d --name overpower-app-new --restart unless-stopped \
+  -p $NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=true $ECR_URI:$GITHUB_SHA
+# health gate (30s wait + up to 36×5s polls on localhost:$NEW_PORT/health)
+sed -i "s/localhost:$CURRENT_PORT/localhost:$NEW_PORT/g" /etc/nginx/conf.d/excelsior.cards.conf
+nginx -t && nginx -s reload
+```
+
+**Verify deployment failure (`Deployment verification failed — old commit SHA`):**
+Check whether SSM actually ran a new command — look for empty `CMD_ID` or exhausted poll loop in deploy workflow output. Diagnose:
+```bash
+aws ssm list-command-invocations --instance-id i-04493611b99785f28 --region us-west-2 \
+  --max-results 5 --query 'CommandInvocations[*].{CommandId:CommandId,Status:Status,RequestedDateTime:RequestedDateTime}' --output table
+```
+
+---
 
 ## Prerequisites
 
@@ -63,7 +117,7 @@ aws ssm send-command --instance-ids i-0dee560af076c0f9d --document-name "AWS-Run
 **Every time** you use a GUI or CLI on your machine:
 
 1. **Start the SSM tunnel first** and leave that terminal open (see [Production database access (SSM port forwarding)](#production-database-access-ssm-port-forwarding) below). Use [scripts/ssm-prod-db-tunnel.sh](../../scripts/ssm-prod-db-tunnel.sh) or the raw `aws ssm start-session` command there.
-2. Point the client at **`127.0.0.1`** and the **local** port (default **`15432`**), **not** `op-deckbuilder-postgres....amazonaws.com`.
+2. Point the client at `**127.0.0.1`** and the **local** port (default `**15432`**), **not** `op-deckbuilder-postgres....amazonaws.com`.
 
 **Symptom you forgot the tunnel:** timeout or “could not connect” to the RDS hostname from your laptop; or TablePlus to `127.0.0.1` fails while the tunnel terminal is not running.
 
@@ -75,33 +129,30 @@ Connect from your laptop **without** opening RDS to the public internet: traffic
 
 **Checklist (keep the tunnel terminal visible while you work):**
 
-| Step | Action |
-|------|--------|
-| 1 | `aws` CLI works; Session Manager plugin installed. |
-| 2 | IAM allows `ssm:StartSession` for your app EC2 instance + `AWS-StartPortForwardingSessionToRemoteHost` (see **G2** below). |
-| 3 | **Start tunnel** — `./scripts/ssm-prod-db-tunnel.sh i-...` (or equivalent). Leave it running. |
-| 4 | **Only then** open TablePlus / `psql` to `127.0.0.1` and the tunnel port (`15432` by default). |
+
+| Step | Action                                                                                                                     |
+| ---- | -------------------------------------------------------------------------------------------------------------------------- |
+| 1    | `aws` CLI works; Session Manager plugin installed.                                                                         |
+| 2    | IAM allows `ssm:StartSession` for your app EC2 instance + `AWS-StartPortForwardingSessionToRemoteHost` (see **G2** below). |
+| 3    | **Start tunnel** — `./scripts/ssm-prod-db-tunnel.sh i-...` (or equivalent). Leave it running.                              |
+| 4    | **Only then** open TablePlus / `psql` to `127.0.0.1` and the tunnel port (`15432` by default).                             |
+
 
 **Confirm before you change AWS access:** attaching the IAM policy below changes **your** permissions (not Terraform). **Do not** run `terraform apply` for this flow unless you deliberately change infrastructure (e.g. security groups).
 
 ### G1 — Committed samples (no AWS change)
 
 - **IAM policy (placeholders only):** [docs/examples/ssm-prod-db-tunnel-policy.json.sample](../../docs/examples/ssm-prod-db-tunnel-policy.json.sample) — copy it, replace `REPLACE_AWS_ACCOUNT_ID` and `REPLACE_EC2_INSTANCE_ID`, then attach as **G2**. For `aws iam put-user-policy`, point `--policy-document` at your filled copy. A filled file at repo root named `ssm-prod-db-tunnel-policy.json` is **gitignored** so you can keep it next to the repo for convenience.
-
 - **Tunnel script:** [scripts/ssm-prod-db-tunnel.sh](../../scripts/ssm-prod-db-tunnel.sh) — executable helper; same as the `aws ssm start-session` block under **Start tunnel** below.
 
 ### Prerequisites on your machine
 
 1. **AWS CLI v2** and **Session Manager plugin** — [Install Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
-
-   On macOS, Homebrew can install both. If `aws --version` fails with **`pyexpat` / `libexpat` / `_XML_SetAllocTrackerActivationThreshold`**, use the **official AWS CLI v2 macOS installer** from AWS instead of Homebrew’s `awscli` (bundled runtime avoids Python library conflicts on Apple Silicon / Python 3.14).
-
+  On macOS, Homebrew can install both. If `aws --version` fails with `**pyexpat` / `libexpat` / `_XML_SetAllocTrackerActivationThreshold`**, use the **official AWS CLI v2 macOS installer** from AWS instead of Homebrew’s `awscli` (bundled runtime avoids Python library conflicts on Apple Silicon / Python 3.14).
 2. **Credentials:** `aws configure` or `aws configure sso`, then verify:
-
-   ```bash
+  ```bash
    aws sts get-caller-identity
-   ```
-
+  ```
    Add `--profile YOUR_PROFILE` to every `aws` command below if you use a non-default profile.
 
 ### G2 — IAM permission (you must confirm, then attach in AWS)
@@ -137,7 +188,7 @@ aws ssm describe-instance-information --region us-west-2 \
 
 ### SSM parameter names
 
-Terraform stores parameters under `/var.project_name/var.environment/...` ([infra/ssm.tf](../../infra/ssm.tf)). Defaults are `op-deckbuilder` and **`dev`** — the same prefix appears elsewhere in this doc (e.g. JWT). If your deployed environment name differs, substitute it in every path below (e.g. `/op-deckbuilder/dev/database/host`).
+Terraform stores parameters under `/var.project_name/var.environment/...` ([infra/ssm.tf](../../infra/ssm.tf)). Defaults are `op-deckbuilder` and `**dev**` — the same prefix appears elsewhere in this doc (e.g. JWT). If your deployed environment name differs, substitute it in every path below (e.g. `/op-deckbuilder/dev/database/host`).
 
 **Host and port:**
 
@@ -197,14 +248,16 @@ psql -h 127.0.0.1 -p 15432 -U postgres -d overpower 'sslmode=require'
 
 Use these settings **only while the SSM tunnel is running** (terminal A). If the tunnel stops, the DB connection will drop or fail to connect.
 
-| Setting | Value |
-|--------|--------|
-| Host | `127.0.0.1` (not the RDS hostname) |
-| Port | `15432` (or whatever `LOCAL_PORT` you passed to the script) |
-| Database | `overpower` |
-| User | `postgres` |
+
+| Setting  | Value                                                         |
+| -------- | ------------------------------------------------------------- |
+| Host     | `127.0.0.1` (not the RDS hostname)                            |
+| Port     | `15432` (or whatever `LOCAL_PORT` you passed to the script)   |
+| Database | `overpower`                                                   |
+| User     | `postgres`                                                    |
 | Password | From SSM: `/op-deckbuilder/dev/database/password` (see above) |
-| SSL | Try **Require**; if errors, try **Prefer** once |
+| SSL      | Try **Require**; if errors, try **Prefer** once               |
+
 
 **URL form (TablePlus “import URL”):** `postgresql://postgres:YOUR_PASSWORD@127.0.0.1:15432/overpower?sslmode=require` — URL-encode special characters in the password if needed.
 
@@ -221,7 +274,7 @@ If PostgreSQL TLS errors through the tunnel, try once with `sslmode=prefer` to d
 
 **TablePlus / client cannot connect to `127.0.0.1`:** Is `./scripts/ssm-prod-db-tunnel.sh` (or `start-session`) still running in another terminal? Restart the tunnel, then reconnect.
 
-**Timeout to `op-deckbuilder-postgres...amazonaws.com` from laptop:** Expected without a tunnel or admin SG allowlist — use **`127.0.0.1` + tunnel** instead.
+**Timeout to `op-deckbuilder-postgres...amazonaws.com` from laptop:** Expected without a tunnel or admin SG allowlist — use `**127.0.0.1` + tunnel** instead.
 
 ## Environment Variables
 
@@ -425,7 +478,7 @@ aws ssm send-command --instance-ids i-0dee560af076c0f9d --document-name AWS-RunS
 ### Common Issues
 
 1. **Database Connection Failed**
-  - **From your laptop / TablePlus:** Confirm the **SSM tunnel is running** and the client uses **`127.0.0.1`** and the **tunnel port** — not the RDS hostname ([section above](#connecting-from-your-laptop-tableplus-dbeaver-local-psql)).
+  - **From your laptop / TablePlus:** Confirm the **SSM tunnel is running** and the client uses `**127.0.0.1`** and the **tunnel port** — not the RDS hostname ([section above](#connecting-from-your-laptop-tableplus-dbeaver-local-psql)).
   - **From the app on EC2:** Check if RDS instance is running; security groups allow the app EC2 to connect to RDS; credentials in SSM / `.env` match RDS.
 2. **SSL Certificate Issues**
   - Ensure `NODE_TLS_REJECT_UNAUTHORIZED=0` is set
@@ -451,15 +504,12 @@ docker logs overpower-deckbuilder --tail 50
 # Check environment variables
 cat /opt/app/.env
 
-# Test database connection from the EC2 host (same network / SG as the app — not from your laptop)
+# Test database connection
 psql -h op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com -U postgres -d overpower
 ```
 
-**From your laptop:** use the [SSM tunnel](#production-database-access-ssm-port-forwarding) and `psql -h 127.0.0.1 -p 15432 ...`; the command above will usually **timeout** on a typical dev machine.
-
 ## Security Considerations
 
-- **Laptop access to prod RDS** should go through **Session Manager port forwarding**, not by widening the RDS security group to the public internet.
 - Database password is stored in AWS SSM Parameter Store
 - SSL is required for database connections
 - Application runs in Docker container for isolation

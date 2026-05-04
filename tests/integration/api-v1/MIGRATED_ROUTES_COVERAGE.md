@@ -2,6 +2,8 @@
 
 Each row lists at least one integration test that exercises the route (happy path, auth error, or security case). Update this file when adding routes or tests.
 
+**Keep in sync with [`API_MIGRATION_CHECKLIST.md`](../../../API_MIGRATION_CHECKLIST.md):** when a route is ticked as migrated in that checklist, add a coverage row here. When a route is removed, remove the row from both files.
+
 | Method | Path | Test reference |
 |--------|------|----------------|
 | POST | `/api/v1/auth/login` | `api-v1/v1-api.integration.test.ts` — login + me |

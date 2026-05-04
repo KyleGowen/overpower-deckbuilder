@@ -1,5 +1,7 @@
 # Edgar Rice Burroughs and the WoPrize Packs
 
+> **Scope:** "Edgar Rice Burroughs and the WoPrize Packs" tab from the Google Sheet. Includes **Have** (personal collector tracking) and **Notes**. Do NOT use this file as the source of truth for DB corrections or collection UX — use [`checklist.md`](checklist.md) (main tab, `gid=1007221192`) for canonical name/`set_number`/rarity values per [`docs/current/COLLECTION_CHECKLIST_SOURCE.md`](../current/COLLECTION_CHECKLIST_SOURCE.md).
+
 Full ERB-set style checklist including Have, Set, #, name, special, rarity, location, and notes.
 
 - **Spreadsheet**: [OverPower Check List](https://docs.google.com/spreadsheets/d/1WGvA8v8NAd8ByOtiuhhG6d13R3twSGbs/edit)

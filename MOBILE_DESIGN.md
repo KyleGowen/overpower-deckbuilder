@@ -2,6 +2,27 @@
 
 This document is the **source of truth** for mobile and dual–layout-mode work on Excelsior Deckbuilder. It complements `[docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md)` (visual specs) and repo `[.cursorrules](.cursorrules)`.
 
+## Quick Navigation — Mobile Docs Index
+
+Use this table to jump directly to the right doc. All per-tab specs stay in `docs/current/`.
+
+| Task / Topic | Go to |
+|---|---|
+| Mobile layout strategy, milestones, `layout-mobile` class, `isLayoutMobile()` | This file (sections below) |
+| DBV Aspects tab mobile (filters, caption, art) | [`docs/current/DBV_ASPECTS_MOBILE.md`](docs/current/DBV_ASPECTS_MOBILE.md) |
+| DBV Missions tab mobile (mission-set select, card rows) | [`docs/current/DBV_MISSIONS_MOBILE.md`](docs/current/DBV_MISSIONS_MOBILE.md) |
+| DBV Training tab mobile (type toggles, card rows) | [`docs/current/DBV_TRAINING_MOBILE.md`](docs/current/DBV_TRAINING_MOBILE.md) |
+| DBV Basic Universe tab mobile (type toggles + Teamwork strips) | [`docs/current/DBV_BASIC_UNIVERSE_MOBILE.md`](docs/current/DBV_BASIC_UNIVERSE_MOBILE.md) |
+| Deck Editor View (DEV) in mobile (list, search, row actions) | [`docs/current/DECK_EDITOR_MOBILE_VIEW.md`](docs/current/DECK_EDITOR_MOBILE_VIEW.md) |
+| Collection tab mobile (list vs detail sheet, fixed sort) | [`docs/current/COLLECTION_VIEW_MOBILE.md`](docs/current/COLLECTION_VIEW_MOBILE.md) |
+| Mobile DBV image sizing repeatable fix (`max-height: none !important`) | [`docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md`](docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md) |
+| Mobile DBV row-art sizing history / experiments | [`docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md`](docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md) |
+| DBV power-type icon filter strip (reusable component) | [`public/js/DBV_POWER_TYPE_FILTER_STRIP.md`](public/js/DBV_POWER_TYPE_FILTER_STRIP.md) |
+| DBV card-name filter (reusable component) | [`public/js/DBV_CARD_NAME_FILTER.md`](public/js/DBV_CARD_NAME_FILTER.md) |
+| DBV mission set `<select>` filter (Missions + Events) | [`public/js/DBV_MISSION_SET_FILTER.md`](public/js/DBV_MISSION_SET_FILTER.md) |
+
+---
+
 ---
 
 ## 1. Current architecture

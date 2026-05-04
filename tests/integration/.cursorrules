@@ -10,3 +10,16 @@
 - Use integrationTestUtils.trackTestUser(userId) when using userRepository.createUser directly
 - Use integrationTestUtils.trackTestDeck(deckId) for decks created via API
 - **NEVER leave orphaned test data in the database**
+
+## Test Categorization (CI Workflow Buckets)
+
+- **ALWAYS try to match new integration tests to the best category first before using "Remaining" as fallback**
+- **Filename patterns → CI category:**
+  - **Security & Auth**: `*-security-*.test.ts`, `*-auth-*.test.ts`, `guest-*.test.ts`, `authentication*.test.ts`
+  - **Search & Filtering**: `*search*.test.ts`, `*filtering*.test.ts`, `stat-type-filtering*.test.ts`, `ally-search*.test.ts`
+  - **Deck Core**: `deckBuilding.test.ts`, `deckManagement.test.ts`, `deck-navigation-flow.test.ts`, `deck-editor-search-new-deck.test.ts`, `deckClickability.test.ts`, `deckEditabilityBrowser.test.ts`, `deckEditabilityHTML.test.ts`, `deckTitleDescriptionEditability.test.ts`, `deck-validation-unusable-cards.test.ts`, `limitedDeckIntegration.test.ts`, `limitedDeckSaveAndLoad.test.ts`, `limitedDeckSimpleIntegration.test.ts`
+  - **Deck Security**: `deck-editor-role-access.test.ts`, `deck-ownership-security-simple.test.ts`, `deck-ownership-security.test.ts`, `deck-save-frontend-validation.test.ts`, `deck-save-security-api.test.ts`, `deck-save-security-comprehensive.test.ts`, `deck-save-security-simple.test.ts`
+  - **Game Logic**: `reserve-character*.test.ts`, `character*.test.ts`, `power*.test.ts`, `teamwork*.test.ts`, `event-mission-filtering*.test.ts`
+  - **UI/UX & Frontend**: `*HTML*.test.ts`, `*Browser*.test.ts`, `*Clickability*.test.ts`, `*Editability*.test.ts`, `*Layout*.test.ts`, `*Navigation*.test.ts`, `*Tooltip*.test.ts`
+  - **Remaining**: `create*.test.ts`, `user*.test.ts`, `cross*.test.ts`, `new*.test.ts`, `auto*.test.ts`, `database*.test.ts`, `change*.test.ts`, `username*.test.ts`, `alternate*.test.ts`
+- Aim for balanced groups (5–15 minutes each); update GitHub Actions workflow patterns when adding new categories

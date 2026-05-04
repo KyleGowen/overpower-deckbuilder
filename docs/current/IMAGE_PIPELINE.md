@@ -1,5 +1,7 @@
 # Image Pipeline — Card Thumbnails
 
+> **Scope:** Build-time thumbnail generation (`npm run generate:thumbnails`), folder layout, and dev vs. production S3 sync. For runtime CDN/CloudFront architecture, see [`CLOUDFRONT_CDN.md`](CLOUDFRONT_CDN.md). For the two-layer progressive-load pattern in the deck editor, see [`PROGRESSIVE_IMAGE_LOADING.md`](PROGRESSIVE_IMAGE_LOADING.md).
+
 ## Overview
 
 Card images on deck tiles are served as WebP thumbnails sized to exactly match the CSS display dimensions. Generating at display size reduces bytes transferred per tile by ~60% compared to serving full-resolution images.

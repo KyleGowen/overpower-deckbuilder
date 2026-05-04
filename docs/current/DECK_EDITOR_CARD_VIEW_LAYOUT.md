@@ -72,5 +72,5 @@ Goal: **Image fills the frame with bevelled (rounded) corners; no visible border
 ## References
 
 - [STYLE_GUIDE.md](STYLE_GUIDE.md) — Deck Editor Card View Styling (dimensions, breakpoints).
-- [DECK_EDITOR_IMAGE_LOADING.md](DECK_EDITOR_IMAGE_LOADING.md) — Two-layer progressive load (thumb + full-res).
+- [PROGRESSIVE_IMAGE_LOADING.md](PROGRESSIVE_IMAGE_LOADING.md) — Two-layer progressive load pattern (thumb + full-res fade-in, decode before reveal).
 - [PROGRESSIVE_IMAGE_LOADING.md](PROGRESSIVE_IMAGE_LOADING.md) — Decode-before-reveal pattern.
