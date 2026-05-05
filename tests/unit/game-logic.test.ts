@@ -30,8 +30,8 @@ declare global {
         deckEditorCards?: any[];
         availableCardsMap?: Map<string, any>;
         displayDeckCardsForEditing?: () => Promise<void>;
-        renderDeckCardsCardView?: () => void;
-        renderDeckCardsListView?: () => void;
+        renderDeckCardsCardView?: () => Promise<void>;
+        renderDeckCardsListView?: () => Promise<void>;
         getExpansionState?: () => any;
         applyUIPreferences?: (prefs: any) => void;
         updateDeckEditorCardCount?: () => void;

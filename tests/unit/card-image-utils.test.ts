@@ -16,7 +16,7 @@ import path from 'path';
 declare global {
     interface Window {
         mapImagePathToActualFile?: (imagePath: string) => string;
-        getCardImagePath?: (card: any, cardType: string, options?: { useThumbnail?: boolean }) => string;
+        getCardImagePath?: any;
         toThumbnailPath?: (fullPath: string) => string;
         toThumbnailPathForType?: (fullPath: string, type: string) => string;
         mapDatabaseIdToDeckCardId?: (databaseId: string, cardType: string) => string;

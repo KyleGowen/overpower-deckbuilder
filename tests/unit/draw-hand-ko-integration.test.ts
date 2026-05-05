@@ -16,8 +16,10 @@ declare global {
     interface Window {
         DrawHand?: {
             init: () => void;
+            drawHand: () => void;
             refresh: () => void;
             displayDrawnCards: (cards: any[]) => void;
+            getDrawnCards: () => any[];
             toggle: () => void;
             close: () => void;
         };
