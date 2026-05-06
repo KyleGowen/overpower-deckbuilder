@@ -286,6 +286,8 @@ export interface DeckMetadata {
   cardCount: number; // Total number of cards in deck
   userId: string; // Owner of the deck
   uiPreferences?: UIPreferences; // UI state persistence
+  /** UUID of reserve character; present on API list/detail metadata when set */
+  reserve_character?: string | null;
 }
 
 export interface DeckData {

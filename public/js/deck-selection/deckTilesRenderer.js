@@ -4,6 +4,22 @@
 (function initDeckTilesRenderer() {
     window.DeckSelection = window.DeckSelection || {};
 
+    /** Keep in sync with `extractReserveUuid` in `public/js/index-page.js` (reserve vs. card id). */
+    function normalizeReserveUuid(id) {
+        if (!id) return null;
+        const s = String(id);
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidPattern.test(s)) return s;
+        const prefixedMatch = s.match(/^[a-z]+_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+        if (prefixedMatch && prefixedMatch[1]) return prefixedMatch[1];
+        const parts = s.split('_');
+        for (let i = 1; i < parts.length; i++) {
+            const candidate = parts.slice(i).join('_');
+            if (uuidPattern.test(candidate)) return candidate;
+        }
+        return s;
+    }
+
     window.DeckSelection.displayDecks = async function displayDecks(decks) {
         const deckList = document.getElementById('deck-list');
 
@@ -49,6 +65,8 @@
             const characterCards = cards.filter(card => card.type === 'character').slice(0, 4);
             const locationCard = cards.find(card => card.type === 'location');
             const missionCard = cards.find(card => card.type === 'mission');
+            const reserveRaw = deck.metadata && deck.metadata.reserve_character;
+            const reserveNorm = reserveRaw ? normalizeReserveUuid(reserveRaw) : null;
 
             // Character preview: always 4 slots (empty placeholders if missing)
             const characterPreviewHtml = (() => {
@@ -62,8 +80,16 @@
                     const imagePath = window.DeckSelection.getDeckCardImagePath(card);
                     const title = card.name || 'Unknown Character';
                     const foilClass = card.is_foil ? ' foil-shimmer foil-once' : '';
+                    const isReserveSlot =
+                        !!reserveNorm &&
+                        !!card.cardId &&
+                        normalizeReserveUuid(card.cardId) === reserveNorm;
+                    const titleAttr = (isReserveSlot ? title + ' (reserve)' : title).replace(/"/g, '&quot;');
+                    const reserveMark = isReserveSlot
+                        ? '<span class="deck-tile-reserve-mark" aria-hidden="true">R</span>'
+                        : '';
                     if (imagePath) {
-                        html += `<div class="deck-character-card-display deck-tile-lazy-bg${foilClass}" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${title.replace(/"/g, '&quot;')}"></div>`;
+                        html += `<div class="deck-character-card-display deck-tile-lazy-bg${foilClass}" data-image-url="${imagePath.replace(/"/g, '&quot;')}" title="${titleAttr}">${reserveMark}</div>`;
                     } else {
                         html += `<div class="deck-character-card-display empty">?</div>`;
                     }

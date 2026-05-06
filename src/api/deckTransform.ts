@@ -17,6 +17,7 @@ export function transformDeckListItem(deck: Deck) {
       userId: deck.user_id,
       uiPreferences: deck.ui_preferences,
       is_limited: deck.is_limited,
+      reserve_character: deck.reserve_character ?? null,
       background_image_path: deck.background_image_path || null,
     },
     cards: deck.cards || [], // Character and location cards from metadata
@@ -42,6 +43,7 @@ export function transformGuestDeckToListItem(deckData: DeckData) {
       userId: deckData.metadata.userId,
       uiPreferences: deckData.metadata.uiPreferences,
       is_limited: false,
+      reserve_character: deckData.metadata.reserve_character ?? null,
       background_image_path: null
     },
     cards: deckData.cards || []

@@ -380,7 +380,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data`** is the transformed deck list (array of `{ "metadata", "cards" }` rows from `transformDeckList` — same shapes the legacy list returned inside `{ success, data }`).
+**Response 200:** v1 envelope; `**data`** is the transformed deck list (array of `{ "metadata", "cards" }` rows from `transformDeckList` — same shapes the legacy list returned inside `{ success, data }`). Each `**metadata`** object includes **`reserve_character`** (UUID string or **`null`**, same semantics as single-deck `**GET /api/v1/decks/:id`**) so clients can show reserve on deck tiles without fetching each deck in full.
 
 **Caching:** `Cache-Control: private, max-age=0, must-revalidate`, `Vary: Cookie`, `**ETag`** over the full v1 JSON body (`SHA-1` of `{"data":...,"meta":{},"errors":[]}`). Clients revalidate each use; if request header `**If-None-Match`** matches `**ETag**`, responds **304** with an **empty** body. (No long freshness window — deck metadata such as `**is_valid`** changes frequently after saves.)
 
@@ -453,7 +453,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 **Request model:** none (path param `**id`** = deck UUID).
 
-**Response 200:** v1 envelope; `**data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `threat`, `is_valid`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc. — `**metadata.threat` / `metadata.is_valid`** align with list rows from `transformDeckListItem`).
+**Response 200:** v1 envelope; `**data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `threat`, `is_valid`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc. — `**metadata.threat`**, `**metadata.is_valid`**, and **`metadata.reserve_character`** align with list rows from `transformDeckListItem`).
 
 **Response 404:** v1 envelope — `errors` with code `**DECK_NOT_FOUND`**.
 

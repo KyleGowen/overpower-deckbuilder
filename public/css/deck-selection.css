@@ -418,6 +418,7 @@
 
 .deck-character-card-display {
     position: relative;
+    container-type: inline-size;
     width: 190px;
     height: 140px;
     margin-left: -38px;
@@ -467,6 +468,28 @@
     color: rgba(78, 205, 196, 0.5);
     font-size: 0.6rem;
     text-align: center;
+}
+
+/* Reserve character marker on deck list character thumbnails (DTV + MV) */
+.deck-tile-reserve-mark {
+    position: absolute;
+    top: clamp(6px, calc(2.5cqw + 2px), 10px);
+    left: clamp(7px, calc(3cqw + 2px), 12px);
+    z-index: 4;
+    font-family: system-ui, "Segoe UI", "Avenir Next", sans-serif;
+    font-weight: 600;
+    font-size: clamp(12.87px, 8.415cqw, 17.82px);
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: rgba(242, 244, 247, 0.05);
+    text-shadow:
+        -0.5px -0.5px 0 rgba(255, 255, 255, 0.42),
+        0.5px 0.5px 0 rgba(0, 0, 0, 0.42),
+        0 1px 0 rgba(255, 255, 255, 0.24),
+        0 2px 4px rgba(0, 0, 0, 0.62),
+        1px 4px 7px rgba(0, 0, 0, 0.45),
+        0 4px 12px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
 }
 
 
