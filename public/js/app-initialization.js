@@ -55,13 +55,15 @@ function showMainApp() {
 // loadDecks (called by switchToDeckBuilder) fetches decks and populates userDecks via setUserDecks
 // loadDatabaseViewData() deferred - called by switchToDatabaseView() on first tab switch
 function loadMainAppDataInBackground() {
-    if (window.__EXCELSIOR_PAGE__ === 'deck-editor') {
-        return;
-    }
+    // Standalone `/deck-editor` skips the rest of this function but still needs the foil map
+    // for deck editor Foil buttons and helpers that consult `window.foilCardMap`.
     // Load the foil card map early so it is ready before any deck editor, database view,
     // deck selection, or collection view rendering happens.
     if (typeof loadFoilCardMap === 'function') {
         loadFoilCardMap();
+    }
+    if (window.__EXCELSIOR_PAGE__ === 'deck-editor') {
+        return;
     }
 }
 

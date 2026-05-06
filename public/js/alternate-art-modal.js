@@ -521,13 +521,25 @@ window.showAlternateArtSelectionForExistingCard = function showAlternateArtSelec
             if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
                 window.renderDeckEditorMobileView();
             } else if (deckCardsEditor && deckCardsEditor.classList.contains('card-view')) {
-                // Card View - use renderDeckCardsCardView
-                if (typeof renderDeckCardsCardView === 'function') {
+                const inst =
+                    cardType === 'location'
+                        ? 0
+                        : targetCard.currentInstanceIndex !== undefined
+                          ? targetCard.currentInstanceIndex
+                          : 0;
+                const patched =
+                    typeof window.patchDeckCardViewInstance === 'function' &&
+                    window.patchDeckCardViewInstance(cardIndex, inst);
+                if (!patched && typeof renderDeckCardsCardView === 'function') {
                     renderDeckCardsCardView();
                 }
             } else {
                 // Tile View or other views - use displayDeckCardsForEditing
                 displayDeckCardsForEditing();
+            }
+
+            if (typeof showDeckValidation === 'function') {
+                void showDeckValidation(window.deckEditorCards);
             }
             
             // Close modal

@@ -24,7 +24,8 @@ function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
  * layer's src, waits for that layer's decode(), then adds card-view-image-full--loaded so it fades
  * in over the thumb with no flash (decode-before-reveal). See docs/current/PROGRESSIVE_IMAGE_LOADING.md.
  */
-function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
+function initDeckEditorCardViewProgressiveLoad(scopeRoot) {
+    const deckCardsEditor = scopeRoot || document.getElementById('deckCardsEditor');
     if (!deckCardsEditor) return;
     const fullResLayers = deckCardsEditor.querySelectorAll('.deck-card-card-view-item .card-view-image-full[data-full-res]');
     fullResLayers.forEach(function (img) {
@@ -50,6 +51,283 @@ function initDeckEditorCardViewProgressiveLoad(deckCardsEditor) {
         fullResImg.src = fullRes;
     });
 }
+
+/**
+ * Shared strings for every quantity instance of one deck-editor row (Card View).
+ * @returns {object|null}
+ */
+function buildDeckCardViewRowContext(slotIndex, card) {
+    const index = slotIndex;
+    const cardIdForImage = card.selectedAlternateCardId || card.cardId;
+    let availableCard = window.availableCardsMap.get(cardIdForImage);
+    if (!availableCard && card.type) {
+        availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
+        if (!availableCard && card.type.includes('_')) {
+            const hyphenType = card.type.replace(/_/g, '-');
+            availableCard = window.availableCardsMap.get(`${hyphenType}_${cardIdForImage}`);
+        }
+    }
+
+    if ((card.type === 'basic-universe' || card.type === 'basic_universe') && !availableCard) {
+        const normalizedType = 'basic-universe';
+        availableCard =
+            window.availableCardsMap.get(`${normalizedType}_${cardIdForImage}`) ||
+            window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
+    }
+
+    if (!availableCard) {
+        console.warn('Card not found in availableCardsMap:', cardIdForImage);
+        return null;
+    }
+
+    let hasAlternateArts = false;
+    if (availableCard && window.availableCardsMap) {
+        if (card.type === 'character') {
+            const name = (availableCard.name || '').trim();
+            const set = (availableCard.set || 'ERB').trim() || 'ERB';
+            let count = 0;
+            window.availableCardsMap.forEach((c, id) => {
+                const cardType = c.cardType || c.type || '';
+                if (
+                    (cardType === 'character' || id.startsWith('char_')) &&
+                    (c.name || '').trim() === name &&
+                    (c.set || 'ERB').trim() === set
+                ) {
+                    count++;
+                }
+            });
+            hasAlternateArts = count > 1;
+        } else if (card.type === 'special') {
+            const characterName = (availableCard.character || '').trim();
+            const cardName = (availableCard.name || availableCard.card_name || '').trim();
+            const uniqueImagePaths = new Set();
+            window.availableCardsMap.forEach((c, id) => {
+                const cardType = c.cardType || c.type || '';
+                if (
+                    (cardType === 'special' || id.startsWith('special_')) &&
+                    (c.character || '').trim() === characterName &&
+                    (c.name || c.card_name || '').trim() === cardName
+                ) {
+                    const imagePath = getCardImagePath(c, 'special');
+                    uniqueImagePaths.add(imagePath);
+                }
+            });
+            hasAlternateArts = uniqueImagePaths.size > 1;
+        } else if (card.type === 'power') {
+            const value = String(availableCard.value || '').trim();
+            const powerType = (availableCard.power_type || '').trim();
+            const uniqueImagePaths = new Set();
+            window.availableCardsMap.forEach((c, id) => {
+                const cardType = c.cardType || c.type || '';
+                if (
+                    (cardType === 'power' || id.startsWith('power_')) &&
+                    String(c.value || '').trim() === value &&
+                    (c.power_type || '').trim() === powerType
+                ) {
+                    const imagePath = getCardImagePath(c, 'power');
+                    uniqueImagePaths.add(imagePath);
+                }
+            });
+            hasAlternateArts = uniqueImagePaths.size > 1;
+        } else if (card.type === 'location') {
+            const name = (availableCard.name || '').trim();
+            const uniqueLocationIds = new Set();
+            window.availableCardsMap.forEach((c, id) => {
+                const iterCardType = c.cardType || c.type || '';
+                if (
+                    (iterCardType === 'location' || id.startsWith('location_')) &&
+                    (c.name || '').trim() === name
+                ) {
+                    uniqueLocationIds.add(c.id || id);
+                }
+            });
+            hasAlternateArts = uniqueLocationIds.size > 1;
+        }
+    }
+
+    const changeArtButton = hasAlternateArts
+        ? `<button class="alternate-art-btn card-view-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>`
+        : '';
+
+    let quantityButtons = '';
+    if (card.type !== 'character' && card.type !== 'location' && card.type !== 'mission') {
+        quantityButtons = `
+                        <button class="remove-one-btn card-view-btn" onclick="removeOneCardFromEditor(${index})">-1</button>
+                        <button class="add-one-btn card-view-btn" onclick="addOneCardToEditor(${index})">+1</button>
+                    `;
+    } else if (card.type === 'character') {
+        const reserveButton = getReserveCharacterButton(card.cardId, index);
+        const koButton = currentUser
+            ? `<button class="ko-btn card-view-btn ${window.SimulateKO && window.SimulateKO.isKOd(card.cardId) ? 'active' : ''}" onclick="toggleKOCharacter('${card.cardId}', ${index})" title="${window.SimulateKO && window.SimulateKO.isKOd(card.cardId) ? 'Un-KO Character' : 'KO Character'}">KO</button>`
+            : '';
+        quantityButtons = `
+                        <button class="quantity-btn card-view-btn" onclick="removeCardFromEditor(${index})">-</button>
+                        ${koButton}
+                        ${reserveButton}
+                    `;
+    } else {
+        quantityButtons = `<button class="quantity-btn card-view-btn" onclick="removeCardFromEditor(${index})">-</button>`;
+    }
+
+    let prePlacedButton = '';
+    if (card.type === 'training' && hasSpartanTrainingGround()) {
+        const isExcluded = card.exclude_from_draw === true;
+        const activeClass = isExcluded ? 'active' : '';
+        prePlacedButton = `
+                        <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawTrainingCard('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
+                    `;
+    } else if (card.type === 'basic-universe' && hasDraculasArmory()) {
+        const isExcluded = card.exclude_from_draw === true;
+        const activeClass = isExcluded ? 'active' : '';
+        prePlacedButton = `
+                        <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawBasicUniverseCard('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
+                    `;
+    } else if (card.type === 'special' && hasLancelot()) {
+        let cardData = window.availableCardsMap.get(card.cardId);
+        if (!cardData && card.type) cardData = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+        const cardName = cardData ? cardData.name || cardData.card_name || '' : '';
+        if (
+            cardName === 'Sword and Shield' ||
+            card.cardId.includes('sword_and_shield') ||
+            card.cardId.includes('sword-and-shield')
+        ) {
+            const isExcluded = card.exclude_from_draw === true;
+            const activeClass = isExcluded ? 'active' : '';
+            prePlacedButton = `
+                        <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawSwordAndShield('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
+                    `;
+        }
+    }
+
+    const isKOdCardView = card.type === 'character' && window.SimulateKO && window.SimulateKO.isKOd(card.cardId);
+    const koDimmedClassCardView = isKOdCardView ? 'ko-dimmed' : '';
+    const cardOrientation =
+        card.type === 'character' || card.type === 'location' || card.type === 'event'
+            ? 'landscape'
+            : 'portrait';
+
+    return {
+        availableCard,
+        changeArtButton,
+        quantityButtons,
+        prePlacedButton,
+        koDimmedClassCardView,
+        cardOrientation,
+    };
+}
+
+function buildDeckCardViewInstanceHtml(slotIndex, card, instanceLoopIndex, rowCtx) {
+    const index = slotIndex;
+    const i = instanceLoopIndex;
+    const {
+        availableCard,
+        changeArtButton,
+        quantityButtons,
+        prePlacedButton,
+        koDimmedClassCardView,
+        cardOrientation,
+    } = rowCtx;
+
+    const instanceCardId =
+        card.selectedAlternateCardIds && card.selectedAlternateCardIds[i]
+            ? card.selectedAlternateCardIds[i]
+            : card.selectedAlternateCardId || card.cardId;
+
+    let instanceAvailableCard = window.availableCardsMap.get(instanceCardId);
+    if (!instanceAvailableCard && card.type) {
+        instanceAvailableCard = window.availableCardsMap.get(`${card.type}_${instanceCardId}`);
+    }
+    if (!instanceAvailableCard) instanceAvailableCard = availableCard;
+
+    const instanceFullResPath = getCardImagePath(instanceAvailableCard, card.type);
+    const instanceImagePath = getDeckEditorCardViewInitialImagePath(instanceFullResPath, card.type);
+    const useTwoLayer = instanceImagePath !== instanceFullResPath;
+
+    const instanceChangeArtButton = changeArtButton.replace(
+        `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})`,
+        `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index}, ${i})`
+    );
+
+    const instanceIsFoil = !!(instanceAvailableCard && instanceAvailableCard.is_foil);
+    const instanceHasFoilVersion = !!(window.foilCardMap && window.foilCardMap[instanceCardId] !== undefined);
+    const instanceFoilButton = instanceHasFoilVersion
+        ? `<button class="foil-btn card-view-btn${instanceIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index}, ${i})">Foil</button>`
+        : '';
+    const placeholderUrl = (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp';
+    const placeholderUrlAttr = placeholderUrl.replace(/'/g, "\\'");
+    return `
+                        <div class="deck-card-card-view-item ${koDimmedClassCardView}"
+                             data-orientation="${cardOrientation}"
+                             data-index="${index}"
+                             data-card-id="${card.cardId}"
+                             data-type="${card.type}"
+                             data-instance="${i + 1}"
+                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}', ${instanceIsFoil})"
+                             onmouseleave="hideCardHoverModal()">
+                            <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
+                                ${useTwoLayer
+        ? `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-thumb" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">
+                                <img data-full-res="${instanceFullResPath.replace(/"/g, '&quot;')}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-full" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`
+        : `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`}
+                            </div>
+                            <div class="card-view-actions">
+                                ${instanceChangeArtButton}
+                                ${instanceFoilButton}
+                                ${quantityButtons}
+                                ${prePlacedButton}
+                                ${card.type === 'mission' ? getDisplayMissionButton(card.cardId, index) : ''}
+                            </div>
+                        </div>
+                    `;
+}
+
+/**
+ * Rebuild a single Card View tile — used for foil / alternate-art to avoid resetting every tile's progressive layers.
+ * @returns {boolean} whether the DOM node was patched
+ */
+function patchDeckCardViewInstance(slotIndex, instanceIndex) {
+    const editor = document.getElementById('deckCardsEditor');
+    if (
+        !editor ||
+        !editor.classList.contains('card-view') ||
+        typeof editor.querySelector !== 'function'
+    ) {
+        return false;
+    }
+    const deckRow = window.deckEditorCards && window.deckEditorCards[slotIndex];
+    if (!deckRow) return false;
+    const qty = deckRow.quantity || 1;
+    if (instanceIndex < 0 || instanceIndex >= qty) return false;
+
+    const rowCtx = buildDeckCardViewRowContext(slotIndex, deckRow);
+    if (!rowCtx) return false;
+
+    const sel = `.deck-card-card-view-item[data-index="${slotIndex}"][data-instance="${instanceIndex + 1}"]`;
+    const existing = editor.querySelector(sel);
+    if (!existing) return false;
+
+    existing.outerHTML = buildDeckCardViewInstanceHtml(slotIndex, deckRow, instanceIndex, rowCtx);
+
+    const patchRoot = editor.querySelector(sel);
+    if (typeof currentUser !== 'undefined' && currentUser && typeof applyKODimming === 'function') {
+        applyKODimming();
+    }
+    if (patchRoot && typeof initDeckEditorCardViewProgressiveLoad === 'function') {
+        initDeckEditorCardViewProgressiveLoad(patchRoot);
+    }
+    if (typeof initDeckEditorFoilElements === 'function') {
+        initDeckEditorFoilElements(editor);
+    }
+    if (typeof updateDeckEditorCardCount === 'function') {
+        updateDeckEditorCardCount();
+    }
+    if (typeof updateDeckSummary === 'function') {
+        updateDeckSummary(window.deckEditorCards);
+    }
+    return true;
+}
+
+window.patchDeckCardViewInstance = patchDeckCardViewInstance;
 
 // ===== View toggle and list/card view rendering =====
 
@@ -1048,228 +1326,12 @@ function renderDeckCardsCardView() {
                 const card = cardData;
                 const index = cardData.originalIndex;
                 const quantity = card.quantity || 1;
-                
-                // Direct lookup using UUID
-                // If selectedAlternateCardId exists, use that for image lookup; otherwise use original cardId
-                const cardIdForImage = card.selectedAlternateCardId || card.cardId;
-                let availableCard = window.availableCardsMap.get(cardIdForImage);
-                // Fallback: try type_cardId format (deck-builder uses this)
-                if (!availableCard && card.type) {
-                    availableCard = window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
-                    // DB uses underscore (ally_universe, basic_universe) but map uses hyphen (ally-universe, basic-universe)
-                    if (!availableCard && card.type.includes('_')) {
-                        const hyphenType = card.type.replace(/_/g, '-');
-                        availableCard = window.availableCardsMap.get(`${hyphenType}_${cardIdForImage}`);
-                    }
-                }
-                
-                // Try alternate key formats for basic-universe cards
-                if ((card.type === 'basic-universe' || card.type === 'basic_universe') && !availableCard) {
-                    const normalizedType = 'basic-universe';
-                    availableCard = window.availableCardsMap.get(`${normalizedType}_${cardIdForImage}`) ||
-                                  window.availableCardsMap.get(`${card.type}_${cardIdForImage}`);
-                    
-                    if (!availableCard) {
-                        // Card not found - will use placeholder
-                    }
-                }
-                
-                if (!availableCard) {
-                    console.warn('Card not found in availableCardsMap:', cardIdForImage);
-                    return;
-                }
-                
-                // Get card image path - use the alternate card's image if selected
-                const cardImagePath = getCardImagePath(availableCard, card.type);
-                
-                // Check if this card has alternate arts (same logic as tile view)
-                let hasAlternateArts = false;
-                if (availableCard && window.availableCardsMap) {
-                    if (card.type === 'character') {
-                        const name = (availableCard.name || '').trim();
-                        const set = (availableCard.set || 'ERB').trim() || 'ERB';
-                        let count = 0;
-                        window.availableCardsMap.forEach((c, id) => {
-                            const cardType = c.cardType || c.type || '';
-                            if ((cardType === 'character' || id.startsWith('char_')) && 
-                                (c.name || '').trim() === name && 
-                                (c.set || 'ERB').trim() === set) {
-                                count++;
-                            }
-                        });
-                        hasAlternateArts = count > 1;
-                    } else if (card.type === 'special') {
-                        const characterName = (availableCard.character || '').trim();
-                        const cardName = (availableCard.name || availableCard.card_name || '').trim();
-                        const uniqueImagePaths = new Set();
-                        window.availableCardsMap.forEach((c, id) => {
-                            const cardType = c.cardType || c.type || '';
-                            if ((cardType === 'special' || id.startsWith('special_')) && 
-                                (c.character || '').trim() === characterName && 
-                                (c.name || c.card_name || '').trim() === cardName) {
-                                const imagePath = getCardImagePath(c, 'special');
-                                uniqueImagePaths.add(imagePath);
-                            }
-                        });
-                        // Only show button if there are multiple unique image paths
-                        hasAlternateArts = uniqueImagePaths.size > 1;
-                    } else if (card.type === 'power') {
-                        // Group by value and power_type only (not by set) to include alternates across all sets
-                        // Check for unique image paths, not just card count
-                        const value = String(availableCard.value || '').trim();
-                        const powerType = (availableCard.power_type || '').trim();
-                        const uniqueImagePaths = new Set();
-                        window.availableCardsMap.forEach((c, id) => {
-                            const cardType = c.cardType || c.type || '';
-                            if ((cardType === 'power' || id.startsWith('power_')) && 
-                                String(c.value || '').trim() === value && 
-                                (c.power_type || '').trim() === powerType) {
-                                const imagePath = getCardImagePath(c, 'power');
-                                uniqueImagePaths.add(imagePath);
-                            }
-                        });
-                        hasAlternateArts = uniqueImagePaths.size > 1;
-                    } else if (card.type === 'location') {
-                        // For locations, group by name - alternates are separate rows with same name
-                        // Use Set to count unique location IDs (map stores same card under multiple keys)
-                        const name = (availableCard.name || '').trim();
-                        const uniqueLocationIds = new Set();
-                        window.availableCardsMap.forEach((c, id) => {
-                            const iterCardType = c.cardType || c.type || '';
-                            if ((iterCardType === 'location' || id.startsWith('location_')) && 
-                                (c.name || '').trim() === name) {
-                                uniqueLocationIds.add(c.id || id);
-                            }
-                        });
-                        hasAlternateArts = uniqueLocationIds.size > 1;
-                    }
-                }
-                
-                // Create Change Art button if card has alternate arts
-                const changeArtButton = hasAlternateArts ? 
-                    `<button class="alternate-art-btn card-view-btn" onclick="showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})">Change Art</button>` : '';
-                
-                // Add quantity buttons for applicable card types
-                let quantityButtons = '';
-                if (card.type !== 'character' && card.type !== 'location' && card.type !== 'mission') {
-                    quantityButtons = `
-                        <button class="remove-one-btn card-view-btn" onclick="removeOneCardFromEditor(${index})">-1</button>
-                        <button class="add-one-btn card-view-btn" onclick="addOneCardToEditor(${index})">+1</button>
-                    `;
-                } else if (card.type === 'character') {
-                    // For characters, add remove button, KO button, and reserve button
-                    const reserveButton = getReserveCharacterButton(card.cardId, index);
-                    const koButton = currentUser 
-                        ? `<button class="ko-btn card-view-btn ${window.SimulateKO && window.SimulateKO.isKOd(card.cardId) ? 'active' : ''}" onclick="toggleKOCharacter('${card.cardId}', ${index})" title="${window.SimulateKO && window.SimulateKO.isKOd(card.cardId) ? 'Un-KO Character' : 'KO Character'}">KO</button>`
-                        : '';
-                    quantityButtons = `
-                        <button class="quantity-btn card-view-btn" onclick="removeCardFromEditor(${index})">-</button>
-                        ${koButton}
-                        ${reserveButton}
-                    `;
-                } else {
-                    quantityButtons = `<button class="quantity-btn card-view-btn" onclick="removeCardFromEditor(${index})">-</button>`;
-                }
-                
-                // Add Pre-Placed button for Training cards when Spartan Training Ground is present
-                // Add Pre-Placed button for Basic Universe cards when Dracula's Armory is present
-                // Add Pre-Placed button for Sword and Shield special card when Lancelot is present
-                let prePlacedButton = '';
-                if (card.type === 'training' && hasSpartanTrainingGround()) {
-                    const isExcluded = card.exclude_from_draw === true;
-                    const activeClass = isExcluded ? 'active' : '';
-                    prePlacedButton = `
-                        <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawTrainingCard('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
-                    `;
-                } else if (card.type === 'basic-universe' && hasDraculasArmory()) {
-                    const isExcluded = card.exclude_from_draw === true;
-                    const activeClass = isExcluded ? 'active' : '';
-                    prePlacedButton = `
-                        <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawBasicUniverseCard('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
-                    `;
-                } else if (card.type === 'special' && hasLancelot()) {
-                    // Check if this is Sword and Shield special card
-                    let cardData = window.availableCardsMap.get(card.cardId);
-                    if (!cardData && card.type) cardData = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
-                    const cardName = cardData ? (cardData.name || cardData.card_name || '') : '';
-                    if (cardName === 'Sword and Shield' || card.cardId.includes('sword_and_shield') || card.cardId.includes('sword-and-shield')) {
-                        const isExcluded = card.exclude_from_draw === true;
-                        const activeClass = isExcluded ? 'active' : '';
-                        prePlacedButton = `
-                            <button class="draw-training-btn card-view-btn ${activeClass}" onclick="drawSwordAndShield('${card.cardId}', ${index})" title="${isExcluded ? 'Unmark as Pre-Placed (include in Draw Hand)' : 'Mark as Pre-Placed (exclude from Draw Hand)'}">Pre-Placed</button>
-                        `;
-                    }
-                }
-                
-                // Check if this character is KO'd (for card view)
-                const isKOdCardView = card.type === 'character' && window.SimulateKO && window.SimulateKO.isKOd(card.cardId);
-                const koDimmedClassCardView = isKOdCardView ? 'ko-dimmed' : '';
 
-                // Orientation: only character, location, event = landscape; all other types = portrait
-                const cardOrientation = (card.type === 'character' || card.type === 'location' || card.type === 'event') ? 'landscape' : 'portrait';
+                const rowCtx = buildDeckCardViewRowContext(index, card);
+                if (!rowCtx) return;
 
-                // Render multiple instances of the card based on quantity
                 for (let i = 0; i < quantity; i++) {
-                    // Get instance-specific alternate card ID if it exists
-                    const instanceCardId = (card.selectedAlternateCardIds && card.selectedAlternateCardIds[i]) 
-                        ? card.selectedAlternateCardIds[i] 
-                        : (card.selectedAlternateCardId || card.cardId);
-                    
-                    // Look up the card for this instance
-                    let instanceAvailableCard = window.availableCardsMap.get(instanceCardId);
-                    if (!instanceAvailableCard && card.type) instanceAvailableCard = window.availableCardsMap.get(`${card.type}_${instanceCardId}`);
-                    if (!instanceAvailableCard) {
-                        instanceAvailableCard = availableCard; // Fallback to original
-                    }
-                    
-                    // Instance image: two-layer when thumb !== full-res (thumb + full-res layer that fades in; see initDeckEditorCardViewProgressiveLoad)
-                    const instanceFullResPath = getCardImagePath(instanceAvailableCard, card.type);
-                    const instanceImagePath = getDeckEditorCardViewInitialImagePath(instanceFullResPath, card.type);
-                    const useTwoLayer = instanceImagePath !== instanceFullResPath;
-
-                    // Create instance-specific Change Art button
-                    const instanceChangeArtButton = changeArtButton.replace(
-                        `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index})`,
-                        `showAlternateArtSelectionForExistingCard('${card.cardId}', ${index}, ${i})`
-                    );
-
-                    /**
-                     * Foil toggle button for this card instance.
-                     * Uses window.foilCardMap for O(1) lookup — if instanceCardId is in the map,
-                     * a foil counterpart exists. See .cursor/rules for the foil map system.
-                     */
-                    const instanceIsFoil = !!(instanceAvailableCard && instanceAvailableCard.is_foil);
-                    const instanceHasFoilVersion = !!(window.foilCardMap && window.foilCardMap[instanceCardId] !== undefined);
-                    const instanceFoilButton = instanceHasFoilVersion
-                        ? `<button class="foil-btn card-view-btn${instanceIsFoil ? ' foil-btn--active' : ''}" onclick="toggleFoilForCard('${card.cardId}', ${index}, ${i})">Foil</button>`
-                        : '';
-                    const placeholderUrl = (window.APP_CDN_BASE || '') + '/src/resources/cards/images/placeholder.webp';
-                    const placeholderUrlAttr = placeholderUrl.replace(/'/g, "\\'");
-                    cardsHtml += `
-                        <div class="deck-card-card-view-item ${koDimmedClassCardView}"
-                             data-orientation="${cardOrientation}"
-                             data-index="${index}"
-                             data-card-id="${card.cardId}"
-                             data-type="${card.type}"
-                             data-instance="${i + 1}"
-                             onmouseenter="showCardHoverModal('${instanceFullResPath.replace(/'/g, "\\'")}', '${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/'/g, "\\'")}', '${(card.cardId || '').replace(/'/g, "\\'")}', '${(card.type || '').replace(/'/g, "\\'")}', ${instanceIsFoil})"
-                             onmouseleave="hideCardHoverModal()">
-                            <div class="card-foil-img-wrap${instanceIsFoil ? ' foil-shimmer foil-once' : ''}">
-                                ${useTwoLayer
-                                    ? `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-thumb" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">
-                                <img data-full-res="${instanceFullResPath.replace(/"/g, '&quot;')}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image card-view-image-full" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`
-                                    : `<img src="${instanceImagePath}" alt="${(instanceAvailableCard.name || instanceAvailableCard.card_name || 'Card').replace(/"/g, '&quot;')}" class="card-view-image" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${placeholderUrlAttr}';">`
-                                }
-                            </div>
-                            <div class="card-view-actions">
-                                ${instanceChangeArtButton}
-                                ${instanceFoilButton}
-                                ${quantityButtons}
-                                ${prePlacedButton}
-                                ${card.type === 'mission' ? getDisplayMissionButton(card.cardId, index) : ''}
-                            </div>
-                        </div>
-                    `;
+                    cardsHtml += buildDeckCardViewInstanceHtml(index, card, i, rowCtx);
                 }
             });
             
@@ -1292,7 +1354,7 @@ function renderDeckCardsCardView() {
     
     // Thumbnail-first + progressive full-res for card-view images (character/location/mission)
     initDeckEditorCardViewProgressiveLoad(deckCardsEditor);
-    
+
     // Update deck summary and card count to ensure Draw Hand button state is correct
     updateDeckEditorCardCount();
     if (typeof updateDeckSummary === 'function') {

@@ -1722,7 +1722,12 @@ window.toggleFoilForCard = function toggleFoilForCard(cardId, index, instanceInd
     if (typeof window.isLayoutMobile === 'function' && window.isLayoutMobile() && typeof window.renderDeckEditorMobileView === 'function') {
         window.renderDeckEditorMobileView();
     } else if (deckCardsEditor.classList.contains('card-view') && typeof renderDeckCardsCardView === 'function') {
-        renderDeckCardsCardView();
+        const patched =
+            typeof window.patchDeckCardViewInstance === 'function' &&
+            window.patchDeckCardViewInstance(index, instanceIndex);
+        if (!patched) {
+            renderDeckCardsCardView();
+        }
     } else if (deckCardsEditor.classList.contains('list-view') && typeof renderDeckCardsListView === 'function') {
         renderDeckCardsListView();
     } else if (typeof displayDeckCardsForEditing === 'function') {

@@ -537,10 +537,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.body.classList.add('guest-user');
                 }
                 
-                // Load main app data in background (without showing the UI) for when user navigates back
-                if (window.__EXCELSIOR_PAGE__ !== 'deck-editor') {
-                    loadMainAppDataInBackground();
-                }
+                // Standalone `/deck-editor` must still populate `window.foilCardMap` before rendering the deck editor.
+                loadMainAppDataInBackground();
                 
                 // Check if readonly=true parameter is set - this takes precedence
                 const urlParams = new URLSearchParams(window.location.search);
@@ -567,9 +565,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.history.replaceState({}, '', url.toString());
                     const databaseView = document.getElementById('database-view');
                     if (databaseView) databaseView.classList.add('view-removed');
-                    if (window.__EXCELSIOR_PAGE__ !== 'deck-editor') {
-                        loadMainAppDataInBackground();
-                    }
+                    loadMainAppDataInBackground();
                     await loadDeckForEditing(authResult.deckId, authResult.urlUserId, true);
                     showDeckEditor();
                 } else {

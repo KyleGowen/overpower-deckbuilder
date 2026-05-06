@@ -52,18 +52,28 @@ Where we do thumb → full-res (deck editor card-view, card hover modal):
    - Do not add the class in the same tick as setting `src`; that avoids the decode-delay flash.
 
 4. **Single img when no thumb**  
-   - For card types without thumbnails (e.g. special, power), we keep a single `<img class="card-view-image">` with full-res only — no second layer.
+   - For card types without thumbnails (or when thumb URL equals full-res), we emit a single `<img class="card-view-image">`. It uses `position: absolute; inset: 0` in `.card-foil-img-wrap` so intrinsic dimensions do not affect outer layout. Full deck refreshes still run `initDeckEditorCardViewProgressiveLoad`; **foil**/**Change Art** prefers **`patchDeckCardViewInstance`** so only one tile rebuilds and other tiles do not refade.
 
 Entry points:
 
-- Deck editor: `getDeckEditorCardViewInitialImagePath`, `initDeckEditorCardViewProgressiveLoad()` in `public/js/deck-editor-rendering.js`.
+- Deck editor: `getDeckEditorCardViewInitialImagePath`, `initDeckEditorCardViewProgressiveLoad()`, `buildDeckCardViewRowContext` / `buildDeckCardViewInstanceHtml`, and `patchDeckCardViewInstance()` in `public/js/deck-editor-rendering.js`.
 - Hover modal: two-layer block in `public/js/card-hover-modal.js` (and inline equivalent in `public/deck-builder.html`).
+
+---
+
+## Known limitations (deck editor Card View foil / art swap)
+
+Recent work (**context**):
+
+1. **Foil controls on standalone deck editor** — `loadFoilCardMap()` runs even when `__EXCELSIOR_PAGE__ === 'deck-editor'`, and `loadMainAppDataInBackground()` is invoked for shared deck deep links (`index-page.js`), so `window.foilCardMap` is populated before the editor renders (`app-initialization.js`).
+2. **Deck-wide flashing on foil/alternate-art** — full `renderDeckCardsCardView()` replaced all tiles and reset every progressive opacity layer (and briefly hid solo-layer tiles). Mitigation: extracted **`buildDeckCardViewRowContext`** / **`buildDeckCardViewInstanceHtml`**, **`patchDeckCardViewInstance(slotIndex, instanceIndex)`** (single `[data-index][data-instance]` DOM replace), scoped **`initDeckEditorCardViewProgressiveLoad(patchRoot)`**, full-container **`initDeckEditorFoilElements`**, **`toggleFoilForCard`** and **alternate-art modal** use patch first with fallback full render; removed global solo **`opacity: 0`** in favor of **`position: absolute`** solo imgs in **`deck-editor-card-view.css`**; removed **`initDeckEditorCardViewSoloReveal`**.
+3. **Still open:** **single-tile intermittent flash.** On some foil / non-foil toggles — not every swap — one card can still briefly paint at the **large intrinsic bitmap size** before the clip (`object-fit: cover`, wrapper) settles. Frequency feels random ("every few swaps"). Hypotheses: browser decode/cache scheduling, first paint vs. **`decode()`**, or repaint order when swapping between different image URLs within the patched tile only. Deck-wide flashes from sibling tiles resetting should **not** recur; investigation would target **race conditions inside one replaced tile**, not **`innerHTML`** of the entire editor.
 
 ---
 
 ## References
 
 - [MDN: HTMLImageElement.decode()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode)
-- `public/js/deck-editor-rendering.js` — `initDeckEditorCardViewProgressiveLoad()` (deck editor card-view)
+- `public/js/deck-editor-rendering.js` — `initDeckEditorCardViewProgressiveLoad()`, `patchDeckCardViewInstance()` (deck editor card-view)
 - `public/js/card-hover-modal.js` — same two-layer + fade for hover modal
 - [IMAGE_PIPELINE.md](IMAGE_PIPELINE.md) — thumbnail generation and pipeline
