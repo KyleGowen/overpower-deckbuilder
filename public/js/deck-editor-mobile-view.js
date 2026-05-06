@@ -71,11 +71,23 @@
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>';
     var ICON_MENU_HAND =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="9" height="12" rx="1.5"/><rect x="9" y="7" width="9" height="12" rx="1.5"/></svg>';
+    var ICON_MENU_RESERVE =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>';
     function devMobileRowMenuItemButton(label, onclickAttr, iconSvg, iconExtraClass) {
         var iconClass = 'deck-editor-menu-item-icon' + (iconExtraClass || '');
         return (
             '<button type="button" class="deck-editor-menu-panel-btn touch-target-min" onclick="' + onclickAttr + '">' +
             '<span class="deck-editor-menu-item-label">' + escapeHtml(label) + '</span>' +
+            '<span class="' + iconClass + '" aria-hidden="true">' + iconSvg + '</span></button>'
+        );
+    }
+
+    /** Matches read-only reserve badge on desktop (.reserve-btn.active:disabled) when body has read-only-mode. */
+    function devMobileRowMenuReserveReadOnly(iconSvg, iconExtraClass) {
+        var iconClass = 'deck-editor-menu-item-icon' + (iconExtraClass || '');
+        return (
+            '<button type="button" disabled class="deck-editor-menu-panel-btn deck-editor-menu-panel-btn--disabled touch-target-min" aria-label="Reserve character" title="Reserve character">' +
+            '<span class="deck-editor-menu-item-label">' + escapeHtml('Reserve') + '</span>' +
             '<span class="' + iconClass + '" aria-hidden="true">' + iconSvg + '</span></button>'
         );
     }
@@ -182,10 +194,30 @@
             ));
         }
 
-        if (card.type === 'character' && typeof getReserveCharacterButton === 'function') {
-            var rbtn = getReserveCharacterButton(card.cardId, deckIndex);
-            if (rbtn) {
-                parts.push('<div class="dev-mobile-deck-row-menu-custom">' + rbtn + '</div>');
+        if (card.type === 'character' && typeof computeReserveCharacterRowState === 'function') {
+            var st = computeReserveCharacterRowState(card.cardId, deckIndex);
+            if (st.isReadOnlyUI) {
+                if (st.hasReserveCharacter && st.isReserveCharacter) {
+                    parts.push(devMobileRowMenuReserveReadOnly(ICON_MENU_RESERVE, ' deck-editor-menu-item-icon--reserve-active'));
+                }
+            } else if (st.isReserveCharacter) {
+                parts.push(
+                    devMobileRowMenuItemButton(
+                        'Reserve',
+                        'deselectReserveCharacter(' + safeIndex + ')',
+                        ICON_MENU_RESERVE,
+                        ' deck-editor-menu-item-icon--reserve-active'
+                    )
+                );
+            } else {
+                parts.push(
+                    devMobileRowMenuItemButton(
+                        'Select Reserve',
+                        'selectReserveCharacter(\'' + cid + '\',' + safeIndex + ')',
+                        ICON_MENU_RESERVE,
+                        ''
+                    )
+                );
             }
         }
 
@@ -371,9 +403,21 @@
                     }
 
                     var rowFoilClass = instanceAvailable.is_foil ? ' collection-card-foil' : '';
-                    var nameHtml = escapeHtml(name) +
+                    var primaryLine =
+                        escapeHtml(name) +
                         (instanceAvailable.is_foil
                             ? '<span class="collection-foil-badge">' + escapeHtml('✦ FOIL') + '</span>'
+                            : '');
+                    var showReserveLabel =
+                        normalizeDeckType(card.type) === 'character' &&
+                        typeof computeReserveCharacterRowState === 'function' &&
+                        computeReserveCharacterRowState(card.cardId, index).isReserveCharacter;
+                    var nameHtml =
+                        '<span class="dev-mobile-deck-row-name-primary">' + primaryLine + '</span>' +
+                        (showReserveLabel
+                            ? '<span class="dev-mobile-deck-row-reserve-label">' +
+                              escapeHtml('Reserve') +
+                              '</span>'
                             : '');
                     html += '<div class="dev-mobile-deck-row' + rowFoilClass + '" data-deck-index="' + index + '" data-instance="' + i + '">';
                     html += '<div class="dev-mobile-deck-row-thumb"><img src="' + escapeAttr(imgSrc) + '" alt=""></div>';

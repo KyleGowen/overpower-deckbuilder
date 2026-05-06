@@ -609,11 +609,28 @@
 
 .dev-mobile-deck-row-name {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
     min-width: 0;
     font-size: var(--font-sm);
     font-weight: 400;
     color: #f8fafc;
     line-height: 1.35;
+}
+
+.dev-mobile-deck-row-name-primary {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-reserve-label {
+    font-size: var(--font-2xs);
+    font-weight: 500;
+    line-height: 1.25;
+    color: #64748b;
 }
 
 .dev-mobile-deck-row-actions {
@@ -761,6 +778,28 @@
 .layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-item-icon--foil-active svg path {
     fill: #ffd700 !important;
     stroke: #b8860b !important;
+}
+
+/* Current reserve row / read-only reserve indicator (bookmark icon + row); mirrors desktop .reserve-btn.active */
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-item-icon--reserve-active {
+    color: #94a3b8 !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-panel-btn--disabled {
+    opacity: 0.82 !important;
+    cursor: not-allowed !important;
+    color: #94a3b8 !important;
+    border-color: rgba(148, 163, 184, 0.4) !important;
+    background: rgba(71, 85, 105, 0.2) !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-panel-btn--disabled:hover {
+    background: rgba(71, 85, 105, 0.2) !important;
+    border-color: rgba(148, 163, 184, 0.4) !important;
+}
+
+.layout-mobile #deckEditorModal .dev-mobile-deck-row-menu-panel .deck-editor-menu-panel-btn--disabled .deck-editor-menu-item-label {
+    color: #94a3b8 !important;
 }
 
 .dev-mobile-deck-row-menu-custom {

@@ -1374,63 +1374,104 @@ function filterCharacterStacksByName(searchTerm) {
  */
 
 
-// Reserve Character Functions
-function getReserveCharacterButton(cardId, index) {
-    // Use window.currentDeckData if available, otherwise fall back to currentDeckData (local scope)
+// Reserve Character Functions — shared UUID normalization for reserve vs deck row identities
+function extractReserveUuid(id) {
+    if (!id) return null;
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(id)) return id;
+    const prefixedMatch = id.match(/^[a-z]+_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+    if (prefixedMatch && prefixedMatch[1]) return prefixedMatch[1];
+    const parts = id.split('_');
+    for (let i = 1; i < parts.length; i++) {
+        const candidate = parts.slice(i).join('_');
+        if (uuidPattern.test(candidate)) return candidate;
+    }
+    return id;
+}
+
+/**
+ * Whether deck metadata reserve_character refers to this deck row index (base id + alternate art ids).
+ * Used by desktop reserve button and mobile ⋯ reserve row (tap-to-switch).
+ */
+function computeReserveCharacterRowState(cardId, index) {
     const deckData = window.currentDeckData || currentDeckData;
     const reserveCharacterId = deckData && deckData.metadata && deckData.metadata.reserve_character;
     const hasReserveCharacter = !!reserveCharacterId;
     const isReadOnlyUI = !!(document.body && document.body.classList && document.body.classList.contains('read-only-mode'));
-    
-    // Helper function to extract UUID from cardId (removes prefixes like "character_")
-    const extractUUID = (id) => {
-        if (!id) return null;
-        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (uuidPattern.test(id)) return id;
-        const prefixedMatch = id.match(/^[a-z]+_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-        if (prefixedMatch && prefixedMatch[1]) return prefixedMatch[1];
-        const parts = id.split('_');
-        for (let i = 1; i < parts.length; i++) {
-            const candidate = parts.slice(i).join('_');
-            if (uuidPattern.test(candidate)) return candidate;
-        }
-        return id;
-    };
-    
-    // Check if this card matches the reserve character
-    // Need to check: base cardId, selectedAlternateCardId, and selectedAlternateCardIds array
+
     let isReserveCharacter = false;
     if (reserveCharacterId && window.deckEditorCards && window.deckEditorCards[index]) {
         const card = window.deckEditorCards[index];
-        
-        const normalizedReserveId = extractUUID(reserveCharacterId);
-        const normalizedCardId = extractUUID(card.cardId);
-        
-        // Check if reserve_character matches base cardId
+
+        const normalizedReserveId = extractReserveUuid(reserveCharacterId);
+        const normalizedCardId = extractReserveUuid(card.cardId);
+
         if (normalizedReserveId === normalizedCardId) {
             isReserveCharacter = true;
-        }
-        // Check if reserve_character matches selectedAlternateCardId
-        else if (card.selectedAlternateCardId) {
-            const normalizedAlternateId = extractUUID(card.selectedAlternateCardId);
+        } else if (card.selectedAlternateCardId) {
+            const normalizedAlternateId = extractReserveUuid(card.selectedAlternateCardId);
             if (normalizedReserveId === normalizedAlternateId) {
                 isReserveCharacter = true;
             }
-        }
-        // Check if reserve_character matches any ID in selectedAlternateCardIds array
-        else if (card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds)) {
+        } else if (card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds)) {
             for (const altId of card.selectedAlternateCardIds) {
-                const normalizedAltId = extractUUID(altId);
+                const normalizedAltId = extractReserveUuid(altId);
                 if (normalizedReserveId === normalizedAltId) {
                     isReserveCharacter = true;
                     break;
                 }
             }
         }
-    } else {
-        // Fallback: simple comparison if card data not available
+    } else if (reserveCharacterId) {
         isReserveCharacter = reserveCharacterId === cardId;
     }
+
+    let reserveMatchesAnyCard = false;
+    if (hasReserveCharacter && window.deckEditorCards) {
+        const normalizedReserveId = extractReserveUuid(reserveCharacterId);
+        for (const card of window.deckEditorCards) {
+            if (card.type !== 'character') continue;
+            const normalizedCid = extractReserveUuid(card.cardId);
+            if (normalizedReserveId === normalizedCid) {
+                reserveMatchesAnyCard = true;
+                break;
+            }
+            if (card.selectedAlternateCardId) {
+                const normalizedAltId = extractReserveUuid(card.selectedAlternateCardId);
+                if (normalizedReserveId === normalizedAltId) {
+                    reserveMatchesAnyCard = true;
+                    break;
+                }
+            }
+            if (card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds)) {
+                for (const altId of card.selectedAlternateCardIds) {
+                    const normalizedAltId = extractReserveUuid(altId);
+                    if (normalizedReserveId === normalizedAltId) {
+                        reserveMatchesAnyCard = true;
+                        break;
+                    }
+                }
+                if (reserveMatchesAnyCard) break;
+            }
+        }
+    }
+
+    return {
+        hasReserveCharacter,
+        reserveCharacterId,
+        isReadOnlyUI,
+        isReserveCharacter,
+        reserveMatchesAnyCard,
+    };
+}
+
+function getReserveCharacterButton(cardId, index) {
+    const {
+        hasReserveCharacter,
+        isReadOnlyUI,
+        isReserveCharacter,
+        reserveMatchesAnyCard,
+    } = computeReserveCharacterRowState(cardId, index);
 
     // Read-only mode behavior:
     // - If a reserve character is set, show ONLY the selected reserve state (disabled)
@@ -1441,67 +1482,27 @@ function getReserveCharacterButton(cardId, index) {
         }
         return '';
     }
-    
-    // If this card is the selected reserve character, show the "Reserve" button
+
     if (isReserveCharacter) {
         const buttonText = 'Reserve';
         const buttonClass = 'reserve-btn active';
         const onclickFunction = `deselectReserveCharacter(${index})`;
         return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
     }
-    // If a reserve character is selected but doesn't match any card, show "Select Reserve" on all cards
-    // This allows users to fix invalid reserve character references
-    // Otherwise, if reserve matches another card, hide the button
-    else {
-        // Check if the reserve character matches any card in the deck
-        let reserveMatchesAnyCard = false;
-        if (hasReserveCharacter && window.deckEditorCards) {
-            const normalizedReserveId = extractUUID(reserveCharacterId);
-            for (const card of window.deckEditorCards) {
-                if (card.type === 'character') {
-                    const normalizedCardId = extractUUID(card.cardId);
-                    if (normalizedReserveId === normalizedCardId) {
-                        reserveMatchesAnyCard = true;
-                        break;
-                    }
-                    if (card.selectedAlternateCardId) {
-                        const normalizedAltId = extractUUID(card.selectedAlternateCardId);
-                        if (normalizedReserveId === normalizedAltId) {
-                            reserveMatchesAnyCard = true;
-                            break;
-                        }
-                    }
-                    if (card.selectedAlternateCardIds && Array.isArray(card.selectedAlternateCardIds)) {
-                        for (const altId of card.selectedAlternateCardIds) {
-                            const normalizedAltId = extractUUID(altId);
-                            if (normalizedReserveId === normalizedAltId) {
-                                reserveMatchesAnyCard = true;
-                                break;
-                            }
-                        }
-                        if (reserveMatchesAnyCard) break;
-                    }
-                }
-            }
-        }
-        
-        // If reserve doesn't match any card, show "Reserve" button (allows fixing invalid reference)
-        // If reserve matches another card, hide the button
-        if (hasReserveCharacter && !reserveMatchesAnyCard) {
-            const buttonText = 'Reserve';
-            const buttonClass = 'reserve-btn';
-            const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
-            return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
-        } else if (hasReserveCharacter && reserveMatchesAnyCard) {
-            return ''; // Reserve matches another card, hide button
-        } else {
-            // No reserve character selected, show "Reserve" button
-            const buttonText = 'Reserve';
-            const buttonClass = 'reserve-btn';
-            const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
-            return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
-        }
+
+    if (hasReserveCharacter && !reserveMatchesAnyCard) {
+        const buttonText = 'Reserve';
+        const buttonClass = 'reserve-btn';
+        const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
+        return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
     }
+    if (hasReserveCharacter && reserveMatchesAnyCard) {
+        return '';
+    }
+    const buttonText = 'Reserve';
+    const buttonClass = 'reserve-btn';
+    const onclickFunction = `selectReserveCharacter('${cardId}', ${index})`;
+    return `<button class="${buttonClass}" onclick="${onclickFunction}">${buttonText}</button>`;
 }
 
 function updateReserveButtons() {
@@ -1638,6 +1639,16 @@ async function selectReserveCharacter(cardId, index) {
     
     // Update reserve buttons without re-rendering the entire deck to preserve layout
     updateReserveButtons();
+
+    if (
+        typeof isLayoutMobile === 'function' &&
+        isLayoutMobile() &&
+        typeof closeDevMobileDeckActionsSheet === 'function' &&
+        typeof renderDeckEditorMobileView === 'function'
+    ) {
+        closeDevMobileDeckActionsSheet();
+        renderDeckEditorMobileView();
+    }
     
     // Update deck summary to reflect new threat calculation
     // Use window.deckEditorCards which is the working copy of deck cards
@@ -1671,6 +1682,16 @@ async function deselectReserveCharacter(index) {
     
     // Update reserve buttons without re-rendering the entire deck to preserve layout
     updateReserveButtons();
+
+    if (
+        typeof isLayoutMobile === 'function' &&
+        isLayoutMobile() &&
+        typeof closeDevMobileDeckActionsSheet === 'function' &&
+        typeof renderDeckEditorMobileView === 'function'
+    ) {
+        closeDevMobileDeckActionsSheet();
+        renderDeckEditorMobileView();
+    }
     
     // Update deck summary to reflect new threat calculation
     // Use window.deckEditorCards which is the working copy of deck cards

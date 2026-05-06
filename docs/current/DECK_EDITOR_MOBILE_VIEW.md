@@ -86,7 +86,7 @@ Each logical line in the deck is a **`.dev-mobile-deck-row`** with:
 | **`data-deck-index`** | Index into **`window.deckEditorCards`**. |
 | **`data-instance`** | 0-based instance when **`quantity > 1`** (separate row per copy for stackable types). |
 | **`.dev-mobile-deck-row-thumb`** | Square thumb; **`getCardImagePath`** + **`getDeckEditorCardViewInitialImagePath`** (thumb-first for character/location/mission where applicable). |
-| **`.dev-mobile-deck-row-name`** | **`devMobileDisplayName(card, instanceAvailable)`** — type-specific label (power value/type, teamwork line, etc.). Typography: **`font-weight: 400`**, **`font-size: 0.9rem`**, **`color: #f8fafc`** ([`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)). |
+| **`.dev-mobile-deck-row-name`** | Column flex: **`.dev-mobile-deck-row-name-primary`** (first line — **`devMobileDisplayName(card, instanceAvailable)`** + optional **`collection-foil-badge`**) and optional **`.dev-mobile-deck-row-reserve-label`** (**"Reserve"**) when **`computeReserveCharacterRowState(card.cardId, data-deck-index).isReserveCharacter`** (characters only). Typography: primary line **`var(--font-sm)`**, **`font-weight: 400`**, **`#f8fafc`**; reserve line **`var(--font-2xs)`**, **`#64748b`** ([`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)). |
 | **`.dev-mobile-deck-row-actions`** | Quantity controls + optional **⋯**. |
 
 ### Quantity controls (`canStack`)
@@ -108,7 +108,8 @@ The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetPart
 | Type is character, special, power, or location **and** **`deckEditorCardHasAlternateArts(acForAlt, card.type)`** | Change art | **`showAlternateArtSelectionForExistingCard`**, per-instance via **`resolveInstanceCardId`** |
 | **`foilCardMap[instId]`** defined | Foil | **`toggleFoilForCard`**; **`instId`** from **`resolveInstanceCardId`** |
 | Character + logged in | KO / Un-KO | **`toggleKOCharacter`** |
-| Character + **`getReserveCharacterButton`** returns HTML | Custom block | **`.dev-mobile-deck-row-menu-custom`** |
+| Character (**not** **`isDeckEditorReadOnlyUi`**): always **Select Reserve** unless this row is already the reserve (**Reserve** = clear) | **`deck-editor-menu-panel-btn`** row + bookmark icon **`ICON_MENU_RESERVE`** | **`selectReserveCharacter`** / **`deselectReserveCharacter`** (same as desktop DTV); MV **tap-to-switch** shows **Select Reserve** on every eligible character row even when another character already holds reserve—one tap moves reserve. **`computeReserveCharacterRowState`** (**`index-page.js`**) aligns row state with desktop. |
+| Character + body **`read-only-mode`** and this row is the reserve | Disabled **Reserve** row | **`.deck-editor-menu-panel-btn--disabled`**, **`deck-editor-menu-item-icon--reserve-active`** (read-only sheet normally not open — parity with desktop disabled reserve) |
 | Training + **`hasSpartanTrainingGround()`** | Pre-placed / Include in draw | **`drawTrainingCard`** |
 | Basic universe + **`hasDraculasArmory()`** | Same pattern | **`drawBasicUniverseCard`** |
 | Special Sword and Shield + **`hasLancelot()`** | Same pattern | **`drawSwordAndShield`** |
@@ -119,7 +120,7 @@ The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetPart
 ### Menu presentation
 
 - Primary actions use **`deck-editor-menu-panel-btn`** + **`deck-editor-menu-item-label`** + **`deck-editor-menu-item-icon`** (same structural pattern as the hamburger panel in **`index.css`**).
-- Icons are inline SVGs (change art, foil, KO, “hand” for draw/pre-placed) defined in **`deck-editor-mobile-view.js`**; size is controlled in **`deck-editor-mobile.css`**.
+- Icons are inline SVGs (change art, foil, KO, bookmark for reserve, “hand” for draw/pre-placed) defined in **`deck-editor-mobile-view.js`**; size is controlled in **`deck-editor-mobile.css`**.
 
 ---
 
@@ -195,10 +196,11 @@ The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetPart
 
 ## Testing
 
-There is **no** dedicated Jest suite for **`deck-editor-mobile-view.js`** today. Regression coverage is indirect:
+There is **no** dedicated Jest suite that drives the full MV deck list in a browser today. Regression coverage includes:
 
-- **`npm run test:unit`** — project-wide; no MV deck list assertions unless added.
-- Manual QA: narrow viewport → open deck editor → expand types, **−**/**+**, **⋯** (alternate art, foil, KO, reserve, mission/training/special pre-place when deck qualifies), backdrop tap, Escape, switch to DTV via **`preferDesktopLayout`** or wide window.
+- **`tests/unit/deck-editor-mobile-reserve-ui.test.ts`** — loads **`deck-editor-mobile-view.js`** in jsdom + **`vm`** (same harness as **`deck-editor-mobile-header-collapse.test.ts`**). Asserts **`computeReserveCharacterRowState`** wiring: under-name **`.dev-mobile-deck-row-reserve-label`**, alternate-art reserve ID matching, ⋯ **Select Reserve** / **`deselectReserveCharacter`**, read-only disabled row, and **`deck-editor-mobile.css`** tokens for the reserve subtitle.
+- **`npm run test:unit`** — project-wide; extend the file above when changing MV reserve UX.
+- Manual QA: narrow viewport → open deck editor → expand types, **−**/**+**, **⋯** (alternate art, foil, KO, **Select Reserve** / **Reserve** on characters with tap-to-switch, mission/training/special pre-place when deck qualifies), backdrop tap, Escape, switch to DTV via **`preferDesktopLayout`** or wide window.
 
 When adding behavior, prefer **small unit tests** for pure helpers if extracted (e.g. alternate-art gating already lives on **`deckEditorCardHasAlternateArts`** in **`deck-editor-rendering.js`**).
 
@@ -208,6 +210,7 @@ When adding behavior, prefer **small unit tests** for pure helpers if extracted 
 
 1. **⋯ only when there are real actions** — avoids empty sheets; **Change art** only if **`deckEditorCardHasAlternateArts`** is true (parity with desktop card view).
 2. **Bottom sheet replaced with hamburger-style dropdown** — **`#devMobileDeckActionsSheet`** is a fixed flyout anchored to **⋯**, reusing **`.deck-editor-controls-menu-panel`** visuals at smaller scale.
+3. **Character reserve in MV** — **Select Reserve** is a first-class teal menu row (not **`.dev-mobile-deck-row-menu-custom`** **`.reserve-btn`**). Reserve changes close the flyout and **`renderDeckEditorMobileView()`** so indices stay fresh; DTV still uses **`getReserveCharacterButton`** (hidden on non-reserve rows when another character holds reserve—MV intentionally allows **tap-to-switch**). The reserve character also shows **Reserve** under the name in the list (**`.dev-mobile-deck-row-reserve-label`**).
 
 ---
 
