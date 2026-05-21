@@ -128,11 +128,21 @@ function handlePlusButtonClick(event, cardType, cardId, cardName, allCardsJson =
     if (typeof isReadOnlyMode !== 'undefined' && isReadOnlyMode) {
         return;
     }
-    
-    // If allCardsJson is provided and contains multiple cards, show alternate art selection
-    if (allCardsJson && allCardsJson.trim() !== '') {
+
+    const cardElement = event.target.closest('.card-item');
+    if (cardElement && cardElement.classList.contains('disabled')) {
+        return;
+    }
+
+    // Prefer data-all-cards on the row (safe for apostrophes); onclick 5th arg is legacy fallback only
+    const allCardsFromData = cardElement ? cardElement.getAttribute('data-all-cards') : null;
+    const resolvedAllCardsJson =
+        (allCardsFromData && allCardsFromData.trim() !== '') ? allCardsFromData : allCardsJson;
+
+    // If alternate-art JSON is available, show selection when multiple playable arts exist
+    if (resolvedAllCardsJson && resolvedAllCardsJson.trim() !== '') {
         try {
-            const allCards = JSON.parse(allCardsJson.replace(/&quot;/g, '"'));
+            const allCards = JSON.parse(resolvedAllCardsJson.replace(/&quot;/g, '"'));
 
             const playableChoices = getPlayableArtChoices(cardType, allCards);
             if (playableChoices.length > 1) {

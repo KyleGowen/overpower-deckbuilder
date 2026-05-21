@@ -1,4 +1,10 @@
 // Extracted from public/index.html (index-page split). Category UI must stay in sync with deck editor.
+
+/** Escape a value for use inside single-quoted JS string literals in inline onclick handlers. */
+function escapeJsSingleQuoted(value) {
+    return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
 async function loadAvailableCardsData() {
     try {
         const categories = [
@@ -313,7 +319,7 @@ async function loadAvailableCards() {
                             if (stackCards.length === 0) return;
 
                             const cardItems = stackCards.map(stackCard => {
-                                const cardName = (stackCard.name || '').replace(/'/g, "\\'");
+                                const cardName = escapeJsSingleQuoted(stackCard.name || '');
                                 const escapedImagePath = (stackCard.imagePath || '').replace(/'/g, "\\'");
                                 const escapedCardType = (stackCard.cardType || '').replace(/'/g, "\\'");
                                 const escapedCardId = (stackCard.id || '').replace(/'/g, "\\'");
@@ -490,7 +496,7 @@ async function loadAvailableCards() {
                                     <div class="character-name">${name}</div>
                                     <div class="character-stats">${statsHtml}</div>
                                     </div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${name}', '${allCardsJson}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${escapeJsSingleQuoted(name)}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `;
                         });
@@ -545,7 +551,7 @@ async function loadAvailableCards() {
                                      data-name="${(card[category.nameField] || card.name || '').replace(/'/g, "\\'")}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${card[category.nameField]}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(card[category.nameField] || card.name || '')}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `;
                         }).join('');
@@ -603,7 +609,7 @@ async function loadAvailableCards() {
                                      data-name="${(card[category.nameField] || card.name || '').replace(/'/g, "\\'")}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${card[category.nameField]}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(card[category.nameField] || card.name || '')}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `;
                         }).join('');
@@ -733,7 +739,7 @@ async function loadAvailableCards() {
                                      data-name="${name.replace(/'/g, "\\'")}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${name}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${name}', '${allCardsJson}')" title="Add to deck (multiple copies allowed)">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${escapeJsSingleQuoted(name)}')" title="Add to deck (multiple copies allowed)">+</div>
                                 </div>
                             `);
                         });
@@ -807,7 +813,7 @@ async function loadAvailableCards() {
                                      data-name="${(card[category.nameField] || card.name || '').replace(/'/g, "\\'")}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${card[category.nameField]}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(card[category.nameField] || card.name || '')}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `;
                         }).join('');
@@ -878,11 +884,11 @@ async function loadAvailableCards() {
                                      data-id="${card.id}"
                                      onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                      onmouseleave="hideCardHoverModal()"
-                                     onclick="handleCardClick(event, '${category.type}', '${card.id}', '${summary}')"
+                                     onclick="handleCardClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')"
                                      data-name="${summary}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${summary}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                                 </div>
                             `;
                         }).join('');
@@ -920,11 +926,11 @@ async function loadAvailableCards() {
                                  data-id="${card.id}"
                                  onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
-                                 onclick="handleCardClick(event, '${category.type}', '${card.id}', '${summary}')"
+                                 onclick="handleCardClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')"
                                  data-name="${summary}"
                                  title="${disabledTitle}">
                                 <div class="card-item-content">${summary}</div>
-                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                             </div>
                         `;
                     }).join('');
@@ -952,11 +958,11 @@ async function loadAvailableCards() {
                                  data-id="${card.id}"
                                  onmouseenter="showCardHoverModal('${getCardImagePath(card, category.type).replace(/'/g, "\\'")}', '${summary}', '${(card.id || '').replace(/'/g, "\\'")}', '${(category.type || '').replace(/'/g, "\\'")}')"
                                  onmouseleave="hideCardHoverModal()"
-                                 onclick="handleCardClick(event, '${category.type}', '${card.id}', '${summary}')"
+                                 onclick="handleCardClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')"
                                  data-name="${summary}"
                                  title="${disabledTitle}">
                                 <div class="card-item-content">${summary}</div>
-                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${summary}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(summary)}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                             </div>
                         `;
                     }).join('');
@@ -964,7 +970,7 @@ async function loadAvailableCards() {
                     // Special handling for basic universe cards - show summary with type, value, and bonus
                     cardsHtml = data.data.map(card => {
                         const summary = `${card.card_name} - ${card.type} (${card.value_to_use} → ${card.bonus})`;
-                        const escapedSummary = summary.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                        const escapedSummary = escapeJsSingleQuoted(summary);
                         const escapedImagePath = getCardImagePath(card, category.type).replace(/'/g, "\\'").replace(/"/g, '\\"');
                         
                         // Check if this basic-universe card is One Per Deck and already in deck
@@ -1139,7 +1145,7 @@ async function loadAvailableCards() {
                                      data-name="${summary.replace(/'/g, "\\'")}"
                                      title="${disabledTitle}">
                                     <div class="card-item-content">${summary}</div>
-                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${summary}', '${allCardsJson}')" title="Add to deck (multiple copies allowed)">+</div>
+                                    <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${escapeJsSingleQuoted(summary)}')" title="Add to deck (multiple copies allowed)">+</div>
                                 </div>
                             `);
                         });
@@ -1256,7 +1262,7 @@ async function loadAvailableCards() {
                                     <div class="location-name">${name}</div>
                                     <div class="location-stats">${statsHtml}</div>
                                 </div>
-                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${name}', '${allCardsJson}')" title="Add to deck (max 1 location)">+</div>
+                                <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${displayCard.id}', '${escapeJsSingleQuoted(name)}')" title="Add to deck (max 1 location)">+</div>
                             </div>
                         `;
                     });
@@ -1272,7 +1278,7 @@ async function loadAvailableCards() {
                              onclick="handleCardClick(event, '${category.type}', '${card.id}', '${(card[category.nameField] || card.name || '').replace(/'/g, "\\'")}')"
                              data-name="${(card[category.nameField] || card.name || '').replace(/'/g, "\\'")}">
                             <div class="card-item-content">${card[category.nameField]}</div>
-                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${card[category.nameField]}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
+                            <div class="card-item-plus" onclick="handlePlusButtonClick(event, '${category.type}', '${card.id}', '${escapeJsSingleQuoted(card[category.nameField] || card.name || '')}')" title="${category.type === 'character' ? 'Add to deck (max 4 characters)' : 'Add to deck (multiple copies allowed)'}">+</div>
                         </div>
                     `).join('');
                 }
