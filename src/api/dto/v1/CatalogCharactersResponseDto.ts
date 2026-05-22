@@ -1,5 +1,8 @@
+import { CatalogCharacterItem } from './catalog-item-types';
+
 /**
- * v1 GET /catalog/characters — `data` is the raw character row array from the catalog service.
+ * v1 GET /catalog/characters — `data` is an array of character rows.
  * @see API_V1.md
+ * @see catalog-item-types.ts for the full field list
  */
-export type CatalogCharactersDataDto = unknown[];
+export type CatalogCharactersDataDto = CatalogCharacterItem[];

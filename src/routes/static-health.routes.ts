@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import type { StaticHealthRoutesDeps } from './types';
 import { setStaticAssetCacheHeaders } from '../middleware/staticAssetCache';
 
@@ -207,5 +208,21 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     const startTime = Date.now();
     const { data, httpStatus } = await buildDeepPayload(deps, startTime);
     res.status(httpStatus).json(data);
+  });
+
+  // SPA catch-all — must be registered LAST, after all API routes, page routes,
+  // and static mounts. Serves the app shell for any unmatched path so that
+  // client-side routing in the new SPA framework works for deep links.
+  // The entry-point path here will be updated when the new frontend ships.
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
+      return next();
+    }
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
+    res.sendFile(path.join(process.cwd(), 'public/index.html'));
   });
 }

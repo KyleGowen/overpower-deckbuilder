@@ -113,11 +113,19 @@ Users have a `role` of `GUEST`, `USER`, or `ADMIN` (see `src/types/index.ts`).
 | * | `/src/resources/cards/images/*` | `src/middleware/setup.ts` | Narrower mount for card images (registered before full tree) |
 | * | `/src/resources/images/*` | `src/middleware/setup.ts` | Narrower mount for general images |
 
-### `GET /health`
+### `GET /health` (alias: `GET /health/deep`)
 
 **File:** `src/routes/static-health.routes.ts`
 
-Returns a large JSON payload: `status` (`OK`, `DEGRADED`, or `ERROR`), `timestamp`, `uptime`, `version`, `environment`, `git` (commit metadata), `resources` (memory/CPU), `database` (connectivity, counts, Flyway latest migration), and `latency`. **503** when `status === 'ERROR'`; degraded DB may still return **200** with `DEGRADED`.
+Full deep health check. Returns a large JSON payload: `status` (`OK`, `DEGRADED`, or `ERROR`), `timestamp`, `uptime`, `version`, `environment`, `git` (commit metadata), `resources` (memory/CPU), `database` (connectivity, counts, Flyway latest migration), and `latency`. **503** when `status === 'ERROR'`; degraded DB may still return **200** with `DEGRADED`.
+
+`GET /health/deep` is a registered alias for the same handler — use it when you want a semantically explicit deep-check URL (e.g. Kubernetes readiness probes).
+
+### `GET /health/live`
+
+**File:** `src/routes/static-health.routes.ts`
+
+Lightweight liveness probe — **no database query**. Always returns `{ "status": "OK" }` with **200** while the Node process is alive. Use for Kubernetes/ECS liveness probes where you do not want DB latency in the path.
 
 **Sample (truncated):**
 
@@ -456,9 +464,9 @@ Quick lookup: **method**, **path**, **source file**.
 | Method | Path | File |
 |--------|------|------|
 | * | `/public`, `/`, `/src/resources` (+ setup mounts) | `static-health.routes.ts`, `middleware/setup.ts` |
-| GET | `/health` | `static-health.routes.ts` |
+| GET | `/health`, `/health/deep` (deep health), `/health/live` (liveness probe, no DB) | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
-| GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js` | `auth.routes.ts` |
+| GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js`, `/api/v1/config/app` (JSON CDN config) | `auth.routes.ts` |
 | POST | `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | ~~`/api/guest/decks`~~ (removed) | *use* **`/api/v1/guest/decks...`** · [`guest-decks.http.ts`](src/api/http/guest-decks.http.ts) |
@@ -474,6 +482,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | Method | Path | HTTP module |
 |--------|------|-------------|
 | POST | `/api/v1/auth/login` | `src/api/http/auth.http.ts` |
+| POST | `/api/v1/auth/refresh` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |

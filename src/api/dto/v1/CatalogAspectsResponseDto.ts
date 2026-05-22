@@ -1,5 +1,8 @@
+import { CatalogSpecialCardItem } from './catalog-item-types';
+
 /**
- * v1 GET /catalog/aspects — `data` is the raw aspect row array from the catalog service.
+ * v1 GET /catalog/aspects — `data` is an array of aspect card rows (same shape as special cards).
  * @see API_V1.md
+ * @see catalog-item-types.ts for the full field list
  */
-export type CatalogAspectsDataDto = unknown[];
+export type CatalogAspectsDataDto = CatalogSpecialCardItem[];

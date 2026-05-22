@@ -7,11 +7,12 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Tab Title Branding Tests', () => {
+  // Legacy monolith files (deck-builder.html, database-view.html, database-backup.html,
+  // database-old.html, database-clean.html) have been deleted as part of the
+  // frontend migration readiness cleanup.
   const htmlFiles = [
     'public/index.html',
     'public/deck-editor.html',
-    'public/deck-builder.html', 
-    'public/database-view.html'
   ];
 
   describe('HTML Page Titles', () => {
@@ -43,7 +44,7 @@ describe('Tab Title Branding Tests', () => {
   describe('Logo Alt Text', () => {
     const filesWithLogos = [
       // 'public/index.html', // Logo is rendered via JavaScript, not in static HTML
-      'public/deck-builder.html',
+      // 'public/deck-builder.html', // deleted — legacy monolith removed in frontend migration readiness
       'public/components/globalNav.html'
     ];
 

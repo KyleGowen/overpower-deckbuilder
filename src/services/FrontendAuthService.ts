@@ -1,3 +1,15 @@
+/**
+ * FrontendAuthService — server-side TypeScript mirror of the browser client's
+ * `public/js/auth-service.js`. Used exclusively by integration tests and
+ * server-side dev utilities that need to simulate the browser auth flow
+ * (localStorage persistence, session verification, guest re-login, etc.).
+ *
+ * ⚠️  DO NOT extend this class with new backend logic. It intentionally
+ * reaches into browser APIs (localStorage, document, fetch) and belongs to
+ * the frontend-test boundary, not the backend service layer.
+ *
+ * References: `tests/integration/`, `src/test-server/`
+ */
 import { User, UserRole } from '../types';
 
 export interface LoginCredentials {

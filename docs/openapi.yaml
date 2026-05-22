@@ -45,6 +45,10 @@ tags:
     description: User deck CRUD. Accepts session cookie OR Bearer JWT.
   - name: Collections
     description: User card collections. Accepts session cookie OR Bearer JWT.
+  - name: Guest Decks
+    description: Session-scoped in-memory decks for GUEST users.
+  - name: Config
+    description: Public app configuration (CDN base, etc.). No auth required.
   - name: Admin
     description: ADMIN-only operations.
 
@@ -135,6 +139,139 @@ components:
         role:
           type: string
           enum: [ADMIN, USER, GUEST]
+    CatalogCharacterItem:
+      type: object
+      required: [id, name, set, energy, combat, brute_force, intelligence, threat_level, image, image_path, is_foil]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        set: { type: string }
+        set_number: { type: string, nullable: true }
+        rarity: { type: string, nullable: true }
+        energy: { type: integer }
+        combat: { type: integer }
+        brute_force: { type: integer }
+        intelligence: { type: integer }
+        threat_level: { type: integer }
+        special_abilities: { type: string }
+        image: { type: string }
+        image_path: { type: string }
+        is_foil: { type: boolean }
+    CatalogLocationItem:
+      type: object
+      required: [id, name, threat_level, image, image_path]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        threat_level: { type: integer }
+        special_ability: { type: string }
+        image: { type: string }
+        image_path: { type: string }
+        set: { type: string }
+        set_number: { type: string, nullable: true }
+        rarity: { type: string, nullable: true }
+    CatalogSpecialCardItem:
+      type: object
+      description: |
+        Shared shape for special-cards, events, aspects, advanced-universe,
+        teamwork, ally-universe, training, and basic-universe endpoints.
+      required: [id, name, image, image_path]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        character: { type: string }
+        card_effect: { type: string }
+        image: { type: string }
+        image_path: { type: string }
+        set: { type: string }
+        set_number: { type: string, nullable: true }
+        rarity: { type: string, nullable: true }
+        icons: { type: array, items: { type: string } }
+        value: { type: integer, nullable: true }
+        is_cataclysm: { type: boolean }
+        is_assist: { type: boolean }
+        is_ambush: { type: boolean }
+        one_per_deck: { type: boolean }
+        icon_offensive_swords: { type: boolean }
+        icon_defensive_shield: { type: boolean }
+        icon_remainder_of_battle: { type: boolean }
+        icon_remainder_of_game: { type: boolean }
+        icon_attached_paperclip: { type: boolean }
+        icon_astral_plane: { type: boolean }
+        icon_first_action_only: { type: boolean }
+        banned: { type: boolean }
+        is_foil: { type: boolean }
+    CatalogMissionItem:
+      type: object
+      required: [id, mission_set, card_name, name, image, image_path]
+      properties:
+        id: { type: string, format: uuid }
+        mission_set: { type: string }
+        card_name: { type: string }
+        name: { type: string }
+        image: { type: string }
+        image_path: { type: string }
+        set: { type: string }
+        set_number: { type: string, nullable: true }
+        rarity: { type: string, nullable: true }
+    CatalogPowerCardItem:
+      type: object
+      required: [id, name, power_type, value, image, image_path, one_per_deck, is_foil]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        power_type: { type: string, enum: [Energy, Combat, 'Brute Force', Intelligence, Any-Power, Multi-Power] }
+        value: { type: integer }
+        image: { type: string }
+        image_path: { type: string }
+        set: { type: string }
+        set_number: { type: string, nullable: true }
+        rarity: { type: string, nullable: true }
+        set_name: { type: string }
+        one_per_deck: { type: boolean }
+        is_foil: { type: boolean }
+    CatalogFoilCardMapItem:
+      type: object
+      required: [foilCardId, baseCardId, cardType]
+      properties:
+        foilCardId: { type: string, format: uuid }
+        baseCardId: { type: string, format: uuid }
+        cardType: { type: string }
+    DeckMetadata:
+      type: object
+      required: [id, name, userId, isOwner]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        created: { type: string, format: date-time }
+        lastModified: { type: string, format: date-time }
+        cardCount: { type: integer }
+        threat: { type: integer }
+        is_valid: { type: boolean }
+        userId: { type: string, format: uuid }
+        uiPreferences: { type: object, nullable: true, additionalProperties: true }
+        isOwner: { type: boolean }
+        is_limited: { type: boolean }
+        reserve_character: { type: string, format: uuid, nullable: true }
+        display_mission_card_id: { type: string, format: uuid, nullable: true }
+        background_image_path: { type: string }
+    DeckCardEntry:
+      type: object
+      required: [id, type, cardId, quantity]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        cardId: { type: string, format: uuid }
+        quantity: { type: integer, minimum: 1 }
+        exclude_from_draw: { type: boolean }
+    CollectionCardRow:
+      type: object
+      properties:
+        card_id: { type: string, format: uuid }
+        card_type: { type: string }
+        quantity: { type: integer }
+        image_path: { type: string }
     Deck:
       type: object
       additionalProperties: true
@@ -238,68 +375,235 @@ paths:
         - $ref: '#/components/parameters/SinceVersion'
         - $ref: '#/components/parameters/IfNoneMatch'
       responses:
-        '200': { description: OK }
-        '304': { description: Not Modified }
+        '200':
+          description: OK — full character array.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogCharacterItem' }
+        '304': { description: Not Modified (ETag match) }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/locations:
     get:
       tags: [Catalog]
       summary: All locations.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      responses:
+        '200':
+          description: OK — full location array.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogLocationItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/special-cards:
     get:
       tags: [Catalog]
       summary: All special cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      responses:
+        '200':
+          description: OK — full special-card array.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/missions:
     get:
       tags: [Catalog]
       summary: All missions.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      responses:
+        '200':
+          description: OK — full mission array.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogMissionItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/events:
     get:
       tags: [Catalog]
-      summary: All events.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: All events (same item shape as special-cards).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/aspects:
     get:
       tags: [Catalog]
-      summary: All aspects.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: All aspects (same item shape as special-cards).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/advanced-universe:
     get:
       tags: [Catalog]
-      summary: Advanced Universe cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: Universe: Advanced cards.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/teamwork:
     get:
       tags: [Catalog]
-      summary: Teamwork cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: Universe: Teamwork cards.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/ally-universe:
     get:
       tags: [Catalog]
-      summary: Ally Universe cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: Universe: Ally cards.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/training:
     get:
       tags: [Catalog]
-      summary: Training cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: Universe: Training cards.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/basic-universe:
     get:
       tags: [Catalog]
-      summary: Basic Universe cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: Universe: Basic cards.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogSpecialCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/power-cards:
     get:
       tags: [Catalog]
-      summary: Power cards.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      summary: All power cards.
+      responses:
+        '200':
+          description: OK — full power-card array.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogPowerCardItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/catalog/foil-card-map:
     get:
       tags: [Catalog]
       summary: Map of foil card IDs to base card IDs.
-      responses: { '200': { description: OK }, '304': { description: Not Modified } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CatalogFoilCardMapItem' }
+        '304': { description: Not Modified }
+        '401': { description: Unauthenticated }
   /api/v1/dbv/sets:
     get:
       tags: [DBV Support]
@@ -426,5 +730,110 @@ paths:
       tags: [Collections]
       summary: Remove all copies of a card.
       responses: { '200': { description: OK } }
+  /api/v1/decks/validate:
+    post:
+      tags: [Decks]
+      summary: Validate a deck without saving.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cards]
+              properties:
+                cards:
+                  type: array
+                  items: { $ref: '#/components/schemas/DeckCardEntry' }
+      responses:
+        '200': { description: Valid deck }
+        '400': { description: Validation errors in data.validationErrors }
+  /api/v1/guest/decks:
+    get:
+      tags: [Guest Decks]
+      summary: List guest session decks (merged with DB decks for guest user).
+      responses: { '200': { description: OK }, '401': { description: Unauthenticated }, '403': { description: Not GUEST role } }
+    post:
+      tags: [Guest Decks]
+      summary: Create a new guest deck (in-memory, session-scoped).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+      responses: { '201': { description: Created }, '401': { description: Unauthenticated }, '403': { description: Not GUEST role } }
+  /api/v1/guest/decks/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Guest Decks]
+      summary: Get a single guest deck.
+      responses: { '200': { description: OK }, '404': { description: Not found } }
+    put:
+      tags: [Guest Decks]
+      summary: Update name / description of a guest deck.
+      responses: { '200': { description: OK } }
+    delete:
+      tags: [Guest Decks]
+      summary: Delete a guest deck.
+      responses: { '200': { description: OK } }
+  /api/v1/guest/decks/{id}/cards:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Guest Decks]
+      summary: Replace all cards in a guest deck.
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Guest Decks]
+      summary: Add a card to a guest deck.
+      responses: { '200': { description: OK } }
+  /api/v1/config/app:
+    get:
+      tags: [Config]
+      summary: Public app configuration (CDN base URL).
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cdnBase: { type: string, description: Base URL for CDN-served static assets. }
+  /api/v1/admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users.
+      responses: { '200': { description: OK }, '403': { description: Not ADMIN } }
+    post:
+      tags: [Admin]
+      summary: Create a user.
+      responses: { '201': { description: Created }, '403': { description: Not ADMIN } }
+  /api/v1/admin/debug/clear-cache:
+    get:
+      tags: [Admin]
+      summary: Clear the catalog cache.
+      responses: { '200': { description: OK }, '403': { description: Not ADMIN } }
+  /api/v1/admin/debug/clear-card-cache:
+    get:
+      tags: [Admin]
+      summary: Clear the card cache.
+      responses: { '200': { description: OK }, '403': { description: Not ADMIN } }
+  /api/v1/admin/database/status:
+    get:
+      tags: [Admin]
+      summary: Database status and Flyway migration info.
+      responses: { '200': { description: OK }, '403': { description: Not ADMIN } }
 
 # NOTE: keep this file updated whenever /api/v1 endpoints change.

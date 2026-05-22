@@ -1,5 +1,8 @@
+import { CatalogFoilCardMapItem } from './catalog-item-types';
+
 /**
- * v1 GET /catalog/foil-card-map — `data` is the foil↔base mapping row array from the catalog service.
+ * v1 GET /catalog/foil-card-map — `data` is an array of foil↔base card ID mappings.
  * @see API_V1.md
+ * @see catalog-item-types.ts for the full field list
  */
-export type CatalogFoilCardMapDataDto = unknown[];
+export type CatalogFoilCardMapDataDto = CatalogFoilCardMapItem[];

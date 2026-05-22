@@ -4,7 +4,10 @@ import path from 'path';
 export const APP_SHELL_CACHE_CONTROL = 'no-cache, no-store, must-revalidate';
 export const SHORT_STATIC_CACHE_CONTROL = 'public, max-age=300';
 
-const PUBLIC_FRAGMENT_DIRS = ['/public/components/', '/public/templates/'];
+// Directories whose .html files are treated as partial fragments (short-cached)
+// rather than app-shell entries (no-store). Update this list when the new
+// frontend introduces a different component directory structure.
+export const PUBLIC_FRAGMENT_DIRS = ['/public/components/', '/public/templates/'];
 const SHORT_CACHE_EXTENSIONS = new Set([
   '.css',
   '.js',

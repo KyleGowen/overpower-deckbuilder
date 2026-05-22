@@ -22,4 +22,13 @@ export function registerAuthRoutes(app: express.Application, deps: AuthRoutesDep
     res.set('Cache-Control', 'public, max-age=300');
     res.send(`window.APP_CDN_BASE = ${JSON.stringify(cdnBaseUrl)};`);
   });
+
+  // Framework-friendly JSON equivalent of /js/app-config.js.
+  // New frontend consumes this instead of eval-ing the JS snippet.
+  // Retire /js/app-config.js once the old vanilla frontend is replaced.
+  app.get('/api/v1/config/app', (req, res) => {
+    const cdnBase = process.env.CDN_BASE_URL || '';
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({ cdnBase });
+  });
 }

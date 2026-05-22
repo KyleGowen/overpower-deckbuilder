@@ -12,7 +12,26 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 
 - **Bearer JWT:** `Authorization: Bearer <access_token>` for protected v1 routes.
 - **Login:** `POST /api/v1/auth/login` with JSON body `{ "username", "password" }` returns an access token. Password verification uses the **same** server stack as `POST /api/auth/login` (no separate hashing implementation).
-- **Session cookie (`sessionId`):** Routes that use session auth (e.g. decks, collections, guest decks, admin, DBV backgrounds) accept the same cookie as legacy `/api/`*. If the session is missing or invalid, the server responds with `**401`** and the standard v1 envelope: `data: null`, `errors: [{ "code": "UNAUTHORIZED", "message": "..." }]` (e.g. `Authentication required`, `Invalid or expired session`, `User not found`).
+- **Session cookie (`sessionId`):** Routes that use session auth (e.g. decks, collections, guest decks, admin, DBV backgrounds) accept the same cookie as legacy `/api/`*. If the session is missing or invalid, the server responds with **401** and the standard v1 envelope: `data: null`, `errors: [{ "code": "UNAUTHORIZED", "message": "..." }]`.
+
+**Route auth matrix — which credential each endpoint family accepts:**
+
+| Route family | Session cookie | Bearer JWT | Notes |
+| ------------ | :------------: | :--------: | ----- |
+| `POST /api/v1/auth/login` | — | — | Open — returns access + refresh tokens |
+| `POST /api/v1/auth/refresh` | — | — | Open — accepts refresh token in body |
+| `GET /api/v1/auth/me` | ✓ | ✓ | Returns current user; 401 if not authed |
+| `POST /api/v1/auth/logout` | ✓ | ✓ | Clears session / revokes refresh token |
+| `GET /api/v1/catalog/*` | ✓ | ✓ | GUEST, USER, ADMIN all allowed |
+| `GET /api/v1/dbv/*` | ✓ | ✓ | Same as catalog |
+| `GET /api/v1/config/app` | — | — | Open — no auth required |
+| `GET /api/v1/decks*` | ✓ | ✓ | USER/ADMIN; GUEST→403 on write routes |
+| `POST/PUT/DELETE /api/v1/decks*` | ✓ | ✓ | Owner only; GUEST→403 |
+| `/api/v1/guest/decks*` | ✓ (GUEST only) | ✗ | GUEST role required; wrong role→403 |
+| `/api/v1/collections/me*` | ✓ | ✗ | USER/ADMIN; GUEST→401 (no collection) |
+| `/api/v1/admin/*` | ✓ | — | ADMIN role required; other roles→403 |
+
+Bearer support on decks/catalog can be disabled server-side via `DISABLE_BEARER_DECKS_COLLECTIONS=1`. For a complete guide including token lifetimes, cookie names, and the GUEST session flow, see [docs/current/FRONTEND_AUTH_AND_SESSION.md](docs/current/FRONTEND_AUTH_AND_SESSION.md).
 
 ### JSON envelope
 
@@ -184,29 +203,68 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Response 401:** Missing, invalid, or expired session; missing/invalid Bearer token; or user record missing. Body: `{ "data": null, "meta": {}, "errors": [{ "code": "UNAUTHORIZED", "message": "..." }] }`.
 
+> **Full-catalog download:** There are no server-side pagination or filtering parameters on these endpoints. Each call returns the **complete** array for that card type. The existing frontend downloads all catalogs at page load and filters entirely client-side. A new frontend should do the same — or cache the responses using the `ETag`/`If-None-Match` conditional GET pattern documented in [Caching & conditional GET](#caching--conditional-get) to avoid re-downloading unchanged catalogs. See `meta.catalogDataVersion` and `meta.catalogLastUpdated` in the response for cache keying.
+
 ### `GET /api/v1/catalog/characters`
 
 **Auth:** Session cookie or Bearer JWT (see introduction above).
 
-**Request model:** none (no body; no query contract file required for this GET).
+**Request model:** none.
 
-**Response 200:** `data` is an array of character records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of character objects. Example item:
+
+```json
+{
+  "id": "98fd610e-39fd-470e-84b7-ab723cc0f39d",
+  "name": "Angry Mob (Industrial Age)",
+  "set": "ERB",
+  "set_number": "008",
+  "rarity": "Common",
+  "energy": 4,
+  "combat": 5,
+  "brute_force": 7,
+  "intelligence": 3,
+  "threat_level": 18,
+  "special_abilities": "Must have 25 hits to be Cumulative KO'd.",
+  "image": "characters/angry_mob_industrial_age.webp",
+  "image_path": "characters/angry_mob_industrial_age.webp",
+  "is_foil": false
+}
+```
+
+Fields: `id`, `name`, `set`, `set_number` (string|null), `rarity` (`"Common"|"Uncommon"|"Rare"|"Ultra Rare"|null`), `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` (all numbers), `special_abilities` (string), `image`, `image_path`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogCharactersResponseDto.ts](src/api/dto/v1/CatalogCharactersResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/locations`
 
 **Auth:** Session cookie or Bearer JWT (see introduction above).
 
-**Request model:** none (no body; no query contract file required for this GET).
+**Request model:** none.
 
-**Response 200:** `data` is an array of location records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of location objects. Example item:
+
+```json
+{
+  "id": "bc4e4d65-cc3f-4527-9005-cc7ebb7307be",
+  "name": "221-B Baker St.",
+  "threat_level": 0,
+  "special_ability": "Any time the 221-B Baker St. team plays a card that Reveals...",
+  "image": "alternate/221_b_baker_st.png",
+  "image_path": "alternate/221_b_baker_st.png",
+  "set": "ERBP",
+  "set_number": null,
+  "rarity": null
+}
+```
+
+Fields: `id`, `name`, `threat_level`, `special_ability`, `image`, `image_path`, `set`, `set_number` (string|null), `rarity` (string|null).
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogLocationsResponseDto.ts](src/api/dto/v1/CatalogLocationsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/special-cards`
 
@@ -214,11 +272,42 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of special card records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of special card objects. Example item:
+
+```json
+{
+  "id": "79cdbac0-ccfc-4e6f-bc68-5b6f47db5e43",
+  "name": "Don't Let it Get Away!",
+  "character": "Angry Mob",
+  "card_effect": "Acts as a level 2 MultiPower attack...",
+  "image": "specials/dont_let_it_get_away.webp",
+  "image_path": "specials/dont_let_it_get_away.webp",
+  "set": "ERB",
+  "set_number": "002",
+  "rarity": "Common",
+  "icons": ["Energy", "Combat", "Brute Force", "Intelligence"],
+  "value": 2,
+  "is_cataclysm": false,
+  "is_assist": false,
+  "is_ambush": false,
+  "one_per_deck": false,
+  "icon_offensive_swords": true,
+  "icon_defensive_shield": false,
+  "icon_remainder_of_battle": false,
+  "icon_remainder_of_game": false,
+  "icon_attached_paperclip": false,
+  "icon_astral_plane": false,
+  "icon_first_action_only": false,
+  "banned": false,
+  "is_foil": false
+}
+```
+
+Fields: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons` (string[]), `value` (number|null), `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans (`icon_offensive_swords` etc.), `banned`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogSpecialCardsResponseDto.ts](src/api/dto/v1/CatalogSpecialCardsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/missions`
 
@@ -226,11 +315,27 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of mission records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of mission objects. Example item:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440015",
+  "mission_set": "The Warlord of Mars",
+  "card_name": "A Fighting Man of Mars",
+  "name": "A Fighting Man of Mars",
+  "image": "missions/the-warlord-of-mars/a_fighting_man_of_mars.webp",
+  "image_path": "missions/the-warlord-of-mars/a_fighting_man_of_mars.webp",
+  "set": "ERB",
+  "set_number": "376",
+  "rarity": "Common"
+}
+```
+
+Fields: `id`, `mission_set`, `card_name` (primary display name), `name` (same as `card_name` on list), `image`, `image_path`, `set`, `set_number`, `rarity`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogMissionsResponseDto.ts](src/api/dto/v1/CatalogMissionsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/events`
 
@@ -238,11 +343,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of event records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of event card objects. Fields match the special-cards shape: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons`, `value`, `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans, `banned`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogEventsResponseDto.ts](src/api/dto/v1/CatalogEventsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/aspects`
 
@@ -250,11 +355,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of aspect records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of aspect card objects. Fields match the special-cards shape: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons`, `value`, `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans, `banned`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogAspectsResponseDto.ts](src/api/dto/v1/CatalogAspectsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/advanced-universe`
 
@@ -262,11 +367,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Advanced records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of Universe: Advanced card objects. Fields match the special-cards shape: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons`, `value`, `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans, `banned`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogAdvancedUniverseResponseDto.ts](src/api/dto/v1/CatalogAdvancedUniverseResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/teamwork`
 
@@ -274,11 +379,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Teamwork records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of Universe: Teamwork card objects. Fields match the special-cards shape.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogTeamworkResponseDto.ts](src/api/dto/v1/CatalogTeamworkResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/ally-universe`
 
@@ -286,11 +391,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Ally records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of Universe: Ally card objects. Fields match the special-cards shape.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogAllyUniverseResponseDto.ts](src/api/dto/v1/CatalogAllyUniverseResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/training`
 
@@ -298,11 +403,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Training records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of Universe: Training card objects. Fields match the special-cards shape.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogTrainingResponseDto.ts](src/api/dto/v1/CatalogTrainingResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/basic-universe`
 
@@ -310,11 +415,11 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Basic records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of Universe: Basic card objects. Fields match the special-cards shape.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogBasicUniverseResponseDto.ts](src/api/dto/v1/CatalogBasicUniverseResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/power-cards`
 
@@ -322,11 +427,30 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of power card records (same objects as legacy `data` array).
+**Response 200:** `data` is an array of power card objects. Example item:
+
+```json
+{
+  "id": "b37d8f9c-364c-4b29-a0f2-cae2a54c157b",
+  "name": "5 - Any-Power",
+  "power_type": "Any-Power",
+  "value": 5,
+  "image": "power-cards/5_anypower.webp",
+  "image_path": "power-cards/5_anypower.webp",
+  "set": "ERB",
+  "set_number": "473F",
+  "rarity": "Uncommon",
+  "set_name": "Edgar Rice Burroughs and the World Legends",
+  "one_per_deck": true,
+  "is_foil": true
+}
+```
+
+Fields: `id`, `name`, `power_type` (`"Energy"|"Combat"|"Brute Force"|"Intelligence"|"Any-Power"|"Multi-Power"`), `value`, `image`, `image_path`, `set`, `set_number`, `rarity`, `set_name`, `one_per_deck`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
-**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)` · response shape `[src/api/dto/v1/CatalogPowerCardsResponseDto.ts](src/api/dto/v1/CatalogPowerCardsResponseDto.ts)`
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
 ### `GET /api/v1/catalog/foil-card-map`
 
@@ -376,7 +500,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `GET /api/v1/decks`
 
-**Auth:** Valid **session cookie** (same `**authenticateUser`** middleware as removed legacy `GET /api/decks`). The main web app uses `credentials: 'include'`; unauthenticated requests receive **401** with the **legacy** JSON shape `{ "success": false, "error": "..." }` from session middleware.
+**Auth:** Valid **session cookie** OR `**Authorization: Bearer <accessToken>`** (`ownedAuth` middleware — accepts either; Bearer can be disabled via env `DISABLE_BEARER_DECKS_COLLECTIONS=1`). Send `credentials: 'include'` when using session cookies. Unauthenticated → **401** v1 envelope.
 
 **Request model:** none.
 
@@ -390,7 +514,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `GET /api/v1/decks/stats`
 
-**Auth:** Valid **session cookie** (same `**authenticateUser`** as `**GET /api/v1/decks`**). Unauthenticated requests receive **401** (legacy `{ success, error }` from session middleware).
+**Auth:** Valid **session cookie** or Bearer JWT (same `ownedAuth` as `GET /api/v1/decks`). Unauthenticated → **401** v1 envelope.
 
 **Request model:** none.
 
@@ -411,7 +535,7 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `POST /api/v1/decks`
 
-**Auth:** Valid **session cookie** (same `**authenticateUser`** as legacy DB deck routes). **GUEST** receives **403** v1 envelope (`errors` with code `**GUEST_FORBIDDEN`**). Unauthenticated requests receive **401** (legacy `{ success, error }` from session middleware).
+**Auth:** Valid **session cookie** or Bearer JWT (`ownedAuth`). **GUEST** receives **403** v1 envelope (`errors` with code `**GUEST_FORBIDDEN`**). Unauthenticated → **401** v1 envelope.
 
 **Rate limiting / read-only:** Same behavior as legacy create: **429** v1 envelope (`RATE_LIMIT_EXCEEDED`) when the shared per-IP limit is exceeded; **403** v1 envelope (`READ_ONLY_MODE`) when read-only mode is active (query/header as in [API_DOCUMENTATION.md](API_DOCUMENTATION.md)).
 
@@ -431,13 +555,27 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `POST /api/v1/decks/validate`
 
-**Auth:** Valid **session cookie**. Unauthenticated requests receive **401** (legacy shape).
+**Auth:** Valid **session cookie** or Bearer JWT. Unauthenticated → **401** v1 envelope.
 
 **Request model:** `[src/api/http/models/decks/ValidateDeckRequestBody.ts](src/api/http/models/decks/ValidateDeckRequestBody.ts)` — `{ "cards": [ ... ] }` (array required; card shapes match legacy `**POST /api/decks/validate`**).
 
 **Response 200:** v1 envelope; `**data`** is `{ "valid": true, "message": "Deck is valid" }` (`[DeckValidateV1SuccessDto](src/api/dto/v1/DeckValidateV1SuccessDto.ts)`).
 
-**Response 400:** v1 envelope — `errors` with code `**DECK_VALIDATION_FAILED`** and summary message; `**data`** includes `**validationErrors**` (same objects as legacy `validationErrors`, `[DeckValidateV1ErrorDataDto](src/api/dto/v1/DeckValidateV1ErrorDataDto.ts)`).
+**Response 400:** v1 envelope — `errors` with code `**DECK_VALIDATION_FAILED`** and summary message; `data` includes a `validationErrors` array. Example:
+
+```json
+{
+  "data": {
+    "validationErrors": [
+      "Deck must contain exactly 4 characters",
+      "Deck must contain at least 1 location",
+      "Total threat exceeds maximum allowed (60)"
+    ]
+  },
+  "errors": [{ "code": "DECK_VALIDATION_FAILED", "message": "Deck validation failed" }],
+  "success": false
+}
+```
 
 **Response 500:** v1 envelope — `errors` with code `**DECK_VALIDATE_ERROR`**.
 
@@ -449,11 +587,51 @@ Reference data for Database View and collection UI (set codes → display names,
 
 ### `GET /api/v1/decks/:id`
 
-**Auth:** Valid **session cookie** (same `**authenticateUser`** as other DB deck routes). Unauthenticated requests receive **401** (legacy `{ success, error }`).
+**Auth:** Valid **session cookie** or Bearer JWT (`ownedAuth`). Unauthenticated → **401** v1 envelope.
 
 **Request model:** none (path param `**id`** = deck UUID).
 
-**Response 200:** v1 envelope; `**data`** is `{ "metadata", "cards" }` (same transformed shape legacy returned: `isOwner`, `threat`, `is_valid`, `reserve_character`, `display_mission_card_id`, `background_image_path`, etc. — `**metadata.threat`**, `**metadata.is_valid`**, and **`metadata.reserve_character`** align with list rows from `transformDeckListItem`).
+**Response 200:** v1 envelope; `data` is `{ "metadata", "cards" }`. Example:
+
+```json
+{
+  "data": {
+    "metadata": {
+      "id": "e967130b-ca86-4e51-a6b3-c7908a5ce39f",
+      "name": "My Deck",
+      "description": "",
+      "created": "2026-04-05T20:06:53.316Z",
+      "lastModified": "2026-04-05T20:06:53.379Z",
+      "cardCount": 1,
+      "threat": 20,
+      "is_valid": false,
+      "userId": "c567175f-a07b-41b7-b274-e82901d1b4f1",
+      "uiPreferences": null,
+      "isOwner": true,
+      "is_limited": false,
+      "reserve_character": null,
+      "display_mission_card_id": null,
+      "background_image_path": "src/resources/images/backgrounds/landscape/aesclepnotext.png"
+    },
+    "cards": [
+      {
+        "id": "41122877-fa93-4347-9242-d8b00604df6d",
+        "type": "character",
+        "cardId": "3bf3a341-d100-4718-af7f-de54ddf736ed",
+        "quantity": 1,
+        "exclude_from_draw": false
+      }
+    ]
+  },
+  "meta": {},
+  "errors": [],
+  "success": true
+}
+```
+
+Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid`, `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
+
+Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, `exclude_from_draw`.
 
 **Response 404:** v1 envelope — `errors` with code `**DECK_NOT_FOUND`**.
 
@@ -571,7 +749,18 @@ Deck card CRUD for a database-backed deck. **Legacy** `**/api/decks/:id/cards`**
 
 **Auth:** Session cookie. **GUEST** → **403** (`GUEST_FORBIDDEN`). **Owner only**; non-owner → **403** (`DECK_ACCESS_DENIED`).
 
-**Response 200:** v1 envelope; `**data`** = UI preferences object (JSON stored on `decks.ui_preferences`), or `{}` if unset.
+**Response 200:** v1 envelope; `data` = UI preferences object stored in `decks.ui_preferences`, or `{}` if unset. Schema:
+
+```json
+{
+  "dividerPosition": 350,
+  "expansionState": { "character": true, "location": false },
+  "powerCardsSortMode": "type",
+  "characterGroupExpansionState": { "group-id-abc": true }
+}
+```
+
+All fields are optional: `dividerPosition` (number), `expansionState` (Record<string, boolean>), `powerCardsSortMode` (`"type"|"value"`), `characterGroupExpansionState` (Record<string, boolean>).
 
 **Response 500:** `**UI_PREFERENCES_FETCH_ERROR`**.
 
@@ -597,7 +786,11 @@ Deck card CRUD for a database-backed deck. **Legacy** `**/api/decks/:id/cards`**
 
 Session-scoped decks for **GUEST** users: stored **in memory** keyed by `**sessionId`** cookie (not persisted to PostgreSQL). **GET list** merges DB decks for the guest user (`getDecksByUserId` + `transformDeckList`) with session guest decks (same list shape as `**GET /api/v1/decks`** entries).
 
-**Auth:** Valid **session cookie** (`authenticateUser`) **and** `**GUEST`** role **and** `**sessionId`** cookie. Unauthenticated requests may receive **401** with the **legacy** session middleware shape. Wrong role → **403** v1 envelope, code `**GUEST_ONLY`**. Missing `**sessionId`** → 401, code `**SESSION_REQUIRED**`.
+> **Clone-on-open pattern:** When a GUEST user navigates to a deck URL that belongs to a logged-in user (e.g. a shared link), the frontend checks deck ownership from `metadata.isOwner`. If `isOwner` is `false`, the client can offer to clone the deck into a new guest session deck via `POST /api/v1/guest/decks` (copy name/description) followed by `PUT /api/v1/guest/decks/:id/cards` (copy cards). There is no server-side clone endpoint — the client drives this sequence.
+
+**Auth:** Valid **session cookie** (`authenticateUser`) **and** `**GUEST`** role **and** `**sessionId`** cookie. Unauthenticated → **401** v1 envelope (`UNAUTHORIZED`). Wrong role → **403** v1 envelope, code `**GUEST_ONLY`**. Missing `**sessionId`** → 401, code `**SESSION_REQUIRED**`.
+
+> **Note:** Guest deck routes use **session cookie only** — Bearer JWT is not accepted on these endpoints.
 
 **Implementation:** `[GuestDeckService](src/api/services/guestDeckService.ts)` · HTTP `[guest-decks.http.ts](src/api/http/guest-decks.http.ts)`
 
@@ -645,9 +838,11 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 ## Collections (current user)
 
+> **GUEST users have no server-side collection.** The GUEST role (`POST /api/auth/login` with username `guest` and no password) is denied by `authenticateUser` on all `/api/v1/collections/*` endpoints (**401**). The web app tracks the guest collection entirely in **`localStorage`** (key: `guestCollection`) on the client — no collection API calls are made for GUEST sessions. A new frontend must replicate this localStorage read/write when the user role is `GUEST`.
+
 ### `GET /api/v1/collections/me`
 
-**Auth:** Valid **session cookie** (same `**authenticateUser`** as `**GET /api/v1/decks`**). Unauthenticated requests receive **401** with the **legacy** JSON shape `{ "success": false, "error": "..." }` from session middleware.
+**Auth:** Valid **session cookie** (`authenticateUser`). Unauthenticated requests receive **401** with the v1 envelope: `{ "data": null, "errors": [{ "code": "UNAUTHORIZED", "message": "..." }], "success": false }`.
 
 **Request model:** none.
 
@@ -659,7 +854,7 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 ### `GET /api/v1/collections/me/cards`
 
-**Auth:** Valid **session cookie** (`authenticateUser`). Unauthenticated → **401** (legacy `{ success, error }` from session middleware).
+**Auth:** Valid **session cookie** (`authenticateUser`). Unauthenticated → **401** v1 envelope.
 
 **Response 200:** v1 envelope; `**data`** is an array of collection rows (same shape as legacy `GET /api/collections/me/cards` payload): snake_case fields including `card_id`, `card_type`, `quantity`, `image_path`, plus joined card metadata when present.
 
@@ -667,7 +862,7 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 ### `GET /api/v1/collections/me/history`
 
-**Auth:** Session cookie (`authenticateUser`). Unauthenticated → **401** (legacy `{ success, error }` from session middleware).
+**Auth:** Session cookie (`authenticateUser`). Unauthenticated → **401** v1 envelope.
 
 **Query:** optional `**limit`** — must be a **positive integer** when present (same rule as removed legacy `**GET /api/collections/me/history`**). Omit `**limit`** to return all history (service default).
 
@@ -781,6 +976,7 @@ Clears card repository caches.
 | Method | Path                                    | Router module       |
 | ------ | --------------------------------------- | ------------------- |
 | POST   | /api/v1/auth/login                      | auth.http.ts        |
+| POST   | /api/v1/auth/refresh                    | auth.http.ts        |
 | GET    | /api/v1/auth/me                         | auth.http.ts        |
 | POST   | /api/v1/auth/logout                     | auth.http.ts        |
 | GET    | /api/v1/catalog/characters              | dbv-catalog.http.ts |
@@ -839,8 +1035,15 @@ Clears card repository caches.
 
 These endpoints are **intentionally not** under `**/api/v1`**:
 
-- `**GET /health`** — operations and monitoring; JSON shape is health-specific, not the v1 catalog envelope.
-- **Static assets** and **HTML shell** routes (e.g. `**/users/...`** deck pages, `**/data`**) — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
+| Path | Notes |
+| ---- | ----- |
+| `GET /health` | Operations/monitoring; deep health check with DB ping. Shape is health-specific (not v1 envelope). |
+| `GET /health/live` | Lightweight liveness probe (no DB). Returns `{ "status": "OK" }`. |
+| `GET /health/deep` | Same as `GET /health` — alias for deep health check. |
+| `GET /js/app-config.js` | Injects `window.APP_CDN_BASE` as a JS snippet for the legacy frontend. **Prefer** `GET /api/v1/config/app` in new code. |
+| `GET /api/v1/config/app` | JSON equivalent: `{ "cdnBase": "<string>" }`. No auth required. New frontend should use this. |
+| **Static assets** | `public/`, `src/resources/` served by `express.static` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
+| **HTML shell routes** | `/`, `/users/:userId/decks`, `/users/:userId/collection`, `/data` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
 
 **Legacy** JSON that remains outside v1 (e.g. `**POST /api/users/change-password`**) is documented only in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
 
