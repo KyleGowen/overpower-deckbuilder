@@ -197,8 +197,46 @@
 }
 
 .login-view,
-.signup-view {
+.signup-view,
+.google-confirm-view {
     width: 100%;
+}
+
+.google-confirm-heading {
+    margin: 0 0 12px 0;
+    font-size: 1.5rem;
+    color: #4ecdc4;
+    font-weight: 600;
+}
+
+.google-confirm-message {
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.45;
+}
+
+.google-confirm-message strong {
+    color: #4ecdc4;
+    font-weight: 600;
+}
+
+.google-confirm-hint {
+    margin: 0 0 16px 0;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+}
+
+.google-confirm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.google-confirm-actions .login-btn,
+.google-confirm-actions .guest-btn {
+    width: 100%;
+    margin-top: 0;
 }
 
 .login-contact {

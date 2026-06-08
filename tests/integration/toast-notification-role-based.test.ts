@@ -254,10 +254,9 @@ describe('Toast Notification Role-Based Behavior', () => {
             
             const html = response.text;
             
-            // All existing functionality should still be present
-            expect(html).toContain('startEditingTitle');
-            expect(html).toContain('startEditingDescription');
-            expect(html).toContain('saveTitleEdit');
+            // Title/description edit handlers and toast logic live in external scripts
+            expect(html).toContain('data-edit-handler="startEditingTitle"');
+            expect(html).toContain('data-edit-handler="startEditingDescription"');
             expect(html).toContain('src="/js/ui-utility-functions.js"');
             expect(html).toContain('src="/js/deck-editor-core.js"');
         });

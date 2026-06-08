@@ -194,11 +194,60 @@ class FrontendAuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      await this.signOutFirebaseIfInitialized();
       this.currentUser = null;
       this.clearStoredUser();
       // Do NOT call showLoginModal() here — the caller (auth-app-init.logout) always redirects
       // to '/', so the new page handles showing the login modal. Calling showLoginModal() here
       // causes the login modal to flash on top of the current app page before the redirect fires.
+    }
+  }
+
+  async signOutFirebaseIfInitialized() {
+    try {
+      if (typeof initializeFirebase === 'function') {
+        const auth = await initializeFirebase();
+        if (auth && typeof auth.signOut === 'function') {
+          await auth.signOut();
+        }
+      }
+    } catch (error) {
+      console.error('Firebase sign-out error:', error);
+    }
+  }
+
+  async previewGoogleLogin(idToken) {
+    try {
+      const response = await fetch('/api/auth/google/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ idToken })
+      });
+
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Google preview response parse error:', parseError);
+        return {
+          success: false,
+          error: response.status >= 500
+            ? 'Server is temporarily unavailable. Please try again in a few moments.'
+            : 'Google sign-in failed'
+        };
+      }
+
+      if (!response.ok && !data.error) {
+        data.success = false;
+        data.error = data.error || 'Google sign-in failed';
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Google preview error:', error);
+      return { success: false, error: 'Google sign-in failed' };
     }
   }
 
@@ -248,13 +297,18 @@ class FrontendAuthService {
     }
   }
 
-  async loginWithGoogle(idToken) {
+  async loginWithGoogle(idToken, options = {}) {
     try {
+      const payload = { idToken };
+      if (options.confirmRegistration === true) {
+        payload.confirmRegistration = true;
+      }
+
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify(payload)
       });
 
       let data;

@@ -38,6 +38,7 @@ For local Google Sign-In, add both to **Authentication → Settings → Authoriz
 | "Google sign-in is not available" | Firebase config empty | Ensure .env has all 4 Firebase vars; restart server |
 | "Google sign-in is not configured" | Service account missing | Ensure `infra/firebase-service-account.json` exists |
 | Google popup then error | Firebase key rotated | Get new API key from Firebase Console → Project settings → Your apps → Config; update .env |
+| Google popup then "Please confirm account creation" | New user skipped confirmation | Click **Create Account** on the confirmation screen after choosing Google |
 | Google blocked on localhost | Domain not authorized | Add `localhost` and `127.0.0.1` to Firebase Auth → Settings → Authorized domains |
 
 ## Quick Checks

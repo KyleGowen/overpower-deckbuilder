@@ -22,7 +22,14 @@ function getServiceAccountJson(): string | null {
 export function initializeFirebaseAdmin(): void {
   if (isInitialized) return;
   const serviceAccountJson = getServiceAccountJson();
-  if (!serviceAccountJson || serviceAccountJson.trim() === '') return;
+  if (!serviceAccountJson || serviceAccountJson.trim() === '') {
+    console.warn(
+      '⚠️  Google Sign-In disabled: Firebase Admin service account not found. ' +
+        'Place infra/firebase-service-account.json or set FIREBASE_SERVICE_ACCOUNT_JSON. ' +
+        'See docs/LOCAL_AUTH_SETUP.md or run scripts/sync-firebase-env-local.ps1 (requires AWS CLI).'
+    );
+    return;
+  }
   try {
     const serviceAccount = JSON.parse(serviceAccountJson);
     admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });

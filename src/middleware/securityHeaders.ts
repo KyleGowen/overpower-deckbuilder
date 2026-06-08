@@ -5,8 +5,13 @@ import type { RequestHandler } from 'express';
  * Security headers via `helmet`.
  *
  * What is emitted (see `docs/current/API_V1_SECURITY_HEADERS.md`):
- * - `Strict-Transport-Security` (1 year, includeSubDomains). Ignored by
- *   browsers on HTTP; becomes effective once Phase 0 HTTPS is live.
+ * - `Strict-Transport-Security` (1 year, includeSubDomains) ONLY when
+ *   `COOKIE_SECURE=true` (i.e. an intentional HTTPS deployment). While the site
+ *   runs on HTTP, HSTS is disabled: even though browsers ignore the header when
+ *   it arrives over HTTP, any browser that received it once over HTTPS (during
+ *   earlier TLS experiments) gets pinned to HTTPS for up to a year. On an
+ *   HTTP-only origin that produces erratic, hard-to-reproduce session loss, so
+ *   we stop emitting it until HTTPS is the real, permanent transport.
  * - `X-Content-Type-Options: nosniff`
  * - `Referrer-Policy: strict-origin-when-cross-origin`
  * - `X-Frame-Options: DENY`
@@ -34,13 +39,19 @@ export function createSecurityHeadersMiddleware(): RequestHandler {
     return (_req, _res, next) => next();
   }
 
+  // HSTS only when the operator has explicitly opted into HTTPS hardening.
+  // Default (HTTP-only site): disabled so we never pin browsers to HTTPS.
+  const hstsEnabled = process.env.COOKIE_SECURE === 'true';
+
   return helmet({
     contentSecurityPolicy: false,
-    hsts: {
-      maxAge: 60 * 60 * 24 * 365,
-      includeSubDomains: true,
-      preload: false,
-    },
+    hsts: hstsEnabled
+      ? {
+          maxAge: 60 * 60 * 24 * 365,
+          includeSubDomains: true,
+          preload: false,
+        }
+      : false,
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     frameguard: { action: 'deny' },
     xContentTypeOptions: true,

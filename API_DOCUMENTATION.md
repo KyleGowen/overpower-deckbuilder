@@ -89,7 +89,10 @@ Per-IP rate limits apply to several deck mutations (creation, updates, card chan
 ### Session cookie
 
 - **Name:** `sessionId`
-- **Attributes:** `httpOnly`, `sameSite: 'lax'`, `secure` when `COOKIE_SECURE=true`, **max age ~2 hours**
+- **Attributes (default, HTTP):** `httpOnly`, `sameSite: 'lax'`, `secure: false`, **max age ~2 hours**
+- **Attributes when `COOKIE_SECURE=true` (HTTPS opt-in):** `httpOnly`, `sameSite: 'strict'`, `secure: true`
+- **Deterministic:** attributes depend only on `COOKIE_SECURE` (not on `req.secure`/`X-Forwarded-Proto`), so a proxy or a browser pinned to HTTPS by a stale HSTS header can never cause a `Secure` cookie to be dropped on the HTTP site.
+- **Rolling:** the cookie is re-issued on every authenticated request, so the browser cookie's max age tracks the server-side sliding 2-hour session (active users are not logged out at a fixed 2-hour cap).
 
 Successful login, signup, or Google sign-in sets this cookie. Send it on subsequent requests (`credentials: 'include'` in `fetch`, or browser same-origin navigation).
 
@@ -211,7 +214,7 @@ Host: localhost:8085
 
 **Response 201:** Session cookie set; body same shape as login (`userId`, `username`, `role`). **400:** validation. **409:** username or email exists. **429:** signup rate limit.
 
-### `POST /api/auth/google`
+### `POST /api/auth/google/preview`
 
 **Body:**
 
@@ -219,7 +222,31 @@ Host: localhost:8085
 { "idToken": "<Firebase ID token>" }
 ```
 
-**Response 200:** Same `data` shape as login. **400:** missing token. **401:** invalid token. **503:** Firebase not configured. **429:** too many new accounts (IP-based).
+**Response 200:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "action": "login",
+    "profile": { "email": "user@example.com", "name": "Display Name", "username": "Display Name" }
+  }
+}
+```
+
+`action` is `login` for existing users (by Firebase UID or linked email) or `register` when a new account would be created. Does not create a session or user.
+
+### `POST /api/auth/google`
+
+**Body:**
+
+```json
+{ "idToken": "<Firebase ID token>", "confirmRegistration": true }
+```
+
+`confirmRegistration: true` is **required** when `action` would be `register` (new Google user). Existing users may omit it.
+
+**Response 200:** Same `data` shape as login. **400:** missing token. **401:** invalid token. **403:** new user without confirmation. **503:** Firebase not configured. **429:** too many new accounts (IP-based).
 
 ### `POST /api/auth/logout`
 

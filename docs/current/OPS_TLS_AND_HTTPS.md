@@ -61,26 +61,33 @@ Session cookies are built via
 `AuthenticationService` calls `buildSessionCookieOptions(req, SESSION_TTL_MS)`
 everywhere it issues the `sessionId` cookie (login, Google login, signup).
 
+Cookie attributes are **deterministic** — they depend only on the explicit
+`COOKIE_SECURE` flag, **not** on `req.secure` / `X-Forwarded-Proto`. Keying on
+`req.secure` made attributes flap per-request (a proxy or an HSTS-pinned browser
+could present a request as HTTPS), which set a `Secure` cookie that the browser
+then refused to send back over plain HTTP — the root cause of the "random
+logout" reports. The cookie is also **rolling**: re-issued on every
+authenticated request so its max age tracks the sliding 2-hour DB session.
+
 | Condition                                         | `secure` | `sameSite` |
 |---------------------------------------------------|:--------:|:----------:|
-| HTTPS request (`req.secure === true`) or prod     |  `true`  | `strict`   |
-| Legacy `COOKIE_SECURE=true`                       |  `true`  | `strict`   |
-| Local dev on HTTP                                 | `false`  |  `lax`     |
+| Default (HTTP-only site, `COOKIE_SECURE` unset)   | `false`  |  `lax`     |
+| `COOKIE_SECURE=true` (HTTPS opt-in)               |  `true`  | `strict`   |
 | `DISABLE_SECURE_COOKIES=1` (kill switch)          |  mirrors `COOKIE_SECURE`    | `lax`      |
 
-`sameSite=strict` blocks the cookie from being sent on cross-origin
-navigations. Google sign-in works because the Firebase flow exchanges tokens
-client-side and POSTs to our own origin before the cookie is set; there is no
-cross-site redirect that needs the existing session cookie.
+`sameSite=strict` (only with `COOKIE_SECURE=true`) blocks the cookie from being
+sent on cross-origin navigations. Google sign-in works because the Firebase flow
+exchanges tokens client-side and POSTs to our own origin before the cookie is
+set; there is no cross-site redirect that needs the existing session cookie.
 
 ## 5. Environment / feature flags
 
 | Env var                   | Default | Behavior when set                                                                    |
 |---------------------------|:-------:|--------------------------------------------------------------------------------------|
-| `NODE_ENV`                | -       | `production` forces hardened cookies even when `req.secure` is somehow false.        |
-| `COOKIE_SECURE`           | -       | Legacy override; `true` forces `secure: true`, kept for backward compatibility.       |
-| `DISABLE_SECURE_COOKIES`  | -       | `1` reverts to pre-Phase-0 cookie shape. Emergency rollback only.                    |
+| `COOKIE_SECURE`           | -       | `true` → hardened cookies (`secure: true; sameSite: 'strict'`) **and** re-enables HSTS. Set this only on a real, permanent HTTPS deployment. Cookie attributes no longer depend on `NODE_ENV` or `req.secure`. |
+| `DISABLE_SECURE_COOKIES`  | -       | `1` forces `sameSite: 'lax'` (with `secure` mirroring `COOKIE_SECURE`). Emergency rollback only. |
 | `DISABLE_TRUST_PROXY`     | -       | `1` disables `app.set('trust proxy', 1)`. `req.ip` reverts to the direct socket IP.  |
+| `DEBUG_AUTH`              | on      | Auth diagnostics (`[auth-debug]` logs: cookie issuance, session validate hit/miss, middleware denials, `/api/auth` request log). Set `0`/`false` to silence. |
 
 ## 6. Validation plan
 
@@ -153,10 +160,10 @@ this was still confirmed with Kyle before execution.
 ## 9. Local dev
 
 Local dev stays on plain HTTP at `http://localhost:8085` — `authCookieOptions`
-returns the legacy `{ secure: false, sameSite: 'lax' }` shape when
-`req.secure` is false and `NODE_ENV !== 'production'`. The `.cursorrules`
-health-check example keeps its HTTP URL for that reason; production health
-goes through HTTPS CloudFront.
+returns the HTTP-safe `{ secure: false, sameSite: 'lax' }` shape whenever
+`COOKIE_SECURE` is not `true` (which is the case in dev and on the current
+HTTP-only production site). The `.cursorrules` health-check example keeps its
+HTTP URL for that reason.
 
 ## 10. See also
 

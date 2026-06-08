@@ -6,6 +6,105 @@
 // Singleton promise — prevents concurrent calls from fetching and injecting the template twice
 let _loginTemplateLoadPromise = null;
 
+// Pending Google registration (idToken held until user confirms)
+let _pendingGoogleIdToken = null;
+
+/**
+ * Show only one login modal view at a time.
+ */
+function showLoginModalView(viewId) {
+    const views = ['loginView', 'signupView', 'googleConfirmView'];
+    for (const id of views) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = id === viewId ? 'block' : 'none';
+        }
+    }
+}
+
+function hideGoogleConfirmError() {
+    const errorDiv = document.getElementById('googleConfirmError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    }
+}
+
+function showGoogleConfirmError(message) {
+    const errorDiv = document.getElementById('googleConfirmError');
+    if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+}
+
+async function signOutFirebaseSession() {
+    if (window.authService && typeof window.authService.signOutFirebaseIfInitialized === 'function') {
+        await window.authService.signOutFirebaseIfInitialized();
+    }
+}
+
+function createGoogleAuthProvider() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    return provider;
+}
+
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function showGoogleRegistrationConfirm(profile, idToken) {
+    _pendingGoogleIdToken = idToken;
+    hideGoogleConfirmError();
+    if (typeof window.hideLoginError === 'function') {
+        window.hideLoginError();
+    }
+
+    const messageEl = document.getElementById('googleConfirmMessage');
+    if (messageEl) {
+        const displayName = profile.name || profile.email || 'your Google account';
+        const email = profile.email || '';
+        messageEl.innerHTML = email
+            ? `Sign up as <strong>${escapeHtml(displayName)}</strong> (${escapeHtml(email)})?`
+            : `Sign up as <strong>${escapeHtml(displayName)}</strong>?`;
+    }
+
+    showLoginModalView('googleConfirmView');
+}
+
+async function cancelGoogleRegistrationConfirm() {
+    _pendingGoogleIdToken = null;
+    hideGoogleConfirmError();
+    await signOutFirebaseSession();
+    showLoginModalView('loginView');
+}
+
+async function confirmGoogleRegistration() {
+    if (!_pendingGoogleIdToken) {
+        showGoogleConfirmError('Google sign-in expired. Please try again.');
+        return;
+    }
+
+    hideGoogleConfirmError();
+    const idToken = _pendingGoogleIdToken;
+    _pendingGoogleIdToken = null;
+
+    const result = await window.authService.loginWithGoogle(idToken, { confirmRegistration: true });
+    if (result.success) {
+        await signOutFirebaseSession();
+        await finalizeGoogleSessionWithIdTokenResult(result);
+        return;
+    }
+
+    _pendingGoogleIdToken = idToken;
+    showGoogleConfirmError(result.error || 'Could not create account. Please try again.');
+}
+
 /**
  * Load login HTML template and inject into body.
  * Multiple concurrent callers share a single in-flight promise so the template
@@ -115,6 +214,19 @@ function createFallbackLoginModal() {
                         <a class="login-contact-link" href="https://discord.com/invite/overpowerlives" target="_blank" rel="noopener noreferrer">OverPower Discord</a>: <a class="login-contact-link" href="https://discord.com/users/414971289267339274" target="_blank" rel="noopener noreferrer">@GirlsGoneKyle</a>.
                     </div>
                 </div>
+                <div id="googleConfirmView" class="google-confirm-view" style="display: none;">
+                    <div class="login-header">
+                        <img src="/src/resources/images/logo/logo5.png" alt="Excelsior Deckbuilder" style="max-width: 300px; height: auto; display: block; margin: 0 auto;" data-click-handler="handleLoginLogoClick">
+                    </div>
+                    <h2 class="google-confirm-heading">Create your account?</h2>
+                    <p id="googleConfirmMessage" class="google-confirm-message"></p>
+                    <p class="google-confirm-hint">A sample deck will be added to your account.</p>
+                    <div id="googleConfirmError" class="error-message" style="display: none;"></div>
+                    <div class="google-confirm-actions">
+                        <button type="button" id="googleConfirmBtn" class="login-btn">Create Account</button>
+                        <button type="button" id="googleConfirmCancelBtn" class="guest-btn">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -168,6 +280,19 @@ function setupLoginEventListeners() {
             handleSignupBackClick();
         });
     }
+
+    const googleConfirmBtn = document.getElementById('googleConfirmBtn');
+    const googleConfirmCancelBtn = document.getElementById('googleConfirmCancelBtn');
+    if (googleConfirmBtn) {
+        googleConfirmBtn.addEventListener('click', () => {
+            void confirmGoogleRegistration();
+        });
+    }
+    if (googleConfirmCancelBtn) {
+        googleConfirmCancelBtn.addEventListener('click', () => {
+            void cancelGoogleRegistrationConfirm();
+        });
+    }
 }
 
 /**
@@ -180,10 +305,7 @@ function handleSignUpClick() {
     if (typeof window.hideSignupError === 'function') {
         window.hideSignupError();
     }
-    const loginView = document.getElementById('loginView');
-    const signupView = document.getElementById('signupView');
-    if (loginView) loginView.style.display = 'none';
-    if (signupView) signupView.style.display = 'block';
+    showLoginModalView('signupView');
 }
 
 /**
@@ -193,10 +315,7 @@ function handleSignupBackClick() {
     if (typeof window.hideSignupError === 'function') {
         window.hideSignupError();
     }
-    const loginView = document.getElementById('loginView');
-    const signupView = document.getElementById('signupView');
-    if (loginView) loginView.style.display = 'block';
-    if (signupView) signupView.style.display = 'none';
+    showLoginModalView('loginView');
 }
 
 /**
@@ -303,12 +422,11 @@ async function handleGuestLogin() {
 }
 
 /**
- * Finish Google sign-in after we have a Firebase ID token (redirect return).
+ * Apply a successful Google login response to the UI.
  */
-async function finalizeGoogleSessionWithIdToken(idToken) {
-    const result2 = await window.authService.loginWithGoogle(idToken);
-    if (result2.success) {
-        const user = result2.data;
+async function finalizeGoogleSessionWithIdTokenResult(result) {
+    if (result.success) {
+        const user = result.data;
         if (typeof currentUser !== 'undefined') currentUser = user;
         if (typeof window !== 'undefined') window.currentUser = user;
         if (typeof updateUserWelcome === 'function') updateUserWelcome();
@@ -316,8 +434,39 @@ async function finalizeGoogleSessionWithIdToken(idToken) {
         if (mainContainer) mainContainer.style.display = 'grid';
         if (typeof showMainApp === 'function') showMainApp();
     } else if (typeof window.showLoginError === 'function') {
-        window.showLoginError(result2.error || 'Google sign-in failed');
+        showLoginModalView('loginView');
+        window.showLoginError(result.error || 'Google sign-in failed');
     }
+}
+
+/**
+ * Finish Google sign-in after we have a Firebase ID token (redirect return).
+ */
+async function finalizeGoogleSessionWithIdToken(idToken) {
+    const result = await window.authService.loginWithGoogle(idToken);
+    await finalizeGoogleSessionWithIdTokenResult(result);
+}
+
+/**
+ * After Firebase popup/redirect: preview login vs registration, then proceed or confirm.
+ */
+async function completeGoogleAuthFlow(idToken) {
+    const preview = await window.authService.previewGoogleLogin(idToken);
+    if (!preview.success) {
+        await signOutFirebaseSession();
+        if (typeof window.showLoginError === 'function') {
+            window.showLoginError(preview.error || 'Google sign-in failed');
+        }
+        return;
+    }
+
+    if (preview.data.action === 'register') {
+        showGoogleRegistrationConfirm(preview.data.profile, idToken);
+        return;
+    }
+
+    await finalizeGoogleSessionWithIdToken(idToken);
+    await signOutFirebaseSession();
 }
 
 /**
@@ -340,9 +489,10 @@ async function attemptGoogleRedirectCompletion() {
             }
             return;
         }
-        await finalizeGoogleSessionWithIdToken(idToken);
+        await completeGoogleAuthFlow(idToken);
     } catch (err) {
         console.error('Google redirect completion error:', err);
+        await signOutFirebaseSession();
         if (typeof window.showLoginError === 'function') {
             window.showLoginError(err.message || 'Google sign-in failed');
         }
@@ -367,7 +517,7 @@ async function handleGoogleLogin() {
             }
             return;
         }
-        const provider = new firebase.auth.GoogleAuthProvider();
+        const provider = createGoogleAuthProvider();
         const result = await auth.signInWithPopup(provider);
         const idToken = result && result.user ? await result.user.getIdToken() : null;
         if (!idToken) {
@@ -376,9 +526,10 @@ async function handleGoogleLogin() {
             }
             return;
         }
-        await finalizeGoogleSessionWithIdToken(idToken);
+        await completeGoogleAuthFlow(idToken);
     } catch (err) {
         console.error('Google login error:', err);
+        await signOutFirebaseSession();
         if (typeof window.showLoginError === 'function') {
             window.showLoginError(err.message || 'Google sign-in failed');
         }

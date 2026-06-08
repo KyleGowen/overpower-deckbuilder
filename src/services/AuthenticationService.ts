@@ -7,7 +7,8 @@ import { initializeFirebaseAdmin, getFirebaseAdmin } from '../config/firebaseAdm
 import { checkLimit, recordCreation } from '../middleware/newAccountRateLimiter';
 import { NewUserSampleDeckService } from './newUserSampleDeckService';
 import { type ISessionRepository, SESSION_TTL_MS } from '../database/sessionRepository';
-import { buildSessionCookieOptions } from './authCookieOptions';
+import { buildSessionCookieOptions, clearSessionCookieOptions } from './authCookieOptions';
+import { debugAuth, requestAuthContext, tokenPrefix } from './authDebug';
 
 export interface LoginCredentials {
   username: string;
@@ -72,13 +73,31 @@ export class AuthenticationService {
       const newExpiresAt = new Date(Date.now() + SESSION_TTL_MS);
       const userId = await this.sessionRepository.validateAndSlideExpiry(sessionId, newExpiresAt);
       if (!userId) {
+        debugAuth('validateSession MISS (token not found or expired)', { token: tokenPrefix(sessionId) });
         return null;
       }
+      debugAuth('validateSession HIT (expiry slid)', { token: tokenPrefix(sessionId), userId });
       return { userId };
     } catch (error) {
       console.error('Session validation error:', error);
+      debugAuth('validateSession ERROR', { token: tokenPrefix(sessionId), error: String(error) });
       return null;
     }
+  }
+
+  /**
+   * Set the `sessionId` cookie and log the resolved attributes + request
+   * context (DEBUG_AUTH). Centralizes issuance so login/signup/google and the
+   * rolling-refresh path all behave identically.
+   */
+  private issueSessionCookie(req: Request, res: Response, sessionId: string): void {
+    const options = buildSessionCookieOptions(req, SESSION_TTL_MS);
+    res.cookie('sessionId', sessionId, options);
+    debugAuth('issued sessionId cookie', {
+      token: tokenPrefix(sessionId),
+      options,
+      ...requestAuthContext(req),
+    });
   }
 
   /**
@@ -123,7 +142,7 @@ export class AuthenticationService {
       if (user) {
         const sessionId = await this.createSession(user);
 
-        res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
+        this.issueSessionCookie(req, res, sessionId);
         // Update last_login_at on successful login/session creation
         try {
           await this.userRepository.updateLastLoginAt(user.id);
@@ -160,7 +179,9 @@ export class AuthenticationService {
         await this.destroySession(sessionId);
       }
 
-      res.clearCookie('sessionId');
+      // Clear with the same attributes used when the cookie was set, otherwise
+      // the browser may keep a cookie whose attributes don't match.
+      res.clearCookie('sessionId', clearSessionCookieOptions(req));
       res.json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
       console.error('Logout error:', error);
@@ -169,10 +190,9 @@ export class AuthenticationService {
   }
 
   /**
-   * Handle Google login request.
-   * Verifies Firebase ID token, finds or creates user, creates session.
+   * Preview Google sign-in: verify token and report login vs new registration (no session).
    */
-  public async handleGoogleLogin(req: Request, res: Response): Promise<void> {
+  public async handleGoogleLoginPreview(req: Request, res: Response): Promise<void> {
     try {
       const { idToken } = req.body;
       if (!idToken || typeof idToken !== 'string') {
@@ -180,57 +200,61 @@ export class AuthenticationService {
         return;
       }
 
-      const firebaseAdmin = getFirebaseAdmin();
-      if (!firebaseAdmin) {
-        res.status(503).json({ success: false, error: 'Google sign-in is not configured' });
+      const claims = await this.verifyGoogleIdTokenOrRespond(idToken, res);
+      if (!claims) {
         return;
       }
 
-      let decodedToken: { uid: string; email?: string; name?: string };
-      try {
-        decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-      } catch (err) {
-        console.error('Firebase token verification failed:', err);
-        res.status(401).json({ success: false, error: 'Invalid or expired token' });
+      const resolution = await this.previewGoogleAuthResolution(claims);
+      res.json({
+        success: true,
+        data: {
+          action: resolution.action,
+          profile: resolution.profile,
+        },
+      });
+    } catch (error) {
+      console.error('Google login preview error:', error);
+      res.status(500).json({ success: false, error: 'Google sign-in preview failed' });
+    }
+  }
+
+  /**
+   * Handle Google login request.
+   * Verifies Firebase ID token, finds or creates user, creates session.
+   * New registrations require confirmRegistration: true in the request body.
+   */
+  public async handleGoogleLogin(req: Request, res: Response): Promise<void> {
+    try {
+      const { idToken, confirmRegistration } = req.body;
+      if (!idToken || typeof idToken !== 'string') {
+        res.status(400).json({ success: false, error: 'idToken is required' });
         return;
       }
 
-      const firebaseUid = decodedToken.uid;
-      const email = decodedToken.email || '';
-      const name = decodedToken.name || decodedToken.email?.split('@')[0] || 'Google User';
-
-      // 1. Lookup by Firebase UID first
-      let user = await this.userRepository.getUserByFirebaseUid(firebaseUid);
-
-      // 2. If no user by Firebase UID, lookup by email for linking (exclude GUEST)
-      if (!user && email) {
-        const existingByEmail = await this.userRepository.getUserByEmail(email);
-        if (existingByEmail && existingByEmail.role !== 'GUEST') {
-          await this.userRepository.linkGoogleToUser(existingByEmail.id, firebaseUid);
-          user = existingByEmail;
-        }
+      const claims = await this.verifyGoogleIdTokenOrRespond(idToken, res);
+      if (!claims) {
+        return;
       }
 
-      // 3. If no user, create new Google user (with rate limit check)
+      const preview = await this.previewGoogleAuthResolution(claims);
+      if (preview.action === 'register' && confirmRegistration !== true) {
+        res.status(403).json({
+          success: false,
+          error: 'Please confirm account creation before continuing',
+          code: 'REGISTRATION_CONFIRMATION_REQUIRED',
+        });
+        return;
+      }
+
+      const user = await this.resolveGoogleUserForLogin(claims, req);
       if (!user) {
-        const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-        if (!checkLimit(ip)) {
-          res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
-          return;
-        }
-        recordCreation(ip);
-        user = await this.userRepository.createGoogleUser(email, name, firebaseUid);
-        if (this.newUserSampleDeckService) {
-          try {
-            await this.newUserSampleDeckService.copyRandomGuestDeckForUser(user.id);
-          } catch (e) {
-            console.error('Warning: failed to copy sample deck for new Google user:', e);
-          }
-        }
+        res.status(500).json({ success: false, error: 'Google sign-in failed' });
+        return;
       }
 
       const sessionId = await this.createSession(user);
-      res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
+      this.issueSessionCookie(req, res, sessionId);
 
       try {
         await this.userRepository.updateLastLoginAt(user.id);
@@ -243,9 +267,115 @@ export class AuthenticationService {
         data: { userId: user.id, username: user.name, role: user.role }
       });
     } catch (error) {
+      if (error instanceof Error && (error as Error & { statusCode?: number }).statusCode === 429) {
+        res.status(429).json({ success: false, error: 'Too many new accounts. Please try again later.' });
+        return;
+      }
       console.error('Google login error:', error);
       res.status(500).json({ success: false, error: 'Google sign-in failed' });
     }
+  }
+
+  private async verifyGoogleIdTokenOrRespond(
+    idToken: string,
+    res: Response
+  ): Promise<{ firebaseUid: string; email: string; name: string } | null> {
+    const firebaseAdmin = getFirebaseAdmin();
+    if (!firebaseAdmin) {
+      res.status(503).json({ success: false, error: 'Google sign-in is not configured' });
+      return null;
+    }
+
+    let decodedToken: { uid: string; email?: string; name?: string };
+    try {
+      decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+    } catch (err) {
+      console.error('Firebase token verification failed:', err);
+      res.status(401).json({ success: false, error: 'Invalid or expired token' });
+      return null;
+    }
+
+    return {
+      firebaseUid: decodedToken.uid,
+      email: decodedToken.email || '',
+      name: decodedToken.name || decodedToken.email?.split('@')[0] || 'Google User',
+    };
+  }
+
+  private async previewGoogleAuthResolution(claims: {
+    firebaseUid: string;
+    email: string;
+    name: string;
+  }): Promise<{
+    action: 'login' | 'register';
+    profile: { email: string; name: string; username?: string };
+  }> {
+    const { firebaseUid, email, name } = claims;
+
+    const byUid = await this.userRepository.getUserByFirebaseUid(firebaseUid);
+    if (byUid) {
+      return {
+        action: 'login',
+        profile: { email: byUid.email || email, name: byUid.name, username: byUid.name },
+      };
+    }
+
+    if (email) {
+      const existingByEmail = await this.userRepository.getUserByEmail(email);
+      if (existingByEmail && existingByEmail.role !== 'GUEST') {
+        return {
+          action: 'login',
+          profile: {
+            email: existingByEmail.email || email,
+            name: existingByEmail.name,
+            username: existingByEmail.name,
+          },
+        };
+      }
+    }
+
+    return {
+      action: 'register',
+      profile: { email, name },
+    };
+  }
+
+  /** Find, link, or create the Excelsior user for a verified Google token. */
+  private async resolveGoogleUserForLogin(
+    claims: { firebaseUid: string; email: string; name: string },
+    req?: Request
+  ): Promise<User | null> {
+    const { firebaseUid, email, name } = claims;
+
+    let user = await this.userRepository.getUserByFirebaseUid(firebaseUid);
+
+    if (!user && email) {
+      const existingByEmail = await this.userRepository.getUserByEmail(email);
+      if (existingByEmail && existingByEmail.role !== 'GUEST') {
+        await this.userRepository.linkGoogleToUser(existingByEmail.id, firebaseUid);
+        user = existingByEmail;
+      }
+    }
+
+    if (!user) {
+      const ip = req?.ip || req?.socket?.remoteAddress || 'unknown';
+      if (!checkLimit(ip)) {
+        const err = new Error('RATE_LIMIT_EXCEEDED');
+        (err as Error & { statusCode: number }).statusCode = 429;
+        throw err;
+      }
+      recordCreation(ip);
+      user = await this.userRepository.createGoogleUser(email, name, firebaseUid);
+      if (this.newUserSampleDeckService) {
+        try {
+          await this.newUserSampleDeckService.copyRandomGuestDeckForUser(user.id);
+        } catch (e) {
+          console.error('Warning: failed to copy sample deck for new Google user:', e);
+        }
+      }
+    }
+
+    return user;
   }
 
   /** Simple email format validation - requires local@domain.tld pattern */
@@ -310,7 +440,7 @@ export class AuthenticationService {
       }
 
       const sessionId = await this.createSession(user);
-      res.cookie('sessionId', sessionId, buildSessionCookieOptions(req, SESSION_TTL_MS));
+      this.issueSessionCookie(req, res, sessionId);
 
       try {
         await this.userRepository.updateLastLoginAt(user.id);
@@ -336,6 +466,7 @@ export class AuthenticationService {
       const sessionId = req.cookies?.sessionId;
 
       if (!sessionId) {
+        debugAuth('/api/auth/me DENY: no sessionId cookie', requestAuthContext(req));
         res.status(401).json({ success: false, error: 'No session found' });
         return;
       }
@@ -343,6 +474,10 @@ export class AuthenticationService {
       const session = await this.validateSession(sessionId);
 
       if (!session) {
+        debugAuth('/api/auth/me DENY: invalid/expired session', {
+          token: tokenPrefix(sessionId),
+          ...requestAuthContext(req),
+        });
         res.status(401).json({ success: false, error: 'Invalid or expired session' });
         return;
       }
@@ -385,6 +520,7 @@ export class AuthenticationService {
       }
 
       if (!sessionId) {
+        debugAuth('auth middleware DENY: no sessionId cookie', requestAuthContext(req));
         // Return JSON error for API calls, redirect for page requests
         if (req.originalUrl.startsWith('/api/v1')) {
           return sendV1Unauthorized(res, 'Authentication required');
@@ -398,6 +534,10 @@ export class AuthenticationService {
       const session = await this.validateSession(sessionId);
 
       if (!session) {
+        debugAuth('auth middleware DENY: invalid/expired session', {
+          token: tokenPrefix(sessionId),
+          ...requestAuthContext(req),
+        });
         if (req.originalUrl.startsWith('/api/v1')) {
           return sendV1Unauthorized(res, 'Invalid or expired session');
         }
@@ -410,6 +550,11 @@ export class AuthenticationService {
       // Get the full user object from the database
       const user = await this.getUserById(session.userId);
       if (!user) {
+        debugAuth('auth middleware DENY: user not found for valid session', {
+          token: tokenPrefix(sessionId),
+          userId: session.userId,
+          ...requestAuthContext(req),
+        });
         if (req.originalUrl.startsWith('/api/v1')) {
           return sendV1Unauthorized(res, 'User not found');
         }
@@ -418,6 +563,12 @@ export class AuthenticationService {
         }
         return res.redirect('/');
       }
+
+      // Rolling cookie: re-issue on every authenticated request so the browser
+      // cookie maxAge tracks the sliding DB session (no hard 2h cap for active
+      // users), and any stale `Secure` cookie left over from the old HTTPS
+      // behavior gets overwritten with the current HTTP-safe attributes.
+      this.issueSessionCookie(req, res, sessionId);
 
       (req as unknown as Record<string, unknown>).user = user;
       next();

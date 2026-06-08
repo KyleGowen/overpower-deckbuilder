@@ -5,7 +5,7 @@
 import express, { Request, Response } from 'express';
 import type { CatalogService } from '../api/services/catalogService';
 export interface RouteDependencies {
-  authService: { handleLogin: (req: express.Request, res: Response) => void; handleSignup: (req: express.Request, res: Response) => void; handleGoogleLogin: (req: express.Request, res: Response) => void; handleLogout: (req: express.Request, res: Response) => void; handleSessionValidation: (req: express.Request, res: Response) => void; createAuthMiddleware: () => express.RequestHandler; destroySession: (sessionId: string) => Promise<void> };
+  authService: { handleLogin: (req: express.Request, res: Response) => void; handleSignup: (req: express.Request, res: Response) => void; handleGoogleLoginPreview: (req: express.Request, res: Response) => void; handleGoogleLogin: (req: express.Request, res: Response) => void; handleLogout: (req: express.Request, res: Response) => void; handleSessionValidation: (req: express.Request, res: Response) => void; createAuthMiddleware: () => express.RequestHandler; destroySession: (sessionId: string) => Promise<void> };
   authenticateUser: express.RequestHandler;
   deckRepository: {
     getDecksByUserId: (userId: string) => Promise<unknown[]>;

@@ -3,45 +3,46 @@ import type { Request, CookieOptions } from 'express';
 /**
  * Build the cookie options for the `sessionId` session cookie.
  *
- * We emit `{ httpOnly, secure, sameSite: 'strict' }` when the request actually
- * arrived over HTTPS (`req.secure === true`), or when the operator explicitly
- * opts in with `COOKIE_SECURE=true`. Otherwise we return the legacy
- * `sameSite: 'lax'` + `secure: false` options so the cookie still round-trips
- * on plain HTTP — this matters both for local dev AND for production
- * deployments that have not yet enabled TLS at the edge (Phase 0 of the HTTPS
- * rollout — see `docs/current/OPS_TLS_AND_HTTPS.md`).
+ * Hardening (`{ secure: true, sameSite: 'strict' }`) is emitted ONLY when the
+ * operator explicitly opts in with `COOKIE_SECURE=true`. Otherwise we always
+ * return the HTTP-safe `{ secure: false, sameSite: 'lax' }` options so the
+ * cookie round-trips on plain HTTP — for local dev AND for the production site
+ * which currently runs on HTTP.
  *
- * Gotcha: keying on `NODE_ENV === 'production'` instead of `req.secure` was
- * what caused the `http://excelsior.cards` login outage — the browser silently
- * dropped `Set-Cookie: ...; Secure` on HTTP, so the session never persisted.
- * Once HTTPS is live, set `COOKIE_SECURE=true` on the container to force
- * hardening even if `trust proxy` / `X-Forwarded-Proto` ever regress.
+ * Why this is decoupled from `req.secure`: deciding per-request based on
+ * `req.secure` (which follows `X-Forwarded-Proto` once `trust proxy` is on)
+ * made the cookie attributes flap. A browser pinned to HTTPS by a leftover
+ * HSTS header (from earlier TLS experiments), or any proxy presenting a request
+ * as HTTPS, would get a `Secure` cookie that the browser then refuses to send
+ * back over plain HTTP — the session silently vanishes and the user appears to
+ * be "randomly" logged out mid-session. Keying solely on the explicit
+ * `COOKIE_SECURE` flag makes the cookie attributes deterministic regardless of
+ * proxy/HSTS state.
+ *
+ * Forward-compatible: when you do a real HTTPS cutover, set `COOKIE_SECURE=true`
+ * on the container (this also re-enables HSTS in `securityHeaders.ts`).
  *
  * Kill switch: setting `DISABLE_SECURE_COOKIES=1` forces the legacy
  * `sameSite: 'lax'` options regardless of request (with `secure` driven by
  * `COOKIE_SECURE`). Use this only as an emergency rollback.
  *
- * NOTE: callers must pass a valid Express request so `req.secure` can be read.
- * `req.secure` relies on `app.set('trust proxy', 1)` in `src/index.ts` because
- * TLS terminates at CloudFront + nginx, not the Node process.
+ * NOTE: the `_req` param is retained for call-site compatibility but is no
+ * longer used to decide cookie attributes.
  */
-export function buildSessionCookieOptions(req: Request, maxAge: number): CookieOptions {
+export function buildSessionCookieOptions(_req: Request, maxAge: number): CookieOptions {
   const killSwitch = process.env.DISABLE_SECURE_COOKIES === '1';
-  const legacyFlag = process.env.COOKIE_SECURE === 'true';
+  const secureOptIn = process.env.COOKIE_SECURE === 'true';
 
   if (killSwitch) {
     return {
       httpOnly: true,
-      secure: legacyFlag,
+      secure: secureOptIn,
       sameSite: 'lax',
       maxAge,
     };
   }
 
-  const httpsRequest = Boolean(req.secure);
-  const shouldHarden = httpsRequest || legacyFlag;
-
-  if (shouldHarden) {
+  if (secureOptIn) {
     return {
       httpOnly: true,
       secure: true,
@@ -56,4 +57,17 @@ export function buildSessionCookieOptions(req: Request, maxAge: number): CookieO
     sameSite: 'lax',
     maxAge,
   };
+}
+
+/**
+ * Options for `res.clearCookie('sessionId', ...)`.
+ *
+ * `clearCookie` only reliably removes a cookie when the attributes (path,
+ * secure, sameSite, httpOnly) match those used at `res.cookie`. We reuse
+ * `buildSessionCookieOptions` and drop `maxAge` (Express sets an expired date).
+ */
+export function clearSessionCookieOptions(req: Request): CookieOptions {
+  const opts = buildSessionCookieOptions(req, 0);
+  delete opts.maxAge;
+  return opts;
 }

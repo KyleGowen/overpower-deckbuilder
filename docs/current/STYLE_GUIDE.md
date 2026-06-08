@@ -2400,10 +2400,24 @@ Part of the login buttons 2x2 grid (see Login Buttons Grid below).
 - **Margin Top**: `12px`
 - **Button sizing**: `padding: 8px 14px`, `font-size: 0.9rem`, `border-radius: 6px`, `white-space: nowrap`
 
+### Google account picker
+- Firebase `GoogleAuthProvider` uses `prompt: 'select_account'` so users always choose a Google account before continuing.
+
+### Google new-account confirmation view
+- **When shown**: After Google auth, if the server preview returns `action: register` (no existing Excelsior account).
+- **Container**: `#googleConfirmView` with class `.google-confirm-view`
+- **Heading**: `.google-confirm-heading` — `#4ecdc4`, `1.5rem`, text “Create your account?”
+- **Message**: `#googleConfirmMessage.google-confirm-message` — white body text; name/email highlighted with `<strong>` in `#4ecdc4`
+- **Hint**: `.google-confirm-hint` — muted white (`rgba(255,255,255,0.65)`), notes sample deck copy
+- **Actions**: `.google-confirm-actions` — vertical stack, `8px` gap
+  - **Create Account**: `#googleConfirmBtn.login-btn` (primary teal gradient)
+  - **Cancel**: `#googleConfirmCancelBtn.guest-btn` (outline teal); clears pending token and Firebase session
+- **Location**: [public/components/login/login.html](public/components/login/login.html), [public/components/login/login.css](public/components/login/login.css), [public/components/login/login.js](public/components/login/login.js)
+
 ## Sign Up and Account Creation Styling
 
 ### Overview
-The login modal supports two views: Login and Sign Up. The Sign Up button toggles to the account creation form. Sign Up uses the same outline/teal secondary style as "Continue as Guest" for visual consistency.
+The login modal supports three views: Login, Sign Up, and Google new-account confirmation. The Sign Up button toggles to the account creation form. Sign Up uses the same outline/teal secondary style as "Continue as Guest" for visual consistency.
 
 ### Sign Up Button
 - **Element**: Button with class `.signup-btn`

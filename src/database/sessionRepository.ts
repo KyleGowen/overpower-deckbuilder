@@ -16,10 +16,14 @@ export interface ISessionRepository {
 export class SessionRepository implements ISessionRepository {
   constructor(private readonly pool: Pool) {}
 
-  async insert(userId: string, sessionToken: string, expiresAt: Date): Promise<void> {
+  async insert(userId: string, sessionToken: string, _expiresAt: Date): Promise<void> {
+    // Use DB clock + interval so expires_at matches NOW() comparisons regardless of
+    // Node host timezone (timestamp without time zone + JS Date caused sessions to
+    // look expired immediately on non-UTC dev machines).
     await this.pool.query(
-      `INSERT INTO sessions (user_id, session_token, expires_at) VALUES ($1, $2, $3)`,
-      [userId, sessionToken, expiresAt]
+      `INSERT INTO sessions (user_id, session_token, expires_at)
+       VALUES ($1, $2, NOW() + INTERVAL '2 hours')`,
+      [userId, sessionToken]
     );
   }
 
@@ -27,13 +31,13 @@ export class SessionRepository implements ISessionRepository {
    * If the session exists and is not expired, extends `expires_at` and returns `user_id`.
    * Otherwise returns null (expired or unknown token).
    */
-  async validateAndSlideExpiry(sessionToken: string, newExpiresAt: Date): Promise<string | null> {
+  async validateAndSlideExpiry(sessionToken: string, _newExpiresAt: Date): Promise<string | null> {
     const result = await this.pool.query<{ user_id: string }>(
       `UPDATE sessions
-       SET expires_at = $2, updated_at = CURRENT_TIMESTAMP
+       SET expires_at = NOW() + INTERVAL '2 hours', updated_at = CURRENT_TIMESTAMP
        WHERE session_token = $1 AND expires_at > NOW()
        RETURNING user_id`,
-      [sessionToken, newExpiresAt]
+      [sessionToken]
     );
     return result.rows[0]?.user_id ?? null;
   }

@@ -27,7 +27,7 @@ The app supports two parallel auth mechanisms:
 
 | Mechanism | Cookie name | Accepted by | Use case |
 | --------- | ----------- | ----------- | -------- |
-| **Session cookie** | `connect.sid` (Express-session) | All `/api/*` and `/api/v1/*` routes | Main web app, server-rendered flow |
+| **Session cookie** | `sessionId` (custom, Postgres-backed) | All `/api/*` and `/api/v1/*` routes | Main web app, server-rendered flow |
 | **Bearer JWT** | — (header: `Authorization: Bearer <token>`) | Catalog, deck, and auth v1 routes | API-first / mobile clients, CI |
 
 Both mechanisms go through the same `AuthenticationService`; the user record fetched is identical. Roles (`GUEST`, `USER`, `ADMIN`) are stored on the session row and returned in both token payloads and the session.
@@ -51,7 +51,7 @@ Content-Type: application/json
 { "success": true, "data": { "userId": "...", "username": "...", "role": "USER" } }
 ```
 
-The response sets a `Set-Cookie: connect.sid=...` header. The cookie is **HttpOnly** and **SameSite=Lax** in production (HTTPS). **Lifetime:** the session expires after inactivity (server default: 24 hours for regular users).
+The response sets a `Set-Cookie: sessionId=...` header. The cookie is **HttpOnly** and **SameSite=Lax** (the HTTP-safe default; it becomes `Secure; SameSite=Strict` only when `COOKIE_SECURE=true` for a real HTTPS deployment). **Lifetime:** a **sliding 2-hour** session — the server slides the expiry and re-issues the cookie on every authenticated request, so active users stay logged in; the session only expires after ~2 hours of inactivity.
 
 > **Legacy vs v1 envelope:** `/api/auth/login` uses the legacy `{ success, data, error }` shape, not the v1 envelope. For new frontend code, prefer the v1 login endpoint (see §5).
 
@@ -286,6 +286,8 @@ Common error codes:
 | `ADMIN_REQUIRED` | 403 | Non-ADMIN attempted an admin route |
 
 Legacy routes outside `/api/v1/` (e.g. `POST /api/auth/login`, `GET /api/auth/me`) return the legacy shape `{ "success": false, "error": "..." }` on 401.
+
+**Client 401 handling (vanilla frontend):** the global `fetch` interceptor in [`public/js/index-page.js`](../../public/js/index-page.js) does **not** log the user out on the first 401 from an arbitrary endpoint. A 401 from `/api/auth/me` is treated as authoritative (immediate logout); a 401 from any other endpoint triggers a single re-verification against `/api/auth/me`, and the session is only torn down (login modal shown) if that confirms the session is gone. This prevents a transient/endpoint-specific 401 from causing a spurious logout. Set `window.__AUTH_DEBUG = false` to silence the `[auth-debug]` client logs.
 
 ---
 

@@ -2,6 +2,7 @@ import express, { Request } from 'express';
 import path from 'path';
 import type { PageRoutesDeps } from './types';
 import { pathToDeckEditorHtml } from './deckEditorPagePath';
+import { clearSessionCookieOptions } from '../services/authCookieOptions';
 
 /** Lets Firebase (and other) OAuth popups communicate with the opener; avoids COOP blocking `window.closed`. */
 const HTML_POPUP_FRIENDLY_HEADERS = {
@@ -16,7 +17,7 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
       if (sessionId) {
         await deps.authService.destroySession(sessionId);
       }
-      res.clearCookie('sessionId');
+      res.clearCookie('sessionId', clearSessionCookieOptions(req));
       res.redirect('/');
     } catch (err) {
       next(err);

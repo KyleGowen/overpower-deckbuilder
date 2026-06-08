@@ -91,9 +91,10 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', guestSessionCookie)
         .expect(200);
 
-      // Verify the page contains the global nav loading mechanism
+      // Verify the page loads deck-selection scripts (logic lives in external files)
       expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('loadGlobalNav');
+      expect(response.text).toContain('src="/js/app-initialization.js"');
+      expect(response.text).toContain('src="/components/globalNav.js"');
 
       // Verify the deck editor modal is present
       expect(response.text).toContain('id="deckEditorModal"');
@@ -108,9 +109,10 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', userSessionCookie)
         .expect(200);
 
-      // Verify the page contains the global nav loading mechanism
+      // Verify the page loads deck-selection scripts (logic lives in external files)
       expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('loadGlobalNav');
+      expect(response.text).toContain('src="/js/app-initialization.js"');
+      expect(response.text).toContain('src="/components/globalNav.js"');
 
       // Verify the deck editor modal is present
       expect(response.text).toContain('id="deckEditorModal"');
@@ -125,9 +127,10 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', adminSessionCookie)
         .expect(200);
 
-      // Verify the page contains the global nav loading mechanism
+      // Verify the page loads deck-selection scripts (logic lives in external files)
       expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('loadGlobalNav');
+      expect(response.text).toContain('src="/js/app-initialization.js"');
+      expect(response.text).toContain('src="/components/globalNav.js"');
 
       // Verify the deck editor modal is present
       expect(response.text).toContain('id="deckEditorModal"');
@@ -144,10 +147,9 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', guestSessionCookie)
         .expect(200);
 
-      // Verify the initializeBlankDeck function is present
-      expect(response.text).toContain('function initializeBlankDeck()');
-      expect(response.text).toContain('New Deck');
-      expect(response.text).toContain('Click to add description');
+      // Blank deck setup lives in index-page.js (loaded by index.html)
+      expect(response.text).toContain('src="/js/index-page.js"');
+      expect(response.text).toContain('Create New Deck');
     });
 
     it('should have createNewDeck function that opens blank editor', async () => {
@@ -158,7 +160,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
       // Verify the createNewDeck function is present
       expect(response.text).toContain('function createNewDeck()');
-      expect(response.text).toContain('showDeckEditor()');
+      expect(response.text).toContain('createNewDeckForUser');
     });
   });
 
@@ -413,9 +415,9 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', guestSessionCookie)
         .expect(200);
 
-      // Verify the save button functionality is present
-      expect(response.text).toContain('saveDeckChanges');
-      expect(response.text).toContain('isGuestUser');
+      // Verify save wiring and guest detection scripts are present
+      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
+      expect(response.text).toContain('src="/js/filter-functions.js"');
     });
 
     it('should have save button enabled for USER role users in frontend', async () => {
@@ -424,9 +426,9 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', userSessionCookie)
         .expect(200);
 
-      // Verify the save button functionality is present
-      expect(response.text).toContain('saveDeckChanges');
-      expect(response.text).toContain('isGuestUser');
+      // Verify save wiring and guest detection scripts are present
+      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
+      expect(response.text).toContain('src="/js/filter-functions.js"');
     });
 
     it('should have save button enabled for ADMIN users in frontend', async () => {
@@ -435,9 +437,9 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', adminSessionCookie)
         .expect(200);
 
-      // Verify the save button functionality is present
-      expect(response.text).toContain('saveDeckChanges');
-      expect(response.text).toContain('isGuestUser');
+      // Verify save wiring and guest detection scripts are present
+      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
+      expect(response.text).toContain('src="/js/filter-functions.js"');
     });
   });
 
@@ -458,8 +460,8 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         .set('Cookie', guestSessionCookie)
         .expect(200);
 
-      // Verify guest user restriction checks are present
-      expect(response.text).toContain('isGuestUser');
+      // Verify guest user restriction checks load from external scripts
+      expect(response.text).toContain('src="/js/filter-functions.js"');
       expect(response.text).toContain('src="/js/deck-editor-core.js"');
     });
   });
@@ -487,7 +489,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
         'id="deckEditorTitle"',
         'id="deckEditorDescription"',
         'id="saveDeckButton"',
-        'function initializeBlankDeck()'
+        'src="/js/index-page.js"'
       ];
 
       commonElements.forEach(element => {

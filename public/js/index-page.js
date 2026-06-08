@@ -411,15 +411,49 @@ window.addEventListener('hashchange', function(event) {
 // Global fetch interceptor to handle 401 responses (session expired)
 // Legacy /api/* catalog list URLs are rewritten in <head> via /js/catalog-legacy-fetch-rewrite.js
 const originalFetch = window.fetch;
+
+// Toggleable client-side auth diagnostics. Enabled by default while we chase
+// the "random logout" reports; set `window.__AUTH_DEBUG = false` in the console
+// to silence. Helps pinpoint which request triggered a logout.
+if (typeof window.__AUTH_DEBUG === 'undefined') {
+    window.__AUTH_DEBUG = true;
+}
+function authDebugLog(message, details) {
+    if (!window.__AUTH_DEBUG) return;
+    if (details !== undefined) {
+        console.log('[auth-debug] ' + message, details);
+    } else {
+        console.log('[auth-debug] ' + message);
+    }
+}
+
+// Tear down the local session and surface the login modal. Only called once we
+// are confident the session is actually gone (see re-verify below).
+async function handleConfirmedLogout(reasonUrl) {
+    authDebugLog('session confirmed invalid - logging out', { triggeredBy: reasonUrl });
+    if (window.authService) {
+        window.authService.currentUser = null;
+        window.authService.clearStoredUser();
+        await window.authService.showLoginModal();
+    } else if (typeof showLoginModal === 'function') {
+        await showLoginModal();
+    } else if (typeof window.showLoginModal === 'function') {
+        await window.showLoginModal();
+    }
+}
+
 window.fetch = async function(...args) {
     const response = await originalFetch.apply(this, args);
-    
+
     // Check for 401 Unauthorized responses
     if (response.status === 401) {
-        // Skip for /api/auth/me when user is guest - guest sessions may 401 but user is valid
         const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
         const isGuest = (typeof getCurrentUser === 'function' && getCurrentUser()?.role === 'GUEST') ||
             (window.authService?.getCurrentUser?.()?.role === 'GUEST');
+
+        authDebugLog('intercepted 401 response', { url: url, isGuest: isGuest });
+
+        // Skip for /api/auth/me when user is guest - guest sessions may 401 but user is valid
         if (url.includes('/api/auth/me') && isGuest) {
             return response;
         }
@@ -427,18 +461,39 @@ window.fetch = async function(...args) {
         if (isGuest && (url.includes('/api/v1/guest/') || url.includes('/api/guest/'))) {
             return response;
         }
-        // Session expired - clear user and show login modal
-        if (window.authService) {
-            window.authService.currentUser = null;
-            window.authService.clearStoredUser();
-            await window.authService.showLoginModal();
-        } else if (typeof showLoginModal === 'function') {
-            await showLoginModal();
-        } else if (typeof window.showLoginModal === 'function') {
-            await window.showLoginModal();
+
+        // `/api/auth/me` IS the authoritative session check — a 401 here means
+        // the session really is gone, so act immediately without re-verifying.
+        if (url.includes('/api/auth/me')) {
+            await handleConfirmedLogout(url);
+            return response;
+        }
+
+        // For any other endpoint, a single 401 is NOT trusted as proof the
+        // session expired (it may be a transient/endpoint-specific failure that
+        // previously caused "random" logouts). Re-verify once against
+        // /api/auth/me using the un-intercepted fetch before tearing down.
+        if (window.__authReverifyInFlight) {
+            return response;
+        }
+        window.__authReverifyInFlight = true;
+        try {
+            authDebugLog('re-verifying session via /api/auth/me', { triggeredBy: url });
+            const verify = await originalFetch('/api/auth/me', { credentials: 'include' });
+            if (verify.status === 401) {
+                await handleConfirmedLogout(url);
+            } else {
+                authDebugLog('session still valid - ignoring transient 401', { triggeredBy: url, verifyStatus: verify.status });
+            }
+        } catch (e) {
+            // Network error during verification: don't log the user out on a
+            // transient failure.
+            authDebugLog('re-verify failed (network) - not logging out', { triggeredBy: url, error: String(e) });
+        } finally {
+            window.__authReverifyInFlight = false;
         }
     }
-    
+
     return response;
 };
 

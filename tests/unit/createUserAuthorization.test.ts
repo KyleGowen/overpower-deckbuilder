@@ -43,7 +43,8 @@ describe('Create User Authorization Security Tests', () => {
         mockResponse = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis(),
-            redirect: jest.fn()
+            redirect: jest.fn(),
+            cookie: jest.fn()
         };
 
         mockNext = jest.fn();

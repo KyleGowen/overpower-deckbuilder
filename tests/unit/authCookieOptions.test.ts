@@ -1,4 +1,4 @@
-import { buildSessionCookieOptions } from '../../src/services/authCookieOptions';
+import { buildSessionCookieOptions, clearSessionCookieOptions } from '../../src/services/authCookieOptions';
 import { Request } from 'express';
 
 function mockReq(secure: boolean): Request {
@@ -14,20 +14,20 @@ describe('buildSessionCookieOptions', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
-  it('returns hardened options when req.secure is true (HTTPS)', () => {
+  it('does NOT harden on an HTTPS request unless COOKIE_SECURE is set (deterministic, HTTP-safe default)', () => {
     delete process.env.NODE_ENV;
     delete process.env.COOKIE_SECURE;
     delete process.env.DISABLE_SECURE_COOKIES;
     const opts = buildSessionCookieOptions(mockReq(true), MAX_AGE);
     expect(opts).toEqual({
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: false,
+      sameSite: 'lax',
       maxAge: MAX_AGE,
     });
   });
 
-  it('returns legacy options when NODE_ENV=production but the request is HTTP (no TLS at edge yet)', () => {
+  it('returns HTTP-safe options when NODE_ENV=production but COOKIE_SECURE is unset', () => {
     process.env.NODE_ENV = 'production';
     delete process.env.COOKIE_SECURE;
     delete process.env.DISABLE_SECURE_COOKIES;
@@ -40,15 +40,15 @@ describe('buildSessionCookieOptions', () => {
     });
   });
 
-  it('returns hardened options when NODE_ENV=production AND request is HTTPS', () => {
+  it('stays HTTP-safe even on an HTTPS request in production when COOKIE_SECURE is unset', () => {
     process.env.NODE_ENV = 'production';
     delete process.env.COOKIE_SECURE;
     delete process.env.DISABLE_SECURE_COOKIES;
     const opts = buildSessionCookieOptions(mockReq(true), MAX_AGE);
     expect(opts).toEqual({
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: false,
+      sameSite: 'lax',
       maxAge: MAX_AGE,
     });
   });
@@ -111,6 +111,37 @@ describe('buildSessionCookieOptions', () => {
       secure: true,
       sameSite: 'lax',
       maxAge: MAX_AGE,
+    });
+  });
+});
+
+describe('clearSessionCookieOptions', () => {
+  const ORIGINAL_ENV = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...ORIGINAL_ENV };
+  });
+
+  it('mirrors the set-cookie attributes without maxAge (HTTP-safe default)', () => {
+    delete process.env.COOKIE_SECURE;
+    delete process.env.DISABLE_SECURE_COOKIES;
+    const opts = clearSessionCookieOptions(mockReq(false));
+    expect(opts).toEqual({
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+    expect(opts.maxAge).toBeUndefined();
+  });
+
+  it('mirrors hardened attributes when COOKIE_SECURE=true', () => {
+    process.env.COOKIE_SECURE = 'true';
+    delete process.env.DISABLE_SECURE_COOKIES;
+    const opts = clearSessionCookieOptions(mockReq(false));
+    expect(opts).toEqual({
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
   });
 });

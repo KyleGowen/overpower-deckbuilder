@@ -8,6 +8,7 @@ function buildApp(): express.Application {
     authService: {
       handleLogin: jest.fn(),
       handleSignup: jest.fn(),
+      handleGoogleLoginPreview: jest.fn(),
       handleGoogleLogin: jest.fn(),
       handleLogout: jest.fn(),
       handleSessionValidation: jest.fn(),

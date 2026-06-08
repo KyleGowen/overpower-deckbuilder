@@ -16,7 +16,8 @@ describe('scanSpecialFunctionIcons CLI helpers', () => {
     ]);
 
     expect(parsed.files).toEqual(['300.webp', 'banishment.webp']);
-    expect(parsed.outSql.endsWith('migrations/V999__test.sql')).toBe(true);
+    // resolveOutPath uses path.join on Windows (backslashes); normalize for assertion
+    expect(parsed.outSql.replace(/\\/g, '/').endsWith('migrations/V999__test.sql')).toBe(true);
     expect(parsed.minAccept).toBeCloseTo(0.6);
     expect(parsed.uncertainBelow).toBeCloseTo(0.7);
   });

@@ -1,9 +1,19 @@
 import express from 'express';
 import type { AuthRoutesDeps } from './types';
+import { debugAuth, requestAuthContext } from '../services/authDebug';
 
 export function registerAuthRoutes(app: express.Application, deps: AuthRoutesDeps): void {
+  // Lightweight request logger for the auth surface (DEBUG_AUTH). Shows whether
+  // the incoming request carried a sessionId cookie and over which protocol —
+  // the fastest way to spot proxy/HSTS-driven cookie drops.
+  app.use('/api/auth', (req, _res, next) => {
+    debugAuth('incoming /api/auth request', requestAuthContext(req));
+    next();
+  });
+
   app.post('/api/auth/login', (req, res) => deps.authService.handleLogin(req, res));
   app.post('/api/auth/signup', (req, res) => deps.authService.handleSignup(req, res));
+  app.post('/api/auth/google/preview', (req, res) => deps.authService.handleGoogleLoginPreview(req, res));
   app.post('/api/auth/google', (req, res) => deps.authService.handleGoogleLogin(req, res));
   app.post('/api/auth/logout', (req, res) => deps.authService.handleLogout(req, res));
   app.get('/api/auth/me', (req, res) => deps.authService.handleSessionValidation(req, res));
