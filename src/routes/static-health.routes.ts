@@ -9,6 +9,8 @@ import { setStaticAssetCacheHeaders } from '../middleware/staticAssetCache';
  * - `GET /health/live`  — public, minimal. OK / version / uptime / git sha.
  *                          Never hits the database. Safe to probe from load
  *                          balancers and uptime monitors.
+ * - `GET /health/ready` — public readiness for deploy gates. Live payload +
+ *                          lightweight `SELECT 1` DB ping (no table scans).
  * - `GET /health/deep`  — ADMIN only. Full payload: migrations, table counts,
  *                          memory, guest checks, DB latency.
  * - `GET /health`        — back-compat. Returns the deep payload when called
@@ -42,6 +44,42 @@ async function buildLivePayload(deps: StaticHealthRoutesDeps): Promise<Record<st
       commitEmail: gitInfo.commitEmail,
     },
   };
+}
+
+/** Lightweight DB ping for blue-green deploy and readiness probes. */
+async function buildReadyPayload(deps: StaticHealthRoutesDeps, startTime: number): Promise<{ data: Record<string, unknown>; httpStatus: number }> {
+  const healthData: Record<string, unknown> = await buildLivePayload(deps);
+
+  try {
+    const dbStartTime = Date.now();
+
+    if (!deps.dataSource) {
+      throw new Error('DataSource not initialized');
+    }
+    const pool = deps.dataSource.getPool();
+    if (!pool) {
+      throw new Error('Database connection pool not initialized');
+    }
+
+    await pool.query('SELECT 1 AS ok');
+
+    healthData.database = {
+      status: 'OK',
+      latency: `${Date.now() - dbStartTime}ms`,
+      connection: 'Active',
+    };
+  } catch (dbError) {
+    healthData.database = {
+      status: 'ERROR',
+      error: dbError instanceof Error ? dbError.message : 'Unknown database error',
+      connection: 'Failed',
+    };
+    healthData.status = 'DEGRADED';
+  }
+
+  healthData.latency = `${Date.now() - startTime}ms`;
+  const httpStatus = healthData.status === 'ERROR' ? 503 : 200;
+  return { data: healthData, httpStatus };
 }
 
 async function buildDeepPayload(deps: StaticHealthRoutesDeps, startTime: number): Promise<{ data: Record<string, unknown>; httpStatus: number }> {
@@ -186,6 +224,14 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     res.status(200).json(payload);
   });
 
+  // Readiness — live payload + SELECT 1. Used by EC2 blue-green deploy gate.
+  app.get('/health/ready', async (_req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const startTime = Date.now();
+    const { data, httpStatus } = await buildReadyPayload(deps, startTime);
+    res.status(httpStatus).json(data);
+  });
+
   // Admin-gated deep health — full payload with DB introspection.
   app.get('/health/deep', deps.authenticateUser, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -199,10 +245,8 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     res.status(httpStatus).json(data);
   });
 
-  // Back-compat /health — always returns the deep payload so the EC2 blue/green
-  // deploy gate, nginx LB probes, and external uptime monitors keep seeing
-  // `.database.status`. New callers that want the lean public payload use
-  // /health/live; ADMIN-only deep tooling uses /health/deep.
+  // Back-compat /health — deep payload for ops monitors and manual diagnostics.
+  // EC2 blue-green deploy uses /health/ready (lighter SELECT 1 gate).
   app.get('/health', async (_req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const startTime = Date.now();

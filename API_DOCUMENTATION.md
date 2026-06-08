@@ -116,6 +116,12 @@ Users have a `role` of `GUEST`, `USER`, or `ADMIN` (see `src/types/index.ts`).
 | * | `/src/resources/cards/images/*` | `src/middleware/setup.ts` | Narrower mount for card images (registered before full tree) |
 | * | `/src/resources/images/*` | `src/middleware/setup.ts` | Narrower mount for general images |
 
+### `GET /health/ready`
+
+**File:** `src/routes/static-health.routes.ts`
+
+Readiness probe for deploy gates — live payload plus a single `SELECT 1` DB ping (no table scans). Returns **200** with `status: OK` and `database.status: OK` when RDS is reachable; **200** with `DEGRADED` when the DB ping fails. EC2 blue-green deploy polls this endpoint instead of `/health`.
+
 ### `GET /health` (alias: `GET /health/deep`)
 
 **File:** `src/routes/static-health.routes.ts`
@@ -491,7 +497,7 @@ Quick lookup: **method**, **path**, **source file**.
 | Method | Path | File |
 |--------|------|------|
 | * | `/public`, `/`, `/src/resources` (+ setup mounts) | `static-health.routes.ts`, `middleware/setup.ts` |
-| GET | `/health`, `/health/deep` (deep health), `/health/live` (liveness probe, no DB) | `static-health.routes.ts` |
+| GET | `/health`, `/health/deep` (deep health), `/health/live` (liveness, no DB), `/health/ready` (readiness, SELECT 1) | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
 | GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js`, `/api/v1/config/app` (JSON CDN config) | `auth.routes.ts` |
 | POST | `/api/users/change-password` | `users-debug.routes.ts` |

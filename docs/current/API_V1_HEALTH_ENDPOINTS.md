@@ -33,6 +33,29 @@ Example:
 }
 ```
 
+### `GET /health/ready`
+
+- **Auth:** public.
+- **Response:** live payload plus `database.status` and `database.latency` from a single `SELECT 1` (no table scans or migration queries).
+- **Purpose:** EC2 blue-green deploy gate — confirms the app process is up and RDS is reachable without the heavy `/health` deep probe.
+- `Cache-Control: no-store`.
+- **200** when app and DB ping succeed (`status: OK`, `database.status: OK`); **200** with `status: DEGRADED` when DB ping fails; **503** only on critical errors.
+
+Example:
+
+```json
+{
+  "status": "OK",
+  "timestamp": "2026-04-16T20:12:44.123Z",
+  "uptime": 12345.678,
+  "version": "1.0.0",
+  "environment": "production",
+  "git": { "shortCommit": "abc1234", "..." : "..." },
+  "database": { "status": "OK", "latency": "12ms", "connection": "Active" },
+  "latency": "15ms"
+}
+```
+
 ### `GET /health/deep`
 
 - **Auth:** requires a valid session cookie and `role === 'ADMIN'`.
@@ -45,10 +68,13 @@ Example:
 ### `GET /health` (back-compat)
 
 Unconditionally returns the **deep payload**, matching the pre-Phase-1
-`/health` contract verbatim. No auth, no cookie required. This is what the
-EC2 blue/green deploy gate in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
-(`jq -r '.database.status'`), nginx LB probes, and external uptime monitors
-depend on.
+`/health` contract verbatim. No auth, no cookie required. External uptime
+monitors and manual ops diagnostics still use this URL for full DB introspection.
+
+The EC2 blue/green deploy gate in [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
+uses **`GET /health/ready`** instead — live payload plus a lightweight
+`SELECT 1` so deploy does not fail when the deep probe times out under
+connection pool pressure.
 
 Access control on DB internals lives on `/health/deep` (ADMIN-gated) now;
 `/health` is the legacy alias that ops tooling already treats as anonymous.
@@ -83,9 +109,10 @@ single-endpoint shape verbatim.
 - Manual smoke (matches the EC2 deploy-gate curl):
 
   ```bash
-  curl -s http://localhost:8085/health        | jq '.status, .database.status'   # expect "OK" / "OK"
-  curl -s http://localhost:8085/health/live   | jq '.database'                   # expect null (lean)
-  curl -si http://localhost:8085/health/deep  # expect 403 anonymously
+  curl -s http://localhost:8085/health/ready   | jq '.status, .database.status'   # deploy gate: expect "OK" / "OK"
+  curl -s http://localhost:8085/health         | jq '.status, .database.status'   # deep probe (heavier)
+  curl -s http://localhost:8085/health/live    | jq '.database'                   # expect null (lean)
+  curl -si http://localhost:8085/health/deep   # expect 403 anonymously
   ```
 
 ## See also

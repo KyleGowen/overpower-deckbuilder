@@ -33,7 +33,10 @@ export interface RouteDependencies {
   deckBackgroundService: Record<string, (...args: unknown[]) => Promise<unknown>>;
   foilCardMapRepository: { getFoilCardMap: () => Promise<unknown[]> };
   databaseInit: { validateDatabase: () => Promise<boolean>; checkDatabaseStatus: () => Promise<boolean> };
-  dataSource: { getPool: () => { connect: () => Promise<{ query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>; release: () => void }> } };
+  dataSource: { getPool: () => {
+    connect: () => Promise<{ query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>; release: () => void }>;
+    query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>;
+  } };
   validateCardAddition: (currentCards: { type: string; cardId: string; quantity: number }[], cardType: string, cardId: string, quantity: number) => Promise<string | null>;
   checkIfCardIsCataclysm: (cardType: string, cardId: string) => Promise<boolean>;
   checkIfCardIsAssist: (cardType: string, cardId: string) => Promise<boolean>;

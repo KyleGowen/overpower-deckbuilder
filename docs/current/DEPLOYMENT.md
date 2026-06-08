@@ -42,7 +42,7 @@ GitHub (main branch push)
 docker pull $ECR_URI:$GITHUB_SHA
 docker run -d --name overpower-app-new --restart unless-stopped \
   -p $NEW_PORT:3000 --env-file /opt/app/.env -e SKIP_MIGRATIONS=true $ECR_URI:$GITHUB_SHA
-# health gate (30s wait + up to 36×5s polls on localhost:$NEW_PORT/health)
+# health gate (10s wait + up to 36×5s polls on localhost:$NEW_PORT/health/ready)
 sed -i "s/localhost:$CURRENT_PORT/localhost:$NEW_PORT/g" /etc/nginx/conf.d/excelsior.cards.conf
 nginx -t && nginx -s reload
 ```

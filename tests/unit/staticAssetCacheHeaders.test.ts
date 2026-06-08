@@ -22,6 +22,7 @@ function buildStaticApp(): express.Application {
           query: async () => ({ rows: [] }),
           release: () => undefined,
         }),
+        query: async () => ({ rows: [] }),
       }),
     },
   });
@@ -78,5 +79,77 @@ describe('static asset cache headers', () => {
       'https://d6vp4hrkfkf5v.cloudfront.net',
     )).toBeNull();
     expect(buildStaticImageCdnRedirectUrl('/src/resources/images/icons/energy.png', '')).toBeNull();
+  });
+});
+
+describe('/health/ready', () => {
+  it('returns OK with database status when SELECT 1 succeeds', async () => {
+    const query = jest.fn().mockResolvedValue({ rows: [{ ok: 1 }] });
+    const app = express();
+    registerStaticAndHealthRoutes(app, {
+      authenticateUser: (_req, _res, next) => next(),
+      getGitInfo: () => ({
+        commit: 'test',
+        shortCommit: 'test',
+        branch: 'test',
+        commitDate: 'test',
+        commitMessage: 'test',
+        commitAuthor: 'test',
+        commitEmail: 'test@example.com',
+      }),
+      dataSource: {
+        getPool: () => ({
+          connect: async () => ({
+            query: async () => ({ rows: [] }),
+            release: () => undefined,
+          }),
+          query,
+        }),
+      },
+    });
+
+    const response = await request(app).get('/health/ready');
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('OK');
+    expect(response.body.database).toEqual(expect.objectContaining({
+      status: 'OK',
+      connection: 'Active',
+    }));
+    expect(response.body.database.latency).toMatch(/^\d+ms$/);
+    expect(query).toHaveBeenCalledWith('SELECT 1 AS ok');
+  });
+
+  it('returns DEGRADED when SELECT 1 fails', async () => {
+    const query = jest.fn().mockRejectedValue(new Error('Connection terminated due to connection timeout'));
+    const app = express();
+    registerStaticAndHealthRoutes(app, {
+      authenticateUser: (_req, _res, next) => next(),
+      getGitInfo: () => ({
+        commit: 'test',
+        shortCommit: 'test',
+        branch: 'test',
+        commitDate: 'test',
+        commitMessage: 'test',
+        commitAuthor: 'test',
+        commitEmail: 'test@example.com',
+      }),
+      dataSource: {
+        getPool: () => ({
+          connect: async () => ({
+            query: async () => ({ rows: [] }),
+            release: () => undefined,
+          }),
+          query,
+        }),
+      },
+    });
+
+    const response = await request(app).get('/health/ready');
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('DEGRADED');
+    expect(response.body.database.status).toBe('ERROR');
+    expect(response.body.database.error).toContain('connection timeout');
   });
 });

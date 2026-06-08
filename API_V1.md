@@ -1038,6 +1038,7 @@ These endpoints are **intentionally not** under `**/api/v1`**:
 | Path | Notes |
 | ---- | ----- |
 | `GET /health` | Operations/monitoring; deep health check with DB ping. Shape is health-specific (not v1 envelope). |
+| `GET /health/ready` | Readiness for deploy gates — live payload + `SELECT 1` DB ping. |
 | `GET /health/live` | Lightweight liveness probe (no DB). Returns `{ "status": "OK" }`. |
 | `GET /health/deep` | Same as `GET /health` — alias for deep health check. |
 | `GET /js/app-config.js` | Injects `window.APP_CDN_BASE` as a JS snippet for the legacy frontend. **Prefer** `GET /api/v1/config/app` in new code. |
