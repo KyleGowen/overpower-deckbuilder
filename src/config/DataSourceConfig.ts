@@ -26,14 +26,15 @@ export class DataSourceConfig {
     console.log('🐘 Initializing PostgreSQL repositories...');
     
     let poolConfig: PoolConfig;
-    
+    const connectionTimeoutMillis = process.env.NODE_ENV === 'production' ? 8000 : 2000;
+
     if (process.env.DATABASE_URL) {
       // Use DATABASE_URL if provided
       poolConfig = {
         connectionString: process.env.DATABASE_URL,
         max: 20, // Maximum number of clients in the pool
         idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-        connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+        connectionTimeoutMillis, // Production deploy: allow RDS slot under dual-container pressure
       };
     } else {
       // Fallback to individual environment variables for local development
@@ -46,7 +47,7 @@ export class DataSourceConfig {
         password: process.env.DB_PASSWORD || 'password',
         max: 20,
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000,
+        connectionTimeoutMillis,
       };
     }
     

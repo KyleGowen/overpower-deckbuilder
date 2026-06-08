@@ -182,10 +182,14 @@ async function initializeServer() {
     // First, initialize database with Flyway migrations and data
     await databaseInit.initializeDatabase();
 
+    const deferMetricsSeed = process.env.SKIP_MIGRATIONS === 'true';
+    let endpointKeys: string[] = [];
     if (process.env.NODE_ENV !== 'test') {
-      const endpointKeys = enumerateExpressRoutes(app);
-      await seedEndpointHitCounts(dataSource.getPool(), endpointKeys);
-      await pruneStaleEndpointHitCounts(dataSource.getPool(), endpointKeys);
+      endpointKeys = enumerateExpressRoutes(app);
+      if (!deferMetricsSeed) {
+        await seedEndpointHitCounts(dataSource.getPool(), endpointKeys);
+        await pruneStaleEndpointHitCounts(dataSource.getPool(), endpointKeys);
+      }
     }
 
     // Migrations may have changed card rows; drop cached catalog payloads from any prior in-process state
@@ -208,6 +212,13 @@ async function initializeServer() {
     const bindAddress = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
     app.listen(port, bindAddress, () => {
       console.log('🌐 Server is listening on port', port, 'on', bindAddress);
+      if (deferMetricsSeed && endpointKeys.length > 0) {
+        seedEndpointHitCounts(dataSource.getPool(), endpointKeys)
+          .then(() => pruneStaleEndpointHitCounts(dataSource.getPool(), endpointKeys))
+          .catch((err: Error) => {
+            console.error('⚠️ Deferred endpoint hit metrics seed failed (server still running):', err.message);
+          });
+      }
     });
     
     // Try to get card stats in the background (non-blocking)

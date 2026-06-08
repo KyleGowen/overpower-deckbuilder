@@ -50,28 +50,45 @@ async function buildLivePayload(deps: StaticHealthRoutesDeps): Promise<Record<st
 async function buildReadyPayload(deps: StaticHealthRoutesDeps, startTime: number): Promise<{ data: Record<string, unknown>; httpStatus: number }> {
   const healthData: Record<string, unknown> = await buildLivePayload(deps);
 
-  try {
-    const dbStartTime = Date.now();
+  if (!deps.dataSource) {
+    healthData.database = { status: 'ERROR', error: 'DataSource not initialized', connection: 'Failed' };
+    healthData.status = 'DEGRADED';
+    healthData.latency = `${Date.now() - startTime}ms`;
+    return { data: healthData, httpStatus: 200 };
+  }
+  const pool = deps.dataSource.getPool();
+  if (!pool) {
+    healthData.database = { status: 'ERROR', error: 'Database connection pool not initialized', connection: 'Failed' };
+    healthData.status = 'DEGRADED';
+    healthData.latency = `${Date.now() - startTime}ms`;
+    return { data: healthData, httpStatus: 200 };
+  }
 
-    if (!deps.dataSource) {
-      throw new Error('DataSource not initialized');
+  const dbStartTime = Date.now();
+  const maxAttempts = 3;
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await pool.query('SELECT 1 AS ok');
+      healthData.database = {
+        status: 'OK',
+        latency: `${Date.now() - dbStartTime}ms`,
+        connection: 'Active',
+      };
+      lastError = null;
+      break;
+    } catch (dbError) {
+      lastError = dbError;
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     }
-    const pool = deps.dataSource.getPool();
-    if (!pool) {
-      throw new Error('Database connection pool not initialized');
-    }
+  }
 
-    await pool.query('SELECT 1 AS ok');
-
-    healthData.database = {
-      status: 'OK',
-      latency: `${Date.now() - dbStartTime}ms`,
-      connection: 'Active',
-    };
-  } catch (dbError) {
+  if (lastError) {
     healthData.database = {
       status: 'ERROR',
-      error: dbError instanceof Error ? dbError.message : 'Unknown database error',
+      error: lastError instanceof Error ? lastError.message : 'Unknown database error',
       connection: 'Failed',
     };
     healthData.status = 'DEGRADED';
