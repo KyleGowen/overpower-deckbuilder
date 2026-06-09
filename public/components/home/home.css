@@ -1,0 +1,426 @@
+/**
+ * Home Component Styles
+ * Hero banner, community decks, tournament decks, news section.
+ */
+
+#view-home {
+  overflow-y: auto;
+  padding-bottom: var(--sp-12);
+}
+
+/* ── Hero Banner ─────────────────────────────────────────────── */
+.home-hero {
+  position: relative;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--color-bg-deep);
+}
+
+.home-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/home-hero-bg.webp'), url('/assets/home-hero-bg.png');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  opacity: 0.65;
+}
+
+.home-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(13, 13, 26, 1.0)  0%,
+    rgba(13, 13, 26, 0.95) 30%,
+    rgba(13, 13, 26, 0.6)  55%,
+    rgba(13, 13, 26, 0.2)  80%,
+    rgba(13, 13, 26, 0.05) 100%
+  );
+}
+
+.home-hero-content {
+  position: relative;
+  z-index: 1;
+  padding: var(--sp-12) var(--sp-12) var(--sp-12) var(--sp-8);
+  max-width: 580px;
+}
+
+.home-hero-title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--sp-2);
+  letter-spacing: -0.02em;
+}
+
+.home-hero-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-teal);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--sp-3);
+}
+
+.home-hero-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--sp-6);
+  max-width: 420px;
+}
+
+.home-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-6);
+  background: transparent;
+  border: 2px solid var(--color-teal);
+  border-radius: var(--radius-md);
+  color: var(--color-teal);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+.home-hero-cta:hover {
+  background: var(--color-teal-dim);
+  color: var(--color-teal);
+  transform: translateX(4px);
+}
+.home-hero-cta svg { width: 18px; height: 18px; }
+
+/* ── Section Nav Pills ───────────────────────────────────────── */
+.home-section-nav {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-8);
+  border-bottom: 1px solid var(--color-border-subtle);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.home-section-nav::-webkit-scrollbar { display: none; }
+
+.home-section-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-5);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-base);
+  text-decoration: none;
+}
+.home-section-btn:hover,
+.home-section-btn.active {
+  background: var(--color-teal-dim);
+  border-color: var(--color-teal-border);
+  color: var(--color-teal);
+}
+.home-section-btn svg { width: 15px; height: 15px; }
+
+/* ── Content Sections ────────────────────────────────────────── */
+.home-section {
+  padding: var(--sp-8) var(--sp-8) var(--sp-4);
+}
+
+.home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+
+.home-section-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-teal);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.home-section-title svg { width: 20px; height: 20px; }
+
+.home-view-all {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-teal);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: gap var(--transition-base);
+}
+.home-view-all:hover { gap: var(--sp-2); color: var(--color-teal-hover); }
+.home-view-all svg { width: 14px; height: 14px; }
+
+/* ── Deck Card Strip ─────────────────────────────────────────── */
+.home-deck-strip {
+  display: flex;
+  gap: var(--sp-4);
+  overflow-x: auto;
+  padding-bottom: var(--sp-3);
+  scrollbar-width: thin;
+  scroll-padding-left: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.home-deck-card {
+  flex-shrink: 0;
+  width: 220px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+}
+.home-deck-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-teal-border);
+  box-shadow: var(--shadow-teal);
+  color: var(--color-text-primary);
+}
+
+/* Art area — landscape, character image fills it */
+.home-deck-card-art {
+  width: 100%;
+  height: 150px;
+  background-size: cover;
+  background-position: center top;
+  background-color: var(--color-bg-elevated);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.home-deck-card-no-art {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  opacity: 0.4;
+}
+
+.home-deck-card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(13,13,26,0.5) 70%,
+    rgba(13,13,26,0.85) 100%
+  );
+}
+
+/* Text overlay on the art */
+.home-deck-card-overlay {
+  padding: var(--sp-3);
+  background: var(--color-bg-surface);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.home-deck-card-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-deck-card-archetype {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-deck-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--sp-1);
+}
+
+.home-deck-card-count {
+  color: var(--color-text-muted);
+}
+
+.home-deck-card-threat {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gold);
+  font-size: var(--font-size-sm);
+}
+
+.home-deck-card-menu {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  width: 28px; height: 28px;
+  background: rgba(0,0,0,0.6);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 14px;
+  line-height: 1;
+  border: none;
+  z-index: 1;
+}
+.home-deck-card-menu:hover {
+  background: rgba(0,0,0,0.85);
+  color: var(--color-text-primary);
+}
+
+/* ── Tournament Decks Section ────────────────────────────────── */
+.home-tournament-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-10) var(--sp-8);
+  background: var(--color-bg-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  gap: var(--sp-3);
+}
+
+.home-tournament-empty-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--color-gold-dim);
+  border: 1px solid var(--color-gold-border);
+  border-radius: var(--radius-full);
+  color: var(--color-gold);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.home-tournament-empty svg { width: 16px; height: 16px; }
+
+.home-tournament-empty p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  max-width: 320px;
+}
+
+/* ── News Section ────────────────────────────────────────────── */
+.home-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.home-news-item {
+  display: flex;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+.home-news-item:hover {
+  border-color: var(--color-teal-border);
+  background: var(--color-bg-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.home-news-image {
+  width: 100px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--color-bg-elevated);
+}
+
+.home-news-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.home-news-tag {
+  display: inline-block;
+  padding: 2px var(--sp-2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.home-news-tag-new-cards  { background: rgba(167,139,250,0.15); color: var(--color-purple); }
+.home-news-tag-feature    { background: var(--color-teal-dim);  color: var(--color-teal); }
+.home-news-tag-update     { background: var(--color-gold-dim);  color: var(--color-gold); }
+.home-news-tag-tournament { background: var(--color-success-dim);color: var(--color-success); }
+
+.home-news-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-news-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-news-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Loading skeleton */
+.home-deck-skeleton {
+  width: 200px;
+  height: 200px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--color-bg-surface) 25%, var(--color-bg-surface-hover) 50%, var(--color-bg-surface) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
