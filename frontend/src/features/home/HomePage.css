@@ -24,8 +24,8 @@
   position: absolute;
   inset: 0;
   background-image: var(--hero-art);
-  background-size: cover;
-  background-position: center 28%;
+  background-size: 70%;
+  background-position: 100% 35.5%;
   z-index: 0;
 }
 .home__hero-art::after {
@@ -202,7 +202,7 @@
   font-size: var(--font-size-base);
 }
 .layout-mobile .home__hero-art {
-  background-position: center 20%;
+  background-position: 100% 27.5%;
 }
 .layout-mobile .home__hero-art::after {
   background:
