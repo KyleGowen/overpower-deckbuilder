@@ -1,0 +1,119 @@
+/*
+ * Excelsior design tokens (v2). Source of truth: STYLE_GUIDE_V2.md.
+ * Dark, neon, card-game-companion theme derived from docs/mocks.
+ */
+:root {
+  /* ---- Surfaces (deep navy, layered) ---- */
+  --color-bg-base: #070b16;
+  --color-bg-surface: #0d1526;
+  --color-bg-elevated: #141f35;
+  --color-bg-panel: #0f1928;
+  --color-bg-input: #0a1220;
+  --color-bg-hover: #18243d;
+  --color-bg-scrim: rgba(4, 7, 14, 0.72);
+
+  /* ---- Accent (neon cyan) ---- */
+  --color-accent: #00c8e8;
+  --color-accent-bright: #00e5ff;
+  --color-accent-dim: #1c7d92;
+  --color-accent-soft: rgba(0, 200, 232, 0.14);
+  --color-accent-glow: rgba(0, 229, 255, 0.35);
+
+  /* ---- Text ---- */
+  --color-text: #e8edf7;
+  --color-text-muted: #8aa0c2;
+  --color-text-dim: #56678a;
+  --color-text-on-accent: #021018;
+
+  /* ---- Borders ---- */
+  --color-border: #1d2c47;
+  --color-border-strong: #2a3e63;
+  --color-border-accent: rgba(0, 200, 232, 0.45);
+
+  /* ---- OverPower stat colors ---- */
+  --color-stat-energy: #f6a623;
+  --color-stat-combat: #ef4d5a;
+  --color-stat-brute-force: #4bd07b;
+  --color-stat-intelligence: #3aa0ff;
+  --color-stat-total: #b06bff;
+
+  /* ---- Semantic ---- */
+  --color-success: #36d399;
+  --color-warning: #f6a623;
+  --color-danger: #ef4d5a;
+  --color-info: #3aa0ff;
+  --color-legal: #36d399;
+  --color-not-legal: #ef4d5a;
+
+  /* ---- Rarity ---- */
+  --color-rarity-common: #9fb0cc;
+  --color-rarity-uncommon: #4bd07b;
+  --color-rarity-rare: #3aa0ff;
+  --color-rarity-ultra: #b06bff;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+  --font-size-4xl: 3rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-tight: 1.2;
+  --line-normal: 1.5;
+
+  /* ---- Spacing ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ---- Shadows / glow ---- */
+  --shadow-panel: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 0 1px var(--color-border-accent), 0 0 24px var(--color-accent-glow);
+  --shadow-pop: 0 10px 40px rgba(0, 0, 0, 0.6);
+
+  /* ---- Layout ---- */
+  --layout-mobile-max: 900px;
+  --top-nav-height: 60px;
+  --bottom-nav-height: 66px;
+  --left-panel-width: 232px;
+  --right-panel-width: 340px;
+  --content-max-width: 1320px;
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-med: 220ms;
+  --dur-slow: 360ms;
+
+  /* ---- Z-index scale ---- */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-drawer: 800;
+  --z-modal: 1000;
+  --z-nav: 9999;
+  --z-toast: 10000;
+}

@@ -1,0 +1,73 @@
+.character-ribbon {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Strip: equal-width character art panels filling the tile face. */
+.character-ribbon--strip {
+  gap: 1px;
+}
+
+.character-ribbon--strip .character-ribbon__slot {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle seam highlight between characters. */
+.character-ribbon--strip .character-ribbon__slot + .character-ribbon__slot::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 200, 232, 0.25);
+  z-index: 2;
+}
+
+/* Each character's art is framed to show faces (top-weighted crop). */
+.character-ribbon__slot :global(.card-image__img),
+.character-ribbon__slot .card-image__img {
+  object-position: center 22%;
+}
+
+/* Fan: overlapping rounded thumbnails (compact contexts). */
+.character-ribbon--fan {
+  align-items: center;
+  padding: 0 var(--space-1);
+}
+
+.character-ribbon--fan .character-ribbon__slot {
+  width: 34px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--color-bg-panel);
+  margin-left: -12px;
+  box-shadow: var(--shadow-card);
+}
+.character-ribbon--fan .character-ribbon__slot:first-child {
+  margin-left: 0;
+}
+
+.character-ribbon__reserve {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-scrim);
+  border: 1px solid var(--color-border-accent);
+  color: var(--color-accent-bright);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}

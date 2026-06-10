@@ -1,0 +1,1 @@
+export { CardDetailPanel } from './CardDetailPanel';

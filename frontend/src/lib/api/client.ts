@@ -1,0 +1,110 @@
+/**
+ * Shared fetch client for the Excelsior API.
+ *
+ * - Always sends cookies (`credentials: 'include'`) so the session-based
+ *   `/api/auth/*` login works for all subsequent `/api/v1` calls.
+ * - Unwraps the v1 envelope `{ data, success, errors, meta }`.
+ * - Throws `ApiError` with a useful message on non-2xx responses.
+ */
+
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+interface V1Envelope<T> {
+  data: T;
+  success?: boolean;
+  errors?: Array<{ message?: string; code?: string } | string>;
+  meta?: Record<string, unknown>;
+}
+
+interface RequestOptions {
+  method?: string;
+  body?: unknown;
+  /** When true, return the raw parsed JSON without unwrapping `.data`. */
+  raw?: boolean;
+  signal?: AbortSignal;
+}
+
+function extractErrorMessage(payload: unknown, fallback: string): { message: string; code?: string } {
+  if (payload && typeof payload === 'object') {
+    const obj = payload as Record<string, unknown>;
+    const errors = obj.errors;
+    if (Array.isArray(errors) && errors.length > 0) {
+      const first = errors[0];
+      if (typeof first === 'string') return { message: first };
+      if (first && typeof first === 'object') {
+        const e = first as Record<string, unknown>;
+        return {
+          message: (e.message as string) || (e.detail as string) || fallback,
+          code: e.code as string | undefined,
+        };
+      }
+    }
+    if (typeof obj.message === 'string') return { message: obj.message };
+    if (typeof obj.error === 'string') return { message: obj.error };
+  }
+  return { message: fallback };
+}
+
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { method = 'GET', body, raw = false, signal } = options;
+
+  const headers: Record<string, string> = {};
+  let bodyInit: BodyInit | undefined;
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    bodyInit = JSON.stringify(body);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method,
+      headers,
+      body: bodyInit,
+      credentials: 'include',
+      signal,
+    });
+  } catch (err) {
+    if ((err as Error)?.name === 'AbortError') throw err;
+    throw new ApiError('Network error. Please check your connection.', 0);
+  }
+
+  const text = await response.text();
+  let parsed: unknown = undefined;
+  if (text) {
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = text;
+    }
+  }
+
+  if (!response.ok) {
+    const { message, code } = extractErrorMessage(parsed, `Request failed (${response.status})`);
+    throw new ApiError(message, response.status, code);
+  }
+
+  if (raw) return parsed as T;
+
+  // Unwrap v1 envelope when present.
+  if (parsed && typeof parsed === 'object' && 'data' in (parsed as object)) {
+    return (parsed as V1Envelope<T>).data;
+  }
+  return parsed as T;
+}
+
+export const api = {
+  get: <T>(path: string, signal?: AbortSignal) => apiRequest<T>(path, { method: 'GET', signal }),
+  post: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'POST', body }),
+  put: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PUT', body }),
+  del: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'DELETE', body }),
+};

@@ -1,0 +1,97 @@
+.card-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.card-detail__image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-base);
+  aspect-ratio: 5 / 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-detail__image .card-image {
+  background: transparent;
+}
+
+.card-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.card-detail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.card-detail__stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+.card-detail__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-input);
+}
+.card-detail__stat--total {
+  background: rgba(176, 107, 255, 0.1);
+}
+.card-detail__stat-val {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+.card-detail__stat-label {
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-dim);
+  text-align: center;
+}
+
+.card-detail__section-title {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+.card-detail__text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.card-detail__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.card-detail__field {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+.card-detail__field dt {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.card-detail__field dd {
+  color: var(--color-text);
+  text-align: right;
+  word-break: break-word;
+}

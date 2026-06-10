@@ -1,0 +1,49 @@
+.card-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-surface));
+  width: 100%;
+  height: 100%;
+}
+
+.card-image__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+.card-image--loading .card-image__img {
+  opacity: 0;
+}
+
+.card-image--loaded .card-image__img {
+  opacity: 1;
+}
+
+.card-image--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: card-image-shimmer 1.2s infinite linear;
+}
+
+@keyframes card-image-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Contain variant for natural card ratio (deck editor card view, detail). */
+.card-image--contain .card-image__img {
+  object-fit: contain;
+}

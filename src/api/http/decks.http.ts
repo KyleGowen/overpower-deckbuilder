@@ -20,6 +20,7 @@ import { DeckCardsPutBody } from './models/decks/DeckCardsPutBody';
 import type { DeckBackgroundListReader } from './dbv-support.http';
 import type { DeckStatsV1DataDto } from '../dto/v1/DeckStatsV1DataDto';
 import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
+import { GUEST_USER_ID } from '../../constants/guestUser';
 
 /**
  * Maps validated JSON fields to repository `Partial<Deck>`.
@@ -54,6 +55,11 @@ export interface DecksV1HttpDeps {
   deckBackgroundService: DeckBackgroundListReader;
   authenticateUser: RequestHandler;
   deckUIPreferencesService: DeckUIPreferencesService;
+  /**
+   * User id whose decks back the public "Community Decks" pool. Defaults to the
+   * GUEST account when omitted (e.g. in unit fixtures).
+   */
+  communityGuestUserId?: string;
 }
 
 function stableV1DeckListBody<T>(data: T): string {
@@ -100,6 +106,27 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     } catch (error) {
       console.error('v1 GET /decks/stats error:', error);
       sendV1Json(res, 500, null, [{ code: 'DECK_STATS_ERROR', message: 'Failed to fetch deck stats' }]);
+    }
+  });
+
+  /**
+   * Community deck pool. Returns the GUEST account's saved decks (the temporary
+   * "Community Decks" source surfaced on the new Home screen). Registered before
+   * `/decks/:id` so the literal `community` segment is not captured as an id.
+   * To migrate to real community decks later, change the source user id /
+   * selection here (see docs/current/FRONTEND_V2.md). Requires an authenticated
+   * session (the Home screen is behind auth).
+   */
+  router.get('/decks/community', deps.authenticateUser, async (_req, res) => {
+    try {
+      const communityUserId = deps.communityGuestUserId ?? GUEST_USER_ID;
+      const list = await deps.deckListService.getTransformedListForUser(communityUserId);
+      sendV1Success(res, list);
+    } catch (error) {
+      console.error('v1 GET /decks/community error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'COMMUNITY_DECKS_ERROR', message: 'Failed to fetch community decks' }
+      ]);
     }
   });
 

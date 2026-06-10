@@ -1,0 +1,43 @@
+# frontend/ - Excelsior React SPA (v2)
+
+Greenfield React 19 + Vite 6 + TypeScript single-page app that replaces the
+legacy vanilla-JS site under `public/`. This is the production frontend going
+forward.
+
+## Visual source of truth
+- Design decisions live in repo-root `STYLE_GUIDE_V2.md`. Update it whenever you
+  change visual patterns, tokens, or add a screen.
+- Architecture/reference: `docs/current/FRONTEND_V2.md`.
+
+## Structure
+- `src/app/` - router, AuthProvider, ProtectedRoute (cross-cutting app wiring).
+- `src/components/` - reusable presentational/UI components. Each component dir
+  has `Component.tsx`, `Component.css`, `Component.md` (context), `index.ts`.
+- `src/features/` - route-level pages (login, home, database, collection,
+  deck-selection, deck-editor). Pages compose shared components.
+- `src/lib/` - non-UI logic: `api/` (typed fetch wrappers), `images/`,
+  `catalog/`, `collection/`, `layout/`.
+- `src/styles/` - `tokens.css` (design tokens) + `global.css` (reset + base).
+- `src/content/` - static content (e.g. recent-updates news items).
+
+## Conventions
+- Server state via TanStack Query; cross-cutting state via `useAuth()` /
+  `useLayoutMode()` hooks.
+- All data calls go to `/api/v1/*`; session auth uses legacy `/api/auth/*`.
+  Always send credentials (cookies) via the shared api client.
+- Card images: never hardcode paths. Use the `CardImage` component / the
+  `cardImages.ts` helpers, which apply the CDN base and thumbnail rules.
+- Mobile vs desktop: never branch on user-agent. Use `useLayoutMode()` (900px
+  breakpoint, `preferDesktopLayout` override) and `.layout-mobile` /
+  `.layout-desktop` scoped CSS.
+
+## Dev
+- `npm run dev` (Vite :5173) proxies `/api`, `/health`, `/src/resources`, `/js`
+  to the Express backend on :8085.
+- `npm run build` outputs to `dist/`, served in prod by Express
+  `src/routes/spaIndexPath.ts`.
+
+## Guest rules (product)
+- GUEST users: `+ Deck` is disabled on the Database view; guest collection is
+  stored only in `localStorage`. Do not re-enable guest DB-deck adds without a
+  product decision (see docs/current/GUEST_DECK_LESSONS_LEARNED.md).

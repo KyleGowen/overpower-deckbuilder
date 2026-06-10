@@ -1,0 +1,62 @@
+.card-tile {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.card-tile:hover {
+  border-color: var(--color-border-accent);
+  transform: translateY(-2px);
+}
+
+.card-tile__art {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  background: var(--color-bg-elevated);
+  padding: 0;
+}
+.card-tile--dimmed .card-tile__art {
+  filter: grayscale(0.7) brightness(0.55);
+}
+
+.card-tile__overlay {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+}
+
+.card-tile__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  min-height: 0;
+}
+.card-tile__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-tile__sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+}
+.card-tile__rarity {
+  color: var(--color-text-muted);
+}
+
+.card-tile__footer {
+  padding: 0 var(--space-3) var(--space-3);
+}

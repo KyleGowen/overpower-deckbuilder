@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" class="layout-desktop">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/src/resources/images/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#070b16" />
+    <title>Excelsior - OverPower Deckbuilding Companion</title>
+    <!--
+      Layout-mode FOUC guard. Mirrors the legacy public/js/layout-mode.js rule:
+        - viewport <= 900px  -> layout-mobile
+        - viewport >= 901px  -> layout-desktop
+        - localStorage.preferDesktopLayout === '1' forces layout-desktop
+      Runs before first paint so .layout-* scoped CSS applies without a flash.
+      The LayoutModeProvider re-uses these same globals at runtime.
+    -->
+    <script>
+      (function () {
+        var MOBILE_MAX_PX = 900;
+        window.LAYOUT_MOBILE_MAX_PX = MOBILE_MAX_PX;
+        function preferDesktop() {
+          try {
+            return localStorage.getItem('preferDesktopLayout') === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function isLayoutMobile() {
+          if (preferDesktop()) return false;
+          return window.matchMedia('(max-width: ' + MOBILE_MAX_PX + 'px)').matches;
+        }
+        function applyLayoutMode() {
+          var mobile = isLayoutMobile();
+          var root = document.documentElement;
+          root.classList.toggle('layout-mobile', mobile);
+          root.classList.toggle('layout-desktop', !mobile);
+          return mobile;
+        }
+        window.isLayoutMobile = isLayoutMobile;
+        window.applyLayoutMode = applyLayoutMode;
+        window.setPreferDesktopLayout = function (on) {
+          try {
+            if (on) localStorage.setItem('preferDesktopLayout', '1');
+            else localStorage.removeItem('preferDesktopLayout');
+          } catch (e) { /* ignore */ }
+          applyLayoutMode();
+          window.dispatchEvent(new CustomEvent('layout-mode-change'));
+        };
+        applyLayoutMode();
+        try {
+          window.matchMedia('(max-width: ' + MOBILE_MAX_PX + 'px)').addEventListener('change', function () {
+            applyLayoutMode();
+            window.dispatchEvent(new CustomEvent('layout-mode-change'));
+          });
+        } catch (e) { /* older browsers */ }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

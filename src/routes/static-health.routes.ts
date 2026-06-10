@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import type { StaticHealthRoutesDeps } from './types';
 import { setStaticAssetCacheHeaders } from '../middleware/staticAssetCache';
+import { resolveSpaIndexPath, isSpaBuilt, spaDistDir } from './spaIndexPath';
 
 /**
  * Phase 1 split the single `/health` into:
@@ -226,6 +227,24 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     setHeaders: setStaticAssetCacheHeaders,
   }));
 
+  // v2 React SPA build output (hashed /assets/*). Mounted before the SPA
+  // catch-all so real built files are served rather than the app shell. Only
+  // active once the SPA has been built (frontend/dist exists).
+  if (isSpaBuilt()) {
+    app.use(
+      express.static(spaDistDir(), {
+        index: false,
+        setHeaders: (res, filePath) => {
+          if (filePath.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          } else {
+            setStaticAssetCacheHeaders(res, filePath);
+          }
+        },
+      })
+    );
+  }
+
   const splitDisabled = process.env.DISABLE_HEALTH_SPLIT === '1';
 
   // Public liveness — never hits the database.
@@ -273,10 +292,21 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
 
   // SPA catch-all — must be registered LAST, after all API routes, page routes,
   // and static mounts. Serves the app shell for any unmatched path so that
-  // client-side routing in the new SPA framework works for deep links.
-  // The entry-point path here will be updated when the new frontend ships.
+  // client-side routing works for deep links / refreshes. Serves the v2 SPA
+  // shell when built (frontend/dist), else the legacy public/index.html.
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
+    const p = req.path;
+    // Let API/health and real asset namespaces fall through (assets are handled
+    // by the static mounts above; if missing they should 404, not return HTML).
+    if (
+      p.startsWith('/api/') ||
+      p.startsWith('/health') ||
+      p.startsWith('/assets/') ||
+      p.startsWith('/js/') ||
+      p.startsWith('/src/') ||
+      p.startsWith('/public/') ||
+      p.includes('.')
+    ) {
       return next();
     }
     res.set({
@@ -284,6 +314,6 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
       'Pragma': 'no-cache',
       'Expires': '0',
     });
-    res.sendFile(path.join(process.cwd(), 'public/index.html'));
+    res.sendFile(isSpaBuilt() ? resolveSpaIndexPath() : path.join(process.cwd(), 'public/index.html'));
   });
 }

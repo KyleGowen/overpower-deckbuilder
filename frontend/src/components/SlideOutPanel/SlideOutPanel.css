@@ -1,0 +1,107 @@
+.slideout {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+}
+
+.slideout__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg-scrim);
+  backdrop-filter: blur(2px);
+  animation: slideout-fade var(--dur-fast) var(--ease-out);
+}
+
+.slideout__panel {
+  position: absolute;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+  outline: none;
+}
+
+.slideout__panel--right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 100vw;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  animation: slideout-in-right var(--dur-med) var(--ease-out);
+}
+
+.slideout__panel--bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 85vh;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  animation: slideout-in-bottom var(--dur-med) var(--ease-out);
+}
+
+.slideout__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.slideout__title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  min-width: 0;
+}
+
+.slideout__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.slideout__close:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.slideout__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.slideout__footer {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-3);
+}
+
+@keyframes slideout-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideout-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes slideout-in-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.layout-mobile .slideout__panel--right {
+  width: 100vw !important;
+  border-left: none;
+}

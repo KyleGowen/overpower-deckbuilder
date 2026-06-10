@@ -26,6 +26,7 @@ import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCardsService } from '../services/deckCardsService';
 import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
 import type { Pool } from 'pg';
+import { GUEST_USER_ID } from '../../constants/guestUser';
 
 export interface RegisterApiV1Deps {
   authenticationService: AuthenticationService;
@@ -128,7 +129,8 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     deckCardsService: deps.deckCardsService,
     deckBackgroundService: deps.deckBackgroundService,
     authenticateUser: ownedAuth,
-    deckUIPreferencesService: deps.deckUIPreferencesService
+    deckUIPreferencesService: deps.deckUIPreferencesService,
+    communityGuestUserId: GUEST_USER_ID
   });
 
   registerCollectionsV1HttpRoutes(router, {

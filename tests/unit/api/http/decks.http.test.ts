@@ -115,6 +115,55 @@ describe('decks.http', () => {
     expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith('user-1');
   });
 
+  it('GET /decks/community returns the community guest account decks', async () => {
+    const deckListService = {
+      getTransformedListForUser: jest.fn().mockResolvedValue(sampleList)
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth,
+      communityGuestUserId: 'community-guest-id'
+    };
+    const res = await request(buildApp(deps)).get('/decks/community').expect(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toEqual(sampleList);
+    expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith('community-guest-id');
+  });
+
+  it('GET /decks/community defaults to the GUEST account when no id provided', async () => {
+    const deckListService = {
+      getTransformedListForUser: jest.fn().mockResolvedValue(sampleList)
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth
+    };
+    await request(buildApp(deps)).get('/decks/community').expect(200);
+    expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001'
+    );
+  });
+
   it('GET /decks returns 304 when If-None-Match matches ETag', async () => {
     const deckListService = {
       getTransformedListForUser: jest.fn().mockResolvedValue(sampleList)
