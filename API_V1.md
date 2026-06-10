@@ -24,6 +24,7 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 | `POST /api/v1/auth/logout` | ✓ | ✓ | Clears session / revokes refresh token |
 | `GET /api/v1/catalog/*` | ✓ | ✓ | GUEST, USER, ADMIN all allowed |
 | `GET /api/v1/dbv/*` | ✓ | ✓ | Same as catalog |
+| `GET /api/v1/recent-updates` | ✓ | ✓ | Same as catalog |
 | `GET /api/v1/config/app` | — | — | Open — no auth required |
 | `GET /api/v1/decks*` | ✓ | ✓ | USER/ADMIN; GUEST→403 on write routes |
 | `POST/PUT/DELETE /api/v1/decks*` | ✓ | ✓ | Owner only; GUEST→403 |
@@ -72,19 +73,20 @@ All v1 JSON responses use:
 1. [Auth](#auth)
 2. [DBV catalog](#dbv-catalog)
 3. [DBV support](#dbv-support)
-4. [User decks (list)](#user-decks-list)
-5. [User decks (create + validate)](#user-decks-create--validate)
-6. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
-7. [User decks (cards)](#user-decks-cards)
-8. [User decks (UI preferences)](#user-decks-ui-preferences)
-9. [Guest decks (session memory)](#guest-decks-session-memory)
-10. [Collections (current user)](#collections-current-user)
-11. [Admin](#admin)
-12. [Image URL contract](#image-url-contract)
-13. [Caching & conditional GET](#caching--conditional-get)
-14. [Error catalog](#error-catalog)
-15. [Changelog](#changelog)
-16. [Deprecation policy](#deprecation-policy)
+4. [Recent updates](#recent-updates)
+5. [User decks (list)](#user-decks-list)
+6. [User decks (create + validate)](#user-decks-create--validate)
+7. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
+8. [User decks (cards)](#user-decks-cards)
+9. [User decks (UI preferences)](#user-decks-ui-preferences)
+10. [Guest decks (session memory)](#guest-decks-session-memory)
+11. [Collections (current user)](#collections-current-user)
+12. [Admin](#admin)
+13. [Image URL contract](#image-url-contract)
+14. [Caching & conditional GET](#caching--conditional-get)
+15. [Error catalog](#error-catalog)
+16. [Changelog](#changelog)
+17. [Deprecation policy](#deprecation-policy)
 
 ---
 
@@ -493,6 +495,38 @@ Reference data for Database View and collection UI (set codes → display names,
 **Response 500:** v1 envelope — `errors` with code `**DBV_SUPPORT_ERROR`**; `data` may be `null`.
 
 **Implementation:** `[src/services/deckBackgroundService.ts](src/services/deckBackgroundService.ts)` · HTTP `[src/api/http/dbv-support.http.ts](src/api/http/dbv-support.http.ts)` · response shape `[src/api/dto/v1/DbvDeckBackgroundsResponseDto.ts](src/api/dto/v1/DbvDeckBackgroundsResponseDto.ts)`
+
+---
+
+## Recent updates
+
+Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recent_updates` table and are updated manually via SQL or migrations — not inferred from app activity.
+
+### `GET /api/v1/recent-updates`
+
+**Auth:** Session cookie or Bearer JWT (same rules as **DBV catalog** introduction).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of objects (newest `createdAt` first):
+
+```json
+{
+  "id": "uuid",
+  "title": "string",
+  "type": "feature | fix | news | update | event | new_cards",
+  "description": "string (max 400 chars in DB)",
+  "cardImageUrl": "characters/anubis.webp | null",
+  "createdAt": "ISO 8601",
+  "updatedAt": "ISO 8601"
+}
+```
+
+`cardImageUrl` is a repo-relative card-art path (same convention as catalog image paths); the client resolves it via CDN/thumbnail helpers.
+
+**Response 500:** `errors` with code `RECENT_UPDATES_ERROR`; `data` may be `null`.
+
+**Implementation:** `[src/api/services/recentUpdatesService.ts](src/api/services/recentUpdatesService.ts)` · HTTP `[src/api/http/recent-updates.http.ts](src/api/http/recent-updates.http.ts)` · DB `[src/database/recentUpdatesLookup.ts](src/database/recentUpdatesLookup.ts)`
 
 ---
 
@@ -1008,6 +1042,7 @@ Clears card repository caches.
 | GET    | /api/v1/catalog/foil-card-map           | dbv-catalog.http.ts |
 | GET    | /api/v1/dbv/sets                        | dbv-support.http.ts |
 | GET    | /api/v1/dbv/deck-backgrounds            | dbv-support.http.ts |
+| GET    | /api/v1/recent-updates                  | recent-updates.http.ts |
 | GET    | /api/v1/decks                           | decks.http.ts       |
 | GET    | /api/v1/decks/stats                     | decks.http.ts       |
 | POST   | /api/v1/decks                           | decks.http.ts       |

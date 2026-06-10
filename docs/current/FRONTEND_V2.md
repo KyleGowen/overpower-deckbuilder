@@ -26,7 +26,7 @@ frontend/src/
     collection/ guestCollection.ts, useCollection.ts
     decks/      favorites.ts (localStorage favorites)
     layout/     LayoutModeProvider.tsx (mobile/desktop)
-  content/    recent-updates.ts (static news)
+  lib/api/    recent-updates.ts (GET /api/v1/recent-updates)
   styles/     tokens.css, global.css
   main.tsx    provider tree + router mount
 ```

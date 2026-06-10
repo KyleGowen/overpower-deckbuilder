@@ -128,6 +128,16 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **Document the reasoning** behind visual design decisions
 - **Maintain consistency** with existing style guide format and structure
 
+## Local Dev (v2 SPA) — always use port 5173
+- **The local app URL is `http://localhost:5173`** (Vite dev server in `frontend/`). Use this for browsing, browser automation, and when telling the user where to open the site after restarting dev servers.
+- **Two processes are required for v2 frontend work:**
+  1. **Repo root:** `npm run dev` → Express API on **:8085**
+  2. **`frontend/`:** `npm run dev` → React SPA on **:5173** (proxies `/api`, `/health`, `/src/resources`, `/js` to 8085)
+- **When relaunching the server** (migrations, backend changes, frontend work): start **both** unless the task is API-only. Then confirm the user should open **5173**, not 8085.
+- **Do not use `http://localhost:8085` as the main dev URL.** Port 8085 serves the API and, if browsed directly, a stale `frontend/dist/` build or legacy `public/` UI — not live Vite HMR.
+- **8085 remains correct for** health checks (`/health`), direct API verification, and production-like single-port testing after `npm run build` in `frontend/`.
+- Full workflow: [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
+
 ## Server Health Check Requirements
 - **ALWAYS use the health check endpoint when verifying server status**
 - **NEVER use basic curl or simple port checks for server verification**
@@ -163,10 +173,11 @@ See [`src/metrics/.cursorrules`](src/metrics/.cursorrules). Key rule: register a
 - `npm run test:integration` - Run integration tests  
 - `npm run test:all` - Run both unit and integration tests
 - `npm run build` - Build the project
-- `npm run dev` - Start development server
+- `npm run dev` (repo root) - Start Express API on **:8085**
+- `npm run dev` (`frontend/`) - Start v2 React SPA on **:5173** (open this in the browser)
 
 ## Flyway migrations — local dev
-See [`migrations/.cursorrules`](migrations/.cursorrules). Summary: after adding/editing SQL, run `npm run migrate` then restart `npm run dev`.
+See [`migrations/.cursorrules`](migrations/.cursorrules). Summary: after adding/editing SQL, run `npm run migrate` then restart **both** dev servers (root `npm run dev` + `frontend/npm run dev`); browse the app at **http://localhost:5173**.
 
 ## Integration Test Output Format
 - **ALWAYS provide table-style output when running integration tests**

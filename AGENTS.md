@@ -5,7 +5,8 @@
 Before making changes:
 
 1. **Read [.cursorrules](.cursorrules)** — ship command, testing, lint, GUEST behavior, style guide, infra rules, Flyway migrations, and subagent requirements. `.cursorrules` is the authoritative source for workflow rules.
-2. **Read [DEAD_CODE_POLICY.md](DEAD_CODE_POLICY.md)** — how to identify and remove unused code (Knip, frontend manifest).
+2. **Local dev URL is `http://localhost:5173`** (Vite in `frontend/`). Run root `npm run dev` (API :8085) **and** `frontend/npm run dev` (UI :5173). Do not browse `:8085` for v2 UI work unless testing a production-like build.
+3. **Read [DEAD_CODE_POLICY.md](DEAD_CODE_POLICY.md)** — how to identify and remove unused code (Knip, frontend manifest).
 
 Key docs:
 

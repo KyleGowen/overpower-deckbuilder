@@ -165,3 +165,14 @@ export interface DeckValidationResult {
   message?: string;
   validationErrors?: string[];
 }
+
+/** Home screen "Recent Updates" card from `GET /api/v1/recent-updates`. */
+export interface RecentUpdate {
+  id: string;
+  title: string;
+  type: string;
+  description: string;
+  cardImageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

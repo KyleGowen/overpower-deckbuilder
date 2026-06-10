@@ -4,7 +4,7 @@ Landing page after login. Sections, top to bottom:
 
 1. **Hero** — "Welcome to Excelsior" over character art, with an "Explore Decks" CTA.
 2. **Recent Updates** — news cards from
-   [`src/content/recent-updates.ts`](../../content/recent-updates.ts) (static content).
+   `GET /api/v1/recent-updates` (`fetchRecentUpdates`; rows in `recent_updates` table).
    The cards form a single-open accordion: every card is a button
    (`aria-expanded`). On desktop the cards have a fixed height, so clicking a
    card expands it **horizontally only** (the flex tile grows, siblings shrink)
@@ -17,7 +17,7 @@ Landing page after login. Sections, top to bottom:
 4. **Tournament Winning Decks** — placeholder section for a future feature.
 
 ## Data
-- TanStack Query for community decks (`fetchCommunityDecks`).
+- TanStack Query for recent updates (`fetchRecentUpdates`) and community decks (`fetchCommunityDecks`).
 - Deck tiles use `compact` variant in the rail.
 
 ## Notes

@@ -7,6 +7,7 @@ import { V1JwtTokenService } from '../services/v1JwtTokenService';
 import { RefreshTokenService } from '../services/refreshTokenService';
 import { CatalogService } from '../services/catalogService';
 import { DbvSupportService } from '../services/dbvSupportService';
+import { RecentUpdatesService } from '../services/recentUpdatesService';
 import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
 import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
@@ -16,6 +17,7 @@ import { registerDecksV1HttpRoutes } from './decks.http';
 import { registerCollectionsV1HttpRoutes } from './collections.http';
 import { registerGuestDecksV1HttpRoutes } from './guest-decks.http';
 import { registerAdminV1HttpRoutes } from './admin.http';
+import { registerRecentUpdatesV1HttpRoutes } from './recent-updates.http';
 import type { AdminService } from '../services/adminService';
 import type { CollectionService } from '../../services/collectionService';
 import type { GuestDeckService } from '../services/guestDeckService';
@@ -40,6 +42,7 @@ export interface RegisterApiV1Deps {
   };
   catalogService: CatalogService;
   dbvSupportService: DbvSupportService;
+  recentUpdatesService: RecentUpdatesService;
   authenticateUser: RequestHandler;
   deckBackgroundService: DeckBackgroundListReader;
   deckListService: DeckListService;
@@ -119,6 +122,11 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     dbvSupportService: deps.dbvSupportService,
     catalogAuth,
     deckBackgroundService: deps.deckBackgroundService
+  });
+
+  registerRecentUpdatesV1HttpRoutes(router, {
+    recentUpdatesService: deps.recentUpdatesService,
+    catalogAuth
   });
 
   registerDecksV1HttpRoutes(router, {

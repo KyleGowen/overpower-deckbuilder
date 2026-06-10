@@ -18,7 +18,7 @@ forward.
 - `src/lib/` - non-UI logic: `api/` (typed fetch wrappers), `images/`,
   `catalog/`, `collection/`, `layout/`.
 - `src/styles/` - `tokens.css` (design tokens) + `global.css` (reset + base).
-- `src/content/` - static content (e.g. recent-updates news items).
+- Home "Recent Updates" cards load from `GET /api/v1/recent-updates` (`lib/api/recent-updates.ts`).
 
 ## Conventions
 - Server state via TanStack Query; cross-cutting state via `useAuth()` /
@@ -32,6 +32,8 @@ forward.
   `.layout-desktop` scoped CSS.
 
 ## Dev
+- **Open the app at `http://localhost:5173`** (not :8085). Requires root
+  `npm run dev` running in parallel for the API backend on :8085.
 - `npm run dev` (Vite :5173) proxies `/api`, `/health`, `/src/resources`, `/js`
   to the Express backend on :8085.
 - `npm run build` outputs to `dist/`, served in prod by Express

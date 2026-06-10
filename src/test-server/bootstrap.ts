@@ -21,6 +21,7 @@ import { registerRoutes, type RouteDependencies } from '../routes';
 import { transformDeckList } from '../api/deckTransform';
 import { CatalogService } from '../api/services/catalogService';
 import { DbvSupportService } from '../api/services/dbvSupportService';
+import { RecentUpdatesService } from '../api/services/recentUpdatesService';
 import { DeckListService } from '../api/services/deckListService';
 import { DeckStatsService } from '../api/services/deckStatsService';
 import { DeckWriteService } from '../api/services/deckWriteService';
@@ -67,6 +68,7 @@ const deckBackgroundService = new DeckBackgroundService();
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
 const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
 const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
+const recentUpdatesService = new RecentUpdatesService(() => dataSource.getPool());
 const deckListService = new DeckListService(deckRepository);
 const deckStatsService = new DeckStatsService(deckRepository);
 const deckWriteService = new DeckWriteService(deckBusinessService, deckValidationService);
@@ -186,6 +188,7 @@ registerApiV1Routes(app, {
   userRepository,
   catalogService,
   dbvSupportService,
+  recentUpdatesService,
   authenticateUser: optionalAuth,
   deckBackgroundService,
   deckListService,

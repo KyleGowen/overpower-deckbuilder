@@ -2874,7 +2874,7 @@ Three stacked layers produce the mock's look:
 
 ## Home Recent Updates Cards (v2 SPA)
 
-The "Recent Updates" section on `/home` (markup in [frontend/src/features/home/HomePage.tsx](../../frontend/src/features/home/HomePage.tsx), `NewsSection`; styles in [frontend/src/features/home/HomePage.css](../../frontend/src/features/home/HomePage.css)) renders static news cards from [frontend/src/content/recent-updates.ts](../../frontend/src/content/recent-updates.ts).
+The "Recent Updates" section on `/home` (markup in [frontend/src/features/home/HomePage.tsx](../../frontend/src/features/home/HomePage.tsx), `NewsSection`; styles in [frontend/src/features/home/HomePage.css](../../frontend/src/features/home/HomePage.css)) loads news cards from `GET /api/v1/recent-updates` via TanStack Query (`fetchRecentUpdates` in [frontend/src/lib/api/recent-updates.ts](../../frontend/src/lib/api/recent-updates.ts)). Rows are stored in the `recent_updates` database table and updated manually via SQL or migrations.
 
 ### Layout
 
@@ -2896,4 +2896,4 @@ Every card is a `<button class="home__news-item">` (`aria-expanded`). Clicking a
 - To change the card height, edit `height` on `.home__news-item` (keep it tall enough to fit tag + 1-line title + 2-line summary + date, currently ~134px, or the date will be clipped by `overflow: hidden`).
 - To tune how wide an open card grows, change `flex-grow` on `.home__news-item--open`.
 - To change how much text shows, adjust `-webkit-line-clamp` on `.home__news-summary--clamped` / `--expanded` (and the card `height` to match).
-- News content (tag, title, summary, date, image) is hand-maintained in `recent-updates.ts`; `imagePath` must reference real card art (slug-style, e.g. `characters/anubis.webp`).
+- News content (`type`, `title`, `description`, `createdAt`, `cardImageUrl`) is hand-maintained in the `recent_updates` table; `cardImageUrl` must reference real card art (slug-style, e.g. `characters/anubis.webp`). `description` is capped at 400 characters in the database to match the expanded card's `-webkit-line-clamp: 6` layout bound.
