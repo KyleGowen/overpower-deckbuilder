@@ -33,6 +33,9 @@
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
 31. [Collection view — mobile (`layout-mobile`)](#collection-view--mobile-layout-mobile)
 32. [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile)
+33. [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa)
+34. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
+35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
 
 ## Overview
 
@@ -2796,3 +2799,101 @@ Character Stacks intentionally reuses existing Available Cards styling to match 
 ### Responsive Behavior
 
 Character Stacks uses the same responsive behavior as other Available Cards categories because it reuses existing card category and group classes; no additional breakpoints are introduced.
+
+## Login Page Layout (v2 SPA)
+
+This section covers the React v2 SPA login screen at `/login` (markup in [frontend/src/features/login/LoginPage.tsx](../../frontend/src/features/login/LoginPage.tsx), styles in [frontend/src/features/login/LoginPage.css](../../frontend/src/features/login/LoginPage.css)). It is distinct from the legacy `public/components/login/` modal documented in the Google Sign-In / Sign Up sections above.
+
+### Two-column grid — `.login`
+
+- **Layout**: CSS Grid, `grid-template-columns: max-content 1fr`.
+  - **Left track (`max-content`)**: sized to the brand/marketing column (`.login__brand`, capped at `max-width: 420px`) holding the "Build. Battle. OverPower." tagline and the Build / Collect / Database callouts.
+  - **Right track (`1fr`)**: the remaining width between the brand column's right edge and the screen's right edge.
+- **Alignment**: `align-items: center` (vertical centering of both columns).
+- **Reasoning**: the previous `1fr 1fr` split centered the login card inside its own right half, leaving a large empty gap in the middle on wide screens. Using `max-content 1fr` shrinks the left column to the text and lets the card center within the remaining space.
+
+### Card header — `.login__card-header`
+
+- **Layout**: centered text block at the top of the auth card (`width: 100%`, `text-align: center`, `margin-bottom: var(--space-8)` — extra breathing room before the form).
+- **Content**: `.login__heading` ("Welcome Back" / "Create Account") and `.login__subheading` only — no logo in the card (brand wordmark remains in the left `.login__brand` column on desktop).
+
+### Login card — `.login__card` (`+ .panel`)
+
+- **Element**: `<main className="login__card panel">` ("Welcome Back" card).
+- **Width**: `width: 100%; max-width: 540px` (enlarged from the prior `420px`).
+- **Centering**: `justify-self: center` — centers the card within the right `1fr` track, i.e. centered between the right edge of the text section and the right edge of the screen.
+- **Padding**: `var(--space-10)` (increased from `var(--space-8)` to stay balanced at the larger width).
+- **Surface**: `background: rgba(13, 21, 38, 0.82)`, `backdrop-filter: blur(16px)`, plus shared `.panel` chrome (border, `--radius-lg`, panel shadow).
+
+### Responsive behavior (`layout-mobile`)
+
+Mobile overrides are unchanged: `.layout-mobile .login` collapses to a single column (`grid-template-columns: 1fr`), `.login__brand` is hidden, and `.login__card` drops its background/border/blur and uses reduced padding. The `max-width: 540px` cap is effectively inert on typical phone widths where the card is full-width.
+
+## Home Hero Art Shading (v2 SPA)
+
+This section covers the "Welcome to Excelsior" hero on the React v2 SPA home screen at `/home` (markup in [frontend/src/features/home/HomePage.tsx](../../frontend/src/features/home/HomePage.tsx), styles in [frontend/src/features/home/HomePage.css](../../frontend/src/features/home/HomePage.css)).
+
+### Structure
+
+The hero art lives on an absolutely-positioned layer `.home__hero-art` (a child of `.home__hero`), with the image URL injected via the `--hero-art` CSS custom property set inline on the `.home__hero` section. A `::after` pseudo-element on the same layer carries the shading. Text (`.home__hero-text`) sits above on `z-index: 1`.
+
+### Background image — `.home__hero-art`
+
+- **`background-size: cover`** and **`background-position: 68% 28%`**.
+- **Why**: the source card art (`specials/department_of_theoretical_physics.webp`) is a full card that includes a framed border with rotated "VICTORY VAR…" text near its edges. Using `cover` with a character-focused crop pushes that frame outside the visible tile so only the character shows. Do **not** shrink this below `cover` (e.g. a percentage size like `70%`) — it re-exposes the card frame/border.
+
+### Shading overlay — `.home__hero-art::after`
+
+Three stacked layers produce the mock's look:
+
+1. **Left dark fade** (text legibility + covers the frame side):
+   `linear-gradient(90deg, var(--color-bg-panel) 0%, var(--color-bg-panel) 16%, rgba(15, 25, 40, 0.85) 38%, rgba(15, 25, 40, 0.35) 62%, transparent 82%)`
+2. **Edge vignette** (feathers the art into the panel and hides the rectangular image bounds / any residual frame at the edges):
+   `radial-gradient(135% 150% at 76% 40%, transparent 46%, rgba(8, 14, 24, 0.6) 100%)`
+3. **Subtle cyan accent glow** (brand tint, retained from prior design):
+   `radial-gradient(700px 400px at 80% 20%, rgba(0, 200, 232, 0.12), transparent 60%)`
+
+### Responsive behavior (`layout-mobile`)
+
+`.layout-mobile .home__hero-art` uses the same `background-position: 68% 28%`. Its `::after` keeps a top→bottom fade to the panel and a left→right fade for stacked text, plus the same edge vignette layer:
+
+```css
+.layout-mobile .home__hero-art::after {
+  background:
+    linear-gradient(180deg, rgba(15, 25, 40, 0.15) 0%, var(--color-bg-panel) 92%),
+    linear-gradient(90deg, var(--color-bg-panel) 0%, transparent 70%),
+    radial-gradient(135% 150% at 76% 45%, transparent 46%, rgba(8, 14, 24, 0.55) 100%);
+}
+```
+
+### Editing notes
+
+- To reposition the character within the tile, adjust **only** `background-position` on `.home__hero-art` (keep `cover`).
+- To deepen/soften the vignette, tune the inner transparent stop (`46%`) and outer alpha (`rgba(8, 14, 24, 0.6)`) of the radial gradient.
+- To extend how far the dark fade covers the art (e.g. if a frame edge reappears), push the solid/`0.85` stops of the left linear gradient further right.
+
+## Home Recent Updates Cards (v2 SPA)
+
+The "Recent Updates" section on `/home` (markup in [frontend/src/features/home/HomePage.tsx](../../frontend/src/features/home/HomePage.tsx), `NewsSection`; styles in [frontend/src/features/home/HomePage.css](../../frontend/src/features/home/HomePage.css)) renders static news cards from [frontend/src/content/recent-updates.ts](../../frontend/src/content/recent-updates.ts).
+
+### Layout
+
+- `.home__news` is a flex row (`display: flex`, `align-items: flex-start`, `gap: var(--space-3)`). `.layout-mobile .home__news` switches to `flex-direction: column`.
+- `.home__news-item` is itself a flex row (`align-items: flex-start`, `gap: var(--space-4)`, `padding: var(--space-3)`, `border-radius: var(--radius-lg)`) holding a 72×72 thumbnail (`.home__news-thumb`) and the text body (`.home__news-body`). Each item is a flex child with `flex: 1 1 0; min-width: 0;` so the cards share the row equally by default.
+
+### Expand-horizontally accordion
+
+Every card is a `<button class="home__news-item">` (`aria-expanded`). Clicking a card expands it **horizontally only** to reveal its full title and summary; it is a single-open accordion, so opening one collapses any previously open card. There is no modal, no navigation, and no long-form body behind a card.
+
+- **Fixed height — horizontal-only resize**: desktop cards have a fixed `height: 134px` with `overflow: hidden`. This is the key rule that keeps the row height constant: opening a card changes only its width (and its siblings'), never any card's height. Collapsed siblings show a truncated teaser; the open card shows the full text because it is wider.
+- **Horizontal growth**: the open card gets `.home__news-item--open { flex-grow: 2.4; }`, so it widens while its siblings shrink. The width change is animated via `transition: ... flex-grow var(--dur-med) var(--ease-out)`.
+- **No reflow growth**: `.home__news-title` is single-line (`white-space: nowrap; overflow: hidden; text-overflow: ellipsis`) so a narrowed card's title can't wrap to a second line and change height. `.home__news-summary--clamped` applies `-webkit-line-clamp: 2`; `.home__news-summary--expanded` allows up to `-webkit-line-clamp: 6` (still bounded by the fixed card height + `overflow: hidden`).
+- **Affordance**: the whole card is the toggle (no "Read more" link, no caret — the old `.home__news-more` indicator and `.home__news-caret` / `IconChevronRight` were removed). All cards get `cursor: pointer`, a hover border (`--color-border-accent`), and a `:focus-visible` outline.
+- **Mobile**: `.layout-mobile .home__news-item` resets to `height: auto; overflow: visible` and `.home__news-title` wraps (`white-space: normal`). In the stacked column there is no horizontal room, so expansion is vertical (the card grows taller to fit the full summary).
+
+### Editing notes
+
+- To change the card height, edit `height` on `.home__news-item` (keep it tall enough to fit tag + 1-line title + 2-line summary + date, currently ~134px, or the date will be clipped by `overflow: hidden`).
+- To tune how wide an open card grows, change `flex-grow` on `.home__news-item--open`.
+- To change how much text shows, adjust `-webkit-line-clamp` on `.home__news-summary--clamped` / `--expanded` (and the card `height` to match).
+- News content (tag, title, summary, date, image) is hand-maintained in `recent-updates.ts`; `imagePath` must reference real card art (slug-style, e.g. `characters/anubis.webp`).

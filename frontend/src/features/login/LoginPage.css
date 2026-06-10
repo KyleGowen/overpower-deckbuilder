@@ -123,8 +123,10 @@
   background: linear-gradient(90deg, transparent, var(--color-accent-bright), transparent);
   box-shadow: 0 0 16px 1px var(--color-accent-glow);
 }
-.login__card-logo {
-  margin-bottom: var(--space-4);
+.login__card-header {
+  width: 100%;
+  margin-bottom: var(--space-8);
+  text-align: center;
 }
 .login__heading {
   font-size: var(--font-size-2xl);
@@ -133,7 +135,7 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   margin-top: var(--space-2);
-  margin-bottom: var(--space-6);
+  margin-bottom: 0;
 }
 
 .login__form {
@@ -256,7 +258,4 @@
   border: none;
   box-shadow: none;
   padding: var(--space-4);
-}
-.layout-mobile .login__card-logo {
-  height: 64px;
 }

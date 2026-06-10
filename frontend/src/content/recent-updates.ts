@@ -27,7 +27,7 @@ export const RECENT_UPDATES: NewsItem[] = [
     title: 'A fresh new Excelsior',
     summary: 'The site has been rebuilt from the ground up with a faster, cleaner desktop and mobile experience.',
     date: '2026-06-09',
-    imagePath: 'characters/035_carson_of_venus.webp',
+    imagePath: 'characters/carson_of_venus.webp',
   },
   {
     id: 'database-pagination',
@@ -35,7 +35,7 @@ export const RECENT_UPDATES: NewsItem[] = [
     title: 'Browse the full card database',
     summary: 'Search, filter and page through every modern OverPower card, with a detail view for every card type.',
     date: '2026-06-09',
-    imagePath: 'characters/014_anubis.webp',
+    imagePath: 'characters/anubis.webp',
   },
   {
     id: 'collection-tracking',
@@ -43,6 +43,6 @@ export const RECENT_UPDATES: NewsItem[] = [
     title: 'Track your collection',
     summary: 'Record how many of each card you own and keep your inventory in sync across the app.',
     date: '2026-06-09',
-    imagePath: 'characters/028_captain_nemo.webp',
+    imagePath: 'characters/captain_nemo.webp',
   },
 ];

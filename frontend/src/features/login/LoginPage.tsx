@@ -86,13 +86,14 @@ export default function LoginPage() {
       </aside>
 
       <main className="login__card panel">
-        <Logo height={40} className="login__card-logo" />
-        <h2 className="login__heading">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
-        <p className="login__subheading">
-          {mode === 'login'
-            ? 'Log in to access your decks, collections, and battles.'
-            : 'Join the Excelsior community and start building.'}
-        </p>
+        <div className="login__card-header">
+          <h2 className="login__heading">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
+          <p className="login__subheading">
+            {mode === 'login'
+              ? 'Log in to access your decks, collections, and battles.'
+              : 'Join the Excelsior community and start building.'}
+          </p>
+        </div>
 
         <form className="login__form" onSubmit={handleSubmit}>
           <label className="login__field">

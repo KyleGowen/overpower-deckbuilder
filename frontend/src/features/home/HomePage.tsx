@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
@@ -129,6 +130,12 @@ function DeckRail({ icon, title, loading, error, decks, emptyMessage, onOpen }: 
 }
 
 function NewsSection() {
+  // Single-open accordion: clicking a tile expands it horizontally to reveal the
+  // full summary and collapses any previously open tile.
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id));
+
   return (
     <section className="home__section">
       <header className="home__section-head">
@@ -138,28 +145,38 @@ function NewsSection() {
         </h2>
       </header>
       <div className="home__news">
-        {RECENT_UPDATES.map((item) => (
-          <article className="home__news-item" key={item.id}>
-            <div className="home__news-thumb">
-              {item.imagePath ? (
-                <img src={resolveThumbUrl(item.imagePath)} alt="" loading="lazy" draggable={false} />
-              ) : (
-                <span className="home__news-thumb-icon"><IconSparkles /></span>
-              )}
-            </div>
-            <div className="home__news-body">
-              <span className={`home__news-tag home__news-tag--${item.tag.replace(/\s+/g, '-').toLowerCase()}`}>
-                {item.tag}
-              </span>
-              <h3 className="home__news-title">{item.title}</h3>
-              <p className="home__news-summary">{item.summary}</p>
-              <span className="home__news-date">
-                {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            </div>
-            <IconChevronRight className="home__news-caret" />
-          </article>
-        ))}
+        {RECENT_UPDATES.map((item) => {
+          const isOpen = openId === item.id;
+          return (
+            <button
+              type="button"
+              className={`home__news-item${isOpen ? ' home__news-item--open' : ''}`}
+              key={item.id}
+              aria-expanded={isOpen}
+              onClick={() => toggle(item.id)}
+            >
+              <div className="home__news-thumb">
+                {item.imagePath ? (
+                  <img src={resolveThumbUrl(item.imagePath)} alt="" loading="lazy" draggable={false} />
+                ) : (
+                  <span className="home__news-thumb-icon"><IconSparkles /></span>
+                )}
+              </div>
+              <div className="home__news-body">
+                <span className={`home__news-tag home__news-tag--${item.tag.replace(/\s+/g, '-').toLowerCase()}`}>
+                  {item.tag}
+                </span>
+                <h3 className="home__news-title">{item.title}</h3>
+                <p className={`home__news-summary home__news-summary--${isOpen ? 'expanded' : 'clamped'}`}>
+                  {item.summary}
+                </p>
+                <span className="home__news-date">
+                  {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
