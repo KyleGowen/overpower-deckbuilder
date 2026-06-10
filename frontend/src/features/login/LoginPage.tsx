@@ -2,23 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
 import { Logo } from '../../components/Logo';
-import { resolveThumbUrl } from '../../lib/images/cardImages';
+import { assetUrl } from '../../lib/images/cardImages';
 import { IconBuild, IconCollection, IconDatabase, IconEye, IconEyeOff, IconGoogle, IconProfile, IconLock } from '../../components/icons';
 import './LoginPage.css';
-
-/**
- * Real card art for the decorative background fan (confirmed paths from
- * migrations/V20). Card images are public static assets, so they load on the
- * pre-auth login screen. We never invent art.
- */
-const FAN_CARDS = [
-  'characters/035_carson_of_venus.webp',
-  'characters/014_anubis.webp',
-  'characters/021_billy_the_kid.webp',
-  'characters/028_captain_nemo.webp',
-  'characters/008_angry_mob_industrial_age.webp',
-  'characters/001_angry_mob_middle_ages.webp',
-];
 
 const CALLOUTS = [
   { icon: <IconBuild />, title: 'Build', copy: 'Assemble decks and share them with the community.' },
@@ -70,18 +56,18 @@ export default function LoginPage() {
   return (
     <div className="login">
       <div className="login__bg" aria-hidden="true">
-        <div className="login__fan">
-          {FAN_CARDS.map((path, i) => (
-            <div className="login__fan-card" key={path} style={{ '--i': i } as React.CSSProperties}>
-              <img src={resolveThumbUrl(path)} alt="" loading="eager" draggable={false} />
-            </div>
-          ))}
-        </div>
+        <img
+          className="login__bg-image"
+          src={assetUrl('/src/resources/images/login/login-bg.png')}
+          alt=""
+          loading="eager"
+          draggable={false}
+        />
         <div className="login__bg-veil" />
       </div>
 
       <aside className="login__brand">
-        <Logo height={70} className="login__brand-logo" />
+        <Logo height={210} className="login__brand-logo" />
         <h1 className="login__tagline">Build. Battle. OverPower.</h1>
         <p className="login__brand-sub">
           Create unstoppable decks, command powerful cards, and rise to the top of the Excelsior.

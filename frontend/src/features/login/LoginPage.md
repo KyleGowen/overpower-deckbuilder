@@ -1,7 +1,18 @@
 # Login screen (`/login`)
 
 Standalone auth screen (no AppShell). Left: brand hero ("Build. Battle. OverPower.") with
-a decorative card-fan background built from real card art. Right: the auth card.
+the enlarged Excelsior wordmark (DTV `Logo height={130}`). Right: the auth card.
+
+## Visuals (DTV)
+- **Background:** full-bleed nebula image at `src/resources/images/login/login-bg.png`,
+  rendered as `.login__bg-image` (`object-fit: cover`) and **dimmed to 80% brightness**
+  (`filter: brightness(0.8)`). Loaded via `assetUrl()` so it resolves through the CDN in prod.
+- **Card fan:** the decorative real-card-art fan (`.login__fan`) sits on the right edge,
+  above the nebula; `.login__bg-veil` adds a subtle dark gradient for text legibility while
+  keeping the nebula visible behind the brand panel.
+- **Auth card top glow:** `.login__card` has a bright teal top edge — a 1px accent border,
+  an outer cyan glow, and a centered `::before` gradient bar — over the frosted
+  `rgba(13,21,38,0.82)` + `backdrop-filter: blur(16px)` surface.
 
 ## Capabilities
 - **Log in** with username/email + password (`useAuth().login`).

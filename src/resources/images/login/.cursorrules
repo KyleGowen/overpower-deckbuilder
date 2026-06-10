@@ -1,0 +1,20 @@
+# Login Screen Images Directory
+
+## Purpose
+
+This directory holds **static image assets used by the v2 login screen** (`frontend/src/features/login/LoginPage.tsx`). Currently:
+
+- **`login-bg.png`** — full-bleed nebula background for the DTV login screen. Rendered as an `<img className="login__bg-image">` and dimmed to 80% brightness via CSS (`filter: brightness(0.8)`) in `frontend/src/features/login/LoginPage.css`.
+
+## Rules
+
+- **These images are committed to git** (UI images under `src/resources/images/**` are not gitignored) and are synced to S3/CloudFront by the deploy workflow, so they load from the CDN in production.
+- **Reference via `assetUrl('/src/resources/images/login/<file>')`** in the frontend (CDN-safe). Do NOT hardcode CDN URLs or use CSS `url()` with an absolute `/src/...` path (it would resolve against the SPA origin, not the CDN).
+- **Not auto-discovered.** Unlike `backgrounds/landscape` (deck-editor picker), files here are referenced explicitly. Adding a file requires a code reference; it will not appear anywhere automatically.
+- **No thumbnails** — the card thumbnail pipeline does not process this directory; do not add a `thumb/` subfolder.
+
+## Related Context
+
+- Login page component: `frontend/src/features/login/LoginPage.tsx`
+- Login page styles: `frontend/src/features/login/LoginPage.css`
+- Asset URL helper: `frontend/src/lib/images/cardImages.ts` (`assetUrl`)
