@@ -25,25 +25,43 @@ type ThumbResizeConfig = {
   background?: ResizeOptions['background'];
 };
 
-const PRESET_CHARACTER: ThumbResizeConfig = { width: 380, height: 280, fit: 'cover' };
+/** Letterbox pad for `contain` thumbs — matches `--color-bg-elevated` (#0a1220). */
+const THUMB_LETTERBOX_BG = { r: 10, g: 18, b: 32, alpha: 1 } as const;
+
+/** Landscape character DB/deck tile (380×280); `contain` matches full-res `object-fit: contain`. */
+export const PRESET_CHARACTER: ThumbResizeConfig = {
+  width: 380,
+  height: 280,
+  fit: 'contain',
+  background: THUMB_LETTERBOX_BG,
+};
+
+/** Portrait DB tile ratio 5:7 at 2× retina; `contain` matches progressive full-res framing. */
+export const PRESET_PORTRAIT: ThumbResizeConfig = {
+  width: 350,
+  height: 490,
+  fit: 'contain',
+  background: THUMB_LETTERBOX_BG,
+};
+
 const PRESET_MISSION: ThumbResizeConfig = { width: 264, height: 378, fit: 'cover' };
 /** Matches deck tile location slot 236×151 (2×); `cover` fills the frame (may crop tall/wide art). */
 const PRESET_LOCATION: ThumbResizeConfig = { width: 472, height: 302, fit: 'cover' };
 
 /** One entry per top-level folder under src/resources/cards/images (excluding backgrounds, etc.). */
-const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
+export const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
   characters: PRESET_CHARACTER,
-  missions: PRESET_MISSION,
+  missions: PRESET_PORTRAIT,
   locations: PRESET_LOCATION,
-  specials: PRESET_CHARACTER,
-  'power-cards': PRESET_CHARACTER,
+  specials: PRESET_PORTRAIT,
+  'power-cards': PRESET_PORTRAIT,
   events: PRESET_MISSION,
-  aspects: PRESET_CHARACTER,
-  'advanced-universe': PRESET_CHARACTER,
-  'teamwork-universe': PRESET_CHARACTER,
-  'ally-universe': PRESET_CHARACTER,
-  'training-universe': PRESET_CHARACTER,
-  'basic-universe': PRESET_CHARACTER,
+  aspects: PRESET_PORTRAIT,
+  'advanced-universe': PRESET_PORTRAIT,
+  'teamwork-universe': PRESET_PORTRAIT,
+  'ally-universe': PRESET_PORTRAIT,
+  'training-universe': PRESET_PORTRAIT,
+  'basic-universe': PRESET_PORTRAIT,
 };
 
 const THUMBNAIL_DIRS = [
@@ -150,7 +168,7 @@ async function generateThumbnails(): Promise<void> {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
   console.log(
-    '   Presets: character-like 380×280 cover; mission/event-like 264×378 cover; locations 472×302 cover (2× retina) | WebP quality:',
+    '   Presets: characters 380×280 contain; portrait 350×490 contain; events 264×378 cover; locations 472×302 cover (2× retina) | WebP quality:',
     WEBP_QUALITY
   );
   console.log('');
@@ -180,7 +198,11 @@ async function generateThumbnails(): Promise<void> {
   console.log(`✅ Done: ${totalProcessed} generated, ${totalSkipped} skipped (up to date), ${totalErrors} error(s)`);
 }
 
-generateThumbnails().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+const isMain = require.main === module || process.argv[1]?.includes('generateCardThumbnails');
+
+if (isMain) {
+  generateThumbnails().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}

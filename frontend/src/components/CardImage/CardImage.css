@@ -15,11 +15,15 @@
   transition: opacity var(--dur-med) var(--ease-out);
 }
 
-.card-image--loading .card-image__img {
+.card-image--progressive .card-image__img--thumb {
+  transition: none;
+}
+
+.card-image--loading .card-image__img:not(.card-image__img--full) {
   opacity: 0;
 }
 
-.card-image--loaded .card-image__img {
+.card-image--loaded .card-image__img:not(.card-image__img--full) {
   opacity: 1;
 }
 
@@ -46,4 +50,20 @@
 /* Contain variant for natural card ratio (deck editor card view, detail). */
 .card-image--contain .card-image__img {
   object-fit: contain;
+  object-position: center;
 }
+
+/* Progressive two-layer (thumb → full-res fade). */
+.card-image--progressive .card-image__img--full {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.card-image--progressive .card-image__full--loaded {
+  opacity: 1;
+}
+
+/* Full layer stacks above thumb; no visibility:hidden (avoids blank if reveal is skipped). */

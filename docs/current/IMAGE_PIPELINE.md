@@ -43,22 +43,27 @@ The same generator also fills `thumb/` under every **card-art** top-level folder
 
 Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either requires updating both.
 
-| Preset (in `THUMB_CONFIGS`) | 2× source (Sharp) | Typical use |
-|----------------------------|-------------------|-------------|
-| Character-like (`cover`)   | 380×280           | characters, specials, power-cards, aspects, universe folders |
-| Mission-like (`cover`)     | 264×378           | missions, events |
-| Location-like (`cover`)    | 472×302           | locations |
+| Preset (in `THUMB_CONFIGS`) | 2× source (Sharp) | Fit | Typical use |
+|----------------------------|-------------------|-----|-------------|
+| Character (`contain`)      | 380×280           | `contain` | characters (landscape DB/deck tiles) |
+| Portrait (`contain`)       | 350×490 (5:7)     | `contain` | specials, power-cards, aspects, missions, universe folders |
+| Event-like (`cover`)       | 264×378           | `cover` | events (landscape DB tile) |
+| Location-like (`cover`)    | 472×302           | `cover` | locations |
 
-Deck tile CSS still targets characters / locations / missions in `public/css/deck-selection.css`. Other card types reuse the character or mission preset for list/search thumbnails.
+Portrait and character presets letterbox with `#0a1220` pad so progressive DB tiles match full-res `object-fit: contain` framing.
+
+Deck tile CSS still targets characters / locations / missions in `public/css/deck-selection.css`.
 
 To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` **and** any CSS that assumes a fixed thumb aspect ratio.
 
 ### Resize fit (`cover` vs `contain`)
 
-- **Characters** and **missions**: thumbnails use Sharp **`cover`** (fills the box; may crop edges).
-- **Locations**: thumbnails use Sharp **`cover`** at 472×302 (2× the deck-tile location slot `236×151`). The bitmap fills the frame edge-to-edge in deck selection (no letterboxing). **Tall or wide source art may be cropped** at top/bottom or sides; full-card views should use full-resolution art or the editor/hover layer. DBV and other surfaces that use location thumbs share this crop.
+- **Characters**: thumbnails use Sharp **`contain`** on 380×280 (matches DB grid full-res framing).
+- **Portrait card types** (specials, power, aspects, missions, universe): **`contain`** on 350×490 (5:7).
+- **Events**: thumbnails use Sharp **`cover`** at 264×378.
+- **Locations**: thumbnails use Sharp **`cover`** at 472×302 (2× the deck-tile location slot `236×151`).
 
-After changing resize behavior, regenerate all location thumbs once: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
+After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
 
 ---
 

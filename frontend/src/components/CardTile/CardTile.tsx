@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { CardImage } from '../CardImage';
-import { cardDisplayName, catalogTypeUsesFullImageInDbGrid } from '../../lib/catalog/catalogTypeMap';
+import { cardDisplayName } from '../../lib/catalog/catalogTypeMap';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardTile.css';
 
@@ -48,7 +48,6 @@ export function CardTile({
   const imagePath = (card.image_path as string) || (card.image as string);
   const setLabel = formatSetLabel(card);
   const orientationClass = tileOrientationClass(catalogType);
-  const useThumbnail = !(catalogType && catalogTypeUsesFullImageInDbGrid(catalogType));
 
   return (
     <article className={`card-tile ${dimmed ? 'card-tile--dimmed' : ''} ${orientationClass}`.trim()}>
@@ -56,7 +55,9 @@ export function CardTile({
         <CardImage
           imagePath={imagePath}
           alt={name}
-          useThumbnail={useThumbnail}
+          useThumbnail={!catalogType}
+          progressive={Boolean(catalogType)}
+          catalogType={catalogType}
           className={catalogType ? 'card-image--contain' : ''}
         />
         {overlay ? <span className="card-tile__overlay">{overlay}</span> : null}

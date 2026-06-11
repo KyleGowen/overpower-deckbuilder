@@ -88,6 +88,31 @@ export function resolveThumbUrl(raw: string | null | undefined): string {
   return applyCdn(toAssetPath(thumbify(raw)));
 }
 
+/** True when a distinct thumbnail path exists (thumb → full progressive load applies). */
+export function canProgressiveLoad(raw: string | null | undefined): boolean {
+  if (!raw || isAbsolute(raw) || raw.includes('/thumb/')) return false;
+  const thumbAsset = toAssetPath(thumbify(raw));
+  const fullAsset = toAssetPath(raw);
+  return thumbAsset !== fullAsset;
+}
+
+/** Compare a resolved asset URL to an in-DOM img (browser normalizes src to absolute). */
+export function imageElementMatchesUrl(img: HTMLImageElement, url: string): boolean {
+  if (!url || !img.src) return false;
+  if (img.src === url) return true;
+  try {
+    const actualPath = new URL(img.src, 'http://localhost').pathname;
+    const expectedPath = isAbsolute(url)
+      ? new URL(url).pathname
+      : url.startsWith('/')
+        ? url.split('?')[0]
+        : `/${url.split('?')[0]}`;
+    return actualPath === expectedPath;
+  } catch {
+    return img.src.endsWith(url);
+  }
+}
+
 export function cardImageUrl(card: Partial<CatalogCard> | null | undefined): string {
   return resolveImageUrl(imagePathFromCard(card));
 }

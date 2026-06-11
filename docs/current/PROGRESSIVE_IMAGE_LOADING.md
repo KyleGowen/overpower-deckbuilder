@@ -58,6 +58,7 @@ Entry points:
 
 - Deck editor: `getDeckEditorCardViewInitialImagePath`, `initDeckEditorCardViewProgressiveLoad()`, `buildDeckCardViewRowContext` / `buildDeckCardViewInstanceHtml`, and `patchDeckCardViewInstance()` in `public/js/deck-editor-rendering.js`.
 - Hover modal: two-layer block in `public/js/card-hover-modal.js` (and inline equivalent in `public/deck-builder.html`).
+- **v2 database grid:** `CardTile` passes `progressive` to `CardImage` when `catalogType` is set (`DatabasePage`). `CardImage` renders `.card-image__img--thumb` + `.card-image__img--full`, preloads via `preloadAndRevealFullRes()` in `frontend/src/lib/images/progressiveImageLoad.ts`, and gates full-res fetch on `IntersectionObserver` (200px root margin). Falls back to single-layer when `canProgressiveLoad()` is false.
 
 ---
 

@@ -2941,13 +2941,11 @@ When `catalogType` is passed from the database page:
 
 Art uses the same no-crop strategy as v2 `DeckTile` hero cards: full card visible inside the frame, letterboxing when needed.
 
-Portrait tabs whose thumbnails use the character landscape preset (`special-cards`, `power-cards`, `aspects`, universe types) load **full-res** art in the grid (`catalogTypeUsesFullImageInDbGrid`) so portrait cards are not cropped to landscape thumbs.
+**Progressive tile images:** database `CardTile` uses `CardImage` with `progressive` + `catalogType` — thumbnail layer (`.card-image__img--thumb`) paints first, then full-res (`.card-image__img--full`) fades in after preload + `decode()` (`.card-image__full--loaded`, 0.2s opacity). Both layers use `object-fit: contain` and `object-position: center`. Portrait tabs use 350×490 `contain` thumbs (`PRESET_PORTRAIT`); landscape character tabs use 380×280 `contain` thumbs. Full-res preload runs when the tile is near the viewport (`IntersectionObserver`, 200px margin).
 
-### Filters — `.db__filters`
+### Header controls — `.db__header-controls`
 
-- **Set** dropdown (all tabs).
-- **Character** search input (Special Cards tab only): filters by linked `character` field.
-- Card name search stays in the header search bar. Rarity and Sort-by dropdowns removed.
+Single row after the page title: **search bar** (`.db__search`, `flex: 1`) then **Set** dropdown (`.db__set`, `flex-shrink: 0`, `min-width: 140px`, `max-width: 200px`). Character name is covered by the header search (`cardMatchesSearchQuery`); there is no separate character filter or filter row below the type tabs. Mobile: `.db__header-controls` spans full width; set select `min-width: 120px`.
 
 ### Sort order
 

@@ -71,22 +71,11 @@ export function isLandscapeCatalogType(type: CatalogType): boolean {
 }
 
 /**
- * Portrait catalog types whose thumbnails use the character landscape preset (380×280 cover).
- * The database grid loads full-res art for these so portrait cards are not cropped.
+ * Portrait DB tabs (5:7 tiles) use portrait preset thumbs (350×490 contain) in progressive load.
+ * Landscape tabs (characters, locations, events) use landscape thumbs.
  */
-const DB_GRID_FULL_IMAGE_TYPES: ReadonlySet<CatalogType> = new Set([
-  'special-cards',
-  'power-cards',
-  'aspects',
-  'advanced-universe',
-  'teamwork',
-  'ally-universe',
-  'training',
-  'basic-universe',
-]);
-
-export function catalogTypeUsesFullImageInDbGrid(type: CatalogType): boolean {
-  return DB_GRID_FULL_IMAGE_TYPES.has(type);
+export function catalogTypeUsesPortraitThumb(type: CatalogType): boolean {
+  return !isLandscapeCatalogType(type);
 }
 
 /** Resolve the display name across the differing name fields. */
@@ -167,4 +156,40 @@ export function cardAbilityText(card: Partial<CatalogCard> | null | undefined): 
     (card.card_text as string) ||
     ''
   );
+}
+
+/** Fields scanned by the database view top search bar (name, character, text, abilities). */
+const DBV_SEARCH_TEXT_FIELDS: (keyof CatalogCard)[] = [
+  'special_abilities',
+  'special_ability',
+  'card_effect',
+  'card_text',
+  'card_description',
+  'aspect_description',
+  'game_effect',
+];
+
+function cardSearchTextFields(card: Partial<CatalogCard>): string[] {
+  return DBV_SEARCH_TEXT_FIELDS.map((key) => String(card[key] ?? '').trim()).filter(Boolean);
+}
+
+/** Lowercase haystack for DBV text search across name, character, and card text/abilities. */
+export function cardSearchHaystack(card: Partial<CatalogCard> | null | undefined): string {
+  if (!card) return '';
+  return [
+    cardDisplayName(card),
+    cardCharacterName(card),
+    ...cardSearchTextFields(card),
+  ]
+    .join(' ')
+    .toLowerCase();
+}
+
+export function cardMatchesSearchQuery(
+  card: Partial<CatalogCard> | null | undefined,
+  query: string,
+): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return cardSearchHaystack(card).includes(q);
 }

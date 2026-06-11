@@ -10,8 +10,7 @@ import {
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
   CATALOG_TYPES,
-  cardDisplayName,
-  cardCharacterName,
+  cardMatchesSearchQuery,
   compareCatalogCards,
   isLandscapeCatalogType,
   metaForDeckType,
@@ -22,9 +21,8 @@ import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
-import { SlideOutPanel } from '../../components/SlideOutPanel';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
-import { IconSearch, IconSliders, IconPlus, IconLock, IconDatabase } from '../../components/icons';
+import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './DatabasePage.css';
 
@@ -43,14 +41,11 @@ export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
   const [type, setType] = useState<CatalogType>('characters');
   const [search, setSearch] = useState('');
-  const [characterSearch, setCharacterSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const debouncedSearch = useDebounced(search);
-  const debouncedCharacterSearch = useDebounced(characterSearch);
 
   const catalogQuery = useQuery({
     queryKey: ['catalog', type],
@@ -76,74 +71,52 @@ export default function DatabasePage() {
 
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    const charQ = debouncedCharacterSearch.trim().toLowerCase();
     const result = allCards.filter((c) => {
-      if (q && !cardDisplayName(c).toLowerCase().includes(q)) return false;
+      if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
-      if (type === 'special-cards' && charQ && !cardCharacterName(c).toLowerCase().includes(charQ)) return false;
       return true;
     });
     result.sort((a, b) => compareCatalogCards(a, b, type));
     return result;
-  }, [allCards, debouncedSearch, debouncedCharacterSearch, setFilter, type]);
-
-  useEffect(() => {
-    setCharacterSearch('');
-  }, [type]);
+  }, [allCards, debouncedSearch, setFilter, type]);
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, debouncedCharacterSearch, setFilter]);
+  }, [type, debouncedSearch, setFilter]);
 
   const pageCards = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const filterControls = (
-    <>
-      <div className="db-field">
-        <label className="db-field__label">Set</label>
-        <select value={setFilter} onChange={(e) => setSetFilter(e.target.value)}>
-          <option value="">All sets</option>
-          {(setsQuery.data ?? []).map((s) => (
-            <option key={s.code} value={s.code}>{s.name || s.code}</option>
-          ))}
-        </select>
-      </div>
-      {type === 'special-cards' ? (
-        <div className="db-field">
-          <label className="db-field__label" htmlFor="db-character-search">Character</label>
-          <input
-            id="db-character-search"
-            type="search"
-            placeholder="Search by character..."
-            value={characterSearch}
-            onChange={(e) => setCharacterSearch(e.target.value)}
-            aria-label="Search by character name"
-          />
-        </div>
-      ) : null}
-    </>
-  );
 
   return (
     <div className="db">
       <div className="db__inner">
         <header className="db__header">
           <h1 className="db__title"><IconDatabase /> Card Database</h1>
-          <div className="db__search">
-            <IconSearch className="db__search-icon" />
-            <input
-              type="search"
-              placeholder="Search cards by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search cards"
-            />
+          <div className="db__header-controls">
+            <div className="db__search">
+              <IconSearch className="db__search-icon" />
+              <input
+                type="search"
+                placeholder="Search name, character, or card text..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search cards"
+              />
+            </div>
+            <div className="db__set">
+              <label className="sr-only" htmlFor="db-set-filter">Set</label>
+              <select
+                id="db-set-filter"
+                value={setFilter}
+                onChange={(e) => setSetFilter(e.target.value)}
+                aria-label="Filter by set"
+              >
+                <option value="">All sets</option>
+                {(setsQuery.data ?? []).map((s) => (
+                  <option key={s.code} value={s.code}>{s.name || s.code}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          {isMobile ? (
-            <button type="button" className="btn btn-secondary db__filter-btn" onClick={() => setFiltersOpen(true)}>
-              <IconSliders /> Filters
-            </button>
-          ) : null}
         </header>
 
         <div className="db__types" role="tablist" aria-label="Card types">
@@ -160,8 +133,6 @@ export default function DatabasePage() {
             </button>
           ))}
         </div>
-
-        {!isMobile ? <div className="db__filters">{filterControls}</div> : null}
 
         {catalogQuery.isLoading ? (
           <LoadingState label="Loading cards..." />
@@ -195,9 +166,6 @@ export default function DatabasePage() {
         actions={selected ? <AddToDeck card={selected} type={type} /> : null}
       />
 
-      <SlideOutPanel open={filtersOpen} onClose={() => setFiltersOpen(false)} side="bottom" title="Filters" ariaLabel="Filters">
-        <div className="db__filters db__filters--sheet">{filterControls}</div>
-      </SlideOutPanel>
     </div>
   );
 }
