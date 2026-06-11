@@ -102,6 +102,8 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 
 ## Layout & Navigation
 - Fixed-width content rail: `--content-max-width: 1320px`, centered with side gutters.
+- **`html { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
+  top nav does not shift when shorter pages (e.g. Decks) hide the document scrollbar.
 - **Desktop** (`> 900px`): sticky **top nav** (`--top-nav-height: 60px`) with the logo,
   primary links (Home, Database, Decks, Collection), and the user menu on the right. The
   active link is cyan with a soft pill background.
