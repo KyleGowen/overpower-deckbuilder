@@ -1,9 +1,14 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RibbonCharacter } from '../CharacterRibbon';
 import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
 import { IconCards, IconDots, IconStar } from '../icons';
 import type { DeckCardEntry, DeckListItem } from '../../lib/api/types';
 import './DeckTile.css';
+
+const CHARACTER_CYCLE_MS = 1500;
+/** Wait before first advance — current character is already visible on hover enter. */
+const CHARACTER_CYCLE_HOVER_DELAY_MS = 1000;
 
 export interface DeckStatLine {
   energy: number;
@@ -52,8 +57,40 @@ export function DeckTile({
 }: DeckTileProps) {
   const meta = deck.metadata;
   const characters = deckCharacters(deck);
-  const hero = characters[0];
+  const [charIndex, setCharIndex] = useState(0);
+  const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cycleDelayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shownCharacter = characters[charIndex] ?? characters[0];
   const isLegal = meta.is_valid;
+
+  const stopCharacterCycle = useCallback(() => {
+    if (cycleTimer.current != null) {
+      clearInterval(cycleTimer.current);
+      cycleTimer.current = null;
+    }
+    if (cycleDelayTimer.current != null) {
+      clearTimeout(cycleDelayTimer.current);
+      cycleDelayTimer.current = null;
+    }
+  }, []);
+
+  const handleArtPointerEnter = useCallback(() => {
+    if (characters.length <= 1) return;
+    stopCharacterCycle();
+    cycleDelayTimer.current = setTimeout(() => {
+      cycleDelayTimer.current = null;
+      setCharIndex((i) => (i + 1) % characters.length);
+      cycleTimer.current = setInterval(() => {
+        setCharIndex((i) => (i + 1) % characters.length);
+      }, CHARACTER_CYCLE_MS);
+    }, CHARACTER_CYCLE_HOVER_DELAY_MS);
+  }, [characters.length, stopCharacterCycle]);
+
+  const handleArtPointerLeave = useCallback(() => {
+    stopCharacterCycle();
+  }, [stopCharacterCycle]);
+
+  useEffect(() => () => stopCharacterCycle(), [stopCharacterCycle]);
   const location = firstCardOfType(deck, 'location');
   const mission = firstCardOfType(deck, 'mission');
   const updatedLabel = meta.lastModified
@@ -77,10 +114,19 @@ export function DeckTile({
         }
       }}
     >
-      <div className="deck-tile__art">
-        {hero ? (
+      <div
+        className="deck-tile__art"
+        onPointerEnter={handleArtPointerEnter}
+        onPointerLeave={handleArtPointerLeave}
+      >
+        {shownCharacter ? (
           <div className="deck-tile__hero" aria-hidden="true">
-            <CardImage imagePath={hero.imagePath} alt={hero.name || 'Character'} useThumbnail />
+            <CardImage
+              imagePath={shownCharacter.imagePath}
+              alt={shownCharacter.name || 'Character'}
+              useThumbnail
+              className="card-image--contain"
+            />
           </div>
         ) : (
           <div className="deck-tile__art-empty">

@@ -2,9 +2,10 @@
 
 Summary tile for a deck. Layout ("hero" art + info panel):
 
-- **Art zone:** one feature character (first in the lineup) rendered via `CardImage`, zoomed
-  (`scale(1.4)`, top-weighted crop) so the card's baked-in title/flavor text crops out. A tall
-  bottom gradient scrim keeps the overlaid deck name readable.
+- **Art zone:** feature character via `CardImage` with `card-image--contain` — full landscape card
+  (380:280), 1px padding, no zoom/crop. **Hover:** waits 1s (current card already visible), then
+  cycles every 1.5s; pointer leave stops and keeps the last shown character. Bottom gradient scrim keeps
+  the deck name readable.
 - **On the scrim:** the deck name (`<h3>`).
 - **Info panel (solid, never overlaps the art):** card count + threat ring, legality/Limited
   badges, and the last-updated date (shown on **both** variants).
