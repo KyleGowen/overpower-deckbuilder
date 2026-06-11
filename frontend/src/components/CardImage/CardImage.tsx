@@ -76,7 +76,7 @@ export function CardImage({
   style,
   loading = 'lazy',
 }: CardImageProps) {
-  const useProgressive = progressive && canProgressiveLoad(imagePath);
+  const useProgressive = progressive && canProgressiveLoad(imagePath, catalogType);
   const progressiveThumb = catalogTypeSupportsProgressiveThumb(catalogType);
 
   if (useProgressive) {
@@ -84,6 +84,7 @@ export function CardImage({
       <ProgressiveCardImage
         key={imagePath ?? ''}
         imagePath={imagePath}
+        catalogType={catalogType}
         alt={alt}
         className={className}
         style={style}
@@ -96,6 +97,7 @@ export function CardImage({
   return (
     <SingleLayerCardImage
       imagePath={imagePath}
+      catalogType={catalogType}
       alt={alt}
       useThumbnail={useThumbnail}
       className={className}
@@ -107,6 +109,7 @@ export function CardImage({
 
 function SingleLayerCardImage({
   imagePath,
+  catalogType,
   alt,
   useThumbnail,
   className,
@@ -114,6 +117,7 @@ function SingleLayerCardImage({
   loading,
 }: {
   imagePath?: string | null;
+  catalogType?: CatalogType;
   alt: string;
   useThumbnail: boolean;
   className: string;
@@ -126,8 +130,8 @@ function SingleLayerCardImage({
   const src = failed
     ? placeholderImageUrl()
     : useThumbnail
-      ? resolveThumbUrl(imagePath)
-      : resolveImageUrl(imagePath);
+      ? resolveThumbUrl(imagePath, catalogType)
+      : resolveImageUrl(imagePath, catalogType);
 
   return (
     <span className={`card-image ${loaded ? 'card-image--loaded' : 'card-image--loading'} ${className}`} style={style}>
@@ -152,6 +156,7 @@ function SingleLayerCardImage({
 
 function ProgressiveCardImage({
   imagePath,
+  catalogType,
   alt,
   className,
   style,
@@ -159,6 +164,7 @@ function ProgressiveCardImage({
   progressiveThumb,
 }: {
   imagePath?: string | null;
+  catalogType?: CatalogType;
   alt: string;
   className: string;
   style?: CSSProperties;
@@ -172,8 +178,8 @@ function ProgressiveCardImage({
   const [thumbFailed, setThumbFailed] = useState(false);
   const [fullLoaded, setFullLoaded] = useState(false);
 
-  const thumbSrc = thumbFailed ? placeholderImageUrl() : resolveThumbUrl(imagePath);
-  const fullSrc = resolveImageUrl(imagePath);
+  const thumbSrc = thumbFailed ? placeholderImageUrl() : resolveThumbUrl(imagePath, catalogType);
+  const fullSrc = resolveImageUrl(imagePath, catalogType);
 
   const markThumbLoaded = () => setThumbLoaded(true);
   const showLoadedState = progressiveThumb ? thumbLoaded : fullLoaded;

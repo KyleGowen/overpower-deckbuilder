@@ -45,8 +45,13 @@ export const PRESET_PORTRAIT: ThumbResizeConfig = {
 };
 
 const PRESET_MISSION: ThumbResizeConfig = { width: 264, height: 378, fit: 'cover' };
-/** Matches deck tile location slot 236×151 (2×); `cover` fills the frame (may crop tall/wide art). */
-const PRESET_LOCATION: ThumbResizeConfig = { width: 472, height: 302, fit: 'cover' };
+/** Landscape DB/deck location slot 236×151 (2×); `contain` matches full-res progressive framing. */
+export const PRESET_LOCATION: ThumbResizeConfig = {
+  width: 472,
+  height: 302,
+  fit: 'contain',
+  background: THUMB_LETTERBOX_BG,
+};
 
 /** One entry per top-level folder under src/resources/cards/images (excluding backgrounds, etc.). */
 export const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
@@ -168,7 +173,7 @@ async function generateThumbnails(): Promise<void> {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
   console.log(
-    '   Presets: characters 380×280 contain; portrait 350×490 contain; events 264×378 cover; locations 472×302 cover (2× retina) | WebP quality:',
+    '   Presets: characters 380×280 contain; portrait 350×490 contain; events 264×378 cover; locations 472×302 contain (2× retina) | WebP quality:',
     WEBP_QUALITY
   );
   console.log('');

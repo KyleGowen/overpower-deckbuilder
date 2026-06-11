@@ -19,11 +19,16 @@
   transition: none;
 }
 
-.card-image--loading .card-image__img:not(.card-image__img--full) {
+.card-image--loading:not(.card-image--progressive) .card-image__img:not(.card-image__img--full) {
   opacity: 0;
 }
 
 .card-image--loaded .card-image__img:not(.card-image__img--full) {
+  opacity: 1;
+}
+
+/* Progressive: keep thumb visible while loading (cached thumbs paint without a blank frame). */
+.card-image--progressive.card-image--loading .card-image__img--thumb {
   opacity: 1;
 }
 
@@ -48,6 +53,10 @@
 }
 
 /* Contain variant for natural card ratio (deck editor card view, detail). */
+.card-image--contain {
+  background: var(--color-bg-elevated);
+}
+
 .card-image--contain .card-image__img {
   object-fit: contain;
   object-position: center;
@@ -66,4 +75,9 @@
   opacity: 1;
 }
 
-/* Full layer stacks above thumb; no visibility:hidden (avoids blank if reveal is skipped). */
+/* Contain progressive: instant full reveal; thumb stays underneath (contain thumbs match framing). */
+.card-image--contain.card-image--progressive .card-image__img--full {
+  transition: none;
+}
+
+/* Full layer stacks above thumb; thumb remains visible as letterbox backing (no blank gap on swap). */

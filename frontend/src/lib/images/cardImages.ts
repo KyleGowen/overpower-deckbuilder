@@ -13,7 +13,7 @@
  *  - Always resolve from the catalog `image` / `image_path` field; never guess
  *    from a card id.
  */
-import type { CatalogCard } from '../api/types';
+import type { CatalogCard, CatalogType } from '../api/types';
 
 const CARD_IMAGES_BASE = '/src/resources/cards/images';
 const PLACEHOLDER = `${CARD_IMAGES_BASE}/placeholder.webp`;
@@ -31,6 +31,60 @@ export function getCdnBase(): string {
 
 function isAbsolute(url: string): boolean {
   return /^https?:\/\//i.test(url) || url.startsWith('data:');
+}
+
+const TYPE_FOLDER_PREFIXES = [
+  'characters/',
+  'missions/',
+  'specials/',
+  'locations/',
+  'events/',
+  'aspects/',
+  'power-cards/',
+  'teamwork-universe/',
+  'ally-universe/',
+  'training-universe/',
+  'basic-universe/',
+  'advanced-universe/',
+] as const;
+
+/**
+ * Location catalog rows store bare filenames or `alternate/...` without a
+ * `locations/` prefix (legacy DB shape). Normalise before URL resolution.
+ */
+export function normalizeRawImagePath(
+  raw: string | null | undefined,
+  catalogType?: CatalogType,
+): string {
+  if (!raw || isAbsolute(raw)) return raw || '';
+
+  if (catalogType !== 'locations') return raw;
+
+  const badAbsoluteAlternate = raw.match(/^\/src\/resources\/cards\/images\/alternate\/(.+)$/);
+  if (badAbsoluteAlternate) {
+    return `/src/resources/cards/images/locations/alternate/${badAbsoluteAlternate[1]}`;
+  }
+
+  const badRelativeAlternate = raw.match(/^(src\/resources\/cards\/images\/)alternate\/(.+)$/);
+  if (badRelativeAlternate) {
+    return `/src/resources/cards/images/locations/alternate/${badRelativeAlternate[2]}`;
+  }
+
+  const rel = raw.replace(/^\/+/, '');
+  if (rel.startsWith('locations/') || rel.startsWith('src/resources/cards/images/locations/')) {
+    return raw;
+  }
+
+  if (!rel.includes('/')) {
+    return `locations/${rel}`;
+  }
+
+  const hasTypePrefix = TYPE_FOLDER_PREFIXES.some((prefix) => rel.startsWith(prefix));
+  if (!hasTypePrefix) {
+    return `locations/${rel}`;
+  }
+
+  return raw;
 }
 
 /** Normalise a raw card path into a site-absolute asset path (no CDN yet). */
@@ -78,21 +132,33 @@ export function imagePathFromCard(card: Partial<CatalogCard> | null | undefined)
 }
 
 /** Full-resolution image URL (detail slide-out, deck card view, hero). */
-export function resolveImageUrl(raw: string | null | undefined): string {
-  return applyCdn(toAssetPath(raw || ''));
+export function resolveImageUrl(
+  raw: string | null | undefined,
+  catalogType?: CatalogType,
+): string {
+  const normalized = normalizeRawImagePath(raw, catalogType);
+  return applyCdn(toAssetPath(normalized || ''));
 }
 
 /** Thumbnail URL (lists, tiles, ribbons). */
-export function resolveThumbUrl(raw: string | null | undefined): string {
-  if (!raw) return applyCdn(PLACEHOLDER);
-  return applyCdn(toAssetPath(thumbify(raw)));
+export function resolveThumbUrl(
+  raw: string | null | undefined,
+  catalogType?: CatalogType,
+): string {
+  const normalized = normalizeRawImagePath(raw, catalogType);
+  if (!normalized) return applyCdn(PLACEHOLDER);
+  return applyCdn(toAssetPath(thumbify(normalized)));
 }
 
 /** True when a distinct thumbnail path exists (thumb → full progressive load applies). */
-export function canProgressiveLoad(raw: string | null | undefined): boolean {
-  if (!raw || isAbsolute(raw) || raw.includes('/thumb/')) return false;
-  const thumbAsset = toAssetPath(thumbify(raw));
-  const fullAsset = toAssetPath(raw);
+export function canProgressiveLoad(
+  raw: string | null | undefined,
+  catalogType?: CatalogType,
+): boolean {
+  const normalized = normalizeRawImagePath(raw, catalogType);
+  if (!normalized || isAbsolute(normalized) || normalized.includes('/thumb/')) return false;
+  const thumbAsset = toAssetPath(thumbify(normalized));
+  const fullAsset = toAssetPath(normalized);
   return thumbAsset !== fullAsset;
 }
 

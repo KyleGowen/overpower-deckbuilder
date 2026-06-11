@@ -6,6 +6,7 @@ import * as path from 'path';
 import {
   canProgressiveLoad,
   imageElementMatchesUrl,
+  normalizeRawImagePath,
   resolveImageUrl,
   resolveThumbUrl,
 } from '../../frontend/src/lib/images/cardImages';
@@ -22,6 +23,38 @@ function containPaintedSize(nw: number, nh: number, fw: number, fh: number) {
   if (ia > fa) return { pw: fw, ph: fw / ia };
   return { ph: fh, pw: fh * ia };
 }
+
+describe('normalizeRawImagePath for locations', () => {
+  it('prepends locations/ for bare filenames and alternate subfolders', () => {
+    expect(normalizeRawImagePath('barsoom.webp', 'locations')).toBe('locations/barsoom.webp');
+    expect(normalizeRawImagePath('alternate/draculas_armory.png', 'locations')).toBe(
+      'locations/alternate/draculas_armory.png',
+    );
+    expect(normalizeRawImagePath('/src/resources/cards/images/alternate/221_b_baker_st.png', 'locations')).toBe(
+      '/src/resources/cards/images/locations/alternate/221_b_baker_st.png',
+    );
+  });
+
+  it('leaves already-prefixed location paths unchanged', () => {
+    expect(normalizeRawImagePath('locations/barsoom.webp', 'locations')).toBe('locations/barsoom.webp');
+  });
+
+  it('does not rewrite non-location catalog types', () => {
+    expect(normalizeRawImagePath('barsoom.webp', 'characters')).toBe('barsoom.webp');
+  });
+});
+
+describe('location progressive load paths', () => {
+  it('resolves thumb and full URLs for bare location filenames', () => {
+    expect(canProgressiveLoad('barsoom.webp', 'locations')).toBe(true);
+    expect(resolveImageUrl('barsoom.webp', 'locations')).toBe(
+      '/src/resources/cards/images/locations/barsoom.webp',
+    );
+    expect(resolveThumbUrl('barsoom.webp', 'locations')).toBe(
+      '/src/resources/cards/images/locations/thumb/barsoom.webp',
+    );
+  });
+});
 
 describe('canProgressiveLoad', () => {
   it('returns true when thumb and full asset paths differ', () => {
@@ -122,6 +155,8 @@ describe('CardImage progressive CSS', () => {
     expect(css).toContain('.card-image__full--loaded');
     expect(css).toContain('.card-image--progressive');
     expect(css).not.toContain('visibility: hidden');
+    expect(css).toContain('.card-image--progressive.card-image--loading .card-image__img--thumb');
+    expect(css).toContain('.card-image--contain.card-image--progressive .card-image__img--full');
   });
 });
 
@@ -131,6 +166,13 @@ describe('contain painted size parity', () => {
     const thumb = containPaintedSize(350, 490, frame.w, frame.h);
     const full = containPaintedSize(819, 1114, frame.w, frame.h);
     expect(Math.abs(thumb.ph - full.ph)).toBeLessThan(12);
+  });
+
+  it('location full art letterboxes in a 236:151 frame (contain thumbs must match, not cover-fill)', () => {
+    const frame = { w: 304, h: 195 };
+    const full = containPaintedSize(1114, 819, frame.w, frame.h);
+    expect(full.ph).toBeCloseTo(frame.h, 0);
+    expect(full.pw).toBeLessThan(frame.w);
   });
 });
 

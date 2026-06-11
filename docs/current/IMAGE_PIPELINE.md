@@ -61,7 +61,7 @@ To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbna
 - **Characters**: thumbnails use Sharp **`contain`** on 380×280 (matches DB grid full-res framing).
 - **Portrait card types** (specials, power, aspects, missions, universe): **`contain`** on 350×490 (5:7).
 - **Events**: thumbnails use Sharp **`cover`** at 264×378.
-- **Locations**: thumbnails use Sharp **`cover`** at 472×302 (2× the deck-tile location slot `236×151`).
+- **Locations**: thumbnails use Sharp **`contain`** at 472×302 (2× the deck-tile location slot `236×151`) so progressive DB tiles match full-res framing.
 
 After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
 

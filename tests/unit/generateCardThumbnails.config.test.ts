@@ -1,5 +1,6 @@
 import {
   PRESET_CHARACTER,
+  PRESET_LOCATION,
   PRESET_PORTRAIT,
   THUMB_CONFIGS,
 } from '../../src/scripts/generateCardThumbnails';
@@ -31,5 +32,11 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
 
     expect(PRESET_PORTRAIT.fit).toBe('contain');
     expect(PRESET_PORTRAIT.width / PRESET_PORTRAIT.height).toBeCloseTo(5 / 7, 2);
+  });
+
+  it('uses contain for landscape location thumbs', () => {
+    expect(THUMB_CONFIGS.locations).toBe(PRESET_LOCATION);
+    expect(PRESET_LOCATION.fit).toBe('contain');
+    expect(PRESET_LOCATION.width / PRESET_LOCATION.height).toBeCloseTo(236 / 151, 2);
   });
 });

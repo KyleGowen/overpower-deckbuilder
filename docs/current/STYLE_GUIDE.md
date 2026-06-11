@@ -2941,7 +2941,7 @@ When `catalogType` is passed from the database page:
 
 Art uses the same no-crop strategy as v2 `DeckTile` hero cards: full card visible inside the frame, letterboxing when needed.
 
-**Progressive tile images:** database `CardTile` uses `CardImage` with `progressive` + `catalogType` — thumbnail layer (`.card-image__img--thumb`) paints first, then full-res (`.card-image__img--full`) fades in after preload + `decode()` (`.card-image__full--loaded`, 0.2s opacity). Both layers use `object-fit: contain` and `object-position: center`. Portrait tabs use 350×490 `contain` thumbs (`PRESET_PORTRAIT`); landscape character tabs use 380×280 `contain` thumbs. Full-res preload runs when the tile is near the viewport (`IntersectionObserver`, 200px margin).
+**Progressive tile images:** database `CardTile` uses `CardImage` with `progressive` + `catalogType` — thumbnail layer (`.card-image__img--thumb`) paints first (stays visible during load and under full-res), then full-res (`.card-image__img--full`) reveals after preload + `decode()` (`.card-image__full--loaded`). Both layers use `object-fit: contain` and `object-position: center` on a solid `var(--color-bg-elevated)` backing. Contain progressive tiles use an instant full swap (no opacity fade) so the thumb is never hidden before full paints. Portrait tabs use 350×490 `contain` thumbs (`PRESET_PORTRAIT`); landscape character tabs use 380×280 `contain` thumbs; location tabs use 472×302 `contain` thumbs (`PRESET_LOCATION`). Full-res preload runs when the tile is near the viewport (`IntersectionObserver`, 200px margin).
 
 ### Header controls — `.db__header-controls`
 
