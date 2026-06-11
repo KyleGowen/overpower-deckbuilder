@@ -1,7 +1,8 @@
 import express from 'express';
 import type { AuthRoutesDeps } from './types';
 import { debugAuth, requestAuthContext } from '../services/authDebug';
-import { GUEST_USER_ID } from '../constants/guestUser';
+import { COMMUNITY_DECKS_USER_ID } from '../constants/communityDecksUser';
+import { TOURNAMENT_DECKS_USER_ID } from '../constants/tournamentDecksUser';
 
 export function registerAuthRoutes(app: express.Application, deps: AuthRoutesDeps): void {
   // Lightweight request logger for the auth surface (DEBUG_AUTH). Shows whether
@@ -40,8 +41,12 @@ export function registerAuthRoutes(app: express.Application, deps: AuthRoutesDep
   app.get('/api/v1/config/app', (req, res) => {
     const cdnBase = process.env.CDN_BASE_URL || '';
     res.set('Cache-Control', 'public, max-age=300');
-    // communityGuestUserId: the GUEST account whose decks back the Home
-    // "Community Decks" pool (placeholder until real community decks exist).
-    res.json({ cdnBase, communityGuestUserId: GUEST_USER_ID });
+    // communityDecksUserId: the internal community_decks account whose decks back the Home
+    // "Community Decks" pool.
+    res.json({
+      cdnBase,
+      communityDecksUserId: COMMUNITY_DECKS_USER_ID,
+      tournamentDecksUserId: TOURNAMENT_DECKS_USER_ID,
+    });
   });
 }

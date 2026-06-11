@@ -75,10 +75,14 @@ export async function fetchAppConfig(): Promise<AppConfig> {
   try {
     const cfg = await api.get<AppConfig>('/api/v1/config/app');
     setCdnBase(cfg?.cdnBase);
-    return { cdnBase: cfg?.cdnBase ?? '', communityGuestUserId: cfg?.communityGuestUserId ?? null };
+    return {
+      cdnBase: cfg?.cdnBase ?? '',
+      communityDecksUserId: cfg?.communityDecksUserId ?? null,
+      tournamentDecksUserId: cfg?.tournamentDecksUserId ?? null,
+    };
   } catch {
     setCdnBase('');
-    return { cdnBase: '', communityGuestUserId: null };
+    return { cdnBase: '', communityDecksUserId: null, tournamentDecksUserId: null };
   }
 }
 

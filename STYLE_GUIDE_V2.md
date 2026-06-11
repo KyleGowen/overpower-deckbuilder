@@ -117,8 +117,13 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   border, and a label + set line beneath. Owned/selected tiles get the accent glow; unowned
   tiles in the Collection are dimmed.
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
-- Character art is also composited into deck tiles via `CharacterRibbon` (overlapping
-  cropped portraits) for a recognizable, art-forward deck summary.
+- **Deck tiles (`DeckTile`)** use a "hero" layout: one feature character fills the art zone
+  (zoomed/top-cropped so the card's baked-in title and stat text crop out), under a tall bottom
+  gradient scrim. The deck **name** sits on the scrim. All numbers/text live in a **solid info
+  panel below** the art (never overlapping it): card count + threat ring, legality/Limited badges,
+  and the updated date on both variants; the `full` variant adds location/mission chips and the
+  max-stat bar. This replaced the earlier equal-width 4-up strip, which stacked four full-card
+  scans and produced unreadable, jumbled repeated stat-column text.
 
 ## Stats, Badges & Status
 OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):

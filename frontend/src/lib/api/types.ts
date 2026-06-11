@@ -19,7 +19,8 @@ export interface AppUser {
 
 export interface AppConfig {
   cdnBase: string;
-  communityGuestUserId?: string | null;
+  communityDecksUserId?: string | null;
+  tournamentDecksUserId?: string | null;
 }
 
 export type CardRarity = 'Common' | 'Uncommon' | 'Rare' | 'Ultra Rare' | (string & {});

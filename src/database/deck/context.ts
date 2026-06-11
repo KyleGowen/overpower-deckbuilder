@@ -4,6 +4,12 @@ import { Deck } from '../../types';
 export type DeckCacheEntry = { deck: Deck | Deck[]; timestamp: number };
 export type DeckCache = Map<string, DeckCacheEntry>;
 
+export function invalidateUserDeckListCache(cache: DeckCache, userId: string): void {
+  cache.delete(`user_decks_${userId}`);
+  cache.delete(`user_decks_${userId}_created_at`);
+  cache.delete(`user_decks_${userId}_updated_at`);
+}
+
 export interface DeckRepositoryContext {
   pool: Pool;
   cache: DeckCache;
@@ -31,7 +37,7 @@ export function createDeckRepositoryContext(
         const userResult = await client.query('SELECT user_id FROM decks WHERE id = $1', [deckId]);
         const userId = userResult.rows[0]?.user_id;
         if (userId) {
-          cache.delete(`user_decks_${userId}`);
+          invalidateUserDeckListCache(cache, userId);
         }
       } finally {
         client.release();

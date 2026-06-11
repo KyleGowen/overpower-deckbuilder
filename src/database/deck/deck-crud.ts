@@ -1,5 +1,5 @@
 import { Deck, DeckCard } from '../../types';
-import type { DeckRepositoryContext } from './context';
+import { invalidateUserDeckListCache, type DeckRepositoryContext } from './context';
 
 /** Deck row from SELECT * FROM decks */
 type DeckRow = Record<string, unknown>;
@@ -286,7 +286,7 @@ export async function createDeck(
     const newDeck = mapDeckRowBasic(updatedDeck);
 
     ctx.cache.set(deckId, { deck: newDeck, timestamp: Date.now() });
-    ctx.cache.delete(`user_decks_${userId}`);
+    invalidateUserDeckListCache(ctx.cache, userId);
 
     return newDeck;
   } catch (error) {
@@ -352,11 +352,14 @@ export async function getDeckById(
   }
 }
 
+export type DeckListOrderBy = 'created_at' | 'updated_at';
+
 export async function getDecksByUserId(
   ctx: DeckRepositoryContext,
-  userId: string
+  userId: string,
+  orderBy: DeckListOrderBy = 'created_at'
 ): Promise<Deck[]> {
-  const cacheKey = `user_decks_${userId}`;
+  const cacheKey = `user_decks_${userId}_${orderBy}`;
   const now = Date.now();
   const cached = ctx.cache.get(cacheKey);
   if (cached && now - cached.timestamp < ctx.cacheTtlMs) {
@@ -400,7 +403,7 @@ ${characterJoinSql}
           LIMIT 1
         ) dm1 ON true
         WHERE d.user_id = $1 
-        ORDER BY d.created_at DESC
+        ORDER BY d.${orderBy === 'updated_at' ? 'updated_at' : 'created_at'} DESC
       `,
       [userId]
     );
@@ -551,7 +554,7 @@ export async function deleteDeck(
     if (success) {
       ctx.cache.delete(id);
       if (userId) {
-        ctx.cache.delete(`user_decks_${userId}`);
+        invalidateUserDeckListCache(ctx.cache, userId);
       }
     }
     return success;

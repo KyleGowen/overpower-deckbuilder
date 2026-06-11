@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
-import { fetchCommunityDecks } from '../../lib/api/decks';
+import { fetchCommunityDecks, fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchRecentUpdates } from '../../lib/api/recent-updates';
 import { resolveImageUrl, resolveThumbUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
@@ -21,7 +21,7 @@ import './HomePage.css';
 const HERO_ART = 'specials/department_of_theoretical_physics.webp';
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, communityDecksUserId, tournamentDecksUserId } = useAuth();
   const navigate = useNavigate();
 
   const communityQuery = useQuery({
@@ -30,9 +30,18 @@ export default function HomePage() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const communityDecks = communityQuery.data ?? [];
-  // Tournament decks have no data source yet (documented placeholder).
-  const tournamentDecks: DeckListItem[] = [];
+  const communityDecks = (communityQuery.data ?? []).filter(
+    (deck) => !communityDecksUserId || deck.metadata.userId === communityDecksUserId,
+  );
+  const tournamentQuery = useQuery({
+    queryKey: ['decks', 'tournament'],
+    queryFn: () => fetchTournamentDecks(),
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const tournamentDecks = (tournamentQuery.data ?? []).filter(
+    (deck) => !tournamentDecksUserId || deck.metadata.userId === tournamentDecksUserId,
+  );
 
   const openDeck = (deck: DeckListItem) => {
     const m = deck.metadata;
@@ -78,10 +87,10 @@ export default function HomePage() {
         <DeckRail
           icon={<IconTrophy />}
           title="Tournament Winning Decks"
-          loading={false}
-          error={false}
+          loading={tournamentQuery.isLoading}
+          error={tournamentQuery.isError}
           decks={tournamentDecks}
-          emptyMessage="Tournament-winning decks are coming soon."
+          emptyMessage="Tournament-winning decks will appear here as they are added."
           onOpen={openDeck}
         />
       </div>

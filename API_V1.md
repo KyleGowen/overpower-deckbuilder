@@ -569,11 +569,23 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is currently backed by the saved decks of the shared **GUEST** account (`communityGuestUserId` = `00000000-0000-0000-0000-000000000001`, also surfaced in `GET /api/v1/config/app`). This is a documented placeholder until real community decks exist — to migrate, change the source user id / selection in `[decks.http.ts](src/api/http/decks.http.ts)` (see [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md)).
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is backed by the internal **`community_decks`** user account (`communityDecksUserId` = `00000000-0000-0000-0000-000000000002`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-community-deck/SKILL.md` for importing decks.
 
 **Response 500:** v1 envelope — `errors` with code `**COMMUNITY_DECKS_ERROR**`.
 
 **Note:** registered before `GET /api/v1/decks/:id` so the literal `community` segment is not parsed as a deck id.
+
+### `GET /api/v1/decks/tournament`
+
+**Auth:** Valid **session cookie** or Bearer JWT (same `ownedAuth` as `GET /api/v1/decks`). Unauthenticated → **401** v1 envelope.
+
+**Request model:** none.
+
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **tournament pool**. The pool is backed by the internal **`tournament_decks`** user account (`tournamentDecksUserId` = `00000000-0000-0000-0000-000000000003`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-tournament-deck/SKILL.md` for importing decks.
+
+**Response 500:** v1 envelope — `errors` with code `**TOURNAMENT_DECKS_ERROR**`.
+
+**Note:** registered before `GET /api/v1/decks/:id` so the literal `tournament` segment is not parsed as a deck id.
 
 **Implementation:** `[DeckListService](src/api/services/deckListService.ts)` · HTTP `[decks.http.ts](src/api/http/decks.http.ts)` · guest id constant `[src/constants/guestUser.ts](src/constants/guestUser.ts)`
 
@@ -1091,7 +1103,7 @@ These endpoints are **intentionally not** under `**/api/v1`**:
 | `GET /health/live` | Lightweight liveness probe (no DB). Returns `{ "status": "OK" }`. |
 | `GET /health/deep` | Same as `GET /health` — alias for deep health check. |
 | `GET /js/app-config.js` | Injects `window.APP_CDN_BASE` as a JS snippet for the legacy frontend. **Prefer** `GET /api/v1/config/app` in new code. |
-| `GET /api/v1/config/app` | JSON: `{ "cdnBase": "<string>", "communityGuestUserId": "<uuid>" }`. No auth required. New frontend should use this. `communityGuestUserId` is the GUEST account backing the Home "Community Decks" pool. |
+| `GET /api/v1/config/app` | JSON: `{ "cdnBase": "<string>", "communityDecksUserId": "<uuid>", "tournamentDecksUserId": "<uuid>" }`. No auth required. New frontend should use this. `communityDecksUserId` backs the Home "Community Decks" pool; `tournamentDecksUserId` backs the "Tournament Winning Decks" pool. |
 | **Static assets** | `public/`, `src/resources/` served by `express.static` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
 | **HTML shell routes** | `/`, `/users/:userId/decks`, `/users/:userId/collection`, `/data` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
 

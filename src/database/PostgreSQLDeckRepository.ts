@@ -54,8 +54,11 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     return deckCrud.getDeckById(this.getContext(), id);
   }
 
-  async getDecksByUserId(userId: string): Promise<Deck[]> {
-    return deckCrud.getDecksByUserId(this.getContext(), userId);
+  async getDecksByUserId(
+    userId: string,
+    orderBy?: deckCrud.DeckListOrderBy
+  ): Promise<Deck[]> {
+    return deckCrud.getDecksByUserId(this.getContext(), userId, orderBy);
   }
 
   async getDeckSummaryWithAllCards(deckId: string): Promise<Deck | undefined> {

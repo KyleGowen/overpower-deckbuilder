@@ -1,0 +1,109 @@
+{
+  "name": "2025 Nationals 4th (Felipe Cagno)",
+  "description": "",
+  "total_cards": 51,
+  "max_energy": 8,
+  "max_combat": 4,
+  "max_brute_force": 6,
+  "max_intelligence": 6,
+  "total_energy_icons": 13,
+  "total_combat_icons": 10,
+  "total_brute_force_icons": 10,
+  "total_intelligence_icons": 12,
+  "total_threat": 75,
+  "legal": true,
+  "limited": false,
+  "export_timestamp": "2026-06-10T21:19:11.184Z",
+  "exported_by": "guest",
+  "reserve_character": null,
+  "cataclysm_special": "Fairy Protection",
+  "assist_special": "Charge into Battle!",
+  "ambush_special": "Valkyrie Skeggjold",
+  "cards": {
+    "characters": [
+      "Mina Harker",
+      "Jane Porter",
+      "Morgan le Fay",
+      "Wicked Witch"
+    ],
+    "special_cards": {
+      "Mina Harker": [
+        "Tracking Movements",
+        "Tracking Movements",
+        "The Hunger",
+        "Jonathan Harker, Solicitor",
+        "Vampiric Celerity",
+        "Nocturnal Hunter"
+      ],
+      "Any Character": [
+        "Legendary Escape",
+        "Disorient Opponent",
+        "Valkyrie Skeggjold",
+        "Charge into Battle!",
+        "Grim Reaper",
+        "Fairy Protection",
+        "Merlin's Magic",
+        "The Gemini",
+        "Hades: Lord of the Underworld",
+        "Freya: Goddess of Protection",
+        "Valkyrie Hildr: Select the Slain"
+      ],
+      "Wicked Witch": [
+        "Feared by All Witches",
+        "Harness the Wind",
+        "Wolves, Crows, & Black Bees",
+        "I Will Have Those Silver Shoes!",
+        "One Eye"
+      ],
+      "Jane Porter": [
+        "Not Without My Friends",
+        "Ethnoarchaeology",
+        "Not a Damsel in Distress",
+        "Archimedes Q. Porter",
+        "Tenacious Pursuit"
+      ],
+      "Morgan le Fay": [
+        "Apprentice of Merlin",
+        "Avalon's Warmth"
+      ]
+    },
+    "locations": [
+      "The Land That Time Forgot"
+    ],
+    "missions": {},
+    "events": {},
+    "aspects": [
+      "Isis"
+    ],
+    "advanced_universe": {},
+    "teamwork": [
+      "7 Any-Power - Any-Power",
+      "6 Brute Force - Intelligence + Energy",
+      "6 Any-Power - Any-Power / Any-Power",
+      "6 Intelligence - Brute Force + Energy"
+    ],
+    "allies": [
+      "Professor Porter - 5 or less Intelligence",
+      "Little John - 5 or less Brute Force",
+      "Hucklebuck - 5 or less Combat"
+    ],
+    "training": [],
+    "basic_universe": [],
+    "power_cards": [
+      "1 - Brute Force",
+      "2 - Brute Force",
+      "3 - Energy",
+      "3 - Multi Power",
+      "4 - Intelligence",
+      "4 - Multi Power",
+      "5 - Intelligence",
+      "5 - Multi Power",
+      "6 - Energy",
+      "6 - Any-Power",
+      "7 - Energy",
+      "7 - Energy",
+      "8 - Energy",
+      "8 - Energy"
+    ]
+  }
+}

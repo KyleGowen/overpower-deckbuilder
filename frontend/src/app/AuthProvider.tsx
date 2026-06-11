@@ -1,6 +1,6 @@
 /**
  * Auth context. Session-cookie based; loads the current user and app config
- * (CDN base + community guest id) via TanStack Query. Exposes login, signup,
+ * (CDN base + pool user ids) via TanStack Query. Exposes login, signup,
  * guest login, Google sign-in and logout to the rest of the app.
  */
 import {
@@ -28,7 +28,8 @@ interface AuthContextValue {
   isLoading: boolean;
   isGuest: boolean;
   isAdmin: boolean;
-  communityGuestUserId: string | null;
+  communityDecksUserId: string | null;
+  tournamentDecksUserId: string | null;
   login: (username: string, password: string) => Promise<AppUser | null>;
   signUp: (username: string, email: string, password: string) => Promise<AppUser | null>;
   loginAsGuest: () => Promise<AppUser | null>;
@@ -119,7 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading: userQuery.isLoading || configQuery.isLoading,
       isGuest: user?.role === 'GUEST',
       isAdmin: user?.role === 'ADMIN',
-      communityGuestUserId: configQuery.data?.communityGuestUserId ?? null,
+      communityDecksUserId: configQuery.data?.communityDecksUserId ?? null,
+      tournamentDecksUserId: configQuery.data?.tournamentDecksUserId ?? null,
       login,
       signUp,
       loginAsGuest,

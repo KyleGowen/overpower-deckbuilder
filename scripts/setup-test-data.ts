@@ -36,6 +36,52 @@ async function setupTestData() {
       console.log('✅ Guest user already exists');
     }
     
+    // Create community_decks user if it doesn't exist
+    const communityDecksResult = await pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      ['community_decks']
+    );
+
+    if (communityDecksResult.rows.length === 0) {
+      const communityHashedPassword = await bcrypt.hash('5101', 10);
+      await pool.query(
+        'INSERT INTO users (id, username, email, password_hash, role) VALUES ($1, $2, $3, $4, $5)',
+        [
+          '00000000-0000-0000-0000-000000000002',
+          'community_decks',
+          'community_decks@example.com',
+          communityHashedPassword,
+          'USER',
+        ]
+      );
+      console.log('✅ community_decks user created');
+    } else {
+      console.log('✅ community_decks user already exists');
+    }
+
+    // Create tournament_decks user if it doesn't exist
+    const tournamentDecksResult = await pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      ['tournament_decks']
+    );
+
+    if (tournamentDecksResult.rows.length === 0) {
+      const tournamentHashedPassword = await bcrypt.hash('5101', 10);
+      await pool.query(
+        'INSERT INTO users (id, username, email, password_hash, role) VALUES ($1, $2, $3, $4, $5)',
+        [
+          '00000000-0000-0000-0000-000000000003',
+          'tournament_decks',
+          'tournament_decks@example.com',
+          tournamentHashedPassword,
+          'USER',
+        ]
+      );
+      console.log('✅ tournament_decks user created');
+    } else {
+      console.log('✅ tournament_decks user already exists');
+    }
+
     // Create kyle user if it doesn't exist
     const kyleUserResult = await pool.query(
       'SELECT * FROM users WHERE username = $1',

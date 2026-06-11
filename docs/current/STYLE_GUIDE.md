@@ -36,6 +36,7 @@
 33. [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa)
 34. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
 35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
+36. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
 
 ## Overview
 
@@ -2897,3 +2898,21 @@ Every card is a `<button class="home__news-item">` (`aria-expanded`). Clicking a
 - To tune how wide an open card grows, change `flex-grow` on `.home__news-item--open`.
 - To change how much text shows, adjust `-webkit-line-clamp` on `.home__news-summary--clamped` / `--expanded` (and the card `height` to match).
 - News content (`type`, `title`, `description`, `createdAt`, `cardImageUrl`) is hand-maintained in the `recent_updates` table; `cardImageUrl` must reference real card art (slug-style, e.g. `characters/anubis.webp`). `description` is capped at 400 characters in the database to match the expanded card's `-webkit-line-clamp: 6` layout bound.
+
+## Home Deck Rails (v2 SPA)
+
+Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail` markup (`HomePage.tsx`) and rail CSS (`HomePage.css`). Each tile is a `DeckTile` with `variant="compact"`.
+
+### Rail grid — `.home__rail`
+
+- `display: grid; grid-auto-flow: column; justify-content: start`
+- **Capped column width** (does not grow to fill when fewer decks): `grid-auto-columns: clamp(230px, 25%, 280px)` — each tile targets ~25% of the row (up to 280px) so four community decks span desktop; two tournament decks stay the same size with empty space on the right.
+- `gap: var(--space-4)`; `overflow-x: auto` for horizontal scroll when tiles exceed the viewport; `scroll-snap-type: x proximity` with `.home__rail-item { scroll-snap-align: start; min-width: 0 }`.
+
+### Mobile — `.layout-mobile .home__rail`
+
+- `grid-auto-columns: clamp(210px, 78vw, 280px)` — one tile mostly visible per swipe; still capped, no stretch.
+
+### Rationale
+
+Previously `grid-auto-columns: minmax(230px, 1fr)` let columns expand to fill the row, so rails with only two tournament decks rendered oversized tiles. Capped columns match community tile size and leave trailing space until more decks are added.

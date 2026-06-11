@@ -72,7 +72,8 @@ Data endpoints used:
 - Catalog: `GET /api/v1/catalog/:slug` (full arrays; pagination/sort/filter is **client
   side** — the catalog endpoints do not paginate).
 - Decks: `GET/POST/PUT/DELETE /api/v1/decks*`, guest equivalents under
-  `/api/v1/guest/decks*` (guest deck ids are prefixed `guest_`), `GET /api/v1/decks/community`.
+  `/api/v1/guest/decks*` (guest deck ids are prefixed `guest_`), `GET /api/v1/decks/community`,
+  `GET /api/v1/decks/tournament`.
 - Collection: `GET /api/v1/collections/me/cards`, `POST` to add, `PUT /…/:cardId` to update.
 
 ### Endpoint quirks captured in the client
@@ -114,13 +115,24 @@ and toggles `.layout-mobile` / `.layout-desktop` on `<html>`. `index.html` runs 
 logic inline pre-paint to avoid FOUC. Components read `useLayoutMode()` rather than
 sniffing the user agent.
 
-## Community decks (placeholder)
+## Community decks
 The Home "Community Decks" rail is backed by `GET /api/v1/decks/community`, which returns
-the shared **GUEST account's** saved decks (`GUEST_USER_ID`, exposed as
-`communityGuestUserId` in `/api/v1/config/app`). This is a temporary stand-in until real
-community decks exist; see
+the internal **`community_decks`** user's saved decks (`COMMUNITY_DECKS_USER_ID`, exposed as
+`communityDecksUserId` in `/api/v1/config/app`), sorted by `updated_at` descending. Import
+new community decks via `npm run import:community-deck` or the
+`.cursor/skills/add-community-deck` skill. See
 [`frontend/src/features/home/COMMUNITY_DECKS.md`](../../frontend/src/features/home/COMMUNITY_DECKS.md)
-and `src/constants/guestUser.ts`.
+and `src/constants/communityDecksUser.ts`.
+
+## Tournament decks
+The Home "Tournament Winning Decks" rail is backed by `GET /api/v1/decks/tournament`, which
+returns the internal **`tournament_decks`** user's saved decks (`TOURNAMENT_DECKS_USER_ID`,
+exposed as `tournamentDecksUserId` in `/api/v1/config/app`), sorted by `updated_at`
+descending. Initial seed: `npm run seed:tournament-decks` after migration V280. Import
+additional decks via `npm run import:tournament-deck` or the
+`.cursor/skills/add-tournament-deck` skill. See
+[`frontend/src/features/home/TOURNAMENT_DECKS.md`](../../frontend/src/features/home/TOURNAMENT_DECKS.md)
+and `src/constants/tournamentDecksUser.ts`.
 
 ## Build & serving
 - **Dev:** `npm run dev` in `frontend/` runs Vite on **:5173** and proxies `/api`,

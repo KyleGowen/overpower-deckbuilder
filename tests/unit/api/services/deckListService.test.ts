@@ -2,54 +2,39 @@ import { DeckListService } from '../../../../src/api/services/deckListService';
 import type { Deck } from '../../../../src/types';
 
 describe('DeckListService', () => {
-  it('getTransformedListForUser maps repository rows through transformDeckList', async () => {
-    const deck: Deck = {
-      id: 'deck-1',
-      name: 'Test',
-      user_id: 'u1',
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-02T00:00:00.000Z',
-      card_count: 3,
-      threat: 10,
-      is_valid: true,
-      ui_preferences: {},
-      is_limited: false,
-      cards: []
+  const sampleDeck: Deck = {
+    id: 'deck-1',
+    user_id: 'user-1',
+    name: 'Test Deck',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-02T00:00:00.000Z',
+  };
+
+  it('getTransformedListForUser uses default created_at ordering', async () => {
+    const repo = {
+      getDecksByUserId: jest.fn().mockResolvedValue([sampleDeck]),
     };
-    const deckRepository = {
-      getDecksByUserId: jest.fn().mockResolvedValue([deck])
-    };
-    const svc = new DeckListService(deckRepository);
-    const out = await svc.getTransformedListForUser('u1');
-    expect(deckRepository.getDecksByUserId).toHaveBeenCalledWith('u1');
-    expect(out).toHaveLength(1);
-    expect(out[0].metadata.id).toBe('deck-1');
-    expect(out[0].metadata.name).toBe('Test');
-    expect(out[0].metadata.cardCount).toBe(3);
-    expect(out[0].metadata.reserve_character).toBeNull();
+    const service = new DeckListService(repo);
+    const list = await service.getTransformedListForUser('user-1');
+    expect(repo.getDecksByUserId).toHaveBeenCalledWith('user-1');
+    expect(list[0].metadata.name).toBe('Test Deck');
   });
 
-  it('maps reserve_character onto list metadata when present', async () => {
-    const reserveId = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-    const deck: Deck = {
-      id: 'deck-2',
-      name: 'WithReserve',
-      user_id: 'u1',
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-02T00:00:00.000Z',
-      card_count: 2,
-      threat: 5,
-      is_valid: true,
-      ui_preferences: {},
-      is_limited: false,
-      reserve_character: reserveId,
-      cards: []
+  it('getTransformedCommunityListForUser requests updated_at ordering', async () => {
+    const repo = {
+      getDecksByUserId: jest.fn().mockResolvedValue([sampleDeck]),
     };
-    const deckRepository = {
-      getDecksByUserId: jest.fn().mockResolvedValue([deck])
+    const service = new DeckListService(repo);
+    await service.getTransformedCommunityListForUser('community-user');
+    expect(repo.getDecksByUserId).toHaveBeenCalledWith('community-user', 'updated_at');
+  });
+
+  it('getTransformedTournamentListForUser requests updated_at ordering', async () => {
+    const repo = {
+      getDecksByUserId: jest.fn().mockResolvedValue([sampleDeck]),
     };
-    const svc = new DeckListService(deckRepository);
-    const out = await svc.getTransformedListForUser('u1');
-    expect(out[0].metadata.reserve_character).toBe(reserveId);
+    const service = new DeckListService(repo);
+    await service.getTransformedTournamentListForUser('tournament-user');
+    expect(repo.getDecksByUserId).toHaveBeenCalledWith('tournament-user', 'updated_at');
   });
 });

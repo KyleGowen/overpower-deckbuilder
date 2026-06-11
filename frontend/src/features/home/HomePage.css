@@ -101,11 +101,13 @@
 .home__rail {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(230px, 1fr);
+  /* Cap column growth so 2-deck rails don't stretch; ~4 tiles still fit across desktop. */
+  grid-auto-columns: clamp(230px, 25%, 280px);
   gap: var(--space-4);
   overflow-x: auto;
   padding-bottom: var(--space-2);
   scroll-snap-type: x proximity;
+  justify-content: start;
 }
 .home__rail-item {
   scroll-snap-align: start;
@@ -243,7 +245,7 @@
     radial-gradient(135% 150% at 76% 45%, transparent 46%, rgba(8, 14, 24, 0.55) 100%);
 }
 .layout-mobile .home__rail {
-  grid-auto-columns: minmax(210px, 78%);
+  grid-auto-columns: clamp(210px, 78vw, 280px);
 }
 .layout-mobile .home__news {
   flex-direction: column;

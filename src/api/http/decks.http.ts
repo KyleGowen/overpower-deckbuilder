@@ -20,7 +20,8 @@ import { DeckCardsPutBody } from './models/decks/DeckCardsPutBody';
 import type { DeckBackgroundListReader } from './dbv-support.http';
 import type { DeckStatsV1DataDto } from '../dto/v1/DeckStatsV1DataDto';
 import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
-import { GUEST_USER_ID } from '../../constants/guestUser';
+import { COMMUNITY_DECKS_USER_ID } from '../../constants/communityDecksUser';
+import { TOURNAMENT_DECKS_USER_ID } from '../../constants/tournamentDecksUser';
 
 /**
  * Maps validated JSON fields to repository `Partial<Deck>`.
@@ -57,9 +58,14 @@ export interface DecksV1HttpDeps {
   deckUIPreferencesService: DeckUIPreferencesService;
   /**
    * User id whose decks back the public "Community Decks" pool. Defaults to the
-   * GUEST account when omitted (e.g. in unit fixtures).
+   * community_decks account when omitted (e.g. in unit fixtures).
    */
-  communityGuestUserId?: string;
+  communityDecksUserId?: string;
+  /**
+   * User id whose decks back the public "Tournament Winning Decks" pool. Defaults to the
+   * tournament_decks account when omitted (e.g. in unit fixtures).
+   */
+  tournamentDecksUserId?: string;
 }
 
 function stableV1DeckListBody<T>(data: T): string {
@@ -110,22 +116,38 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
   });
 
   /**
-   * Community deck pool. Returns the GUEST account's saved decks (the temporary
-   * "Community Decks" source surfaced on the new Home screen). Registered before
-   * `/decks/:id` so the literal `community` segment is not captured as an id.
-   * To migrate to real community decks later, change the source user id /
-   * selection here (see docs/current/FRONTEND_V2.md). Requires an authenticated
+   * Community deck pool. Returns the community_decks account's saved decks,
+   * sorted by updated_at descending. Registered before `/decks/:id` so the
+   * literal `community` segment is not captured as an id. Requires an authenticated
    * session (the Home screen is behind auth).
    */
   router.get('/decks/community', deps.authenticateUser, async (_req, res) => {
     try {
-      const communityUserId = deps.communityGuestUserId ?? GUEST_USER_ID;
-      const list = await deps.deckListService.getTransformedListForUser(communityUserId);
+      const communityUserId = deps.communityDecksUserId ?? COMMUNITY_DECKS_USER_ID;
+      const list = await deps.deckListService.getTransformedCommunityListForUser(communityUserId);
       sendV1Success(res, list);
     } catch (error) {
       console.error('v1 GET /decks/community error:', error);
       sendV1Json(res, 500, null, [
         { code: 'COMMUNITY_DECKS_ERROR', message: 'Failed to fetch community decks' }
+      ]);
+    }
+  });
+
+  /**
+   * Tournament deck pool. Returns the tournament_decks account's saved decks,
+   * sorted by updated_at descending. Registered before `/decks/:id` so the
+   * literal `tournament` segment is not captured as an id.
+   */
+  router.get('/decks/tournament', deps.authenticateUser, async (_req, res) => {
+    try {
+      const tournamentUserId = deps.tournamentDecksUserId ?? TOURNAMENT_DECKS_USER_ID;
+      const list = await deps.deckListService.getTransformedTournamentListForUser(tournamentUserId);
+      sendV1Success(res, list);
+    } catch (error) {
+      console.error('v1 GET /decks/tournament error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'TOURNAMENT_DECKS_ERROR', message: 'Failed to fetch tournament decks' }
       ]);
     }
   });

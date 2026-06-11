@@ -27,9 +27,14 @@ export function fetchDecksForUser(isGuest: boolean): Promise<DeckListItem[]> {
   return isGuest ? fetchGuestDecks() : fetchUserDecks();
 }
 
-/** Community deck pool (backed by the guest account's saved decks). */
+/** Community deck pool (backed by the community_decks account's saved decks). */
 export function fetchCommunityDecks(): Promise<DeckListItem[]> {
   return api.get<DeckListItem[]>('/api/v1/decks/community');
+}
+
+/** Tournament deck pool (backed by the tournament_decks account's saved decks). */
+export function fetchTournamentDecks(): Promise<DeckListItem[]> {
+  return api.get<DeckListItem[]>('/api/v1/decks/tournament');
 }
 
 export function fetchDeckFull(deckId: string, isGuest: boolean): Promise<DeckDetail> {

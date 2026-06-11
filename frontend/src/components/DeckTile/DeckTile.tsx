@@ -1,7 +1,8 @@
-import { CharacterRibbon, type RibbonCharacter } from '../CharacterRibbon';
+import type { RibbonCharacter } from '../CharacterRibbon';
+import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
 import { IconCards, IconDots, IconStar } from '../icons';
-import type { DeckListItem } from '../../lib/api/types';
+import type { DeckCardEntry, DeckListItem } from '../../lib/api/types';
 import './DeckTile.css';
 
 export interface DeckStatLine {
@@ -29,6 +30,10 @@ function deckCharacters(deck: DeckListItem): RibbonCharacter[] {
     .map((c) => ({ cardId: c.cardId, name: c.name, imagePath: c.defaultImage }));
 }
 
+function firstCardOfType(deck: DeckListItem, type: DeckCardEntry['type']): DeckCardEntry | undefined {
+  return (deck.cards ?? []).find((c) => c.type === type);
+}
+
 const STAT_DEFS: Array<{ key: keyof DeckStatLine; label: string; cls: string }> = [
   { key: 'energy', label: 'Energy', cls: 'stat-energy' },
   { key: 'combat', label: 'Combat', cls: 'stat-combat' },
@@ -47,7 +52,17 @@ export function DeckTile({
 }: DeckTileProps) {
   const meta = deck.metadata;
   const characters = deckCharacters(deck);
+  const hero = characters[0];
   const isLegal = meta.is_valid;
+  const location = firstCardOfType(deck, 'location');
+  const mission = firstCardOfType(deck, 'mission');
+  const updatedLabel = meta.lastModified
+    ? new Date(meta.lastModified).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : null;
 
   return (
     <article
@@ -63,14 +78,17 @@ export function DeckTile({
       }}
     >
       <div className="deck-tile__art">
-        {characters.length > 0 ? (
-          <CharacterRibbon characters={characters} hasReserve={Boolean(meta.reserve_character)} />
+        {hero ? (
+          <div className="deck-tile__hero" aria-hidden="true">
+            <CardImage imagePath={hero.imagePath} alt={hero.name || 'Character'} useThumbnail />
+          </div>
         ) : (
           <div className="deck-tile__art-empty">
             <IconCards />
           </div>
         )}
         <div className="deck-tile__art-veil" />
+
         {rankLabel ? <span className="deck-tile__rank">{rankLabel}</span> : null}
         {favorite ? (
           <span className="deck-tile__fav" aria-label="Favorite"><IconStar /></span>
@@ -88,20 +106,21 @@ export function DeckTile({
             <IconDots />
           </button>
         ) : null}
+
+        <div className="deck-tile__overlay">
+          <h3 className="deck-tile__name" title={meta.name}>{meta.name}</h3>
+        </div>
       </div>
 
       <div className="deck-tile__body">
-        <div className="deck-tile__heading">
-          <h3 className="deck-tile__name" title={meta.name}>{meta.name}</h3>
-          <div className="deck-tile__numbers">
-            <span className="deck-tile__count">
-              <IconCards /> {meta.cardCount}
-            </span>
-            <span className="deck-tile__threat" title="Threat">
-              {meta.threat ?? 0}
-              <small>THREAT</small>
-            </span>
-          </div>
+        <div className="deck-tile__numbers">
+          <span className="deck-tile__count">
+            <IconCards /> {meta.cardCount}
+          </span>
+          <span className="deck-tile__threat" title="Threat">
+            {meta.threat ?? 0}
+            <small>THREAT</small>
+          </span>
         </div>
 
         <div className="deck-tile__badges">
@@ -110,6 +129,24 @@ export function DeckTile({
           </span>
           {meta.is_limited ? <span className="badge">Limited</span> : null}
         </div>
+
+        {variant === 'full' && (location || mission) ? (
+          <div className="deck-tile__chips">
+            {location ? (
+              <span className="deck-tile__chip" title={`Location: ${location.name ?? ''}`}>
+                <span className="deck-tile__chip-thumb">
+                  <CardImage imagePath={location.defaultImage} alt={location.name || 'Location'} useThumbnail />
+                </span>
+                <span className="deck-tile__chip-text">{location.name ?? 'Location'}</span>
+              </span>
+            ) : null}
+            {mission ? (
+              <span className="deck-tile__chip" title={`Mission: ${mission.name ?? ''}`}>
+                <span className="deck-tile__chip-text">{mission.name ?? 'Mission'}</span>
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         {variant === 'full' && maxStats ? (
           <div className="deck-tile__stats">
@@ -122,10 +159,8 @@ export function DeckTile({
           </div>
         ) : null}
 
-        {variant === 'full' && meta.lastModified ? (
-          <div className="deck-tile__updated">
-            Updated {new Date(meta.lastModified).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-          </div>
+        {updatedLabel ? (
+          <div className="deck-tile__updated">Updated {updatedLabel}</div>
         ) : null}
       </div>
     </article>

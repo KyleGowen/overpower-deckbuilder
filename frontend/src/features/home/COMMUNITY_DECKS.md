@@ -1,21 +1,19 @@
-# Community Decks (placeholder)
+# Community Decks
 
-The Home "Community Decks" rail is a **temporary** stand-in until real community decks
-exist.
+The Home "Community Decks" rail shows decks owned by the internal **`community_decks`** user account.
 
-## How it works today
-- Source: the shared **GUEST account's** saved decks.
-- The guest user id is `GUEST_USER_ID` in
-  [`src/constants/guestUser.ts`](../../../../src/constants/guestUser.ts) and is exposed to
-  the client as `communityGuestUserId` via `GET /api/v1/config/app`.
+## How it works
+- Source user: `community_decks` (`COMMUNITY_DECKS_USER_ID` in
+  [`src/constants/communityDecksUser.ts`](../../../../src/constants/communityDecksUser.ts)), exposed to the client as
+  `communityDecksUserId` via `GET /api/v1/config/app`.
 - Backend endpoint: `GET /api/v1/decks/community` (in
-  [`src/api/http/decks.http.ts`](../../../../src/api/http/decks.http.ts)) returns that
-  account's transformed deck list. It is registered **before** `/decks/:id` so the literal
-  `community` segment isn't captured as an id, and it requires an authenticated session.
-- Frontend: `fetchCommunityDecks()` in
-  [`src/lib/api/decks.ts`](../../lib/api/decks.ts), rendered as `DeckTile`s on Home.
+  [`src/api/http/decks.http.ts`](../../../../src/api/http/decks.http.ts)) returns that account's deck list sorted by
+  `updated_at` descending. Registered **before** `/decks/:id` so the literal `community` segment isn't captured as an id.
+  Requires an authenticated session.
+- Frontend: `fetchCommunityDecks()` in [`src/lib/api/decks.ts`](../../lib/api/decks.ts), filtered to
+  `communityDecksUserId` on Home, rendered as `DeckTile`s.
 
-## Migrating to real community decks
-Replace the source selection in the `/decks/community` handler (e.g. a "published/community"
-flag or a dedicated table/owner) and update this doc + `API_V1.md`. The frontend contract
-(list of `DeckListItem`) can stay the same.
+## Managing community decks
+- **Import via Cursor skill:** `.cursor/skills/add-community-deck/SKILL.md` — paste exported deck JSON v2.0.
+- **CLI:** `npm run import:community-deck -- path/to/export.json`
+- **Manual edit:** log in as `community_decks` (password in migration `V278`) and use the normal deck editor.

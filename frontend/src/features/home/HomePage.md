@@ -12,15 +12,16 @@ Landing page after login. Sections, top to bottom:
    card collapses any previously open one. On mobile the row stacks into a column
    and expansion is vertical instead. No modal or navigation.
 3. **Community Decks** rail — horizontally scrolling `DeckTile`s backed by
-   `GET /api/v1/decks/community` (the shared GUEST account's decks; see
+   `GET /api/v1/decks/community` (the `community_decks` account's decks only; see
    [`COMMUNITY_DECKS.md`](./COMMUNITY_DECKS.md)).
-4. **Tournament Winning Decks** — placeholder section for a future feature.
+4. **Tournament Winning Decks** rail — horizontally scrolling `DeckTile`s backed by
+   `GET /api/v1/decks/tournament` (the `tournament_decks` account's decks only; see
+   [`TOURNAMENT_DECKS.md`](./TOURNAMENT_DECKS.md)).
 
 ## Data
-- TanStack Query for recent updates (`fetchRecentUpdates`) and community decks (`fetchCommunityDecks`).
+- TanStack Query for recent updates (`fetchRecentUpdates`), community decks (`fetchCommunityDecks`),
+  and tournament decks (`fetchTournamentDecks`).
 - Deck tiles use `compact` variant in the rail.
 
 ## Notes
-- Mock-only/placeholder areas (Tournament rail) are clearly stubbed and must not imply live
-  data.
 - Responsive: hero and rails stack into a single column under `.layout-mobile`.

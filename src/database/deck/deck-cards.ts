@@ -3,6 +3,10 @@ import { catalogCardExistsInTable } from '../collection/card-lookup';
 import { DeckCard } from '../../types';
 import type { DeckRepositoryContext } from './context';
 
+async function touchDeckUpdatedAt(client: PoolClient, deckId: string): Promise<void> {
+  await client.query('UPDATE decks SET updated_at = NOW() WHERE id = $1', [deckId]);
+}
+
 /**
  * Check if a card exists in the appropriate card table for the given type.
  * @param allowUnknown - If true, unknown card types are treated as valid (for bulk replace). If false, returns false and logs error.
@@ -68,6 +72,7 @@ export async function addCardToDeck(
       );
     }
 
+    await touchDeckUpdatedAt(client, deckId);
     await ctx.invalidateDeck(deckId);
     return true;
   } catch (error) {
@@ -132,6 +137,7 @@ export async function removeCardFromDeck(
       );
     }
 
+    await touchDeckUpdatedAt(client, deckId);
     await ctx.invalidateDeck(deckId);
     return true;
   } catch (error) {
@@ -175,6 +181,7 @@ export async function updateCardInDeck(
 
     const success = (result.rowCount || 0) > 0;
     if (success) {
+      await touchDeckUpdatedAt(client, deckId);
       await ctx.invalidateDeck(deckId);
     }
     return success;
@@ -193,6 +200,7 @@ export async function removeAllCardsFromDeck(
   const client = await ctx.pool.connect();
   try {
     await client.query('DELETE FROM deck_cards WHERE deck_id = $1', [deckId]);
+    await touchDeckUpdatedAt(client, deckId);
     await ctx.invalidateDeck(deckId);
     return true;
   } catch (error) {
@@ -274,6 +282,7 @@ export async function replaceAllCardsInDeck(
       }
     }
 
+    await touchDeckUpdatedAt(client, deckId);
     await client.query('COMMIT');
     await ctx.invalidateDeck(deckId);
   } catch (error: unknown) {

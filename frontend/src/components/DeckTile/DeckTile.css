@@ -22,6 +22,7 @@
   box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
+/* ---- Art zone (single feature character) ---- */
 .deck-tile__art {
   position: relative;
   width: 100%;
@@ -32,6 +33,19 @@
 }
 .deck-tile--compact .deck-tile__art {
   aspect-ratio: 16 / 10;
+}
+
+.deck-tile__hero {
+  position: absolute;
+  inset: 0;
+}
+/* Zoom into the character art and anchor below the title banner so the card's
+ * baked-in name crops out of frame and the deck name stays the dominant text.
+ * (Plain CSS file: do not use the :global() pseudo here - it is invalid and
+ * would invalidate the whole rule.) */
+.deck-tile__hero .card-image__img {
+  transform: scale(1.4);
+  object-position: center 46%;
 }
 
 .deck-tile__art-empty {
@@ -45,10 +59,16 @@
   font-size: 2.5rem;
 }
 
+/* Tall scrim so the name + roster stay readable over busy card art. */
 .deck-tile__art-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(7, 11, 22, 0.05) 30%, rgba(7, 11, 22, 0.85) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(7, 11, 22, 0) 30%,
+    rgba(7, 11, 22, 0.55) 62%,
+    rgba(7, 11, 22, 0.94) 100%
+  );
   pointer-events: none;
 }
 
@@ -95,29 +115,25 @@
   background: var(--color-bg-hover);
 }
 
-.deck-tile__body {
-  position: relative;
-  padding: var(--space-4);
+/* ---- Name + roster overlaid on the scrim ---- */
+.deck-tile__overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-top: -32px;
-  z-index: 2;
-}
-.deck-tile--compact .deck-tile__body {
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-}
-
-.deck-tile__heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
 }
 .deck-tile__name {
+  margin: 0;
   font-size: var(--font-size-lg);
-  line-height: 1.2;
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-tight);
+  color: var(--color-text);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -128,11 +144,25 @@
   font-size: var(--font-size-base);
 }
 
+/* ---- Info panel (solid, never overlaps art) ---- */
+.deck-tile__body {
+  position: relative;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  z-index: 2;
+}
+.deck-tile--compact .deck-tile__body {
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
 .deck-tile__numbers {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  flex-shrink: 0;
 }
 .deck-tile__count {
   display: inline-flex;
@@ -167,6 +197,45 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+/* ---- Optional location / mission chips (full variant) ---- */
+.deck-tile__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.deck-tile__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+/* When a chip leads with a round thumb, hug it to the pill edge. */
+.deck-tile__chip:has(.deck-tile__chip-thumb) {
+  padding-left: 2px;
+}
+.deck-tile__chip-thumb {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.deck-tile__chip-thumb .card-image__img {
+  object-position: center 30%;
+}
+.deck-tile__chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deck-tile__stats {

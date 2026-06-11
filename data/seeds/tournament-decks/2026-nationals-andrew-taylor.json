@@ -1,0 +1,124 @@
+{
+  "name": "2026 Nationals (Andrew Taylor)",
+  "description": "",
+  "total_cards": 55,
+  "max_energy": 8,
+  "max_combat": 5,
+  "max_brute_force": 7,
+  "max_intelligence": 7,
+  "total_energy_icons": 14,
+  "total_combat_icons": 13,
+  "total_brute_force_icons": 8,
+  "total_intelligence_icons": 12,
+  "total_threat": 76,
+  "legal": true,
+  "limited": false,
+  "export_timestamp": "2026-06-10T21:18:30.648Z",
+  "exported_by": "guest",
+  "reserve_character": null,
+  "cataclysm_special": "Fairy Protection",
+  "assist_special": "Subjugate the Meek",
+  "ambush_special": "Bodhisattva: Enlightened One",
+  "cards": {
+    "characters": [
+      "Joan of Arc",
+      "Morgan le Fay",
+      "Wicked Witch",
+      "Sheriff of Nottingham"
+    ],
+    "special_cards": {
+      "Joan of Arc": [
+        "Early Feminist Leader",
+        "Inspirational Leadership",
+        "Inspirational Leadership",
+        "Patron Saint of France",
+        "Protection of Saint Michael"
+      ],
+      "Morgan le Fay": [
+        "Apprentice of Merlin",
+        "Duality",
+        "Shapeshifter's Guise",
+        "Shapeshifter's Guise",
+        "Shapeshifter's Guise"
+      ],
+      "Wicked Witch": [
+        "Harness the Wind",
+        "I Will Have Those Silver Shoes!",
+        "I Will Have Those Silver Shoes!",
+        "One Eye",
+        "Wolves, Crows, & Black Bees"
+      ],
+      "Sheriff of Nottingham": [
+        "I Command an Army",
+        "Taxes"
+      ],
+      "Any Character": [
+        "Bodhisattva: Enlightened One",
+        "Disorient Opponent",
+        "Fairy Protection",
+        "Freya: Goddess of Protection",
+        "Grim Reaper",
+        "Hades: Lord of the Underworld",
+        "Legendary Escape",
+        "Merlin's Magic",
+        "Subjugate the Meek",
+        "The Gemini"
+      ]
+    },
+    "locations": [
+      "Spartan Training Ground"
+    ],
+    "missions": {
+      "The Warlord of Mars": [
+        "A Fighting Man of Mars",
+        "Swords of Mars",
+        "The Battle of Kings",
+        "The Face of Death",
+        "The Invisible Men",
+        "The Loyalty of Woola",
+        "Under the Moons of Mars"
+      ]
+    },
+    "events": {},
+    "aspects": [
+      "Isis"
+    ],
+    "advanced_universe": {},
+    "teamwork": [
+      "7 Energy - Combat + Intelligence",
+      "6 Any-Power - Any-Power / Any-Power",
+      "7 Any-Power - Any-Power"
+    ],
+    "allies": [
+      "Hera - 7 or higher Energy",
+      "Allan Quatermain - 5 or less Energy",
+      "Hucklebuck - 5 or less Combat",
+      "Little John - 5 or less Brute Force",
+      "Professor Porter - 5 or less Intelligence"
+    ],
+    "training": [
+      "Training (Leonidas) - Combat Intelligence +4",
+      "Training (Merlin) - Energy Combat +4",
+      "Training (Cultists) - Energy Intelligence +4"
+    ],
+    "basic_universe": [],
+    "power_cards": [
+      "1 - Intelligence",
+      "2 - Combat",
+      "3 - Intelligence",
+      "3 - Multi Power",
+      "4 - Intelligence",
+      "4 - Multi Power",
+      "5 - Multi Power",
+      "5 - Any-Power",
+      "6 - Energy",
+      "6 - Energy",
+      "6 - Any-Power",
+      "7 - Energy",
+      "7 - Energy",
+      "7 - Any-Power",
+      "8 - Energy",
+      "8 - Energy"
+    ]
+  }
+}

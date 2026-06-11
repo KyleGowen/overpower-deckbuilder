@@ -115,9 +115,10 @@ describe('decks.http', () => {
     expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith('user-1');
   });
 
-  it('GET /decks/community returns the community guest account decks', async () => {
+  it('GET /decks/community returns the community decks account decks', async () => {
     const deckListService = {
-      getTransformedListForUser: jest.fn().mockResolvedValue(sampleList)
+      getTransformedListForUser: jest.fn(),
+      getTransformedCommunityListForUser: jest.fn().mockResolvedValue(sampleList)
     } as unknown as DeckListService;
     const deckWriteService = {
       createDeck: jest.fn(),
@@ -132,17 +133,20 @@ describe('decks.http', () => {
       deckCardsService: stubDeckCards(),
       deckUIPreferencesService: stubDeckUIPreferences(),
       authenticateUser: passAuth,
-      communityGuestUserId: 'community-guest-id'
+      communityDecksUserId: 'community-decks-id'
     };
     const res = await request(buildApp(deps)).get('/decks/community').expect(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toEqual(sampleList);
-    expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith('community-guest-id');
+    expect(deckListService.getTransformedCommunityListForUser).toHaveBeenCalledWith(
+      'community-decks-id'
+    );
   });
 
-  it('GET /decks/community defaults to the GUEST account when no id provided', async () => {
+  it('GET /decks/community defaults to the community_decks account when no id provided', async () => {
     const deckListService = {
-      getTransformedListForUser: jest.fn().mockResolvedValue(sampleList)
+      getTransformedListForUser: jest.fn(),
+      getTransformedCommunityListForUser: jest.fn().mockResolvedValue(sampleList)
     } as unknown as DeckListService;
     const deckWriteService = {
       createDeck: jest.fn(),
@@ -159,8 +163,63 @@ describe('decks.http', () => {
       authenticateUser: passAuth
     };
     await request(buildApp(deps)).get('/decks/community').expect(200);
-    expect(deckListService.getTransformedListForUser).toHaveBeenCalledWith(
-      '00000000-0000-0000-0000-000000000001'
+    expect(deckListService.getTransformedCommunityListForUser).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000002'
+    );
+  });
+
+  it('GET /decks/tournament returns the tournament decks account decks', async () => {
+    const deckListService = {
+      getTransformedListForUser: jest.fn(),
+      getTransformedCommunityListForUser: jest.fn(),
+      getTransformedTournamentListForUser: jest.fn().mockResolvedValue(sampleList)
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth,
+      tournamentDecksUserId: 'tournament-decks-id'
+    };
+    const res = await request(buildApp(deps)).get('/decks/tournament').expect(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toEqual(sampleList);
+    expect(deckListService.getTransformedTournamentListForUser).toHaveBeenCalledWith(
+      'tournament-decks-id'
+    );
+  });
+
+  it('GET /decks/tournament defaults to the tournament_decks account when no id provided', async () => {
+    const deckListService = {
+      getTransformedListForUser: jest.fn(),
+      getTransformedCommunityListForUser: jest.fn(),
+      getTransformedTournamentListForUser: jest.fn().mockResolvedValue(sampleList)
+    } as unknown as DeckListService;
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn()
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth
+    };
+    await request(buildApp(deps)).get('/decks/tournament').expect(200);
+    expect(deckListService.getTransformedTournamentListForUser).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000003'
     );
   });
 

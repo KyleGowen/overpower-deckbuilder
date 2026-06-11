@@ -337,6 +337,41 @@ export const integrationTestUtils = {
     } finally {
       await pool.end();
     }
+  },
+
+  // Internal pool user for tournament deck integration tests (V280)
+  ensureTournamentDecksUser: async () => {
+    const { Pool } = require('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower'
+    });
+    const TOURNAMENT_DECKS_USER_ID = '00000000-0000-0000-0000-000000000003';
+    const POOL_PASSWORD_HASH = '$2b$10$4y9lsEvvADN1Q2LuP4Pd2.VMFT4Qdt5HPpA6mmnq.LS3nBdXa15dW';
+
+    try {
+      const result = await pool.query('SELECT id FROM users WHERE username = $1', ['tournament_decks']);
+      if (result.rows.length === 0) {
+        await pool.query(
+          `INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
+          [
+            TOURNAMENT_DECKS_USER_ID,
+            'tournament_decks',
+            'tournament_decks@example.com',
+            POOL_PASSWORD_HASH,
+            'USER'
+          ]
+        );
+        console.log('✅ tournament_decks user created for integration tests');
+      }
+    } catch (err: any) {
+      console.warn(
+        '⚠️ Skipping ensureTournamentDecksUser: database not reachable or query failed.',
+        err?.message || err
+      );
+    } finally {
+      await pool.end();
+    }
   }
 };
 
@@ -345,6 +380,7 @@ beforeAll(async () => {
   try {
     await integrationTestUtils.ensureGuestUser();
     await integrationTestUtils.ensureAdminUser();
+    await integrationTestUtils.ensureTournamentDecksUser();
     // Initialize test server
     await initializeTestServer();
   } catch (err: any) {
