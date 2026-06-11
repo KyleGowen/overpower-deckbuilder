@@ -25,6 +25,51 @@ Do **not** duplicate IAM policy JSON here; use the runbook and [docs/examples/ss
 
 Per DEPLOYMENT: AWS CLI v2, **Session Manager plugin**, credentials (`aws sts get-caller-identity`), and IAM allowing `ssm:StartSession` for the target instance and port-forward document. Use `--profile NAME` on every `aws` command when the user relies on a non-default profile.
 
+## Windows (PowerShell) specifics
+
+Kyle's primary machine is **Windows + PowerShell**. The bash helper script needs Git Bash; in plain PowerShell, drive `aws` directly. All of the following were hit in practice (2026-06-10):
+
+1. **Agent CANNOT run `aws.exe` itself.** In the Cursor agent shell, every `aws.exe` invocation — even `aws --version` — hangs with no output and wedges follow-up `aws` / `Get-Process aws` / `Stop-Process aws` calls. **Do not attempt to start the tunnel (or any `aws` command) from the agent shell.** Instead, hand the user copy-paste PowerShell commands to run in their own terminal, then continue from their pasted output.
+
+2. **`aws` not on PATH / pager hangs.** Binary lives at `C:\Program Files\Amazon\AWSCLIV2\aws.exe`. If `aws` isn't found, prepend it and silence the pager for the session:
+   ```powershell
+   $env:Path = "C:\Program Files\Amazon\AWSCLIV2;" + $env:Path
+   $env:AWS_PAGER = ""
+   ```
+
+3. **Session Manager plugin is separate from the CLI.** If `start-session` errors `SessionManagerPlugin is not found`, install it, then **open a new terminal**:
+   ```powershell
+   Invoke-WebRequest -Uri "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe" -OutFile "$env:TEMP\SessionManagerPluginSetup.exe"
+   Start-Process "$env:TEMP\SessionManagerPluginSetup.exe" -ArgumentList "/quiet" -Wait
+   ```
+   It installs to `C:\Program Files\Amazon\SessionManagerPlugin\bin\`; reopen the terminal (or prepend that bin to PATH) so `aws` can find it.
+
+4. **PowerShell mangles inline `--parameters` JSON** (strips the double quotes → `Invalid JSON: Expecting property name enclosed in double quotes`). Use a params **file** instead:
+   ```powershell
+   @'
+   {"host":["op-deckbuilder-postgres.cdaeyc0ik7bu.us-west-2.rds.amazonaws.com"],"portNumber":["5432"],"localPortNumber":["15432"]}
+   '@ | Set-Content -Encoding ascii "$env:TEMP\ssm-params.json"
+
+   aws ssm start-session --region us-west-2 --target i-INSTANCE_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters file://$env:TEMP/ssm-params.json
+   ```
+   Or escape inline: `--parameters '{\"host\":[\"...\"],\"portNumber\":[\"5432\"],\"localPortNumber\":[\"15432\"]}'`.
+
+5. **Check / stop the local port (PowerShell, replaces `lsof`):**
+   ```powershell
+   Get-NetTCPConnection -LocalPort 15432 -State Listen -ErrorAction SilentlyContinue
+   ```
+   Stop the tunnel with Ctrl+C in its window (or kill the owning PID from the command above).
+
+6. **Known app EC2 instance:** `i-04493611b99785f28` (resolved 2026-06-10). Always verify it's still the running `op-deckbuilder-app` instance before trusting it (see *Resolve EC2 instance ID*).
+
+### TablePlus import URL (Windows)
+
+```
+postgresql://postgres:YOUR_PASSWORD@127.0.0.1:15432/overpower?sslmode=require
+```
+
+`YOUR_PASSWORD` is from SSM `/op-deckbuilder/dev/database/password` (`--with-decryption`). URL-encode special characters (`@`→`%40`, `#`→`%23`, `%`→`%25`, `/`→`%2F`). Works only while the tunnel window is running.
+
 ## Resolve EC2 instance ID
 
 Prefer an `i-...` the user supplies. Otherwise list the running app instance (tag `Name=op-deckbuilder-app`, region `us-west-2`):
@@ -40,7 +85,7 @@ Optionally confirm SSM **Online** (see DEPLOYMENT for `aws ssm describe-instance
 
 ## Avoid duplicate tunnels
 
-Default local port is **15432** (`LOCAL_PORT`). Before starting, check nothing is already listening (macOS):
+Default local port is **15432** (`LOCAL_PORT`). Before starting, check nothing is already listening (macOS; for Windows see the *Windows (PowerShell) specifics* section):
 
 ```bash
 lsof -nP -iTCP:15432 -sTCP:LISTEN
@@ -51,6 +96,8 @@ If the port is in use, either reuse the existing tunnel or pick another port, e.
 ## Start the tunnel in the background
 
 The `start-session` process must **keep running**. Do not block the whole agent turn on a foreground session unless the user explicitly wants that.
+
+> **Windows:** the agent shell cannot run `aws.exe` at all (it hangs). On Windows, do **not** use the patterns below — give the user the PowerShell commands from *Windows (PowerShell) specifics* to run in their own terminal.
 
 **Preferred patterns:**
 
