@@ -1,4 +1,5 @@
 .card-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--color-bg-panel);
@@ -19,6 +20,23 @@
   aspect-ratio: 5 / 7;
   background: var(--color-bg-elevated);
   padding: 0;
+  overflow: hidden;
+}
+.card-tile__art .card-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* Database grid — landscape types (match deck preview / card-view ratios). */
+.card-tile--characters .card-tile__art {
+  aspect-ratio: 380 / 280;
+}
+.card-tile--locations .card-tile__art,
+.card-tile--events .card-tile__art {
+  aspect-ratio: 236 / 151;
+}
+.card-tile--portrait .card-tile__art {
+  aspect-ratio: 5 / 7;
 }
 .card-tile--dimmed .card-tile__art {
   filter: grayscale(0.7) brightness(0.55);
@@ -29,6 +47,48 @@
   top: var(--space-2);
   right: var(--space-2);
   z-index: 2;
+}
+
+.card-tile__foil-badge {
+  position: absolute;
+  bottom: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.card-tile__foil-badge-icon {
+  display: block;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    #8a8a8a 0%,
+    #f0f0f0 35%,
+    #ffffff 50%,
+    #c8c8c8 65%,
+    #9a9a9a 100%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 3px rgba(220, 220, 255, 0.85)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  animation: card-tile-foil-shimmer 2.8s ease-in-out infinite;
+}
+@keyframes card-tile-foil-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .card-tile__meta {

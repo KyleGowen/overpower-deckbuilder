@@ -65,10 +65,66 @@ export function isStatCardType(type: CatalogType): boolean {
   return type === 'characters';
 }
 
+/** Character, location, and event art use landscape tiles in the database grid. */
+export function isLandscapeCatalogType(type: CatalogType): boolean {
+  return type === 'characters' || type === 'locations' || type === 'events';
+}
+
+/**
+ * Portrait catalog types whose thumbnails use the character landscape preset (380×280 cover).
+ * The database grid loads full-res art for these so portrait cards are not cropped.
+ */
+const DB_GRID_FULL_IMAGE_TYPES: ReadonlySet<CatalogType> = new Set([
+  'special-cards',
+  'power-cards',
+  'aspects',
+  'advanced-universe',
+  'teamwork',
+  'ally-universe',
+  'training',
+  'basic-universe',
+]);
+
+export function catalogTypeUsesFullImageInDbGrid(type: CatalogType): boolean {
+  return DB_GRID_FULL_IMAGE_TYPES.has(type);
+}
+
 /** Resolve the display name across the differing name fields. */
 export function cardDisplayName(card: Partial<CatalogCard> | null | undefined): string {
   if (!card) return '';
   return (card.name as string) || (card.card_name as string) || '(Unnamed card)';
+}
+
+/** Linked character on special cards (`character` in the v1 API). */
+export function cardCharacterName(card: Partial<CatalogCard> | null | undefined): string {
+  if (!card) return '';
+  return String((card.character as string) ?? (card.character_name as string) ?? '').trim();
+}
+
+function isAnyCharacterName(value: string): boolean {
+  return value.trim().toLowerCase() === 'any character';
+}
+
+export function compareCharacterNames(a: string, b: string): number {
+  const aIsAny = isAnyCharacterName(a);
+  const bIsAny = isAnyCharacterName(b);
+  if (aIsAny !== bIsAny) return aIsAny ? 1 : -1;
+  return a.localeCompare(b, undefined, { sensitivity: 'base' });
+}
+
+/** Default database grid sort order per catalog tab (no user sort control). */
+export function compareCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
+  if (type === 'special-cards') {
+    const setCmp = String(a.set ?? '').localeCompare(String(b.set ?? ''), undefined, { sensitivity: 'base' });
+    if (setCmp !== 0) return setCmp;
+
+    const charCmp = compareCharacterNames(cardCharacterName(a), cardCharacterName(b));
+    if (charCmp !== 0) return charCmp;
+
+    return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
+  }
+
+  return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
 export interface StatLine {

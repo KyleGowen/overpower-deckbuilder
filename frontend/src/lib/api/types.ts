@@ -74,6 +74,8 @@ export interface CatalogCard {
   id: string;
   /** Characters/specials/power/missions/events use `name`. */
   name?: string;
+  /** Special cards: linked character (`character_name` in DB). */
+  character?: string;
   /** Aspects/ally/training/basic-universe use `card_name`. */
   card_name?: string;
   set?: string;

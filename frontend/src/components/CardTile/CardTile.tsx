@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { CardImage } from '../CardImage';
-import { cardDisplayName } from '../../lib/catalog/catalogTypeMap';
-import type { CatalogCard } from '../../lib/api/types';
+import { cardDisplayName, catalogTypeUsesFullImageInDbGrid } from '../../lib/catalog/catalogTypeMap';
+import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardTile.css';
 
 interface CardTileProps {
@@ -14,28 +14,69 @@ interface CardTileProps {
   /** Dim the art (e.g. unowned cards in the collection view). */
   dimmed?: boolean;
   showMeta?: boolean;
+  /** When set (database grid), picks landscape vs portrait art frame and contain-fit. */
+  catalogType?: CatalogType;
+  /** Silver starburst on tile when a foil variant exists (database grid). */
+  hasFoilVersion?: boolean;
 }
 
-export function CardTile({ card, onClick, overlay, footer, dimmed = false, showMeta = true }: CardTileProps) {
+function tileOrientationClass(catalogType?: CatalogType): string {
+  if (!catalogType) return '';
+  if (catalogType === 'characters') return 'card-tile--characters';
+  if (catalogType === 'locations') return 'card-tile--locations';
+  if (catalogType === 'events') return 'card-tile--events';
+  return 'card-tile--portrait';
+}
+
+function formatSetLabel(card: CatalogCard): string | null {
+  if (!card.set) return null;
+  const setNumber = String(card.set_number ?? '').trim();
+  return setNumber ? `${card.set} ${setNumber}` : card.set;
+}
+
+export function CardTile({
+  card,
+  onClick,
+  overlay,
+  footer,
+  dimmed = false,
+  showMeta = true,
+  catalogType,
+  hasFoilVersion = false,
+}: CardTileProps) {
   const name = cardDisplayName(card);
   const imagePath = (card.image_path as string) || (card.image as string);
+  const setLabel = formatSetLabel(card);
+  const orientationClass = tileOrientationClass(catalogType);
+  const useThumbnail = !(catalogType && catalogTypeUsesFullImageInDbGrid(catalogType));
 
   return (
-    <article className={`card-tile ${dimmed ? 'card-tile--dimmed' : ''}`}>
+    <article className={`card-tile ${dimmed ? 'card-tile--dimmed' : ''} ${orientationClass}`.trim()}>
       <button type="button" className="card-tile__art" onClick={onClick} aria-label={`View ${name}`}>
-        <CardImage imagePath={imagePath} alt={name} useThumbnail />
+        <CardImage
+          imagePath={imagePath}
+          alt={name}
+          useThumbnail={useThumbnail}
+          className={catalogType ? 'card-image--contain' : ''}
+        />
         {overlay ? <span className="card-tile__overlay">{overlay}</span> : null}
       </button>
       {showMeta ? (
         <div className="card-tile__meta">
           <span className="card-tile__name" title={name}>{name}</span>
           <span className="card-tile__sub">
-            {card.set ? <span>{card.set}</span> : null}
+            {setLabel ? <span>{setLabel}</span> : null}
             {card.rarity ? <span className="card-tile__rarity">{card.rarity}</span> : null}
           </span>
         </div>
       ) : null}
       {footer ? <div className="card-tile__footer">{footer}</div> : null}
+      {hasFoilVersion ? (
+        <span className="card-tile__foil-badge" title="has foil">
+          <span className="card-tile__foil-badge-icon" aria-hidden>✦</span>
+          <span className="sr-only">has foil</span>
+        </span>
+      ) : null}
     </article>
   );
 }

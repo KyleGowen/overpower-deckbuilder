@@ -101,8 +101,13 @@
 /* Grid */
 .db__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: var(--space-4);
+}
+.db__grid--landscape {
+  grid-template-columns: repeat(4, 1fr);
+}
+.db__grid--portrait {
+  grid-template-columns: repeat(6, 1fr);
 }
 
 /* Add to deck */

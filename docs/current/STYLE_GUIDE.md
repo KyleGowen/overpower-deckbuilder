@@ -37,6 +37,7 @@
 34. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
 35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
 36. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
+37. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
 
 ## Overview
 
@@ -2916,3 +2917,46 @@ Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail
 ### Rationale
 
 Previously `grid-auto-columns: minmax(230px, 1fr)` let columns expand to fill the row, so rails with only two tournament decks rendered oversized tiles. Capped columns match community tile size and leave trailing space until more decks are added.
+
+## Card Database grid (v2 SPA)
+
+The `/data` database page (`DatabasePage.tsx`) renders catalog cards with `CardTile` and type-aware grid density.
+
+### Grid columns — `.db__grid`
+
+- **Landscape tabs** (Characters, Locations, Events): `.db__grid--landscape` → `grid-template-columns: repeat(4, 1fr)` — four tiles per row on desktop.
+- **Portrait tabs** (all other catalog types): `.db__grid--portrait` → `grid-template-columns: repeat(6, 1fr)` — six tiles per row on desktop.
+- **Mobile** (`.layout-mobile .db__grid`): `repeat(2, 1fr)` for both orientations.
+- `gap: var(--space-4)`; container max width `--content-max-width` (1320px).
+
+### Tile orientation — `CardTile` + `catalogType`
+
+When `catalogType` is passed from the database page:
+
+| Catalog type | Tile class | Art `aspect-ratio` | Image fit |
+|---|---|---|---|
+| `characters` | `.card-tile--characters` | `380 / 280` | `object-fit: contain` (`.card-image--contain`) |
+| `locations`, `events` | `.card-tile--locations`, `.card-tile--events` | `236 / 151` | `object-fit: contain` |
+| All other types | `.card-tile--portrait` | `5 / 7` | `object-fit: contain` |
+
+Art uses the same no-crop strategy as v2 `DeckTile` hero cards: full card visible inside the frame, letterboxing when needed.
+
+Portrait tabs whose thumbnails use the character landscape preset (`special-cards`, `power-cards`, `aspects`, universe types) load **full-res** art in the grid (`catalogTypeUsesFullImageInDbGrid`) so portrait cards are not cropped to landscape thumbs.
+
+### Filters — `.db__filters`
+
+- **Set** dropdown (all tabs).
+- **Character** search input (Special Cards tab only): filters by linked `character` field.
+- Card name search stays in the header search bar. Rarity and Sort-by dropdowns removed.
+
+### Sort order
+
+Fixed per tab (no user control): Special Cards sort by **set**, then **character** (`Any Character` last), then card name as tiebreaker; all other tabs sort by card name.
+
+### Foil deduplication
+
+`GET /api/v1/catalog/foil-card-map` drives one row per logical card: foil duplicates are hidden when the base row exists in the same catalog tab; **foil-only** promos (no base row) stay visible. A silver **✦** starburst (`.card-tile__foil-badge`, bottom-right on the full `.card-tile`, `title="has foil"`) appears when the row has a foil variant per the map, or when the displayed row is foil-only.
+
+### Set line — `.card-tile__sub`
+
+Bottom-left set label: set code, then a space and `set_number` when present (e.g. `ERB 12`); code only when number is absent. Rarity stays right-aligned in the same row.

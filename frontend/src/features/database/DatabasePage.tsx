@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
-import { fetchCatalog, fetchSets } from '../../lib/api/catalog';
+import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
+import {
+  buildFoilCardMapLookup,
+  cardHasFoilVersion,
+  dedupeFoilCatalogCards,
+} from '../../lib/catalog/foilCatalog';
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
   CATALOG_TYPES,
   cardDisplayName,
-  cardStats,
+  cardCharacterName,
+  compareCatalogCards,
+  isLandscapeCatalogType,
   metaForDeckType,
   CATALOG_TYPE_BY_SLUG,
 } from '../../lib/catalog/catalogTypeMap';
@@ -23,8 +30,6 @@ import './DatabasePage.css';
 
 const PAGE_SIZE = 24;
 
-type SortKey = 'name' | 'set' | 'rarity' | 'total';
-
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -38,14 +43,14 @@ export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
   const [type, setType] = useState<CatalogType>('characters');
   const [search, setSearch] = useState('');
+  const [characterSearch, setCharacterSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
-  const [rarityFilter, setRarityFilter] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('name');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const debouncedSearch = useDebounced(search);
+  const debouncedCharacterSearch = useDebounced(characterSearch);
 
   const catalogQuery = useQuery({
     queryKey: ['catalog', type],
@@ -53,38 +58,42 @@ export default function DatabasePage() {
     staleTime: 30 * 60 * 1000,
   });
   const setsQuery = useQuery({ queryKey: ['sets'], queryFn: () => fetchSets(), staleTime: 60 * 60 * 1000 });
+  const foilMapQuery = useQuery({
+    queryKey: ['foil-card-map'],
+    queryFn: () => fetchFoilCardMap(),
+    staleTime: 60 * 60 * 1000,
+  });
 
-  const allCards = catalogQuery.data ?? [];
+  const foilLookup = useMemo(
+    () => buildFoilCardMapLookup(foilMapQuery.data ?? []),
+    [foilMapQuery.data],
+  );
 
-  const rarities = useMemo(() => {
-    const set = new Set<string>();
-    allCards.forEach((c) => c.rarity && set.add(String(c.rarity)));
-    return Array.from(set).sort();
-  }, [allCards]);
+  const allCards = useMemo(
+    () => dedupeFoilCatalogCards(catalogQuery.data ?? [], foilLookup.foilToBase),
+    [catalogQuery.data, foilLookup.foilToBase],
+  );
 
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
-    let result = allCards.filter((c) => {
+    const charQ = debouncedCharacterSearch.trim().toLowerCase();
+    const result = allCards.filter((c) => {
       if (q && !cardDisplayName(c).toLowerCase().includes(q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
-      if (rarityFilter && String(c.rarity ?? '') !== rarityFilter) return false;
+      if (type === 'special-cards' && charQ && !cardCharacterName(c).toLowerCase().includes(charQ)) return false;
       return true;
     });
-    result = [...result].sort((a, b) => {
-      if (sortKey === 'total') {
-        return (cardStats(b)?.total ?? 0) - (cardStats(a)?.total ?? 0);
-      }
-      const av = String((a[sortKey] as string) ?? (sortKey === 'name' ? cardDisplayName(a) : '')).toLowerCase();
-      const bv = String((b[sortKey] as string) ?? (sortKey === 'name' ? cardDisplayName(b) : '')).toLowerCase();
-      if (sortKey === 'name') return cardDisplayName(a).localeCompare(cardDisplayName(b));
-      return av.localeCompare(bv);
-    });
+    result.sort((a, b) => compareCatalogCards(a, b, type));
     return result;
-  }, [allCards, debouncedSearch, setFilter, rarityFilter, sortKey]);
+  }, [allCards, debouncedSearch, debouncedCharacterSearch, setFilter, type]);
+
+  useEffect(() => {
+    setCharacterSearch('');
+  }, [type]);
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, setFilter, rarityFilter, sortKey]);
+  }, [type, debouncedSearch, debouncedCharacterSearch, setFilter]);
 
   const pageCards = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -99,24 +108,19 @@ export default function DatabasePage() {
           ))}
         </select>
       </div>
-      <div className="db-field">
-        <label className="db-field__label">Rarity</label>
-        <select value={rarityFilter} onChange={(e) => setRarityFilter(e.target.value)}>
-          <option value="">All rarities</option>
-          {rarities.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-      </div>
-      <div className="db-field">
-        <label className="db-field__label">Sort by</label>
-        <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
-          <option value="name">Name</option>
-          <option value="set">Set</option>
-          <option value="rarity">Rarity</option>
-          {type === 'characters' ? <option value="total">Total stats</option> : null}
-        </select>
-      </div>
+      {type === 'special-cards' ? (
+        <div className="db-field">
+          <label className="db-field__label" htmlFor="db-character-search">Character</label>
+          <input
+            id="db-character-search"
+            type="search"
+            placeholder="Search by character..."
+            value={characterSearch}
+            onChange={(e) => setCharacterSearch(e.target.value)}
+            aria-label="Search by character name"
+          />
+        </div>
+      ) : null}
     </>
   );
 
@@ -167,9 +171,15 @@ export default function DatabasePage() {
           <EmptyState title="No cards found" message="Try adjusting your search or filters." icon={<IconSearch />} />
         ) : (
           <>
-            <div className="db__grid">
+            <div className={`db__grid ${isLandscapeCatalogType(type) ? 'db__grid--landscape' : 'db__grid--portrait'}`}>
               {pageCards.map((card) => (
-                <CardTile key={card.id} card={card} onClick={() => setSelected(card)} />
+                <CardTile
+                  key={card.id}
+                  card={card}
+                  catalogType={type}
+                  hasFoilVersion={cardHasFoilVersion(card, foilLookup.baseToFoil)}
+                  onClick={() => setSelected(card)}
+                />
               ))}
             </div>
             <Pagination page={page} pageSize={PAGE_SIZE} totalItems={filtered.length} onPageChange={setPage} />
