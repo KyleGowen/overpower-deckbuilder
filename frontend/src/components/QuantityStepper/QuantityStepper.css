@@ -23,11 +23,25 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
-.qty-stepper__value {
+.qty-stepper__input {
+  width: 3ch;
   min-width: 2ch;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
   text-align: center;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
+  font-family: inherit;
+  line-height: 1.2;
+  -moz-appearance: textfield;
+}
+.qty-stepper__input:focus,
+.qty-stepper__input.is-editing {
+  outline: none;
+  background: var(--color-bg-elevated);
 }
 
 .qty-stepper--md .qty-stepper__btn {
@@ -40,6 +54,6 @@
   height: 24px;
   font-size: 0.85rem;
 }
-.qty-stepper--sm .qty-stepper__value {
+.qty-stepper--sm .qty-stepper__input {
   font-size: var(--font-size-xs);
 }

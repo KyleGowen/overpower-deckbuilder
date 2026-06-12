@@ -51,23 +51,37 @@
 .col__controls {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
   flex-wrap: wrap;
 }
 .col__search {
   position: relative;
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  min-width: 240px;
 }
 .col__search-icon {
   position: absolute;
   left: 14px;
   color: var(--color-text-dim);
+  font-size: 1.1rem;
   pointer-events: none;
 }
 .col__search input {
   padding-left: 42px;
+}
+.col__set {
+  flex-shrink: 0;
+  width: auto;
+}
+.col__set select {
+  width: auto;
+  min-width: 140px;
+  max-width: 200px;
+  padding-right: var(--space-6);
 }
 .col__owned-toggle {
   display: inline-flex;
@@ -151,4 +165,9 @@
 }
 .layout-mobile .col__search {
   flex: 1;
+  min-width: 0;
+}
+.layout-mobile .col__set select {
+  min-width: 120px;
+  max-width: 160px;
 }

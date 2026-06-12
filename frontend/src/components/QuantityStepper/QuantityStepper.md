@@ -1,6 +1,8 @@
 # QuantityStepper
 
 Compact −/value/+ control for adjusting quantities (collection counts, deck card copies).
+The center value is an editable field: type a non-negative integer and press Enter or blur to
+apply (clamped to `min`/`max`). Escape cancels editing.
 
 ## Props
 | Prop | Type | Default | Notes |

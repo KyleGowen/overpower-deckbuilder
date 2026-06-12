@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCatalog } from '../../lib/api/catalog';
+import { fetchCatalog, fetchSets } from '../../lib/api/catalog';
 import { useCollection } from '../../lib/collection/useCollection';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
-  cardDisplayName,
+  cardMatchesSearchQuery,
   isLandscapeCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
 import { CardTile } from '../../components/CardTile';
@@ -35,6 +35,7 @@ export default function CollectionPage() {
   const collection = useCollection();
   const [type, setType] = useState<CatalogType>('characters');
   const [search, setSearch] = useState('');
+  const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
@@ -47,20 +48,22 @@ export default function CollectionPage() {
     queryFn: () => fetchCatalog(type),
     staleTime: 30 * 60 * 1000,
   });
+  const setsQuery = useQuery({ queryKey: ['sets'], queryFn: () => fetchSets(), staleTime: 60 * 60 * 1000 });
   const allCards = catalogQuery.data ?? [];
 
   const filtered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
     return allCards.filter((c) => {
-      if (q && !cardDisplayName(c).toLowerCase().includes(q)) return false;
+      if (q && !cardMatchesSearchQuery(c, q)) return false;
+      if (setFilter && String(c.set ?? '') !== setFilter) return false;
       if (ownedOnly && collection.quantityFor(c.id, collectionType) <= 0) return false;
       return true;
     });
-  }, [allCards, debouncedSearch, ownedOnly, collection, collectionType]);
+  }, [allCards, debouncedSearch, setFilter, ownedOnly, collection, collectionType]);
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, ownedOnly]);
+  }, [type, debouncedSearch, setFilter, ownedOnly]);
 
   const pageCards = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -81,11 +84,25 @@ export default function CollectionPage() {
               <IconSearch className="col__search-icon" />
               <input
                 type="search"
-                placeholder="Search your collection..."
+                placeholder="Search name, character, or card text..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 aria-label="Search collection"
               />
+            </div>
+            <div className="col__set">
+              <label className="sr-only" htmlFor="col-set-filter">Set</label>
+              <select
+                id="col-set-filter"
+                value={setFilter}
+                onChange={(e) => setSetFilter(e.target.value)}
+                aria-label="Filter by set"
+              >
+                <option value="">All sets</option>
+                {(setsQuery.data ?? []).map((s) => (
+                  <option key={s.code} value={s.code}>{s.name || s.code}</option>
+                ))}
+              </select>
             </div>
             <label className="col__owned-toggle">
               <input type="checkbox" checked={ownedOnly} onChange={(e) => setOwnedOnly(e.target.checked)} />
@@ -114,7 +131,11 @@ export default function CollectionPage() {
         ) : filtered.length === 0 ? (
           <EmptyState
             title={ownedOnly ? 'No cards owned here yet' : 'No cards found'}
-            message={ownedOnly ? 'Add cards to your collection to see them here.' : 'Try a different search or type.'}
+            message={
+              ownedOnly
+                ? 'Add cards to your collection to see them here.'
+                : 'Try adjusting your search or filters.'
+            }
             icon={<IconCollection />}
           />
         ) : (
