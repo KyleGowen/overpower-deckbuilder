@@ -27,6 +27,9 @@ import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
+import { DbvFilterRail } from './components/DbvFilterRail';
+import { cardMatchesDbvFilters } from './filters/dbvFilterPredicates';
+import { useDbvFilters } from './filters/useDbvFilters';
 import './DatabasePage.css';
 
 const PAGE_SIZE = 24;
@@ -50,6 +53,7 @@ export default function DatabasePage() {
   const [selected, setSelected] = useState<CatalogCard | null>(null);
 
   const debouncedSearch = useDebounced(search);
+  const dbvFilters = useDbvFilters(type);
 
   const catalogQuery = useQuery({
     queryKey: ['catalog', type],
@@ -83,15 +87,16 @@ export default function DatabasePage() {
     const result = allCards.filter((c) => {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
+      if (!cardMatchesDbvFilters(c, type, dbvFilters.state)) return false;
       return true;
     });
     result.sort((a, b) => compareCatalogCards(a, b, type));
     return result;
-  }, [allCards, debouncedSearch, setFilter, type]);
+  }, [allCards, debouncedSearch, setFilter, type, dbvFilters.state]);
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, setFilter]);
+  }, [type, debouncedSearch, setFilter, dbvFilters.state]);
 
   useEffect(() => () => clearProgressiveImageSession('database'), []);
 
@@ -147,6 +152,10 @@ export default function DatabasePage() {
             </button>
           ))}
         </div>
+
+        {!catalogQuery.isLoading && !catalogQuery.isError ? (
+          <DbvFilterRail catalogType={type} filters={dbvFilters} allCards={allCards} />
+        ) : null}
 
         {catalogQuery.isLoading ? (
           <LoadingState label="Loading cards..." />

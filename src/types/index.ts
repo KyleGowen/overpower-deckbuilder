@@ -155,6 +155,11 @@ export interface AdvancedUniverse {
   image: string;
   image_path?: string;
   is_one_per_deck: boolean;
+  icon_offensive_swords?: boolean;
+  icon_defensive_shield?: boolean;
+  icon_remainder_of_battle?: boolean;
+  icon_remainder_of_game?: boolean;
+  icon_astral_plane?: boolean;
   set?: string;
   set_number?: string | null;
   rarity?: CardRarity | null;

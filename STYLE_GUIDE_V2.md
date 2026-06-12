@@ -22,6 +22,7 @@ guide describes the dark, neon, card-game-companion theme derived from the mocks
 9. [Responsive (Mobile vs Desktop)](#responsive-mobile-vs-desktop)
 10. [Motion](#motion)
 11. [Per-Screen Notes](#per-screen-notes)
+12. [Database Filter Rail](#database-filter-rail)
 
 ---
 
@@ -177,3 +178,21 @@ Each screen has a companion doc in its feature folder:
 
 Architecture, data flow, and serving are documented in
 [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
+
+## Database Filter Rail
+
+Always-visible per-type filter rail on DBV (`/data`), inserted between `.db__types` and
+`.db__grid`. See [`DbvFilterRail.css`](frontend/src/features/database/components/DbvFilterRail.css).
+
+| Element | Tokens / values |
+|---|---|
+| Rail (`.dbv-filter-rail`) | `--color-bg-elevated`, `--radius-md`, `--space-2` vertical / `--space-3` horizontal padding, `min-height: 40px`, `border: 1px solid var(--color-border)` |
+| Group labels (`.dbv-filter-rail__label`) | `--font-size-xs`, `--color-text-dim` |
+| Active icon toggles (`.dbv-power-strip__btn.is-active`, `.dbv-func-strip__btn.is-active`) | `--color-border-accent`, `box-shadow: 0 0 0 1px var(--color-accent-glow)` (matches `.db__type.is-active`) |
+| Active stat cell (`.dbv-stat-cell.has-filter`) | `--color-border-accent`, `--color-accent-soft` |
+| Chips (`.dbv-filter-rail__chip`) | `--color-accent-soft`, `--color-border-accent`, `--font-size-xs` |
+| Clear (`.dbv-filter-rail__clear`) | `--color-accent-bright` |
+| Stat op/value (`.dbv-stat-cell__op`, `.dbv-stat-cell__value`) | `width: calc(2.75rem * 1.15)`, `min-height: calc(1.5rem * 1.15)`, `font-size: calc(var(--font-size-xs) * 1.15)`; mobile `min-height: calc(36px * 1.15)` |
+
+**Layout:** Controls scroll horizontally on narrow viewports; mobile icon/stat tap targets
+are **44px** under `.layout-mobile`. Trailing chips + Clear sit at the rail end.

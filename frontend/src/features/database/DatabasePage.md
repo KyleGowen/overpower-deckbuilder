@@ -9,6 +9,11 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   Aspects, and the Universe types (Advanced/Teamwork/Ally/Training/Basic) — vocab via
   `catalogTypeMap`.
 - **Set** dropdown inline with the header search bar (all tabs).
+- **Filter rail** (`DbvFilterRail`) always visible between type tabs and the card grid.
+  Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
+  mission-set select) are config-driven via `filters/dbvFilterConfig.ts`. Advanced filters
+  reset on tab change; search and set persist. Active constraints show as removable chips
+  at the rail end with a **Clear** action.
 - Sort is fixed per tab: Special Cards by set → character → card name; others by card name.
 
 ## Data flow

@@ -188,6 +188,11 @@ export function mapAdvancedUniverseRow(row: DbRow): AdvancedUniverse {
     image: (row.image_path as string) ?? '',
     image_path: row.image_path as string,
     is_one_per_deck: (row.one_per_deck as boolean) || false,
+    icon_offensive_swords: (row.icon_offensive_swords as boolean) || false,
+    icon_defensive_shield: (row.icon_defensive_shield as boolean) || false,
+    icon_remainder_of_battle: (row.icon_remainder_of_battle as boolean) || false,
+    icon_remainder_of_game: (row.icon_remainder_of_game as boolean) || false,
+    icon_astral_plane: (row.icon_astral_plane as boolean) || false,
   };
 }
 

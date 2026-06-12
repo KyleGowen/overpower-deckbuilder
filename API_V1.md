@@ -369,7 +369,7 @@ Fields: `id`, `mission_set`, `card_name` (primary display name), `name` (same as
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of Universe: Advanced card objects. Fields match the special-cards shape: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons`, `value`, `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans, `banned`, `is_foil`.
+**Response 200:** `data` is an array of Universe: Advanced card objects: `id`, `name`, `character`, `card_effect`, `card_description`, `image`, `image_path`, `set`, `set_number`, `rarity`, `is_one_per_deck`, function icon booleans (`icon_offensive_swords`, `icon_defensive_shield`, `icon_remainder_of_battle`, `icon_remainder_of_game`, `icon_astral_plane`).
 
 **Response 500:** `errors` populated; `data` may be `null`.
 

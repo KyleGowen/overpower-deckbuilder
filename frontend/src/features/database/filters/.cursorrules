@@ -1,0 +1,10 @@
+# DBV v2 filter module
+
+Config-driven per-tab filters for `DatabasePage` (`/data`).
+
+- `dbvFilterConfig.ts` — which filter groups each `CatalogType` exposes.
+- `dbvFilterPredicates.ts` — pure `cardMatchesDbvFilters` and helpers (port of legacy `public/js` filter math).
+- `useDbvFilters.ts` — React state, chips, reset on tab change.
+- UI: `../components/DbvFilterRail.tsx` and strip/numeric subcomponents.
+
+Do not duplicate filter logic in `DatabasePage.tsx`; extend config + predicates here.
