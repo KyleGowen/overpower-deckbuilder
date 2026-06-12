@@ -16,6 +16,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Bind 0.0.0.0 so other devices on the LAN can reach the dev SPA.
+    // API traffic still proxies to localhost:8085 on this machine.
+    host: true,
     proxy: {
       '/api': { target: BACKEND, changeOrigin: true },
       '/health': { target: BACKEND, changeOrigin: true },

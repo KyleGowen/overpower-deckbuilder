@@ -5,6 +5,7 @@ Project rules have been split into individual `.mdc` files under [`.cursor/rules
 | Rule file | Scope |
 |-----------|--------|
 | [project-overview.mdc](rules/project-overview.mdc) | Always apply — project context, local dev (port 5173) |
+| [local-dev-lan.mdc](rules/local-dev-lan.mdc) | Always apply — LAN access for Vite dev server |
 | [code-style-patterns.mdc](rules/code-style-patterns.mdc) | Always apply — TS/JS, DB, API, frontend patterns |
 | [project-domain-rules.mdc](rules/project-domain-rules.mdc) | Card data, decks, auth, images, performance |
 | [power-type-sorting.mdc](rules/power-type-sorting.mdc) | OverPower power type sort order |

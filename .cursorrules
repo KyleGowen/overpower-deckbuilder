@@ -130,10 +130,11 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 
 ## Local Dev (v2 SPA) — always use port 5173
 - **The local app URL is `http://localhost:5173`** (Vite dev server in `frontend/`). Use this for browsing, browser automation, and when telling the user where to open the site after restarting dev servers.
+- **LAN access:** Vite is configured with `host: true` in `frontend/vite.config.ts` so other devices on the home network can use `http://<LAN-IP>:5173`. When starting/restarting dev servers, always use the normal `npm run dev` commands (do not bind localhost-only). Express stays on `127.0.0.1:8085` in dev; API calls from LAN clients go through Vite’s proxy.
 - **Two processes are required for v2 frontend work:**
   1. **Repo root:** `npm run dev` → Express API on **:8085**
   2. **`frontend/`:** `npm run dev` → React SPA on **:5173** (proxies `/api`, `/health`, `/src/resources`, `/js` to 8085)
-- **When relaunching the server** (migrations, backend changes, frontend work): start **both** unless the task is API-only. Then confirm the user should open **5173**, not 8085.
+- **When relaunching the server** (migrations, backend changes, frontend work): start **both** unless the task is API-only. Then confirm the user should open **5173**, not 8085. Mention the Vite **Network** URL for LAN devices when restarting.
 - **Do not use `http://localhost:8085` as the main dev URL.** Port 8085 serves the API and, if browsed directly, a stale `frontend/dist/` build or legacy `public/` UI — not live Vite HMR.
 - **8085 remains correct for** health checks (`/health`), direct API verification, and production-like single-port testing after `npm run build` in `frontend/`.
 - Full workflow: [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).

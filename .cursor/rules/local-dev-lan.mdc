@@ -1,0 +1,27 @@
+---
+description: Start local dev servers with LAN access enabled
+alwaysApply: true
+---
+
+# Local Dev — LAN Access
+
+When starting or restarting local dev servers, **always enable LAN access** so Kyle can open the app from other devices on the home network (phone, tablet, another PC).
+
+## Required setup
+
+1. **Vite (frontend)** — must listen on all interfaces (`host: true` in `frontend/vite.config.ts`). Do not remove this or start Vite without it.
+2. **Express (repo root)** — keep the default dev bind (`127.0.0.1:8085`). LAN clients reach the API through Vite’s proxy; do not expose `:8085` directly unless explicitly requested.
+
+## Starting dev servers
+
+Always start **both** processes:
+
+1. Repo root: `npm run dev` → API on `:8085` (localhost only)
+2. `frontend/`: `npm run dev` → SPA on `:5173` (LAN + localhost)
+
+## URLs to give Kyle
+
+- **This machine:** `http://localhost:5173`
+- **Other devices on LAN:** `http://<host-LAN-IP>:5173` (Vite prints the Network URL on startup; e.g. `http://192.168.x.x:5173`)
+
+After restart, mention both URLs when relevant. If LAN access fails, check Windows Firewall for inbound TCP **5173**.
