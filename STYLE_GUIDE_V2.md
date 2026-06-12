@@ -116,9 +116,11 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 - Card art is rendered exclusively through the `CardImage` component, which resolves
   paths via [`frontend/src/lib/images/cardImages.ts`](frontend/src/lib/images/cardImages.ts)
   (CDN base + thumbnail rules). Never hardcode image URLs.
-- Card tiles (`CardTile`) use a portrait aspect frame, `--radius-md` corners, subtle
-  border, and a label + set line beneath. Owned/selected tiles get the accent glow; unowned
-  tiles in the Collection are dimmed.
+- Card tiles (`CardTile`) use a type-aware aspect frame (`catalogType` prop): portrait
+  `5:7` by default; characters `380:280`; locations and events `236:151`. Tiles use
+  `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
+  get the accent glow; unowned tiles in the Collection are dimmed. Database and Collection
+  grids use 4 columns for landscape types and 6 for portrait (2 on mobile).
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
   (`aspect-ratio: 380 / 280`): the first character is shown as a **full card** (`object-fit:

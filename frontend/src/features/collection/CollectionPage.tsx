@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { useCollection } from '../../lib/collection/useCollection';
-import { CATALOG_TYPES, CATALOG_TYPE_BY_SLUG, cardDisplayName } from '../../lib/catalog/catalogTypeMap';
+import {
+  CATALOG_TYPES,
+  CATALOG_TYPE_BY_SLUG,
+  cardDisplayName,
+  isLandscapeCatalogType,
+} from '../../lib/catalog/catalogTypeMap';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { QuantityStepper } from '../../components/QuantityStepper';
@@ -114,16 +119,18 @@ export default function CollectionPage() {
           />
         ) : (
           <>
-            <div className="col__grid">
+            <div
+              className={`col__grid ${isLandscapeCatalogType(type) ? 'col__grid--landscape' : 'col__grid--portrait'}`}
+            >
               {pageCards.map((card) => {
                 const qty = collection.quantityFor(card.id, collectionType);
                 return (
                   <CardTile
                     key={card.id}
                     card={card}
+                    catalogType={type}
                     dimmed={qty <= 0}
                     onClick={() => setSelected(card)}
-                    overlay={qty > 0 ? <span className="col__owned-badge">x{qty}</span> : null}
                     footer={
                       <QuantityStepper
                         value={qty}
