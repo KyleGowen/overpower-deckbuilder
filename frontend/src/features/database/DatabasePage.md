@@ -13,7 +13,9 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
   mission-set select) are config-driven via `filters/dbvFilterConfig.ts`. Advanced filters
   reset on tab change; search and set persist. Active constraints show as removable chips
-  at the rail end with a **Clear** action.
+  at the rail end with a **Clear** action. Optional **collapse** via left chevron (default
+  expanded; collapsed state is a thin rule with left-aligned chevron-down; collapse
+  preference persists across tab switches).
 - Sort is fixed per tab: Special Cards by set → character → card name; others by card name.
 
 ## Data flow

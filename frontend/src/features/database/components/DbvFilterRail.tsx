@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { IconChevronDown } from '../../../components/icons';
 import type { CatalogCard, CatalogType } from '../../../lib/api/types';
 import { collectMissionSetOptions } from '../filters/dbvFilterPredicates';
 import { getDbvFilterConfig } from '../filters/dbvFilterConfig';
@@ -16,6 +17,8 @@ interface DbvFilterRailProps {
   catalogType: CatalogType;
   filters: UseDbvFiltersReturn;
   allCards: CatalogCard[];
+  collapsed: boolean;
+  onCollapsedChange: (collapsed: boolean) => void;
 }
 
 function FilterChips({
@@ -52,7 +55,13 @@ function FilterChips({
   );
 }
 
-export function DbvFilterRail({ catalogType, filters, allCards }: DbvFilterRailProps) {
+export function DbvFilterRail({
+  catalogType,
+  filters,
+  allCards,
+  collapsed,
+  onCollapsedChange,
+}: DbvFilterRailProps) {
   const config = getDbvFilterConfig(catalogType);
   const hasFilterGroups = config.groups.length > 0;
 
@@ -64,39 +73,62 @@ export function DbvFilterRail({ catalogType, filters, allCards }: DbvFilterRailP
   if (!hasFilterGroups) return null;
 
   return (
-    <div className="dbv-filter-rail" aria-label="Card filters">
-      <div className="dbv-filter-rail__controls">
-        {config.groups.includes('numeric') && config.numericFields ? (
-          <DbvNumericStatInline fields={config.numericFields} filters={filters} />
-        ) : null}
+    <div
+      className={`dbv-filter-rail${collapsed ? ' is-collapsed' : ''}`}
+      aria-label="Card filters"
+    >
+      <button
+        type="button"
+        className={`dbv-filter-rail__toggle${collapsed ? ' dbv-filter-rail__toggle--collapsed-row' : ''}`}
+        aria-expanded={!collapsed}
+        aria-label={collapsed ? 'Expand filters' : 'Collapse filters'}
+        onClick={() => onCollapsedChange(!collapsed)}
+      >
+        <span className="dbv-filter-rail__toggle-icon-wrap">
+          <IconChevronDown
+            className={`dbv-filter-rail__toggle-icon${collapsed ? '' : ' is-expanded'}`}
+            aria-hidden
+          />
+        </span>
+        {collapsed ? <span className="dbv-filter-rail__toggle-line" aria-hidden="true" /> : null}
+      </button>
 
-        {config.groups.includes('powerTypes') && config.powerTypeKeys ? (
-          <div className="dbv-filter-rail__group">
-            <span className="dbv-filter-rail__label">Power types</span>
-            <DbvPowerTypeStrip powerTypeKeys={config.powerTypeKeys} filters={filters} />
+      {!collapsed ? (
+        <>
+          <div className="dbv-filter-rail__controls">
+            {config.groups.includes('numeric') && config.numericFields ? (
+              <DbvNumericStatInline fields={config.numericFields} filters={filters} />
+            ) : null}
+
+            {config.groups.includes('powerTypes') && config.powerTypeKeys ? (
+              <div className="dbv-filter-rail__group">
+                <span className="dbv-filter-rail__label">Power types</span>
+                <DbvPowerTypeStrip powerTypeKeys={config.powerTypeKeys} filters={filters} />
+              </div>
+            ) : null}
+
+            {config.groups.includes('functionIcons') ? (
+              <div className="dbv-filter-rail__group">
+                <span className="dbv-filter-rail__label">Function</span>
+                <DbvFunctionIconStrip filters={filters} />
+              </div>
+            ) : null}
+
+            {config.groups.includes('missionSet') ? (
+              <DbvMissionSetSelect options={missionSetOptions} filters={filters} />
+            ) : null}
           </div>
-        ) : null}
 
-        {config.groups.includes('functionIcons') ? (
-          <div className="dbv-filter-rail__group">
-            <span className="dbv-filter-rail__label">Function</span>
-            <DbvFunctionIconStrip filters={filters} />
+          <div className="dbv-filter-rail__trailing">
+            <FilterChips chips={filters.chips} onRemove={filters.removeChip} />
+            {filters.activeCount > 0 ? (
+              <button type="button" className="dbv-filter-rail__clear" onClick={filters.clearAll}>
+                Clear
+              </button>
+            ) : null}
           </div>
-        ) : null}
-
-        {config.groups.includes('missionSet') ? (
-          <DbvMissionSetSelect options={missionSetOptions} filters={filters} />
-        ) : null}
-      </div>
-
-      <div className="dbv-filter-rail__trailing">
-        <FilterChips chips={filters.chips} onRemove={filters.removeChip} />
-        {filters.activeCount > 0 ? (
-          <button type="button" className="dbv-filter-rail__clear" onClick={filters.clearAll}>
-            Clear
-          </button>
-        ) : null}
-      </div>
+        </>
+      ) : null}
     </div>
   );
 }

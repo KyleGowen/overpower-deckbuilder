@@ -193,6 +193,8 @@ Always-visible per-type filter rail on DBV (`/data`), inserted between `.db__typ
 | Chips (`.dbv-filter-rail__chip`) | `--color-accent-soft`, `--color-border-accent`, `--font-size-xs` |
 | Clear (`.dbv-filter-rail__clear`) | `--color-accent-bright` |
 | Stat op/value (`.dbv-stat-cell__op`, `.dbv-stat-cell__value`) | `width: calc(2.75rem * 1.15)`, `min-height: calc(1.5rem * 1.15)`, `font-size: calc(var(--font-size-xs) * 1.15)`; mobile `min-height: calc(36px * 1.15)` |
+| Collapse toggle (`.dbv-filter-rail__toggle`) | Left-edge chevron; `28×28px` desktop, `44×44px` mobile; `--color-text-muted`, hover `--color-bg-hover` |
+| Collapsed rail (`.dbv-filter-rail.is-collapsed`) | Transparent, no border; keeps `--space-3` horizontal padding so the chevron stays aligned with expanded; chevron locked left in `.dbv-filter-rail__toggle-icon-wrap` (28px); `1px` rule (`.dbv-filter-rail__toggle-line`) extends right |
 
 **Layout:** Controls scroll horizontally on narrow viewports; mobile icon/stat tap targets
 are **44px** under `.layout-mobile`. Trailing chips + Clear sit at the rail end.

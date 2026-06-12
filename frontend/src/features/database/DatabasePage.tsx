@@ -51,6 +51,7 @@ export default function DatabasePage() {
   const [setFilter, setSetFilter] = useState('');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
+  const [filterRailCollapsed, setFilterRailCollapsed] = useState(false);
 
   const debouncedSearch = useDebounced(search);
   const dbvFilters = useDbvFilters(type);
@@ -153,8 +154,14 @@ export default function DatabasePage() {
           ))}
         </div>
 
-        {!catalogQuery.isLoading && !catalogQuery.isError ? (
-          <DbvFilterRail catalogType={type} filters={dbvFilters} allCards={allCards} />
+        {!catalogQuery.isError ? (
+          <DbvFilterRail
+            catalogType={type}
+            filters={dbvFilters}
+            allCards={allCards}
+            collapsed={filterRailCollapsed}
+            onCollapsedChange={setFilterRailCollapsed}
+          />
         ) : null}
 
         {catalogQuery.isLoading ? (

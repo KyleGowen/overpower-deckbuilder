@@ -7,6 +7,93 @@
   background: var(--color-bg-elevated);
   padding: var(--space-2) var(--space-3);
   min-height: 40px;
+  transition: min-height var(--dur-fast) var(--ease-out);
+}
+
+.dbv-filter-rail.is-collapsed {
+  min-height: 0;
+  /* Match expanded horizontal inset so the chevron does not jump left */
+  padding: 0 var(--space-3);
+  gap: 0;
+  border: none;
+  background: transparent;
+}
+
+.dbv-filter-rail__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.dbv-filter-rail__toggle-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.dbv-filter-rail__toggle--collapsed-row {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 20px;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+
+.dbv-filter-rail__toggle-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.dbv-filter-rail__toggle--collapsed-row:hover {
+  color: var(--color-text);
+}
+
+.dbv-filter-rail__toggle--collapsed-row:hover .dbv-filter-rail__toggle-line {
+  background: var(--color-border-accent);
+}
+
+.dbv-filter-rail__toggle:not(.dbv-filter-rail__toggle--collapsed-row):hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.dbv-filter-rail__toggle:focus-visible {
+  outline: 2px solid var(--color-border-accent);
+  outline-offset: 1px;
+}
+
+.dbv-filter-rail__toggle-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.dbv-filter-rail__toggle-icon.is-expanded {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dbv-filter-rail,
+  .dbv-filter-rail__toggle-icon {
+    transition: none;
+  }
 }
 
 .dbv-filter-rail__controls {
@@ -255,6 +342,25 @@
 .layout-mobile .dbv-stat-cell__value {
   min-height: calc(36px * 1.15);
   font-size: calc(var(--font-size-sm) * 1.15);
+}
+
+.layout-mobile .dbv-filter-rail__toggle-icon-wrap {
+  width: 44px;
+  height: 44px;
+}
+
+.layout-mobile .dbv-filter-rail__toggle:not(.dbv-filter-rail__toggle--collapsed-row) {
+  width: 44px;
+  height: 44px;
+}
+
+.layout-mobile .dbv-filter-rail__toggle--collapsed-row {
+  min-height: 44px;
+}
+
+.layout-mobile .dbv-filter-rail__toggle-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .layout-mobile .dbv-filter-rail {
