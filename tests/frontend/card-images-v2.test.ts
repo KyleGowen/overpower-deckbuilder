@@ -10,7 +10,10 @@ import {
   resolveImageUrl,
   resolveThumbUrl,
 } from '../../frontend/src/lib/images/cardImages';
-import { preloadAndRevealFullRes } from '../../frontend/src/lib/images/progressiveImageLoad';
+import {
+  clearProgressiveImageSession,
+  preloadAndRevealFullRes,
+} from '../../frontend/src/lib/images/progressiveImageLoad';
 import {
   catalogTypeUsesPortraitThumb,
   isLandscapeCatalogType,
@@ -86,6 +89,10 @@ describe('imageElementMatchesUrl', () => {
 describe('preloadAndRevealFullRes', () => {
   const OriginalImage = global.Image;
 
+  beforeEach(() => {
+    clearProgressiveImageSession('database');
+  });
+
   afterEach(() => {
     global.Image = OriginalImage;
     jest.restoreAllMocks();
@@ -116,6 +123,9 @@ describe('preloadAndRevealFullRes', () => {
 
     expect(preloadInstance).not.toBeNull();
     preloadInstance!.onload?.();
+
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
 
     expect(target.src).toBe('/src/resources/cards/images/characters/foo.webp');
     expect(decode).toHaveBeenCalled();

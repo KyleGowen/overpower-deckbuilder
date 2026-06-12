@@ -23,6 +23,7 @@ import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
+import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './DatabasePage.css';
 
@@ -84,7 +85,11 @@ export default function DatabasePage() {
     setPage(1);
   }, [type, debouncedSearch, setFilter]);
 
-  const pageCards = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => () => clearProgressiveImageSession('database'), []);
+
+  const maxPage = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const effectivePage = Math.min(page, maxPage);
+  const pageCards = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
 
   return (
     <div className="db">

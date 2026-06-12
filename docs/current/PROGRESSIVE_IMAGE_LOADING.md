@@ -62,6 +62,27 @@ Entry points:
 
 ---
 
+## Session reveal cache (v2 database grid)
+
+Search, filter, and pagination remount `CardTile` instances. Without a session cache, each remount reruns the thumb → full progressive pipeline even when the browser already fetched the full-res bytes.
+
+**Approach:** an in-memory registry in `progressiveImageLoad.ts` scoped to `'database'`:
+
+| Mechanism | Detail |
+|-----------|--------|
+| Storage | URL strings only (~100 B each) — **not** image blobs, IndexedDB, or Cache API |
+| LRU cap | 400 revealed URLs (~16 pages × 24 tiles); evicts oldest metadata |
+| Idle TTL | 30 minutes per URL while staying on `/data` |
+| Route clear | `DatabasePage` calls `clearProgressiveImageSession('database')` on unmount (navigate away) |
+| In-flight dedupe | Concurrent preloads for the same URL share one `Image()` fetch |
+| Remount hit | `ProgressiveCardImage` initializes `fullLoaded` from `isFullResRevealed(fullSrc)` and sets full `src` immediately |
+
+**Mobile / data saver:** when `navigator.connection.saveData` or `prefers-reduced-data: reduce`, `shouldSkipFullResUpgrade()` disables progressive full-res (thumbs only).
+
+**Desktop vs mobile:** same code path; image bytes remain in the browser HTTP cache (evicted under memory pressure). The registry only avoids redundant UI reveal work.
+
+---
+
 ## Known limitations (deck editor Card View foil / art swap)
 
 Recent work (**context**):
