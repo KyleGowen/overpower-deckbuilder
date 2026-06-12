@@ -14,6 +14,9 @@
   align-items: center;
   justify-content: center;
 }
+.card-detail__image--landscape {
+  aspect-ratio: 380 / 280;
+}
 .card-detail__image .card-image {
   background: transparent;
 }
@@ -46,6 +49,9 @@
 }
 .card-detail__stat--total {
   background: rgba(176, 107, 255, 0.1);
+}
+.card-detail__stat--threat {
+  background: rgba(138, 160, 194, 0.12);
 }
 .card-detail__stat-val {
   font-size: var(--font-size-lg);

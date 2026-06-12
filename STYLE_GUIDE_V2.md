@@ -147,8 +147,10 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
   create deck, deck actions, add cards). It uses `--color-bg-panel`, `--shadow-pop`, a
   scrim at `--z-drawer`, focus trapping, `Esc` to close, and slides in with `--ease-out`.
 - The card **detail panel** shows the full art, type/set chips, an action slot (e.g. Add to
-  Deck / collection stepper), the color-coded stat row, and a Details key/value list
-  (Set, Set Number, Threat Level, Is Foil, abilities when present).
+  Deck / + Collection), the color-coded stat row, and a Details key/value list
+  (Set, Set Number, Has Foil, abilities when present). Default width **504px** (20% wider
+  than the original 420px drawer). Character detail uses a landscape art frame (`380:280`);
+  the fifth stat tile is gray **Threat** instead of purple **Total**.
 
 ## Responsive (Mobile vs Desktop)
 - Single breakpoint: **900px** (`--layout-mobile-max`).

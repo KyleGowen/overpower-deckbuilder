@@ -2958,3 +2958,12 @@ Fixed per tab (no user control): Special Cards sort by **set**, then **character
 ### Set line — `.card-tile__sub`
 
 Bottom-left set label: set code, then a space and `set_number` when present (e.g. `ERB 12`); code only when number is absent. Rarity stays right-aligned in the same row.
+
+### Detail slide-out — `CardDetailPanel`
+
+- **Width**: `504px` on desktop (`CARD_DETAIL_PANEL_WIDTH`); full viewport on mobile (`.layout-mobile .slideout__panel--right`).
+- **Character art**: `.card-detail__image--landscape` with `aspect-ratio: 380 / 280` (matches grid tile ratio; no portrait letterboxing).
+- **Action row**: `.db__detail-actions` — equal-width **Add to Deck** (`.db__add-deck`, primary) and **+ Collection** (`.db__add-collection`, secondary); deck picker menu still expands below the deck button inside `.db__add-deck-wrap`.
+- **Character stats**: fifth tile is gray **Threat** (`.card-detail__stat--threat`, `.stat-threat` → `var(--color-text-muted)`) showing `threat_level`; other stat types keep purple **Total** (`.card-detail__stat--total`).
+- **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.
+- **Details — Set**: `setDisplayName` from `GET /api/v1/dbv/sets` via `resolveSetDisplayName()` (DatabasePage passes the friendly name; badge tags still use the set code).

@@ -16,6 +16,8 @@ import {
   metaForDeckType,
   CATALOG_TYPE_BY_SLUG,
 } from '../../lib/catalog/catalogTypeMap';
+import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
+import { useCollection } from '../../lib/collection/useCollection';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { Pagination } from '../../components/Pagination';
@@ -40,6 +42,7 @@ function useDebounced<T>(value: T, delay = 250): T {
 
 export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
+  const collection = useCollection();
   const [type, setType] = useState<CatalogType>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
@@ -63,6 +66,11 @@ export default function DatabasePage() {
   const foilLookup = useMemo(
     () => buildFoilCardMapLookup(foilMapQuery.data ?? []),
     [foilMapQuery.data],
+  );
+
+  const setNameLookup = useMemo(
+    () => buildSetNameLookup(setsQuery.data ?? []),
+    [setsQuery.data],
   );
 
   const allCards = useMemo(
@@ -90,6 +98,7 @@ export default function DatabasePage() {
   const maxPage = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const effectivePage = Math.min(page, maxPage);
   const pageCards = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
+  const collectionType = CATALOG_TYPE_BY_SLUG[type].collectionType;
 
   return (
     <div className="db">
@@ -168,7 +177,28 @@ export default function DatabasePage() {
         type={type}
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
-        actions={selected ? <AddToDeck card={selected} type={type} /> : null}
+        hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
+        setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
+        actions={
+          selected ? (
+            <div className="db__detail-actions">
+              <AddToDeck card={selected} type={type} />
+              <button
+                type="button"
+                className="btn btn-secondary db__add-collection"
+                onClick={() =>
+                  void collection.setQuantity(
+                    selected,
+                    collectionType,
+                    collection.quantityFor(selected.id, collectionType) + 1,
+                  )
+                }
+              >
+                <IconPlus /> Collection
+              </button>
+            </div>
+          ) : null
+        }
       />
 
     </div>
@@ -194,9 +224,11 @@ function AddToDeck({ card, type }: { card: CatalogCard; type: CatalogType }) {
 
   if (isGuest) {
     return (
-      <button type="button" className="btn btn-secondary db__add-deck" disabled title="Log in to add to decks">
-        <IconLock /> Log in to add to decks
-      </button>
+      <div className="db__add-deck-wrap">
+        <button type="button" className="btn btn-secondary db__add-deck" disabled title="Log in to add to decks">
+          <IconLock /> Log in to add to decks
+        </button>
+      </div>
     );
   }
 

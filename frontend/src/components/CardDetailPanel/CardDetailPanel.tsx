@@ -5,6 +5,9 @@ import { cardDisplayName, cardStats, cardAbilityText, labelForCatalogType } from
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardDetailPanel.css';
 
+/** Default slide-out width for catalog card detail (20% wider than the original 420px). */
+export const CARD_DETAIL_PANEL_WIDTH = 504;
+
 interface CardDetailPanelProps {
   card: CatalogCard | null;
   type: CatalogType | null;
@@ -12,6 +15,10 @@ interface CardDetailPanelProps {
   onClose: () => void;
   /** Action area rendered under the header (e.g. +Deck, collection stepper). */
   actions?: ReactNode;
+  /** When set, renders "Has Foil" in Details (replaces raw `is_foil` from the card row). */
+  hasFoil?: boolean;
+  /** Friendly set name for Details (falls back to `card.set` code when omitted). */
+  setDisplayName?: string;
 }
 
 /** Internal / non-display fields hidden from the auto-generated field list. */
@@ -33,6 +40,9 @@ const HIDDEN_FIELDS = new Set([
   'card_effect',
   'game_effect',
   'card_text',
+  'is_foil',
+  'threat_level',
+  'set',
 ]);
 
 function humanizeKey(key: string): string {
@@ -60,23 +70,28 @@ const STAT_ROWS: Array<{ key: 'energy' | 'combat' | 'bruteForce' | 'intelligence
   { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
 ];
 
-export function CardDetailPanel({ card, type, open, onClose, actions }: CardDetailPanelProps) {
+export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, setDisplayName }: CardDetailPanelProps) {
   if (!card) return null;
 
   const name = cardDisplayName(card);
   const stats = cardStats(card);
   const ability = cardAbilityText(card);
   const typeLabel = type ? labelForCatalogType(type) : '';
+  const isCharacter = type === 'characters';
+  const threatLevel = isCharacter ? Number(card.threat_level ?? 0) : null;
 
   const extraFields = Object.entries(card)
     .filter(([key]) => !HIDDEN_FIELDS.has(key))
     .map(([key, value]) => [key, formatValue(value)] as const)
     .filter(([, value]) => value !== null);
 
+  const showDetails = Boolean(card.set) || hasFoil !== undefined || extraFields.length > 0;
+  const setLabel = card.set ? (setDisplayName ?? String(card.set)) : null;
+
   return (
-    <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={420}>
+    <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
       <div className="card-detail">
-        <div className="card-detail__image">
+        <div className={`card-detail__image${isCharacter ? ' card-detail__image--landscape' : ''}`}>
           <CardImage imagePath={(card.image_path as string) || (card.image as string)} alt={name} useThumbnail={false} className="card-image--contain" />
         </div>
 
@@ -97,10 +112,17 @@ export function CardDetailPanel({ card, type, open, onClose, actions }: CardDeta
                 <span className="card-detail__stat-label">{s.label}</span>
               </div>
             ))}
-            <div className="card-detail__stat card-detail__stat--total">
-              <span className="card-detail__stat-val stat-total">{stats.total}</span>
-              <span className="card-detail__stat-label">Total</span>
-            </div>
+            {isCharacter ? (
+              <div className="card-detail__stat card-detail__stat--threat">
+                <span className="card-detail__stat-val stat-threat">{threatLevel}</span>
+                <span className="card-detail__stat-label">Threat</span>
+              </div>
+            ) : (
+              <div className="card-detail__stat card-detail__stat--total">
+                <span className="card-detail__stat-val stat-total">{stats.total}</span>
+                <span className="card-detail__stat-label">Total</span>
+              </div>
+            )}
           </div>
         ) : null}
 
@@ -111,10 +133,22 @@ export function CardDetailPanel({ card, type, open, onClose, actions }: CardDeta
           </section>
         ) : null}
 
-        {extraFields.length > 0 ? (
+        {showDetails ? (
           <section className="card-detail__section">
             <h4 className="card-detail__section-title">Details</h4>
             <dl className="card-detail__fields">
+              {setLabel ? (
+                <div className="card-detail__field">
+                  <dt>Set</dt>
+                  <dd>{setLabel}</dd>
+                </div>
+              ) : null}
+              {hasFoil !== undefined ? (
+                <div className="card-detail__field">
+                  <dt>Has Foil</dt>
+                  <dd>{hasFoil ? 'Yes' : 'No'}</dd>
+                </div>
+              ) : null}
               {extraFields.map(([key, value]) => (
                 <div className="card-detail__field" key={key}>
                   <dt>{humanizeKey(key)}</dt>

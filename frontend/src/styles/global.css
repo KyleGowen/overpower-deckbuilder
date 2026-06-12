@@ -179,6 +179,7 @@ a:focus-visible,
 .stat-brute-force { color: var(--color-stat-brute-force); }
 .stat-intelligence { color: var(--color-stat-intelligence); }
 .stat-total { color: var(--color-stat-total); }
+.stat-threat { color: var(--color-text-muted); }
 
 /* ---- Badges ---- */
 .badge {
