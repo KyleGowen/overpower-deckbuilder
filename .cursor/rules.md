@@ -21,5 +21,6 @@ Project rules have been split into individual `.mdc` files under [`.cursor/rules
 | [trivy-ci.mdc](rules/trivy-ci.mdc) | Trivy vulnerability scanning in CI |
 | [legacy-type-names.mdc](rules/legacy-type-names.mdc) | Legacy → modern power type name mapping |
 | [ui-ux-designer.mdc](rules/ui-ux-designer.mdc) | Desktop UI/UX review and improvement |
+| [mobile-ui-ux-designer.mdc](rules/mobile-ui-ux-designer.mdc) | Mobile UI/UX review and improvement |
 
 Authoritative workflow rules (ship, lint, tests, infra lock) remain in the repo root [`.cursorrules`](../.cursorrules) and [`AGENTS.md`](../AGENTS.md).
