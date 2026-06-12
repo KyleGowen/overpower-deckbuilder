@@ -7,19 +7,26 @@ import {
   CATALOG_TYPE_BY_SLUG,
   cardMatchesSearchQuery,
   isLandscapeCatalogType,
+  type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
+import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
+import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
+import { isFoilCard } from '../../lib/catalog/foilCatalog';
+import { buildSetNameLookup } from '../../lib/catalog/setNames';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
+import { CatalogAllList } from '../../components/CatalogAllList';
 import { QuantityStepper } from '../../components/QuantityStepper';
 import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { IconSearch, IconCollection } from '../../components/icons';
-import type { CatalogCard, CatalogType } from '../../lib/api/types';
+import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
 import './CollectionPage.css';
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE_GRID = 24;
+const PAGE_SIZE_ALL = 48;
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
@@ -33,39 +40,84 @@ function useDebounced<T>(value: T, delay = 250): T {
 export default function CollectionPage() {
   const { isMobile } = useLayoutMode();
   const collection = useCollection();
-  const [type, setType] = useState<CatalogType>('characters');
+  const [tab, setTab] = useState<CatalogTabSelection>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
+  const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
+
+  const isAllTab = tab === 'all';
+  const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
+  const activeCatalogType = isAllTab ? selectedCatalogType : tab;
+  const activeCollectionType = CATALOG_TYPE_BY_SLUG[activeCatalogType].collectionType;
 
   const debouncedSearch = useDebounced(search);
-  const collectionType = CATALOG_TYPE_BY_SLUG[type].collectionType;
 
   const catalogQuery = useQuery({
-    queryKey: ['catalog', type],
-    queryFn: () => fetchCatalog(type),
+    queryKey: ['catalog', tab],
+    queryFn: () => fetchCatalog(tab as CatalogType),
+    enabled: !isAllTab,
     staleTime: 30 * 60 * 1000,
   });
   const setsQuery = useQuery({ queryKey: ['sets'], queryFn: () => fetchSets(), staleTime: 60 * 60 * 1000 });
-  const allCards = catalogQuery.data ?? [];
+  const allCatalogQuery = useAllCatalogCards({ enabled: isAllTab });
+  const setNameLookup = useMemo(
+    () => buildSetNameLookup(setsQuery.data ?? []),
+    [setsQuery.data],
+  );
 
-  const filtered = useMemo(() => {
+  const perTypeCards = catalogQuery.data ?? [];
+
+  const gridFiltered = useMemo(() => {
+    if (isAllTab) return [];
     const q = debouncedSearch.trim().toLowerCase();
-    return allCards.filter((c) => {
+    const collectionType = CATALOG_TYPE_BY_SLUG[tab].collectionType;
+    return perTypeCards.filter((c) => {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
       if (ownedOnly && collection.quantityFor(c.id, collectionType) <= 0) return false;
       return true;
     });
-  }, [allCards, debouncedSearch, setFilter, ownedOnly, collection, collectionType]);
+  }, [perTypeCards, debouncedSearch, setFilter, ownedOnly, collection, tab, isAllTab]);
+
+  const allTabFiltered = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    const result = allCatalogQuery.cards.filter(({ card, catalogType }) => {
+      const collectionType = CATALOG_TYPE_BY_SLUG[catalogType].collectionType;
+      if (q && !cardMatchesSearchQuery(card, q)) return false;
+      if (setFilter && String(card.set ?? '') !== setFilter) return false;
+      if (ownedOnly && collection.quantityFor(card.id, collectionType) <= 0) return false;
+      return true;
+    });
+    result.sort((a, b) => compareAllCatalogCards(a.card, b.card));
+    return result;
+  }, [allCatalogQuery.cards, debouncedSearch, setFilter, ownedOnly, collection]);
+
+  const filtered = isAllTab ? allTabFiltered : gridFiltered;
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, setFilter, ownedOnly]);
+  }, [tab, debouncedSearch, setFilter, ownedOnly]);
 
-  const pageCards = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const effectivePage = Math.min(page, maxPage);
+  const pageStart = (effectivePage - 1) * pageSize;
+  const pageGridCards = isAllTab ? [] : gridFiltered.slice(pageStart, pageStart + pageSize);
+  const pageAllItems = isAllTab ? allTabFiltered.slice(pageStart, pageStart + pageSize) : [];
+
+  const isLoading = isAllTab
+    ? allCatalogQuery.isLoading || collection.isLoading
+    : catalogQuery.isLoading || collection.isLoading;
+
+  const selectCard = (card: CatalogCard, catalogType: CatalogType) => {
+    setSelected(card);
+    setSelectedCatalogType(catalogType);
+  };
+
+  const quantityForItem = (cardId: string, collectionType: CollectionCardType) =>
+    collection.quantityFor(cardId, collectionType);
 
   return (
     <div className="col">
@@ -117,16 +169,28 @@ export default function CollectionPage() {
               key={meta.type}
               type="button"
               role="tab"
-              aria-selected={type === meta.type}
-              className={`col__type ${type === meta.type ? 'is-active' : ''}`}
-              onClick={() => setType(meta.type)}
+              aria-selected={tab === meta.type}
+              className={`col__type ${tab === meta.type ? 'is-active' : ''}`}
+              onClick={() => {
+                setTab(meta.type);
+                setSelectedCatalogType(meta.type);
+              }}
             >
               {isMobile ? meta.shortLabel : meta.label}
             </button>
           ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isAllTab}
+            className={`col__type ${isAllTab ? 'is-active' : ''}`}
+            onClick={() => setTab('all')}
+          >
+            All
+          </button>
         </div>
 
-        {catalogQuery.isLoading || collection.isLoading ? (
+        {isLoading ? (
           <LoadingState label="Loading collection..." />
         ) : filtered.length === 0 ? (
           <EmptyState
@@ -138,20 +202,45 @@ export default function CollectionPage() {
             }
             icon={<IconCollection />}
           />
+        ) : isAllTab ? (
+          <>
+            <CatalogAllList
+              items={pageAllItems}
+              selectedId={selected?.id}
+              onSelect={(item) => selectCard(item.card, item.catalogType)}
+              setNameLookup={setNameLookup}
+              dimmed={(item) =>
+                quantityForItem(item.card.id, CATALOG_TYPE_BY_SLUG[item.catalogType].collectionType) <= 0
+              }
+              renderTrailing={(item) => {
+                const ct = CATALOG_TYPE_BY_SLUG[item.catalogType].collectionType;
+                const qty = quantityForItem(item.card.id, ct);
+                return (
+                  <QuantityStepper
+                    value={qty}
+                    size="sm"
+                    onChange={(next) => void collection.setQuantity(item.card, ct, next)}
+                  />
+                );
+              }}
+            />
+            <Pagination page={page} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} />
+          </>
         ) : (
           <>
             <div
-              className={`col__grid ${isLandscapeCatalogType(type) ? 'col__grid--landscape' : 'col__grid--portrait'}`}
+              className={`col__grid ${isLandscapeCatalogType(tab) ? 'col__grid--landscape' : 'col__grid--portrait'}`}
             >
-              {pageCards.map((card) => {
+              {pageGridCards.map((card) => {
+                const collectionType = CATALOG_TYPE_BY_SLUG[tab].collectionType;
                 const qty = collection.quantityFor(card.id, collectionType);
                 return (
                   <CardTile
                     key={card.id}
                     card={card}
-                    catalogType={type}
+                    catalogType={tab}
                     dimmed={qty <= 0}
-                    onClick={() => setSelected(card)}
+                    onClick={() => selectCard(card, tab)}
                     footer={
                       <QuantityStepper
                         value={qty}
@@ -163,23 +252,25 @@ export default function CollectionPage() {
                 );
               })}
             </div>
-            <Pagination page={page} pageSize={PAGE_SIZE} totalItems={filtered.length} onPageChange={setPage} />
+            <Pagination page={page} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} />
           </>
         )}
       </div>
 
       <CardDetailPanel
         card={selected}
-        type={type}
+        type={activeCatalogType}
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
+        isFoil={selected ? isFoilCard(selected) : undefined}
         actions={
           selected ? (
             <div className="col__detail-qty">
               <span>In your collection</span>
               <QuantityStepper
-                value={collection.quantityFor(selected.id, collectionType)}
-                onChange={(next) => void collection.setQuantity(selected, collectionType, next)}
+                value={collection.quantityFor(selected.id, activeCollectionType)}
+                size="sm"
+                onChange={(next) => void collection.setQuantity(selected, activeCollectionType, next)}
               />
             </div>
           ) : null

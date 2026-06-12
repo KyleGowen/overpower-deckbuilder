@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconMinus, IconPlus } from '../icons';
 import './QuantityStepper.css';
 
@@ -21,33 +21,41 @@ export function QuantityStepper({
 }: QuantityStepperProps) {
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   const inputRef = useRef<HTMLInputElement>(null);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
+  const focusedRef = useRef(false);
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    if (!focusedRef.current) {
+      setDraft(String(value));
+    }
+  }, [value]);
 
   const commitDraft = (raw: string) => {
     const trimmed = raw.trim();
     if (trimmed === '') {
       onChange(min);
+      setDraft(String(min));
       return;
     }
     const parsed = Number.parseInt(trimmed, 10);
     if (Number.isNaN(parsed)) {
+      setDraft(String(value));
       return;
     }
-    onChange(clamp(parsed));
+    const next = clamp(parsed);
+    onChange(next);
+    setDraft(String(next));
   };
 
-  const startEditing = () => {
+  const handleFocus = () => {
+    focusedRef.current = true;
     setDraft(String(value));
-    setEditing(true);
     requestAnimationFrame(() => inputRef.current?.select());
   };
 
-  const finishEditing = () => {
-    if (editing) {
-      commitDraft(draft);
-      setEditing(false);
-    }
+  const handleBlur = () => {
+    focusedRef.current = false;
+    commitDraft(draft);
   };
 
   return (
@@ -56,7 +64,7 @@ export function QuantityStepper({
         type="button"
         className="qty-stepper__btn"
         onClick={() => {
-          setEditing(false);
+          focusedRef.current = false;
           onChange(clamp(value - 1));
         }}
         disabled={value <= min}
@@ -69,25 +77,26 @@ export function QuantityStepper({
         type="text"
         inputMode="numeric"
         pattern="[0-9]*"
-        className={`qty-stepper__input ${editing ? 'is-editing' : ''}`}
-        value={editing ? draft : String(value)}
+        className="qty-stepper__input"
+        value={draft}
         onChange={(e) => {
           const next = e.target.value;
           if (next === '' || /^\d+$/.test(next)) {
             setDraft(next);
           }
         }}
-        onFocus={startEditing}
-        onBlur={finishEditing}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
             commitDraft(draft);
-            setEditing(false);
+            focusedRef.current = false;
             inputRef.current?.blur();
           } else if (e.key === 'Escape') {
             e.preventDefault();
-            setEditing(false);
+            focusedRef.current = false;
+            setDraft(String(value));
             inputRef.current?.blur();
           }
         }}
@@ -98,7 +107,7 @@ export function QuantityStepper({
         type="button"
         className="qty-stepper__btn"
         onClick={() => {
-          setEditing(false);
+          focusedRef.current = false;
           onChange(clamp(value + 1));
         }}
         disabled={value >= max}

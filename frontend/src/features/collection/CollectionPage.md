@@ -4,10 +4,12 @@ Track how many of each card you own. Same browse/filter chrome as the Database, 
 per-card quantity steppers and an "Owned only" toggle.
 
 ## Controls
-- Search (debounced), type tabs, **Owned only** checkbox.
+- Search (debounced), type tabs ( **All** last ), set dropdown, **Owned only** checkbox.
 - Header shows `totalOwned` and `uniqueCards`.
-- Each `CardTile` has a footer `QuantityStepper` and an `x{n}` owned badge; unowned cards
-  are dimmed. The detail panel also exposes a stepper.
+- Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.
+- **All** tab: `CatalogAllList` spread grid rows (`#`, name, type/set badges, stepper);
+  checklist sort (`compareAllCatalogCards`). Detail panel also exposes a stepper and
+  **Is Foil** Yes/No (`card.is_foil` via `isFoilCard`).
 
 ## Data flow (`useCollection`)
 Unifies two backends:
@@ -22,4 +24,5 @@ otherwise). So `setQuantity`:
 - **PUTs** (`setCollectionQuantity`) once it is — including quantity `0` to remove.
 
 ## Notes
-- Catalog is fetched per type and paginated client-side, like the Database.
+- Per-type catalog is fetched per tab; **All** merges all 12 slugs client-side. Pagination
+  is client-side (24 tiles per type tab, 48 list rows on All).

@@ -12,6 +12,9 @@ import type {
   CatalogCard,
 } from '../api/types';
 
+/** Per-type catalog tab or cross-type All list tab. */
+export type CatalogTabSelection = CatalogType | 'all';
+
 export interface CatalogTypeMeta {
   type: CatalogType;
   label: string;

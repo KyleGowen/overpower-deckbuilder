@@ -15,8 +15,10 @@ interface CardDetailPanelProps {
   onClose: () => void;
   /** Action area rendered under the header (e.g. +Deck, collection stepper). */
   actions?: ReactNode;
-  /** When set, renders "Has Foil" in Details (replaces raw `is_foil` from the card row). */
+  /** When set, renders "Has Foil" in Details (foil variant exists for this card). */
   hasFoil?: boolean;
+  /** When set, renders "Is Foil" in Details (this catalog row is a foil printing). */
+  isFoil?: boolean;
   /** Friendly set name for Details (falls back to `card.set` code when omitted). */
   setDisplayName?: string;
 }
@@ -70,7 +72,7 @@ const STAT_ROWS: Array<{ key: 'energy' | 'combat' | 'bruteForce' | 'intelligence
   { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
 ];
 
-export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, setDisplayName }: CardDetailPanelProps) {
+export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, isFoil, setDisplayName }: CardDetailPanelProps) {
   if (!card) return null;
 
   const name = cardDisplayName(card);
@@ -85,7 +87,7 @@ export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, s
     .map(([key, value]) => [key, formatValue(value)] as const)
     .filter(([, value]) => value !== null);
 
-  const showDetails = Boolean(card.set) || hasFoil !== undefined || extraFields.length > 0;
+  const showDetails = Boolean(card.set) || hasFoil !== undefined || isFoil !== undefined || extraFields.length > 0;
   const setLabel = card.set ? (setDisplayName ?? String(card.set)) : null;
 
   return (
@@ -141,6 +143,12 @@ export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, s
                 <div className="card-detail__field">
                   <dt>Set</dt>
                   <dd>{setLabel}</dd>
+                </div>
+              ) : null}
+              {isFoil !== undefined ? (
+                <div className="card-detail__field">
+                  <dt>Is Foil</dt>
+                  <dd>{isFoil ? 'Yes' : 'No'}</dd>
                 </div>
               ) : null}
               {hasFoil !== undefined ? (

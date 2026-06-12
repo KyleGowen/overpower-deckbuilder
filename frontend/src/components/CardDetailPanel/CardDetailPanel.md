@@ -12,7 +12,8 @@ auto-generated Details key/value list.
 | `open` | `boolean` | Visibility (wraps `SlideOutPanel`). |
 | `onClose` | `() => void` | Close handler. |
 | `actions` | `ReactNode` | Action area under the header (e.g. Add to Deck button, or a collection `QuantityStepper`). |
-| `hasFoil` | `boolean` | When set, renders **Has Foil** Yes/No in Details (replaces raw `is_foil`). |
+| `hasFoil` | `boolean` | When set, renders **Has Foil** Yes/No in Details (foil variant exists). |
+| `isFoil` | `boolean` | When set, renders **Is Foil** Yes/No in Details (this row is a foil printing). |
 | `setDisplayName` | `string` | Friendly set name for the **Set** Details row (falls back to `card.set` code when omitted). |
 
 ## Details list

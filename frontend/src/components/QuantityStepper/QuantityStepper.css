@@ -23,9 +23,10 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
-.qty-stepper__input {
+.qty-stepper .qty-stepper__input {
   width: 3ch;
   min-width: 2ch;
+  max-width: 4ch;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -36,12 +37,15 @@
   font-size: var(--font-size-sm);
   font-family: inherit;
   line-height: 1.2;
+  cursor: text;
+  box-shadow: none;
   -moz-appearance: textfield;
 }
-.qty-stepper__input:focus,
-.qty-stepper__input.is-editing {
+.qty-stepper .qty-stepper__input:focus {
   outline: none;
   background: var(--color-bg-elevated);
+  border: none;
+  box-shadow: none;
 }
 
 .qty-stepper--md .qty-stepper__btn {
@@ -56,4 +60,5 @@
 }
 .qty-stepper--sm .qty-stepper__input {
   font-size: var(--font-size-xs);
+  max-width: 3.5ch;
 }

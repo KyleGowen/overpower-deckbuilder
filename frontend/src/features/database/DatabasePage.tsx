@@ -15,11 +15,15 @@ import {
   isLandscapeCatalogType,
   metaForDeckType,
   CATALOG_TYPE_BY_SLUG,
+  type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
+import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
+import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
 import { useCollection } from '../../lib/collection/useCollection';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
+import { CatalogAllList } from '../../components/CatalogAllList';
 import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -32,7 +36,8 @@ import { cardMatchesDbvFilters } from './filters/dbvFilterPredicates';
 import { useDbvFilters } from './filters/useDbvFilters';
 import './DatabasePage.css';
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE_GRID = 24;
+const PAGE_SIZE_ALL = 48;
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
@@ -46,19 +51,25 @@ function useDebounced<T>(value: T, delay = 250): T {
 export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
   const collection = useCollection();
-  const [type, setType] = useState<CatalogType>('characters');
+  const [tab, setTab] = useState<CatalogTabSelection>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
+  const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
   const [filterRailCollapsed, setFilterRailCollapsed] = useState(false);
 
+  const isAllTab = tab === 'all';
+  const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
+  const activeCatalogType = isAllTab ? selectedCatalogType : tab;
+
   const debouncedSearch = useDebounced(search);
-  const dbvFilters = useDbvFilters(type);
+  const dbvFilters = useDbvFilters(isAllTab ? 'characters' : tab);
 
   const catalogQuery = useQuery({
-    queryKey: ['catalog', type],
-    queryFn: () => fetchCatalog(type),
+    queryKey: ['catalog', tab],
+    queryFn: () => fetchCatalog(tab as CatalogType),
+    enabled: !isAllTab,
     staleTime: 30 * 60 * 1000,
   });
   const setsQuery = useQuery({ queryKey: ['sets'], queryFn: () => fetchSets(), staleTime: 60 * 60 * 1000 });
@@ -78,33 +89,63 @@ export default function DatabasePage() {
     [setsQuery.data],
   );
 
-  const allCards = useMemo(
+  const allCatalogQuery = useAllCatalogCards({
+    enabled: isAllTab,
+    foilToBase: foilLookup.foilToBase,
+  });
+
+  const perTypeCards = useMemo(
     () => dedupeFoilCatalogCards(catalogQuery.data ?? [], foilLookup.foilToBase),
     [catalogQuery.data, foilLookup.foilToBase],
   );
 
-  const filtered = useMemo(() => {
+  const gridFiltered = useMemo(() => {
+    if (isAllTab) return [];
     const q = debouncedSearch.trim().toLowerCase();
-    const result = allCards.filter((c) => {
+    const catalogType = tab;
+    const result = perTypeCards.filter((c) => {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
-      if (!cardMatchesDbvFilters(c, type, dbvFilters.state)) return false;
+      if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
       return true;
     });
-    result.sort((a, b) => compareCatalogCards(a, b, type));
+    result.sort((a, b) => compareCatalogCards(a, b, catalogType));
     return result;
-  }, [allCards, debouncedSearch, setFilter, type, dbvFilters.state]);
+  }, [perTypeCards, debouncedSearch, setFilter, tab, dbvFilters.state, isAllTab]);
+
+  const allTabFiltered = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    const result = allCatalogQuery.cards.filter(({ card }) => {
+      if (q && !cardMatchesSearchQuery(card, q)) return false;
+      if (setFilter && String(card.set ?? '') !== setFilter) return false;
+      return true;
+    });
+    result.sort((a, b) => compareAllCatalogCards(a.card, b.card));
+    return result;
+  }, [allCatalogQuery.cards, debouncedSearch, setFilter]);
+
+  const filtered = isAllTab ? allTabFiltered : gridFiltered;
 
   useEffect(() => {
     setPage(1);
-  }, [type, debouncedSearch, setFilter, dbvFilters.state]);
+  }, [tab, debouncedSearch, setFilter, dbvFilters.state]);
 
   useEffect(() => () => clearProgressiveImageSession('database'), []);
 
-  const maxPage = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
   const effectivePage = Math.min(page, maxPage);
-  const pageCards = filtered.slice((effectivePage - 1) * PAGE_SIZE, effectivePage * PAGE_SIZE);
-  const collectionType = CATALOG_TYPE_BY_SLUG[type].collectionType;
+  const pageStart = (effectivePage - 1) * pageSize;
+  const pageGridCards = isAllTab ? [] : gridFiltered.slice(pageStart, pageStart + pageSize);
+  const pageAllItems = isAllTab ? allTabFiltered.slice(pageStart, pageStart + pageSize) : [];
+
+  const isLoading = isAllTab ? allCatalogQuery.isLoading : catalogQuery.isLoading;
+  const isError = isAllTab ? allCatalogQuery.isError : catalogQuery.isError;
+  const detailCollectionType = CATALOG_TYPE_BY_SLUG[activeCatalogType].collectionType;
+
+  const selectCard = (card: CatalogCard, catalogType: CatalogType) => {
+    setSelected(card);
+    setSelectedCatalogType(catalogType);
+  };
 
   return (
     <div className="db">
@@ -145,52 +186,74 @@ export default function DatabasePage() {
               key={meta.type}
               type="button"
               role="tab"
-              aria-selected={type === meta.type}
-              className={`db__type ${type === meta.type ? 'is-active' : ''}`}
-              onClick={() => setType(meta.type)}
+              aria-selected={tab === meta.type}
+              className={`db__type ${tab === meta.type ? 'is-active' : ''}`}
+              onClick={() => {
+                setTab(meta.type);
+                setSelectedCatalogType(meta.type);
+              }}
             >
               {isMobile ? meta.shortLabel : meta.label}
             </button>
           ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isAllTab}
+            className={`db__type ${isAllTab ? 'is-active' : ''}`}
+            onClick={() => setTab('all')}
+          >
+            All
+          </button>
         </div>
 
-        {!catalogQuery.isError ? (
+        {!isError && !isAllTab ? (
           <DbvFilterRail
-            catalogType={type}
+            catalogType={tab}
             filters={dbvFilters}
-            allCards={allCards}
+            allCards={perTypeCards}
             collapsed={filterRailCollapsed}
             onCollapsedChange={setFilterRailCollapsed}
           />
         ) : null}
 
-        {catalogQuery.isLoading ? (
+        {isLoading ? (
           <LoadingState label="Loading cards..." />
-        ) : catalogQuery.isError ? (
+        ) : isError ? (
           <EmptyState variant="error" title="Couldn't load cards" message="Please try again." icon={<IconDatabase />} />
         ) : filtered.length === 0 ? (
           <EmptyState title="No cards found" message="Try adjusting your search or filters." icon={<IconSearch />} />
+        ) : isAllTab ? (
+          <>
+            <CatalogAllList
+              items={pageAllItems}
+              selectedId={selected?.id}
+              onSelect={(item) => selectCard(item.card, item.catalogType)}
+              setNameLookup={setNameLookup}
+            />
+            <Pagination page={page} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} />
+          </>
         ) : (
           <>
-            <div className={`db__grid ${isLandscapeCatalogType(type) ? 'db__grid--landscape' : 'db__grid--portrait'}`}>
-              {pageCards.map((card) => (
+            <div className={`db__grid ${isLandscapeCatalogType(tab) ? 'db__grid--landscape' : 'db__grid--portrait'}`}>
+              {pageGridCards.map((card) => (
                 <CardTile
                   key={card.id}
                   card={card}
-                  catalogType={type}
+                  catalogType={tab}
                   hasFoilVersion={cardHasFoilVersion(card, foilLookup.baseToFoil)}
-                  onClick={() => setSelected(card)}
+                  onClick={() => selectCard(card, tab)}
                 />
               ))}
             </div>
-            <Pagination page={page} pageSize={PAGE_SIZE} totalItems={filtered.length} onPageChange={setPage} />
+            <Pagination page={page} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} />
           </>
         )}
       </div>
 
       <CardDetailPanel
         card={selected}
-        type={type}
+        type={activeCatalogType}
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
@@ -198,15 +261,15 @@ export default function DatabasePage() {
         actions={
           selected ? (
             <div className="db__detail-actions">
-              <AddToDeck card={selected} type={type} />
+              <AddToDeck card={selected} type={activeCatalogType} />
               <button
                 type="button"
                 className="btn btn-secondary db__add-collection"
                 onClick={() =>
                   void collection.setQuantity(
                     selected,
-                    collectionType,
-                    collection.quantityFor(selected.id, collectionType) + 1,
+                    detailCollectionType,
+                    collection.quantityFor(selected.id, detailCollectionType) + 1,
                   )
                 }
               >

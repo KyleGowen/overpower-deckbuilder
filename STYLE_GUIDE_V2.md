@@ -121,6 +121,16 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
   get the accent glow; unowned tiles in the Collection are dimmed. Database and Collection
   grids use 4 columns for landscape types and 6 for portrait (2 on mobile).
+- **All tab** (last type tab on Database and Collection): cross-type **text list** via
+  `CatalogAllList` — no card images. Rows use a **spread grid layout**: `#set_number`
+  (monospace, `4.5rem`, extra padding before name), card name (foil `✦` when applicable),
+  type badge (right-aligned column), friendly **set name** badge (left-aligned, ellipsis),
+  a flexible spacer, and (Collection only) a trailing `QuantityStepper`.
+  Mobile collapses to two rows (`#` + name, then badges + stepper). Sort is fixed checklist
+  order: set → non-foil before foil → set_number → name (`compareAllCatalogCards`). Selected
+  row: accent left border + `--color-accent-soft` background. DBV All opens detail slideout on
+  row click only (deck/collection actions in panel). Pagination uses 48 rows per page on All
+  (24 on image grids). Search + set filter apply; DBV hides `DbvFilterRail` on All.
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
   (`aspect-ratio: 380 / 280`): the first character is shown as a **full card** (`object-fit:
@@ -151,7 +161,7 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
   scrim at `--z-drawer`, focus trapping, `Esc` to close, and slides in with `--ease-out`.
 - The card **detail panel** shows the full art, type/set chips, an action slot (e.g. Add to
   Deck / + Collection), the color-coded stat row, and a Details key/value list
-  (Set, Set Number, Has Foil, abilities when present). Default width **504px** (20% wider
+  (Set, **Is Foil** on Collection, **Has Foil** on Database, Set Number, abilities when present). Default width **504px** (20% wider
   than the original 420px drawer). Character detail uses a landscape art frame (`380:280`);
   the fifth stat tile is gray **Threat** instead of purple **Total**.
 

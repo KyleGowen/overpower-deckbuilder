@@ -1,0 +1,31 @@
+---
+description: Require Cursor browser verification on new v2 pages and UI features before marking work complete.
+alwaysApply: true
+---
+
+# Browser verification (v2 UI)
+
+Before marking a **new page, route, tab, or user-visible feature** complete in the v2 React SPA (`frontend/`), verify it in the **Cursor browser** against the running dev app.
+
+## When required
+
+- New or materially changed routes, tabs, modals, or layouts
+- Features that need a **refresh** or HMR to see (not trivial one-line CSS tweaks)
+- Bug fixes for runtime errors reported in the browser
+
+Skip for: backend-only changes, docs-only, unit-test-only refactors with no UI surface.
+
+## How to verify
+
+1. Ensure dev servers are running (repo root `npm run dev` + `frontend/npm run dev`). Browse **`http://localhost:5173`** (or the Vite Network URL for LAN).
+2. Use **cursor-ide-browser** MCP: `browser_navigate` → `browser_lock` → `browser_snapshot` / interactions → `browser_unlock`.
+3. Exercise the **happy path** and the change-specific edge cases (e.g. new tab, empty state, row click → slideout, filters).
+4. Confirm **no error overlay**, no console-breaking exceptions, and expected DOM (tab active, list/grid visible, controls wired).
+
+## Completion gate
+
+Do **not** tell the user the UI work is done until browser verification passes or you report a specific blocker (server down, auth required, MCP unavailable) and what remains.
+
+## Local auth
+
+Log in as **kyle** / **test** when a flow requires a logged-in user.
