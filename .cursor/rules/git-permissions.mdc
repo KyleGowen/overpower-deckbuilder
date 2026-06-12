@@ -1,0 +1,19 @@
+---
+description: Git commit and push permissions — never commit or push without explicit user approval.
+alwaysApply: true
+---
+
+# Git & Version Control
+
+- **NEVER commit or push to git without explicit user permission**
+- **You must ALWAYS ask the user before:**
+  1. Running `git add` commands
+  2. Running `git commit` commands
+  3. Running `git push` commands
+  4. Any other git operations that modify the repository
+- **You can only suggest git commands but must wait for user approval**
+- **The user has full control over when and what gets committed/pushed**
+- **This rule takes precedence over all other rules**
+- Write descriptive commit messages when instructed to commit
+- Test changes before committing
+- Use meaningful branch names for features

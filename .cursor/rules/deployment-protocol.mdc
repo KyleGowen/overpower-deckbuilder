@@ -1,0 +1,198 @@
+---
+description: Mandatory AWS/EC2/Docker deployment workflow, verification checklist, and rollback procedure.
+alwaysApply: false
+---
+
+# MANDATORY Deployment Protocol
+
+## DEPLOYMENT WORKFLOW RULES
+
+You must ALWAYS follow this exact sequence for any deployment:
+
+### 1. Pre-Deployment Validation
+
+- **ALWAYS run `npm test` and ensure ALL tests pass (95/95)**
+- **ALWAYS run `npm run build` to verify TypeScript compilation**
+- **NEVER deploy with failing tests or build errors**
+- **If tests fail, fix them before proceeding with deployment**
+
+### 2. Docker Image Build Process
+
+- **ALWAYS use `docker buildx build --platform linux/amd64 --no-cache` for production builds**
+- **NEVER use cached builds for production deployments**
+- **ALWAYS tag images as `overpower-deckbuilder:latest` locally first**
+- **ALWAYS verify the image builds successfully before pushing**
+- **ALWAYS rebuild the image when deploying code changes**
+
+### 3. ECR Authentication & Push
+
+- **ALWAYS get ECR URL from Terraform: `cd infra/ && terraform output -raw ecr_repository_url`**
+- **ALWAYS login to ECR: `aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $ECR_URL`**
+- **ALWAYS tag for ECR: `docker tag overpower-deckbuilder:latest $ECR_URL:latest`**
+- **ALWAYS push to ECR: `docker push $ECR_URL:latest`**
+
+### 4. EC2 Deployment Process
+
+- **ALWAYS get instance ID: `cd infra/ && terraform output -raw ec2_instance_id`**
+- **ALWAYS get ECR URL: `cd infra/ && terraform output -raw ecr_repository_url`**
+- **ALWAYS use SSM to deploy with proper environment variables:**
+
+```bash
+aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AWS-RunShellScript" --parameters 'commands=[
+  "export aws_region=us-west-2",
+  "export ecr_repository_url=$ECR_URL",
+  "export project_name=op-deckbuilder",
+  "export environment=dev",
+  "docker stop overpower-app || true",
+  "docker rm overpower-app || true",
+  "docker pull $ECR_URL:latest",
+  "docker run -d --name overpower-app --restart unless-stopped -p 3000:3000 -e NODE_ENV=production -e DATABASE_URL=\"$(aws ssm get-parameter --name \"/op-deckbuilder/dev/database/url\" --with-decryption --region us-west-2 --query \"Parameter.Value\" --output text)\" -e NODE_TLS_REJECT_UNAUTHORIZED=0 -e PORT=3000 $ECR_URL:latest",
+  "sleep 20",
+  "docker ps | grep overpower-app",
+  "docker logs overpower-app --tail 10"
+]'
+```
+
+- **ALWAYS use the user_data.sh script approach when possible for full deployment**
+
+### 4a. User Data Script Deployment (Preferred Method)
+
+- **ALWAYS use `infra/user_data.sh` for complete deployments including nginx configuration**
+- **ALWAYS upload the script to the EC2 instance or reference it properly**
+- **ALWAYS set required environment variables before running the script:**
+  - `aws_region=us-west-2`
+  - `ecr_repository_url=474120878015.dkr.ecr.us-west-2.amazonaws.com/op-deckbuilder-repo`
+  - `project_name=op-deckbuilder`
+  - `environment=dev`
+- **ALWAYS verify the script configures nginx properly for excelsior.cards domain**
+- **ALWAYS check that the script pulls the latest image and restarts the container**
+
+### 5. Post-Deployment Verification
+
+- **ALWAYS verify deployment success by checking SSM command output**
+- **ALWAYS test application accessibility: `curl -I http://excelsior.cards`**
+- **ALWAYS check container logs for any errors**
+- **ALWAYS confirm HTTP 200 response from the application**
+- **ALWAYS verify login functionality works by testing the login endpoint**
+- **ALWAYS confirm the application is using the correct RDS database, not a local Docker database**
+- **NEVER consider deployment complete until the application is fully functional and accessible**
+
+### 6. Database Connection Rules
+
+- **ALWAYS use the existing RDS database for production deployments**
+- **NEVER create new local PostgreSQL containers for production**
+- **ALWAYS use the correct SSM parameter: `/op-deckbuilder/dev/database/url`**
+- **ALWAYS verify database connection string points to RDS endpoint, not localhost**
+- **NEVER use Docker networks for production database connections**
+- **ALWAYS confirm database migrations run successfully against RDS**
+
+### 7. Deployment Verification Checklist
+
+- [ ] All tests pass (npm test)
+- [ ] Build succeeds (npm run build)
+- [ ] Docker image builds without cache
+- [ ] ECR push successful
+- [ ] SSM deployment command succeeds
+- [ ] Container is running (docker ps shows Up status)
+- [ ] Application responds with HTTP 200
+- [ ] Database connection successful (logs show "Database initialization completed")
+- [ ] Login functionality works
+- [ ] No 401/403 errors in browser console
+- [ ] Application is accessible at http://excelsior.cards
+
+## PROHIBITED Deployment Practices
+
+- **NEVER deploy without running tests first**
+- **NEVER deploy with build errors or TypeScript compilation failures**
+- **NEVER use cached Docker builds for production (`--no-cache` is mandatory)**
+- **NEVER build for wrong architecture (must be `linux/amd64`)**
+- **NEVER skip ECR authentication before pushing**
+- **NEVER create new databases or PostgreSQL containers for production**
+- **NEVER use localhost database connections in production**
+- **NEVER modify existing RDS infrastructure without explicit user permission**
+- **NEVER consider deployment complete without full functionality verification**
+- **NEVER deploy without proper environment variables**
+- **NEVER skip post-deployment verification**
+
+## Deployment Environment Variables
+
+- **NODE_ENV**: Always `production` for deployments
+- **DATABASE_URL**: Always use SSM parameter `/op-deckbuilder/dev/database/url` for RDS connection
+- **NODE_TLS_REJECT_UNAUTHORIZED**: Set to `0` for RDS SSL connections
+- **PORT**: Always `3000` for production
+
+## CRITICAL: What NOT to Do (Based on Past Mistakes)
+
+- **NEVER create new PostgreSQL Docker containers for production**
+- **NEVER use `localhost:5432` for production database connections**
+- **NEVER create Docker networks for production database connectivity**
+- **NEVER assume deployment is complete without testing login functionality**
+- **NEVER ignore 401/403 errors — they indicate authentication/database issues**
+- **ALWAYS verify the application is using the existing RDS database**
+- **ALWAYS check that database connection string contains the RDS endpoint, not localhost**
+
+## Required AWS Resources
+
+- **ECR Repository**: `overpower-deckbuilder` in `us-west-2`
+- **EC2 Instance**: `i-0dee560af076c0f9d` (or get from Terraform output)
+- **RDS Database**: PostgreSQL instance with proper security groups
+- **SSM Parameters**: All database and app configuration stored in Parameter Store
+- **Route 53**: Domain configuration for `excelsior.cards`
+
+## Emergency Deployment Commands
+
+If standard deployment fails, use these commands in order:
+
+1. **Check EC2 status:**
+   ```bash
+   aws ec2 describe-instances --instance-ids $INSTANCE_ID --region us-west-2
+   ```
+
+2. **Check container status:**
+   ```bash
+   aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AWS-RunShellScript" --parameters 'commands=["docker ps -a"]'
+   ```
+
+3. **Check application logs:**
+   ```bash
+   aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AWS-RunShellScript" --parameters 'commands=["docker logs overpower-app --tail 50"]'
+   ```
+
+4. **Restart application:**
+   ```bash
+   aws ssm send-command --region us-west-2 --instance-ids $INSTANCE_ID --document-name "AWS-RunShellScript" --parameters 'commands=["docker restart overpower-app"]'
+   ```
+
+## Deployment Success Criteria
+
+- All tests pass (95/95)
+- Docker image builds successfully for AMD64
+- Image pushes to ECR without errors
+- SSM deployment command returns success status
+- Container runs and shows "Up" status
+- Application responds with HTTP 200
+- No error logs in container output
+
+## Rollback Procedure
+
+If deployment fails:
+
+1. **Stop current container: `docker stop overpower-app`**
+2. **Remove failed container: `docker rm overpower-app`**
+3. **Pull previous working image: `docker pull $ECR_URL:previous-tag`**
+4. **Run previous version: `docker run -d --name overpower-app [previous-command]`**
+5. **Verify rollback success**
+
+## Deployment Checklist
+
+Before any deployment, verify:
+
+- [ ] All tests pass (`npm test`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] Docker image builds for AMD64
+- [ ] ECR authentication successful
+- [ ] Image pushed to ECR
+- [ ] SSM deployment command sent
+- [ ] Container running successfully
+- [ ] Application accessible via HTTP
+- [ ] No critical errors in logs

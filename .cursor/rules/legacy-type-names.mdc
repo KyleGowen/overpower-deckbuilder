@@ -1,0 +1,15 @@
+---
+description: Map legacy power type names (fighting, strength, intellect) to modern OverPower names.
+alwaysApply: false
+---
+
+# Legacy Type Names Mapping
+
+When legacy terms are used, interpret them as the modern Overpower types:
+
+- energy → Energy
+- fighting → Combat
+- strength → Brute Force
+- intellect → Intelligence
+
+These may be used interchangeably in issues, code comments, migrations, and tests.

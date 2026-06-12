@@ -1,0 +1,46 @@
+---
+description: Google Sign-In via Firebase Admin SDK — verifyIdToken only, no Cloud Storage usage.
+globs: "**/firebase*,**/auth*,tests/integration/google-auth*"
+alwaysApply: false
+---
+
+# Google Sign-In / Firebase Admin Setup
+
+The application supports Google Sign-In using Firebase Admin SDK for server-side ID token verification.
+
+## Architecture
+
+- **Frontend**: Uses Firebase Client SDK to trigger Google Sign-In popup and obtain ID token
+- **Backend**: Uses `firebase-admin` to verify the ID token via `verifyIdToken()`
+- **No Cloud Storage**: We only use Firebase for authentication, NOT for `@google-cloud/storage` or any other Google Cloud services
+
+## Key Files
+
+| Layer | File |
+|-------|------|
+| Firebase config | `src/config/firebaseAdmin.ts` |
+| Auth service | `src/services/AuthenticationService.ts` |
+| Frontend auth | `public/js/auth-service.js` |
+| Integration tests | `tests/integration/google-auth-firebase.test.ts` |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | JSON string of Firebase service account credentials |
+
+For local dev, can also use file: `infra/firebase-service-account.json`
+
+## Dependency Chain Issue
+
+The `firebase-admin` package pulls in `@google-cloud/storage` which has a deep dependency chain:
+
+```
+firebase-admin
+  → @google-cloud/storage
+    → teeny-request
+      → http-proxy-agent@5.x
+        → @tootallnate/once@2.x (VULNERABLE)
+```
+
+**Important**: We do NOT use `@google-cloud/storage` functionality. Firebase Admin is used solely for `verifyIdToken()` in Google Sign-In. The vulnerable code path (`@tootallnate/once`) is never executed in our usage.

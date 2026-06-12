@@ -1,0 +1,11 @@
+---
+description: OverPower power type sort order for cards, stats, and UI lists.
+globs: "**/*sort*,**/*deck*,**/*power*,public/js/**"
+alwaysApply: false
+---
+
+# OverPower Game Sorting Rules
+
+- **Power Type Sorting Order**: Energy → Combat → Brute Force → Intelligence → Multi-Power → Any-Power
+- Any sorting by power types should follow this exact order
+- This applies to power card sections, character stat requirements, and any other power type sorting

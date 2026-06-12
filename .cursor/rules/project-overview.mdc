@@ -1,0 +1,14 @@
+---
+description: Project overview and local dev setup for the Overpower deckbuilder (v2 SPA on port 5173).
+alwaysApply: true
+---
+
+# Overpower Deckbuilder — Project Overview
+
+Node.js/TypeScript deck building application for the Overpower card game with PostgreSQL database, Flyway migrations, and a web-based frontend.
+
+## Local Dev (v2 SPA) — always use port 5173
+
+- **App URL:** `http://localhost:5173` (Vite in `frontend/`). Start **both** root `npm run dev` (API :8085) and `frontend/npm run dev` (UI :5173).
+- **When relaunching dev servers:** browse and automate at **5173**, not 8085. Port 8085 is API/health only during v2 dev.
+- See [`.cursorrules`](../../.cursorrules) and [`docs/current/FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md).

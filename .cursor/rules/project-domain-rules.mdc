@@ -1,0 +1,39 @@
+---
+description: Card data, deck management, authentication, and image handling conventions.
+alwaysApply: false
+---
+
+# Project-Specific Rules
+
+## Card Data Handling
+
+- Card names should display apostrophes correctly (no double-escaping)
+- Image paths should use the `mapImagePathToActualFile` function for consistency
+- Card types: character, location, mission, event, aspect, special, power, teamwork, ally_universe, training, basic_universe, advanced_universe
+
+## Deck Management
+
+- Enforce game rules (e.g., max 1 location per deck)
+- Validate deck composition before saving
+- Provide clear user feedback for validation errors
+- Auto-cleanup invalid deck states when loading
+
+## Authentication
+
+- Always include `credentials: 'include'` in fetch requests to authenticated endpoints
+- Handle authentication failures gracefully
+- Maintain session state properly
+
+## Image Management
+
+- Images are stored in `src/resources/cards/images/` with subdirectories by type
+- Use proper image path mapping for different card types
+- Include cache-busting when needed for development
+- **Deck editor card-view**: Show card images via **thumbnail first**, then **progressive swap to full-res** for character, location, and mission (using `toThumbnailPath` / `toThumbnailPathForType` from `card-image-utils.js`). Implementation: `deck-editor-rendering.js` (`getDeckEditorCardViewInitialImagePath`, `initDeckEditorCardViewProgressiveLoad`). Other card types (special, power, etc.) use full-res only; hover modal uses the same progressive pattern.
+
+## Performance
+
+- Optimize database queries
+- Minimize DOM manipulation
+- Use efficient data structures
+- Consider caching for frequently accessed data

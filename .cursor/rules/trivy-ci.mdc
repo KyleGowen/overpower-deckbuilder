@@ -1,0 +1,74 @@
+---
+description: Trivy vulnerability scanning in CI — use CLI directly, not trivy-action; .trivyignore format.
+globs: ".github/workflows/**,.trivyignore,docs/trivy*"
+alwaysApply: false
+---
+
+# Trivy CI Configuration
+
+## Known Issue: trivy-action Ignores .trivyignore
+
+The `aquasecurity/trivy-action` GitHub Action has [documented bugs](https://github.com/aquasecurity/trivy-action/issues/436) where:
+
+- The `TRIVY_IGNOREFILE` environment variable doesn't work
+- The `trivyignores` input parameter doesn't reliably pass the ignore file to Trivy
+
+**Solution**: Use Trivy CLI directly instead of the GitHub Action.
+
+## Current Configuration (deploy.yml)
+
+```yaml
+- name: Install Trivy
+  run: |
+    sudo apt-get update
+    sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+    sudo apt-get update
+    sudo apt-get install -y trivy
+
+- name: Run Trivy vulnerability scanner
+  run: |
+    trivy fs \
+      --ignorefile .trivyignore \
+      --severity CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN \
+      --exit-code 1 \
+      --ignore-unfixed \
+      --scanners vuln \
+      .
+```
+
+## .trivyignore File
+
+Located at project root. Format: one CVE ID per line with comments explaining the suppression reason.
+
+```
+# CVE-XXXX-YYYY: Package Name - Brief description
+# Suppressed because: [reason]
+# Review periodically: [what to check]
+CVE-XXXX-YYYY
+```
+
+## Currently Suppressed CVEs
+
+| CVE | Package | Reason |
+|-----|---------|--------|
+| CVE-2026-3449 | @tootallnate/once | Vulnerable code path never executed — we only use firebase-admin for `verifyIdToken()`, not `@google-cloud/storage` or proxy functionality |
+
+## Adding New Suppressions
+
+1. Add the CVE ID to `.trivyignore` with full documentation:
+   - CVE ID and package name
+   - CVSS score and severity
+   - Why it's safe to suppress (what code path is/isn't executed)
+   - What blocks the fix (upstream dependency issues)
+   - When to review (what upstream change would allow removal)
+2. The CI will automatically pick it up via `--ignorefile .trivyignore`
+
+## Key Files
+
+| Purpose | File |
+|---------|------|
+| Ignore file | `.trivyignore` |
+| CI workflow | `.github/workflows/deploy.yml` (trivy job) |
+| Documentation | `docs/trivy-dependency-scanning.md` |

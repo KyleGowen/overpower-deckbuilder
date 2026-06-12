@@ -1,0 +1,52 @@
+---
+description: Foil card map schema, API, and frontend bidirectional lookup via window.foilCardMap.
+globs: "**/foil*,**/deck-editor*,migrations/*foil*"
+alwaysApply: false
+---
+
+# Foil Card Map (`foil_card_map`)
+
+Foil cards are stored as **separate rows** in their card table with `is_foil = TRUE`.
+They share the same `name`, `set`, and `image_path` as their non-foil counterpart —
+the metallic shimmer is CSS-only (`.foil-shimmer` in `public/css/foil-effect.css`).
+
+## DB schema
+
+```sql
+foil_card_map (
+  foil_card_id  VARCHAR(255) PRIMARY KEY,
+  base_card_id  VARCHAR(255) NOT NULL,
+  card_type     VARCHAR(50)  NOT NULL   -- 'character' | 'special' | 'power'
+)
+```
+
+Index on `base_card_id` for reverse lookups.
+
+## Frontend: `window.foilCardMap`
+
+Loaded at startup by `loadFoilCardMap()` in `public/js/data-loading.js` from `GET /api/v1/catalog/foil-card-map`.
+It is a **bidirectional plain object** — both directions stored for O(1) lookup:
+
+```js
+window.foilCardMap[foilCardId]  // → baseCardId
+window.foilCardMap[baseCardId]  // → foilCardId
+```
+
+Check if a card has a foil version: `window.foilCardMap[card.id] !== undefined`
+
+## Files that use the foil map
+
+| Layer | File |
+|-------|------|
+| DB | `migrations/V231__Create_foil_card_map.sql` |
+| Repository | `src/database/foilCardMapRepository.ts` |
+| API | `GET /api/v1/catalog/foil-card-map` (`dbv-catalog.http.ts` via `registerApiV1Routes`) |
+| Frontend load | `loadFoilCardMap()` in `public/js/data-loading.js` |
+| Deck editor toggle | `toggleFoilForCard()` in `public/js/deck-editor-core.js` |
+| Deck editor render | `hasFoilVersion` check in `public/js/deck-editor-rendering.js` |
+
+## Adding new foils in the future
+
+1. Insert the foil card row (V230 pattern — copy from source row with `is_foil = TRUE`)
+2. Insert a row into `foil_card_map` in the same migration
+3. No application code changes needed
