@@ -181,6 +181,15 @@ export default function DatabasePage() {
         </header>
 
         <div className="db__types" role="tablist" aria-label="Card types">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isAllTab}
+            className={`db__type ${isAllTab ? 'is-active' : ''}`}
+            onClick={() => setTab('all')}
+          >
+            All
+          </button>
           {CATALOG_TYPES.map((meta) => (
             <button
               key={meta.type}
@@ -196,15 +205,6 @@ export default function DatabasePage() {
               {isMobile ? meta.shortLabel : meta.label}
             </button>
           ))}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isAllTab}
-            className={`db__type ${isAllTab ? 'is-active' : ''}`}
-            onClick={() => setTab('all')}
-          >
-            All
-          </button>
         </div>
 
         {!isError && !isAllTab ? (

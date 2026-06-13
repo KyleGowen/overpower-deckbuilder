@@ -4,7 +4,7 @@ Track how many of each card you own. Same browse/filter chrome as the Database, 
 per-card quantity steppers and an "Owned only" toggle.
 
 ## Controls
-- Search (debounced), type tabs ( **All** last ), set dropdown, **Owned only** checkbox.
+- Search (debounced), type tabs (**All** first; default **Characters**), set dropdown, **Owned only** checkbox.
 - Header shows `totalOwned` and `uniqueCards`.
 - Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.
 - **All** tab: `CatalogAllList` spread grid rows (`#`, name, type/set badges, stepper);

@@ -121,7 +121,7 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
   get the accent glow; unowned tiles in the Collection are dimmed. Database and Collection
   grids use 4 columns for landscape types and 6 for portrait (2 on mobile).
-- **All tab** (last type tab on Database and Collection): cross-type **text list** via
+- **All tab** (first tab on Database and Collection; default selection remains Characters): cross-type **text list** via
   `CatalogAllList` — no card images. Rows use a **spread grid layout**: `#set_number`
   (monospace, `4.5rem`, extra padding before name), card name (foil `✦` when applicable),
   type badge (right-aligned column), friendly **set name** badge (left-aligned, ellipsis),

@@ -7,7 +7,7 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   (debounced, header bar; `cardMatchesSearchQuery` in `catalogTypeMap`).
 - **Type tabs**: Characters, Special Cards, Power Cards, Locations, Missions, Events,
   Aspects, and the Universe types (Advanced/Teamwork/Ally/Training/Basic) — vocab via
-  `catalogTypeMap`. **All** is the last tab: text list across every type (no images).
+  `catalogTypeMap`. **All** is the first tab (default selection remains Characters): text list across every type (no images).
 - **Set** dropdown inline with the header search bar (all tabs).
 - **Filter rail** (`DbvFilterRail`) visible on per-type tabs only (hidden on **All**).
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,

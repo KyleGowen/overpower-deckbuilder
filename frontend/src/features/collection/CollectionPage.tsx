@@ -164,6 +164,15 @@ export default function CollectionPage() {
         </header>
 
         <div className="col__types" role="tablist" aria-label="Card types">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isAllTab}
+            className={`col__type ${isAllTab ? 'is-active' : ''}`}
+            onClick={() => setTab('all')}
+          >
+            All
+          </button>
           {CATALOG_TYPES.map((meta) => (
             <button
               key={meta.type}
@@ -179,15 +188,6 @@ export default function CollectionPage() {
               {isMobile ? meta.shortLabel : meta.label}
             </button>
           ))}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isAllTab}
-            className={`col__type ${isAllTab ? 'is-active' : ''}`}
-            onClick={() => setTab('all')}
-          >
-            All
-          </button>
         </div>
 
         {isLoading ? (
