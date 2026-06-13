@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { RibbonCharacter } from '../CharacterRibbon';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
 import { IconCards, IconDots, IconStar } from '../icons';
-import type { DeckCardEntry, DeckListItem } from '../../lib/api/types';
+import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
+import { assetUrl } from '../../lib/images/cardImages';
+import { deckTileLegalityBadge } from './deckTileLegality';
 import './DeckTile.css';
 
-const CHARACTER_CYCLE_MS = 1500;
-/** Wait before first advance — current character is already visible on hover enter. */
-const CHARACTER_CYCLE_HOVER_DELAY_MS = 1000;
+const THREAT_ICON_URL = assetUrl('/src/resources/images/icons/threat.png');
+
+const ART_CYCLE_MS = 1500;
+/** Wait before first advance — current slide is already visible on hover enter. */
+const ART_CYCLE_HOVER_DELAY_MS = 1000;
 
 export interface DeckStatLine {
   energy: number;
@@ -22,21 +25,49 @@ interface DeckTileProps {
   variant?: 'compact' | 'full';
   /** Optional precomputed max-stat line (deck selection enriches from catalog). */
   maxStats?: DeckStatLine | null;
+  /** Mission set name from catalog lookup (not the display mission card name). */
+  missionSetName?: string | null;
   rankLabel?: string;
   onOpen?: () => void;
   onMenu?: () => void;
   favorite?: boolean;
 }
 
-function deckCharacters(deck: DeckListItem): RibbonCharacter[] {
+interface ArtSlide {
+  cardId: string;
+  name?: string;
+  imagePath?: string | null;
+  catalogType?: CatalogType;
+}
+
+function deckCharacters(deck: DeckListItem): ArtSlide[] {
   const cards = deck.cards ?? [];
   return cards
     .filter((c) => c.type === 'character')
-    .map((c) => ({ cardId: c.cardId, name: c.name, imagePath: c.defaultImage }));
+    .map((c) => ({
+      cardId: c.cardId,
+      name: c.name,
+      imagePath: c.defaultImage,
+      catalogType: 'characters',
+    }));
 }
 
 function firstCardOfType(deck: DeckListItem, type: DeckCardEntry['type']): DeckCardEntry | undefined {
   return (deck.cards ?? []).find((c) => c.type === type);
+}
+
+function deckArtSlides(deck: DeckListItem): ArtSlide[] {
+  const slides = deckCharacters(deck);
+  const location = firstCardOfType(deck, 'location');
+  if (location?.defaultImage) {
+    slides.push({
+      cardId: location.cardId,
+      name: location.name ?? 'Location',
+      imagePath: location.defaultImage,
+      catalogType: 'locations',
+    });
+  }
+  return slides;
 }
 
 const STAT_DEFS: Array<{ key: keyof DeckStatLine; label: string; cls: string }> = [
@@ -50,20 +81,22 @@ export function DeckTile({
   deck,
   variant = 'full',
   maxStats,
+  missionSetName,
   rankLabel,
   onOpen,
   onMenu,
   favorite,
 }: DeckTileProps) {
   const meta = deck.metadata;
-  const characters = deckCharacters(deck);
-  const [charIndex, setCharIndex] = useState(0);
+  const artSlides = useMemo(() => deckArtSlides(deck), [deck]);
+  const legalityBadge = deckTileLegalityBadge(meta);
+  const [slideIndex, setSlideIndex] = useState(0);
   const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const cycleDelayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shownCharacter = characters[charIndex] ?? characters[0];
-  const isLegal = meta.is_valid;
+  const shownSlide = artSlides[slideIndex] ?? artSlides[0];
+  const isLocationSlide = shownSlide?.catalogType === 'locations';
 
-  const stopCharacterCycle = useCallback(() => {
+  const stopArtCycle = useCallback(() => {
     if (cycleTimer.current != null) {
       clearInterval(cycleTimer.current);
       cycleTimer.current = null;
@@ -75,24 +108,25 @@ export function DeckTile({
   }, []);
 
   const handleArtPointerEnter = useCallback(() => {
-    if (characters.length <= 1) return;
-    stopCharacterCycle();
+    if (artSlides.length <= 1) return;
+    stopArtCycle();
     cycleDelayTimer.current = setTimeout(() => {
       cycleDelayTimer.current = null;
-      setCharIndex((i) => (i + 1) % characters.length);
+      setSlideIndex((i) => (i + 1) % artSlides.length);
       cycleTimer.current = setInterval(() => {
-        setCharIndex((i) => (i + 1) % characters.length);
-      }, CHARACTER_CYCLE_MS);
-    }, CHARACTER_CYCLE_HOVER_DELAY_MS);
-  }, [characters.length, stopCharacterCycle]);
+        setSlideIndex((i) => (i + 1) % artSlides.length);
+      }, ART_CYCLE_MS);
+    }, ART_CYCLE_HOVER_DELAY_MS);
+  }, [artSlides.length, stopArtCycle]);
 
   const handleArtPointerLeave = useCallback(() => {
-    stopCharacterCycle();
-  }, [stopCharacterCycle]);
+    stopArtCycle();
+  }, [stopArtCycle]);
 
-  useEffect(() => () => stopCharacterCycle(), [stopCharacterCycle]);
-  const location = firstCardOfType(deck, 'location');
+  useEffect(() => () => stopArtCycle(), [stopArtCycle]);
+
   const mission = firstCardOfType(deck, 'mission');
+  const missionChipLabel = missionSetName?.trim() || mission?.name?.trim() || null;
   const updatedLabel = meta.lastModified
     ? new Date(meta.lastModified).toLocaleDateString(undefined, {
         month: 'short',
@@ -119,13 +153,17 @@ export function DeckTile({
         onPointerEnter={handleArtPointerEnter}
         onPointerLeave={handleArtPointerLeave}
       >
-        {shownCharacter ? (
-          <div className="deck-tile__hero" aria-hidden="true">
+        {shownSlide ? (
+          <div
+            className={`deck-tile__hero${isLocationSlide ? ' deck-tile__hero--location' : ''}`}
+            aria-hidden="true"
+          >
             <CardImage
-              imagePath={shownCharacter.imagePath}
-              alt={shownCharacter.name || 'Character'}
-              useThumbnail
-              className="card-image--contain"
+              imagePath={shownSlide.imagePath}
+              catalogType={shownSlide.catalogType}
+              alt={shownSlide.name || 'Character'}
+              useThumbnail={!isLocationSlide}
+              className={isLocationSlide ? undefined : 'card-image--contain'}
             />
           </div>
         ) : (
@@ -159,40 +197,25 @@ export function DeckTile({
       </div>
 
       <div className="deck-tile__body">
-        <div className="deck-tile__numbers">
-          <span className="deck-tile__count">
-            <IconCards /> {meta.cardCount}
+        <div className="deck-tile__meta-bar" aria-label="Deck summary">
+          <span className="deck-tile__metric deck-tile__metric--start" title="Cards">
+            <span className="deck-tile__metric-icon" aria-hidden="true">
+              <IconCards />
+            </span>
+            {meta.cardCount}
           </span>
-          <span className="deck-tile__threat" title="Threat">
+          {variant === 'full' && missionChipLabel ? (
+            <span className="deck-tile__chip" title={`Mission set: ${missionChipLabel}`}>
+              <span className="deck-tile__chip-text">{missionChipLabel}</span>
+            </span>
+          ) : null}
+          <span className="deck-tile__metric deck-tile__metric--end" title="Threat">
+            <span className="deck-tile__metric-icon" aria-hidden="true">
+              <img src={THREAT_ICON_URL} alt="" className="deck-tile__metric-img" width={18} height={18} />
+            </span>
             {meta.threat ?? 0}
-            <small>THREAT</small>
           </span>
         </div>
-
-        <div className="deck-tile__badges">
-          <span className={`badge ${isLegal ? 'badge-legal' : 'badge-not-legal'}`}>
-            {isLegal ? 'Legal' : 'Not Legal'}
-          </span>
-          {meta.is_limited ? <span className="badge">Limited</span> : null}
-        </div>
-
-        {variant === 'full' && (location || mission) ? (
-          <div className="deck-tile__chips">
-            {location ? (
-              <span className="deck-tile__chip" title={`Location: ${location.name ?? ''}`}>
-                <span className="deck-tile__chip-thumb">
-                  <CardImage imagePath={location.defaultImage} alt={location.name || 'Location'} useThumbnail />
-                </span>
-                <span className="deck-tile__chip-text">{location.name ?? 'Location'}</span>
-              </span>
-            ) : null}
-            {mission ? (
-              <span className="deck-tile__chip" title={`Mission: ${mission.name ?? ''}`}>
-                <span className="deck-tile__chip-text">{mission.name ?? 'Mission'}</span>
-              </span>
-            ) : null}
-          </div>
-        ) : null}
 
         {variant === 'full' && maxStats ? (
           <div className="deck-tile__stats">
@@ -205,8 +228,23 @@ export function DeckTile({
           </div>
         ) : null}
 
-        {updatedLabel ? (
-          <div className="deck-tile__updated">Updated {updatedLabel}</div>
+        {updatedLabel || legalityBadge ? (
+          <div className="deck-tile__footer">
+            {updatedLabel ? (
+              <span className="deck-tile__updated">Updated {updatedLabel}</span>
+            ) : (
+              <span className="deck-tile__footer-spacer" aria-hidden="true" />
+            )}
+            {legalityBadge ? (
+              <span
+                className={`badge ${
+                  legalityBadge.variant === 'not-legal' ? 'badge-not-legal' : ''
+                }`}
+              >
+                {legalityBadge.label}
+              </span>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </article>

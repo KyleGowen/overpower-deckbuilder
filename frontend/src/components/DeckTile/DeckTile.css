@@ -40,6 +40,12 @@
   height: 100%;
 }
 
+/* Location art is 236×151; fill the 380×280 hero slot edge-to-edge (legacy deck-selection uses cover). */
+.deck-tile__hero--location .card-image__img {
+  object-fit: cover;
+  object-position: center;
+}
+
 .deck-tile__art-empty {
   display: flex;
   align-items: center;
@@ -121,7 +127,7 @@
 }
 .deck-tile__name {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: calc(var(--font-size-lg) * 1.1);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-tight);
   color: var(--color-text);
@@ -133,7 +139,7 @@
   -webkit-box-orient: vertical;
 }
 .deck-tile--compact .deck-tile__name {
-  font-size: var(--font-size-base);
+  font-size: calc(var(--font-size-base) * 1.1);
 }
 
 /* ---- Info panel (solid, never overlaps art) ---- */
@@ -150,79 +156,64 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
-.deck-tile__numbers {
+.deck-tile__meta-bar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  flex-wrap: nowrap;
+  min-width: 0;
 }
-.deck-tile__count {
+.deck-tile__metric {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
 }
-.deck-tile__threat {
+.deck-tile__metric-icon {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: var(--radius-full);
-  border: 2px solid var(--color-border-accent);
-  color: var(--color-accent-bright);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.72);
 }
-.deck-tile__threat small {
-  font-size: 7px;
-  letter-spacing: 0.06em;
-  color: var(--color-text-dim);
-  font-weight: var(--font-weight-medium);
-}
-
-.deck-tile__badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.deck-tile__metric-img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+  opacity: 0.9;
 }
 
-/* ---- Optional location / mission chips (full variant) ---- */
-.deck-tile__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.deck-tile__metric--start {
+  flex-shrink: 0;
 }
+.deck-tile__metric--end {
+  flex-shrink: 0;
+}
+
+/* Mission set chip (centered in meta bar) */
 .deck-tile__chip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  max-width: 100%;
+  min-width: 0;
+  max-width: calc(100% - 5.5rem);
   padding: 3px var(--space-3);
   border-radius: var(--radius-full);
   background: var(--color-bg-input);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
-}
-/* When a chip leads with a round thumb, hug it to the pill edge. */
-.deck-tile__chip:has(.deck-tile__chip-thumb) {
-  padding-left: 2px;
-}
-.deck-tile__chip-thumb {
-  display: block;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.deck-tile__chip-thumb .card-image__img {
-  object-position: center 30%;
 }
 .deck-tile__chip-text {
   overflow: hidden;
@@ -256,6 +247,15 @@
   color: var(--color-text-dim);
 }
 
+.deck-tile__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.deck-tile__footer-spacer {
+  flex: 1 1 auto;
+}
 .deck-tile__updated {
   font-size: var(--font-size-xs);
   color: var(--color-text-dim);

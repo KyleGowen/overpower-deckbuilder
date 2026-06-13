@@ -31,6 +31,11 @@ export default function DeckSelectionPage() {
     queryFn: () => fetchCatalog('characters'),
     staleTime: 30 * 60 * 1000,
   });
+  const missionsQuery = useQuery({
+    queryKey: ['catalog', 'missions'],
+    queryFn: () => fetchCatalog('missions'),
+    staleTime: 30 * 60 * 1000,
+  });
 
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -55,6 +60,21 @@ export default function DeckSelectionPage() {
     });
     return m;
   }, [charactersQuery.data]);
+
+  const missionSetByCardId = useMemo(() => {
+    const m = new Map<string, string>();
+    (missionsQuery.data ?? []).forEach((mission) => {
+      const setName = String(mission.mission_set ?? '').trim();
+      if (setName) m.set(mission.id, setName);
+    });
+    return m;
+  }, [missionsQuery.data]);
+
+  const deckMissionSetName = (deck: DeckListItem): string | null => {
+    const mission = (deck.cards ?? []).find((c) => c.type === 'mission');
+    if (!mission?.cardId) return null;
+    return missionSetByCardId.get(mission.cardId) ?? null;
+  };
 
   const deckMaxStats = (deck: DeckListItem): DeckStatLine | null => {
     const chars = (deck.cards ?? []).filter((c) => c.type === 'character');
@@ -180,6 +200,7 @@ export default function DeckSelectionPage() {
                 deck={deck}
                 variant="full"
                 maxStats={deckMaxStats(deck)}
+                missionSetName={deckMissionSetName(deck)}
                 favorite={favorites.has(deck.metadata.id)}
                 onOpen={() => openDeck(deck)}
                 onMenu={() => setMenuDeck(deck)}

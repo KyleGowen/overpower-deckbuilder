@@ -357,10 +357,16 @@ export default function DeckEditorPage() {
                       (catalogCard?.image as string | undefined);
                     const cardName =
                       entry.name || (catalogCard ? cardDisplayName(catalogCard) : 'Card');
+                    const catalogType = CATALOG_SLUG_BY_DECK_TYPE.get(entry.type);
                     return (
                     <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
                       <div className="deck-editor__card-img">
-                        <CardImage imagePath={imagePath} alt={cardName} useThumbnail />
+                        <CardImage
+                          imagePath={imagePath}
+                          catalogType={catalogType}
+                          alt={cardName}
+                          useThumbnail
+                        />
                         {entry.quantity > 1 ? <span className="deck-editor__card-qty">x{entry.quantity}</span> : null}
                       </div>
                       <div className="deck-editor__card-name" title={cardName}>{cardName}</div>

@@ -57,6 +57,13 @@ describe('location progressive load paths', () => {
       '/src/resources/cards/images/locations/thumb/barsoom.webp',
     );
   });
+
+  it('requires catalogType for deck-list location defaultImage (bare filename)', () => {
+    expect(resolveThumbUrl('danger_room.webp')).not.toContain('/locations/');
+    expect(resolveThumbUrl('danger_room.webp', 'locations')).toBe(
+      '/src/resources/cards/images/locations/thumb/danger_room.webp',
+    );
+  });
 });
 
 describe('canProgressiveLoad', () => {

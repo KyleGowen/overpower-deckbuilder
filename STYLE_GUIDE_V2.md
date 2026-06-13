@@ -133,10 +133,15 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   (24 on image grids). Search + set filter apply; DBV hides `DbvFilterRail` on All.
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
-  (`aspect-ratio: 380 / 280`): the first character is shown as a **full card** (`object-fit:
-  contain`, no zoom/crop), tight 1px inset. A bottom gradient scrim carries the deck **name**.
-  Count, threat, legality/Limited badges, and updated date live in the solid info panel below; the
-  `full` variant adds location/mission chips and the max-stat bar.
+  (`aspect-ratio: 380 / 280`): characters (and the location card when set) cycle on hover after a
+  1s delay. Character slides use `object-fit: contain`; location slides use full-res art with
+  `object-fit: cover` so the 236×151 location frame fills the hero slot without letterboxing. A bottom
+  gradient scrim carries the deck **name** (`.deck-tile__name`: `calc(var(--font-size-lg) * 1.1)`;
+  compact tiles use `calc(var(--font-size-base) * 1.1)`). The info panel opens with a single
+  **meta bar**: 18×18 cards icon + count on the left, mission set chip centered (`full`,
+  catalog `mission_set`), and `threat.png` + threat on the right. Max-stat bar follows on `full` tiles. A **footer** row
+  shows the updated date (left) and optional legality badge lower-right (**Limited** or **Not Legal**
+  only; legal decks show date only).
 
 ## Stats, Badges & Status
 OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
@@ -150,8 +155,10 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
 | Total | `--color-stat-total` | violet `#b06bff` |
 
 - Stat tiles show the value in the stat color over an elevated surface with a muted label.
-- **Legality**: `Legal` uses `--color-legal` (green), `Not Legal` uses `--color-not-legal`
-  (red); `Limited` is a neutral/info chip.
+- **Deck tile legality** (`DeckTile` footer): show **Limited** when `is_limited`; else **Not
+  Legal** when `!is_valid`; else no badge. Never show Legal + Limited together.
+- **Legality** (deck editor, etc.): `Legal` uses `--color-legal` (green), `Not Legal` uses
+  `--color-not-legal` (red); `Limited` is a neutral/info chip.
 - **Rarity** dots/labels use the `--color-rarity-*` ramp.
 - Quantity badges (`x2`) overlay the top-right of a card tile in an accent pill.
 
