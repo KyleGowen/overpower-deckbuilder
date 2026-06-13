@@ -204,7 +204,7 @@ export function DeckTile({
             </span>
             {meta.cardCount}
           </span>
-          {variant === 'full' && missionChipLabel ? (
+          {missionChipLabel ? (
             <span className="deck-tile__chip" title={`Mission set: ${missionChipLabel}`}>
               <span className="deck-tile__chip-text">{missionChipLabel}</span>
             </span>

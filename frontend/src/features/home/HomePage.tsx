@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import { fetchCommunityDecks, fetchTournamentDecks } from '../../lib/api/decks';
+import { fetchCatalog } from '../../lib/api/catalog';
 import { fetchRecentUpdates } from '../../lib/api/recent-updates';
+import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
 import { resolveImageUrl, resolveThumbUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
@@ -41,6 +43,17 @@ export default function HomePage() {
 
   const tournamentDecks = (tournamentQuery.data ?? []).filter(
     (deck) => !tournamentDecksUserId || deck.metadata.userId === tournamentDecksUserId,
+  );
+
+  const missionsQuery = useQuery({
+    queryKey: ['catalog', 'missions'],
+    queryFn: () => fetchCatalog('missions'),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const missionSetByCardId = useMemo(
+    () => buildMissionSetByCardId(missionsQuery.data ?? []),
+    [missionsQuery.data],
   );
 
   const openDeck = (deck: DeckListItem) => {
@@ -81,6 +94,7 @@ export default function HomePage() {
           error={communityQuery.isError}
           decks={communityDecks}
           emptyMessage="Community decks will appear here as they are shared."
+          missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}
         />
 
@@ -91,6 +105,7 @@ export default function HomePage() {
           error={tournamentQuery.isError}
           decks={tournamentDecks}
           emptyMessage="Tournament-winning decks will appear here as they are added."
+          missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}
         />
       </div>
@@ -105,10 +120,20 @@ interface DeckRailProps {
   error: boolean;
   decks: DeckListItem[];
   emptyMessage: string;
+  missionSetByCardId: Map<string, string>;
   onOpen: (deck: DeckListItem) => void;
 }
 
-function DeckRail({ icon, title, loading, error, decks, emptyMessage, onOpen }: DeckRailProps) {
+function DeckRail({
+  icon,
+  title,
+  loading,
+  error,
+  decks,
+  emptyMessage,
+  missionSetByCardId,
+  onOpen,
+}: DeckRailProps) {
   return (
     <section className="home__section">
       <header className="home__section-head">
@@ -129,7 +154,12 @@ function DeckRail({ icon, title, loading, error, decks, emptyMessage, onOpen }: 
         <div className="home__rail">
           {decks.map((deck) => (
             <div className="home__rail-item" key={deck.metadata.id}>
-              <DeckTile deck={deck} variant="compact" onOpen={() => onOpen(deck)} />
+              <DeckTile
+                deck={deck}
+                variant="compact"
+                missionSetName={deckMissionSetName(deck, missionSetByCardId)}
+                onOpen={() => onOpen(deck)}
+              />
             </div>
           ))}
         </div>

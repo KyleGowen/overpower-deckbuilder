@@ -11,7 +11,7 @@ per-deck actions. Titled "My Decks" (or "Guest Decks").
   localStorage).
 - **Actions** panel (kebab on a tile): Open/Edit, View (read-only `?readonly=true`), toggle
   favorite, and Delete (with confirm).
-- Header shows deck count and total card count.
+- Header shows deck count.
 
 ## Data
 - `fetchDecksForUser(isGuest)` → user (`/api/v1/decks`) or guest (`/api/v1/guest/decks`).

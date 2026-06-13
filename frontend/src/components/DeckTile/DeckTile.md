@@ -18,9 +18,9 @@ Used on Home (Community Decks rail, `compact`) and Deck Selection (`full`).
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `deck` | `DeckListItem` | – | `{ metadata, cards }` shape from the list API. |
-| `variant` | `'compact' \| 'full'` | `'full'` | `compact` (rails) hides mission chip and stats; both variants show meta bar + footer. |
+| `variant` | `'compact' \| 'full'` | `'full'` | `compact` (rails) hides stats; both variants show meta bar + footer + mission set chip when known. |
 | `maxStats` | `DeckStatLine \| null` | – | Precomputed max E/C/BF/INT (Deck Selection); `full` only. |
-| `missionSetName` | `string \| null` | – | Mission **set** name from catalog (Deck Selection); shown in meta bar on `full`. |
+| `missionSetName` | `string \| null` | – | Mission **set** name from catalog; shown centered in meta bar when known. |
 | `rankLabel` | `string` | – | Optional rank tag (e.g. tournament rail). |
 | `onOpen` | `() => void` | – | Opens the deck (whole tile is the button). |
 | `onMenu` | `() => void` | – | Shows the actions menu (kebab); stops propagation. |
@@ -28,7 +28,7 @@ Used on Home (Community Decks rail, `compact`) and Deck Selection (`full`).
 
 ## Meta bar
 
-One row: card count on the **left**, mission set chip **centered** (`full` when known), threat on the **right**. Long mission set names ellipsize; legality is not shown here.
+One row: card count on the **left**, mission set chip **centered** when known, threat on the **right**. Long mission set names ellipsize; legality is not shown here. Applies to **compact** (Home rails) and **full** (deck selection).
 
 ## Footer
 

@@ -5,6 +5,7 @@ import { useAuth } from '../../app/AuthProvider';
 import { fetchDecksForUser, createDeck, deleteDeck } from '../../lib/api/decks';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { cardStats } from '../../lib/catalog/catalogTypeMap';
+import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
 import { DeckTile, type DeckStatLine } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -61,20 +62,13 @@ export default function DeckSelectionPage() {
     return m;
   }, [charactersQuery.data]);
 
-  const missionSetByCardId = useMemo(() => {
-    const m = new Map<string, string>();
-    (missionsQuery.data ?? []).forEach((mission) => {
-      const setName = String(mission.mission_set ?? '').trim();
-      if (setName) m.set(mission.id, setName);
-    });
-    return m;
-  }, [missionsQuery.data]);
+  const missionSetByCardId = useMemo(
+    () => buildMissionSetByCardId(missionsQuery.data ?? []),
+    [missionsQuery.data],
+  );
 
-  const deckMissionSetName = (deck: DeckListItem): string | null => {
-    const mission = (deck.cards ?? []).find((c) => c.type === 'mission');
-    if (!mission?.cardId) return null;
-    return missionSetByCardId.get(mission.cardId) ?? null;
-  };
+  const deckMissionSetLabel = (deck: DeckListItem): string | null =>
+    deckMissionSetName(deck, missionSetByCardId);
 
   const deckMaxStats = (deck: DeckListItem): DeckStatLine | null => {
     const chars = (deck.cards ?? []).filter((c) => c.type === 'character');
@@ -113,8 +107,6 @@ export default function DeckSelectionPage() {
       return a.metadata.name.localeCompare(b.metadata.name);
     });
   }, [decks, search, favorites]);
-
-  const totalCards = decks.reduce((s, d) => s + (d.metadata.cardCount ?? 0), 0);
 
   const openDeck = (deck: DeckListItem) => {
     navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}`);
@@ -156,7 +148,6 @@ export default function DeckSelectionPage() {
             <h1 className="dsel__title"><IconDecks /> {isGuest ? 'Guest Decks' : 'My Decks'}</h1>
             <div className="dsel__stats">
               <span><strong>{decks.length}</strong> decks</span>
-              <span><strong>{totalCards}</strong> cards</span>
               {isGuest ? <span className="dsel__guest-note">Stored for this session</span> : null}
             </div>
           </div>
@@ -200,7 +191,7 @@ export default function DeckSelectionPage() {
                 deck={deck}
                 variant="full"
                 maxStats={deckMaxStats(deck)}
-                missionSetName={deckMissionSetName(deck)}
+                missionSetName={deckMissionSetLabel(deck)}
                 favorite={favorites.has(deck.metadata.id)}
                 onOpen={() => openDeck(deck)}
                 onMenu={() => setMenuDeck(deck)}
