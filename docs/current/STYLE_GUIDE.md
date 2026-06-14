@@ -38,6 +38,7 @@
 35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
 36. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
 37. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
+38. [Deck Editor stats panel (v2 SPA)](#deck-editor-stats-panel-v2-spa)
 
 ## Overview
 
@@ -2967,3 +2968,51 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
 - **Character stats**: fifth tile is gray **Threat** (`.card-detail__stat--threat`, `.stat-threat` → `var(--color-text-muted)`) showing `threat_level`; other stat types keep purple **Total** (`.card-detail__stat--total`).
 - **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.
 - **Details — Set**: `setDisplayName` from `GET /api/v1/dbv/sets` via `resolveSetDisplayName()` (DatabasePage passes the friendly name; badge tags still use the set code).
+
+## Deck Editor stats panel (v2 SPA)
+
+The v2 deck editor (`DeckEditorPage.tsx`) shows two labeled stat rows below the top bar.
+
+### Container — `.deck-editor__stats-panel`
+
+- `display: flex; flex-direction: column; gap: var(--space-4)`
+- `padding: var(--space-4) var(--space-5); max-width: 640px`
+- Mobile (`.layout-mobile`): `max-width: none; padding: var(--space-3); gap: var(--space-3)`
+
+### Section headings — `.deck-editor__stats-heading`
+
+- `font-size: 10px; font-weight: var(--font-weight-semibold); text-transform: uppercase`
+- `letter-spacing: 0.06em; color: var(--color-text-dim)`
+- Row labels: **Character maximums** (max character primaries) and **Icon totals** (deck icon counts)
+
+### Stat grid — `.deck-editor__stats`
+
+- `display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3)`
+- Each tile: `.deck-editor__stat` — panel background `var(--color-bg-panel)`, `1px solid var(--color-border)`, `border-radius: var(--radius-md)`, centered column layout
+
+### Values and colors
+
+- Value: `.deck-editor__stat-val` — `font-size: var(--font-size-xl); font-weight: var(--font-weight-bold)`
+- Label: `.deck-editor__stat-label` — `9px`, uppercase, `var(--color-text-dim)`
+- Stat colors (global): `.stat-energy` `#f6a623`, `.stat-combat` red family, `.stat-brute-force` green, `.stat-intelligence` blue (`tokens.css`)
+
+### Icon totals row only
+
+- `.deck-editor__stat-icon` — `18×18px` PNG above the value (`opacity: 0.9`)
+- Icons from `STAT_ICON_PATHS` (`/src/resources/images/icons/energy.png`, etc.)
+
+### Logic
+
+- Max stats: highest character primary per stat (catalog `cardStats`)
+- Icon totals: `calculateDeckIconTotals` in `frontend/src/lib/decks/iconTotals.ts` (same rules as legacy `calculateIconTotals`)
+
+### Add Cards slide-out (`SlideOutPanel`)
+
+- **Width**: `575px` on desktop (`width={575}` on `SlideOutPanel` in `AddCardsPanel`) — 25% wider than the prior `460px` width to fit more card tiles per row.
+- **Type chips**: **All** first (default on open), then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
+- **Search**: placeholder *"Search name, character, or card text..."*; uses `cardMatchesSearchQuery` (DBV/Collection parity).
+- **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
+- **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
+- **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
+- **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned.
+- **Mobile**: `SlideOutPanel` right variant becomes full viewport width (`100vw`) per component CSS; width prop applies on desktop only.

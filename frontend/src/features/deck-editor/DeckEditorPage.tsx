@@ -10,17 +10,17 @@ import {
   type DeckCardInput,
 } from '../../lib/api/decks';
 import { fetchCatalog } from '../../lib/api/catalog';
+import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
   cardDisplayName,
   cardStats,
 } from '../../lib/catalog/catalogTypeMap';
+import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
 import { CardImage } from '../../components/CardImage';
-import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { QuantityStepper } from '../../components/QuantityStepper';
-import { SlideOutPanel } from '../../components/SlideOutPanel';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { Logo } from '../../components/Logo';
@@ -32,11 +32,9 @@ import {
   IconSave,
   IconPlus,
   IconTrash,
-  IconSearch,
-  IconCheck,
-  IconClose,
   IconPlay,
 } from '../../components/icons';
+import { AddCardsPanel } from './AddCardsPanel';
 import type {
   CatalogCard,
   CatalogType,
@@ -49,6 +47,40 @@ import './DeckEditorPage.css';
 const CATALOG_SLUG_BY_DECK_TYPE = new Map<string, CatalogType>(
   CATALOG_TYPES.map((m) => [m.deckType, m.type]),
 );
+
+const DECK_STAT_ROWS = [
+  { key: 'energy', label: 'Energy', cls: 'stat-energy', iconKey: 'energy' },
+  { key: 'combat', label: 'Combat', cls: 'stat-combat', iconKey: 'combat' },
+  { key: 'bruteForce', label: 'Brute Force', cls: 'stat-brute-force', iconKey: 'brute_force' },
+  { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence', iconKey: 'intelligence' },
+] as const;
+
+function DeckStatGrid({
+  values,
+  showIcons = false,
+}: {
+  values: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
+  showIcons?: boolean;
+}) {
+  return (
+    <div className="deck-editor__stats">
+      {DECK_STAT_ROWS.map(({ key, label, cls, iconKey }) => (
+        <div className="deck-editor__stat" key={label}>
+          {showIcons ? (
+            <img
+              className="deck-editor__stat-icon"
+              src={STAT_ICON_PATHS[iconKey]}
+              alt=""
+              aria-hidden
+            />
+          ) : null}
+          <span className={`deck-editor__stat-val ${cls}`}>{values[key]}</span>
+          <span className="deck-editor__stat-label">{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DeckEditorPage() {
   const { deckId = '', userId = '' } = useParams();
@@ -153,6 +185,14 @@ export default function DeckEditorPage() {
     });
     return acc;
   }, [cards, charactersQuery.data]);
+
+  const iconTotals = useMemo(
+    () =>
+      calculateDeckIconTotals(cards, (type, cardId) =>
+        cardIndex.get(`${type}:${cardId}`),
+      ),
+    [cards, cardIndex],
+  );
 
   const grouped = useMemo(() => {
     const map = new Map<DeckCardType, DeckCardEntry[]>();
@@ -312,18 +352,15 @@ export default function DeckEditorPage() {
         </header>
 
         {/* Stat summary */}
-        <div className="deck-editor__stats">
-          {([
-            ['Energy', maxStats.energy, 'stat-energy'],
-            ['Combat', maxStats.combat, 'stat-combat'],
-            ['Brute Force', maxStats.bruteForce, 'stat-brute-force'],
-            ['Intelligence', maxStats.intelligence, 'stat-intelligence'],
-          ] as const).map(([label, val, cls]) => (
-            <div className="deck-editor__stat" key={label}>
-              <span className={`deck-editor__stat-val ${cls}`}>{val}</span>
-              <span className="deck-editor__stat-label">{label}</span>
-            </div>
-          ))}
+        <div className="deck-editor__stats-panel">
+          <section className="deck-editor__stats-section" aria-label="Character maximums">
+            <h2 className="deck-editor__stats-heading">Character maximums</h2>
+            <DeckStatGrid values={maxStats} />
+          </section>
+          <section className="deck-editor__stats-section" aria-label="Icon totals">
+            <h2 className="deck-editor__stats-heading">Icon totals</h2>
+            <DeckStatGrid values={iconTotals} showIcons />
+          </section>
         </div>
 
         {/* Card list */}
@@ -409,101 +446,5 @@ export default function DeckEditorPage() {
         onClose={() => setSelected(null)}
       />
     </div>
-  );
-}
-
-/* ---- Add cards panel (catalog browser inside the editor) ---- */
-
-function useDebounced<T>(value: T, delay = 250): T {
-  const [v, setV] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
-}
-
-interface AddCardsPanelProps {
-  open: boolean;
-  onClose: () => void;
-  onAdd: (card: CatalogCard, type: CatalogType) => void;
-  cards: DeckCardEntry[];
-}
-
-function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProps) {
-  const [type, setType] = useState<CatalogType>('characters');
-  const [search, setSearch] = useState('');
-  const debounced = useDebounced(search);
-
-  const catalogQuery = useQuery({
-    queryKey: ['catalog', type],
-    queryFn: () => fetchCatalog(type),
-    enabled: open,
-    staleTime: 30 * 60 * 1000,
-  });
-
-  const list = useMemo(() => {
-    const q = debounced.trim().toLowerCase();
-    const all = catalogQuery.data ?? [];
-    return q ? all.filter((c) => cardDisplayName(c).toLowerCase().includes(q)) : all;
-  }, [catalogQuery.data, debounced]);
-
-  const qtyInDeck = (card: CatalogCard) => {
-    const deckType = CATALOG_TYPE_BY_SLUG[type].deckType;
-    return cards.find((c) => c.type === deckType && c.cardId === card.id)?.quantity ?? 0;
-  };
-
-  return (
-    <SlideOutPanel open={open} onClose={onClose} title="Add Cards" ariaLabel="Add cards" width={460}>
-      <div className="add-cards">
-        <div className="add-cards__search">
-          <IconSearch className="add-cards__search-icon" />
-          <input
-            type="search"
-            placeholder="Search cards..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search cards to add"
-          />
-        </div>
-        <div className="add-cards__types">
-          {CATALOG_TYPES.map((meta) => (
-            <button
-              key={meta.type}
-              type="button"
-              className={`add-cards__type ${type === meta.type ? 'is-active' : ''}`}
-              onClick={() => setType(meta.type)}
-            >
-              {meta.shortLabel}
-            </button>
-          ))}
-        </div>
-
-        {catalogQuery.isLoading ? (
-          <LoadingState label="Loading..." />
-        ) : list.length === 0 ? (
-          <EmptyState title="No cards" message="Try another search or type." icon={<IconSearch />} />
-        ) : (
-          <div className="add-cards__grid">
-            {list.slice(0, 60).map((card) => {
-              const inDeck = qtyInDeck(card);
-              return (
-                <CardTile
-                  key={card.id}
-                  card={card}
-                  showMeta={false}
-                  onClick={() => onAdd(card, type)}
-                  overlay={inDeck > 0 ? <span className="add-cards__badge"><IconCheck /> {inDeck}</span> : <span className="add-cards__add"><IconPlus /></span>}
-                />
-              );
-            })}
-          </div>
-        )}
-        {list.length > 60 ? <p className="add-cards__hint">Showing first 60 - refine your search.</p> : null}
-      </div>
-      <button type="button" className="add-cards__done btn btn-primary" onClick={onClose}>
-        <IconClose /> Done
-      </button>
-    </SlideOutPanel>
   );
 }

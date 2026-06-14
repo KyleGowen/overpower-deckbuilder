@@ -9,12 +9,21 @@ are read-only automatically).
 - **Top bar**: back button, editable deck name, card count + threat + legality badge, and
   actions — Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean,
   "Saving…" while in flight).
-- **Body**: max-stat tiles (E/C/BF/INT) and the card list grouped by type, each row with a
-  `QuantityStepper` and remove. Empty decks show an EmptyState with an Add Cards CTA.
+- **Body**: two stat sections — **Character maximums** (max E/C/BF/INT from characters) and **Icon totals**
+  (deck-wide Energy/Combat/Brute Force/Intelligence icon counts from power/special/aspect/ally/teamwork
+  cards, computed client-side via `calculateDeckIconTotals`). Below that, the card list grouped by type.
 
 ## Add Cards panel
-A `SlideOutPanel` with search + type chips + a card grid (first 60, refine via search).
-Clicking a card adds a copy to the working deck; "Done" closes the panel.
+A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).
+
+- **All** is the first chip and default when the panel opens. It shows card images grouped by catalog type (characters → … → basic), each type in its own isolated 3-column grid so portrait and landscape art do not share rows across types.
+- Per-type chips show a single 3-column `CardTile` grid for that slug only.
+- Search uses `cardMatchesSearchQuery` (name, character, card text) across all types on **All**, same scope as DBV/Collection.
+- **Pagination**: **16** cards/page on All (8 rows at 2-column landscape width); per-type **24** for portrait types (8 rows × 3 columns) or **16** for landscape types — characters, locations, events (8 rows × 2 columns). Landscape sections use `.add-cards__grid--landscape`.
+- **Default art only**: the catalog list dedupes foil rows and alternate-art variants client-side (`prepareAddCardsCatalogList` in `frontend/src/lib/catalog/defaultCatalogCards.ts`) so each logical card appears once with its default art. The in-deck badge counts copies of any variant (base, foil, or alternate) already in the deck.
+- Clicking a card adds a copy to the working deck; **Done** closes the panel.
+
+Implementation: [`AddCardsPanel.tsx`](AddCardsPanel.tsx), helpers in [`addCardsCatalog.ts`](addCardsCatalog.ts) and [`defaultCatalogCards.ts`](../../lib/catalog/defaultCatalogCards.ts).
 
 ## Save model
 Edits accumulate in local working state; **Save** persists the full card list

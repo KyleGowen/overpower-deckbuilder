@@ -17,6 +17,8 @@ deck, deck actions, add cards, mobile account sheet).
 ## Accessibility
 - `role="dialog"`, `aria-modal="true"`; focus moves into the panel on open and returns to
   the trigger on close.
+- Focus management runs only when `open` changes (not when `onClose` identity changes), so
+  typing in form fields inside an open panel does not steal focus.
 - Closes on `Escape` and backdrop click.
 
 ## Notes

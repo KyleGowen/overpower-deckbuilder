@@ -10,6 +10,8 @@
  * - Power Cards
  */
 
+import { calculateDeckIconTotals } from '../../frontend/src/lib/decks/iconTotals';
+
 // Type definitions
 interface MockDeckCard {
     id: string;
@@ -28,92 +30,14 @@ interface MockCardData {
     stat_type_to_use?: string;
 }
 
-// Mock the calculateIconTotals function logic
 function calculateIconTotals(deckCards: MockDeckCard[], availableCardsMap: Map<string, MockCardData>) {
-    const totals = {
-        'Energy': 0,
-        'Combat': 0,
-        'Brute Force': 0,
-        'Intelligence': 0
+    const result = calculateDeckIconTotals(deckCards, (_type, cardId) => availableCardsMap.get(cardId));
+    return {
+        Energy: result.energy,
+        Combat: result.combat,
+        'Brute Force': result.bruteForce,
+        Intelligence: result.intelligence,
     };
-    
-    const iconTypes = ['Energy', 'Combat', 'Brute Force', 'Intelligence'];
-    
-    // Only process card types that should contribute to icon totals
-    const allowedTypes = ['special', 'aspect', 'ally-universe', 'ally_universe', 'teamwork', 'power'];
-    
-    deckCards.forEach(card => {
-        // Skip card types that don't contribute to icon totals
-        if (!allowedTypes.includes(card.type)) {
-            return;
-        }
-        
-        const availableCard = availableCardsMap.get(card.cardId);
-        if (!availableCard) return;
-        
-        const quantity = (card.quantity && card.quantity > 0) ? card.quantity : 1;
-        let icons: string[] = [];
-        
-        // Determine icons based on card type, using same logic as list view
-        if (card.type === 'power') {
-            // Power cards: use power_type field
-            const type = String(availableCard.power_type || '').trim();
-            const isMulti = /multi\s*-?power/i.test(type);
-            
-            if (type === 'Any-Power') {
-                // Any-Power doesn't count toward icon totals
-                icons = [];
-            } else if (isMulti) {
-                // Multi Power counts as all 4 types
-                icons = ['Energy', 'Combat', 'Brute Force', 'Intelligence'];
-            } else {
-                // Single type power card
-                const matchedType = iconTypes.find(t => t === type);
-                if (matchedType) {
-                    icons = [matchedType];
-                }
-            }
-        } else if (card.type === 'teamwork') {
-            // Teamwork cards: use to_use field
-            const src = String(availableCard.to_use || '');
-            const isAny = /Any-?Power/i.test(src);
-            
-            if (isAny) {
-                // Any-Power doesn't count toward icon totals
-                icons = [];
-            } else {
-                // Match Energy, Combat, Brute Force, Intelligence from to_use string
-                icons = iconTypes.filter(t => {
-                    const regex = new RegExp(t, 'i');
-                    return regex.test(src);
-                });
-            }
-        } else if (card.type === 'ally-universe' || card.type === 'ally_universe') {
-            // Ally-universe cards: use stat_type_to_use field
-            const src = String(availableCard.stat_type_to_use || '');
-            const matchedType = iconTypes.find(t => {
-                const regex = new RegExp(t, 'i');
-                return regex.test(src);
-            });
-            if (matchedType) {
-                icons = [matchedType];
-            }
-        } else {
-            // For other card types (special, aspect, etc.): use icons array
-            icons = Array.isArray(availableCard.icons) ? availableCard.icons : [];
-            // Filter to only count the 4 main icon types
-            icons = icons.filter(icon => iconTypes.includes(icon));
-        }
-        
-        // Count each icon type, multiplied by quantity
-        icons.forEach(icon => {
-            if (totals.hasOwnProperty(icon)) {
-                totals[icon as keyof typeof totals] += quantity;
-            }
-        });
-    });
-    
-    return totals;
 }
 
 describe('calculateIconTotals', () => {
