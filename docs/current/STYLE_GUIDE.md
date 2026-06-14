@@ -38,7 +38,8 @@
 35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
 36. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
 37. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
-38. [Deck Editor stats panel (v2 SPA)](#deck-editor-stats-panel-v2-spa)
+38. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
+39. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
 
 ## Overview
 
@@ -2969,42 +2970,72 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
 - **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.
 - **Details — Set**: `setDisplayName` from `GET /api/v1/dbv/sets` via `resolveSetDisplayName()` (DatabasePage passes the friendly name; badge tags still use the set code).
 
-## Deck Editor stats panel (v2 SPA)
+## Deck Editor stats strip (v2 SPA)
 
-The v2 deck editor (`DeckEditorPage.tsx`) shows two labeled stat rows below the top bar.
+The v2 deck editor (`DeckEditorPage.tsx`) shows **two labeled metadata rows** below the top bar — **Character max** and **Icon totals** — each with four inline icon + value groups. Values use toned stat colors; icons are lightly desaturated so card art below remains the visual focus.
 
 ### Container — `.deck-editor__stats-panel`
 
-- `display: flex; flex-direction: column; gap: var(--space-4)`
-- `padding: var(--space-4) var(--space-5); max-width: 640px`
-- Mobile (`.layout-mobile`): `max-width: none; padding: var(--space-3); gap: var(--space-3)`
+- `display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--space-4)`
+- `padding: var(--space-2) var(--space-5) var(--space-3); border-bottom: 1px solid var(--color-border)`
+- Two blocks side by side on desktop, separated by `border-left` on the second block
+- Mobile (`.layout-mobile`): blocks stack full-width with `border-top` between them
 
-### Section headings — `.deck-editor__stats-heading`
+### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
-- `font-size: 10px; font-weight: var(--font-weight-semibold); text-transform: uppercase`
-- `letter-spacing: 0.06em; color: var(--color-text-dim)`
-- Row labels: **Character maximums** (max character primaries) and **Icon totals** (deck icon counts)
+- Row layout: label column (`flex: 0 0 6.5rem`) + values row
+- Label: `10px`, uppercase, `letter-spacing: 0.05em`, `var(--color-text-dim)` — **Character max** and **Icon totals**
+- `aria-label` on each block matches the row meaning
 
-### Stat grid — `.deck-editor__stats`
+### Values row — `.deck-editor__stats-row` / `.deck-editor__stat-group`
 
-- `display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3)`
-- Each tile: `.deck-editor__stat` — panel background `var(--color-bg-panel)`, `1px solid var(--color-border)`, `border-radius: var(--radius-md)`, centered column layout
+- `display: flex; flex-wrap: wrap; gap: var(--space-3)`
+- Each group: muted stat PNG icon + bold value in global stat color (`.stat-energy`, `.stat-combat`, `.stat-brute-force`, `.stat-intelligence`)
+- Vertical divider between groups: `border-right: 1px solid var(--color-border)` (except last)
+- Per-stat `title` tooltip (e.g. *"Energy: 5"*)
 
-### Values and colors
+### Icon — `.deck-editor__stat-group-icon`
 
-- Value: `.deck-editor__stat-val` — `font-size: var(--font-size-xl); font-weight: var(--font-weight-bold)`
-- Label: `.deck-editor__stat-label` — `9px`, uppercase, `var(--color-text-dim)`
-- Stat colors (global): `.stat-energy` `#f6a623`, `.stat-combat` red family, `.stat-brute-force` green, `.stat-intelligence` blue (`tokens.css`)
+- `18×18px` PNG from `STAT_ICON_PATHS` via `assetUrl()`
+- Light muting: `opacity: 0.9; filter: saturate(0.92) brightness(0.95)`
 
-### Icon totals row only
+### Value — `.deck-editor__stat-val`
 
-- `.deck-editor__stat-icon` — `18×18px` PNG above the value (`opacity: 0.9`)
-- Icons from `STAT_ICON_PATHS` (`/src/resources/images/icons/energy.png`, etc.)
+- `font-size: var(--font-size-md); font-weight: var(--font-weight-bold)` + stat color utility class
 
 ### Logic
 
 - Max stats: highest character primary per stat (catalog `cardStats`)
 - Icon totals: `calculateDeckIconTotals` in `frontend/src/lib/decks/iconTotals.ts` (same rules as legacy `calculateIconTotals`)
+
+## Deck Editor card grid (v2 SPA)
+
+The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type. Each tile uses type-specific aspect ratios so **characters, locations, and events** render landscape (horizontal) and all other types stay portrait — matching Add Cards / DBV `CardTile` framing.
+
+### Grid — `.deck-editor__cards`
+
+- Default (portrait type groups): `grid-template-columns: repeat(auto-fill, minmax(140px, 1fr))`
+- Landscape type groups (`.deck-editor__cards--landscape`): `minmax(190px, 1fr)` — wider cells for horizontal art
+- Mobile (`.layout-mobile`): portrait `minmax(110px, 1fr)`; landscape `minmax(150px, 1fr)`
+
+### Image frame — `.deck-editor__card-img` + orientation modifiers
+
+Base: `position: relative`, `border-radius: var(--radius-sm)`, `overflow: hidden`.
+
+| Modifier | Types | `aspect-ratio` |
+|---|---|---|
+| `.deck-editor__card-img--portrait` | missions, power, special, aspects, universe cards, etc. | `5 / 7` |
+| `.deck-editor__card-img--characters` | characters | `380 / 280` |
+| `.deck-editor__card-img--locations` | locations | `236 / 151` |
+| `.deck-editor__card-img--events` | events | `236 / 151` |
+
+Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via deck card type → catalog slug).
+
+### Image fit — `CardImage`
+
+- Landscape types: `className="card-image--contain"` (`object-fit: contain`) so location/event bottom text is not clipped
+- Portrait types: default `object-fit: cover` in a `5:7` frame
+- `catalogType` is passed to `CardImage` for correct thumbnail URLs
 
 ### Add Cards slide-out (`SlideOutPanel`)
 

@@ -9,9 +9,7 @@ are read-only automatically).
 - **Top bar**: back button, editable deck name, card count + threat + legality badge, and
   actions — Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean,
   "Saving…" while in flight).
-- **Body**: two stat sections — **Character maximums** (max E/C/BF/INT from characters) and **Icon totals**
-  (deck-wide Energy/Combat/Brute Force/Intelligence icon counts from power/special/aspect/ally/teamwork
-  cards, computed client-side via `calculateDeckIconTotals`). Below that, the card list grouped by type.
+- **Body**: two compact **stats rows** below the top bar — **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color. Below that, the card list grouped by type. **Main grid orientation**: characters, locations, and events use landscape aspect ratios (`380:280` / `236:151`) with `card-image--contain`; all other types use portrait `5:7`. Landscape type sections use a wider grid (`deck-editor__cards--landscape`, `minmax(190px, 1fr)`).
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

@@ -16,7 +16,9 @@ import {
   CATALOG_TYPE_BY_SLUG,
   cardDisplayName,
   cardStats,
+  isLandscapeCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
+import { assetUrl } from '../../lib/images/cardImages';
 import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
 import { CardImage } from '../../components/CardImage';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
@@ -48,6 +50,14 @@ const CATALOG_SLUG_BY_DECK_TYPE = new Map<string, CatalogType>(
   CATALOG_TYPES.map((m) => [m.deckType, m.type]),
 );
 
+function deckCardImgOrientationClass(catalogType?: CatalogType): string {
+  if (!catalogType) return 'deck-editor__card-img--portrait';
+  if (catalogType === 'characters') return 'deck-editor__card-img--characters';
+  if (catalogType === 'locations') return 'deck-editor__card-img--locations';
+  if (catalogType === 'events') return 'deck-editor__card-img--events';
+  return 'deck-editor__card-img--portrait';
+}
+
 const DECK_STAT_ROWS = [
   { key: 'energy', label: 'Energy', cls: 'stat-energy', iconKey: 'energy' },
   { key: 'combat', label: 'Combat', cls: 'stat-combat', iconKey: 'combat' },
@@ -55,29 +65,51 @@ const DECK_STAT_ROWS = [
   { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence', iconKey: 'intelligence' },
 ] as const;
 
-function DeckStatGrid({
+function DeckStatRow({
+  label,
+  ariaLabel,
   values,
-  showIcons = false,
 }: {
+  label: string;
+  ariaLabel: string;
   values: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
-  showIcons?: boolean;
 }) {
   return (
-    <div className="deck-editor__stats">
-      {DECK_STAT_ROWS.map(({ key, label, cls, iconKey }) => (
-        <div className="deck-editor__stat" key={label}>
-          {showIcons ? (
-            <img
-              className="deck-editor__stat-icon"
-              src={STAT_ICON_PATHS[iconKey]}
-              alt=""
-              aria-hidden
-            />
-          ) : null}
-          <span className={`deck-editor__stat-val ${cls}`}>{values[key]}</span>
-          <span className="deck-editor__stat-label">{label}</span>
-        </div>
-      ))}
+    <section className="deck-editor__stats-block" aria-label={ariaLabel}>
+      <span className="deck-editor__stats-block-label">{label}</span>
+      <div className="deck-editor__stats-row">
+        {DECK_STAT_ROWS.map(({ key, label: statLabel, cls, iconKey }) => (
+          <span
+            className="deck-editor__stat-group"
+            key={key}
+            title={`${statLabel}: ${values[key]}`}
+          >
+            <span className="deck-editor__stat-group-icon" aria-hidden="true">
+              <img src={assetUrl(STAT_ICON_PATHS[iconKey])} alt="" />
+            </span>
+            <span className={`deck-editor__stat-val ${cls}`}>{values[key]}</span>
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DeckStatsPanel({
+  maxStats,
+  iconTotals,
+}: {
+  maxStats: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
+  iconTotals: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
+}) {
+  return (
+    <div className="deck-editor__stats-panel">
+      <DeckStatRow
+        label="Character max"
+        ariaLabel="Character maximums"
+        values={maxStats}
+      />
+      <DeckStatRow label="Icon totals" ariaLabel="Icon totals" values={iconTotals} />
     </div>
   );
 }
@@ -352,16 +384,7 @@ export default function DeckEditorPage() {
         </header>
 
         {/* Stat summary */}
-        <div className="deck-editor__stats-panel">
-          <section className="deck-editor__stats-section" aria-label="Character maximums">
-            <h2 className="deck-editor__stats-heading">Character maximums</h2>
-            <DeckStatGrid values={maxStats} />
-          </section>
-          <section className="deck-editor__stats-section" aria-label="Icon totals">
-            <h2 className="deck-editor__stats-heading">Icon totals</h2>
-            <DeckStatGrid values={iconTotals} showIcons />
-          </section>
-        </div>
+        <DeckStatsPanel maxStats={maxStats} iconTotals={iconTotals} />
 
         {/* Card list */}
         <div className="deck-editor__content">
@@ -385,7 +408,11 @@ export default function DeckEditorPage() {
                   {meta.label}
                   <span className="deck-editor__group-count">{entries.reduce((s, e) => s + e.quantity, 0)}</span>
                 </h2>
-                <div className="deck-editor__cards">
+                <div
+                  className={`deck-editor__cards${
+                    isLandscapeCatalogType(meta.type) ? ' deck-editor__cards--landscape' : ''
+                  }`}
+                >
                   {entries.map((entry) => {
                     const catalogCard = cardIndex.get(`${entry.type}:${entry.cardId}`);
                     const imagePath =
@@ -395,14 +422,18 @@ export default function DeckEditorPage() {
                     const cardName =
                       entry.name || (catalogCard ? cardDisplayName(catalogCard) : 'Card');
                     const catalogType = CATALOG_SLUG_BY_DECK_TYPE.get(entry.type);
+                    const landscape = catalogType ? isLandscapeCatalogType(catalogType) : false;
                     return (
                     <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
-                      <div className="deck-editor__card-img">
+                      <div
+                        className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}`}
+                      >
                         <CardImage
                           imagePath={imagePath}
                           catalogType={catalogType}
                           alt={cardName}
                           useThumbnail
+                          className={landscape ? 'card-image--contain' : ''}
                         />
                         {entry.quantity > 1 ? <span className="deck-editor__card-qty">x{entry.quantity}</span> : null}
                       </div>
