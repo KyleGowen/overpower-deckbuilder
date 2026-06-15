@@ -140,8 +140,7 @@ export function filterCharacterStacks(
   const q = searchQuery.trim();
   if (!q) return stacks;
 
-  return stacks.filter((stack) => {
-    if (cardMatchesSearchQuery({ name: stack.characterName }, q)) return true;
-    return stackCardsInAddOrder(stack).some(({ card }) => cardMatchesSearchQuery(card, q));
-  });
+  return stacks.filter((stack) =>
+    cardMatchesSearchQuery({ name: stack.characterName }, q),
+  );
 }

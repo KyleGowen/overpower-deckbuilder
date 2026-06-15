@@ -3042,7 +3042,7 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 
 - **Width**: `575px` on desktop (`width={575}` on `SlideOutPanel` in `AddCardsPanel`) — 25% wider than the prior `460px` width to fit more card tiles per row.
 - **Type chips**: **All** first (default on open), **Stacks** second, then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
-- **Search**: placeholder *"Search name, character, or card text..."*; uses `cardMatchesSearchQuery` (DBV/Collection parity).
+- **Search**: placeholder *"Search name, character, or card text..."* on **All** and per-type tabs; uses `cardMatchesSearchQuery` (DBV/Collection parity). On **Stacks**, placeholder switches to *"Search character names..."* (`aria-label`: *Search character names*).
 - **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
@@ -3074,5 +3074,5 @@ The **Stacks** chip (`tab === 'stacks'`) lists one block per character with link
 - One stack per character **display name** (ERB/ERBP variants merge); excludes `Any Character`
 - Special matching: `specialCardMatchesCharacter` (exact name + Angry Mob variant rules)
 - UA matching: `card.character === characterName`
-- Search filters stacks by character name or any stack card (`cardMatchesSearchQuery`)
+- Search filters stacks by **character name only** (`filterCharacterStacks`); placeholder *"Search character names..."*
 - **Pagination**: **6 stacks/page** (`ADD_CARDS_STACKS_PAGE_SIZE`)

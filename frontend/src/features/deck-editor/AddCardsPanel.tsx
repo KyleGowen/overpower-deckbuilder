@@ -43,6 +43,11 @@ import {
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
+const ADD_CARDS_SEARCH_PLACEHOLDER = 'Search name, character, or card text...';
+const STACKS_SEARCH_PLACEHOLDER = 'Search character names...';
+const ADD_CARDS_SEARCH_ARIA_LABEL = 'Search cards to add';
+const STACKS_SEARCH_ARIA_LABEL = 'Search character names';
+
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -299,10 +304,10 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
           <IconSearch className="add-cards__search-icon" />
           <input
             type="search"
-            placeholder="Search name, character, or card text..."
+            placeholder={isStacksTab ? STACKS_SEARCH_PLACEHOLDER : ADD_CARDS_SEARCH_PLACEHOLDER}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search cards to add"
+            aria-label={isStacksTab ? STACKS_SEARCH_ARIA_LABEL : ADD_CARDS_SEARCH_ARIA_LABEL}
           />
         </div>
         <div className="add-cards__types" role="tablist" aria-label="Card types">

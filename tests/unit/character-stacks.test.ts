@@ -100,9 +100,8 @@ describe('characterStacks', () => {
       expect(filterCharacterStacks(stacks, 'anubis')[0].characterName).toBe('Anubis');
     });
 
-    it('filters by special card name', () => {
-      expect(filterCharacterStacks(stacks, 'thunderbolt')).toHaveLength(1);
-      expect(filterCharacterStacks(stacks, 'thunderbolt')[0].characterName).toBe('Zeus');
+    it('does not filter by special card name', () => {
+      expect(filterCharacterStacks(stacks, 'thunderbolt')).toHaveLength(0);
     });
   });
 
