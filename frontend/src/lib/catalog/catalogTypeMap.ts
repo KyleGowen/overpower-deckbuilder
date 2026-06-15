@@ -12,8 +12,8 @@ import type {
   CatalogCard,
 } from '../api/types';
 
-/** Per-type catalog tab or cross-type All list tab. */
-export type CatalogTabSelection = CatalogType | 'all';
+/** Per-type catalog tab, All list, or character Stacks tab in Add Cards. */
+export type CatalogTabSelection = CatalogType | 'all' | 'stacks';
 
 export interface CatalogTypeMeta {
   type: CatalogType;

@@ -43,6 +43,7 @@ import type {
   DeckCardEntry,
   DeckCardType,
 } from '../../lib/api/types';
+import type { StackCardEntry } from '../../lib/catalog/characterStacks';
 import './DeckEditorPage.css';
 
 /** Deck card types are stored hyphen/underscore-keyed; map them to catalog slugs. */
@@ -271,6 +272,32 @@ export default function DeckEditorPage() {
     setDirty(true);
   };
 
+  const addStack = (entries: StackCardEntry[]) => {
+    if (entries.length === 0) return;
+    setCards((prev) => {
+      let next = [...prev];
+      for (const { card, catalogType } of entries) {
+        const deckType = CATALOG_TYPE_BY_SLUG[catalogType].deckType;
+        const existing = next.find((c) => c.type === deckType && c.cardId === card.id);
+        if (existing) {
+          continue;
+        }
+        next = [
+          ...next,
+          {
+            type: deckType,
+            cardId: card.id,
+            quantity: 1,
+            name: cardDisplayName(card),
+            defaultImage: (card.image_path as string) || (card.image as string),
+          },
+        ];
+      }
+      return next;
+    });
+    setDirty(true);
+  };
+
   const handleSave = async () => {
     if (!isOwner || saving) return;
     setSaving(true);
@@ -467,7 +494,13 @@ export default function DeckEditorPage() {
 
       {/* Add cards panel */}
       {isOwner ? (
-        <AddCardsPanel open={addOpen} onClose={() => setAddOpen(false)} onAdd={addCard} cards={cards} />
+        <AddCardsPanel
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          onAdd={addCard}
+          onAddStack={addStack}
+          cards={cards}
+        />
       ) : null}
 
       <CardDetailPanel

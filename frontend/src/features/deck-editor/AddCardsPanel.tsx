@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { fetchCatalog, fetchFoilCardMap } from '../../lib/api/catalog';
 import {
   CATALOG_TYPES,
@@ -20,6 +20,16 @@ import { EmptyState } from '../../components/EmptyState';
 import { IconSearch, IconPlus, IconCheck, IconClose } from '../../components/icons';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/types';
 import {
+  ADD_CARDS_STACKS_PAGE_SIZE,
+  buildCharacterStacks,
+  filterCharacterStacks,
+  stackCardsInAddOrder,
+  stackTotalCardCount,
+  type CharacterStack,
+  type StackCardEntry,
+} from '../../lib/catalog/characterStacks';
+import { CharacterStackRow } from './CharacterStackRow';
+import {
   ADD_CARDS_PAGE_SIZE_ALL,
   addCardsGridClassName,
   addCardsPageSizeForType,
@@ -30,6 +40,8 @@ import {
   groupPageItemsByType,
   paginateItems,
 } from './addCardsCatalog';
+
+const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
@@ -44,6 +56,7 @@ export interface AddCardsPanelProps {
   open: boolean;
   onClose: () => void;
   onAdd: (card: CatalogCard, type: CatalogType) => void;
+  onAddStack: (entries: StackCardEntry[]) => void;
   cards: DeckCardEntry[];
 }
 
@@ -62,14 +75,15 @@ function cardTileOverlay(inDeck: number) {
   );
 }
 
-export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProps) {
+export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCardsPanelProps) {
   const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounced(search);
 
   const isAllTab = tab === 'all';
-  const activeType = isAllTab ? null : tab;
+  const isStacksTab = tab === 'stacks';
+  const activeType = isAllTab || isStacksTab ? null : tab;
 
   useEffect(() => {
     if (open) {
@@ -100,12 +114,56 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
   const catalogQuery = useQuery({
     queryKey: ['catalog', activeType],
     queryFn: () => fetchCatalog(activeType!),
-    enabled: open && !isAllTab && activeType !== null,
+    enabled: open && !isAllTab && !isStacksTab && activeType !== null,
     staleTime: 30 * 60 * 1000,
+  });
+
+  const stackCatalogQueries = useQueries({
+    queries: STACK_CATALOG_TYPES.map((type) => ({
+      queryKey: ['catalog', type] as const,
+      queryFn: () => fetchCatalog(type),
+      enabled: open && isStacksTab,
+      staleTime: 30 * 60 * 1000,
+    })),
   });
 
   const { cardsByType, variantLookupByType } = useMemo(() => {
     const variantLookupByType = new Map<CatalogType, Map<string, string[]>>();
+
+    if (isStacksTab) {
+      const charactersRaw = stackCatalogQueries[0]?.data ?? [];
+      const specialsRaw = stackCatalogQueries[1]?.data ?? [];
+      const uaRaw = stackCatalogQueries[2]?.data ?? [];
+
+      const characters = prepareAddCardsCatalogList(
+        charactersRaw,
+        'characters',
+        foilLookup.foilToBase,
+      );
+      const specials = prepareAddCardsCatalogList(
+        specialsRaw,
+        'special-cards',
+        foilLookup.foilToBase,
+      );
+      const advancedUniverse = prepareAddCardsCatalogList(
+        uaRaw,
+        'advanced-universe',
+        foilLookup.foilToBase,
+      );
+
+      variantLookupByType.set('characters', characters.variantIdsByRepresentative);
+      variantLookupByType.set('special-cards', specials.variantIdsByRepresentative);
+      variantLookupByType.set('advanced-universe', advancedUniverse.variantIdsByRepresentative);
+
+      return {
+        cardsByType: {
+          characters: characters.cards,
+          'special-cards': specials.cards,
+          'advanced-universe': advancedUniverse.cards,
+        } as Partial<Record<CatalogType, CatalogCard[]>>,
+        variantLookupByType,
+      };
+    }
 
     if (isAllTab) {
       const rawByType = groupAllCatalogByType(allCatalogQuery.cards);
@@ -134,7 +192,29 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
     }
 
     return { cardsByType: {} as Partial<Record<CatalogType, CatalogCard[]>>, variantLookupByType };
-  }, [isAllTab, activeType, allCatalogQuery.cards, catalogQuery.data, foilLookup.foilToBase]);
+  }, [
+    isAllTab,
+    isStacksTab,
+    activeType,
+    allCatalogQuery.cards,
+    catalogQuery.data,
+    stackCatalogQueries,
+    foilLookup.foilToBase,
+  ]);
+
+  const characterStacks = useMemo(() => {
+    if (!isStacksTab) return [];
+    return buildCharacterStacks({
+      characters: cardsByType.characters ?? [],
+      specials: cardsByType['special-cards'] ?? [],
+      advancedUniverse: cardsByType['advanced-universe'] ?? [],
+    });
+  }, [isStacksTab, cardsByType]);
+
+  const filteredStacks = useMemo(
+    () => filterCharacterStacks(characterStacks, debouncedSearch),
+    [characterStacks, debouncedSearch],
+  );
 
   const allSections = useMemo(
     () => buildAddCardsSections(cardsByType, debouncedSearch),
@@ -148,10 +228,16 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
     return filterAndSortTypeCards(cardsByType[activeType] ?? [], activeType, debouncedSearch);
   }, [isAllTab, activeType, cardsByType, debouncedSearch]);
 
-  const pageSize = isAllTab
-    ? ADD_CARDS_PAGE_SIZE_ALL
-    : addCardsPageSizeForType(activeType!);
-  const totalItems = isAllTab ? allFlat.length : typeList.length;
+  const pageSize = isStacksTab
+    ? ADD_CARDS_STACKS_PAGE_SIZE
+    : isAllTab
+      ? ADD_CARDS_PAGE_SIZE_ALL
+      : addCardsPageSizeForType(activeType!);
+  const totalItems = isStacksTab
+    ? filteredStacks.length
+    : isAllTab
+      ? allFlat.length
+      : typeList.length;
   const maxPage = Math.max(1, Math.ceil(totalItems / pageSize));
   const effectivePage = Math.min(page, maxPage);
 
@@ -166,8 +252,13 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
   );
 
   const pageTypeCards = useMemo(
-    () => (!isAllTab ? paginateItems(typeList, effectivePage, pageSize) : []),
-    [isAllTab, typeList, effectivePage, pageSize],
+    () => (!isAllTab && !isStacksTab ? paginateItems(typeList, effectivePage, pageSize) : []),
+    [isAllTab, isStacksTab, typeList, effectivePage, pageSize],
+  );
+
+  const pageStacks = useMemo(
+    () => (isStacksTab ? paginateItems(filteredStacks, effectivePage, pageSize) : []),
+    [isStacksTab, filteredStacks, effectivePage, pageSize],
   );
 
   const qtyInDeck = (card: CatalogCard, catalogType: CatalogType) => {
@@ -176,10 +267,29 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
     return qtyInDeckForRepresentative(card, catalogType, cards, deckType, variantMap);
   };
 
-  const isLoading = isAllTab
-    ? allCatalogQuery.isLoading || foilMapQuery.isLoading
-    : catalogQuery.isLoading || foilMapQuery.isLoading;
-  const isError = isAllTab ? allCatalogQuery.isError : catalogQuery.isError;
+  const stackInDeckCount = (stack: CharacterStack) =>
+    stackCardsInAddOrder(stack).filter(({ card, catalogType }) => qtyInDeck(card, catalogType) > 0)
+      .length;
+
+  const handleAddStack = (stack: CharacterStack) => {
+    const missing = stackCardsInAddOrder(stack).filter(
+      ({ card, catalogType }) => qtyInDeck(card, catalogType) === 0,
+    );
+    if (missing.length > 0) {
+      onAddStack(missing);
+    }
+  };
+
+  const isLoading = isStacksTab
+    ? stackCatalogQueries.some((q) => q.isLoading) || foilMapQuery.isLoading
+    : isAllTab
+      ? allCatalogQuery.isLoading || foilMapQuery.isLoading
+      : catalogQuery.isLoading || foilMapQuery.isLoading;
+  const isError = isStacksTab
+    ? stackCatalogQueries.some((q) => q.isError)
+    : isAllTab
+      ? allCatalogQuery.isError
+      : catalogQuery.isError;
   const hasResults = totalItems > 0;
 
   return (
@@ -205,6 +315,15 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
           >
             All
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isStacksTab}
+            className={`add-cards__type ${isStacksTab ? 'is-active' : ''}`}
+            onClick={() => setTab('stacks')}
+          >
+            Stacks
+          </button>
           {CATALOG_TYPES.map((meta) => (
             <button
               key={meta.type}
@@ -225,6 +344,18 @@ export function AddCardsPanel({ open, onClose, onAdd, cards }: AddCardsPanelProp
           <EmptyState title="Could not load cards" message="Try again in a moment." icon={<IconSearch />} />
         ) : !hasResults ? (
           <EmptyState title="No cards" message="Try another search or type." icon={<IconSearch />} />
+        ) : isStacksTab ? (
+          <div className="add-cards__stack-list">
+            {pageStacks.map((stack) => (
+              <CharacterStackRow
+                key={stack.characterName}
+                stack={stack}
+                inDeckCount={stackInDeckCount(stack)}
+                totalCount={stackTotalCardCount(stack)}
+                onAddStack={() => handleAddStack(stack)}
+              />
+            ))}
+          </div>
         ) : isAllTab ? (
           <div className="add-cards__sections">
             {pageAllBlocks.map((block, blockIndex) => (

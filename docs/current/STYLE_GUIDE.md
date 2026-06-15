@@ -40,6 +40,7 @@
 37. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
 38. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
 39. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
+40. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
 
 ## Overview
 
@@ -3040,10 +3041,38 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 ### Add Cards slide-out (`SlideOutPanel`)
 
 - **Width**: `575px` on desktop (`width={575}` on `SlideOutPanel` in `AddCardsPanel`) — 25% wider than the prior `460px` width to fit more card tiles per row.
-- **Type chips**: **All** first (default on open), then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
+- **Type chips**: **All** first (default on open), **Stacks** second, then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
 - **Search**: placeholder *"Search name, character, or card text..."*; uses `cardMatchesSearchQuery` (DBV/Collection parity).
 - **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
 - **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned.
 - **Mobile**: `SlideOutPanel` right variant becomes full viewport width (`100vw`) per component CSS; width prop applies on desktop only.
+
+## Add Cards Stacks tab (v2 SPA)
+
+The **Stacks** chip (`tab === 'stacks'`) lists one block per character with linked specials and Universe: Advanced cards — legacy Character Stacks parity for v2 Add Cards.
+
+### Layout — `.add-cards__stack` / `.add-cards__stack-list`
+
+- Vertical list (`.add-cards__stack-list`, `gap: var(--space-4)`)
+- Each stack is a full-width **clickable `<button>`** (`.add-cards__stack`) — bordered frame with landscape character row + portrait grid below (no title row or separate add button)
+- **Character row** (`.add-cards__stack-character`): centered flex row; character tile width matches one **landscape grid cell** (`calc((100% - var(--space-3)) / 2)` — same as `.add-cards__grid--landscape` column)
+- **Portrait grid** (`.add-cards__stack-portraits.add-cards__grid--portrait`): specials then UA in **3 columns**
+- Inner `CardTile` art is **display-only** (`pointer-events: none` on `.card-tile__art`); the frame button is the sole hit target
+
+### Interaction — clickable frame
+
+- **Hover** (incomplete): `border-color: var(--color-border-accent)` + teal glow `box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.35)`
+- **Click:** adds qty **1** of each missing stack card in one batch (`DeckEditorPage.addStack`); brief success flash `.add-cards__stack--added` (teal border/glow, 1.5s)
+- **Complete** (`.add-cards__stack--complete:disabled`): `opacity: 0.55`, not clickable, no hover
+- `aria-label`: `Add {characterName} stack` or `In deck: {characterName}`
+
+### Data / matching
+
+- Built in `frontend/src/lib/catalog/characterStacks.ts` from deduped characters, special-cards, and advanced-universe catalogs
+- One stack per character **display name** (ERB/ERBP variants merge); excludes `Any Character`
+- Special matching: `specialCardMatchesCharacter` (exact name + Angry Mob variant rules)
+- UA matching: `card.character === characterName`
+- Search filters stacks by character name or any stack card (`cardMatchesSearchQuery`)
+- **Pagination**: **6 stacks/page** (`ADD_CARDS_STACKS_PAGE_SIZE`)

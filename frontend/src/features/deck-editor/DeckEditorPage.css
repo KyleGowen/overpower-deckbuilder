@@ -408,6 +408,60 @@
   width: 100%;
 }
 
+/* Stacks tab — character + linked specials/UA */
+.add-cards__stack-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.add-cards__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.add-cards__stack:not(:disabled):hover {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.35);
+}
+.add-cards__stack--added {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.25);
+}
+.add-cards__stack--complete:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.add-cards__stack-character {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.add-cards__stack-character .card-tile {
+  width: calc((100% - var(--space-3)) / 2);
+  max-width: calc((100% - var(--space-3)) / 2);
+}
+.add-cards__stack .card-tile:hover {
+  transform: none;
+  border-color: var(--color-border);
+}
+.add-cards__stack .card-tile__art {
+  pointer-events: none;
+  cursor: default;
+}
+.add-cards__stack-portraits {
+  width: 100%;
+}
+
 /* ---- Mobile ---- */
 .layout-mobile .deck-editor {
   grid-template-columns: 1fr;
