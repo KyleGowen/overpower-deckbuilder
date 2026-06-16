@@ -466,6 +466,62 @@
   width: 100%;
 }
 
+/* Missions tab — mission set groups */
+.add-cards__mission-set-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.add-cards__mission-set {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.add-cards__mission-set--added {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.25);
+}
+.add-cards__mission-set--complete {
+  opacity: 0.55;
+}
+.add-cards__grid--portrait-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.add-cards__add-set {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  padding: var(--space-2);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-bright);
+  text-align: center;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.add-cards__add-set:not(:disabled):hover {
+  background: var(--color-accent-soft);
+  box-shadow: 0 0 0 1px rgba(78, 205, 196, 0.35);
+}
+.add-cards__add-set:disabled {
+  opacity: 0.55;
+  cursor: default;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
 /* ---- Mobile ---- */
 .layout-mobile .deck-editor {
   grid-template-columns: 1fr;

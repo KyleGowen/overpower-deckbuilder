@@ -41,6 +41,7 @@
 38. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
 39. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
 40. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
+41. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
 
 ## Overview
 
@@ -3083,3 +3084,33 @@ The **Stacks** chip (`tab === 'stacks'`) lists one block per character with link
 - UA matching: `card.character === characterName`
 - Search filters stacks by **character name only** (`filterCharacterStacks`); placeholder *"Search character names..."*
 - **Pagination**: **6 stacks/page** (`ADD_CARDS_STACKS_PAGE_SIZE`)
+
+## Add Cards Missions tab (v2 SPA)
+
+The **Missions** chip (`tab === 'missions'`) groups missions by **`mission_set`** in bordered frames with a **4-column portrait grid** and per-card add controls plus an **Add Set** bulk action.
+
+### Layout — `.add-cards__mission-set` / `.add-cards__mission-set-list`
+
+- Vertical list (`.add-cards__mission-set-list`, `gap: var(--space-4)`)
+- Each mission set is a **non-clickable `<div>`** (`.add-cards__mission-set`) — framed container matching stack panel tokens (`padding: var(--space-3)`, `background: var(--color-bg-panel)`, `border: 1px solid var(--color-border)`, `border-radius: var(--radius-md)`)
+- **Grid** (`.add-cards__grid.add-cards__grid--portrait-4`): `grid-template-columns: repeat(4, 1fr)` — four portrait tiles per row (smaller than the default 3-column missions grid on other tabs)
+- Typical 7-mission set layout:
+  - Row 1: missions 1–4
+  - Row 2: missions 5–7 + **Add Set** button in the 8th cell
+- No set title row — set name is printed on mission card art
+
+### Interaction
+
+- **Individual missions**: each `CardTile` keeps `onClick` → add one copy; teal **+** overlay or green check + qty badge (same as other Add Cards tabs)
+- **Add Set** (`.add-cards__add-set`): portrait `aspect-ratio: 5 / 7`, teal accent border (`var(--color-border-accent)`), centered label; adds all **missing** missions in the set via `onAddStack`
+- **Disabled Add Set** when all missions in set are in deck, when deck already has **7 missions**, or when nothing remains to add
+- **Post-add flash**: `.add-cards__mission-set--added` (teal border/glow, 1.5s) after successful Add Set
+- **Complete set** (`.add-cards__mission-set--complete`): `opacity: 0.55`
+
+### Data / sorting
+
+- Built in `frontend/src/lib/catalog/missionSets.ts` from deduped missions catalog
+- Sets sorted A→Z by `mission_set`; within set by numeric `set_number` then display name
+- Search keeps a set when the set name matches **or** any mission matches `cardMatchesSearchQuery` (including `mission_set` in haystack)
+- **Pagination**: **4 mission sets/page** (`ADD_CARDS_MISSION_SETS_PAGE_SIZE`)
+- **All** tab Missions section remains a flat 3-column grid (unchanged)

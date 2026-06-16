@@ -29,6 +29,15 @@ import {
   type StackCardEntry,
 } from '../../lib/catalog/characterStacks';
 import { CharacterStackRow } from './CharacterStackRow';
+import { MissionSetRow } from './MissionSetRow';
+import {
+  ADD_CARDS_MISSION_SETS_PAGE_SIZE,
+  buildMissionSets,
+  countDeckMissions,
+  filterMissionSets,
+  missionSetCardsInAddOrder,
+  type MissionSet,
+} from '../../lib/catalog/missionSets';
 import {
   ADD_CARDS_PAGE_SIZE_ALL,
   addCardsGridClassName,
@@ -88,6 +97,7 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
 
   const isAllTab = tab === 'all';
   const isStacksTab = tab === 'stacks';
+  const isMissionsTab = tab === 'missions';
   const activeType = isAllTab || isStacksTab ? null : tab;
 
   useEffect(() => {
@@ -229,20 +239,37 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
   const allFlat = useMemo(() => flattenAddCardsSections(allSections), [allSections]);
 
   const typeList = useMemo(() => {
-    if (isAllTab || !activeType) return [];
+    if (isAllTab || isStacksTab || isMissionsTab || !activeType) return [];
     return filterAndSortTypeCards(cardsByType[activeType] ?? [], activeType, debouncedSearch);
-  }, [isAllTab, activeType, cardsByType, debouncedSearch]);
+  }, [isAllTab, isStacksTab, isMissionsTab, activeType, cardsByType, debouncedSearch]);
+
+  const missionSets = useMemo(() => {
+    if (!isMissionsTab) return [];
+    return buildMissionSets(cardsByType.missions ?? []);
+  }, [isMissionsTab, cardsByType.missions]);
+
+  const filteredMissionSets = useMemo(
+    () => filterMissionSets(missionSets, debouncedSearch),
+    [missionSets, debouncedSearch],
+  );
+
+  const deckMissionCount = useMemo(() => countDeckMissions(cards), [cards]);
+  const missionLimitReached = deckMissionCount >= 7;
 
   const pageSize = isStacksTab
     ? ADD_CARDS_STACKS_PAGE_SIZE
-    : isAllTab
-      ? ADD_CARDS_PAGE_SIZE_ALL
-      : addCardsPageSizeForType(activeType!);
+    : isMissionsTab
+      ? ADD_CARDS_MISSION_SETS_PAGE_SIZE
+      : isAllTab
+        ? ADD_CARDS_PAGE_SIZE_ALL
+        : addCardsPageSizeForType(activeType!);
   const totalItems = isStacksTab
     ? filteredStacks.length
-    : isAllTab
-      ? allFlat.length
-      : typeList.length;
+    : isMissionsTab
+      ? filteredMissionSets.length
+      : isAllTab
+        ? allFlat.length
+        : typeList.length;
   const maxPage = Math.max(1, Math.ceil(totalItems / pageSize));
   const effectivePage = Math.min(page, maxPage);
 
@@ -257,13 +284,21 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
   );
 
   const pageTypeCards = useMemo(
-    () => (!isAllTab && !isStacksTab ? paginateItems(typeList, effectivePage, pageSize) : []),
-    [isAllTab, isStacksTab, typeList, effectivePage, pageSize],
+    () =>
+      !isAllTab && !isStacksTab && !isMissionsTab
+        ? paginateItems(typeList, effectivePage, pageSize)
+        : [],
+    [isAllTab, isStacksTab, isMissionsTab, typeList, effectivePage, pageSize],
   );
 
   const pageStacks = useMemo(
     () => (isStacksTab ? paginateItems(filteredStacks, effectivePage, pageSize) : []),
     [isStacksTab, filteredStacks, effectivePage, pageSize],
+  );
+
+  const pageMissionSets = useMemo(
+    () => (isMissionsTab ? paginateItems(filteredMissionSets, effectivePage, pageSize) : []),
+    [isMissionsTab, filteredMissionSets, effectivePage, pageSize],
   );
 
   const qtyInDeck = (card: CatalogCard, catalogType: CatalogType) => {
@@ -279,6 +314,15 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
   const handleAddStack = (stack: CharacterStack) => {
     const missing = stackCardsInAddOrder(stack).filter(
       ({ card, catalogType }) => qtyInDeck(card, catalogType) === 0,
+    );
+    if (missing.length > 0) {
+      onAddStack(missing);
+    }
+  };
+
+  const handleAddMissionSet = (set: MissionSet) => {
+    const missing = missionSetCardsInAddOrder(set).filter(
+      ({ card }) => qtyInDeck(card, 'missions') === 0,
     );
     if (missing.length > 0) {
       onAddStack(missing);
@@ -358,6 +402,20 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
                 inDeckCount={stackInDeckCount(stack)}
                 totalCount={stackTotalCardCount(stack)}
                 onAddStack={() => handleAddStack(stack)}
+              />
+            ))}
+          </div>
+        ) : isMissionsTab ? (
+          <div className="add-cards__mission-set-list">
+            {pageMissionSets.map((set) => (
+              <MissionSetRow
+                key={set.missionSetName}
+                missionSet={set}
+                qtyInDeck={(card) => qtyInDeck(card, 'missions')}
+                missionLimitReached={missionLimitReached}
+                renderOverlay={cardTileOverlay}
+                onAddMission={(card) => onAdd(card, 'missions')}
+                onAddSet={() => handleAddMissionSet(set)}
               />
             ))}
           </div>
