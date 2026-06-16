@@ -2929,10 +2929,10 @@ The `/data` database page (`DatabasePage.tsx`) renders catalog cards with `CardT
 
 ### Grid columns — `.db__grid`
 
-- **Landscape tabs** (Characters, Locations, Events): `.db__grid--landscape` → `grid-template-columns: repeat(4, 1fr)` — four tiles per row on desktop.
-- **Portrait tabs** (all other catalog types): `.db__grid--portrait` → `grid-template-columns: repeat(6, 1fr)` — six tiles per row on desktop.
+- **Landscape tabs** (Characters, Locations, Events): `.db__grid--landscape` → `grid-template-columns: repeat(auto-fill, minmax(290px, 1fr))` — scales from ~4 columns at typical desktop widths to more on ultrawide.
+- **Portrait tabs** (all other catalog types): `.db__grid--portrait` → `grid-template-columns: repeat(auto-fill, minmax(195px, 1fr))` — scales from ~6 columns at typical desktop widths to more on ultrawide.
 - **Mobile** (`.layout-mobile .db__grid`): `repeat(2, 1fr)` for both orientations.
-- `gap: var(--space-4)`; container max width `--content-max-width` (1320px).
+- `gap: var(--space-4)`; page content is full-width (`--content-max-width: none`) with `--space-6` horizontal padding on `.db__inner`.
 
 ### Tile orientation — `CardTile` + `catalogType`
 

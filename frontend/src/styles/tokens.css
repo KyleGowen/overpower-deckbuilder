@@ -101,7 +101,7 @@
   --bottom-nav-height: 66px;
   --left-panel-width: 232px;
   --right-panel-width: 340px;
-  --content-max-width: 1320px;
+  --content-max-width: none;
 
   /* ---- Motion ---- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);

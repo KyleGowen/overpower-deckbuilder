@@ -97,10 +97,10 @@
   gap: var(--space-4);
 }
 .db__grid--landscape {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
 }
 .db__grid--portrait {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
 }
 
 /* Add to deck / collection */

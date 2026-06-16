@@ -34,7 +34,7 @@ guide describes the dark, neon, card-game-companion theme derived from the mocks
 - **Card art is the hero.** OverPower card images carry the visual weight. Chrome stays
   understated (muted text, thin borders) so art pops. Only ever render real card images
   shipped in the repo — never invent or hotlink art.
-- **Calm density.** Generous spacing on a fixed `--content-max-width` rail; grids breathe.
+- **Calm density.** Generous spacing on a full-width layout with edge padding; grids breathe and scale with viewport width.
 
 ## Design Tokens
 All tokens live in `:root` in `tokens.css`. Reference them via `var(--token)`; **never**
@@ -102,7 +102,7 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   cyan focus ring (`--color-border-accent`).
 
 ## Layout & Navigation
-- Fixed-width content rail: `--content-max-width: 1320px`, centered with side gutters.
+- Full-width layout: `--content-max-width: none`; page `*__inner` wrappers and `.top-nav__inner` span the viewport with horizontal padding (`--space-6` desktop, `--space-4` mobile) as side gutters. Deck editor uses the same full-bleed pattern with its own chrome (no AppShell).
 - **`html { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
   top nav does not shift when shorter pages (e.g. Decks) hide the document scrollbar.
 - **Desktop** (`> 900px`): sticky **top nav** (`--top-nav-height: 60px`) with the logo,
