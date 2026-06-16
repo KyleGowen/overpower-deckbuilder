@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { fetchCatalog, fetchFoilCardMap } from '../../lib/api/catalog';
+import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
@@ -22,7 +22,6 @@ import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/type
 import {
   ADD_CARDS_STACKS_PAGE_SIZE,
   buildCharacterStacks,
-  filterCharacterStacks,
   stackCardsInAddOrder,
   stackTotalCardCount,
   type CharacterStack,
@@ -34,7 +33,6 @@ import {
   ADD_CARDS_MISSION_SETS_PAGE_SIZE,
   buildMissionSets,
   countDeckMissions,
-  filterMissionSets,
   missionSetCardsInAddOrder,
   type MissionSet,
 } from '../../lib/catalog/missionSets';
@@ -42,15 +40,25 @@ import {
   ADD_CARDS_PAGE_SIZE_ALL,
   addCardsGridClassName,
   addCardsPageSizeForType,
-  buildAddCardsSections,
-  filterAndSortTypeCards,
   flattenAddCardsSections,
   groupAllCatalogByType,
   groupPageItemsByType,
   paginateItems,
 } from './addCardsCatalog';
+import {
+  buildAddCardsSectionsWithOptions,
+  filterAndSortTypeCardsWithOptions,
+  filterCharacterStacksWithOptions,
+  filterMissionSetsWithOptions,
+  type AddCardsFilterOptions,
+} from './addCardsFilters';
+import { AddCardsFilterBar } from './AddCardsFilterBar';
+import { buildDeckUsabilityContext, tabSupportsHideUnusables } from '../../lib/deck-usability';
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
+
+/** Catalog slugs needed for hide-unusable deck context when tab-scoped data is incomplete. */
+const DECK_USABILITY_CONTEXT_TYPES = ['characters', 'missions', 'locations'] as const;
 
 const ADD_CARDS_SEARCH_PLACEHOLDER = 'Search name, character, or card text...';
 const STACKS_SEARCH_PLACEHOLDER = 'Search character names...';
@@ -72,6 +80,8 @@ export interface AddCardsPanelProps {
   onAdd: (card: CatalogCard, type: CatalogType) => void;
   onAddStack: (entries: StackCardEntry[]) => void;
   cards: DeckCardEntry[];
+  /** Resolved catalog rows for deck cards (`${deckType}:${cardId}`), from DeckEditorPage. */
+  deckCatalogIndex?: Map<string, CatalogCard>;
 }
 
 function cardTileOverlay(inDeck: number) {
@@ -89,9 +99,18 @@ function cardTileOverlay(inDeck: number) {
   );
 }
 
-export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCardsPanelProps) {
+export function AddCardsPanel({
+  open,
+  onClose,
+  onAdd,
+  onAddStack,
+  cards,
+  deckCatalogIndex,
+}: AddCardsPanelProps) {
   const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
+  const [setFilter, setSetFilter] = useState('');
+  const [hideUnusables, setHideUnusables] = useState(false);
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounced(search);
 
@@ -104,17 +123,26 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
     if (open) {
       setTab('all');
       setSearch('');
+      setSetFilter('');
+      setHideUnusables(false);
       setPage(1);
     }
   }, [open]);
 
   useEffect(() => {
     setPage(1);
-  }, [tab, debouncedSearch]);
+  }, [tab, debouncedSearch, setFilter, hideUnusables]);
 
   const foilMapQuery = useQuery({
     queryKey: ['foil-card-map'],
     queryFn: () => fetchFoilCardMap(),
+    enabled: open,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const setsQuery = useQuery({
+    queryKey: ['dbv-sets'],
+    queryFn: () => fetchSets(),
     enabled: open,
     staleTime: 60 * 60 * 1000,
   });
@@ -141,6 +169,26 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
       staleTime: 30 * 60 * 1000,
     })),
   });
+
+  const usabilityContextCatalogQueries = useQueries({
+    queries: DECK_USABILITY_CONTEXT_TYPES.map((type) => ({
+      queryKey: ['catalog', type] as const,
+      queryFn: () => fetchCatalog(type),
+      enabled: open,
+      staleTime: 30 * 60 * 1000,
+    })),
+  });
+
+  const usabilityCatalogByType = useMemo(() => {
+    const byType: Partial<Record<CatalogType, CatalogCard[]>> = {};
+    DECK_USABILITY_CONTEXT_TYPES.forEach((type, i) => {
+      const data = usabilityContextCatalogQueries[i]?.data;
+      if (data && data.length > 0) {
+        byType[type] = data;
+      }
+    });
+    return byType;
+  }, [usabilityContextCatalogQueries]);
 
   const { cardsByType, variantLookupByType } = useMemo(() => {
     const variantLookupByType = new Map<CatalogType, Map<string, string[]>>();
@@ -217,6 +265,29 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
     foilLookup.foilToBase,
   ]);
 
+  const usabilityCtx = useMemo(
+    () =>
+      buildDeckUsabilityContext(cards, usabilityCatalogByType, {
+        deckCatalogIndex,
+      }),
+    [cards, usabilityCatalogByType, deckCatalogIndex],
+  );
+
+  const filterOptions: AddCardsFilterOptions = useMemo(
+    () => ({
+      searchQuery: debouncedSearch,
+      setFilter,
+      hideUnusables,
+      usabilityCtx,
+    }),
+    [debouncedSearch, setFilter, hideUnusables, usabilityCtx],
+  );
+
+  const hideUnusablesDisabled = !tabSupportsHideUnusables(tab);
+  const hideUnusablesDisabledReason = hideUnusablesDisabled
+    ? 'Not available for this card type'
+    : undefined;
+
   const characterStacks = useMemo(() => {
     if (!isStacksTab) return [];
     return buildCharacterStacks({
@@ -227,21 +298,28 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
   }, [isStacksTab, cardsByType]);
 
   const filteredStacks = useMemo(
-    () => filterCharacterStacks(characterStacks, debouncedSearch),
-    [characterStacks, debouncedSearch],
+    () =>
+      filterCharacterStacksWithOptions(characterStacks, filterOptions, {
+        characterNameSearchOnly: true,
+      }),
+    [characterStacks, filterOptions],
   );
 
   const allSections = useMemo(
-    () => buildAddCardsSections(cardsByType, debouncedSearch),
-    [cardsByType, debouncedSearch],
+    () => buildAddCardsSectionsWithOptions(cardsByType, filterOptions),
+    [cardsByType, filterOptions],
   );
 
   const allFlat = useMemo(() => flattenAddCardsSections(allSections), [allSections]);
 
   const typeList = useMemo(() => {
     if (isAllTab || isStacksTab || isMissionsTab || !activeType) return [];
-    return filterAndSortTypeCards(cardsByType[activeType] ?? [], activeType, debouncedSearch);
-  }, [isAllTab, isStacksTab, isMissionsTab, activeType, cardsByType, debouncedSearch]);
+    return filterAndSortTypeCardsWithOptions(
+      cardsByType[activeType] ?? [],
+      activeType,
+      filterOptions,
+    );
+  }, [isAllTab, isStacksTab, isMissionsTab, activeType, cardsByType, filterOptions]);
 
   const missionSets = useMemo(() => {
     if (!isMissionsTab) return [];
@@ -249,8 +327,11 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
   }, [isMissionsTab, cardsByType.missions]);
 
   const filteredMissionSets = useMemo(
-    () => filterMissionSets(missionSets, debouncedSearch),
-    [missionSets, debouncedSearch],
+    () =>
+      filterMissionSetsWithOptions(missionSets, filterOptions, {
+        missionSetNameSearch: true,
+      }),
+    [missionSets, filterOptions],
   );
 
   const deckMissionCount = useMemo(() => countDeckMissions(cards), [cards]);
@@ -386,6 +467,16 @@ export function AddCardsPanel({ open, onClose, onAdd, onAddStack, cards }: AddCa
             </button>
           ))}
         </div>
+
+        <AddCardsFilterBar
+          sets={setsQuery.data ?? []}
+          setFilter={setFilter}
+          onSetFilterChange={setSetFilter}
+          hideUnusables={hideUnusables}
+          onHideUnusablesChange={setHideUnusables}
+          hideUnusablesDisabled={hideUnusablesDisabled}
+          hideUnusablesDisabledReason={hideUnusablesDisabledReason}
+        />
 
         {isLoading ? (
           <LoadingState label="Loading..." />

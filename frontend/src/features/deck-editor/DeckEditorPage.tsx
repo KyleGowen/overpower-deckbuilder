@@ -500,6 +500,7 @@ export default function DeckEditorPage() {
           onAdd={addCard}
           onAddStack={addStack}
           cards={cards}
+          deckCatalogIndex={cardIndex}
         />
       ) : null}
 

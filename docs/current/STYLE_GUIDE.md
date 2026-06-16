@@ -42,6 +42,7 @@
 39. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
 40. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
 41. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
+42. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
 
 ## Overview
 
@@ -3114,3 +3115,48 @@ The **Missions** chip (`tab === 'missions'`) groups missions by **`mission_set`*
 - Search keeps a set when the set name matches **or** any mission matches `cardMatchesSearchQuery` (including `mission_set` in haystack)
 - **Pagination**: **4 mission sets/page** (`ADD_CARDS_MISSION_SETS_PAGE_SIZE`)
 - **All** tab Missions section remains a flat 3-column grid (unchanged)
+
+## Add Cards filter strip (v2 SPA)
+
+The **Add Cards** slideout (`AddCardsPanel.tsx`) includes a horizontal filter bar directly below the card-type tab row (`add-cards__types`), styled like the deck header stats strip (`.deck-editor__stats-panel`).
+
+### Placement
+
+1. Search field (`.add-cards__search`)
+2. Type tabs (`.add-cards__types`)
+3. **Filter strip** (`.add-cards__filters`) — new
+4. Card grids / stacks / missions content
+
+### Container — `.add-cards__filters`
+
+- `display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--space-4)`
+- `padding: var(--space-2) 0 0; border-top: 1px solid var(--color-border)`
+- Tight gap to card grid below: `margin-bottom: calc(-1 * var(--space-3) / 3)` (~8px total with parent flex `gap`, ~2/3 less than prior `padding-bottom` + `gap`)
+- Two blocks side by side on desktop; mobile (`.layout-mobile`) stacks blocks full-width with `border-top` between them
+
+### Set filter — `.add-cards__filters-block` / `.add-cards__filters-select`
+
+- Left block: uppercase dim label **Set** (`.add-cards__filters-label` — `10px`, `letter-spacing: 0.05em`, `var(--color-text-dim)`)
+- `<select id="add-cards-set-filter">` — options from `GET /api/v1/dbv/sets` (`All sets` + set name/code pairs)
+- Select sizing matches DBV set dropdown: `min-width: 140px; max-width: 200px` (mobile: `120px`–`160px`)
+- Compact height: `font-size: var(--font-size-sm)`, `line-height: 1.25`, `padding: 3px var(--space-6) 3px var(--space-2)` (overrides global select padding so the control is only slightly taller than its label text)
+- Filters cards where `card.set ===` selected set code (same predicate as Card Database)
+
+### Hide Unusables — `.add-cards__filters-toggle`
+
+- Right block: checkbox + label **Hide Unusables** (`.add-cards__filters-toggle-label`)
+- `accent-color: var(--color-accent)` on checkbox
+- **Disabled** (`.add-cards__filters-toggle.is-disabled`, `opacity: 0.45`, `cursor: not-allowed`) on **Stacks**, **Missions**, and types without usability rules (Characters, Locations, Missions)
+- Enabled on **All** tab and single-type tabs: Special, Advanced, Power, Teamwork, Basic, Training, Ally, Events, Aspects
+- Usability logic lives in `frontend/src/lib/deck-usability/` (ported from deck validation rules); deck-editor uses `addCardsFilters.ts` adapter only
+
+### Filter reset
+
+- Set filter and Hide Unusables reset when the Add Cards panel opens (along with tab, search, and page)
+
+### Files
+
+- Component: `frontend/src/features/deck-editor/AddCardsFilterBar.tsx`
+- Adapter: `frontend/src/features/deck-editor/addCardsFilters.ts`
+- CSS: `frontend/src/features/deck-editor/DeckEditorPage.css` (`.add-cards__filters*`)
+

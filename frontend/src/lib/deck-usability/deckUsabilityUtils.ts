@@ -1,0 +1,92 @@
+import type { CharacterStatRow } from './types';
+
+/** Multi Power cards are legal in any Venture deck; no character-stat grid gate. */
+export function isMultiPowerPowerCardType(powerType: string): boolean {
+  return powerType === 'Multi Power' || powerType === 'Multi-Power';
+}
+
+export function statForPowerType(
+  char: Pick<CharacterStatRow, 'energy' | 'combat' | 'brute_force' | 'intelligence'>,
+  powerType: string,
+): number {
+  switch (powerType) {
+    case 'Energy':
+      return char.energy;
+    case 'Combat':
+      return char.combat;
+    case 'Brute Force':
+      return char.brute_force;
+    case 'Intelligence':
+      return char.intelligence;
+    case 'Any-Power':
+      return Math.max(char.energy, char.combat, char.brute_force, char.intelligence);
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Training cards use type_1 / type_2 with "N or less" from value_to_use.
+ * Any-Power means at least one primary stat is at or below the cap.
+ */
+export function trainingTypeAtOrBelowCap(
+  char: Pick<CharacterStatRow, 'energy' | 'combat' | 'brute_force' | 'intelligence'>,
+  powerType: string,
+  cap: number,
+): boolean {
+  if (powerType === 'Any-Power') {
+    return (
+      char.energy <= cap ||
+      char.combat <= cap ||
+      char.brute_force <= cap ||
+      char.intelligence <= cap
+    );
+  }
+  return statForPowerType(char, powerType) <= cap;
+}
+
+export function specialLinkedCharacterName(special: {
+  character?: string;
+  character_name?: string;
+  characters?: string[];
+}): string {
+  const primary = (special.character || special.character_name || '').trim();
+  if (primary) return primary;
+  if (Array.isArray(special.characters) && special.characters.length > 0) {
+    return special.characters[0].trim();
+  }
+  return '';
+}
+
+export function teamHasSpecialCharacter(
+  characterNames: string[],
+  linkedName: string,
+  extras: string[],
+): boolean {
+  if (characterNames.includes(linkedName)) return true;
+  if (extras.some((e) => characterNames.includes(e))) return true;
+
+  // Legacy hide-unusable: match alt-art deck names via base name before " ("
+  return characterNames.some((deckName) => {
+    const deckNameClean = deckName.split(' (')[0].trim();
+    return deckNameClean === linkedName;
+  });
+}
+
+export function normalizeAngryMobVariant(v: string): string {
+  return v.toLowerCase().replace(/\s+/g, ' ').trim().replace(/s$/, '');
+}
+
+/** John Carter / Time Traveler effective stats for power-card usability (v1 parity). */
+export function effectiveCharacterStats(char: CharacterStatRow): CharacterStatRow {
+  const nameLower = char.name.toLowerCase();
+  return {
+    ...char,
+    brute_force: Math.max(char.brute_force || 0, nameLower.includes('john carter') ? 8 : 0),
+    intelligence: Math.max(char.intelligence || 0, nameLower.includes('time traveler') ? 8 : 0),
+  };
+}
+
+export function statForPowerTypeWithSpecialCases(char: CharacterStatRow, powerType: string): number {
+  return statForPowerType(effectiveCharacterStats(char), powerType);
+}
