@@ -53,7 +53,7 @@ import {
   type AddCardsFilterOptions,
 } from './addCardsFilters';
 import { AddCardsFilterBar } from './AddCardsFilterBar';
-import { buildDeckUsabilityContext, tabSupportsHideUnusables } from '../../lib/deck-usability';
+import { buildDeckUsabilityContext, effectiveHideUnusablesForTab, tabSupportsHideUnusables } from '../../lib/deck-usability';
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
@@ -273,20 +273,26 @@ export function AddCardsPanel({
     [cards, usabilityCatalogByType, deckCatalogIndex],
   );
 
+  const effectiveHideUnusables = effectiveHideUnusablesForTab(tab, hideUnusables);
+
   const filterOptions: AddCardsFilterOptions = useMemo(
     () => ({
       searchQuery: debouncedSearch,
       setFilter,
-      hideUnusables,
+      hideUnusables: effectiveHideUnusables,
       usabilityCtx,
     }),
-    [debouncedSearch, setFilter, hideUnusables, usabilityCtx],
+    [debouncedSearch, setFilter, effectiveHideUnusables, usabilityCtx],
   );
 
   const hideUnusablesDisabled = !tabSupportsHideUnusables(tab);
-  const hideUnusablesDisabledReason = hideUnusablesDisabled
-    ? 'Not available for this card type'
-    : undefined;
+  const hideUnusablesDisabledReason = isStacksTab
+    ? 'Not available on the Stacks tab'
+    : isMissionsTab
+      ? 'Not available on the Missions tab'
+      : hideUnusablesDisabled
+        ? 'Not available for this card type'
+        : undefined;
 
   const characterStacks = useMemo(() => {
     if (!isStacksTab) return [];
@@ -472,7 +478,7 @@ export function AddCardsPanel({
           sets={setsQuery.data ?? []}
           setFilter={setFilter}
           onSetFilterChange={setSetFilter}
-          hideUnusables={hideUnusables}
+          hideUnusables={effectiveHideUnusables}
           onHideUnusablesChange={setHideUnusables}
           hideUnusablesDisabled={hideUnusablesDisabled}
           hideUnusablesDisabledReason={hideUnusablesDisabledReason}

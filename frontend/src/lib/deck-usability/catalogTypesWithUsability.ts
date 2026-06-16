@@ -24,3 +24,11 @@ export function tabSupportsHideUnusables(
   if (tab === 'all') return true;
   return catalogTypeSupportsHideUnusables(tab);
 }
+
+/** Hide Unusables is inactive on tabs that do not support it (e.g. Stacks). */
+export function effectiveHideUnusablesForTab(
+  tab: CatalogType | 'all' | 'stacks' | 'missions',
+  hideUnusables: boolean,
+): boolean {
+  return tabSupportsHideUnusables(tab) && hideUnusables;
+}

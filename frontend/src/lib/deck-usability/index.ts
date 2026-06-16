@@ -2,6 +2,7 @@ export { buildDeckUsabilityContext } from './buildDeckUsabilityContext';
 export type { BuildDeckUsabilityContextOptions } from './buildDeckUsabilityContext';
 export {
   catalogTypeSupportsHideUnusables,
+  effectiveHideUnusablesForTab,
   tabSupportsHideUnusables,
 } from './catalogTypesWithUsability';
 export { deckCatalogIndexKey } from './deckCatalogIndex';

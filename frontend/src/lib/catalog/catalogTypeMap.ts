@@ -104,6 +104,39 @@ export function compareCharacterNames(a: string, b: string): number {
   return a.localeCompare(b, undefined, { sensitivity: 'base' });
 }
 
+/** OverPower power type order (Energy → Combat → BF → Int → Multi → Any). */
+const POWER_TYPE_SORT_KEYS = [
+  'energy',
+  'combat',
+  'bruteforce',
+  'intelligence',
+  'multipower',
+  'anypower',
+] as const;
+
+function normalizePowerTypeKey(powerType: string): string {
+  return powerType.trim().toLowerCase().replace(/[\s-]+/g, '');
+}
+
+/** Sort index for power card types; unknown types sort last. */
+export function powerTypeSortIndex(powerType: string): number {
+  const key = normalizePowerTypeKey(powerType);
+  const idx = POWER_TYPE_SORT_KEYS.indexOf(key as (typeof POWER_TYPE_SORT_KEYS)[number]);
+  return idx >= 0 ? idx : POWER_TYPE_SORT_KEYS.length;
+}
+
+function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
+  const typeCmp =
+    powerTypeSortIndex(String(a.power_type ?? '')) - powerTypeSortIndex(String(b.power_type ?? ''));
+  if (typeCmp !== 0) return typeCmp;
+
+  const valueA = Number(a.value ?? 0);
+  const valueB = Number(b.value ?? 0);
+  if (valueA !== valueB) return valueA - valueB;
+
+  return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
+}
+
 /** Default database grid sort order per catalog tab (no user sort control). */
 export function compareCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
   if (type === 'special-cards') {
@@ -114,6 +147,10 @@ export function compareCatalogCards(a: CatalogCard, b: CatalogCard, type: Catalo
     if (charCmp !== 0) return charCmp;
 
     return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
+  }
+
+  if (type === 'power-cards') {
+    return comparePowerCatalogCards(a, b);
   }
 
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
