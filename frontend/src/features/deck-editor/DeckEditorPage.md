@@ -12,6 +12,7 @@ are read-only automatically).
     "Saving…" while in flight).
   - **Stats rows** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color.
 - **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters, locations, and events use landscape aspect ratios (`380:280` / `236:151`) with `card-image--contain`; all other types use portrait `5:7`. Landscape type sections use a wider grid (`deck-editor__cards--landscape`, `minmax(190px, 1fr)`).
+- **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Qty stepper and remove stay on the tile below the image; they do not open the panel. Works for owners and read-only visitors.
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

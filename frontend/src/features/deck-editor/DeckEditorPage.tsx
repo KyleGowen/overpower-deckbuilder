@@ -9,7 +9,7 @@ import {
   validateDeck,
   type DeckCardInput,
 } from '../../lib/api/decks';
-import { fetchCatalog } from '../../lib/api/catalog';
+import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
   CATALOG_TYPES,
@@ -19,6 +19,12 @@ import {
   isLandscapeCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
 import { assetUrl } from '../../lib/images/cardImages';
+import {
+  buildFoilCardMapLookup,
+  cardHasFoilVersion,
+  isFoilCard,
+} from '../../lib/catalog/foilCatalog';
+import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
 import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
 import { CardImage } from '../../components/CardImage';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
@@ -191,6 +197,25 @@ export default function DeckEditorPage() {
     return index;
   }, [catalogQueries, deckCatalogTypes]);
 
+  const foilMapQuery = useQuery({
+    queryKey: ['foil-card-map'],
+    queryFn: () => fetchFoilCardMap(),
+    staleTime: 60 * 60 * 1000,
+  });
+  const setsQuery = useQuery({
+    queryKey: ['dbv-sets'],
+    queryFn: () => fetchSets(),
+    staleTime: 60 * 60 * 1000,
+  });
+  const foilLookup = useMemo(
+    () => buildFoilCardMapLookup(foilMapQuery.data ?? []),
+    [foilMapQuery.data],
+  );
+  const setNameLookup = useMemo(
+    () => buildSetNameLookup(setsQuery.data ?? []),
+    [setsQuery.data],
+  );
+
   const charactersQuery = useQuery({
     queryKey: ['catalog', 'characters'],
     queryFn: () => fetchCatalog('characters'),
@@ -248,6 +273,16 @@ export default function DeckEditorPage() {
     });
     setDirty(true);
   };
+
+  const selectDeckCard = (catalogCard: CatalogCard, catalogType: CatalogType) => {
+    setSelected({ card: catalogCard, type: catalogType });
+  };
+
+  const selectedDeckEntry = useMemo(() => {
+    if (!selected) return null;
+    const deckType = CATALOG_TYPE_BY_SLUG[selected.type].deckType;
+    return cards.find((c) => c.type === deckType && c.cardId === selected.card.id) ?? null;
+  }, [selected, cards]);
 
   const addCard = (card: CatalogCard, type: CatalogType) => {
     const deckType = CATALOG_TYPE_BY_SLUG[type].deckType;
@@ -450,10 +485,22 @@ export default function DeckEditorPage() {
                       entry.name || (catalogCard ? cardDisplayName(catalogCard) : 'Card');
                     const catalogType = CATALOG_SLUG_BY_DECK_TYPE.get(entry.type);
                     const landscape = catalogType ? isLandscapeCatalogType(catalogType) : false;
+                    const canOpenDetail = Boolean(catalogCard && catalogType);
+                    const isCardSelected =
+                      canOpenDetail &&
+                      selected?.card.id === entry.cardId &&
+                      selected?.type === catalogType;
                     return (
                     <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
-                      <div
-                        className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}`}
+                      <button
+                        type="button"
+                        className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}${isCardSelected ? ' is-selected' : ''}`}
+                        onClick={() => {
+                          if (catalogCard && catalogType) selectDeckCard(catalogCard, catalogType);
+                        }}
+                        disabled={!canOpenDetail}
+                        aria-label={canOpenDetail ? `View ${cardName}` : cardName}
+                        aria-pressed={isCardSelected}
                       >
                         <CardImage
                           imagePath={imagePath}
@@ -463,7 +510,7 @@ export default function DeckEditorPage() {
                           className={landscape ? 'card-image--contain' : ''}
                         />
                         {entry.quantity > 1 ? <span className="deck-editor__card-qty">x{entry.quantity}</span> : null}
-                      </div>
+                      </button>
                       <div className="deck-editor__card-name" title={cardName}>{cardName}</div>
                       {isOwner ? (
                         <div className="deck-editor__card-controls">
@@ -509,6 +556,17 @@ export default function DeckEditorPage() {
         type={selected?.type ?? null}
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
+        hasFoil={
+          selected ? cardHasFoilVersion(selected.card, foilLookup.baseToFoil) : undefined
+        }
+        setDisplayName={
+          selected ? resolveSetDisplayName(selected.card.set, setNameLookup) : undefined
+        }
+        isFoil={
+          selected
+            ? Boolean(selectedDeckEntry?.is_foil || isFoilCard(selected.card))
+            : undefined
+        }
       />
     </div>
   );

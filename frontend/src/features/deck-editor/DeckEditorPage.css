@@ -252,6 +252,30 @@
   position: relative;
   border-radius: var(--radius-sm);
   overflow: hidden;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.deck-editor__card-img:hover:not(:disabled) {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 1px var(--color-border-accent);
+}
+.deck-editor__card-img:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.deck-editor__card-img:disabled {
+  cursor: default;
+}
+.deck-editor__card-img.is-selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 .deck-editor__card-img--portrait {
   aspect-ratio: 5 / 7;

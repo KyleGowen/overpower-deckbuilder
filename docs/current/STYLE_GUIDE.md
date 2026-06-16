@@ -3030,7 +3030,15 @@ The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type
 
 ### Image frame — `.deck-editor__card-img` + orientation modifiers
 
-Base: `position: relative`, `border-radius: var(--radius-sm)`, `overflow: hidden`.
+Base: `position: relative`, `border-radius: var(--radius-sm)`, `overflow: hidden`. The image frame is a **`<button type="button">`** so clicking opens the read-only `CardDetailPanel` (DBV parity). Disabled while catalog data for that card is still loading.
+
+| State | Style |
+|---|---|
+| Default | `border: 2px solid transparent`, `cursor: pointer` |
+| `:hover:not(:disabled)` | `border-color: var(--color-border-accent)`, subtle `box-shadow` ring |
+| `:focus-visible` | `outline: 2px solid var(--color-accent)`, `outline-offset: 2px` |
+| `.is-selected` | Teal border + ring when that card’s detail panel is open |
+| `:disabled` | `cursor: default` (catalog not resolved yet) |
 
 | Modifier | Types | `aspect-ratio` |
 |---|---|---|
