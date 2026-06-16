@@ -6,10 +6,12 @@ are read-only automatically).
 
 ## Layout
 - **Left rail**: quick nav (Home, Decks, Collection).
-- **Top bar**: back button, editable deck name, card count + threat + legality badge, and
-  actions — Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean,
-  "Saving…" while in flight).
-- **Body**: two compact **stats rows** below the top bar — **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color. Below that, the card list grouped by type. **Main grid orientation**: characters, locations, and events use landscape aspect ratios (`380:280` / `236:151`) with `card-image--contain`; all other types use portrait `5:7`. Landscape type sections use a wider grid (`deck-editor__cards--landscape`, `minmax(190px, 1fr)`).
+- **Sticky page header** (`.deck-editor__header`): stays pinned while the card list scrolls. Contains:
+  - **Top bar row** (`.deck-editor__topbar`): back button, editable deck name, card count + threat + legality badge, and
+    actions — Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean,
+    "Saving…" while in flight).
+  - **Stats rows** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color.
+- **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters, locations, and events use landscape aspect ratios (`380:280` / `236:151`) with `card-image--contain`; all other types use portrait `5:7`. Landscape type sections use a wider grid (`deck-editor__cards--landscape`, `minmax(190px, 1fr)`).
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

@@ -361,57 +361,57 @@ export default function DeckEditorPage() {
       </aside>
 
       <div className="deck-editor__main">
-        {/* Top bar */}
-        <header className="deck-editor__topbar">
-          <button type="button" className="deck-editor__back" onClick={() => navigate(`/users/${user?.id ?? userId}/decks`)} aria-label="Back to decks">
-            <IconChevronLeft />
-          </button>
-
-          {isOwner ? (
-            <input
-              className="deck-editor__name-input"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setDirty(true);
-              }}
-              aria-label="Deck name"
-              maxLength={100}
-            />
-          ) : (
-            <h1 className="deck-editor__name">{deck.metadata.name}</h1>
-          )}
-
-          <div className="deck-editor__meta">
-            <span className="deck-editor__chip">{totalCards} cards</span>
-            <span className="deck-editor__chip">Threat {deck.metadata.threat ?? 0}</span>
-            <span className={`badge ${legality.valid ? 'badge-legal' : 'badge-not-legal'}`} title={legality.message}>
-              {legality.valid ? 'Legal' : 'Not Legal'}
-            </span>
-          </div>
-
-          <div className="deck-editor__actions">
-            <button type="button" className="btn btn-ghost" disabled title="Playtest is coming soon">
-              <IconPlay /> Playtest
+        <header className="deck-editor__header">
+          <div className="deck-editor__topbar">
+            <button type="button" className="deck-editor__back" onClick={() => navigate(`/users/${user?.id ?? userId}/decks`)} aria-label="Back to decks">
+              <IconChevronLeft />
             </button>
-            {isOwner ? (
-              <>
-                <button type="button" className="btn btn-secondary" onClick={() => setAddOpen(true)}>
-                  <IconPlus /> Add Cards
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving || !dirty}>
-                  <IconSave /> {saving ? 'Saving...' : dirty ? 'Save' : 'Saved'}
-                </button>
-              </>
-            ) : (
-              <span className="deck-editor__readonly-tag">Read-only</span>
-            )}
-            {saveMsg ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
-          </div>
-        </header>
 
-        {/* Stat summary */}
-        <DeckStatsPanel maxStats={maxStats} iconTotals={iconTotals} />
+            {isOwner ? (
+              <input
+                className="deck-editor__name-input"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setDirty(true);
+                }}
+                aria-label="Deck name"
+                maxLength={100}
+              />
+            ) : (
+              <h1 className="deck-editor__name">{deck.metadata.name}</h1>
+            )}
+
+            <div className="deck-editor__meta">
+              <span className="deck-editor__chip">{totalCards} cards</span>
+              <span className="deck-editor__chip">Threat {deck.metadata.threat ?? 0}</span>
+              <span className={`badge ${legality.valid ? 'badge-legal' : 'badge-not-legal'}`} title={legality.message}>
+                {legality.valid ? 'Legal' : 'Not Legal'}
+              </span>
+            </div>
+
+            <div className="deck-editor__actions">
+              <button type="button" className="btn btn-ghost" disabled title="Playtest is coming soon">
+                <IconPlay /> Playtest
+              </button>
+              {isOwner ? (
+                <>
+                  <button type="button" className="btn btn-secondary" onClick={() => setAddOpen(true)}>
+                    <IconPlus /> Add Cards
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving || !dirty}>
+                    <IconSave /> {saving ? 'Saving...' : dirty ? 'Save' : 'Saved'}
+                  </button>
+                </>
+              ) : (
+                <span className="deck-editor__readonly-tag">Read-only</span>
+              )}
+              {saveMsg ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
+            </div>
+          </div>
+
+          <DeckStatsPanel maxStats={maxStats} iconTotals={iconTotals} />
+        </header>
 
         {/* Card list */}
         <div className="deck-editor__content">
