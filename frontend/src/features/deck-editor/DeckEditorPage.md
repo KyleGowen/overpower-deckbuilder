@@ -12,7 +12,8 @@ are read-only automatically).
     "Saving…" while in flight).
   - **Stats rows** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color.
 - **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters, locations, and events use landscape aspect ratios (`380:280` / `236:151`) with `card-image--contain`; all other types use portrait `5:7`. Landscape type sections use a wider grid (`deck-editor__cards--landscape`, `minmax(190px, 1fr)`).
-- **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Qty stepper and remove stay on the tile below the image; they do not open the panel. Works for owners and read-only visitors.
+- **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Controls below the image do not open the panel. Works for owners and read-only visitors.
+- **Per-card controls** (owners only): overlaid at the **lower-left** of the card image (`.deck-editor__card-media` + absolute `.deck-editor__card-controls`, `bottom/left: 6px`). **Characters, locations, missions** — trash only. **All other types** — `QuantityStepper` only; decrement to `0` removes the row. OPD catalog cards use stepper `max=1`. Qty badge (`xN`) stays lower-right on the image. Logic: [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts).
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

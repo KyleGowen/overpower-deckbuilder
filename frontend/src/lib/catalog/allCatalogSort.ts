@@ -1,17 +1,7 @@
 import type { CatalogCard } from '../api/types';
 import { cardDisplayName } from './catalogTypeMap';
+import { parseSetNumber, setCodeForCard } from './catalogSetSort';
 import { isFoilCard } from './foilCatalog';
-
-function setCodeForCard(card: Partial<CatalogCard>): string {
-  return String(card.set ?? (card.universe as string) ?? 'ERB').trim();
-}
-
-function parseSetNumber(card: Partial<CatalogCard>): number | null {
-  const raw = String(card.set_number ?? '').trim();
-  if (!raw) return null;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) ? n : null;
-}
 
 /**
  * Checklist sort for All-tab lists: set code, non-foil before foil, set_number, then name.

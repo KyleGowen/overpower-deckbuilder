@@ -6,7 +6,7 @@ import { fetchCommunityDecks, fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { fetchRecentUpdates } from '../../lib/api/recent-updates';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
-import { resolveImageUrl, resolveThumbUrl } from '../../lib/images/cardImages';
+import { resolveImageUrl, resolveThumbUrl, assetUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -20,7 +20,8 @@ import {
 import type { DeckListItem } from '../../lib/api/types';
 import './HomePage.css';
 
-const HERO_ART = 'specials/department_of_theoretical_physics.webp';
+const HERO_BANNER = '/src/resources/images/home/home-hero.png';
+const HERO_BANNER_2X = '/src/resources/images/home/home-hero-2x.png';
 
 export default function HomePage() {
   const { user, communityDecksUserId, tournamentDecksUserId } = useAuth();
@@ -64,10 +65,7 @@ export default function HomePage() {
   return (
     <div className="home">
       <div className="home__inner">
-        <section
-          className="home__hero panel"
-          style={{ ['--hero-art' as string]: `url("${resolveImageUrl(HERO_ART)}")` }}
-        >
+        <section className="home__hero panel">
           <div className="home__hero-text">
             <h1 className="home__hero-title">Welcome to Excelsior</h1>
             <p className="home__hero-tagline">OverPower deck building and collection tracking companion.</p>
@@ -82,7 +80,15 @@ export default function HomePage() {
               <IconDecks /> Explore Decks
             </button>
           </div>
-          <div className="home__hero-art" aria-hidden="true" />
+          <div className="home__hero-art" aria-hidden="true">
+            <img
+              className="home__hero-art-image"
+              src={assetUrl(HERO_BANNER)}
+              srcSet={`${assetUrl(HERO_BANNER)} 1x, ${assetUrl(HERO_BANNER_2X)} 2x`}
+              sizes="(min-width: 2000px) 1333px, 66vw"
+              alt=""
+            />
+          </div>
         </section>
 
         <NewsSection />

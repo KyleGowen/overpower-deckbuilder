@@ -16,7 +16,8 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   at the rail end with a **Clear** action. Optional **collapse** via left chevron (default
   expanded; collapsed state is a thin rule with left-aligned chevron-down; collapse
   preference persists across tab switches).
-- Sort is fixed per tab: Special Cards by set → character → card name; others by card name.
+- Sort is fixed per tab: all per-type tabs sort by **set** → **set_number**, then tab tiebreakers
+  (Special Cards: character with `Any Character` last; Power Cards: power type → value; others: name).
   **All** tab: set → foil tier → set_number → name (`compareAllCatalogCards`).
 
 ## All tab

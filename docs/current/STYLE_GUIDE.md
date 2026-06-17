@@ -2842,27 +2842,32 @@ This section covers the "Welcome to Excelsior" hero on the React v2 SPA home scr
 
 ### Structure
 
-The hero art lives on an absolutely-positioned layer `.home__hero-art` (a child of `.home__hero`), with the image URL injected via the `--hero-art` CSS custom property set inline on the `.home__hero` section. A `::after` pseudo-element on the same layer carries the shading. Text (`.home__hero-text`) sits above on `z-index: 1`.
+The hero art lives on an absolutely-positioned layer `.home__hero-art` (a child of `.home__hero`), containing an `<img class="home__hero-art-image">` sourced from `src/resources/images/home/home-hero.png` via `assetUrl()`. A `::after` pseudo-element on the same layer carries the shading. Text (`.home__hero-text`) sits above on `z-index: 1`.
 
-### Background image — `.home__hero-art`
+### Hero image — `.home__hero-art` + `.home__hero-art-image`
 
-- **`background-size: cover`** and **`background-position: 68% 28%`**.
-- **Why**: the source card art (`specials/department_of_theoretical_physics.webp`) is a full card that includes a framed border with rotated "VICTORY VAR…" text near its edges. Using `cover` with a character-focused crop pushes that frame outside the visible tile so only the character shows. Do **not** shrink this below `cover` (e.g. a percentage size like `70%`) — it re-exposes the card frame/border.
+- **Asset:** `src/resources/images/home/home-hero.png` (1× master) and generated `home-hero-2x.png` (2× retina) — dedicated landscape Victory Harben crop (face centered in the image file). Not card catalog art. Use the `-2x` suffix (not `@2x`) so asset URLs are safe on all CDNs and retina browsers.
+- **URL:** `assetUrl('/src/resources/images/home/home-hero.png')` with `srcSet` `1x` / `2x` in [HomePage.tsx](../../frontend/src/features/home/HomePage.tsx).
+- **Retina generation:** After editing the master PNG, run `npm run generate:home-hero` from the repo root ([`src/scripts/generateHomeHeroAssets.ts`](../../src/scripts/generateHomeHeroAssets.ts); sharp Lanczos 2× upscale). Lanczos cannot invent detail — replace the master with a true 2048px+ export if sharper source art becomes available.
+- **Art zone:** `.home__hero-art` occupies the **right two-thirds** of the tile (`top: 0; right: 0; bottom: 0; left: 33.333%`). The left third stays solid panel background — copy never sits on raw image.
+- **Width cap (wide tiles):** `.home__hero` is a container (`container-type: inline-size; container-name: homeHero`). Below **2000px** hero width (≈ 2048px viewport minus `.home__inner` horizontal padding), the art zone stays fluid (`left: 33.333%`). At **`@container homeHero (min-width: 2000px)`**, art freezes at `--home-hero-art-cap-width` (`calc((2048px - 2 * var(--space-6)) * 2 / 3)` → ~1333px), `left: auto`, `right: 0` — the image stops scaling; extra tile width becomes panel behind the text. CSS vars on `.home`: `--home-hero-cap-width`, `--home-hero-art-cap-width`.
+- **Scaling:** `.home__hero-art-image` uses `width: 100%; height: 100%; object-fit: cover; object-position: center center; z-index: 0` — the image fills the art zone and scales with tile height until the art zone hits the cap. `sizes="(min-width: 2000px) 1333px, 66vw"` on the `<img>` hints retina `srcSet` selection. `.home__hero-art::after` uses `z-index: 1` so shading sits above the image but below hero text.
+- **Left-edge fade:** `mask-image: linear-gradient(90deg, transparent 0%, #000 22%)` on the image softens the boundary into the panel (no hard vertical edge). `.home__hero-art::after` reinforces with a short panel-matched left gradient.
 
 ### Shading overlay — `.home__hero-art::after`
 
-Three stacked layers produce the mock's look:
+Three stacked layers (scoped to the right 2/3 art zone):
 
-1. **Left dark fade** (text legibility + covers the frame side):
-   `linear-gradient(90deg, var(--color-bg-panel) 0%, var(--color-bg-panel) 16%, rgba(15, 25, 40, 0.85) 38%, rgba(15, 25, 40, 0.35) 62%, transparent 82%)`
-2. **Edge vignette** (feathers the art into the panel and hides the rectangular image bounds / any residual frame at the edges):
+1. **Left panel fade** (reinforces mask into solid text column):
+   `linear-gradient(90deg, var(--color-bg-panel) 0%, transparent 18%)`
+2. **Edge vignette** (feathers the art into the panel at the outer edges):
    `radial-gradient(135% 150% at 76% 40%, transparent 46%, rgba(8, 14, 24, 0.6) 100%)`
-3. **Subtle cyan accent glow** (brand tint, retained from prior design):
+3. **Subtle cyan accent glow** (brand tint):
    `radial-gradient(700px 400px at 80% 20%, rgba(0, 200, 232, 0.12), transparent 60%)`
 
 ### Responsive behavior (`layout-mobile`)
 
-`.layout-mobile .home__hero-art` uses the same `background-position: 68% 28%`. Its `::after` keeps a top→bottom fade to the panel and a left→right fade for stacked text, plus the same edge vignette layer:
+`.layout-mobile .home__hero-art` nudges the art zone to `left: 28%` for slightly more character room. `.home__hero-art-image` widens the mask fade to `transparent 0%, #000 28%`. Its `::after` keeps a top→bottom fade to the panel and a left→right fade for stacked text, plus the same edge vignette layer:
 
 ```css
 .layout-mobile .home__hero-art::after {
@@ -2875,9 +2880,11 @@ Three stacked layers produce the mock's look:
 
 ### Editing notes
 
-- To reposition the character within the tile, adjust **only** `background-position` on `.home__hero-art` (keep `cover`).
+- To give the character more horizontal room, decrease `left` on `.home__hero-art` (e.g. `28%`); to protect text, increase it (e.g. `38%`).
+- To change when art stops scaling, edit `2048px` in `--home-hero-cap-width` (or the `2000px` container threshold) on [HomePage.css](../../frontend/src/features/home/HomePage.css).
+- To soften/harden the boundary fade, tune the `mask-image` stop on `.home__hero-art-image` and the `transparent` stop on the `::after` left gradient (`18%`).
 - To deepen/soften the vignette, tune the inner transparent stop (`46%`) and outer alpha (`rgba(8, 14, 24, 0.6)`) of the radial gradient.
-- To extend how far the dark fade covers the art (e.g. if a frame edge reappears), push the solid/`0.85` stops of the left linear gradient further right.
+- Replace `home-hero.png` in `src/resources/images/home/` to change the art, then run `npm run generate:home-hero` to refresh `home-hero-2x.png`; no card pipeline or thumbnail step required.
 
 ## Home Recent Updates Cards (v2 SPA)
 
@@ -2954,7 +2961,10 @@ Single row after the page title: **search bar** (`.db__search`, `flex: 1`) then 
 
 ### Sort order
 
-Fixed per tab (no user control): Special Cards sort by **set**, then **character** (`Any Character` last), then card name as tiebreaker; all other tabs sort by card name.
+Fixed per tab (no user control): all per-type tabs sort by **set**, then **set_number** (numeric;
+unnumbered last), then tab tiebreakers — Special Cards: **character** (`Any Character` last), then
+name; Power Cards: power type order, then value, then name; all other tabs: card name. **All** tab:
+set → non-foil before foil → set_number → name.
 
 ### Foil deduplication
 
@@ -3054,6 +3064,20 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 - Landscape types: `className="card-image--contain"` (`object-fit: contain`) so location/event bottom text is not clipped
 - Portrait types: default `object-fit: cover` in a `5:7` frame
 - `catalogType` is passed to `CardImage` for correct thumbnail URLs
+
+### Per-card controls — `.deck-editor__card-controls`
+
+Owner-only control on the card image, **lower-left** (`position: absolute; bottom: 6px; left: 6px; z-index: 2`) inside `.deck-editor__card-media` (relative wrapper around image + controls). Card name stays below the media block.
+
+| Pattern | Deck types | UI | Removal |
+|---|---|---|---|
+| Trash only | `character`, `location`, `mission` | `.deck-editor__card-remove` (`IconTrash`) on scrim | Click trash |
+| Stepper only | power, special, events, aspects, universe, etc. | `QuantityStepper` (`min=0`) | Decrement to `0` |
+| OPD stepper cap | stepper types with catalog `one_per_deck` / `is_one_per_deck` | Same stepper, `max=1` (`+` disabled at 1) | Decrement to `0` |
+
+- Trash on image: `background: var(--color-bg-scrim)`, `border: 1px solid var(--color-border)` for contrast on art.
+- Multi-qty badge (`.deck-editor__card-qty`) remains **lower-right** on the image.
+- Logic: `deckCardUsesTrashOnlyRemoval` / `deckCardQuantityMax` in `frontend/src/lib/decks/deckCardControls.ts`.
 
 ### Add Cards slide-out (`SlideOutPanel`)
 

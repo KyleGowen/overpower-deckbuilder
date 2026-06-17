@@ -12,6 +12,10 @@ import {
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
+  deckCardQuantityMax,
+  deckCardUsesTrashOnlyRemoval,
+} from '../../lib/decks/deckCardControls';
+import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
   cardDisplayName,
@@ -492,43 +496,55 @@ export default function DeckEditorPage() {
                       selected?.type === catalogType;
                     return (
                     <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
-                      <button
-                        type="button"
-                        className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}${isCardSelected ? ' is-selected' : ''}`}
-                        onClick={() => {
-                          if (catalogCard && catalogType) selectDeckCard(catalogCard, catalogType);
-                        }}
-                        disabled={!canOpenDetail}
-                        aria-label={canOpenDetail ? `View ${cardName}` : cardName}
-                        aria-pressed={isCardSelected}
-                      >
-                        <CardImage
-                          imagePath={imagePath}
-                          catalogType={catalogType}
-                          alt={cardName}
-                          useThumbnail
-                          className={landscape ? 'card-image--contain' : ''}
-                        />
-                        {entry.quantity > 1 ? <span className="deck-editor__card-qty">x{entry.quantity}</span> : null}
-                      </button>
-                      <div className="deck-editor__card-name" title={cardName}>{cardName}</div>
-                      {isOwner ? (
-                        <div className="deck-editor__card-controls">
-                          <QuantityStepper
-                            size="sm"
-                            value={entry.quantity}
-                            onChange={(q) => setQuantity(entry.type, entry.cardId, q)}
+                      <div className="deck-editor__card-media">
+                        <button
+                          type="button"
+                          className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}${isCardSelected ? ' is-selected' : ''}`}
+                          onClick={() => {
+                            if (catalogCard && catalogType) selectDeckCard(catalogCard, catalogType);
+                          }}
+                          disabled={!canOpenDetail}
+                          aria-label={canOpenDetail ? `View ${cardName}` : cardName}
+                          aria-pressed={isCardSelected}
+                        >
+                          <CardImage
+                            imagePath={imagePath}
+                            catalogType={catalogType}
+                            alt={cardName}
+                            useThumbnail
+                            className={landscape ? 'card-image--contain' : ''}
                           />
-                          <button
-                            type="button"
-                            className="deck-editor__card-remove"
-                            onClick={() => setQuantity(entry.type, entry.cardId, 0)}
-                            aria-label="Remove card"
-                          >
-                            <IconTrash />
-                          </button>
-                        </div>
-                      ) : null}
+                          {entry.quantity > 1 ? (
+                            <span className="deck-editor__card-qty">x{entry.quantity}</span>
+                          ) : null}
+                        </button>
+                        {isOwner ? (
+                          <div className="deck-editor__card-controls">
+                            {deckCardUsesTrashOnlyRemoval(entry.type) ? (
+                              <button
+                                type="button"
+                                className="deck-editor__card-remove"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setQuantity(entry.type, entry.cardId, 0);
+                                }}
+                                aria-label={`Remove ${cardName}`}
+                              >
+                                <IconTrash />
+                              </button>
+                            ) : (
+                              <QuantityStepper
+                                size="sm"
+                                value={entry.quantity}
+                                min={0}
+                                max={deckCardQuantityMax(entry.type, catalogCard)}
+                                onChange={(q) => setQuantity(entry.type, entry.cardId, q)}
+                              />
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="deck-editor__card-name" title={cardName}>{cardName}</div>
                     </div>
                     );
                   })}

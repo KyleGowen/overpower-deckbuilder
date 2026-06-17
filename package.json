@@ -59,6 +59,7 @@
     "scan:special-function-icons": "ts-node src/scripts/scanSpecialFunctionIcons.ts --all",
     "scan:special-function-icons:incremental": "ts-node src/scripts/scanSpecialFunctionIcons.ts",
     "generate:thumbnails": "ts-node src/scripts/generateCardThumbnails.ts",
+    "generate:home-hero": "ts-node src/scripts/generateHomeHeroAssets.ts",
     "migrate": "ts-node src/scripts/flywayRunner.ts",
     "migrate:info": "ts-node src/scripts/flywayRunner.ts info",
     "migrate:validate": "ts-node src/scripts/flywayRunner.ts validate",

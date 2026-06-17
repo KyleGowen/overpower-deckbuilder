@@ -11,7 +11,7 @@ import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
   CATALOG_TYPES,
   cardMatchesSearchQuery,
-  compareCatalogCards,
+  compareDbvCatalogCards,
   isLandscapeCatalogType,
   metaForDeckType,
   CATALOG_TYPE_BY_SLUG,
@@ -109,7 +109,7 @@ export default function DatabasePage() {
       if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
       return true;
     });
-    result.sort((a, b) => compareCatalogCards(a, b, catalogType));
+    result.sort((a, b) => compareDbvCatalogCards(a, b, catalogType));
     return result;
   }, [perTypeCards, debouncedSearch, setFilter, tab, dbvFilters.state, isAllTab]);
 

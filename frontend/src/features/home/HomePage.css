@@ -13,6 +13,8 @@
 
 /* ---- Hero ---- */
 .home__hero {
+  container-type: inline-size;
+  container-name: homeHero;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -20,25 +22,40 @@
   min-height: 280px;
   padding: var(--space-10);
 }
+.home {
+  --home-hero-cap-width: calc(2048px - 2 * var(--space-6));
+  --home-hero-art-cap-width: calc(var(--home-hero-cap-width) * 2 / 3);
+}
 .home__hero-art {
   position: absolute;
-  inset: 0;
-  background-image: var(--hero-art);
-  background-size: cover;
-  background-position: 68% 28%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 33.333%;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.home__hero-art-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
 }
 .home__hero-art::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background:
-    linear-gradient(90deg,
-      var(--color-bg-panel) 0%,
-      var(--color-bg-panel) 16%,
-      rgba(15, 25, 40, 0.85) 38%,
-      rgba(15, 25, 40, 0.35) 62%,
-      transparent 82%),
+    linear-gradient(90deg, var(--color-bg-panel) 0%, transparent 18%),
     radial-gradient(135% 150% at 76% 40%,
       transparent 46%, rgba(8, 14, 24, 0.6) 100%),
     radial-gradient(700px 400px at 80% 20%,
@@ -67,6 +84,14 @@
 .home__hero-cta {
   margin-top: var(--space-6);
   padding: var(--space-3) var(--space-6);
+}
+
+@container homeHero (min-width: 2000px) {
+  .home__hero-art {
+    left: auto;
+    width: var(--home-hero-art-cap-width);
+    right: 0;
+  }
 }
 
 /* ---- Sections ---- */
@@ -236,7 +261,11 @@
   font-size: var(--font-size-base);
 }
 .layout-mobile .home__hero-art {
-  background-position: 68% 28%;
+  left: 28%;
+}
+.layout-mobile .home__hero-art-image {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 28%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 28%);
 }
 .layout-mobile .home__hero-art::after {
   background:

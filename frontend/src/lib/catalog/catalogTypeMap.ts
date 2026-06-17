@@ -11,6 +11,7 @@ import type {
   CollectionCardType,
   CatalogCard,
 } from '../api/types';
+import { compareSetThenSetNumber } from './catalogSetSort';
 
 /** Per-type catalog tab, All list, or character Stacks tab in Add Cards. */
 export type CatalogTabSelection = CatalogType | 'all' | 'stacks';
@@ -125,7 +126,7 @@ export function powerTypeSortIndex(powerType: string): number {
   return idx >= 0 ? idx : POWER_TYPE_SORT_KEYS.length;
 }
 
-function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
+function comparePowerCatalogCardTiebreakers(a: CatalogCard, b: CatalogCard): number {
   const typeCmp =
     powerTypeSortIndex(String(a.power_type ?? '')) - powerTypeSortIndex(String(b.power_type ?? ''));
   if (typeCmp !== 0) return typeCmp;
@@ -137,7 +138,27 @@ function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
-/** Default database grid sort order per catalog tab (no user sort control). */
+function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
+  return comparePowerCatalogCardTiebreakers(a, b);
+}
+
+/** Card Database grid sort: set → set_number, then tab-specific tiebreakers. */
+export function compareDbvCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
+  const setNumCmp = compareSetThenSetNumber(a, b);
+  if (setNumCmp !== 0) return setNumCmp;
+
+  if (type === 'special-cards') {
+    const charCmp = compareCharacterNames(cardCharacterName(a), cardCharacterName(b));
+    if (charCmp !== 0) return charCmp;
+  } else if (type === 'power-cards') {
+    const powerCmp = comparePowerCatalogCardTiebreakers(a, b);
+    if (powerCmp !== 0) return powerCmp;
+  }
+
+  return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
+}
+
+/** Default catalog sort for deck-editor add-cards (not DBV grid). */
 export function compareCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
   if (type === 'special-cards') {
     const setCmp = String(a.set ?? '').localeCompare(String(b.set ?? ''), undefined, { sensitivity: 'base' });
