@@ -43,6 +43,9 @@ Defined in [`frontend/src/app/router.tsx`](../../frontend/src/app/router.tsx):
   - `/home`, `/data`, `/users/:userId/decks`, `/users/:userId/collection`
 - `/users/:userId/decks/:deckId` — Deck Editor, its **own** chrome (no AppShell) and
   **unguarded** so read-only/shared deck links work for signed-out visitors.
+  **Simulate KO** (client-only character knockout simulation): see
+  [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md) and
+  [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md).
 - `*` → redirect to `/home`.
 
 `ProtectedRoute` redirects unauthenticated users to `/login` and shows a loading state

@@ -25,6 +25,7 @@ Key docs:
 - **DBV/mobile docs:** See [`MOBILE_DESIGN.md`](MOBILE_DESIGN.md) for the umbrella mobile strategy and per-tab doc index. Per-tab specs live under `docs/current/DBV_*_MOBILE.md`; reusable filter components under `public/js/DBV_*.md`.
 - [docs/current/COLLECTION_CHECKLIST_SOURCE.md](docs/current/COLLECTION_CHECKLIST_SOURCE.md) — Source of truth for collection card names and numbers (OverPower Check List); use when correcting or populating card data.
 - [docs/current/COLLECTION_VIEW_MOBILE.md](docs/current/COLLECTION_VIEW_MOBILE.md) — Collection tab mobile (`layout-mobile`): list vs detail sheet, fixed sort, delegate activation, `layout-mode-change`, unit tests and coverage limits.
+- [docs/current/SIMULATE_KO_FEATURE.md](docs/current/SIMULATE_KO_FEATURE.md) — Simulate KO (client-only deck editor knockout simulation): v2 tile-footer KO in [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md); legacy draw-hand, Card/List/Tile views, and mobile ⋯ menu in the same doc.
 
 ## External API hardening
 

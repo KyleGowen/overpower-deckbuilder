@@ -3,15 +3,16 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [User Experience](#user-experience)
-3. [Code Organization](#code-organization)
-4. [Implementation Details](#implementation-details)
-5. [Card Types Affected](#card-types-affected)
-6. [API Reference](#api-reference)
-7. [Tests](#tests)
-8. [Visual Design](#visual-design)
-9. [Special Rules](#special-rules)
-10. [Troubleshooting](#troubleshooting)
+2. [V1 vs V2 Parity](#v1-vs-v2-parity)
+3. [User Experience](#user-experience)
+4. [Code Organization](#code-organization)
+5. [Implementation Details](#implementation-details)
+6. [Card Types Affected](#card-types-affected)
+7. [API Reference](#api-reference)
+8. [Tests](#tests)
+9. [Visual Design](#visual-design)
+10. [Special Rules](#special-rules)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -34,30 +35,75 @@ The **Simulate KO (Knock Out)** feature allows authenticated users to visually s
 
 ---
 
+## V1 vs V2 Parity
+
+Dimming **rules** are the same in both stacks; UI surfaces and a few presentation behaviors differ by design.
+
+| Concern | V1 legacy | V2 React | Note |
+|---------|-----------|----------|------|
+| Dimming rules | `shouldDimCard` | `shouldDimDeckCard` | **Parity** — same game logic |
+| Who can KO | `currentUser` truthy (incl. GUEST) | `Boolean(user)` (incl. GUEST) | **Parity** |
+| Persistence | In-memory only | In-memory only | **Parity** |
+| Deck validation | Unaffected | Unaffected | **Parity** |
+| UI surfaces | Tile + Card + List + MV overflow menu | Tile grid only (desktop + mobile) | **V2 simplification** |
+| KO button placement | View-mode-specific | Character tile footer before trash | See UX sections below |
+| Card dimming visual | Whole card: `opacity 0.375`, `grayscale(0.4)` | Art only: `grayscale(0.7) brightness(0.55)` | **V2 UX** — footer stays readable |
+| Stats panel Character max | Ignores KO state | Recalculates from active characters when any KO set | **V2 enhancement** |
+| Draw Hand + KO | Integrated | Deferred until Playtest | Wire `shouldDimDeckCard` when pane ships |
+| Mobile entry | `deck-editor-mobile-view.js` ⋯ menu | Same `KoToggleButton` in tile footer | See v2 UX + `DeckEditorPage.md` |
+
+There is **no HTTP API** for KO — state never leaves the browser.
+
+---
+
 ## User Experience
 
-### Deck Contents Pane
+### v2 React deck editor (production SPA)
 
-The KO feature is integrated into the deck editor's main content area across all three view modes:
+Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx).
 
-#### Tile View (Preview View)
+- **KO control**: [`KoToggleButton`](../../frontend/src/features/deck-editor/KoToggleButton.tsx) on character tiles in `.deck-editor__card-footer`, **before** the trash button. Reserve stays in `.deck-editor__card-reserve-wrap` at the bottom-left of the tile.
+- **Availability**: Signed-in **GUEST**, **USER**, and **ADMIN** sessions. Signed-out visitors see no KO control. Read-only shared decks: KO still available for signed-in visitors (simulation only; no deck mutation).
+- **Layout**: Single grouped tile grid by catalog type (no separate Card View or List View modes).
+- **Dimming**: Affected cards get `.deck-editor__card--ko-dimmed` on **art only** (`.deck-editor__card-media` filter); footer controls stay full contrast.
+- **Stats header**: **Character max** row uses active (non-KO) characters when `koCharacterIds.size > 0` via `calculateActiveTeamStats`. **Icon totals** stay deck-wide.
+- **Draw Hand**: Not implemented. Playtest is a placeholder; call `shouldDimDeckCard` from `simulateKo.ts` when that pane ships.
+- **Mobile**: Same tile-footer `KoToggleButton` (not the legacy DEV overflow ⋯ menu — see [DECK_EDITOR_MOBILE_VIEW.md](DECK_EDITOR_MOBILE_VIEW.md) for v1 only).
+
+Full v2 feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md).
+
+### Button interaction (both stacks)
+
+1. **Click KO Button**: Character is marked as KO'd, button state changes to active
+2. **Visual Feedback**:
+   - Character card dims immediately
+   - Affected cards dim based on KO logic
+   - Button changes to "active" state (inverted colors)
+3. **Un-KO**: Click the button again to un-KO the character
+4. **Multiple Characters**: Each character can be independently KO'd or un-KO'd
+
+### Legacy (v1) — deck contents pane
+
+The legacy deck editor integrates KO across **three view modes** (`public/js/deck-editor-rendering.js`):
+
+#### Legacy — Tile View (Preview View)
 - **KO Button Location**: Bottom-right action area, to the left of the Reserve button
-- **Visual State**: 
+- **Visual State**:
   - Normal state: Red button with teal text "KO"
   - Active state (KO'd): Inverted red background with dark text
 - **Card Dimming**: KO'd character cards and affected cards are dimmed with 37.5% opacity and grayscale filter
 
-#### Card View
+#### Legacy — Card View
 - **KO Button Location**: Card view controls, between the "-" remove button and Reserve button
 - **Button Styling**: Matches tile view but with `.card-view-btn` class for consistent sizing
 - **Card Dimming**: Same visual treatment as tile view
 
-#### List View
+#### Legacy — List View
 - **KO Button Location**: Inline with character actions, between Reserve and "-" remove button
 - **Button Styling**: Compact inline button matching list view styling
 - **Card Dimming**: Same visual treatment as tile view
 
-### Draw Hand Pane
+#### Legacy — Draw Hand pane
 
 When the Draw Hand feature is used, cards that would be dimmed in the deck contents (due to KO'd characters) are also dimmed in the draw hand:
 
@@ -65,15 +111,9 @@ When the Draw Hand feature is used, cards that would be dimmed in the deck conte
 - **Visual Consistency**: Uses the same `ko-dimmed` CSS class for consistent appearance
 - **Real-time Updates**: Draw hand refreshes automatically when characters are KO'd or un-KO'd
 
-### Button Interaction
+#### Legacy — Mobile (DEV list)
 
-1. **Click KO Button**: Character is marked as KO'd, button state changes to active
-2. **Visual Feedback**: 
-   - Character card dims immediately
-   - Affected cards dim based on KO logic
-   - Button changes to "active" state (inverted colors)
-3. **Un-KO**: Click the button again to un-KO the character
-4. **Multiple Characters**: Each character can be independently KO'd or un-KO'd
+Character rows in the mobile deck editor overflow **⋯** menu expose KO / Un-KO (`deck-editor-mobile-view.js`). See [DECK_EDITOR_MOBILE_VIEW.md](DECK_EDITOR_MOBILE_VIEW.md).
 
 ---
 
@@ -200,7 +240,9 @@ if (removedCard && removedCard.type === 'character' && window.SimulateKO) {
 
 ## Implementation Details
 
-### State Management
+Shared dimming rules apply to both stacks. State management below describes the **legacy v1** module; v2 uses `koCharacterIds: Set<string>` in React (`DeckEditorPage.tsx`) with the same logical rules in `simulateKo.ts`.
+
+### State Management (legacy v1)
 
 **Private State**:
 - `koCharacters`: A `Set<string>` containing card IDs of KO'd characters
@@ -348,7 +390,9 @@ The dimming logic checks each card type and applies different rules:
 
 ## API Reference
 
-### `window.SimulateKO`
+> **Note:** There is no REST/HTTP API for Simulate KO. This section documents the **legacy v1** `window.SimulateKO` global only. v2 uses pure functions in `frontend/src/lib/decks/simulateKo.ts` (see Code Organization).
+
+### `window.SimulateKO` (legacy v1)
 
 The public API exposed on the `window` object.
 
@@ -453,7 +497,20 @@ const teamStats = window.SimulateKO.calculateActiveTeamStats();
 
 ## Tests
 
-### Unit Tests
+### v2 unit tests
+
+**File**: `tests/unit/simulate-ko.test.ts`
+
+**Module under test**: `frontend/src/lib/decks/simulateKo.ts` (`buildKoDimmingContext`, `shouldDimDeckCard`, `calculateActiveTeamStats`, `toggleKoCharacterId`, `pruneKoCharacterIds`, etc.)
+
+**Coverage**: Character, special, power (incl. Multi-Power sum-of-two-highest), teamwork, ally, training, basic universe, single-character rule, John Carter / Time Traveler overrides, and edge cases.
+
+**Running**:
+```bash
+npm run test:unit -- simulate-ko.test.ts
+```
+
+### Legacy unit tests (draw hand integration)
 
 **File**: `tests/unit/draw-hand-ko-dimming.test.ts`
 
@@ -537,7 +594,21 @@ npm run test:integration -- ko-feature-dimming.test.ts
 
 ## Visual Design
 
-### KO Button
+### v2 React deck editor
+
+See [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md) — **Semantic (KO simulation)** tokens and **Deck Editor — Simulate KO**:
+
+| Element | Classes / tokens |
+|---------|------------------|
+| KO toggle | `.deck-editor__ko-btn` — `--color-ko-soft` fill, `--color-ko` text, `--color-ko-border` border |
+| KO active | `.deck-editor__ko-btn.is-active` — `--color-ko` fill, `--color-text-on-accent` label |
+| KO-dimmed art | `.deck-editor__card--ko-dimmed .deck-editor__card-media` — `filter: grayscale(0.7) brightness(0.55)` |
+
+CSS: [`DeckEditorPage.css`](../../frontend/src/features/deck-editor/DeckEditorPage.css).
+
+### Legacy (v1)
+
+#### KO Button
 
 **Normal State**:
 - Background: `rgba(255, 107, 107, 0.2)` (light red)
@@ -556,7 +627,7 @@ npm run test:integration -- ko-feature-dimming.test.ts
 - Background: `rgba(255, 107, 107, 0.3)` (slightly brighter)
 - Border: `rgba(255, 107, 107, 0.4)` (slightly brighter)
 
-### Dimmed Cards
+### Dimmed Cards (legacy)
 
 **Visual Treatment**:
 - Opacity: `0.375` (37.5% - more dimmed than previous 50%)
@@ -569,7 +640,7 @@ npm run test:integration -- ko-feature-dimming.test.ts
 **CSS Classes**:
 - `.ko-dimmed` - Applied to cards that should be dimmed
 
-### Button Spacing
+### Button Spacing (legacy)
 
 **Consistent Spacing**:
 - All buttons in `.deck-card-editor-actions` use `gap: 0.5rem`
@@ -627,16 +698,42 @@ npm run test:integration -- ko-feature-dimming.test.ts
 
 ## Troubleshooting
 
-### KO Button Not Appearing
+### v2 React deck editor
+
+#### KO button not appearing
+
+**Possible causes**:
+1. User not signed in — `canSimulateKo = Boolean(user)` in `DeckEditorPage.tsx`
+2. Card is not a character — KO only on `entry.type === 'character'`
+3. Wrong route — v2 deck editor is `/users/:userId/decks/:deckId` (Vite SPA on `:5173`)
+
+**Solution**: Confirm `user` from `AuthProvider` (including GUEST role) and character tile type.
+
+#### KO toggles but cards do not dim
+
+**Possible causes**:
+1. `koCharacterIds` state not updating
+2. Catalog card missing from `cardIndex` for a deck entry
+3. Expecting whole-card dimming — v2 dims **art only** (footer stays full contrast)
+
+**Solution**: Check React state and `buildKoDimmingContext` / `shouldDimDeckCard`; verify catalog resolution for deck cards.
+
+#### Character max stats unchanged after KO
+
+v2 **should** update Character max when any character is KO'd. If values look wrong, verify `koCharacterIds.size > 0` and `calculateActiveTeamStats(koCtx)`.
+
+### Legacy (v1)
+
+#### KO Button Not Appearing
 
 **Possible Causes**:
 1. User not logged in - KO feature requires authentication
 2. Card is not a character - KO button only appears on character cards
-3. View mode issue - Check that you're in Tile, Card, or List view
+3. View mode issue (legacy only) — check Tile, Card, or List view
 
 **Solution**: Verify `currentUser` is set and card type is 'character'
 
-### KO Button Not Working
+#### KO Button Not Working
 
 **Possible Causes**:
 1. `window.SimulateKO` not initialized
@@ -648,7 +745,7 @@ npm run test:integration -- ko-feature-dimming.test.ts
 - Verify `window.SimulateKO` exists: `console.log(window.SimulateKO)`
 - Verify user is logged in: `console.log(window.currentUser)`
 
-### Cards Not Dimming
+#### Cards Not Dimming
 
 **Possible Causes**:
 1. `applyDimming()` not called after KO toggle
@@ -660,7 +757,7 @@ npm run test:integration -- ko-feature-dimming.test.ts
 - Verify card type is in supported list
 - Check `window.availableCardsMap` has card data
 
-### Draw Hand Not Dimming
+#### Draw Hand Not Dimming
 
 **Possible Causes**:
 1. `shouldDimCard` not called in `displayDrawnCards`
@@ -672,7 +769,7 @@ npm run test:integration -- ko-feature-dimming.test.ts
 - Check that `toggleKOCharacter` refreshes draw hand if displayed
 - Verify `window.SimulateKO.shouldDimCard` exists
 
-### Multi-Power Cards Not Dimming Correctly
+#### Multi-Power Cards Not Dimming Correctly
 
 **Possible Causes**:
 1. Using Math.max instead of sum of two highest
@@ -687,15 +784,24 @@ npm run test:integration -- ko-feature-dimming.test.ts
 
 ## Related Documentation
 
-- **API Documentation**: `docs/current/API_DOCUMENTATION.md`
-- **Style Guide**: `docs/current/STYLE_GUIDE.md` (KO button styling section)
-- **Card View Documentation**: `docs/current/CARD_VIEW_DOCUMENTATION.md`
+- **v2 deck editor**: [`frontend/src/features/deck-editor/DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md)
+- **v2 visual tokens**: [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md) (Simulate KO section)
+- **v2 architecture**: [`FRONTEND_V2.md`](FRONTEND_V2.md)
+- **Legacy style guide**: [`STYLE_GUIDE.md`](STYLE_GUIDE.md) (`.ko-btn` styling)
+- **Legacy mobile DEV**: [`DECK_EDITOR_MOBILE_VIEW.md`](DECK_EDITOR_MOBILE_VIEW.md) (overflow ⋯ KO — v1 only)
+- **Legacy draw hand**: [`public/js/components/DRAW_HAND.md`](../../public/js/components/DRAW_HAND.md)
+- **Legacy card view**: [`CARD_VIEW_DOCUMENTATION.md`](CARD_VIEW_DOCUMENTATION.md)
 
 ---
 
 ## Version History
 
-- **v1.0** (Current): Initial implementation
+- **v1.1** (2026-06-17): v2 documentation reconciliation
+  - v2 UX, visual design, tests, and troubleshooting sections
+  - V1 vs V2 parity matrix
+  - GUEST availability documented for v2
+  - Draw Hand deferred in v2 until Playtest
+- **v1.0**: Initial legacy implementation
   - KO feature available to all authenticated users
   - Multi-Power dimming logic fixed (sum of two highest stats)
   - Consistent button spacing
@@ -707,9 +813,9 @@ npm run test:integration -- ko-feature-dimming.test.ts
 ## Contributors
 
 - Feature implementation and testing
-- Documentation: Auto-generated comprehensive guide
+- Documentation: Auto-generated comprehensive guide; v2 reconciliation 2026-06-17
 
 ---
 
-*Last Updated: 2025-01-07*
+*Last Updated: 2026-06-17*
 

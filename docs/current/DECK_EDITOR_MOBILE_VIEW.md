@@ -99,6 +99,8 @@ Each logical line in the deck is a **`.dev-mobile-deck-row`** with:
 
 ## ⋯ (overflow) visibility and menu contents
 
+> **Legacy v1 only.** The v2 React deck editor (`frontend/`) uses the same tile-footer `KoToggleButton` on mobile as on desktop — not this overflow menu. See [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md) and [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md).
+
 The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetParts(card, deckIndex, instanceIndex).length > 0`**. The same function builds the flyout HTML, so the row never advertises an empty menu.
 
 ### Actions included (when applicable)
@@ -107,7 +109,7 @@ The **⋯** button is rendered **only** when **`collectDevMobileDeckRowSheetPart
 |-----------|-----|-----------------|
 | Type is character, special, power, or location **and** **`deckEditorCardHasAlternateArts(acForAlt, card.type)`** | Change art | **`showAlternateArtSelectionForExistingCard`**, per-instance via **`resolveInstanceCardId`** |
 | **`foilCardMap[instId]`** defined | Foil | **`toggleFoilForCard`**; **`instId`** from **`resolveInstanceCardId`** |
-| Character + logged in | KO / Un-KO | **`toggleKOCharacter`** |
+| Character + logged in (incl. GUEST) | KO / Un-KO | **`toggleKOCharacter`** |
 | Character (**not** **`isDeckEditorReadOnlyUi`**): always **Select Reserve** unless this row is already the reserve (**Reserve** = clear) | **`deck-editor-menu-panel-btn`** row + bookmark icon **`ICON_MENU_RESERVE`** | **`selectReserveCharacter`** / **`deselectReserveCharacter`** (same as desktop DTV); MV **tap-to-switch** shows **Select Reserve** on every eligible character row even when another character already holds reserve—one tap moves reserve. **`computeReserveCharacterRowState`** (**`index-page.js`**) aligns row state with desktop. |
 | Character + body **`read-only-mode`** and this row is the reserve | Disabled **Reserve** row | **`.deck-editor-menu-panel-btn--disabled`**, **`deck-editor-menu-item-icon--reserve-active`** (read-only sheet normally not open — parity with desktop disabled reserve) |
 | Training + **`hasSpartanTrainingGround()`** | Pre-placed / Include in draw | **`drawTrainingCard`** |

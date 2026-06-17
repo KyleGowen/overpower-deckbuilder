@@ -28,6 +28,7 @@ Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). F
 - **Logic**: [`simulateKo.ts`](../../lib/decks/simulateKo.ts) — `buildKoDimmingContext`, `shouldDimDeckCard`, `calculateActiveTeamStats`.
 - **UI**: `KoToggleButton` on character tiles; affected cards get `.deck-editor__card--ko-dimmed` on art only.
 - **Stats**: **Character max** row uses active (non-KO) characters when any KO is set; icon totals stay deck-wide.
+- **Mobile**: Same tile-footer `KoToggleButton` on character tiles (not the legacy DEV overflow ⋯ menu — see [`DECK_EDITOR_MOBILE_VIEW.md`](../../../docs/current/DECK_EDITOR_MOBILE_VIEW.md) for v1 only).
 - **Signed-out visitors**: no KO control.
 
 ## Add Cards panel
