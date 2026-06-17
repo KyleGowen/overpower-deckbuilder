@@ -15,20 +15,20 @@ are read-only automatically).
 - **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Controls below the image do not open the panel. Works for owners and read-only visitors. **Owners** see a **Printings** section when the card has multiple catalog printings (alternate art + foil): each row shows friendly set name, checklist `#`, and **Apply**; the current printing’s button is disabled (“Applied”). Apply swaps **one deck tile instance** to that printing and refreshes slideout art + Details.
 - **Per-card controls**: in `.deck-editor__card-footer` below the image, **right-aligned** — no tile name (name is on the card art). Card image is **full-bleed** to the tile edges above the footer (`padding: 0` on `.deck-editor__card`). **One tile per physical copy** — duplicate cards appear as separate images (no quantity stepper). New copies are added only via **Add Cards**.
   - **Characters (owners)**: **KO** toggle (`KoToggleButton`, `.deck-editor__ko-btn`) in the footer before trash; **Select Reserve** / **Reserve** (`ReserveCharacterButton`) at the **bottom-left** of the tile (`.deck-editor__card-reserve-wrap`, absolute); trash (`.deck-editor__card-remove`) stays **bottom-right** in the footer. Hidden reserve slots keep trash from shifting on that tile.
-  - **Characters (authenticated visitors, non-guest)**: **KO** toggle only in the footer (no trash/reserve edits).
-  - **Characters (read-only)**: disabled **Reserve** on the reserved character only when applicable; **KO** still available for signed-in non-guest users.
+  - **Characters (authenticated visitors)**: **KO** toggle only in the footer (no trash/reserve edits).
+  - **Characters (read-only)**: disabled **Reserve** on the reserved character only when applicable; **KO** still available for all signed-in users (GUEST, USER, ADMIN).
   - **All types (owners)**: trash only — removes that single instance. Logic: [`deckInstances.ts`](../../lib/decks/deckInstances.ts), [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts), reserve: [`reserveCharacter.ts`](../../lib/decks/reserveCharacter.ts).
 - **Threat chip**: client-calculated live via `calculateDeckTotalThreat` (characters + locations, reserve bumps for Victory Harben, Carson of Venus, Morgan le Fay). Shows `total/76` when over cap.
 
 ## Simulate KO
-Client-only knock-out simulation for signed-in non-guest users. Full behavior spec:
+Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). Full behavior spec:
 [`docs/current/SIMULATE_KO_FEATURE.md`](../../../docs/current/SIMULATE_KO_FEATURE.md).
 
 - **State**: `koCharacterIds: Set<string>` in `DeckEditorPage` — **not saved**; resets on deck change / refresh.
 - **Logic**: [`simulateKo.ts`](../../lib/decks/simulateKo.ts) — `buildKoDimmingContext`, `shouldDimDeckCard`, `calculateActiveTeamStats`.
 - **UI**: `KoToggleButton` on character tiles; affected cards get `.deck-editor__card--ko-dimmed` on art only.
 - **Stats**: **Character max** row uses active (non-KO) characters when any KO is set; icon totals stay deck-wide.
-- **Guests / signed-out**: no KO control.
+- **Signed-out visitors**: no KO control.
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

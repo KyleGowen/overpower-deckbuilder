@@ -181,7 +181,7 @@ export default function DeckEditorPage() {
   const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
-  const canSimulateKo = Boolean(user && !isGuest);
+  const canSimulateKo = Boolean(user);
 
   useEffect(() => {
     loadedRef.current = false;

@@ -17,7 +17,7 @@ Skip for: backend-only changes, docs-only, unit-test-only refactors with no UI s
 
 ## How to verify
 
-1. Ensure dev servers are running (repo root `npm run dev` + `frontend/npm run dev`). Browse **`http://localhost:5173`** (or the Vite Network URL for LAN).
+1. **Dev servers must be up before this step** — follow `v2-dev-server.mdc` (check terminals, health-check `:8085`, confirm `:5173`, start or restart yourself; never ask Kyle to restart). Browse **`http://localhost:5173`** (or the Vite Network URL for LAN).
 2. Use **cursor-ide-browser** MCP: `browser_navigate` → `browser_lock` → `browser_snapshot` / interactions → `browser_unlock`.
 3. Exercise the **happy path** and the change-specific edge cases (e.g. new tab, empty state, row click → slideout, filters).
 4. Confirm **no error overlay**, no console-breaking exceptions, and expected DOM (tab active, list/grid visible, controls wired).

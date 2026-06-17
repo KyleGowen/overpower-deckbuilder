@@ -26,7 +26,7 @@ The **Simulate KO (Knock Out)** feature allows authenticated users to visually s
 
 ### Key Characteristics
 
-- **Available to**: All authenticated users (USER, ADMIN roles)
+- **Available to**: All authenticated users (GUEST, USER, ADMIN roles)
 - **Persistence**: KO state is **not saved** - it's purely visual and resets when the page is refreshed
 - **Multiple KO's**: Multiple characters can be KO'd simultaneously
 - **Reversible**: Characters can be un-KO'd by pressing the KO button again

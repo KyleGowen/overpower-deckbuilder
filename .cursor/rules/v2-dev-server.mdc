@@ -1,0 +1,37 @@
+---
+description: Proactively ensure v2 dev servers are running before UI testing — never ask Kyle to restart them.
+alwaysApply: true
+---
+
+# v2 Dev Server — keep it running
+
+When work needs the live v2 app (browser verification, UI bug fixes, new routes/tabs/modals, or any change under `frontend/` that you would manually check in the browser), **you** ensure the dev stack is up. Do **not** tell Kyle to restart servers unless you hit a blocker you cannot fix (port conflict, crash loop, missing env).
+
+## Two processes required
+
+1. **Repo root:** `npm run dev` → Express API on `127.0.0.1:8085`
+2. **`frontend/`:** `npm run dev` → Vite SPA on `:5173` (`host: true` for LAN)
+
+Browse and automate at **`http://localhost:5173`**, not `:8085`.
+
+## Before testing — check, then start or restart
+
+1. **Inspect terminals** (`terminals/` folder) for already-running `npm run dev` in repo root and `frontend/`.
+2. **Verify API:** `curl -s http://localhost:8085/health` — must return OK JSON.
+3. **Verify Vite:** `curl -s -o /dev/null -w "%{http_code}" http://localhost:5173` — expect `200` (or a Vite dev response).
+4. **If either is down:** start the missing process in the **background** from the correct directory. Do not start duplicate servers if one is already healthy.
+5. **Restart when the change requires it** (do this yourself, without asking):
+   - Backend edits (`src/`, migrations, env) → restart **root** `npm run dev` (restart both if unsure).
+   - After `npm run migrate` → restart **both**.
+   - Vite config / env changes in `frontend/` → restart **frontend** `npm run dev`.
+   - Stale HMR or API proxy errors → restart **both**.
+
+## After start or restart
+
+- Re-run the health check on `:8085`.
+- Confirm `:5173` responds before browser MCP or telling Kyle to look.
+- When mentioning URLs: `http://localhost:5173` plus the Vite **Network** URL for LAN devices (see `local-dev-lan.mdc`).
+
+## Completion gate
+
+UI work is not done until servers were verified (or restarted) **and** browser verification ran per `browser-verification.mdc`. If a server fails to start, report the exact error and what you tried — do not default to "please restart the dev server."
