@@ -41,6 +41,9 @@
   --color-success: #36d399;
   --color-warning: #f6a623;
   --color-danger: #ef4d5a;
+  --color-ko: #e85d6a;
+  --color-ko-soft: rgba(232, 93, 106, 0.16);
+  --color-ko-border: rgba(232, 93, 106, 0.38);
   --color-info: #3aa0ff;
   --color-legal: #36d399;
   --color-not-legal: #ef4d5a;

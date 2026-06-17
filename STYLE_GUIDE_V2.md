@@ -71,6 +71,13 @@ hardcode hex values in component CSS.
 | `--color-border-strong` | `#2a3e63` |
 | `--color-border-accent` | `rgba(0,200,232,.45)` |
 
+### Semantic (KO simulation)
+| Token | Value | Use |
+|---|---|---|
+| `--color-ko` | `#e85d6a` | Simulate KO toggle active fill |
+| `--color-ko-soft` | `rgba(232,93,106,.16)` | KO button default background |
+| `--color-ko-border` | `rgba(232,93,106,.38)` | KO button border |
+
 ### Radius / Shadows
 - Radii: `--radius-sm 6px`, `--radius-md 10px`, `--radius-lg 14px`, `--radius-xl 20px`,
   `--radius-full 999px`.
@@ -194,6 +201,13 @@ Each screen has a companion doc in its feature folder:
 - Collection — [`frontend/src/features/collection/CollectionPage.md`](frontend/src/features/collection/CollectionPage.md)
 - Deck Selection — [`frontend/src/features/deck-selection/DeckSelectionPage.md`](frontend/src/features/deck-selection/DeckSelectionPage.md)
 - Deck Editor (DEV) — [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md)
+
+### Deck Editor — Simulate KO
+| Element | Tokens / values |
+|---|---|
+| KO toggle (`.deck-editor__ko-btn`) | `--color-ko-soft` fill, `--color-ko` text, `--color-ko-border` border; `min-width: 36px`, `font-size-xs`, semibold |
+| KO active (`.deck-editor__ko-btn.is-active`) | `--color-ko` fill, `--color-text-on-accent` label |
+| KO-dimmed card (`.deck-editor__card--ko-dimmed .deck-editor__card-media`) | `filter: grayscale(0.7) brightness(0.55)` on art only — matches `CardTile` dimming; footer controls stay full contrast |
 
 Architecture, data flow, and serving are documented in
 [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).

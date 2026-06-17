@@ -53,7 +53,14 @@ import {
   IconTrash,
   IconPlay,
 } from '../../components/icons';
+import {
+  buildKoDimmingContext,
+  calculateActiveTeamStats,
+  shouldDimDeckCard,
+  toggleKoCharacterId,
+} from '../../lib/decks/simulateKo';
 import { AddCardsPanel } from './AddCardsPanel';
+import { KoToggleButton } from './KoToggleButton';
 import { ReserveCharacterButton } from './ReserveCharacterButton';
 import type {
   CatalogCard,
@@ -165,11 +172,14 @@ export default function DeckEditorPage() {
   const [selected, setSelected] = useState<{ card: CatalogCard; type: CatalogType } | null>(null);
   const [validity, setValidity] = useState<{ valid: boolean; message?: string } | null>(null);
   const [reserveCharacterId, setReserveCharacterId] = useState<string | null>(null);
+  const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
+  const canSimulateKo = Boolean(user && !isGuest);
 
   useEffect(() => {
     loadedRef.current = false;
+    setKoCharacterIds(new Set());
   }, [deckId]);
 
   useEffect(() => {
@@ -251,7 +261,18 @@ export default function DeckEditorPage() {
 
   const totalCards = cards.reduce((s, c) => s + c.quantity, 0);
 
+  const koCtx = useMemo(
+    () =>
+      koCharacterIds.size > 0
+        ? buildKoDimmingContext(cards, cardIndex, koCharacterIds)
+        : null,
+    [cards, cardIndex, koCharacterIds],
+  );
+
   const maxStats = useMemo(() => {
+    if (koCtx) {
+      return calculateActiveTeamStats(koCtx);
+    }
     const statById = new Map<string, ReturnType<typeof cardStats>>();
     (charactersQuery.data ?? []).forEach((c) => {
       const s = cardStats(c);
@@ -269,7 +290,7 @@ export default function DeckEditorPage() {
       }
     });
     return acc;
-  }, [cards, charactersQuery.data]);
+  }, [cards, charactersQuery.data, koCtx]);
 
   const iconTotals = useMemo(
     () =>
@@ -304,6 +325,14 @@ export default function DeckEditorPage() {
   const setQuantity = (type: DeckCardType, cardId: string, qty: number) => {
     if (type === 'character' && qty === 0 && reserveCharacterId === cardId) {
       setReserveCharacterId(null);
+    }
+    if (type === 'character' && qty === 0) {
+      setKoCharacterIds((prev) => {
+        if (!prev.has(cardId)) return prev;
+        const next = new Set(prev);
+        next.delete(cardId);
+        return next;
+      });
     }
     setCards((prev) => {
       const next = prev
@@ -573,13 +602,20 @@ export default function DeckEditorPage() {
                             !isOwner,
                           )
                         : null;
+                    const showKoOnCharacter = entry.type === 'character' && canSimulateKo;
                     const showCardFooter =
                       isOwner ||
                       (entry.type === 'character' &&
                         reserveRowState !== null &&
-                        reserveSlotVisible(reserveRowState));
+                        reserveSlotVisible(reserveRowState)) ||
+                      showKoOnCharacter;
+                    const koDimmed =
+                      koCtx !== null && shouldDimDeckCard(entry, catalogCard, koCtx);
                     return (
-                    <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
+                    <div
+                      className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}`}
+                      key={`${entry.type}:${entry.cardId}`}
+                    >
                       <div className="deck-editor__card-media">
                         <button
                           type="button"
@@ -615,6 +651,17 @@ export default function DeckEditorPage() {
                       {showCardFooter ? (
                         <div className="deck-editor__card-footer">
                           <div className="deck-editor__card-controls">
+                            {showKoOnCharacter ? (
+                              <KoToggleButton
+                                active={koCharacterIds.has(entry.cardId)}
+                                cardName={cardName}
+                                onToggle={() =>
+                                  setKoCharacterIds((prev) =>
+                                    toggleKoCharacterId(prev, entry.cardId),
+                                  )
+                                }
+                              />
+                            ) : null}
                             {isOwner ? (
                               deckCardUsesTrashOnlyRemoval(entry.type) ? (
                                 <button

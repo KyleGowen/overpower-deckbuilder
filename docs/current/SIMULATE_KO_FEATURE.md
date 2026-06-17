@@ -79,9 +79,15 @@ When the Draw Hand feature is used, cards that would be dimmed in the deck conte
 
 ## Code Organization
 
-### Module Structure
+### v2 React SPA (deck editor)
 
-The KO feature is implemented as a self-contained module:
+**File**: `frontend/src/lib/decks/simulateKo.ts`
+
+Pure TypeScript port of the dimming rules (no `window` globals). React state (`koCharacterIds: Set<string>`) lives in [`DeckEditorPage.tsx`](../../../frontend/src/features/deck-editor/DeckEditorPage.tsx). UI: [`KoToggleButton.tsx`](../../../frontend/src/features/deck-editor/KoToggleButton.tsx). Unit tests: `tests/unit/simulate-ko.test.ts`.
+
+Draw Hand integration in v2 is deferred until Playtest ships; call `shouldDimDeckCard` from the same module when that pane exists.
+
+### v1 legacy module
 
 **File**: `public/js/components/simulate-ko.js`
 
