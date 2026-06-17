@@ -9,7 +9,7 @@ are read-only automatically).
 - **Sticky page header** (`.deck-editor__header`): stays pinned while the card list scrolls. Single **topbar row** (`.deck-editor__topbar`) with three zones:
   - **Leading** (`.deck-editor__topbar-leading`): back button, editable deck name, card count + threat + legality badge
   - **Center** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`) — each with a small uppercase label and four inline icon + value groups in stat color
-  - **Trailing** (`.deck-editor__actions`): Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean, "Saving…" while in flight)
+  - **Trailing** (`.deck-editor__actions`): **Draw Hand**, **Add Cards**, and **Save** (shows "Saved" when clean, "Saving…" while in flight)
   - Mobile: stats wrap to a second line within the same header; actions full-width below
 - **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters use landscape `380:280` with thumbnail + cover; locations use **`502:359`** with full-res + cover; events use `236:151` with full-res + cover; all other types use portrait `5:7` with thumb + contain. Landscape sections use fixed **`285px`** columns (`repeat(auto-fill, 285px)`); portrait groups use `minmax(210px, 1fr)`.
 - **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Controls below the image do not open the panel. Works for owners and read-only visitors. **Owners** see a **Printings** section when the card has multiple catalog printings (alternate art + foil): each row shows friendly set name, checklist `#`, and **Apply**; the current printing’s button is disabled (“Applied”). Apply swaps **one deck tile instance** to that printing and refreshes slideout art + Details.
@@ -30,6 +30,19 @@ Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). F
 - **Stats**: **Character max** row uses active (non-KO) characters when any KO is set; icon totals stay deck-wide.
 - **Mobile**: Same tile-footer `KoToggleButton` on character tiles (not the legacy DEV overflow ⋯ menu — see [`DECK_EDITOR_MOBILE_VIEW.md`](../../../docs/current/DECK_EDITOR_MOBILE_VIEW.md) for v1 only).
 - **Signed-out visitors**: no KO control.
+
+## Draw Hand
+
+Client-only random hand simulation. Behavior mirrors legacy v1 [`draw-hand.js`](../../../public/js/components/draw-hand.js).
+
+- **Entry**: **Draw Hand** button in the header actions. Enabled when the deck has **≥8 playable** cards (non character/location/mission); `exclude_from_draw` rows count toward the threshold but are omitted from the draw pile.
+- **State**: `drawHandOpen` + `drawnCards` in `DeckEditorPage` — not persisted.
+- **Logic**: [`drawHand.ts`](../../lib/decks/drawHand.ts) — 8 cards by default, 9th when an event is in the first 8 and the pile has >8 cards.
+- **UI**: [`DrawHandPanel.tsx`](DrawHandPanel.tsx) uses [`SlideOutPanel`](../../components/SlideOutPanel/SlideOutPanel.tsx) (`side="top"`, `position="absolute"`) over `.deck-editor__content` — deck grid stays visible behind the shared blurred scrim (same as Add Cards). Desktop: one horizontal row at **210px** per card (`--deck-editor-portrait-col`), uniform scale-to-fit for 8–9 cards; drag reorder. Mobile (`.layout-mobile`): **165px** cards in a horizontal snap carousel (no scale-down). **Events** in the draw hand are rotated 90° CCW into the portrait slot (draw-hand only).
+- **Toggle**: First click opens and draws; second click (or × / backdrop) closes. **Draw again** footer button redraws without closing.
+- **KO**: Drawn cards use `shouldDimDeckCard`; dimming updates when KO toggles without re-randomizing the hand.
+- **Card detail**: Tapping a drawn card opens [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx).
+- **Availability**: All visitors including read-only and signed-out (when deck has enough playable cards).
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).

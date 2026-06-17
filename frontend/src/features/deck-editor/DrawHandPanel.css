@@ -1,0 +1,146 @@
+.draw-hand-slideout .slideout__body {
+  padding: var(--space-4) var(--space-5);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.draw-hand-slideout .slideout__footer {
+  justify-content: center;
+}
+
+.draw-hand__empty {
+  margin: 0;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Single horizontal row — desktop scales; mobile scrolls */
+.draw-hand__row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  overflow: hidden;
+  min-height: calc(var(--deck-editor-portrait-col) * 7 / 5 * var(--draw-hand-scale, 1));
+}
+
+.draw-hand__row--drag-over {
+  outline: 2px dashed var(--color-border-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
+.draw-hand__row-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+  transform-origin: top center;
+}
+
+.draw-hand__slot {
+  flex: 0 0 auto;
+  width: var(--deck-editor-portrait-col);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.draw-hand__slot--dragging {
+  opacity: 0.45;
+}
+
+.draw-hand__slot--drag-target {
+  transform: translateY(-4px);
+}
+
+.draw-hand__card {
+  width: 100%;
+}
+
+.draw-hand__card .deck-editor__card-img {
+  cursor: grab;
+}
+
+/* Event cards: landscape art rotated 90° CCW into portrait slot */
+.draw-hand__event-portrait {
+  overflow: hidden;
+  position: relative;
+}
+
+.draw-hand__event-rotate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--deck-editor-portrait-col) * 7 / 5);
+  height: var(--deck-editor-portrait-col);
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.draw-hand__event-rotate .card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.draw-hand__event-rotate .card-image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.draw-hand__redraw {
+  min-width: 140px;
+}
+
+.draw-hand__missing-art {
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .draw-hand__slot:hover .draw-hand__card {
+    box-shadow: 0 8px 24px rgba(0, 200, 232, 0.18);
+    border-color: var(--color-border-accent);
+  }
+
+  .draw-hand__slot--dragging .draw-hand__card {
+    box-shadow: none;
+  }
+}
+
+/* Mobile: horizontal snap carousel, no uniform scale */
+.layout-mobile .draw-hand-slideout .slideout__panel--top {
+  max-height: 55vh;
+}
+
+.layout-mobile .draw-hand__row {
+  overflow-x: auto;
+  overflow-y: hidden;
+  justify-content: flex-start;
+  min-height: calc(var(--deck-editor-portrait-col) * 7 / 5);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-2);
+}
+
+.layout-mobile .draw-hand__row-inner {
+  transform: none !important;
+  padding-inline: var(--space-1);
+}
+
+.layout-mobile .draw-hand__slot {
+  scroll-snap-align: center;
+}
+
+.layout-mobile .draw-hand__card .deck-editor__card-img {
+  cursor: pointer;
+}

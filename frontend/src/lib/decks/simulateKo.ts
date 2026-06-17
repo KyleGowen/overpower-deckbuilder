@@ -5,6 +5,13 @@ import {
   specialLinkedCharacterName,
   statForPowerType,
 } from '../deck-usability/deckUsabilityUtils';
+import {
+  type DeckCardIndex,
+  type DeckCardLookup,
+  resolveDeckCatalogCard,
+} from './deckCardCatalog';
+
+export type { DeckCardIndex } from './deckCardCatalog';
 
 export interface ActiveCharacter {
   cardId: string;
@@ -32,17 +39,11 @@ export interface KoDimmingContext {
   cardIndex: Map<string, CatalogCard>;
 }
 
-export type DeckCardIndex = Map<string, CatalogCard>;
-
-function deckIndexKey(deckType: string, cardId: string): string {
-  return `${deckType}:${cardId}`;
-}
-
 function resolveCatalogCard(
-  entry: Pick<DeckCardEntry, 'type' | 'cardId'>,
+  entry: DeckCardLookup,
   cardIndex: DeckCardIndex,
 ): CatalogCard | undefined {
-  return cardIndex.get(deckIndexKey(entry.type, entry.cardId));
+  return resolveDeckCatalogCard(entry, cardIndex);
 }
 
 function characterStatRow(card: CatalogCard, cardId: string): ActiveCharacter {

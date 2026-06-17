@@ -53,7 +53,7 @@ import {
   IconSave,
   IconPlus,
   IconTrash,
-  IconPlay,
+  IconCards,
 } from '../../components/icons';
 import {
   buildKoDimmingContext,
@@ -61,7 +61,16 @@ import {
   shouldDimDeckCard,
   toggleKoCharacterId,
 } from '../../lib/decks/simulateKo';
+import { canDrawHand, drawRandomHand } from '../../lib/decks/drawHand';
+import {
+  buildDeckCardIndex,
+  catalogSlugForDeckType,
+  deckCardDisplayName,
+  normalizeDeckCardType,
+  resolveDeckCatalogCard,
+} from '../../lib/decks/deckCardCatalog';
 import { AddCardsPanel } from './AddCardsPanel';
+import { DrawHandPanel } from './DrawHandPanel';
 import { KoToggleButton } from './KoToggleButton';
 import { ReserveCharacterButton } from './ReserveCharacterButton';
 import type {
@@ -72,11 +81,6 @@ import type {
 } from '../../lib/api/types';
 import type { StackCardEntry } from '../../lib/catalog/characterStacks';
 import './DeckEditorPage.css';
-
-/** Deck card types are stored hyphen/underscore-keyed; map them to catalog slugs. */
-const CATALOG_SLUG_BY_DECK_TYPE = new Map<string, CatalogType>(
-  CATALOG_TYPES.map((m) => [m.deckType, m.type]),
-);
 
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   if (!catalogType) return 'deck-editor__card-img--portrait';
@@ -179,6 +183,8 @@ export default function DeckEditorPage() {
   const [validity, setValidity] = useState<{ valid: boolean; message?: string } | null>(null);
   const [reserveCharacterId, setReserveCharacterId] = useState<string | null>(null);
   const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
+  const [drawHandOpen, setDrawHandOpen] = useState(false);
+  const [drawnCards, setDrawnCards] = useState<DeckCardEntry[]>([]);
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
   const canSimulateKo = Boolean(user);
@@ -186,6 +192,8 @@ export default function DeckEditorPage() {
   useEffect(() => {
     loadedRef.current = false;
     setKoCharacterIds(new Set());
+    setDrawHandOpen(false);
+    setDrawnCards([]);
   }, [deckId]);
 
   useEffect(() => {
@@ -217,12 +225,12 @@ export default function DeckEditorPage() {
   // image. Resolve those from the catalog (by deck card type → catalog slug) so
   // the editor shows real card art rather than "No image" placeholders.
   const deckCatalogTypes = useMemo(
-    () => Array.from(new Set(cards.map((c) => c.type))),
+    () => Array.from(new Set(cards.map((c) => normalizeDeckCardType(c.type)))),
     [cards],
   );
   const catalogQueries = useQueries({
     queries: deckCatalogTypes.map((deckType) => {
-      const slug = CATALOG_SLUG_BY_DECK_TYPE.get(deckType);
+      const slug = catalogSlugForDeckType(deckType);
       return {
         queryKey: ['catalog', slug ?? deckType],
         queryFn: () => fetchCatalog(slug as CatalogType),
@@ -231,14 +239,10 @@ export default function DeckEditorPage() {
       };
     }),
   });
-  const cardIndex = useMemo(() => {
-    const index = new Map<string, CatalogCard>();
-    catalogQueries.forEach((q, i) => {
-      const deckType = deckCatalogTypes[i];
-      (q.data ?? []).forEach((card) => index.set(`${deckType}:${card.id}`, card));
-    });
-    return index;
-  }, [catalogQueries, deckCatalogTypes]);
+  const cardIndex = useMemo(
+    () => buildDeckCardIndex(deckCatalogTypes, catalogQueries.map((q) => q.data)),
+    [catalogQueries, deckCatalogTypes],
+  );
 
   const foilMapQuery = useQuery({
     queryKey: ['foil-card-map'],
@@ -269,7 +273,7 @@ export default function DeckEditorPage() {
     const map = new Map<CatalogType, CatalogCard[]>();
     catalogQueries.forEach((q, i) => {
       const deckType = deckCatalogTypes[i];
-      const slug = CATALOG_SLUG_BY_DECK_TYPE.get(deckType);
+      const slug = catalogSlugForDeckType(deckType);
       if (slug) map.set(slug, q.data ?? []);
     });
     return map;
@@ -284,6 +288,20 @@ export default function DeckEditorPage() {
         : null,
     [cards, cardIndex, koCharacterIds],
   );
+
+  const drawHandKoCtx = useMemo(
+    () => buildKoDimmingContext(cards, cardIndex, koCharacterIds),
+    [cards, cardIndex, koCharacterIds],
+  );
+
+  const canDraw = useMemo(() => canDrawHand(cards), [cards]);
+
+  useEffect(() => {
+    if (!canDraw && drawHandOpen) {
+      setDrawHandOpen(false);
+      setDrawnCards([]);
+    }
+  }, [canDraw, drawHandOpen]);
 
   const maxStats = useMemo(() => {
     if (koCtx) {
@@ -375,6 +393,33 @@ export default function DeckEditorPage() {
     instanceId: string,
   ) => {
     setSelected({ card: catalogCard, type: catalogType, instanceId });
+  };
+
+  const closeDrawHand = () => {
+    setDrawHandOpen(false);
+    setDrawnCards([]);
+  };
+
+  const handleDrawHandToggle = () => {
+    if (drawHandOpen) {
+      closeDrawHand();
+      return;
+    }
+    setDrawnCards(drawRandomHand(cards));
+    setDrawHandOpen(true);
+  };
+
+  const handleDrawHandRedraw = () => {
+    setDrawnCards(drawRandomHand(cards));
+  };
+
+  const handleDrawHandReorder = (fromIndex: number, toIndex: number) => {
+    setDrawnCards((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
   };
 
   const selectedDeckEntry = useMemo(() => {
@@ -584,8 +629,18 @@ export default function DeckEditorPage() {
             <DeckStatsPanel maxStats={maxStats} iconTotals={iconTotals} />
 
             <div className="deck-editor__actions">
-              <button type="button" className="btn btn-ghost" disabled title="Playtest is coming soon">
-                <IconPlay /> Playtest
+              <button
+                type="button"
+                className={`btn btn-ghost${drawHandOpen ? ' is-active' : ''}`}
+                disabled={!canDraw}
+                title={
+                  canDraw
+                    ? 'Draw a random 8-card hand'
+                    : 'Deck must contain at least 8 playable cards.'
+                }
+                onClick={handleDrawHandToggle}
+              >
+                <IconCards /> Draw Hand
               </button>
               {isOwner ? (
                 <>
@@ -604,7 +659,7 @@ export default function DeckEditorPage() {
           </div>
         </header>
 
-        {/* Card list */}
+        {/* Card list + draw hand overlay */}
         <div className="deck-editor__content">
           {cards.length === 0 ? (
             <EmptyState
@@ -632,14 +687,13 @@ export default function DeckEditorPage() {
                   }`}
                 >
                   {entries.map((entry) => {
-                    const catalogCard = cardIndex.get(`${entry.type}:${entry.cardId}`);
+                    const catalogCard = resolveDeckCatalogCard(entry, cardIndex);
                     const imagePath =
                       entry.defaultImage ||
                       (catalogCard?.image_path as string | undefined) ||
                       (catalogCard?.image as string | undefined);
-                    const cardName =
-                      entry.name || (catalogCard ? cardDisplayName(catalogCard) : 'Card');
-                    const catalogType = CATALOG_SLUG_BY_DECK_TYPE.get(entry.type);
+                    const cardName = deckCardDisplayName(entry, cardIndex);
+                    const catalogType = catalogSlugForDeckType(entry.type);
                     const canOpenDetail = Boolean(catalogCard && catalogType);
                     const isCardSelected =
                       canOpenDetail &&
@@ -741,6 +795,17 @@ export default function DeckEditorPage() {
               </section>
             ))
           )}
+
+          <DrawHandPanel
+            open={drawHandOpen}
+            drawnCards={drawnCards}
+            cardIndex={cardIndex}
+            koCtx={drawHandKoCtx}
+            onRedraw={handleDrawHandRedraw}
+            onClose={closeDrawHand}
+            onReorder={handleDrawHandReorder}
+            onCardClick={selectDeckCard}
+          />
         </div>
       </div>
 

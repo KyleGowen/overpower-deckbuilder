@@ -49,7 +49,7 @@ Dimming **rules** are the same in both stacks; UI surfaces and a few presentatio
 | KO button placement | View-mode-specific | Character tile footer before trash | See UX sections below |
 | Card dimming visual | Whole card: `opacity 0.375`, `grayscale(0.4)` | Art only: `grayscale(0.7) brightness(0.55)` | **V2 UX** — footer stays readable |
 | Stats panel Character max | Ignores KO state | Recalculates from active characters when any KO set | **V2 enhancement** |
-| Draw Hand + KO | Integrated | Deferred until Playtest | Wire `shouldDimDeckCard` when pane ships |
+| Draw Hand + KO | Integrated | Integrated in [`DrawHandPanel.tsx`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) | Uses `shouldDimDeckCard`; dimming-only refresh on KO toggle |
 | Mobile entry | `deck-editor-mobile-view.js` ⋯ menu | Same `KoToggleButton` in tile footer | See v2 UX + `DeckEditorPage.md` |
 
 There is **no HTTP API** for KO — state never leaves the browser.
@@ -67,7 +67,7 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 - **Layout**: Single grouped tile grid by catalog type (no separate Card View or List View modes).
 - **Dimming**: Affected cards get `.deck-editor__card--ko-dimmed` on **art only** (`.deck-editor__card-media` filter); footer controls stay full contrast.
 - **Stats header**: **Character max** row uses active (non-KO) characters when `koCharacterIds.size > 0` via `calculateActiveTeamStats`. **Icon totals** stay deck-wide.
-- **Draw Hand**: Not implemented. Playtest is a placeholder; call `shouldDimDeckCard` from `simulateKo.ts` when that pane ships.
+- **Draw Hand**: [`DrawHandPanel`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) replaces the deck grid when open; logic in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts). KO-affected drawn cards use art-only dimming via `shouldDimDeckCard` (re-renders on KO toggle without re-drawing).
 - **Mobile**: Same tile-footer `KoToggleButton` (not the legacy DEV overflow ⋯ menu — see [DECK_EDITOR_MOBILE_VIEW.md](DECK_EDITOR_MOBILE_VIEW.md) for v1 only).
 
 Full v2 feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md).
@@ -125,7 +125,7 @@ Character rows in the mobile deck editor overflow **⋯** menu expose KO / Un-KO
 
 Pure TypeScript port of the dimming rules (no `window` globals). React state (`koCharacterIds: Set<string>`) lives in [`DeckEditorPage.tsx`](../../../frontend/src/features/deck-editor/DeckEditorPage.tsx). UI: [`KoToggleButton.tsx`](../../../frontend/src/features/deck-editor/KoToggleButton.tsx). Unit tests: `tests/unit/simulate-ko.test.ts`.
 
-Draw Hand integration in v2 is deferred until Playtest ships; call `shouldDimDeckCard` from the same module when that pane exists.
+Draw Hand integration in v2: [`DrawHandPanel.tsx`](../../../frontend/src/features/deck-editor/DrawHandPanel.tsx) + [`drawHand.ts`](../../../frontend/src/lib/decks/drawHand.ts). Unit tests: `tests/unit/draw-hand-v2.test.ts`.
 
 ### v1 legacy module
 

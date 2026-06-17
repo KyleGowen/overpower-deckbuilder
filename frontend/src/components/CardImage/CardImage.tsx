@@ -35,6 +35,8 @@ interface CardImageProps {
   style?: CSSProperties;
   /** Native loading hint; defaults to lazy for perf. */
   loading?: 'lazy' | 'eager';
+  /** Fired when thumb + full-res both fail (single-layer mode only). */
+  onImageFailed?: () => void;
 }
 
 function catalogTypeSupportsProgressiveThumb(type?: CatalogType): boolean {
@@ -79,6 +81,7 @@ export function CardImage({
   className = '',
   style,
   loading = 'lazy',
+  onImageFailed,
 }: CardImageProps) {
   const useProgressive =
     progressive && canProgressiveLoad(imagePath, catalogType) && !shouldSkipFullResUpgrade();
@@ -107,6 +110,7 @@ export function CardImage({
       className={className}
       style={style}
       loading={loading}
+      onImageFailed={onImageFailed}
     />
   );
 }
@@ -119,6 +123,7 @@ function SingleLayerCardImage({
   className,
   style,
   loading,
+  onImageFailed,
 }: {
   imagePath?: string | null;
   catalogType?: CatalogType;
@@ -127,15 +132,24 @@ function SingleLayerCardImage({
   className: string;
   style?: CSSProperties;
   loading: 'lazy' | 'eager';
+  onImageFailed?: () => void;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [thumbFailed, setThumbFailed] = useState(false);
 
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+    setThumbFailed(false);
+  }, [imagePath, catalogType, useThumbnail]);
+
+  const useFullRes = !useThumbnail || thumbFailed;
   const src = failed
     ? placeholderImageUrl()
-    : useThumbnail
-      ? resolveThumbUrl(imagePath, catalogType)
-      : resolveImageUrl(imagePath, catalogType);
+    : useFullRes
+      ? resolveImageUrl(imagePath, catalogType)
+      : resolveThumbUrl(imagePath, catalogType);
 
   return (
     <span className={`card-image ${loaded ? 'card-image--loaded' : 'card-image--loading'} ${className}`} style={style}>
@@ -147,9 +161,15 @@ function SingleLayerCardImage({
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => {
+          if (useThumbnail && !thumbFailed) {
+            setThumbFailed(true);
+            setLoaded(false);
+            return;
+          }
           if (!failed) {
             setFailed(true);
             setLoaded(true);
+            onImageFailed?.();
           }
         }}
         draggable={false}

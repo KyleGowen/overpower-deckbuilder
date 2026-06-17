@@ -9,7 +9,9 @@ interface SlideOutPanelProps {
   children: ReactNode;
   footer?: ReactNode;
   /** Which edge the panel slides from. */
-  side?: 'right' | 'bottom';
+  side?: 'right' | 'bottom' | 'top';
+  /** Viewport-fixed (default) or positioned within a relative ancestor. */
+  position?: 'fixed' | 'absolute';
   /** Width for the right variant. */
   width?: number;
   className?: string;
@@ -29,6 +31,7 @@ export function SlideOutPanel({
   children,
   footer,
   side = 'right',
+  position = 'fixed',
   width = 380,
   className = '',
   ariaLabel,
@@ -59,7 +62,10 @@ export function SlideOutPanel({
   if (!open) return null;
 
   return (
-    <div className="slideout" role="presentation">
+    <div
+      className={`slideout${position === 'absolute' ? ' slideout--absolute' : ''}`}
+      role="presentation"
+    >
       <div className="slideout__backdrop" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}

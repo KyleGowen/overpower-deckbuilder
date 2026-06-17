@@ -4,6 +4,10 @@
   z-index: var(--z-modal);
 }
 
+.slideout--absolute {
+  position: absolute;
+}
+
 .slideout__backdrop {
   position: absolute;
   inset: 0;
@@ -40,6 +44,17 @@
   max-height: 85vh;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   animation: slideout-in-bottom var(--dur-med) var(--ease-out);
+}
+
+.slideout__panel--top {
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  height: auto;
+  border-top: none;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  animation: slideout-in-top var(--dur-med) var(--ease-out);
 }
 
 .slideout__header {
@@ -98,6 +113,10 @@
 }
 @keyframes slideout-in-bottom {
   from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes slideout-in-top {
+  from { transform: translateY(-100%); }
   to { transform: translateY(0); }
 }
 
