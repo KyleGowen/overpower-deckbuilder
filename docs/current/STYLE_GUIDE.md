@@ -2985,25 +2985,34 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
 
 ## Deck Editor stats strip (v2 SPA)
 
-The v2 deck editor (`DeckEditorPage.tsx`) shows **two labeled metadata rows** inside the sticky page header — **Character max** and **Icon totals** — each with four inline icon + value groups. Values use toned stat colors; icons are lightly desaturated so card art below remains the visual focus.
+The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon totals** inline in the sticky page header — each with four icon + value groups. Values use toned stat colors; icons are lightly desaturated so card art below remains the visual focus.
 
 ### Sticky header — `.deck-editor__header`
 
-- Wraps `.deck-editor__topbar` (actions row) and `.deck-editor__stats-panel` (stats rows) as one sticky unit
-- `position: sticky; top: 0; z-index: var(--z-sticky)`
+- Wraps a single `.deck-editor__topbar` row (leading cluster, centered stats, trailing actions)
+- `flex-shrink: 0; z-index: var(--z-sticky)`
 - `background: rgba(8, 13, 24, 0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--color-border)`
 - Card list (`.deck-editor__content`) scrolls beneath; header stays visible while browsing deck sections
 
+### Topbar — `.deck-editor__topbar` (three-zone grid)
+
+- `display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; gap: var(--space-4)`
+- **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta chips (card count, threat, legality badge)
+- **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center`
+- **Trailing** (`.deck-editor__actions`): Playtest, Add Cards, Save — `justify-self: end`
+- Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
+- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`), actions full-width (`order: 6`)
+
 ### Container — `.deck-editor__stats-panel`
 
-- `display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--space-4)`
-- `padding: var(--space-2) var(--space-5) var(--space-3); border-top: 1px solid var(--color-border)` (separator from topbar row inside header)
+- `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-3); padding: 0`
+- No `border-top` — stats live in the center column of the topbar, not a separate row
 - Two blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): blocks stack full-width with `border-top` between them
+- Mobile (`.layout-mobile`): `flex: 1 1 100%; justify-content: flex-start`; blocks stack full-width with `border-top` between them
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
-- Row layout: label column (`flex: 0 0 6.5rem`) + values row
+- Row layout: label + values row; `flex: 0 0 auto` (compact, does not stretch)
 - Label: `10px`, uppercase, `letter-spacing: 0.05em`, `var(--color-text-dim)` — **Character max** and **Icon totals**
 - `aria-label` on each block matches the row meaning
 
@@ -3067,7 +3076,8 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 
 - Portrait types (power, special, missions, universe, etc.): **`object-fit: contain`** — thumbnails are normalized to `350×490` (`PRESET_PORTRAIT`) so every card reads at the same scale; `cover` cropped power art unevenly.
 - **Characters**: thumbnail + **`object-fit: cover`** (`center top`) for edge-to-edge fill in the `380:280` frame.
-- **Locations / events**: **full-res** (not thumb — contain-generated thumbs letterbox) + **`object-fit: cover`** (`center center`) in the `236:151` frame so art fills tile width like characters (slight vertical crop vs side gutters).
+- **Locations**: full-res + **`object-fit: cover`** in a **`502 / 359`** frame (~5020×3590 art) — fills width/height with no letterbox; less crop than the old `236 / 151` frame.
+- **Events**: full-res + **`object-fit: cover`** in the `236 / 151` frame.
 - `catalogType` is passed to `CardImage` for correct thumbnail URLs.
 
 ### Per-card controls — `.deck-editor__card-footer`

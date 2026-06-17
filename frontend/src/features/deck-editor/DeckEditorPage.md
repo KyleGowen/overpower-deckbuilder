@@ -6,12 +6,12 @@ are read-only automatically).
 
 ## Layout
 - **Left rail**: quick nav (Home, Decks, Collection).
-- **Sticky page header** (`.deck-editor__header`): stays pinned while the card list scrolls. Contains:
-  - **Top bar row** (`.deck-editor__topbar`): back button, editable deck name, card count + threat + legality badge, and
-    actions — Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean,
-    "Saving…" while in flight).
-  - **Stats rows** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`). Each row has a small uppercase label on the left and four inline icon + value groups in stat color.
-- **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters use landscape `380:280` with thumbnail + cover; locations/events use `236:151` with **full-res** + cover (no thumb letterbox); all other types use portrait `5:7` with thumb + contain. Landscape sections use fixed **`285px`** columns (`repeat(auto-fill, 285px)`); portrait groups use `minmax(210px, 1fr)`.
+- **Sticky page header** (`.deck-editor__header`): stays pinned while the card list scrolls. Single **topbar row** (`.deck-editor__topbar`) with three zones:
+  - **Leading** (`.deck-editor__topbar-leading`): back button, editable deck name, card count + threat + legality badge
+  - **Center** (`.deck-editor__stats-panel`): **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`) — each with a small uppercase label and four inline icon + value groups in stat color
+  - **Trailing** (`.deck-editor__actions`): Playtest (placeholder), **Add Cards**, and **Save** (shows "Saved" when clean, "Saving…" while in flight)
+  - Mobile: stats wrap to a second line within the same header; actions full-width below
+- **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters use landscape `380:280` with thumbnail + cover; locations use **`502:359`** with full-res + cover; events use `236:151` with full-res + cover; all other types use portrait `5:7` with thumb + contain. Landscape sections use fixed **`285px`** columns (`repeat(auto-fill, 285px)`); portrait groups use `minmax(210px, 1fr)`.
 - **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Controls below the image do not open the panel. Works for owners and read-only visitors.
 - **Per-card controls** (owners only): in `.deck-editor__card-footer` below the image, **right-aligned** — no tile name (name is on the card art). Card image is **full-bleed** to the tile edges above the footer (`padding: 0` on `.deck-editor__card`). **Characters, locations, missions** — trash only (`.deck-editor__card-remove`). **All other types** — `QuantityStepper` only; decrement to `0` removes the row. OPD catalog cards use stepper `max=1`. Read-only visitors see image only. Logic: [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts).
 
