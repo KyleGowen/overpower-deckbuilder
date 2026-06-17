@@ -117,6 +117,8 @@ export interface DeckCardEntry {
   type: DeckCardType;
   cardId: string;
   quantity: number;
+  /** Client-only deck-editor tile id (one tile per instance; not sent to API). */
+  instanceId?: string;
   exclude_from_draw?: boolean;
   name?: string;
   defaultImage?: string;

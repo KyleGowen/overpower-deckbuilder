@@ -19,9 +19,12 @@ import {
   reserveSlotVisible,
 } from '../../lib/decks/reserveCharacter';
 import {
-  deckCardQuantityMax,
-  deckCardUsesTrashOnlyRemoval,
-} from '../../lib/decks/deckCardControls';
+  aggregateInstancesForSave,
+  expandDeckToInstances,
+  removeInstance,
+  createInstanceId,
+} from '../../lib/decks/deckInstances';
+import { collectPrintingsForCard } from '../../lib/catalog/cardPrintings';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
@@ -39,7 +42,6 @@ import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/set
 import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
 import { CardImage } from '../../components/CardImage';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
-import { QuantityStepper } from '../../components/QuantityStepper';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { Logo } from '../../components/Logo';
@@ -169,7 +171,11 @@ export default function DeckEditorPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [selected, setSelected] = useState<{ card: CatalogCard; type: CatalogType } | null>(null);
+  const [selected, setSelected] = useState<{
+    card: CatalogCard;
+    type: CatalogType;
+    instanceId: string;
+  } | null>(null);
   const [validity, setValidity] = useState<{ valid: boolean; message?: string } | null>(null);
   const [reserveCharacterId, setReserveCharacterId] = useState<string | null>(null);
   const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
@@ -184,7 +190,7 @@ export default function DeckEditorPage() {
 
   useEffect(() => {
     if (deck && !loadedRef.current) {
-      setCards(deck.cards ?? []);
+      setCards(expandDeckToInstances(deck.cards ?? []));
       setName(deck.metadata.name);
       const loadedReserve = deck.metadata.reserve_character ?? null;
       setReserveCharacterId(loadedReserve);
@@ -259,7 +265,17 @@ export default function DeckEditorPage() {
     staleTime: 30 * 60 * 1000,
   });
 
-  const totalCards = cards.reduce((s, c) => s + c.quantity, 0);
+  const catalogBySlug = useMemo(() => {
+    const map = new Map<CatalogType, CatalogCard[]>();
+    catalogQueries.forEach((q, i) => {
+      const deckType = deckCatalogTypes[i];
+      const slug = CATALOG_SLUG_BY_DECK_TYPE.get(deckType);
+      if (slug) map.set(slug, q.data ?? []);
+    });
+    return map;
+  }, [catalogQueries, deckCatalogTypes]);
+
+  const totalCards = cards.length;
 
   const koCtx = useMemo(
     () =>
@@ -322,24 +338,24 @@ export default function DeckEditorPage() {
     );
   }, [cards]);
 
-  const setQuantity = (type: DeckCardType, cardId: string, qty: number) => {
-    if (type === 'character' && qty === 0 && reserveCharacterId === cardId) {
+  const removeDeckInstance = (instanceId: string) => {
+    const entry = cards.find((c) => c.instanceId === instanceId);
+    if (!entry) return;
+    if (entry.type === 'character' && reserveCharacterId === entry.cardId) {
       setReserveCharacterId(null);
     }
-    if (type === 'character' && qty === 0) {
+    if (entry.type === 'character') {
       setKoCharacterIds((prev) => {
-        if (!prev.has(cardId)) return prev;
+        if (!prev.has(entry.cardId)) return prev;
         const next = new Set(prev);
-        next.delete(cardId);
+        next.delete(entry.cardId);
         return next;
       });
     }
-    setCards((prev) => {
-      const next = prev
-        .map((c) => (c.type === type && c.cardId === cardId ? { ...c, quantity: qty } : c))
-        .filter((c) => c.quantity > 0);
-      return next;
-    });
+    setCards((prev) => removeInstance(prev, instanceId));
+    if (selected?.instanceId === instanceId) {
+      setSelected(null);
+    }
     setDirty(true);
   };
 
@@ -353,36 +369,76 @@ export default function DeckEditorPage() {
     setDirty(true);
   };
 
-  const selectDeckCard = (catalogCard: CatalogCard, catalogType: CatalogType) => {
-    setSelected({ card: catalogCard, type: catalogType });
+  const selectDeckCard = (
+    catalogCard: CatalogCard,
+    catalogType: CatalogType,
+    instanceId: string,
+  ) => {
+    setSelected({ card: catalogCard, type: catalogType, instanceId });
   };
 
   const selectedDeckEntry = useMemo(() => {
     if (!selected) return null;
-    const deckType = CATALOG_TYPE_BY_SLUG[selected.type].deckType;
-    return cards.find((c) => c.type === deckType && c.cardId === selected.card.id) ?? null;
+    return cards.find((c) => c.instanceId === selected.instanceId) ?? null;
   }, [selected, cards]);
+
+  const printingRows = useMemo(() => {
+    if (!selected || !isOwner) return undefined;
+    const allCards = catalogBySlug.get(selected.type) ?? [];
+    const printings = collectPrintingsForCard(
+      selected.card,
+      selected.type,
+      allCards,
+      foilLookup,
+      (set) => resolveSetDisplayName(set, setNameLookup) ?? String(set ?? ''),
+    );
+    if (printings.length <= 1) return undefined;
+    const currentId = selectedDeckEntry?.cardId ?? selected.card.id;
+    return printings.map((printing) => ({
+      card: printing,
+      setDisplayName: resolveSetDisplayName(printing.set, setNameLookup) ?? String(printing.set ?? ''),
+      setNumber: printing.set_number ? String(printing.set_number) : null,
+      isCurrent: printing.id === currentId,
+    }));
+  }, [selected, isOwner, catalogBySlug, foilLookup, setNameLookup, selectedDeckEntry]);
+
+  const applyPrinting = (printingId: string) => {
+    if (!selected?.instanceId || !isOwner) return;
+    const deckType = CATALOG_TYPE_BY_SLUG[selected.type].deckType;
+    const targetCard = cardIndex.get(`${deckType}:${printingId}`);
+    if (!targetCard) return;
+
+    setCards((prev) =>
+      prev.map((c) =>
+        c.instanceId === selected.instanceId
+          ? {
+              ...c,
+              cardId: printingId,
+              defaultImage: (targetCard.image_path as string) || (targetCard.image as string),
+              is_foil: isFoilCard(targetCard),
+              name: cardDisplayName(targetCard),
+            }
+          : c,
+      ),
+    );
+    setSelected((prev) => (prev ? { ...prev, card: targetCard } : null));
+    setDirty(true);
+  };
 
   const addCard = (card: CatalogCard, type: CatalogType) => {
     const deckType = CATALOG_TYPE_BY_SLUG[type].deckType;
-    setCards((prev) => {
-      const existing = prev.find((c) => c.type === deckType && c.cardId === card.id);
-      if (existing) {
-        return prev.map((c) =>
-          c === existing ? { ...c, quantity: c.quantity + 1 } : c,
-        );
-      }
-      return [
-        ...prev,
-        {
-          type: deckType,
-          cardId: card.id,
-          quantity: 1,
-          name: cardDisplayName(card),
-          defaultImage: (card.image_path as string) || (card.image as string),
-        },
-      ];
-    });
+    setCards((prev) => [
+      ...prev,
+      {
+        type: deckType,
+        cardId: card.id,
+        quantity: 1,
+        instanceId: createInstanceId(),
+        name: cardDisplayName(card),
+        defaultImage: (card.image_path as string) || (card.image as string),
+        is_foil: isFoilCard(card),
+      },
+    ]);
     setDirty(true);
   };
 
@@ -392,18 +448,16 @@ export default function DeckEditorPage() {
       let next = [...prev];
       for (const { card, catalogType } of entries) {
         const deckType = CATALOG_TYPE_BY_SLUG[catalogType].deckType;
-        const existing = next.find((c) => c.type === deckType && c.cardId === card.id);
-        if (existing) {
-          continue;
-        }
         next = [
           ...next,
           {
             type: deckType,
             cardId: card.id,
             quantity: 1,
+            instanceId: createInstanceId(),
             name: cardDisplayName(card),
             defaultImage: (card.image_path as string) || (card.image as string),
+            is_foil: isFoilCard(card),
           },
         ];
       }
@@ -429,7 +483,7 @@ export default function DeckEditorPage() {
         savedReserveRef.current = reserveCharacterId;
         queryClient.setQueryData(['deck', deckId], updated);
       }
-      const payload: DeckCardInput[] = cards.map((c) => ({
+      const payload: DeckCardInput[] = aggregateInstancesForSave(cards).map((c) => ({
         cardType: c.type,
         cardId: c.cardId,
         quantity: c.quantity,
@@ -572,7 +626,7 @@ export default function DeckEditorPage() {
               <section className="deck-editor__group" key={meta.type}>
                 <h2 className="deck-editor__group-title">
                   {meta.label}
-                  <span className="deck-editor__group-count">{entries.reduce((s, e) => s + e.quantity, 0)}</span>
+                  <span className="deck-editor__group-count">{entries.length}</span>
                 </h2>
                 <div
                   className={`deck-editor__cards${
@@ -591,7 +645,7 @@ export default function DeckEditorPage() {
                     const canOpenDetail = Boolean(catalogCard && catalogType);
                     const isCardSelected =
                       canOpenDetail &&
-                      selected?.card.id === entry.cardId &&
+                      selected?.instanceId === entry.instanceId &&
                       selected?.type === catalogType;
                     const reserveRowState =
                       entry.type === 'character'
@@ -614,14 +668,16 @@ export default function DeckEditorPage() {
                     return (
                     <div
                       className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}`}
-                      key={`${entry.type}:${entry.cardId}`}
+                      key={entry.instanceId ?? `${entry.type}:${entry.cardId}`}
                     >
                       <div className="deck-editor__card-media">
                         <button
                           type="button"
                           className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}${isCardSelected ? ' is-selected' : ''}`}
                           onClick={() => {
-                            if (catalogCard && catalogType) selectDeckCard(catalogCard, catalogType);
+                            if (catalogCard && catalogType && entry.instanceId) {
+                              selectDeckCard(catalogCard, catalogType, entry.instanceId);
+                            }
                           }}
                           disabled={!canOpenDetail}
                           aria-label={canOpenDetail ? `View ${cardName}` : cardName}
@@ -663,27 +719,19 @@ export default function DeckEditorPage() {
                               />
                             ) : null}
                             {isOwner ? (
-                              deckCardUsesTrashOnlyRemoval(entry.type) ? (
-                                <button
-                                  type="button"
-                                  className="deck-editor__card-remove"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setQuantity(entry.type, entry.cardId, 0);
-                                  }}
-                                  aria-label={`Remove ${cardName}`}
-                                >
-                                  <IconTrash />
-                                </button>
-                              ) : (
-                                <QuantityStepper
-                                  size="sm"
-                                  value={entry.quantity}
-                                  min={0}
-                                  max={deckCardQuantityMax(entry.type, catalogCard)}
-                                  onChange={(q) => setQuantity(entry.type, entry.cardId, q)}
-                                />
-                              )
+                              <button
+                                type="button"
+                                className="deck-editor__card-remove"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (entry.instanceId) {
+                                    removeDeckInstance(entry.instanceId);
+                                  }
+                                }}
+                                aria-label={`Remove ${cardName}`}
+                              >
+                                <IconTrash />
+                              </button>
                             ) : null}
                           </div>
                         </div>
@@ -726,6 +774,8 @@ export default function DeckEditorPage() {
             ? Boolean(selectedDeckEntry?.is_foil || isFoilCard(selected.card))
             : undefined
         }
+        printings={printingRows}
+        onApplyPrinting={isOwner ? applyPrinting : undefined}
       />
     </div>
   );

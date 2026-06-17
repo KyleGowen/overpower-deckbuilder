@@ -8,6 +8,13 @@ import './CardDetailPanel.css';
 /** Default slide-out width for catalog card detail (20% wider than the original 420px). */
 export const CARD_DETAIL_PANEL_WIDTH = 504;
 
+interface CardDetailPrintingRow {
+  card: CatalogCard;
+  setDisplayName: string;
+  setNumber: string | null;
+  isCurrent: boolean;
+}
+
 interface CardDetailPanelProps {
   card: CatalogCard | null;
   type: CatalogType | null;
@@ -21,6 +28,9 @@ interface CardDetailPanelProps {
   isFoil?: boolean;
   /** Friendly set name for Details (falls back to `card.set` code when omitted). */
   setDisplayName?: string;
+  /** Deck editor: alternate printings with Apply actions (hidden when length <= 1). */
+  printings?: CardDetailPrintingRow[];
+  onApplyPrinting?: (printingId: string) => void;
 }
 
 /** Internal / non-display fields hidden from the auto-generated field list. */
@@ -72,7 +82,18 @@ const STAT_ROWS: Array<{ key: 'energy' | 'combat' | 'bruteForce' | 'intelligence
   { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
 ];
 
-export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, isFoil, setDisplayName }: CardDetailPanelProps) {
+export function CardDetailPanel({
+  card,
+  type,
+  open,
+  onClose,
+  actions,
+  hasFoil,
+  isFoil,
+  setDisplayName,
+  printings,
+  onApplyPrinting,
+}: CardDetailPanelProps) {
   if (!card) return null;
 
   const name = cardDisplayName(card);
@@ -89,6 +110,8 @@ export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, i
 
   const showDetails = Boolean(card.set) || hasFoil !== undefined || isFoil !== undefined || extraFields.length > 0;
   const setLabel = card.set ? (setDisplayName ?? String(card.set)) : null;
+
+  const showPrintings = Boolean(printings && printings.length > 1);
 
   return (
     <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
@@ -132,6 +155,33 @@ export function CardDetailPanel({ card, type, open, onClose, actions, hasFoil, i
           <section className="card-detail__section">
             <h4 className="card-detail__section-title">Ability</h4>
             <p className="card-detail__text">{ability}</p>
+          </section>
+        ) : null}
+
+        {showPrintings ? (
+          <section className="card-detail__section">
+            <h4 className="card-detail__section-title">Printings</h4>
+            <ul className="card-detail__printings">
+              {printings!.map((row) => {
+                const labelParts = [row.setDisplayName];
+                if (row.setNumber) labelParts.push(`#${row.setNumber}`);
+                const label = labelParts.join(' · ');
+                return (
+                  <li className="card-detail__printing-row" key={row.card.id}>
+                    <span className="card-detail__printing-meta">{label}</span>
+                    <button
+                      type="button"
+                      className={`card-detail__printing-apply${row.isCurrent ? ' card-detail__printing-apply--current' : ''}`}
+                      disabled={row.isCurrent}
+                      aria-disabled={row.isCurrent}
+                      onClick={() => onApplyPrinting?.(row.card.id)}
+                    >
+                      {row.isCurrent ? 'Applied' : 'Apply'}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         ) : null}
 

@@ -1,0 +1,56 @@
+import type { DeckCardEntry } from '../../frontend/src/lib/api/types';
+import {
+  aggregateInstancesForSave,
+  expandDeckToInstances,
+  removeInstance,
+} from '../../frontend/src/lib/decks/deckInstances';
+
+describe('deckInstances', () => {
+  describe('expandDeckToInstances', () => {
+    it('splits quantity > 1 into separate rows with quantity 1', () => {
+      const input: DeckCardEntry[] = [
+        { type: 'power', cardId: 'p1', quantity: 3 },
+      ];
+      const result = expandDeckToInstances(input);
+      expect(result).toHaveLength(3);
+      expect(result.every((r) => r.quantity === 1)).toBe(true);
+      expect(result.every((r) => r.cardId === 'p1')).toBe(true);
+      const ids = new Set(result.map((r) => r.instanceId));
+      expect(ids.size).toBe(3);
+    });
+
+    it('assigns instanceId to single-quantity rows', () => {
+      const input: DeckCardEntry[] = [{ type: 'character', cardId: 'c1', quantity: 1 }];
+      const result = expandDeckToInstances(input);
+      expect(result).toHaveLength(1);
+      expect(result[0].instanceId).toBeTruthy();
+    });
+  });
+
+  describe('aggregateInstancesForSave', () => {
+    it('merges instances by type and cardId summing quantity', () => {
+      const input: DeckCardEntry[] = [
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'a' },
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'b' },
+        { type: 'special', cardId: 's1', quantity: 1, instanceId: 'c' },
+      ];
+      const result = aggregateInstancesForSave(input);
+      expect(result).toHaveLength(2);
+      const power = result.find((r) => r.type === 'power');
+      expect(power?.quantity).toBe(2);
+      expect(power?.instanceId).toBeUndefined();
+    });
+  });
+
+  describe('removeInstance', () => {
+    it('removes only the matching instance', () => {
+      const input: DeckCardEntry[] = [
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'keep' },
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'drop' },
+      ];
+      const result = removeInstance(input, 'drop');
+      expect(result).toHaveLength(1);
+      expect(result[0].instanceId).toBe('keep');
+    });
+  });
+});

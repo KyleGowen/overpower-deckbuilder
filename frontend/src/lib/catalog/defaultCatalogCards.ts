@@ -38,7 +38,8 @@ function compareDefaultRepresentative(a: CatalogCard, b: CatalogCard, catalogTyp
   return 0;
 }
 
-function variantGroupKey(card: CatalogCard, catalogType: CatalogType): string | null {
+/** Logical variant group key for alternate-art / cross-set printings. */
+export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): string | null {
   const name = cardDisplayName(card).trim();
   if (!name) return null;
 

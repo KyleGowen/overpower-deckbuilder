@@ -209,6 +209,20 @@ Each screen has a companion doc in its feature folder:
 | KO active (`.deck-editor__ko-btn.is-active`) | `--color-ko` fill, `--color-text-on-accent` label |
 | KO-dimmed card (`.deck-editor__card--ko-dimmed .deck-editor__card-media`) | `filter: grayscale(0.7) brightness(0.55)` on art only — matches `CardTile` dimming; footer controls stay full contrast |
 
+### Deck Editor — Card detail Printings (owners)
+Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailPanel.tsx) when a deck tile has **more than one** catalog printing. Section sits **above Details** (after Ability/stats).
+
+| Element | Tokens / values |
+|---|---|
+| Section title (`.card-detail__section-title`) | `--font-size-sm`, uppercase, `--color-text-muted` |
+| Row (`.card-detail__printing-row`) | flex space-between; `--space-2` vertical padding; `border-bottom: 1px solid var(--color-border)` |
+| Meta (`.card-detail__printing-meta`) | `--font-size-sm`, `--color-text` — `{friendly set name} · #{set_number}` |
+| Apply (`.card-detail__printing-apply`) | `--color-accent` border/text; `--radius-sm`; hover fills accent |
+| Current / disabled (`.card-detail__printing-apply--current`) | `opacity: 0.45`; `--color-border` border; `--color-text-muted` text; `cursor: not-allowed` |
+
+### Deck Editor — Instance tiles
+Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash (`.deck-editor__card-remove`) on every type; **Save** aggregates instances by `(type, cardId)` for the API.
+
 Architecture, data flow, and serving are documented in
 [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
 

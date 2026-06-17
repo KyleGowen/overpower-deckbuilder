@@ -101,3 +101,56 @@
   text-align: right;
   word-break: break-word;
 }
+
+.card-detail__printings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.card-detail__printing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.card-detail__printing-meta {
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.card-detail__printing-apply {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.card-detail__printing-apply:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+
+.card-detail__printing-apply--current,
+.card-detail__printing-apply:disabled {
+  opacity: 0.45;
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  background: transparent;
+}

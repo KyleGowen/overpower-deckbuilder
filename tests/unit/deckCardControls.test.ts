@@ -7,16 +7,13 @@ import {
 
 describe('deckCardControls', () => {
   describe('deckCardUsesTrashOnlyRemoval', () => {
-    it('returns true for character, location, and mission', () => {
+    it('returns true for all deck types (one tile per instance)', () => {
       expect(deckCardUsesTrashOnlyRemoval('character')).toBe(true);
       expect(deckCardUsesTrashOnlyRemoval('location')).toBe(true);
       expect(deckCardUsesTrashOnlyRemoval('mission')).toBe(true);
-    });
-
-    it('returns false for multi-copy draw-pile types', () => {
-      expect(deckCardUsesTrashOnlyRemoval('power')).toBe(false);
-      expect(deckCardUsesTrashOnlyRemoval('special')).toBe(false);
-      expect(deckCardUsesTrashOnlyRemoval('event')).toBe(false);
+      expect(deckCardUsesTrashOnlyRemoval('power')).toBe(true);
+      expect(deckCardUsesTrashOnlyRemoval('special')).toBe(true);
+      expect(deckCardUsesTrashOnlyRemoval('event')).toBe(true);
     });
   });
 
@@ -29,17 +26,11 @@ describe('deckCardControls', () => {
   });
 
   describe('deckCardQuantityMax', () => {
-    it('caps OPD catalog cards at 1 for stepper types', () => {
+    it('returns 1 for all types (one tile per instance)', () => {
       const opdSpecial = { id: 's1', one_per_deck: true } as CatalogCard;
-      expect(deckCardQuantityMax('special', opdSpecial)).toBe(1);
-    });
-
-    it('allows 99 for non-OPD stepper types', () => {
       const power = { id: 'p1', one_per_deck: false } as CatalogCard;
-      expect(deckCardQuantityMax('power', power)).toBe(99);
-    });
-
-    it('returns 1 for trash-only types regardless of catalog', () => {
+      expect(deckCardQuantityMax('special', opdSpecial)).toBe(1);
+      expect(deckCardQuantityMax('power', power)).toBe(1);
       expect(deckCardQuantityMax('character', { id: 'c1' } as CatalogCard)).toBe(1);
     });
   });
