@@ -69,6 +69,11 @@ function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   return 'deck-editor__card-img--portrait';
 }
 
+/** Location/event thumbs bake contain letterbox; full-res + cover fills the 236:151 frame like characters. */
+function deckEditorUsesThumbnail(catalogType?: CatalogType): boolean {
+  return catalogType !== 'locations' && catalogType !== 'events';
+}
+
 const DECK_STAT_ROWS = [
   { key: 'energy', label: 'Energy', cls: 'stat-energy', iconKey: 'energy' },
   { key: 'combat', label: 'Combat', cls: 'stat-combat', iconKey: 'combat' },
@@ -488,7 +493,6 @@ export default function DeckEditorPage() {
                     const cardName =
                       entry.name || (catalogCard ? cardDisplayName(catalogCard) : 'Card');
                     const catalogType = CATALOG_SLUG_BY_DECK_TYPE.get(entry.type);
-                    const landscape = catalogType ? isLandscapeCatalogType(catalogType) : false;
                     const canOpenDetail = Boolean(catalogCard && catalogType);
                     const isCardSelected =
                       canOpenDetail &&
@@ -511,14 +515,13 @@ export default function DeckEditorPage() {
                             imagePath={imagePath}
                             catalogType={catalogType}
                             alt={cardName}
-                            useThumbnail
-                            className={landscape ? 'card-image--contain' : ''}
+                            useThumbnail={deckEditorUsesThumbnail(catalogType)}
+                            className="card-image--contain"
                           />
-                          {entry.quantity > 1 ? (
-                            <span className="deck-editor__card-qty">x{entry.quantity}</span>
-                          ) : null}
                         </button>
-                        {isOwner ? (
+                      </div>
+                      {isOwner ? (
+                        <div className="deck-editor__card-footer">
                           <div className="deck-editor__card-controls">
                             {deckCardUsesTrashOnlyRemoval(entry.type) ? (
                               <button
@@ -542,9 +545,8 @@ export default function DeckEditorPage() {
                               />
                             )}
                           </div>
-                        ) : null}
-                      </div>
-                      <div className="deck-editor__card-name" title={cardName}>{cardName}</div>
+                        </div>
+                      ) : null}
                     </div>
                     );
                   })}

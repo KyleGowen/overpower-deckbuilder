@@ -233,55 +233,64 @@
 }
 .deck-editor__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: var(--space-4);
+  align-items: start;
 }
 .deck-editor__cards--landscape {
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  /* Fixed column width — do not use 1fr or sparse rows (e.g. one location) stretch full width */
+  grid-template-columns: repeat(auto-fill, 285px);
+  justify-content: start;
 }
 .deck-editor__card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0;
   background: var(--color-bg-panel);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-2);
+  padding: 0;
+  overflow: hidden;
 }
 .deck-editor__card-media {
-  position: relative;
+  width: 100%;
+  min-width: 0;
 }
 .deck-editor__card-img {
   position: relative;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   overflow: hidden;
   display: block;
   width: 100%;
   padding: 0;
   margin: 0;
-  border: 2px solid transparent;
+  border: none;
   background: none;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow 0.15s ease;
 }
 .deck-editor__card-img:hover:not(:disabled) {
-  border-color: var(--color-border-accent);
-  box-shadow: 0 0 0 1px var(--color-border-accent);
+  box-shadow: inset 0 0 0 2px var(--color-border-accent);
 }
 .deck-editor__card-img:focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 .deck-editor__card-img:disabled {
   cursor: default;
 }
 .deck-editor__card-img.is-selected {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
 }
 .deck-editor__card-img--portrait {
   aspect-ratio: 5 / 7;
+}
+.deck-editor__card-img--portrait .card-image__img,
+.deck-editor__card-img--portrait .card-image--contain .card-image__img {
+  object-fit: contain;
+  object-position: center center;
 }
 .deck-editor__card-img--characters {
   aspect-ratio: 380 / 280;
@@ -290,35 +299,39 @@
 .deck-editor__card-img--events {
   aspect-ratio: 236 / 151;
 }
-.deck-editor__card-qty {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
-  background: var(--color-bg-scrim);
-  border: 1px solid var(--color-border-accent);
-  color: var(--color-accent-bright);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  border-radius: var(--radius-full);
-  padding: 1px 8px;
+/* Fill the frame edge-to-edge; contain letterboxing is too heavy in deck tiles. */
+.deck-editor__card-img .card-image {
+  background: var(--color-bg-elevated);
 }
-.deck-editor__card-name {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.deck-editor__card-img--characters .card-image__img,
+.deck-editor__card-img--characters.card-image--contain .card-image__img {
+  object-fit: cover;
+  object-position: center top;
 }
-.deck-editor__card-controls {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  z-index: 2;
+.deck-editor__card-img--locations .card-image__img,
+.deck-editor__card-img--locations .card-image--contain .card-image__img {
+  object-fit: contain;
+  object-position: center center;
+}
+.deck-editor__card-img--events .card-image__img,
+.deck-editor__card-img--events .card-image--contain .card-image__img {
+  object-fit: cover;
+  object-position: center center;
+}
+.deck-editor__card-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
+  flex-shrink: 0;
+}
+.deck-editor__card-controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--space-1);
-  pointer-events: auto;
 }
 .deck-editor__card-remove {
   width: 26px;
@@ -696,8 +709,9 @@
   padding: var(--space-2) var(--space-3) var(--space-16);
 }
 .layout-mobile .deck-editor__cards {
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
 }
 .layout-mobile .deck-editor__cards--landscape {
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, 225px);
+  justify-content: start;
 }

@@ -3034,21 +3034,21 @@ The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type
 
 ### Grid — `.deck-editor__cards`
 
-- Default (portrait type groups): `grid-template-columns: repeat(auto-fill, minmax(140px, 1fr))`
-- Landscape type groups (`.deck-editor__cards--landscape`): `minmax(190px, 1fr)` — wider cells for horizontal art
-- Mobile (`.layout-mobile`): portrait `minmax(110px, 1fr)`; landscape `minmax(150px, 1fr)`
+- Default (portrait type groups): `grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))`
+- Landscape type groups (`.deck-editor__cards--landscape`): `repeat(auto-fill, 285px)` with `justify-content: start` — fixed column width so sparse rows (one location, two events) do not stretch to full section width like character rows
+- Mobile (`.layout-mobile`): portrait `minmax(165px, 1fr)`; landscape `repeat(auto-fill, 225px)` + `justify-content: start`
 
 ### Image frame — `.deck-editor__card-img` + orientation modifiers
 
-Base: `position: relative`, `border-radius: var(--radius-sm)`, `overflow: hidden`. The image frame is a **`<button type="button">`** so clicking opens the read-only `CardDetailPanel` (DBV parity). Disabled while catalog data for that card is still loading.
+Base: `position: relative`, `overflow: hidden`, **no tile inset padding** (image is full-bleed to the card border above the footer). The image frame is a **`<button type="button">`** so clicking opens the read-only `CardDetailPanel` (DBV parity). Disabled while catalog data for that card is still loading.
 
 | State | Style |
 |---|---|
-| Default | `border: 2px solid transparent`, `cursor: pointer` |
-| `:hover:not(:disabled)` | `border-color: var(--color-border-accent)`, subtle `box-shadow` ring |
-| `:focus-visible` | `outline: 2px solid var(--color-accent)`, `outline-offset: 2px` |
-| `.is-selected` | Teal border + ring when that card’s detail panel is open |
-| `:disabled` | `cursor: default` (catalog not resolved yet) |
+| Default | `border: none`, `box-shadow: inset 0 0 0 2px transparent`, `cursor: pointer` |
+| `:hover:not(:disabled)` | `box-shadow: inset 0 0 0 2px var(--color-border-accent)` |
+| `:focus-visible` | `outline: 2px solid var(--color-accent)`, `outline-offset: -2px` |
+| `.is-selected` | Teal inset ring when that card’s detail panel is open |
+| `:disabled` | `cursor: default` |
 
 | Modifier | Types | `aspect-ratio` |
 |---|---|---|
@@ -3059,24 +3059,29 @@ Base: `position: relative`, `border-radius: var(--radius-sm)`, `overflow: hidden
 
 Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via deck card type → catalog slug).
 
-### Image fit — `CardImage`
+### Tile chrome — `.deck-editor__card`
 
-- Landscape types: `className="card-image--contain"` (`object-fit: contain`) so location/event bottom text is not clipped
-- Portrait types: default `object-fit: cover` in a `5:7` frame
-- `catalogType` is passed to `CardImage` for correct thumbnail URLs
+- `padding: 0`, `overflow: hidden` — image flush to top/left/right; only `.deck-editor__card-footer` has `padding: var(--space-1) var(--space-2)` for controls.
 
-### Per-card controls — `.deck-editor__card-controls`
+### Image fit — `CardImage` (deck editor)
 
-Owner-only control on the card image, **lower-left** (`position: absolute; bottom: 6px; left: 6px; z-index: 2`) inside `.deck-editor__card-media` (relative wrapper around image + controls). Card name stays below the media block.
+- Portrait types (power, special, missions, universe, etc.): **`object-fit: contain`** — thumbnails are normalized to `350×490` (`PRESET_PORTRAIT`) so every card reads at the same scale; `cover` cropped power art unevenly.
+- **Characters**: thumbnail + **`object-fit: cover`** (`center top`) for edge-to-edge fill in the `380:280` frame.
+- **Locations / events**: **full-res** (not thumb — contain-generated thumbs letterbox) + **`object-fit: cover`** (`center center`) in the `236:151` frame so art fills tile width like characters (slight vertical crop vs side gutters).
+- `catalogType` is passed to `CardImage` for correct thumbnail URLs.
+
+### Per-card controls — `.deck-editor__card-footer`
+
+Owner-only controls sit in a footer row **below** the card image (no overlays on art, no tile name — the card art shows the name). `.deck-editor__card-footer` is a flex row with `.deck-editor__card-controls` **right-aligned** (`justify-content: flex-end`). Read-only visitors see the image tile only.
 
 | Pattern | Deck types | UI | Removal |
 |---|---|---|---|
-| Trash only | `character`, `location`, `mission` | `.deck-editor__card-remove` (`IconTrash`) on scrim | Click trash |
+| Trash only | `character`, `location`, `mission` | `.deck-editor__card-remove` (`IconTrash`) | Click trash |
 | Stepper only | power, special, events, aspects, universe, etc. | `QuantityStepper` (`min=0`) | Decrement to `0` |
 | OPD stepper cap | stepper types with catalog `one_per_deck` / `is_one_per_deck` | Same stepper, `max=1` (`+` disabled at 1) | Decrement to `0` |
 
-- Trash on image: `background: var(--color-bg-scrim)`, `border: 1px solid var(--color-border)` for contrast on art.
-- Multi-qty badge (`.deck-editor__card-qty`) remains **lower-right** on the image.
+- Trash button: `background: var(--color-bg-scrim)`, `border: 1px solid var(--color-border)`.
+- Quantity is shown only via the stepper (no `xN` badge on the image).
 - Logic: `deckCardUsesTrashOnlyRemoval` / `deckCardQuantityMax` in `frontend/src/lib/decks/deckCardControls.ts`.
 
 ### Add Cards slide-out (`SlideOutPanel`)
