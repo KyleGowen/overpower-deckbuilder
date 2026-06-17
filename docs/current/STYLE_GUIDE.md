@@ -32,7 +32,7 @@
 29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
 31. [Collection view — mobile (`layout-mobile`)](#collection-view--mobile-layout-mobile)
-32. [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile)
+32. [Draw Hand mobile — legacy v1 (`layout-mobile`)](#draw-hand-mobile-legacy-v1-layout-mobile)
 33. [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa)
 34. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
 35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
@@ -43,6 +43,7 @@
 40. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
 41. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
 42. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
+43. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
 
 ## Overview
 
@@ -246,7 +247,9 @@ Full rationale, per-surface map, and deprecation rules: [MOBILE_DESIGN.md §10.8
 - **Hover**: `background: rgba(78, 205, 196, 0.3)`; `border-color: rgba(78, 205, 196, 0.4)`
 - These specs keep Draw Hand and List View visually identical and match the size of Save/Cancel buttons.
 
-### Draw Hand mobile (`layout-mobile`)
+### Draw Hand mobile — legacy v1 (`layout-mobile`)
+
+> **v2 SPA** uses a horizontal snap carousel in [`DrawHandPanel.css`](../../frontend/src/features/deck-editor/DrawHandPanel.css) — see [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa) and [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md). The section below documents **legacy v1** `#deckEditorModal.draw-hand-active` only.
 - **Marker class**: `#deckEditorModal.draw-hand-active` while the draw-hand pane is open ([`draw-hand.js`](/public/js/components/draw-hand.js)). **`.modal-body`** is hidden so the hand uses the modal height; **`#drawHandSection`** is **`display: flex`** (column) with **`flex: 1`** / **`min-height: 0`** ([`deck-editor-mobile.css`](/public/css/deck-editor-mobile.css)).
 - **Header chrome**: On open, the deck editor mobile header is force-collapsed via **`applyDevMobileDeckHeaderCollapsed(true)`**; on close, the previous collapsed/expanded state is restored from a snapshot (not **`localStorage`** alone). **`.draw-hand-header`** is a single row with **`.draw-hand-close`** (×) aligned end. **`.draw-hand-footer`** sits below **`#drawHandContent`** with **`.draw-hand-redraw-btn`** (**Draw again**, **`data-click-handler="redrawDrawHand"`**) centered ([`draw-hand.css`](/public/css/draw-hand.css)).
 - **Vertical fan**: **`#drawHandContent`** is **`flex-direction: column`** with **`flex-wrap: nowrap`** (wrapping would create a second column). **`--draw-hand-card-scale`** starts as **`clientWidth / 132`** so tiles use the full content width (**`width: min(100%, calc(132px * scale))`**), then JS may shrink scale and adjust overlap so the stack fits **`clientHeight`**. Overlap via **`--draw-hand-stack-overlap`** and **`ResizeObserver`**.
@@ -589,7 +592,7 @@ Full rationale, per-surface map, and deprecation rules: [MOBILE_DESIGN.md §10.8
 
 ## Deck Editor Layout Specifications (2025)
 
-See also [Draw Hand mobile (`layout-mobile`)](#draw-hand-mobile-layout-mobile) under **UI Components**.
+See also [Draw Hand mobile — legacy v1 (`layout-mobile`)](#draw-hand-mobile-legacy-v1-layout-mobile) under **UI Components**. v2 Draw Hand: [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa).
 
 ### Modal Header Layout
 - **Container**: `.modal-header` with `display: flex`, `flex-direction: column`
@@ -2999,7 +3002,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - `display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; gap: var(--space-4)`
 - **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta chips (card count, threat, legality badge)
 - **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
-- **Trailing** (`.deck-editor__actions`): Playtest, Add Cards, Save — `justify-self: end`
+- **Trailing** (`.deck-editor__actions`): Draw Hand, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
 - Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`), actions full-width (`order: 6`)
 
@@ -3219,4 +3222,51 @@ The **Add Cards** slideout (`AddCardsPanel.tsx`) includes a horizontal filter ba
 - Component: `frontend/src/features/deck-editor/AddCardsFilterBar.tsx`
 - Adapter: `frontend/src/features/deck-editor/addCardsFilters.ts`
 - CSS: `frontend/src/features/deck-editor/DeckEditorPage.css` (`.add-cards__filters*`)
+
+## Deck Editor Draw Hand (v2 SPA)
+
+Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx)). Full behavior spec: [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md). Reuses deck-editor tile classes (`.deck-editor__card`, `.deck-editor__card-img--portrait`).
+
+### Trigger — `.deck-editor__actions`
+
+- **Draw Hand** ghost button (`IconCards`); `.is-active` when panel open — accent border/background (see `DeckEditorPage.css`).
+- Disabled when playable count &lt; 8.
+
+### Overlay — `.draw-hand-slideout`
+
+- `SlideOutPanel`: `side="top"`, `position="absolute"` — deck grid remains visible behind blurred scrim.
+- Panel `max-height`: **70vh** desktop; **55vh** under `.layout-mobile`.
+
+### Row — `.draw-hand__row` / `.draw-hand__row-inner`
+
+- Desktop: flex row, centered; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when 8–9 cards overflow width.
+- Mobile: horizontal scroll, `scroll-snap-type: x mandatory`; **no** scale transform (`transform: none !important`).
+
+### Slot — `.draw-hand__slot`
+
+- Fixed width: `var(--deck-editor-portrait-col)` — **210px** desktop, **165px** mobile (`DeckEditorPage.css` on `.deck-editor__content`).
+- Gap between slots: `var(--space-4)`.
+- Fine-pointer drag: `.draw-hand__slot--dragging` (opacity 0.45), `.draw-hand__slot--drag-target` (`translateY(-4px)`).
+
+### Events — `.draw-hand__event-portrait` / `.draw-hand__event-rotate`
+
+- Landscape event art rotated **90° CCW** inside portrait slot; `object-fit: cover` on inner image.
+
+### Missing art — `.draw-hand__missing-art`
+
+- Shown when image path empty or `CardImage` reports failure; displays resolved card name (`deckCardDisplayName`).
+
+### Footer — `.draw-hand__redraw`
+
+- Centered **Draw again**; `min-width: 140px`.
+
+### KO dimming
+
+- Same `.deck-editor__card--ko-dimmed` filter on `.deck-editor__card-media` as main grid (art only).
+
+### Files
+
+- UI: `frontend/src/features/deck-editor/DrawHandPanel.tsx`, `DrawHandPanel.css`, `useDrawHandScale.ts`
+- Logic: `frontend/src/lib/decks/drawHand.ts`, `deckCardCatalog.ts`
+- Slide-out: `frontend/src/components/SlideOutPanel/`
 

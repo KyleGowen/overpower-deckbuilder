@@ -1,4 +1,6 @@
-# Draw Hand Feature
+# Draw Hand Feature (legacy v1)
+
+> **v2 React SPA** — production Draw Hand lives in [`DrawHandPanel.tsx`](../../../frontend/src/features/deck-editor/DrawHandPanel.tsx). Canonical spec: [`docs/current/DRAW_HAND_FEATURE.md`](../../../docs/current/DRAW_HAND_FEATURE.md). This document describes **legacy v1** only (`public/js/components/draw-hand.js`).
 
 The Draw Hand feature allows users to simulate drawing a random hand from their deck, excluding characters, locations, and missions. This is useful for testing deck composition and understanding card draw probabilities.
 

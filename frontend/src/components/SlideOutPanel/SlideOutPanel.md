@@ -10,7 +10,8 @@ deck, deck actions, add cards, mobile account sheet).
 | `onClose` | `() => void` | – | Called on backdrop click, `Esc`, or close button. |
 | `title` | `ReactNode` | – | Header title. |
 | `footer` | `ReactNode` | – | Sticky footer slot. |
-| `side` | `'right' \| 'bottom'` | `'right'` | Edge it slides from. Right = desktop drawer; bottom = mobile sheet. |
+| `side` | `'right' \| 'bottom' \| 'top'` | `'right'` | Edge it slides from. Right = desktop drawer; bottom = mobile sheet; **top** = deck editor Draw Hand overlay (`position="absolute"`). |
+| `position` | `'fixed' \| 'absolute'` | `'fixed'` | Viewport-fixed (default) or positioned within a `position: relative` ancestor (Draw Hand on `.deck-editor__content`). |
 | `width` | `number` | `380` | Width for the right variant (full-width on mobile). |
 | `ariaLabel` | `string` | – | Accessible label when there's no visible title. |
 

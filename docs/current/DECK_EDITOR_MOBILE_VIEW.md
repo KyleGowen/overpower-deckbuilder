@@ -1,5 +1,7 @@
 # Deck Editor — Mobile View (DEV in MV)
 
+> **v2 React SPA** deck editor (`frontend/src/features/deck-editor/`) does **not** use this modal/list layout. v2 **Draw Hand** is a header button + top slide-out — see [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md) and [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md). v2 **Simulate KO** uses tile-footer buttons, not the overflow ⋯ menu documented below.
+
 This document is the **implementation reference** for the **Deck Editor View (DEV)** when the app is in **mobile layout mode** (`html.layout-mobile`, `window.isLayoutMobile() === true`). It complements:
 
 - **[`DECK_EDITOR_CARD_VIEW_LAYOUT.md`](DECK_EDITOR_CARD_VIEW_LAYOUT.md)** — desktop **Card View** tiles (landscape/portrait, image chrome); not the mobile list.

@@ -209,6 +209,20 @@ Each screen has a companion doc in its feature folder:
 | KO active (`.deck-editor__ko-btn.is-active`) | `--color-ko` fill, `--color-text-on-accent` label |
 | KO-dimmed card (`.deck-editor__card--ko-dimmed .deck-editor__card-media`) | `filter: grayscale(0.7) brightness(0.55)` on art only — matches `CardTile` dimming; footer controls stay full contrast |
 
+### Deck Editor — Draw Hand
+Top slide-out overlay ([`DrawHandPanel.css`](frontend/src/features/deck-editor/DrawHandPanel.css)). Full spec: [`docs/current/DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md).
+
+| Element | Tokens / values |
+|---|---|
+| Trigger active (`.deck-editor__actions .btn-ghost.is-active`) | `--color-accent-bright` text, `--color-border-accent` border, `rgba(0, 200, 232, 0.08)` background |
+| Panel (`.draw-hand-slideout`) | `SlideOutPanel` `side="top"`; `max-height: 70vh` desktop, `55vh` mobile |
+| Card slot width | `--deck-editor-portrait-col`: **210px** desktop, **165px** mobile (`DeckEditorPage.css`) |
+| Row gap | `var(--space-4)` between slots |
+| Event rotation | `.draw-hand__event-rotate` — landscape art `rotate(-90deg)` in portrait slot |
+| Missing art label (`.draw-hand__missing-art`) | `--font-size-xs`, `--color-text-muted`, ellipsis |
+| Redraw (`.draw-hand__redraw`) | Centered footer; `min-width: 140px` |
+| KO-dimmed drawn card | Same `.deck-editor__card--ko-dimmed` art filter as main grid |
+
 ### Deck Editor — Card detail Printings (owners)
 Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailPanel.tsx) when a deck tile has **more than one** catalog printing. Section sits **above Details** (after Ability/stats).
 

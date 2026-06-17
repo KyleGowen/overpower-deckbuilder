@@ -12,7 +12,7 @@ Scripts loaded by active HTML entry points (as of unused code cleanup).
 - /js/viewport-positioning.js (sync — `clampRectToViewport` for floating UI)
 - /js/auth-service.js
 - /js/components/simulate-ko.js
-- /js/components/draw-hand.js
+- /js/components/draw-hand.js *(legacy v1 deck editor only — v2 uses `frontend/src/lib/decks/drawHand.ts`; see [`docs/current/DRAW_HAND_FEATURE.md`](current/DRAW_HAND_FEATURE.md))*
 - /js/alphabetization.js
 - /components/globalNav.js
 - /js/utilities.js

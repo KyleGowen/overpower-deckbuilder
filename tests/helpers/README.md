@@ -14,9 +14,11 @@ Shared setup, mocks, and utilities for unit and integration tests.
 
 - **deckExportTestHelpers.ts** — DOM HTML, window mocks, script bootstrap, and teardown for unit tests that load `public/js/components/deck-export.js` in jsdom. Use `setupDeckExportBootstrap()` in `beforeEach` (returns `exportDeckAsJson`, `getExportedJson`, and mocks) and `teardownDeckExportMocks(win)` in `afterEach`. Used by `deck-export-comprehensive-*.test.ts` files (basic, grouping, types-edge, special-attrs, power-sorting, import, enhanced).
 
-## Draw hand KO dimming
+## Draw hand KO dimming (legacy v1)
 
 - **drawHandKoDimmingTestHelpers.ts** — Load `public/js/components/simulate-ko.js`, set window globals (`availableCardsMap`, `deckEditorCards`, `koCharacters`), and call `SimulateKO.init()`. Use `setupDrawHandKoDimmingBootstrap()` in `beforeEach` and `teardownDrawHandKoDimmingMocks(win)` in `afterEach`. Used by `draw-hand-ko-dimming-character-special.test.ts`, `draw-hand-ko-dimming-teamwork-ally.test.ts`, `draw-hand-ko-dimming-power.test.ts`, `draw-hand-ko-dimming-training-universe.test.ts`, and `draw-hand-ko-dimming-edge-integration.test.ts`.
+
+**v2 Draw Hand** does not use these helpers — see `tests/unit/draw-hand-v2.test.ts`, `tests/unit/deck-card-catalog.test.ts`, and [`docs/current/DRAW_HAND_FEATURE.md`](../../docs/current/DRAW_HAND_FEATURE.md).
 
 ## Other
 

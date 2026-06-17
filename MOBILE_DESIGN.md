@@ -13,7 +13,8 @@ Use this table to jump directly to the right doc. All per-tab specs stay in `doc
 | DBV Missions tab mobile (mission-set select, card rows) | [`docs/current/DBV_MISSIONS_MOBILE.md`](docs/current/DBV_MISSIONS_MOBILE.md) |
 | DBV Training tab mobile (type toggles, card rows) | [`docs/current/DBV_TRAINING_MOBILE.md`](docs/current/DBV_TRAINING_MOBILE.md) |
 | DBV Basic Universe tab mobile (type toggles + Teamwork strips) | [`docs/current/DBV_BASIC_UNIVERSE_MOBILE.md`](docs/current/DBV_BASIC_UNIVERSE_MOBILE.md) |
-| Deck Editor View (DEV) in mobile (list, search, row actions) | [`docs/current/DECK_EDITOR_MOBILE_VIEW.md`](docs/current/DECK_EDITOR_MOBILE_VIEW.md) |
+| Deck Editor View (DEV) in mobile — **legacy v1** (list, search, row actions) | [`docs/current/DECK_EDITOR_MOBILE_VIEW.md`](docs/current/DECK_EDITOR_MOBILE_VIEW.md) |
+| Draw Hand — **v2** (header button, top slide-out, horizontal carousel in MV) | [`docs/current/DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md) · [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md) |
 | Collection tab mobile (list vs detail sheet, fixed sort) | [`docs/current/COLLECTION_VIEW_MOBILE.md`](docs/current/COLLECTION_VIEW_MOBILE.md) |
 | Mobile DBV image sizing repeatable fix (`max-height: none !important`) | [`docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md`](docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md) |
 | Mobile DBV row-art sizing history / experiments | [`docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md`](docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md) |
@@ -343,11 +344,11 @@ All tokens are `clamp(MIN_rem, rem-based_preferred + vw, MAX_rem)` — fluid wit
 | `--font-2xl` | `clamp(1.50rem, 1.10rem + 1.80vw, 2.25rem)` | ~24–36 | Collection/login screen titles |
 | `--icon-sm`  | `clamp(0.875rem, 0.80rem + 0.35vw, 1.00rem)` | ~14–16 | Small inline icons (collapse caret, validation icon) |
 | `--icon-md`  | `clamp(1.125rem, 1.00rem + 0.60vw, 1.375rem)` | ~18–22 | `⋯` overflow, sandbox-banner warning, card-view category toggle |
-| `--icon-lg`  | `clamp(1.375rem, 1.20rem + 0.80vw, 1.625rem)` | ~22–26 | `×` close (draw hand) |
+| `--icon-lg`  | `clamp(1.375rem, 1.20rem + 0.80vw, 1.625rem)` | ~22–26 | `×` close (**legacy v1** draw-hand modal; v2 uses `SlideOutPanel` close in Draw Hand) |
 
 **Application surfaces:**
 
-- **Deck editor modal (DEV):** [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css) — header title/meta, validation badge + icon, stats, search input, section headers, rows, row menu, utility actions, draw-hand close + training pill, card-view buttons + category toggle/name + collapse icon.
+- **Deck editor modal (DEV, legacy v1):** [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css) — header title/meta, validation badge + icon, stats, search input, section headers, rows, row menu, utility actions, **legacy** draw-hand close + training pill, card-view buttons + category toggle/name + collapse icon. **v2 Draw Hand** styling: [`DrawHandPanel.css`](frontend/src/features/deck-editor/DrawHandPanel.css) — see [`DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md).
 - **Global nav (mobile header):** [`public/css/mobile-layout.css`](public/css/mobile-layout.css) — `.app-tab-button`, `.new-deck-btn`, user menu, create-user form.
 - **Deck selection tiles:** [`public/css/mobile-layout.css`](public/css/mobile-layout.css) — tile title (`--font-xl`), empty slot placeholder, side label/value, menu button (`--icon-md`), menu items.
 - **DBV tabs:** unified caption ladder across All / Special / Aspects / Missions / Training / Basic Universe / Ally / Power / Teamwork / Events — see [`public/css/mobile-layout.css`](public/css/mobile-layout.css). All power-type filter labels, `td[data-label]::before`, and mission-set `<select>` use the tokens.

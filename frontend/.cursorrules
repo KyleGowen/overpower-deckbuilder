@@ -8,6 +8,7 @@ forward.
 - Design decisions live in repo-root `STYLE_GUIDE_V2.md`. Update it whenever you
   change visual patterns, tokens, or add a screen.
 - Architecture/reference: `docs/current/FRONTEND_V2.md`.
+- Draw Hand + Simulate KO: `docs/current/DRAW_HAND_FEATURE.md`, `docs/current/SIMULATE_KO_FEATURE.md`.
 
 ## Structure
 - `src/app/` - router, AuthProvider, ProtectedRoute (cross-cutting app wiring).
@@ -16,7 +17,7 @@ forward.
 - `src/features/` - route-level pages (login, home, database, collection,
   deck-selection, deck-editor). Pages compose shared components.
 - `src/lib/` - non-UI logic: `api/` (typed fetch wrappers), `images/`,
-  `catalog/`, `collection/`, `layout/`.
+  `catalog/`, `collection/`, `layout/`, `decks/` (draw hand, KO, catalog index).
 - `src/styles/` - `tokens.css` (design tokens) + `global.css` (reset + base).
 - Home "Recent Updates" cards load from `GET /api/v1/recent-updates` (`lib/api/recent-updates.ts`).
 

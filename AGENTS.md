@@ -26,6 +26,7 @@ Key docs:
 - [docs/current/COLLECTION_CHECKLIST_SOURCE.md](docs/current/COLLECTION_CHECKLIST_SOURCE.md) — Source of truth for collection card names and numbers (OverPower Check List); use when correcting or populating card data.
 - [docs/current/COLLECTION_VIEW_MOBILE.md](docs/current/COLLECTION_VIEW_MOBILE.md) — Collection tab mobile (`layout-mobile`): list vs detail sheet, fixed sort, delegate activation, `layout-mode-change`, unit tests and coverage limits.
 - [docs/current/SIMULATE_KO_FEATURE.md](docs/current/SIMULATE_KO_FEATURE.md) — Simulate KO (client-only deck editor knockout simulation): v2 tile-footer KO in [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md); legacy draw-hand, Card/List/Tile views, and mobile ⋯ menu in the same doc.
+- [docs/current/DRAW_HAND_FEATURE.md](docs/current/DRAW_HAND_FEATURE.md) — Draw Hand (client-only random hand simulation): v2 top slide-out in [`DrawHandPanel.tsx`](frontend/src/features/deck-editor/DrawHandPanel.tsx) + [`drawHand.ts`](frontend/src/lib/decks/drawHand.ts); legacy `draw-hand.js` and mobile vertical fan in the same doc.
 
 ## External API hardening
 

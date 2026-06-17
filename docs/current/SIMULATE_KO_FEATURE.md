@@ -67,7 +67,7 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 - **Layout**: Single grouped tile grid by catalog type (no separate Card View or List View modes).
 - **Dimming**: Affected cards get `.deck-editor__card--ko-dimmed` on **art only** (`.deck-editor__card-media` filter); footer controls stay full contrast.
 - **Stats header**: **Character max** row uses active (non-KO) characters when `koCharacterIds.size > 0` via `calculateActiveTeamStats`. **Icon totals** stay deck-wide.
-- **Draw Hand**: [`DrawHandPanel`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) replaces the deck grid when open; logic in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts). KO-affected drawn cards use art-only dimming via `shouldDimDeckCard` (re-renders on KO toggle without re-drawing).
+- **Draw Hand**: [`DrawHandPanel`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) is a **top slide-out overlay** on `.deck-editor__content` (deck grid stays visible behind the blurred scrim); logic in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts). KO-affected drawn cards use art-only dimming via `shouldDimDeckCard` (re-renders on KO toggle without re-drawing). Full spec: [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md).
 - **Mobile**: Same tile-footer `KoToggleButton` (not the legacy DEV overflow ⋯ menu — see [DECK_EDITOR_MOBILE_VIEW.md](DECK_EDITOR_MOBILE_VIEW.md) for v1 only).
 
 Full v2 feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md).
@@ -125,7 +125,7 @@ Character rows in the mobile deck editor overflow **⋯** menu expose KO / Un-KO
 
 Pure TypeScript port of the dimming rules (no `window` globals). React state (`koCharacterIds: Set<string>`) lives in [`DeckEditorPage.tsx`](../../../frontend/src/features/deck-editor/DeckEditorPage.tsx). UI: [`KoToggleButton.tsx`](../../../frontend/src/features/deck-editor/KoToggleButton.tsx). Unit tests: `tests/unit/simulate-ko.test.ts`.
 
-Draw Hand integration in v2: [`DrawHandPanel.tsx`](../../../frontend/src/features/deck-editor/DrawHandPanel.tsx) + [`drawHand.ts`](../../../frontend/src/lib/decks/drawHand.ts). Unit tests: `tests/unit/draw-hand-v2.test.ts`.
+Draw Hand integration in v2: [`DrawHandPanel.tsx`](../../../frontend/src/features/deck-editor/DrawHandPanel.tsx) + [`drawHand.ts`](../../../frontend/src/lib/decks/drawHand.ts) + [`deckCardCatalog.ts`](../../../frontend/src/lib/decks/deckCardCatalog.ts). Unit tests: `tests/unit/draw-hand-v2.test.ts`, `tests/unit/deck-card-catalog.test.ts`. Full Draw Hand spec: [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md).
 
 ### v1 legacy module
 
@@ -510,63 +510,20 @@ const teamStats = window.SimulateKO.calculateActiveTeamStats();
 npm run test:unit -- simulate-ko.test.ts
 ```
 
-### Legacy unit tests (draw hand integration)
+### Legacy unit tests (draw hand + KO dimming)
 
-**File**: `tests/unit/draw-hand-ko-dimming.test.ts`
+**Files**: `tests/unit/draw-hand-ko-dimming-character-special.test.ts`, `draw-hand-ko-dimming-teamwork-ally.test.ts`, `draw-hand-ko-dimming-power.test.ts`, `draw-hand-ko-dimming-training-universe.test.ts`, `draw-hand-ko-dimming-edge-integration.test.ts`
 
-**Coverage**: 28 tests covering all card types and edge cases
+**Helpers**: `tests/helpers/drawHandKoDimmingTestHelpers.ts`
 
-**Test Categories**:
-1. **Character Cards** (2 tests)
-   - KO'd characters dim
-   - Non-KO'd characters don't dim
+**Coverage**: Legacy `simulate-ko.js` + `draw-hand.js` integration — character, special, power, teamwork, ally, training, basic universe, and edge cases.
 
-2. **Special Cards** (3 tests)
-   - Specials belonging to KO'd characters dim
-   - Specials belonging to active characters don't dim
-   - "Any Character" specials never dim
-
-3. **Teamwork Cards** (4 tests)
-   - Dim when team can't meet requirement after KO
-   - Don't dim when team can meet requirement
-   - Dim when only one active character remains (special rule)
-   - Handle Any-Power teamwork cards
-
-4. **Ally Cards** (3 tests)
-   - Don't dim when active character meets requirement
-   - Dim with "or higher" requirement when stat is too low
-   - Dim when only one active character remains (special rule)
-
-5. **Power Cards** (6 tests)
-   - Dim when team can't meet requirement after KO
-   - Handle Any-Power cards correctly
-   - Handle Multi-Power cards correctly (hyphen variant)
-   - Handle Multi Power cards correctly (space variant)
-   - Verify Multi-Power uses sum of two highest stats (not Math.max)
-   - Don't dim when character can meet requirement with sum of two highest
-   - Apply John Carter override for Brute Force
-
-6. **Training Cards** (2 tests)
-   - Dim when no character can use them after KO
-   - Don't dim when a character can use them
-
-7. **Basic Universe Cards** (1 test)
-   - Dim when requirement not met after KO
-
-8. **Edge Cases** (4 tests)
-   - Return false when no KO'd characters exist
-   - Return false when card data is missing
-   - Handle empty deck
-   - Handle single character deck (should not dim teamwork/ally for single character)
-
-9. **Display Drawn Cards Integration** (2 tests)
-   - Apply `ko-dimmed` class to cards that should be dimmed
-   - Don't apply `ko-dimmed` class to cards that shouldn't be dimmed
-
-**Running Tests**:
+**Running**:
 ```bash
-npm run test:unit -- draw-hand-ko-dimming.test.ts
+npm run test:unit -- draw-hand-ko-dimming
 ```
+
+**v2 note**: v2 Draw Hand KO dimming is covered by `simulate-ko.test.ts` (rules) + React wiring in `DrawHandPanel.tsx`; draw logic in `draw-hand-v2.test.ts`. See [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md).
 
 ### Integration Tests
 
@@ -757,7 +714,9 @@ v2 **should** update Character max when any character is KO'd. If values look wr
 - Verify card type is in supported list
 - Check `window.availableCardsMap` has card data
 
-#### Draw Hand Not Dimming
+#### Draw Hand Not Dimming (legacy v1 only)
+
+**Applies to**: `public/js/components/draw-hand.js` — not the v2 React `DrawHandPanel`.
 
 **Possible Causes**:
 1. `shouldDimCard` not called in `displayDrawnCards`
@@ -768,6 +727,8 @@ v2 **should** update Character max when any character is KO'd. If values look wr
 - Verify `displayDrawnCards` calls `shouldDimCard` for each card
 - Check that `toggleKOCharacter` refreshes draw hand if displayed
 - Verify `window.SimulateKO.shouldDimCard` exists
+
+**v2**: KO dimming in Draw Hand is automatic via React state — see [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md).
 
 #### Multi-Power Cards Not Dimming Correctly
 
@@ -789,6 +750,7 @@ v2 **should** update Character max when any character is KO'd. If values look wr
 - **v2 architecture**: [`FRONTEND_V2.md`](FRONTEND_V2.md)
 - **Legacy style guide**: [`STYLE_GUIDE.md`](STYLE_GUIDE.md) (`.ko-btn` styling)
 - **Legacy mobile DEV**: [`DECK_EDITOR_MOBILE_VIEW.md`](DECK_EDITOR_MOBILE_VIEW.md) (overflow ⋯ KO — v1 only)
+- **v2 Draw Hand**: [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md)
 - **Legacy draw hand**: [`public/js/components/DRAW_HAND.md`](../../public/js/components/DRAW_HAND.md)
 - **Legacy card view**: [`CARD_VIEW_DOCUMENTATION.md`](CARD_VIEW_DOCUMENTATION.md)
 
@@ -796,11 +758,13 @@ v2 **should** update Character max when any character is KO'd. If values look wr
 
 ## Version History
 
+- **v1.2** (2026-06-17): v2 Draw Hand shipped
+  - Top slide-out `DrawHandPanel` + `drawHand.ts` + `deckCardCatalog.ts`
+  - KO dimming integrated without re-draw; docs in [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md)
 - **v1.1** (2026-06-17): v2 documentation reconciliation
   - v2 UX, visual design, tests, and troubleshooting sections
   - V1 vs V2 parity matrix
   - GUEST availability documented for v2
-  - Draw Hand deferred in v2 until Playtest
 - **v1.0**: Initial legacy implementation
   - KO feature available to all authenticated users
   - Multi-Power dimming logic fixed (sum of two highest stats)

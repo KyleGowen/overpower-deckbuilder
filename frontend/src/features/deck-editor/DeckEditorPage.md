@@ -33,12 +33,14 @@ Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). F
 
 ## Draw Hand
 
-Client-only random hand simulation. Behavior mirrors legacy v1 [`draw-hand.js`](../../../public/js/components/draw-hand.js).
+Client-only random hand simulation. Full cross-stack spec: [`docs/current/DRAW_HAND_FEATURE.md`](../../../docs/current/DRAW_HAND_FEATURE.md). Behavior mirrors legacy v1 [`draw-hand.js`](../../../public/js/components/draw-hand.js).
 
-- **Entry**: **Draw Hand** button in the header actions. Enabled when the deck has **≥8 playable** cards (non character/location/mission); `exclude_from_draw` rows count toward the threshold but are omitted from the draw pile.
+- **Entry**: **Draw Hand** button in the header actions (replaces the former Playtest placeholder). Enabled when the deck has **≥8 playable** cards (non character/location/mission); `exclude_from_draw` rows count toward the threshold but are omitted from the draw pile.
 - **State**: `drawHandOpen` + `drawnCards` in `DeckEditorPage` — not persisted.
 - **Logic**: [`drawHand.ts`](../../lib/decks/drawHand.ts) — 8 cards by default, 9th when an event is in the first 8 and the pile has >8 cards.
-- **UI**: [`DrawHandPanel.tsx`](DrawHandPanel.tsx) uses [`SlideOutPanel`](../../components/SlideOutPanel/SlideOutPanel.tsx) (`side="top"`, `position="absolute"`) over `.deck-editor__content` — deck grid stays visible behind the shared blurred scrim (same as Add Cards). Desktop: one horizontal row at **210px** per card (`--deck-editor-portrait-col`), uniform scale-to-fit for 8–9 cards; drag reorder. Mobile (`.layout-mobile`): **165px** cards in a horizontal snap carousel (no scale-down). **Events** in the draw hand are rotated 90° CCW into the portrait slot (draw-hand only).
+- **Catalog**: [`deckCardCatalog.ts`](../../lib/decks/deckCardCatalog.ts) — `buildDeckCardIndex`, `resolveDeckCatalogCard`, `deckCardDisplayName` (underscore type normalization + id-only fallback; labels never fall back to generic `"Card"`).
+- **UI**: [`DrawHandPanel.tsx`](DrawHandPanel.tsx) uses [`SlideOutPanel`](../../components/SlideOutPanel/SlideOutPanel.tsx) (`side="top"`, `position="absolute"`) over `.deck-editor__content` — deck grid stays visible behind the shared blurred scrim (same pattern as Add Cards). Desktop: one horizontal row at **210px** per card (`--deck-editor-portrait-col`), uniform scale-to-fit for 8–9 cards; drag reorder on fine pointers. Mobile (`.layout-mobile`): **165px** cards in a horizontal snap carousel (no scale-down). **Events** in the draw hand are rotated 90° CCW into the portrait slot (draw-hand only).
+- **Images**: `CardImage` with deck-grid thumbnail policy; thumb → full-res fallback; `.draw-hand__missing-art` shows card name when art is missing or fails to load.
 - **Toggle**: First click opens and draws; second click (or × / backdrop) closes. **Draw again** footer button redraws without closing.
 - **KO**: Drawn cards use `shouldDimDeckCard`; dimming updates when KO toggles without re-randomizing the hand.
 - **Card detail**: Tapping a drawn card opens [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx).

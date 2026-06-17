@@ -46,6 +46,9 @@ Defined in [`frontend/src/app/router.tsx`](../../frontend/src/app/router.tsx):
   **Simulate KO** (client-only character knockout simulation): see
   [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md) and
   [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md).
+  **Draw Hand** (client-only random hand simulation): see
+  [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md) and
+  [`DRAW_HAND_FEATURE.md`](DRAW_HAND_FEATURE.md).
 - `*` → redirect to `/home`.
 
 `ProtectedRoute` redirects unauthenticated users to `/login` and shows a loading state
