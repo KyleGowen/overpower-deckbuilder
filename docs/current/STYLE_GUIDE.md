@@ -2998,14 +2998,14 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 
 - `display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; gap: var(--space-4)`
 - **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta chips (card count, threat, legality badge)
-- **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center`
+- **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
 - **Trailing** (`.deck-editor__actions`): Playtest, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
 - Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`), actions full-width (`order: 6`)
 
 ### Container — `.deck-editor__stats-panel`
 
-- `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-3); padding: 0`
+- `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-6); padding: 0; transform: translateX(calc(-1 * var(--space-3)))`
 - No `border-top` — stats live in the center column of the topbar, not a separate row
 - Two blocks side by side on desktop, separated by `border-left` on the second block
 - Mobile (`.layout-mobile`): `flex: 1 1 100%; justify-content: flex-start`; blocks stack full-width with `border-top` between them
