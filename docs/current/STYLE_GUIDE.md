@@ -3082,13 +3082,26 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 
 ### Per-card controls — `.deck-editor__card-footer`
 
-Owner-only controls sit in a footer row **below** the card image (no overlays on art, no tile name — the card art shows the name). `.deck-editor__card-footer` is a flex row with `.deck-editor__card-controls` **right-aligned** (`justify-content: flex-end`). Read-only visitors see the image tile only.
+Controls sit in a footer row **below** the card image (no overlays on art, no tile name — the card art shows the name). `.deck-editor__card-footer` is a flex row with `.deck-editor__card-controls` **right-aligned** (`justify-content: flex-end`). Read-only visitors see image only except on the **reserved character** (disabled **Reserve** button).
 
 | Pattern | Deck types | UI | Removal |
 |---|---|---|---|
-| Trash only | `character`, `location`, `mission` | `.deck-editor__card-remove` (`IconTrash`) | Click trash |
+| Reserve + trash | `character` (owners) | `.deck-editor__reserve-btn` + `.deck-editor__card-remove` | Reserve toggle; trash removes card |
+| Trash only | `location`, `mission` | `.deck-editor__card-remove` (`IconTrash`) | Click trash |
 | Stepper only | power, special, events, aspects, universe, etc. | `QuantityStepper` (`min=0`) | Decrement to `0` |
 | OPD stepper cap | stepper types with catalog `one_per_deck` / `is_one_per_deck` | Same stepper, `max=1` (`+` disabled at 1) | Decrement to `0` |
+
+#### Reserve button (v2 SPA — character tiles)
+
+- **Labels**: unselected **Select Reserve**; selected **Reserve** (`.deck-editor__reserve-btn--active`)
+- **Position**: `.deck-editor__card-reserve-wrap` — `position: absolute`, `left: var(--space-2)`, `bottom: var(--space-1)`, `z-index: 2` on `.deck-editor__card` (bottom-left of tile); trash remains in `.deck-editor__card-footer` (bottom-right)
+- **Slot**: `.deck-editor__reserve-slot` — fixed `width: 5.25rem` (`--deck-editor-reserve-slot-w` on wrap); hidden slots use `visibility: hidden` so trash on the same tile does not shift
+- **States** (logic in `frontend/src/lib/decks/reserveCharacter.ts`):
+  - No reserve: all characters show **Select Reserve**
+  - Reserve set: active character shows **Reserve**; others use hidden slot
+  - Read-only: disabled active **Reserve** on reserved character only
+- **Styling**: matches `.deck-editor__card-remove` chrome — `height: 26px`, `font-size: 10px`, `padding: 0 5px`, `var(--color-bg-scrim)` + `var(--color-border)`; hover uses `var(--color-border-accent)`; active state dark grey + `box-shadow: inset 0 1px 3px rgba(0,0,0,0.45)`
+- **Threat**: header chip uses live `calculateDeckTotalThreat` with reserve bumps (Victory Harben → 20, Carson of Venus → 19, Morgan le Fay → 20)
 
 - Trash button: `background: var(--color-bg-scrim)`, `border: 1px solid var(--color-border)`.
 - Quantity is shown only via the stepper (no `xN` badge on the image).

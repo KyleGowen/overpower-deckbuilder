@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import {
   fetchDeckFull,
@@ -8,9 +8,16 @@ import {
   updateDeckMeta,
   validateDeck,
   type DeckCardInput,
+  type UpdateDeckMetaInput,
 } from '../../lib/api/decks';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
+import { calculateDeckTotalThreat, formatThreatDisplay } from '../../lib/decks/deckThreat';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
+import {
+  characterDeckEntries,
+  computeReserveRowState,
+  reserveSlotVisible,
+} from '../../lib/decks/reserveCharacter';
 import {
   deckCardQuantityMax,
   deckCardUsesTrashOnlyRemoval,
@@ -47,6 +54,7 @@ import {
   IconPlay,
 } from '../../components/icons';
 import { AddCardsPanel } from './AddCardsPanel';
+import { ReserveCharacterButton } from './ReserveCharacterButton';
 import type {
   CatalogCard,
   CatalogType,
@@ -138,6 +146,7 @@ export default function DeckEditorPage() {
 
   const forceReadonly = searchParams.get('readonly') === 'true';
 
+  const queryClient = useQueryClient();
   const deckQuery = useQuery({
     queryKey: ['deck', deckId],
     queryFn: () => fetchDeckFull(deckId, isGuest),
@@ -155,12 +164,21 @@ export default function DeckEditorPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [selected, setSelected] = useState<{ card: CatalogCard; type: CatalogType } | null>(null);
   const [validity, setValidity] = useState<{ valid: boolean; message?: string } | null>(null);
+  const [reserveCharacterId, setReserveCharacterId] = useState<string | null>(null);
   const loadedRef = useRef(false);
+  const savedReserveRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    loadedRef.current = false;
+  }, [deckId]);
 
   useEffect(() => {
     if (deck && !loadedRef.current) {
       setCards(deck.cards ?? []);
       setName(deck.metadata.name);
+      const loadedReserve = deck.metadata.reserve_character ?? null;
+      setReserveCharacterId(loadedReserve);
+      savedReserveRef.current = loadedReserve;
       loadedRef.current = true;
     }
   }, [deck]);
@@ -261,6 +279,16 @@ export default function DeckEditorPage() {
     [cards, cardIndex],
   );
 
+  const characterEntries = useMemo(() => characterDeckEntries(cards), [cards]);
+
+  const totalThreat = useMemo(
+    () =>
+      calculateDeckTotalThreat(cards, reserveCharacterId, (type, cardId) =>
+        cardIndex.get(`${type}:${cardId}`),
+      ),
+    [cards, reserveCharacterId, cardIndex],
+  );
+
   const grouped = useMemo(() => {
     const map = new Map<DeckCardType, DeckCardEntry[]>();
     cards.forEach((c) => {
@@ -274,12 +302,25 @@ export default function DeckEditorPage() {
   }, [cards]);
 
   const setQuantity = (type: DeckCardType, cardId: string, qty: number) => {
+    if (type === 'character' && qty === 0 && reserveCharacterId === cardId) {
+      setReserveCharacterId(null);
+    }
     setCards((prev) => {
       const next = prev
         .map((c) => (c.type === type && c.cardId === cardId ? { ...c, quantity: qty } : c))
         .filter((c) => c.quantity > 0);
       return next;
     });
+    setDirty(true);
+  };
+
+  const selectReserveCharacter = (cardId: string) => {
+    setReserveCharacterId(cardId);
+    setDirty(true);
+  };
+
+  const deselectReserveCharacter = () => {
+    setReserveCharacterId(null);
     setDirty(true);
   };
 
@@ -347,8 +388,17 @@ export default function DeckEditorPage() {
     setSaving(true);
     setSaveMsg(null);
     try {
+      const metaPatch: UpdateDeckMetaInput = {};
       if (name.trim() && name.trim() !== deck?.metadata.name) {
-        await updateDeckMeta(deckId, { name: name.trim() }, isGuest);
+        metaPatch.name = name.trim();
+      }
+      if (reserveCharacterId !== savedReserveRef.current) {
+        metaPatch.reserve_character = reserveCharacterId;
+      }
+      if (Object.keys(metaPatch).length > 0) {
+        const updated = await updateDeckMeta(deckId, metaPatch, isGuest);
+        savedReserveRef.current = reserveCharacterId;
+        queryClient.setQueryData(['deck', deckId], updated);
       }
       const payload: DeckCardInput[] = cards.map((c) => ({
         cardType: c.type,
@@ -356,8 +406,22 @@ export default function DeckEditorPage() {
         quantity: c.quantity,
         exclude_from_draw: c.exclude_from_draw,
       }));
-      await replaceDeckCards(deckId, payload, isGuest);
+      const updatedCards = await replaceDeckCards(deckId, payload, isGuest);
+      queryClient.setQueryData(['deck', deckId], (prev) => {
+        const base = prev ?? updatedCards;
+        return {
+          ...base,
+          cards: updatedCards.cards ?? cards,
+          metadata: {
+            ...base.metadata,
+            ...updatedCards.metadata,
+            reserve_character: reserveCharacterId,
+          },
+        };
+      });
       setDirty(false);
+      loadedRef.current = false;
+      await queryClient.invalidateQueries({ queryKey: ['deck', deckId] });
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(null), 2500);
     } catch (err) {
@@ -429,7 +493,7 @@ export default function DeckEditorPage() {
 
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
-                <span className="deck-editor__chip">Threat {deck.metadata.threat ?? 0}</span>
+                <span className="deck-editor__chip">Threat {formatThreatDisplay(totalThreat)}</span>
                 <span className={`badge ${legality.valid ? 'badge-legal' : 'badge-not-legal'}`} title={legality.message}>
                   {legality.valid ? 'Legal' : 'Not Legal'}
                 </span>
@@ -500,6 +564,20 @@ export default function DeckEditorPage() {
                       canOpenDetail &&
                       selected?.card.id === entry.cardId &&
                       selected?.type === catalogType;
+                    const reserveRowState =
+                      entry.type === 'character'
+                        ? computeReserveRowState(
+                            entry.cardId,
+                            reserveCharacterId,
+                            characterEntries,
+                            !isOwner,
+                          )
+                        : null;
+                    const showCardFooter =
+                      isOwner ||
+                      (entry.type === 'character' &&
+                        reserveRowState !== null &&
+                        reserveSlotVisible(reserveRowState));
                     return (
                     <div className="deck-editor__card" key={`${entry.type}:${entry.cardId}`}>
                       <div className="deck-editor__card-media">
@@ -522,30 +600,44 @@ export default function DeckEditorPage() {
                           />
                         </button>
                       </div>
-                      {isOwner ? (
+                      {entry.type === 'character' &&
+                      reserveRowState &&
+                      reserveSlotVisible(reserveRowState) ? (
+                        <div className="deck-editor__card-reserve-wrap">
+                          <ReserveCharacterButton
+                            state={reserveRowState}
+                            cardName={cardName}
+                            onSelect={() => selectReserveCharacter(entry.cardId)}
+                            onDeselect={deselectReserveCharacter}
+                          />
+                        </div>
+                      ) : null}
+                      {showCardFooter ? (
                         <div className="deck-editor__card-footer">
                           <div className="deck-editor__card-controls">
-                            {deckCardUsesTrashOnlyRemoval(entry.type) ? (
-                              <button
-                                type="button"
-                                className="deck-editor__card-remove"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setQuantity(entry.type, entry.cardId, 0);
-                                }}
-                                aria-label={`Remove ${cardName}`}
-                              >
-                                <IconTrash />
-                              </button>
-                            ) : (
-                              <QuantityStepper
-                                size="sm"
-                                value={entry.quantity}
-                                min={0}
-                                max={deckCardQuantityMax(entry.type, catalogCard)}
-                                onChange={(q) => setQuantity(entry.type, entry.cardId, q)}
-                              />
-                            )}
+                            {isOwner ? (
+                              deckCardUsesTrashOnlyRemoval(entry.type) ? (
+                                <button
+                                  type="button"
+                                  className="deck-editor__card-remove"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setQuantity(entry.type, entry.cardId, 0);
+                                  }}
+                                  aria-label={`Remove ${cardName}`}
+                                >
+                                  <IconTrash />
+                                </button>
+                              ) : (
+                                <QuantityStepper
+                                  size="sm"
+                                  value={entry.quantity}
+                                  min={0}
+                                  max={deckCardQuantityMax(entry.type, catalogCard)}
+                                  onChange={(q) => setQuantity(entry.type, entry.cardId, q)}
+                                />
+                              )
+                            ) : null}
                           </div>
                         </div>
                       ) : null}

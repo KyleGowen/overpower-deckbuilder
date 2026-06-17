@@ -107,7 +107,7 @@ export class GuestDeckService {
   updateDeckMetadata(
     sessionId: string,
     deckId: string,
-    body: { name?: string; description?: string | null }
+    body: { name?: string; description?: string | null; reserve_character?: string | null }
   ): Ok<ReturnType<typeof transformGuestDeckToListItem>> | Fail {
     const existing = this.deps.guestDeckPersistence.getDeck(sessionId, deckId);
     if (!existing) {
@@ -125,6 +125,20 @@ export class GuestDeckService {
           ? body.description
           : existing.metadata.description
         : existing.metadata.description;
+    let reserveCharacter = existing.metadata.reserve_character ?? null;
+    if (body.reserve_character !== undefined) {
+      if (body.reserve_character === null) {
+        reserveCharacter = null;
+      } else {
+        const inDeck = (existing.cards ?? []).some(
+          (c) => c.type === 'character' && c.cardId === body.reserve_character,
+        );
+        if (!inDeck) {
+          return fail(400, 'VALIDATION_ERROR', 'Reserve character must be a character in the deck');
+        }
+        reserveCharacter = body.reserve_character;
+      }
+    }
     if (name.length > 100) {
       return fail(400, 'VALIDATION_ERROR', 'Deck name must be 100 characters or less');
     }
@@ -136,6 +150,7 @@ export class GuestDeckService {
         ...existing.metadata,
         name,
         description: description ?? '',
+        reserve_character: reserveCharacter,
         lastModified: new Date().toISOString()
       },
       cards: existing.cards

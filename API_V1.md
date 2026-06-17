@@ -872,7 +872,7 @@ Session-scoped decks for **GUEST** users: stored **in memory** keyed by `**sessi
 
 ### `PUT /api/v1/guest/decks/:id`
 
-**Body:** optional `**name`**, `**description`** — `[UpdateGuestDeckBody.ts](src/api/http/models/guest-decks/UpdateGuestDeckBody.ts)`
+**Body:** optional `**name`**, `**description`**, `**reserve_character`** (character card UUID or `null`) — `[UpdateGuestDeckBody.ts](src/api/http/models/guest-decks/UpdateGuestDeckBody.ts)`
 
 **Response 200:** v1 envelope; `**data`** = list-item shape (same as merged list entries).
 

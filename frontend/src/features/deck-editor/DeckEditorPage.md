@@ -13,7 +13,11 @@ are read-only automatically).
   - Mobile: stats wrap to a second line within the same header; actions full-width below
 - **Body**: card list grouped by type below the sticky header. **Main grid orientation**: characters use landscape `380:280` with thumbnail + cover; locations use **`502:359`** with full-res + cover; events use `236:151` with full-res + cover; all other types use portrait `5:7` with thumb + contain. Landscape sections use fixed **`285px`** columns (`repeat(auto-fill, 285px)`); portrait groups use `minmax(210px, 1fr)`.
 - **Card detail**: clicking a deck card **image** opens the shared read-only [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) (same slide-out as Database View — full art, stats, ability, metadata). Controls below the image do not open the panel. Works for owners and read-only visitors.
-- **Per-card controls** (owners only): in `.deck-editor__card-footer` below the image, **right-aligned** — no tile name (name is on the card art). Card image is **full-bleed** to the tile edges above the footer (`padding: 0` on `.deck-editor__card`). **Characters, locations, missions** — trash only (`.deck-editor__card-remove`). **All other types** — `QuantityStepper` only; decrement to `0` removes the row. OPD catalog cards use stepper `max=1`. Read-only visitors see image only. Logic: [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts).
+- **Per-card controls**: in `.deck-editor__card-footer` below the image, **right-aligned** — no tile name (name is on the card art). Card image is **full-bleed** to the tile edges above the footer (`padding: 0` on `.deck-editor__card`).
+  - **Characters (owners)**: **Select Reserve** / **Reserve** (`ReserveCharacterButton`) at the **bottom-left** of the tile (`.deck-editor__card-reserve-wrap`, absolute); trash (`.deck-editor__card-remove`) stays **bottom-right** in the footer. Hidden reserve slots keep trash from shifting on that tile.
+  - **Characters (read-only)**: disabled **Reserve** on the reserved character only (no footer on other characters).
+  - **Locations, missions** — trash only. **All other types** — `QuantityStepper` only; decrement to `0` removes the row. OPD catalog cards use stepper `max=1`. Logic: [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts), reserve: [`reserveCharacter.ts`](../../lib/decks/reserveCharacter.ts).
+- **Threat chip**: client-calculated live via `calculateDeckTotalThreat` (characters + locations, reserve bumps for Victory Harben, Carson of Venus, Morgan le Fay). Shows `total/76` when over cap.
 
 ## Add Cards panel
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on desktop (`width={575}`).
@@ -31,8 +35,9 @@ Implementation: [`AddCardsPanel.tsx`](AddCardsPanel.tsx), [`CharacterStackRow.ts
 
 ## Save model
 Edits accumulate in local working state; **Save** persists the full card list
-(`replaceDeckCards`) and metadata (`updateDeckMeta`) for owned/DB decks, or the guest
-equivalents for `guest_` decks. Stats/threat/legality reflect the saved deck.
+(`replaceDeckCards`) and metadata (`updateDeckMeta` — name and `reserve_character`) for
+owned/DB decks, or the guest equivalents for `guest_` decks. Threat in the header updates
+live while editing; legality is debounced via `validateDeck`.
 
 ## Notes
 - Owner vs read-only is resolved from the auth user vs the route `userId` and the `readonly`
