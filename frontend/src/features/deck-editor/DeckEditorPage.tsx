@@ -503,8 +503,6 @@ export default function DeckEditorPage() {
         };
       });
       setDirty(false);
-      loadedRef.current = false;
-      await queryClient.invalidateQueries({ queryKey: ['deck', deckId] });
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(null), 2500);
     } catch (err) {

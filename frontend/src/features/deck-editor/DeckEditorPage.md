@@ -50,6 +50,11 @@ Edits accumulate in local working state; **Save** persists the full card list
 owned/DB decks, or the guest equivalents for `guest_` decks. Threat in the header updates
 live while editing; legality is debounced via `validateDeck`.
 
+After a successful save, **local `cards` state remains authoritative** — the editor does
+not re-run `expandDeckToInstances` or invalidate the deck query. React Query cache is updated
+via `setQueryData` only so navigation away/back stays consistent, without remounting tiles or
+flashing card images.
+
 ## Notes
 - Owner vs read-only is resolved from the auth user vs the route `userId` and the `readonly`
   query param.
