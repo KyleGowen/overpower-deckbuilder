@@ -147,6 +147,61 @@ describe('defaultCatalogCards', () => {
       expect(cards[0].id).toBe('base');
       expect(variantIdsByRepresentative.get('base')?.sort()).toEqual(['alt', 'base']);
     });
+
+    it('keeps distinct teamwork cards with same to_use but different followup types', () => {
+      const a = card('tw-1', {
+        name: '6 Brute Force',
+        set: 'ERB',
+        to_use: '6 Brute Force',
+        followup_attack_types: 'Intelligence + Combat',
+        image_path: 'teamwork-universe/6_brute_force_0c_1i.webp',
+      });
+      const b = card('tw-2', {
+        name: '6 Brute Force',
+        set: 'ERB',
+        to_use: '6 Brute Force',
+        followup_attack_types: 'Intelligence + Energy',
+        image_path: 'teamwork-universe/6_brute_force_0e_1i.webp',
+      });
+      const c = card('tw-3', {
+        name: '6 Brute Force',
+        set: 'ERB',
+        to_use: '6 Brute Force',
+        followup_attack_types: 'Energy + Combat',
+        image_path: 'teamwork-universe/6_brute_force_0e_1c.webp',
+      });
+
+      const { cards } = dedupeToDefaultCatalogCards([a, b, c], 'teamwork');
+
+      expect(cards).toHaveLength(3);
+      expect(cards.map((row) => row.id).sort()).toEqual(['tw-1', 'tw-2', 'tw-3']);
+    });
+
+    it('groups teamwork alternate art with same to_use and followup types', () => {
+      const base = card('tw-base', {
+        name: '6 Combat',
+        set: 'ERB',
+        to_use: '6 Combat',
+        followup_attack_types: 'Brute Force + Energy',
+        image_path: 'teamwork-universe/6_combat_0e_1bf.webp',
+      });
+      const alt = card('tw-alt', {
+        name: '6 Combat',
+        set: 'ERB',
+        to_use: '6 Combat',
+        followup_attack_types: 'Brute Force + Energy',
+        image_path: 'teamwork-universe/alternate/6_combat_0e_1bf.png',
+      });
+
+      const { cards, variantIdsByRepresentative } = dedupeToDefaultCatalogCards(
+        [alt, base],
+        'teamwork',
+      );
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('tw-base');
+      expect(variantIdsByRepresentative.get('tw-base')?.sort()).toEqual(['tw-alt', 'tw-base']);
+    });
   });
 
   describe('qtyInDeckForRepresentative', () => {

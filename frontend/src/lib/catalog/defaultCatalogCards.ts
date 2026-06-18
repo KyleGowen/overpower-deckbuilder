@@ -58,6 +58,14 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
     }
     case 'locations':
       return name;
+    case 'teamwork': {
+      const toUse = String(card.to_use ?? name).trim();
+      const followup = String(
+        card.followup_attack_types ?? card.follow_up_attack_types ?? '',
+      ).trim();
+      if (!toUse) return null;
+      return `${toUse}|${followup}`;
+    }
     default:
       return `${name}|${normalizeSet(card.set as string | undefined)}`;
   }
