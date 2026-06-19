@@ -134,15 +134,10 @@ function SingleLayerCardImage({
   loading: 'lazy' | 'eager';
   onImageFailed?: () => void;
 }) {
+  const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [thumbFailed, setThumbFailed] = useState(false);
-
-  useEffect(() => {
-    setLoaded(false);
-    setFailed(false);
-    setThumbFailed(false);
-  }, [imagePath, catalogType, useThumbnail]);
 
   const useFullRes = !useThumbnail || thumbFailed;
   const src = failed
@@ -151,9 +146,23 @@ function SingleLayerCardImage({
       ? resolveImageUrl(imagePath, catalogType)
       : resolveThumbUrl(imagePath, catalogType);
 
+  useLayoutEffect(() => {
+    setFailed(false);
+    setThumbFailed(false);
+    setLoaded(syncImageLoaded(imgRef.current));
+  }, [imagePath, catalogType, useThumbnail]);
+
+  // Thumb→full fallback changes src without resetting thumbFailed; still sync cache hits.
+  useLayoutEffect(() => {
+    if (syncImageLoaded(imgRef.current)) {
+      setLoaded(true);
+    }
+  }, [src]);
+
   return (
     <span className={`card-image ${loaded ? 'card-image--loaded' : 'card-image--loading'} ${className}`} style={style}>
       <img
+        ref={imgRef}
         className="card-image__img"
         src={src}
         alt={alt}

@@ -82,6 +82,13 @@ const STAT_ROWS: Array<{ key: 'energy' | 'combat' | 'bruteForce' | 'intelligence
   { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
 ];
 
+function detailImageClass(type: CatalogType | null): string {
+  if (type === 'characters') return ' card-detail__image--characters';
+  if (type === 'locations') return ' card-detail__image--locations';
+  if (type === 'events') return ' card-detail__image--events';
+  return '';
+}
+
 export function CardDetailPanel({
   card,
   type,
@@ -116,8 +123,14 @@ export function CardDetailPanel({
   return (
     <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
       <div className="card-detail">
-        <div className={`card-detail__image${isCharacter ? ' card-detail__image--landscape' : ''}`}>
-          <CardImage imagePath={(card.image_path as string) || (card.image as string)} alt={name} useThumbnail={false} className="card-image--contain" />
+        <div className={`card-detail__image${detailImageClass(type)}`}>
+          <CardImage
+            imagePath={(card.image_path as string) || (card.image as string)}
+            catalogType={type ?? undefined}
+            alt={name}
+            useThumbnail={false}
+            className="card-image--contain"
+          />
         </div>
 
         <div className="card-detail__tags">

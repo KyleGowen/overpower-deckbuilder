@@ -7,5 +7,7 @@ Pure TypeScript modules for the v2 deck editor (no React, no `window` globals).
 - **deckCardCatalog.ts** — Catalog index for deck rows (`buildDeckCardIndex`, `resolveDeckCatalogCard`, `deckCardDisplayName`). Normalizes underscore deck types; id-only fallback.
 - **simulateKo.ts** — Simulate KO dimming rules (`shouldDimDeckCard`, `buildKoDimmingContext`).
 - **deckInstances.ts**, **reserveCharacter.ts**, **iconTotals.ts**, **deckThreat.ts** — editor save model, reserve, stats.
+- **buildDeckExportJson.ts** — v2.0 deck export JSON builder (read-only export panel). Contract: `public/js/components/deck-export.md`.
+- **importTypes.ts**, **extractCardsFromImportJson.ts**, **resolveImportCardIds.ts**, **importCatalogLoader.ts**, **importDeckFromJson.ts** — deck selection import: parse v2.0 export JSON, resolve card names via catalog, create deck via HTTP APIs. Contract: `public/js/components/deck-import.md` (creates new deck; does not merge into open deck).
 
 Legacy v1 equivalents live under `public/js/components/draw-hand.js` and `simulate-ko.js`.

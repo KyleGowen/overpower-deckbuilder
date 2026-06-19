@@ -1,0 +1,54 @@
+.export-deck-panel__helper {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-normal);
+}
+
+.export-deck-panel__json {
+  margin: 0;
+  padding: var(--space-3);
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  color: var(--color-text);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: all;
+}
+
+.export-deck-panel__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.export-deck-panel__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.export-deck-panel__copy-btn.is-success {
+  background: rgba(54, 211, 153, 0.16);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.export-deck-panel__error {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.layout-mobile .export-deck-panel__json {
+  max-height: 50vh;
+}

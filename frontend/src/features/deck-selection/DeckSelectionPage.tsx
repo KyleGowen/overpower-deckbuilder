@@ -10,8 +10,11 @@ import { DeckTile, type DeckStatLine } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
-import { IconPlus, IconDecks, IconEdit, IconTrash, IconPlay } from '../../components/icons';
+import { IconPlus, IconDecks, IconEdit, IconTrash, IconPlay, IconImport, IconExport } from '../../components/icons';
 import type { DeckListItem } from '../../lib/api/types';
+import { ExportDeckPanel } from '../deck-editor/ExportDeckPanel';
+import { ImportDeckPanel } from './ImportDeckPanel';
+import { useDeckExportInput, createStubDeckExportInput } from './useDeckExportInput';
 import './DeckSelectionPage.css';
 
 export default function DeckSelectionPage() {
@@ -39,11 +42,19 @@ export default function DeckSelectionPage() {
 
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [busy, setBusy] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [menuDeck, setMenuDeck] = useState<DeckListItem | null>(null);
+  const [exportDeckId, setExportDeckId] = useState<string | null>(null);
+
+  const { input: exportDeckInput, loading: exportLoading } = useDeckExportInput(
+    exportDeckId,
+    isGuest,
+    Boolean(exportDeckId),
+  );
 
   const charStatsById = useMemo(() => {
     const m = new Map<string, ReturnType<typeof cardStats>>();
@@ -122,6 +133,12 @@ export default function DeckSelectionPage() {
     }
   };
 
+  const handleImportSuccess = async (deckId: string, userId: string) => {
+    setImportOpen(false);
+    await queryClient.invalidateQueries({ queryKey: ['decks'] });
+    navigate(`/users/${userId}/decks/${deckId}`);
+  };
+
   return (
     <div className="dsel">
       <div className="dsel__inner">
@@ -142,9 +159,18 @@ export default function DeckSelectionPage() {
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search decks"
             />
-            <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-              <IconPlus /> New Deck
-            </button>
+            <div className="dsel__action-buttons">
+              <button
+                type="button"
+                className={`btn btn-ghost${importOpen ? ' is-active' : ''}`}
+                onClick={() => setImportOpen(true)}
+              >
+                <IconImport /> Import Deck
+              </button>
+              <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                <IconPlus /> New Deck
+              </button>
+            </div>
           </div>
         </header>
 
@@ -159,9 +185,14 @@ export default function DeckSelectionPage() {
             icon={<IconDecks />}
             action={
               !search ? (
-                <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-                  <IconPlus /> New Deck
-                </button>
+                <div className="dsel__empty-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setImportOpen(true)}>
+                    <IconImport /> Import Deck
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                    <IconPlus /> New Deck
+                  </button>
+                </div>
               ) : null
             }
           />
@@ -200,6 +231,13 @@ export default function DeckSelectionPage() {
         </form>
       </SlideOutPanel>
 
+      <ImportDeckPanel
+        open={importOpen}
+        isGuest={isGuest}
+        onClose={() => setImportOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
+
       {/* Deck actions panel */}
       <SlideOutPanel
         open={Boolean(menuDeck)}
@@ -216,6 +254,16 @@ export default function DeckSelectionPage() {
             <button type="button" className="dsel__menu-item" onClick={() => navigate(`/users/${menuDeck.metadata.userId}/decks/${menuDeck.metadata.id}?readonly=true`)}>
               <IconPlay /> View (read-only)
             </button>
+            <button
+              type="button"
+              className="dsel__menu-item"
+              onClick={() => {
+                setExportDeckId(menuDeck.metadata.id);
+                setMenuDeck(null);
+              }}
+            >
+              <IconExport /> Export deck
+            </button>
             {!isGuest || menuDeck.metadata.id.startsWith('guest_') ? (
               <button type="button" className="dsel__menu-item dsel__menu-item--danger" onClick={() => handleDelete(menuDeck)}>
                 <IconTrash /> Delete deck
@@ -224,6 +272,15 @@ export default function DeckSelectionPage() {
           </div>
         ) : null}
       </SlideOutPanel>
+
+      {exportDeckId ? (
+        <ExportDeckPanel
+          open
+          input={exportDeckInput ?? createStubDeckExportInput(user?.username ?? 'Guest')}
+          loading={exportLoading || !exportDeckInput}
+          onClose={() => setExportDeckId(null)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -22,11 +22,15 @@ stats, ability/effect fields, timestamps, `is_foil`, `threat_level`, `set`). Key
 (`set_number` → "Set Number"); booleans render Yes/No; arrays join with commas; empty
 values are skipped. Pass `hasFoil` to show foil availability from the foil-card map.
 
+## Landscape art frames (characters, locations, events)
+- **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280` (matches DB grid `CardTile`).
+- **Locations & events**: `.card-detail__image--locations` / `.card-detail__image--events` — `aspect-ratio: 236 / 151` (matches DB grid `CardTile`).
+- **All other types**: default portrait `.card-detail__image` — `aspect-ratio: 5 / 7`.
+- Full art uses `CardImage` with `useThumbnail={false}` + `.card-image--contain`.
+
 ## Character-specific layout
-- Art frame uses `.card-detail__image--landscape` (`aspect-ratio: 380 / 280`) instead of portrait `5 / 7`.
 - The fifth stat tile shows gray **Threat** (`threat_level`) instead of purple **Total**.
 
 ## Notes
 - Uses `cardStats` / `cardAbilityText` from `catalogTypeMap` so stat/ability extraction is
   consistent across card types.
-- Full art uses `CardImage` with `useThumbnail={false}` + `.card-image--contain`.

@@ -14,8 +14,12 @@
   align-items: center;
   justify-content: center;
 }
-.card-detail__image--landscape {
+.card-detail__image--characters {
   aspect-ratio: 380 / 280;
+}
+.card-detail__image--locations,
+.card-detail__image--events {
+  aspect-ratio: 236 / 151;
 }
 .card-detail__image .card-image {
   background: transparent;

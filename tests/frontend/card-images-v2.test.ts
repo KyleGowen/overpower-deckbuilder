@@ -213,3 +213,18 @@ describe('CardTile database progressive wiring', () => {
     expect(source).not.toContain('catalogTypeUsesFullImageInDbGrid');
   });
 });
+
+describe('CardImage single-layer cached sync', () => {
+  it('syncs loaded state from img.complete on path and src changes (deck tile cycling)', () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '../../frontend/src/components/CardImage/CardImage.tsx'),
+      'utf8',
+    );
+    expect(source).toContain('function SingleLayerCardImage');
+    expect(source).toContain('syncImageLoaded(imgRef.current)');
+    expect(source).toMatch(
+      /useLayoutEffect\(\(\) => \{[\s\S]*setThumbFailed\(false\);[\s\S]*\}, \[imagePath, catalogType, useThumbnail\]\);/,
+    );
+    expect(source).toMatch(/useLayoutEffect\(\(\) => \{[\s\S]*setLoaded\(true\);[\s\S]*\}, \[src\]\);/);
+  });
+});

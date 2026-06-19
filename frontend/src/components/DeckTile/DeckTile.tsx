@@ -161,6 +161,7 @@ export function DeckTile({
               catalogType={shownSlide.catalogType}
               alt={shownSlide.name || 'Character'}
               useThumbnail={!isLocationSlide}
+              loading="eager"
               className={isLocationSlide ? undefined : 'card-image--contain'}
             />
           </div>

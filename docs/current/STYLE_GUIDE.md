@@ -2980,7 +2980,10 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
 ### Detail slide-out — `CardDetailPanel`
 
 - **Width**: `504px` on desktop (`CARD_DETAIL_PANEL_WIDTH`); full viewport on mobile (`.layout-mobile .slideout__panel--right`).
-- **Character art**: `.card-detail__image--landscape` with `aspect-ratio: 380 / 280` (matches grid tile ratio; no portrait letterboxing).
+- **Landscape art** (matches DB grid `CardTile` ratios; no portrait letterboxing):
+  - **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280`.
+  - **Locations & events**: `.card-detail__image--locations` / `.card-detail__image--events` — `aspect-ratio: 236 / 151`.
+  - **All other types**: default `.card-detail__image` — `aspect-ratio: 5 / 7`.
 - **Action row**: `.db__detail-actions` — equal-width **Add to Deck** (`.db__add-deck`, primary) and **+ Collection** (`.db__add-collection`, secondary); deck picker menu still expands below the deck button inside `.db__add-deck-wrap`.
 - **Character stats**: fifth tile is gray **Threat** (`.card-detail__stat--threat`, `.stat-threat` → `var(--color-text-muted)`) showing `threat_level`; other stat types keep purple **Total** (`.card-detail__stat--total`).
 - **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.

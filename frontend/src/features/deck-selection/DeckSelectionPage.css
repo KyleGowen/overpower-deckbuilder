@@ -58,6 +58,27 @@
   width: 220px;
 }
 
+.dsel__action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.dsel__action-buttons .btn-ghost.is-active {
+  color: var(--color-accent-bright);
+  border-color: var(--color-border-accent);
+  background: rgba(0, 200, 232, 0.08);
+}
+
+.dsel__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
 .dsel__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
