@@ -24,7 +24,6 @@ Used on Home (Community Decks rail, `compact`) and Deck Selection (`full`).
 | `rankLabel` | `string` | – | Optional rank tag (e.g. tournament rail). |
 | `onOpen` | `() => void` | – | Opens the deck (whole tile is the button). |
 | `onMenu` | `() => void` | – | Shows the actions menu (kebab); stops propagation. |
-| `favorite` | `boolean` | – | Shows a favorite star. |
 
 ## Meta bar
 

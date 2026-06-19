@@ -24,7 +24,6 @@ frontend/src/
     images/     cardImages.ts (CDN + thumbnail resolution, assetUrl)
     catalog/    catalogTypeMap.ts (type vocab mapping + card helpers)
     collection/ guestCollection.ts, useCollection.ts
-    decks/      favorites.ts (localStorage favorites)
     layout/     LayoutModeProvider.tsx (mobile/desktop)
   lib/api/    recent-updates.ts (GET /api/v1/recent-updates)
   styles/     tokens.css, global.css

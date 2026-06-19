@@ -85,16 +85,6 @@
   letter-spacing: 0.04em;
 }
 
-.deck-tile__fav {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  z-index: 3;
-  color: var(--color-accent-bright);
-  font-size: 1.1rem;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
-}
-
 .deck-tile__menu {
   position: absolute;
   top: var(--space-2);

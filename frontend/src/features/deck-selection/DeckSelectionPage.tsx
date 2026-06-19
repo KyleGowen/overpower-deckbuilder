@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
@@ -10,8 +10,7 @@ import { DeckTile, type DeckStatLine } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
-import { getFavorites, toggleFavorite } from '../../lib/decks/favorites';
-import { IconPlus, IconDecks, IconEdit, IconTrash, IconStar, IconPlay } from '../../components/icons';
+import { IconPlus, IconDecks, IconEdit, IconTrash, IconPlay } from '../../components/icons';
 import type { DeckListItem } from '../../lib/api/types';
 import './DeckSelectionPage.css';
 
@@ -45,13 +44,6 @@ export default function DeckSelectionPage() {
   const [busy, setBusy] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [menuDeck, setMenuDeck] = useState<DeckListItem | null>(null);
-  const [favTick, setFavTick] = useState(0);
-
-  useEffect(() => {
-    const h = () => setFavTick((t) => t + 1);
-    window.addEventListener('favorite-decks-change', h);
-    return () => window.removeEventListener('favorite-decks-change', h);
-  }, []);
 
   const charStatsById = useMemo(() => {
     const m = new Map<string, ReturnType<typeof cardStats>>();
@@ -91,22 +83,12 @@ export default function DeckSelectionPage() {
     return found ? { energy, combat, bruteForce, intelligence } : null;
   };
 
-  const favorites = useMemo(() => {
-    void favTick;
-    return getFavorites();
-  }, [favTick]);
-
   const decks = decksQuery.data ?? [];
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = q ? decks.filter((d) => d.metadata.name.toLowerCase().includes(q)) : decks;
-    return [...list].sort((a, b) => {
-      const fa = favorites.has(a.metadata.id) ? 0 : 1;
-      const fb = favorites.has(b.metadata.id) ? 0 : 1;
-      if (fa !== fb) return fa - fb;
-      return a.metadata.name.localeCompare(b.metadata.name);
-    });
-  }, [decks, search, favorites]);
+    return [...list].sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+  }, [decks, search]);
 
   const openDeck = (deck: DeckListItem) => {
     navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}`);
@@ -192,7 +174,6 @@ export default function DeckSelectionPage() {
                 variant="full"
                 maxStats={deckMaxStats(deck)}
                 missionSetName={deckMissionSetLabel(deck)}
-                favorite={favorites.has(deck.metadata.id)}
                 onOpen={() => openDeck(deck)}
                 onMenu={() => setMenuDeck(deck)}
               />
@@ -234,15 +215,6 @@ export default function DeckSelectionPage() {
             </button>
             <button type="button" className="dsel__menu-item" onClick={() => navigate(`/users/${menuDeck.metadata.userId}/decks/${menuDeck.metadata.id}?readonly=true`)}>
               <IconPlay /> View (read-only)
-            </button>
-            <button
-              type="button"
-              className="dsel__menu-item"
-              onClick={() => {
-                toggleFavorite(menuDeck.metadata.id);
-              }}
-            >
-              <IconStar /> {favorites.has(menuDeck.metadata.id) ? 'Remove favorite' : 'Add favorite'}
             </button>
             {!isGuest || menuDeck.metadata.id.startsWith('guest_') ? (
               <button type="button" className="dsel__menu-item dsel__menu-item--danger" onClick={() => handleDelete(menuDeck)}>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
-import { IconCards, IconDots, IconStar } from '../icons';
+import { IconCards, IconDots } from '../icons';
 import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
 import { assetUrl } from '../../lib/images/cardImages';
 import { deckTileLegalityBadge } from './deckTileLegality';
@@ -30,7 +30,6 @@ interface DeckTileProps {
   rankLabel?: string;
   onOpen?: () => void;
   onMenu?: () => void;
-  favorite?: boolean;
 }
 
 interface ArtSlide {
@@ -85,7 +84,6 @@ export function DeckTile({
   rankLabel,
   onOpen,
   onMenu,
-  favorite,
 }: DeckTileProps) {
   const meta = deck.metadata;
   const artSlides = useMemo(() => deckArtSlides(deck), [deck]);
@@ -174,9 +172,6 @@ export function DeckTile({
         <div className="deck-tile__art-veil" />
 
         {rankLabel ? <span className="deck-tile__rank">{rankLabel}</span> : null}
-        {favorite ? (
-          <span className="deck-tile__fav" aria-label="Favorite"><IconStar /></span>
-        ) : null}
         {onMenu ? (
           <button
             type="button"
