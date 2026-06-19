@@ -9,8 +9,8 @@ Landing page after login. Sections, top to bottom:
    (`aria-expanded`). On desktop the cards have a fixed height, so clicking a
    card expands it **horizontally only** (the flex tile grows, siblings shrink)
    to reveal its full title and summary — no card ever changes height. Opening a
-   card collapses any previously open one. On mobile the row stacks into a column
-   and expansion is vertical instead. No modal or navigation.
+   card collapses any previously open one. On mobile the row stacks into a full-width
+   column and expansion is vertical instead. No modal or navigation.
 3. **Community Decks** rail — horizontally scrolling `DeckTile`s backed by
    `GET /api/v1/decks/community` (the `community_decks` account's decks only; see
    [`COMMUNITY_DECKS.md`](./COMMUNITY_DECKS.md)).

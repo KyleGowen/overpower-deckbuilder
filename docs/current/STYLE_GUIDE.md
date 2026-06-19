@@ -2906,7 +2906,7 @@ Every card is a `<button class="home__news-item">` (`aria-expanded`). Clicking a
 - **Horizontal growth**: the open card gets `.home__news-item--open { flex-grow: 2.4; }`, so it widens while its siblings shrink. The width change is animated via `transition: ... flex-grow var(--dur-med) var(--ease-out)`.
 - **No reflow growth**: `.home__news-title` is single-line (`white-space: nowrap; overflow: hidden; text-overflow: ellipsis`) so a narrowed card's title can't wrap to a second line and change height. `.home__news-summary--clamped` applies `-webkit-line-clamp: 2`; `.home__news-summary--expanded` allows up to `-webkit-line-clamp: 6` (still bounded by the fixed card height + `overflow: hidden`).
 - **Affordance**: the whole card is the toggle (no "Read more" link, no caret — the old `.home__news-more` indicator and `.home__news-caret` / `IconChevronRight` were removed). All cards get `cursor: pointer`, a hover border (`--color-border-accent`), and a `:focus-visible` outline.
-- **Mobile**: `.layout-mobile .home__news-item` resets to `height: auto; overflow: visible` and `.home__news-title` wraps (`white-space: normal`). In the stacked column there is no horizontal room, so expansion is vertical (the card grows taller to fit the full summary).
+- **Mobile**: `.layout-mobile .home__news` stacks with `flex-direction: column` and `align-items: stretch`. Each `.layout-mobile .home__news-item` spans full width (`width: 100%`), resets to `height: auto; overflow: visible`, and `.home__news-title` wraps (`white-space: normal`). Open-state horizontal `flex-grow` is reset (`.layout-mobile .home__news-item--open { flex-grow: 0; }`), so expansion is vertical only (the card grows taller to fit the full summary).
 
 ### Editing notes
 

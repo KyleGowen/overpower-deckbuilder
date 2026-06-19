@@ -278,11 +278,16 @@
 }
 .layout-mobile .home__news {
   flex-direction: column;
+  align-items: stretch;
 }
-/* On mobile the row stacks; let cards size to content and titles wrap. */
+/* Stacked mobile cards span full width and expand vertically when open. */
 .layout-mobile .home__news-item {
+  width: 100%;
   height: auto;
   overflow: visible;
+}
+.layout-mobile .home__news-item--open {
+  flex-grow: 0;
 }
 .layout-mobile .home__news-title {
   white-space: normal;
