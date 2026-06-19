@@ -70,7 +70,9 @@ export default function LoginPage() {
         <Logo height={210} className="login__brand-logo" />
         <h1 className="login__tagline">Build. Battle. OverPower.</h1>
         <p className="login__brand-sub">
-          Create unstoppable decks, command powerful cards, and rise to the top of the Excelsior.
+          Excelsior is a modern OverPower deckbuilding hub and card database. Browse
+          tournament-winning lists, study community builds, and craft Venture-ready decks
+          from the full modern card pool.
         </p>
         <ul className="login__callouts">
           {CALLOUTS.map((c) => (

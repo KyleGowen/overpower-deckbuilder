@@ -2822,6 +2822,13 @@ This section covers the React v2 SPA login screen at `/login` (markup in [fronte
 - **Alignment**: `align-items: center` (vertical centering of both columns).
 - **Reasoning**: the previous `1fr 1fr` split centered the login card inside its own right half, leaving a large empty gap in the middle on wide screens. Using `max-content 1fr` shrinks the left column to the text and lets the card center within the remaining space.
 
+### Brand sub — `.login__brand-sub`
+
+- **Visibility**: desktop only (hidden with `.login__brand` on `layout-mobile`).
+- **Placement**: below `.login__tagline` ("Build. Battle. OverPower.") and above the Build / Collect / Database callout list.
+- **Copy**: "Excelsior is a modern OverPower deckbuilding hub and card database. Browse tournament-winning lists, study community builds, and craft Venture-ready decks from the full modern card pool."
+- **Styling**: `color: var(--color-text-muted)`; `font-size: calc(var(--font-size-base) * 1.25)`; `margin-bottom: calc(var(--space-8) + 1.25em)` (extra line of space before callout icons).
+
 ### Card header — `.login__card-header`
 
 - **Layout**: centered text block at the top of the auth card (`width: 100%`, `text-align: center`, `margin-bottom: var(--space-8)` — extra breathing room before the form).

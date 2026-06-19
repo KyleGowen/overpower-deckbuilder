@@ -57,7 +57,7 @@
 }
 .login__brand-sub {
   color: var(--color-text-muted);
-  margin-bottom: var(--space-8);
+  margin-bottom: calc(var(--space-8) + 1.25em);
   font-size: calc(var(--font-size-base) * 1.25);
 }
 .login__callouts {

@@ -21,6 +21,10 @@ with the enlarged Excelsior wordmark (`Logo height={210}`). Right: the auth card
   "Welcome Back" and the form follow inside the card.
 
 ## Copy
+- **Brand sub (DTV only):** "Excelsior is a modern OverPower deckbuilding hub and card database.
+  Browse tournament-winning lists, study community builds, and craft Venture-ready decks from the
+  full modern card pool." (`.login__brand-sub`, below the tagline and above Build / Collect /
+  Database callouts.)
 - **Login subheading:** "Log in to access your decks, collections, and card database."
 - **Support footer:** email `kyle@excelsior.cards`; Discord handle `@GirlsGoneKyle` links to
   `https://discord.com/users/414971289267339274` (opens profile / Message in Discord).
