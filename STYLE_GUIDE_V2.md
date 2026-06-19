@@ -110,8 +110,9 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 
 ## Layout & Navigation
 - Full-width layout: `--content-max-width: none`; page `*__inner` wrappers and `.top-nav__inner` span the viewport with horizontal padding (`--space-6` desktop, `--space-4` mobile) as side gutters. Deck editor uses the same full-bleed pattern with its own chrome (no AppShell).
-- **`html { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
+- **`html.layout-desktop { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
   top nav does not shift when shorter pages (e.g. Decks) hide the document scrollbar.
+- **Mobile horizontal containment:** `html.layout-mobile`, `body`, `#root`, and `.app-shell` / `.app-shell__content` use `overflow-x: clip` and `max-width: 100%` so the page cannot pan sideways. Intentional horizontal scroll stays on inner regions (`.db__types`, `.col__types`, `.dbv-filter-rail__controls`, `.home__rail`) via `overflow-x: auto`, `min-width: 0`, and `overscroll-behavior-x: contain`.
 - **Desktop** (`> 900px`): sticky **top nav** (`--top-nav-height: 60px`) with the logo,
   primary links (Home, Database, Decks, Collection), and the user menu on the right. The
   active link is cyan with a soft pill background.

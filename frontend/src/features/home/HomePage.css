@@ -130,6 +130,8 @@
   grid-auto-columns: clamp(230px, 25%, 280px);
   gap: var(--space-4);
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: var(--space-2);
   scroll-snap-type: x proximity;
   justify-content: start;

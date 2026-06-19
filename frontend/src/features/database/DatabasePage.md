@@ -49,3 +49,4 @@ Browse, search, filter, and sort the full modern OverPower catalog.
 ## Notes
 - Cards legitimately without art show the "No image" placeholder.
 - Type tabs use short labels under `.layout-mobile`.
+- Type tab strip (`.db__types`) scrolls horizontally inside the page; page-level sideways pan is blocked by mobile `overflow-x: clip` on the document/shell chain.

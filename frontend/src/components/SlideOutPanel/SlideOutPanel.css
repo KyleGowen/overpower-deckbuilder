@@ -121,6 +121,7 @@
 }
 
 .layout-mobile .slideout__panel--right {
-  width: 100vw !important;
+  width: 100% !important;
+  max-width: 100%;
   border-left: none;
 }

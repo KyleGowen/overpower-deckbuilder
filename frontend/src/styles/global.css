@@ -18,7 +18,22 @@ body,
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+}
+
+html.layout-desktop {
   scrollbar-gutter: stable;
+}
+
+html.layout-mobile,
+html.layout-mobile body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+html.layout-mobile #root {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {

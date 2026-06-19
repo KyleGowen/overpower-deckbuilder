@@ -82,6 +82,13 @@
 }
 
 /* ---------- Mobile bottom nav ---------- */
+.layout-mobile .app-shell,
+.layout-mobile .app-shell__content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 .app-shell--mobile .app-shell__content {
   padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
 }
