@@ -171,6 +171,6 @@
   max-width: 160px;
 }
 .layout-mobile .db__grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: var(--space-3);
 }

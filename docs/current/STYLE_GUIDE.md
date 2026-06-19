@@ -2941,7 +2941,7 @@ The `/data` database page (`DatabasePage.tsx`) renders catalog cards with `CardT
 
 - **Landscape tabs** (Characters, Locations, Events): `.db__grid--landscape` → `grid-template-columns: repeat(auto-fill, minmax(290px, 1fr))` — scales from ~4 columns at typical desktop widths to more on ultrawide.
 - **Portrait tabs** (all other catalog types): `.db__grid--portrait` → `grid-template-columns: repeat(auto-fill, minmax(195px, 1fr))` — scales from ~6 columns at typical desktop widths to more on ultrawide.
-- **Mobile** (`.layout-mobile .db__grid`): `repeat(2, 1fr)` for both orientations.
+- **Mobile** (`.layout-mobile .db__grid`): `repeat(1, minmax(0, 1fr))` for both orientations (one card per row).
 - `gap: var(--space-4)`; page content is full-width (`--content-max-width: none`) with `--space-6` horizontal padding on `.db__inner`.
 
 ### Tile orientation — `CardTile` + `catalogType`

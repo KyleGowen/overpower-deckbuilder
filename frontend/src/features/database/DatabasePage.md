@@ -31,7 +31,8 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   catalog endpoints don't paginate, so filtering, sorting, and pagination are **client
   side** (`Pagination` component).
 - Grid uses `CardTile` with `catalogType` for orientation: Characters/Locations/Events are
-  landscape (4 per row); other types are portrait (6 per row). Images use `contain` (no crop).
+  landscape (4 per row desktop); other types are portrait (6 per row desktop). Mobile uses
+  one card per row for all types. Images use `contain` (no crop).
   Tile art uses **progressive** thumb → full-res loading (`CardImage` `progressive` prop).
   Set line shows code + number when available.
 - **Foil dedup:** `fetchFoilCardMap` hides foil rows when the base card is in the same tab;
