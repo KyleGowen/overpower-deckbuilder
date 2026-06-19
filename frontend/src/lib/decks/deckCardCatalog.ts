@@ -1,4 +1,4 @@
-import { cardDisplayName, metaForDeckType } from '../catalog/catalogTypeMap';
+import { cardDisplayName, compareDeckPowerCatalogCards, metaForDeckType } from '../catalog/catalogTypeMap';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../api/types';
 
 export type DeckCardIndex = Map<string, CatalogCard>;
@@ -51,6 +51,20 @@ export function deckCardDisplayName(
   const meta = metaForDeckType(normalizeDeckCardType(entry.type));
   const typeLabel = meta?.shortLabel ?? normalizeDeckCardType(entry.type);
   return `Unknown ${typeLabel} card`;
+}
+
+/** Deck editor power section: ascending value, then OP type order. */
+export function sortDeckPowerEntries(
+  entries: DeckCardEntry[],
+  cardIndex: DeckCardIndex,
+): DeckCardEntry[] {
+  if (entries.length <= 1) return entries;
+  return [...entries].sort((a, b) => {
+    const cardA = resolveDeckCatalogCard(a, cardIndex);
+    const cardB = resolveDeckCatalogCard(b, cardIndex);
+    if (!cardA || !cardB) return 0;
+    return compareDeckPowerCatalogCards(cardA, cardB);
+  });
 }
 
 /** Build lookup map for deck editor / draw hand (normalized keys + id-only). */

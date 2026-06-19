@@ -138,8 +138,22 @@ function comparePowerCatalogCardTiebreakers(a: CatalogCard, b: CatalogCard): num
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
-function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
+/** Add-cards / DBV tiebreakers: Energy → Combat → BF → Int → Multi → Any, then value ascending. */
+export function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
   return comparePowerCatalogCardTiebreakers(a, b);
+}
+
+/** Deck editor power section: ascending value, then OP type order. */
+export function compareDeckPowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
+  const valueA = Number(a.value ?? 0);
+  const valueB = Number(b.value ?? 0);
+  if (valueA !== valueB) return valueA - valueB;
+
+  const typeCmp =
+    powerTypeSortIndex(String(a.power_type ?? '')) - powerTypeSortIndex(String(b.power_type ?? ''));
+  if (typeCmp !== 0) return typeCmp;
+
+  return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
 /** Card Database grid sort: set → set_number, then tab-specific tiebreakers. */

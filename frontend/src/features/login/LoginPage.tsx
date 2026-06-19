@@ -86,11 +86,15 @@ export default function LoginPage() {
       </aside>
 
       <main className="login__card panel">
+        <div className="login__card-logo">
+          <Logo height={100} className="login__card-logo-img" alt="Excelsior" />
+        </div>
+
         <div className="login__card-header">
           <h2 className="login__heading">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
           <p className="login__subheading">
             {mode === 'login'
-              ? 'Log in to access your decks, collections, and battles.'
+              ? 'Log in to access your decks, collections, and card database.'
               : 'Join the Excelsior community and start building.'}
           </p>
         </div>
@@ -193,7 +197,15 @@ export default function LoginPage() {
 
         <p className="login__support">
           For support or feedback, email <a href="mailto:kyle@excelsior.cards">kyle@excelsior.cards</a>
-          <br />or join our community on Discord: <strong>@GirlsGoneKyle</strong>
+          <br />
+          or message me on Discord:{' '}
+          <a
+            href="https://discord.com/users/414971289267339274"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            @GirlsGoneKyle
+          </a>
         </p>
       </main>
     </div>

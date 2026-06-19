@@ -2825,7 +2825,21 @@ This section covers the React v2 SPA login screen at `/login` (markup in [fronte
 ### Card header — `.login__card-header`
 
 - **Layout**: centered text block at the top of the auth card (`width: 100%`, `text-align: center`, `margin-bottom: var(--space-8)` — extra breathing room before the form).
-- **Content**: `.login__heading` ("Welcome Back" / "Create Account") and `.login__subheading` only — no logo in the card (brand wordmark remains in the left `.login__brand` column on desktop).
+- **Content**: `.login__heading` ("Welcome Back" / "Create Account") and `.login__subheading`.
+- **Login subheading copy**: "Log in to access your decks, collections, and card database."
+
+### Mobile card logo — `.login__card-logo`
+
+- **Purpose**: show Excelsior branding on mobile where `.login__brand` is hidden.
+- **Markup**: `<Logo height={100} className="login__card-logo-img" />` above `.login__card-header`.
+- **Visibility**: `display: none` by default; `.layout-mobile .login__card-logo { display: block }`.
+- **Spacing**: `margin-bottom: var(--space-6)`; logo centered with `margin-inline: auto` on the image.
+
+### Support footer — `.login__support`
+
+- **Email**: `mailto:kyle@excelsior.cards` (accent link color).
+- **Discord DM**: `@GirlsGoneKyle` links to `https://discord.com/users/414971289267339274` (`target="_blank"`, `rel="noopener noreferrer"`). Copy: "or message me on Discord:".
+- **Link styles**: `.login__support a` uses `var(--color-accent-bright)`; underline on hover/focus-visible.
 
 ### Login card — `.login__card` (`+ .panel`)
 
@@ -2837,7 +2851,7 @@ This section covers the React v2 SPA login screen at `/login` (markup in [fronte
 
 ### Responsive behavior (`layout-mobile`)
 
-Mobile overrides are unchanged: `.layout-mobile .login` collapses to a single column (`grid-template-columns: 1fr`), `.login__brand` is hidden, and `.login__card` drops its background/border/blur and uses reduced padding. The `max-width: 540px` cap is effectively inert on typical phone widths where the card is full-width.
+Mobile overrides: `.layout-mobile .login` collapses to a single column (`grid-template-columns: 1fr`), `.login__brand` is hidden, `.login__card-logo` is shown, and `.login__card` drops its background/border/blur and uses reduced padding. The `max-width: 540px` cap is effectively inert on typical phone widths where the card is full-width.
 
 ## Home Hero Art Shading (v2 SPA)
 

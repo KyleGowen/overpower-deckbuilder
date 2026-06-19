@@ -123,6 +123,15 @@
   background: linear-gradient(90deg, transparent, var(--color-accent-bright), transparent);
   box-shadow: 0 0 16px 1px var(--color-accent-glow);
 }
+.login__card-logo {
+  display: none;
+  margin-bottom: var(--space-6);
+}
+.login__card-logo-img {
+  display: block;
+  margin-inline: auto;
+}
+
 .login__card-header {
   width: 100%;
   margin-bottom: var(--space-8);
@@ -238,6 +247,14 @@
   font-size: var(--font-size-xs);
   line-height: 1.7;
 }
+.login__support a {
+  color: var(--color-accent-bright);
+  text-decoration: none;
+}
+.login__support a:hover,
+.login__support a:focus-visible {
+  text-decoration: underline;
+}
 
 /* ---- Mobile ---- */
 .layout-mobile .login {
@@ -247,6 +264,9 @@
 }
 .layout-mobile .login__brand {
   display: none;
+}
+.layout-mobile .login__card-logo {
+  display: block;
 }
 .layout-mobile .login__bg-veil {
   background:

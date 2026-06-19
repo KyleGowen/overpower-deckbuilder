@@ -18,6 +18,43 @@ function getDeckEditorCardViewInitialImagePath(fullResPath, cardType) {
     return thumb !== fullResPath ? thumb : fullResPath;
 }
 
+/** OverPower power type order (Energy → Combat → BF → Int → Multi → Any). */
+const POWER_TYPE_SORT_KEYS = ['energy', 'combat', 'bruteforce', 'intelligence', 'multipower', 'anypower'];
+
+function normalizePowerTypeKey(powerType) {
+    return String(powerType || '').trim().toLowerCase().replace(/[\s-]+/g, '');
+}
+
+function powerTypeSortIndex(powerType) {
+    const key = normalizePowerTypeKey(powerType);
+    const idx = POWER_TYPE_SORT_KEYS.indexOf(key);
+    return idx >= 0 ? idx : POWER_TYPE_SORT_KEYS.length;
+}
+
+function lookupAvailableCardForDeckSort(card) {
+    let availableCard = window.availableCardsMap.get(card.cardId);
+    if (!availableCard && card.type) availableCard = window.availableCardsMap.get(`${card.type}_${card.cardId}`);
+    if (!availableCard && card.type && card.type.includes('_')) {
+        availableCard = window.availableCardsMap.get(`${card.type.replace(/_/g, '-')}_${card.cardId}`);
+    }
+    return availableCard;
+}
+
+/** Deck view power cards: ascending value first, then OP type order. */
+function comparePowerDeckCards(a, b) {
+    const cardA = lookupAvailableCardForDeckSort(a);
+    const cardB = lookupAvailableCardForDeckSort(b);
+    if (!cardA || !cardB) return 0;
+    const valueA = parseInt(cardA.value, 10) || 0;
+    const valueB = parseInt(cardB.value, 10) || 0;
+    if (valueA !== valueB) return valueA - valueB;
+    const typeCmp = powerTypeSortIndex(cardA.power_type) - powerTypeSortIndex(cardB.power_type);
+    if (typeCmp !== 0) return typeCmp;
+    const nameA = `${valueA} - ${cardA.power_type || ''}`;
+    const nameB = `${valueB} - ${cardB.power_type || ''}`;
+    return nameA.localeCompare(nameB);
+}
+
 /**
  * After card-view HTML is in the DOM, progressively load full-res for tiles that show a thumbnail.
  * Targets only .card-view-image-full (two-layer markup). Preloads full-res, then sets the full-res
@@ -508,16 +545,20 @@ function renderDeckCardsListView() {
             });
         } else {
             // Regular handling for other card types (including characters)
-            // Sort cards by name for consistent display
-            cards.sort((a, b) => {
-                let availableCardA = window.availableCardsMap.get(a.cardId);
-                if (!availableCardA && a.type) availableCardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
-                let availableCardB = window.availableCardsMap.get(b.cardId);
-                if (!availableCardB && b.type) availableCardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
-                const nameA = availableCardA?.name || availableCardA?.card_name || 'Unknown';
-                const nameB = availableCardB?.name || availableCardB?.card_name || 'Unknown';
-                return nameA.localeCompare(nameB);
-            });
+            if (type === 'power') {
+                cards.sort(comparePowerDeckCards);
+            } else {
+                // Sort cards by name for consistent display
+                cards.sort((a, b) => {
+                    let availableCardA = window.availableCardsMap.get(a.cardId);
+                    if (!availableCardA && a.type) availableCardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
+                    let availableCardB = window.availableCardsMap.get(b.cardId);
+                    if (!availableCardB && b.type) availableCardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
+                    const nameA = availableCardA?.name || availableCardA?.card_name || 'Unknown';
+                    const nameB = availableCardB?.name || availableCardB?.card_name || 'Unknown';
+                    return nameA.localeCompare(nameB);
+                });
+            }
 
             cards.forEach((card, index) => {
                 let availableCard = window.availableCardsMap.get(card.cardId);
@@ -1244,28 +1285,11 @@ function renderDeckCardsCardView() {
             `;
             
             // Render cards in horizontal rows - Card View specific rendering
-            // For power cards: sort by value with Overpower type tiebreaker (Energy, Combat, Brute Force, Intelligence, Multi Power, Any-Power)
+            // For power cards: sort by ascending value, then OverPower type order
             // For special cards: sort by character order matching Characters section, with "Any Character" specials last
             const cardsForRendering = (type === 'power') ? (() => {
-                const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Multi Power', 'Any-Power'];
-                const orderIndex = (t) => {
-                    const idx = preferredOrder.indexOf(t);
-                    return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
-                };
                 const copy = [...typeCards];
-                copy.sort((a, b) => {
-                    let cardA = window.availableCardsMap.get(a.cardId);
-                    if (!cardA && a.type) cardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
-                    let cardB = window.availableCardsMap.get(b.cardId);
-                    if (!cardB && b.type) cardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
-                    if (!cardA || !cardB) return 0;
-                    const valueA = parseInt(cardA.value) || 0;
-                    const valueB = parseInt(cardB.value) || 0;
-                    if (valueA !== valueB) return valueA - valueB;
-                    const aType = cardA.power_type || '';
-                    const bType = cardB.power_type || '';
-                    return orderIndex(aType) - orderIndex(bType);
-                });
+                copy.sort(comparePowerDeckCards);
                 return copy;
             })() : (type === 'special') ? (() => {
                 // Sort special cards by character order, with "Any Character" specials last
@@ -1942,26 +1966,14 @@ async function displayDeckCardsForEditing() {
                     });
                     
                     // Sort power types using OverPower order: Energy → Combat → Brute Force → Intelligence → Multi Power → Any-Power
-                    const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Multi Power', 'Any-Power'];
                     const sortedPowerTypes = Object.keys(powerTypeGroups).sort((a, b) => {
-                        const aIndex = preferredOrder.indexOf(a);
-                        const bIndex = preferredOrder.indexOf(b);
-                        
-                        // If both are in preferred order, sort by their position
-                        if (aIndex !== -1 && bIndex !== -1) {
-                            return aIndex - bIndex;
-                        }
-                        
-                        // If only one is in preferred order, prioritize it
-                        if (aIndex !== -1) return -1;
-                        if (bIndex !== -1) return 1;
-                        
-                        // If neither is in preferred order, sort alphabetically
+                        const typeCmp = powerTypeSortIndex(a) - powerTypeSortIndex(b);
+                        if (typeCmp !== 0) return typeCmp;
                         return a.localeCompare(b);
                     });
                     
                     sortedPowerTypes.forEach(powerType => {
-                        const powerTypeCards = powerTypeGroups[powerType];
+                        const powerTypeCards = powerTypeGroups[powerType].sort(comparePowerDeckCards);
                         const cardCount = powerTypeCards.reduce((total, card) => total + (card.quantity || 1), 0);
                         
                         // Check if this power type group should be expanded
@@ -2060,24 +2072,8 @@ async function displayDeckCardsForEditing() {
                         `;
                     });
                 } else {
-                // Value sorted view - sort all power cards by value, then Overpower type order
-                const sortedCards = [...typeCards].sort((a, b) => {
-                        // Direct lookup using UUID
-                        let cardA = window.availableCardsMap.get(a.cardId);
-                        if (!cardA && a.type) cardA = window.availableCardsMap.get(`${a.type}_${a.cardId}`);
-                        let cardB = window.availableCardsMap.get(b.cardId);
-                        if (!cardB && b.type) cardB = window.availableCardsMap.get(`${b.type}_${b.cardId}`);
-                        if (!cardA || !cardB) return 0;
-                        const valueA = parseInt(cardA.value) || 0;
-                        const valueB = parseInt(cardB.value) || 0;
-                        if (valueA !== valueB) return valueA - valueB;
-                        const preferredOrder = ['Energy', 'Combat', 'Brute Force', 'Intelligence', 'Multi Power', 'Any-Power'];
-                        const orderIndex = (t) => {
-                            const idx = preferredOrder.indexOf(t);
-                            return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
-                        };
-                        return orderIndex(cardA.power_type || '') - orderIndex(cardB.power_type || '');
-                    });
+                // Value sorted view - flat list by ascending value, then OverPower type order
+                const sortedCards = [...typeCards].sort(comparePowerDeckCards);
                     
                     sortedCards.forEach(cardData => {
                         const card = cardData;

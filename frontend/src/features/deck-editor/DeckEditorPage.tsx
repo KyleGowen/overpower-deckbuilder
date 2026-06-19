@@ -68,6 +68,7 @@ import {
   deckCardDisplayName,
   normalizeDeckCardType,
   resolveDeckCatalogCard,
+  sortDeckPowerEntries,
 } from '../../lib/decks/deckCardCatalog';
 import { AddCardsPanel } from './AddCardsPanel';
 import { DrawHandPanel } from './DrawHandPanel';
@@ -351,10 +352,13 @@ export default function DeckEditorPage() {
       arr.push(c);
       map.set(c.type, arr);
     });
-    return CATALOG_TYPES.map((meta) => ({ meta, entries: map.get(meta.deckType) ?? [] })).filter(
-      (g) => g.entries.length > 0,
-    );
-  }, [cards]);
+    return CATALOG_TYPES.map((meta) => {
+      const raw = map.get(meta.deckType) ?? [];
+      const entries =
+        meta.deckType === 'power' ? sortDeckPowerEntries(raw, cardIndex) : raw;
+      return { meta, entries };
+    }).filter((g) => g.entries.length > 0);
+  }, [cards, cardIndex]);
 
   const removeDeckInstance = (instanceId: string) => {
     const entry = cards.find((c) => c.instanceId === instanceId);
