@@ -125,7 +125,11 @@
 }
 .login__card-logo {
   display: none;
-  margin-bottom: var(--space-6);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 540px;
+  justify-self: center;
 }
 .login__card-logo-img {
   display: block;
@@ -267,6 +271,7 @@
 }
 .layout-mobile .login__card-logo {
   display: block;
+  margin-bottom: var(--space-5);
 }
 .layout-mobile .login__bg-veil {
   background:

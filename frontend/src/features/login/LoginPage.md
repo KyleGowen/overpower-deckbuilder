@@ -16,8 +16,9 @@ with the enlarged Excelsior wordmark (`Logo height={210}`). Right: the auth card
 
 ## Visuals (MV)
 - **Brand column hidden:** `.layout-mobile .login__brand` is not shown.
-- **Card logo:** `.login__card-logo` shows the Excelsior wordmark (`Logo height={100}`)
-  centered above the auth card heading so mobile users see branding at the top.
+- **Card logo:** `.login__card-logo` is a sibling above `.login__card` (not inside it), so the
+  Excelsior wordmark (`Logo height={200}`) sits above the teal `::before` gradient bar; then
+  "Welcome Back" and the form follow inside the card.
 
 ## Copy
 - **Login subheading:** "Log in to access your decks, collections, and card database."

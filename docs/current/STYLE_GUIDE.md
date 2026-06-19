@@ -2831,9 +2831,10 @@ This section covers the React v2 SPA login screen at `/login` (markup in [fronte
 ### Mobile card logo — `.login__card-logo`
 
 - **Purpose**: show Excelsior branding on mobile where `.login__brand` is hidden.
-- **Markup**: `<Logo height={100} className="login__card-logo-img" />` above `.login__card-header`.
+- **Markup**: sibling **above** `<main className="login__card panel">` (not inside the card), so the wordmark sits above the auth card’s `::before` teal gradient bar.
+- **Logo**: `<Logo height={200} className="login__card-logo-img" />`, centered.
 - **Visibility**: `display: none` by default; `.layout-mobile .login__card-logo { display: block }`.
-- **Spacing**: `margin-bottom: var(--space-6)`; logo centered with `margin-inline: auto` on the image.
+- **Spacing**: `margin-bottom: var(--space-5)` between logo and card top bar; `max-width: 540px` aligned with the auth card.
 
 ### Support footer — `.login__support`
 

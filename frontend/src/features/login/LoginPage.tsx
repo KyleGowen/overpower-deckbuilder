@@ -85,11 +85,11 @@ export default function LoginPage() {
         </ul>
       </aside>
 
-      <main className="login__card panel">
-        <div className="login__card-logo">
-          <Logo height={100} className="login__card-logo-img" alt="Excelsior" />
-        </div>
+      <div className="login__card-logo">
+        <Logo height={200} className="login__card-logo-img" alt="Excelsior" />
+      </div>
 
+      <main className="login__card panel">
         <div className="login__card-header">
           <h2 className="login__heading">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
           <p className="login__subheading">
