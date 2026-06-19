@@ -116,7 +116,9 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   primary links (Home, Database, Decks, Collection), and the user menu on the right. The
   active link is cyan with a soft pill background.
 - **Mobile** (`<= 900px`): a fixed **bottom nav** (`--bottom-nav-height: 66px`) with
-  icon+label tabs (Home, Database, Decks, Collection, Profile). Top nav is hidden.
+  icon+label tabs ordered **Database, Decks, Home, Collection, Profile** (Home centered;
+  `.bottom-nav__item--home .bottom-nav__icon` at `calc(1.4rem * 1.15)` vs `1.4rem` for other
+  tabs). Top nav is hidden.
 - Nav, dropdowns, and tooltips sit at `--z-nav: 9999` so they always clear page content.
 
 ## Cards & Card Art

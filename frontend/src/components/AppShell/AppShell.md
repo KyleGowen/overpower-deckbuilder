@@ -6,8 +6,9 @@ Editor). Renders a responsive navigation frame around its `children`.
 ## Layout
 - **Desktop** (`useLayoutMode().isMobile === false`): sticky **top nav** with the `Logo`,
   primary tabs (Home, Database, Decks, Collection), and `UserMenu` on the right.
-- **Mobile**: fixed **bottom nav** with icon+label tabs (Home, Database, Decks, Collection,
-  Profile). Profile opens a bottom-sheet `SlideOutPanel` ("account sheet") with My Decks,
+- **Mobile**: fixed **bottom nav** with icon+label tabs ordered **Database, Decks, Home,
+  Collection, Profile** (Home centered; its icon is 15% larger via `.bottom-nav__item--home`).
+  Profile opens a bottom-sheet `SlideOutPanel` ("account sheet") with My Decks,
   Collection, a **Use desktop layout** toggle (`preferDesktop`), and Log Out / Exit Guest.
 
 ## Nav model

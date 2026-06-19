@@ -23,6 +23,9 @@ interface NavItem {
   match: (pathname: string, userId: string) => boolean;
 }
 
+/** Mobile bottom nav: Home centered (3rd of 5 slots). Desktop top nav keeps NAV_ITEMS order. */
+const MOBILE_NAV_ORDER = ['database', 'decks', 'home', 'collection'] as const;
+
 const NAV_ITEMS: NavItem[] = [
   {
     key: 'home',
@@ -75,13 +78,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="app-shell__content">{children}</main>
 
         <nav className="bottom-nav" aria-label="Primary">
-          {NAV_ITEMS.map((item) => {
+          {MOBILE_NAV_ORDER.map((key) => NAV_ITEMS.find((item) => item.key === key)!).map((item) => {
             const active = item.match(location.pathname, userId);
             return (
               <NavLink
                 key={item.key}
                 to={item.to(userId)}
-                className={`bottom-nav__item ${active ? 'is-active' : ''}`}
+                className={`bottom-nav__item${item.key === 'home' ? ' bottom-nav__item--home' : ''} ${active ? 'is-active' : ''}`}
               >
                 <span className="bottom-nav__icon">{item.icon}</span>
                 <span className="bottom-nav__label">{item.label}</span>

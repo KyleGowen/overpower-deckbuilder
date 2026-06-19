@@ -121,6 +121,9 @@
   font-size: 1.4rem;
   display: inline-flex;
 }
+.bottom-nav__item--home .bottom-nav__icon {
+  font-size: calc(1.4rem * 1.15);
+}
 .bottom-nav__item.is-active {
   color: var(--color-accent-bright);
 }
