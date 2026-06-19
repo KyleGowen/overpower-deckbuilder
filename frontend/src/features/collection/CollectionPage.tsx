@@ -40,7 +40,7 @@ function useDebounced<T>(value: T, delay = 250): T {
 export default function CollectionPage() {
   const { isMobile } = useLayoutMode();
   const collection = useCollection();
-  const [tab, setTab] = useState<CatalogTabSelection>('characters');
+  const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
