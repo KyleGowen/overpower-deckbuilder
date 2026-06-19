@@ -2829,6 +2829,12 @@ This section covers the React v2 SPA login screen at `/login` (markup in [fronte
 - **Copy**: "Excelsior is a modern OverPower deckbuilding hub and card database. Browse tournament-winning lists, study community builds, and craft Venture-ready decks from the full modern card pool."
 - **Styling**: `color: var(--color-text-muted)`; `font-size: calc(var(--font-size-base) * 1.25)`; `margin-bottom: calc(var(--space-8) + 1.25em)` (extra line of space before callout icons).
 
+### Brand callouts — `.login__callouts`
+
+- **Layout**: vertical flex list (`gap: var(--space-5)`) of Build / Collect / Database rows (`.login__callout` + `.login__callout-icon`).
+- **Bottom spacing**: `padding-bottom: 1.25em` below the Database row.
+- **Column shift**: `.login__brand` uses `margin-bottom: 1.25em` so the vertically centered left column sits ~one line higher on DTV.
+
 ### Card header — `.login__card-header`
 
 - **Layout**: centered text block at the top of the auth card (`width: 100%`, `text-align: center`, `margin-bottom: var(--space-8)` — extra breathing room before the form).
