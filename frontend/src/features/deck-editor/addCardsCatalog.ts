@@ -11,6 +11,9 @@ export const ADD_CARDS_GRID_COLUMNS_PORTRAIT = 3;
 export const ADD_CARDS_GRID_COLUMNS_LANDSCAPE = 2;
 export const ADD_CARDS_PAGE_ROWS = 8;
 
+/** Mobile: 8 rows × 1 column (single-column grids under `.layout-mobile`). */
+export const ADD_CARDS_PAGE_SIZE_MOBILE = ADD_CARDS_PAGE_ROWS;
+
 /** Portrait types: 8 rows × 3 columns. */
 export const ADD_CARDS_PAGE_SIZE_GRID = ADD_CARDS_PAGE_ROWS * ADD_CARDS_GRID_COLUMNS_PORTRAIT;
 /** Landscape types (characters, locations, events): 8 rows × 2 columns. */
@@ -18,10 +21,15 @@ export const ADD_CARDS_PAGE_SIZE_LANDSCAPE = ADD_CARDS_PAGE_ROWS * ADD_CARDS_GRI
 /** All tab: 8 rows at landscape width (2 cols) — avoids 48-card pages that stack 24 character rows. */
 export const ADD_CARDS_PAGE_SIZE_ALL = ADD_CARDS_PAGE_SIZE_LANDSCAPE;
 
-export function addCardsPageSizeForType(catalogType: CatalogType): number {
+export function addCardsPageSizeForType(catalogType: CatalogType, isMobile = false): number {
+  if (isMobile) return ADD_CARDS_PAGE_SIZE_MOBILE;
   return isLandscapeCatalogType(catalogType)
     ? ADD_CARDS_PAGE_SIZE_LANDSCAPE
     : ADD_CARDS_PAGE_SIZE_GRID;
+}
+
+export function addCardsPageSizeAll(isMobile = false): number {
+  return isMobile ? ADD_CARDS_PAGE_SIZE_MOBILE : ADD_CARDS_PAGE_SIZE_ALL;
 }
 
 export function addCardsGridClassName(catalogType: CatalogType): string {

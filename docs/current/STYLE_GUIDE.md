@@ -3079,7 +3079,7 @@ The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type
 
 - Default (portrait type groups): `grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))`
 - Landscape type groups (`.deck-editor__cards--landscape`): `repeat(auto-fill, 285px)` with `justify-content: start` — fixed column width so sparse rows (one location, two events) do not stretch to full section width like character rows
-- Mobile (`.layout-mobile`): portrait `minmax(165px, 1fr)`; landscape `repeat(auto-fill, 225px)` + `justify-content: start`
+- Mobile (`.layout-mobile`): **one card per row** for all types — `grid-template-columns: minmax(0, 1fr)` on `.deck-editor__cards` and `.deck-editor__cards--landscape` (main body) and `.add-cards__grid--*` (Add Cards panel). Matches DBV mobile single-column pattern.
 
 ### Image frame — `.deck-editor__card-img` + orientation modifiers
 

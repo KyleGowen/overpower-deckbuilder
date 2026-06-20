@@ -1,0 +1,3 @@
+# MobileBottomNav
+
+Fixed mobile bottom tab bar (Database, Decks, Home, Collection, Profile) plus account bottom sheet. Shared by AppShell and DeckEditorPage. Nav config in `navConfig.tsx`; styles from `AppShell.css`.

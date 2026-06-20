@@ -3,6 +3,7 @@ import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import {
   CATALOG_TYPE_BY_SLUG,
   cardDisplayName,
+  catalogTypeLabel,
 } from '../../lib/catalog/catalogTypeMap';
 import { isFoilCard } from '../../lib/catalog/foilCatalog';
 import { resolveSetDisplayName } from '../../lib/catalog/setNames';
@@ -21,6 +22,12 @@ interface CatalogAllListProps {
   dimmed?: (item: CatalogAllListItem) => boolean;
   /** Uppercased set code → friendly name (from `buildSetNameLookup`). */
   setNameLookup?: Map<string, string>;
+  /** Optional row label formatter (default: `cardDisplayName`). */
+  formatName?: (item: CatalogAllListItem) => string;
+  /** Collection All: type badge between `#` and name (default: name then type). */
+  typeBetweenNumberAndName?: boolean;
+  /** Use ultra-compact type labels (Collection All mobile). */
+  compactTypeLabels?: boolean;
 }
 
 function setCodeForCard(card: CatalogCard): string {
@@ -36,11 +43,20 @@ export function CatalogAllList({
   renderTrailing,
   dimmed,
   setNameLookup,
+  formatName,
+  typeBetweenNumberAndName = false,
+  compactTypeLabels = false,
 }: CatalogAllListProps) {
   const hasTrailing = Boolean(renderTrailing);
 
   return (
-    <ul className="catalog-all-list" role="list">
+    <ul
+      className={[
+        'catalog-all-list',
+        typeBetweenNumberAndName ? 'catalog-all-list--type-after-number' : '',
+      ].filter(Boolean).join(' ')}
+      role="list"
+    >
       {items.map((item) => {
         const { card, catalogType } = item;
         const meta = CATALOG_TYPE_BY_SLUG[catalogType];
@@ -52,7 +68,51 @@ export function CatalogAllList({
         const isSelected = selectedId === card.id;
         const isDimmed = dimmed?.(item) ?? false;
         const foil = isFoilCard(card);
-        const displayName = cardDisplayName(card);
+        const displayName = formatName ? formatName(item) : cardDisplayName(card);
+
+        const setCodeEl = setCode ? (
+          <span
+            className="catalog-all-list__set-code"
+            aria-hidden="true"
+            title={setLabel && setLabel !== setCode ? setLabel : undefined}
+          >
+            {setCode}
+          </span>
+        ) : (
+          <span className="catalog-all-list__set-code" aria-hidden="true" />
+        );
+
+        const numberEl = (
+          <span className="catalog-all-list__number" aria-hidden="true">
+            {setNumber ? `#${setNumber}` : '—'}
+          </span>
+        );
+
+        const nameEl = (
+          <span className="catalog-all-list__name" title={displayName}>
+            {displayName}
+            {foil ? <span className="catalog-all-list__foil"> ✦</span> : null}
+          </span>
+        );
+
+        const typeLabel = catalogTypeLabel(catalogType, compactTypeLabels);
+
+        const typeEl = (
+          <span
+            className="badge catalog-all-list__type-badge"
+            title={compactTypeLabels ? meta.shortLabel : undefined}
+          >
+            {typeLabel}
+          </span>
+        );
+
+        const setBadgeEl = setLabel ? (
+          <span className="badge catalog-all-list__set-badge" title={setLabel}>
+            {setLabel}
+          </span>
+        ) : (
+          <span className="catalog-all-list__set-badge" aria-hidden="true" />
+        );
 
         return (
           <li
@@ -70,23 +130,20 @@ export function CatalogAllList({
               onClick={() => onSelect(item)}
               aria-pressed={isSelected}
             >
-              <span className="catalog-all-list__number" aria-hidden="true">
-                {setNumber ? `#${setNumber}` : '—'}
-              </span>
-              <span className="catalog-all-list__name" title={displayName}>
-                {displayName}
-                {foil ? <span className="catalog-all-list__foil"> ✦</span> : null}
-              </span>
-              <span className="catalog-all-list__badges">
-                <span className="badge catalog-all-list__type-badge">{meta.shortLabel}</span>
-                {setLabel ? (
-                  <span className="badge catalog-all-list__set-badge" title={setLabel}>
-                    {setLabel}
-                  </span>
-                ) : (
-                  <span className="catalog-all-list__set-badge" aria-hidden="true" />
-                )}
-              </span>
+              {setCodeEl}
+              {numberEl}
+              {typeBetweenNumberAndName ? (
+                <>
+                  {typeEl}
+                  {nameEl}
+                </>
+              ) : (
+                <>
+                  {nameEl}
+                  {typeEl}
+                </>
+              )}
+              {setBadgeEl}
             </button>
             {renderTrailing ? (
               <div className="catalog-all-list__trailing">{renderTrailing(item)}</div>

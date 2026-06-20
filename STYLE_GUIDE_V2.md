@@ -109,7 +109,7 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   cyan focus ring (`--color-border-accent`).
 
 ## Layout & Navigation
-- Full-width layout: `--content-max-width: none`; page `*__inner` wrappers and `.top-nav__inner` span the viewport with horizontal padding (`--space-6` desktop, `--space-4` mobile) as side gutters. Deck editor uses the same full-bleed pattern with its own chrome (no AppShell).
+- Full-width layout: `--content-max-width: none`; page `*__inner` wrappers and `.top-nav__inner` span the viewport with horizontal padding (`--space-6` desktop, `--space-4` mobile) as side gutters. Deck editor uses the same full-bleed pattern with its own chrome (no AppShell wrapper); on mobile it still mounts the shared [`MobileBottomNav`](frontend/src/components/MobileBottomNav/MobileBottomNav.tsx).
 - **`html.layout-desktop { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
   top nav does not shift when shorter pages (e.g. Decks) hide the document scrollbar.
 - **Mobile horizontal containment:** `html.layout-mobile`, `body`, `#root`, and `.app-shell` / `.app-shell__content` use `overflow-x: clip` and `max-width: 100%` so the page cannot pan sideways. Intentional horizontal scroll stays on inner regions (`.db__types`, `.col__types`, `.dbv-filter-rail__controls`, `.home__rail`) via `overflow-x: auto`, `min-width: 0`, and `overscroll-behavior-x: contain`.
@@ -119,7 +119,8 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 - **Mobile** (`<= 900px`): a fixed **bottom nav** (`--bottom-nav-height: 66px`) with
   icon+label tabs ordered **Database, Decks, Home, Collection, Profile** (Home centered;
   `.bottom-nav__item--home .bottom-nav__icon` at `calc(1.4rem * 1.15)` vs `1.4rem` for other
-  tabs). Top nav is hidden.
+  tabs). Top nav is hidden. Deck editor (outside AppShell) uses the same bottom nav on mobile;
+  `.deck-editor__content` bottom padding clears the fixed bar (`--bottom-nav-height` + safe area).
 - Nav, dropdowns, and tooltips sit at `--z-nav: 9999` so they always clear page content.
 
 ## Cards & Card Art
@@ -131,12 +132,12 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
   `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
   get the accent glow; unowned tiles in the Collection are dimmed. Database and Collection
   grids use 4 columns for landscape types and 6 for portrait (1 on mobile).
-- **All tab** (first tab on Database and Collection; default selection remains Characters): cross-type **text list** via
-  `CatalogAllList` — no card images. Rows use a **spread grid layout**: `#set_number`
-  (monospace, `4.5rem`, extra padding before name), card name (foil `✦` when applicable),
-  type badge (right-aligned column), friendly **set name** badge (left-aligned, ellipsis),
-  a flexible spacer, and (Collection only) a trailing `QuantityStepper`.
-  Mobile collapses to two rows (`#` + name, then badges + stepper). Sort is fixed checklist
+- **All tab** (first tab on Database and Collection; Collection defaults to **All**): cross-type **text list** via
+  `CatalogAllList` — no card images. **Database** rows: `#set_number`, card name, type badge, friendly set name,
+  spacer, and (Collection only) trailing `QuantityStepper`. **Collection** All uses `typeBetweenNumberAndName`:
+  `#` → type → name → set on desktop with fixed scan-band column widths and tabular `#` numerals;
+  mobile row 1 is set code + `#` + compact type + name (single row, `compactTypeLabels`).
+  Sort is fixed checklist
   order: set → non-foil before foil → set_number → name (`compareAllCatalogCards`). Selected
   row: accent left border + `--color-accent-soft` background. DBV All opens detail slideout on
   row click only (deck/collection actions in panel). Pagination uses 48 rows per page on All
@@ -239,6 +240,17 @@ Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailP
 
 ### Deck Editor — Instance tiles
 Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash (`.deck-editor__card-remove`) on every type; **Save** aggregates instances by `(type, cardId)` for the API.
+
+### Deck Editor — Mobile bottom nav
+On `.layout-mobile`, the deck editor renders the shared `MobileBottomNav` (`--bottom-nav-height: 66px`,
+`--z-nav: 9999`). Nav is hidden during Add Cards, Draw Hand, and Card Detail slide-outs. Content
+scroll area: `padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-2))`.
+
+### Deck Editor — Mobile card grids
+On `.layout-mobile`, main deck body (`.deck-editor__cards`, `.deck-editor__cards--landscape`) and Add Cards grids (`.add-cards__grid--portrait`, `--landscape`, `--portrait-4`) use **one card per row**: `grid-template-columns: minmax(0, 1fr)`. Stacks tab character tile is full width. Draw Hand carousel is unchanged (horizontal snap). Add Cards pagination: **8** cards/page on mobile.
+
+### Deck Editor — Mobile type tabs
+Sticky `.deck-editor__type-tabs` below the header when the deck has **2+ types** on mobile. Chips use `.deck-editor__type` / `.deck-editor__type-count` (Add Cards pill style); labels are `shortLabel` from `CATALOG_TYPES`. Only types with cards in the deck appear. Swipe left/right on `.deck-editor__content` cycles types cyclically via native `touchstart`/`touchmove`/`touchend` listeners (`useHorizontalSwipe`); horizontal swipes work on card art; gestures starting on footer controls, tabs, or header are ignored. `touch-action: pan-y` on content preserves vertical scroll.
 
 Architecture, data flow, and serving are documented in
 [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).

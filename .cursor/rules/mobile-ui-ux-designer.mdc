@@ -49,6 +49,8 @@ Prefer:
 - Clear search at the top of browsing screens.
 - Large tap targets.
 - Simple stacked layouts.
+- Single-column card stacks in deck editor on mobile (one full-width tile per row).
+- Type tabs on mobile deck view for types present in the deck (swipe left/right to cycle).
 - One primary action per view.
 - Card grids or carousels that keep images prominent.
 - Detail views that let users return without losing scroll/filter state.
@@ -61,6 +63,16 @@ Avoid:
 - Modals stacked on modals.
 - Long control-heavy headers.
 - Actions that are hard to reach with the thumb.
+
+## Deck Editor (v2)
+
+On mobile (`.layout-mobile`), the deck list and **Add Cards** panel use **one card per row for every catalog type** (characters, specials, missions, universe cards, etc.). Card art should span the full content width — no 2- or 3-column cramming on phone. This matches the DBV mobile single-column pattern (`minmax(0, 1fr)`).
+
+**Main deck view (mobile):** Show **one catalog type at a time** via a horizontal chip strip (same `shortLabel` / `CATALOG_TYPES` order as Add Cards, but **only types with cards in the deck** — no All or Stacks). Hide the strip when the deck has only one type. **Swipe left/right** on the card list (including on card art) cycles types cyclically; swipes are ignored when the gesture starts on footer controls (KO, reserve, trash), type tabs, or header actions. Section headings are hidden when tabs are shown (type + count live on the active chip).
+
+**Exception:** Draw Hand uses a horizontal snap carousel (intentional; not a vertical deck grid).
+
+Implementation: [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css) — `.layout-mobile .deck-editor__cards`, `.add-cards__grid--*`, `.deck-editor__type-tabs`. Add Cards pagination on mobile: **8 cards/page** (8 rows × 1 column). Swipe: [`useHorizontalSwipe.ts`](frontend/src/lib/layout/useHorizontalSwipe.ts).
 
 ## Cursor Behavior
 

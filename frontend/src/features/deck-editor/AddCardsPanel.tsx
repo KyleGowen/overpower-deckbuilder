@@ -36,9 +36,10 @@ import {
   missionSetCardsInAddOrder,
   type MissionSet,
 } from '../../lib/catalog/missionSets';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import {
-  ADD_CARDS_PAGE_SIZE_ALL,
   addCardsGridClassName,
+  addCardsPageSizeAll,
   addCardsPageSizeForType,
   flattenAddCardsSections,
   groupAllCatalogByType,
@@ -107,6 +108,7 @@ export function AddCardsPanel({
   cards,
   deckCatalogIndex,
 }: AddCardsPanelProps) {
+  const { isMobile } = useLayoutMode();
   const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
@@ -348,8 +350,8 @@ export function AddCardsPanel({
     : isMissionsTab
       ? ADD_CARDS_MISSION_SETS_PAGE_SIZE
       : isAllTab
-        ? ADD_CARDS_PAGE_SIZE_ALL
-        : addCardsPageSizeForType(activeType!);
+        ? addCardsPageSizeAll(isMobile)
+        : addCardsPageSizeForType(activeType!, isMobile);
   const totalItems = isStacksTab
     ? filteredStacks.length
     : isMissionsTab

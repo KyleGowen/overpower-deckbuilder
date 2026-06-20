@@ -5,6 +5,8 @@ import { useCollection } from '../../lib/collection/useCollection';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
+  cardDisplayName,
+  cardLinkedDisplayName,
   cardMatchesSearchQuery,
   isLandscapeCatalogType,
   type CatalogTabSelection,
@@ -209,6 +211,13 @@ export default function CollectionPage() {
               selectedId={selected?.id}
               onSelect={(item) => selectCard(item.card, item.catalogType)}
               setNameLookup={setNameLookup}
+              typeBetweenNumberAndName
+              compactTypeLabels={isMobile}
+              formatName={({ card, catalogType }) =>
+                isMobile
+                  ? cardDisplayName(card)
+                  : cardLinkedDisplayName(card, catalogType)
+              }
               dimmed={(item) =>
                 quantityForItem(item.card.id, CATALOG_TYPE_BY_SLUG[item.catalogType].collectionType) <= 0
               }

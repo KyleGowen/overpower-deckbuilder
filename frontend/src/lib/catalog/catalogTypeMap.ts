@@ -21,23 +21,25 @@ export interface CatalogTypeMeta {
   label: string;
   /** Short label for compact UIs (chips/tabs). */
   shortLabel: string;
+  /** Ultra-compact label for narrow scan columns (Collection All mobile). */
+  compactLabel: string;
   deckType: DeckCardType;
   collectionType: CollectionCardType;
 }
 
 export const CATALOG_TYPES: CatalogTypeMeta[] = [
-  { type: 'characters', label: 'Characters', shortLabel: 'Characters', deckType: 'character', collectionType: 'character' },
-  { type: 'special-cards', label: 'Special Cards', shortLabel: 'Special', deckType: 'special', collectionType: 'special' },
-  { type: 'power-cards', label: 'Power Cards', shortLabel: 'Power', deckType: 'power', collectionType: 'power' },
-  { type: 'locations', label: 'Locations', shortLabel: 'Locations', deckType: 'location', collectionType: 'location' },
-  { type: 'missions', label: 'Missions', shortLabel: 'Missions', deckType: 'mission', collectionType: 'mission' },
-  { type: 'events', label: 'Events', shortLabel: 'Events', deckType: 'event', collectionType: 'event' },
-  { type: 'aspects', label: 'Aspects', shortLabel: 'Aspects', deckType: 'aspect', collectionType: 'aspect' },
-  { type: 'advanced-universe', label: 'Universe: Advanced', shortLabel: 'Advanced', deckType: 'advanced-universe', collectionType: 'advanced_universe' },
-  { type: 'teamwork', label: 'Universe: Teamwork', shortLabel: 'Teamwork', deckType: 'teamwork', collectionType: 'teamwork' },
-  { type: 'ally-universe', label: 'Universe: Ally', shortLabel: 'Ally', deckType: 'ally-universe', collectionType: 'ally_universe' },
-  { type: 'training', label: 'Universe: Training', shortLabel: 'Training', deckType: 'training', collectionType: 'training' },
-  { type: 'basic-universe', label: 'Universe: Basic', shortLabel: 'Basic', deckType: 'basic-universe', collectionType: 'basic_universe' },
+  { type: 'characters', label: 'Characters', shortLabel: 'Characters', compactLabel: 'Chr', deckType: 'character', collectionType: 'character' },
+  { type: 'special-cards', label: 'Special Cards', shortLabel: 'Special', compactLabel: 'Spc', deckType: 'special', collectionType: 'special' },
+  { type: 'power-cards', label: 'Power Cards', shortLabel: 'Power', compactLabel: 'Pow', deckType: 'power', collectionType: 'power' },
+  { type: 'locations', label: 'Locations', shortLabel: 'Locations', compactLabel: 'Loc', deckType: 'location', collectionType: 'location' },
+  { type: 'missions', label: 'Missions', shortLabel: 'Missions', compactLabel: 'Mis', deckType: 'mission', collectionType: 'mission' },
+  { type: 'events', label: 'Events', shortLabel: 'Events', compactLabel: 'Ev', deckType: 'event', collectionType: 'event' },
+  { type: 'aspects', label: 'Aspects', shortLabel: 'Aspects', compactLabel: 'Asp', deckType: 'aspect', collectionType: 'aspect' },
+  { type: 'advanced-universe', label: 'Universe: Advanced', shortLabel: 'Advanced', compactLabel: 'Adv', deckType: 'advanced-universe', collectionType: 'advanced_universe' },
+  { type: 'teamwork', label: 'Universe: Teamwork', shortLabel: 'Teamwork', compactLabel: 'Tmw', deckType: 'teamwork', collectionType: 'teamwork' },
+  { type: 'ally-universe', label: 'Universe: Ally', shortLabel: 'Ally', compactLabel: 'Aly', deckType: 'ally-universe', collectionType: 'ally_universe' },
+  { type: 'training', label: 'Universe: Training', shortLabel: 'Training', compactLabel: 'Trn', deckType: 'training', collectionType: 'training' },
+  { type: 'basic-universe', label: 'Universe: Basic', shortLabel: 'Basic', compactLabel: 'Bas', deckType: 'basic-universe', collectionType: 'basic_universe' },
 ];
 
 export const CATALOG_TYPE_BY_SLUG: Record<CatalogType, CatalogTypeMeta> = CATALOG_TYPES.reduce(
@@ -47,6 +49,12 @@ export const CATALOG_TYPE_BY_SLUG: Record<CatalogType, CatalogTypeMeta> = CATALO
   },
   {} as Record<CatalogType, CatalogTypeMeta>,
 );
+
+/** Type badge label for All-list rows (`shortLabel` or `compactLabel`). */
+export function catalogTypeLabel(catalogType: CatalogType, compact = false): string {
+  const meta = CATALOG_TYPE_BY_SLUG[catalogType];
+  return compact ? meta.compactLabel : meta.shortLabel;
+}
 
 const DECK_TYPE_TO_META: Record<string, CatalogTypeMeta> = CATALOG_TYPES.reduce(
   (acc, meta) => {
@@ -92,6 +100,18 @@ export function cardDisplayName(card: Partial<CatalogCard> | null | undefined): 
 export function cardCharacterName(card: Partial<CatalogCard> | null | undefined): string {
   if (!card) return '';
   return String((card.character as string) ?? (card.character_name as string) ?? '').trim();
+}
+
+/** Special / Advanced Universe list label with linked character prefix when present. */
+export function cardLinkedDisplayName(
+  card: Partial<CatalogCard> | null | undefined,
+  catalogType?: CatalogType,
+): string {
+  const name = cardDisplayName(card);
+  if (catalogType !== 'special-cards' && catalogType !== 'advanced-universe') return name;
+  const character = cardCharacterName(card);
+  if (!character || isAnyCharacterName(character)) return name;
+  return `${character} - ${name}`;
 }
 
 function isAnyCharacterName(value: string): boolean {

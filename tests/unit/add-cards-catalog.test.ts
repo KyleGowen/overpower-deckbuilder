@@ -1,7 +1,9 @@
 import type { CatalogCard } from '../../frontend/src/lib/api/types';
 import {
   ADD_CARDS_PAGE_SIZE_ALL,
+  ADD_CARDS_PAGE_SIZE_MOBILE,
   addCardsGridClassName,
+  addCardsPageSizeAll,
   addCardsPageSizeForType,
   buildAddCardsSections,
   filterAndSortTypeCards,
@@ -140,6 +142,22 @@ describe('addCardsCatalog', () => {
       expect(addCardsPageSizeForType('locations')).toBe(16);
       expect(addCardsPageSizeForType('characters')).toBe(16);
       expect(addCardsPageSizeForType('events')).toBe(16);
+    });
+
+    it('uses 8 (8×1) on mobile for all catalog types', () => {
+      expect(addCardsPageSizeForType('power-cards', true)).toBe(ADD_CARDS_PAGE_SIZE_MOBILE);
+      expect(addCardsPageSizeForType('characters', true)).toBe(8);
+      expect(addCardsPageSizeForType('special-cards', true)).toBe(8);
+    });
+  });
+
+  describe('addCardsPageSizeAll', () => {
+    it('uses 16 on desktop All tab', () => {
+      expect(addCardsPageSizeAll(false)).toBe(ADD_CARDS_PAGE_SIZE_ALL);
+    });
+
+    it('uses 8 on mobile All tab', () => {
+      expect(addCardsPageSizeAll(true)).toBe(ADD_CARDS_PAGE_SIZE_MOBILE);
     });
   });
 

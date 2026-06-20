@@ -4,10 +4,13 @@ Track how many of each card you own. Same browse/filter chrome as the Database, 
 per-card quantity steppers and an "Owned only" toggle.
 
 ## Controls
-- Search (debounced), type tabs (**All** first; default **Characters**), set dropdown, **Owned only** checkbox.
+- Search (debounced), type tabs (**All** first; default **All**), set dropdown, **Owned only** checkbox.
 - Header shows `totalOwned` and `uniqueCards`.
 - Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.
-- **All** tab: `CatalogAllList` spread grid rows (`#`, name, type/set badges, stepper);
+- **All** tab: `CatalogAllList` spread grid rows (`#`, type, name, set badge, stepper);
+  fixed-width `#` and type columns for aligned skimming; mobile type badges use compact
+  abbreviations (`Spc`, `Chr`, …). Special and Advanced Universe rows prefix the linked character on **desktop** only
+  (`Anubis - Book of the Dead`); mobile uses the card name alone to save width.
   checklist sort (`compareAllCatalogCards`). Detail panel also exposes a stepper and
   **Is Foil** Yes/No (`card.is_foil` via `isFoilCard`).
 

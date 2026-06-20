@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
@@ -42,6 +42,7 @@ import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/set
 import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
 import { CardImage } from '../../components/CardImage';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
+import { MobileBottomNav } from '../../components/MobileBottomNav';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { Logo } from '../../components/Logo';
@@ -81,6 +82,9 @@ import type {
   DeckCardType,
 } from '../../lib/api/types';
 import type { StackCardEntry } from '../../lib/catalog/characterStacks';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
+import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import './DeckEditorPage.css';
 
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
@@ -157,6 +161,7 @@ export default function DeckEditorPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isGuest } = useAuth();
+  const { isMobile } = useLayoutMode();
 
   const forceReadonly = searchParams.get('readonly') === 'true';
 
@@ -186,8 +191,10 @@ export default function DeckEditorPage() {
   const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
   const [drawHandOpen, setDrawHandOpen] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DeckCardEntry[]>([]);
+  const [mobileDeckTypeTab, setMobileDeckTypeTab] = useState<CatalogType | null>(null);
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const canSimulateKo = Boolean(user);
 
   useEffect(() => {
@@ -359,6 +366,53 @@ export default function DeckEditorPage() {
       return { meta, entries };
     }).filter((g) => g.entries.length > 0);
   }, [cards, cardIndex]);
+
+  const immersiveOpen = addOpen || drawHandOpen || Boolean(selected);
+  const deckTypeTabs = grouped;
+
+  useEffect(() => {
+    if (!isMobile || deckTypeTabs.length === 0) {
+      setMobileDeckTypeTab(null);
+      return;
+    }
+    setMobileDeckTypeTab((prev) =>
+      resolveMobileDeckTypeTab(
+        prev,
+        deckTypeTabs.map((g) => g.meta.type),
+      ),
+    );
+  }, [isMobile, deckTypeTabs]);
+
+  const visibleGroups = useMemo(() => {
+    if (!isMobile) return grouped;
+    if (deckTypeTabs.length === 0) return [];
+    const type = mobileDeckTypeTab ?? deckTypeTabs[0].meta.type;
+    const active = grouped.find((g) => g.meta.type === type);
+    return active ? [active] : [deckTypeTabs[0]];
+  }, [isMobile, grouped, deckTypeTabs, mobileDeckTypeTab]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [mobileDeckTypeTab, isMobile]);
+
+  const goToRelativeDeckType = useCallback(
+    (delta: 1 | -1) => {
+      if (deckTypeTabs.length <= 1) return;
+      const activeIndex = deckTypeTabs.findIndex((g) => g.meta.type === mobileDeckTypeTab);
+      const idx = activeIndex >= 0 ? activeIndex : 0;
+      const next = stepCyclicalIndex(idx, deckTypeTabs.length, delta);
+      setMobileDeckTypeTab(deckTypeTabs[next].meta.type);
+    },
+    [deckTypeTabs, mobileDeckTypeTab],
+  );
+
+  useHorizontalSwipe({
+    targetRef: contentRef,
+    enabled: isMobile && !immersiveOpen && deckTypeTabs.length > 1,
+    onSwipeLeft: () => goToRelativeDeckType(1),
+    onSwipeRight: () => goToRelativeDeckType(-1),
+  });
 
   const removeDeckInstance = (instanceId: string) => {
     const entry = cards.find((c) => c.instanceId === instanceId);
@@ -583,8 +637,11 @@ export default function DeckEditorPage() {
   }
 
   const legality = validity ?? { valid: deck.metadata.is_valid ?? false };
+  const showMobileNav = isMobile && !immersiveOpen;
+  const showMobileTypeTabs = isMobile && cards.length > 0 && deckTypeTabs.length > 1;
 
   return (
+    <>
     <div className="deck-editor">
       {/* Left rail (desktop) */}
       <aside className="deck-editor__rail">
@@ -663,8 +720,26 @@ export default function DeckEditorPage() {
           </div>
         </header>
 
+        {showMobileTypeTabs ? (
+          <div className="deck-editor__type-tabs" role="tablist" aria-label="Deck card types">
+            {deckTypeTabs.map(({ meta, entries }) => (
+              <button
+                key={meta.type}
+                type="button"
+                role="tab"
+                aria-selected={mobileDeckTypeTab === meta.type}
+                className={`deck-editor__type ${mobileDeckTypeTab === meta.type ? 'is-active' : ''}`}
+                onClick={() => setMobileDeckTypeTab(meta.type)}
+              >
+                {meta.shortLabel}
+                <span className="deck-editor__type-count">{entries.length}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         {/* Card list + draw hand overlay */}
-        <div className="deck-editor__content">
+        <div className="deck-editor__content" ref={contentRef}>
           {cards.length === 0 ? (
             <EmptyState
               title="This deck is empty"
@@ -679,12 +754,14 @@ export default function DeckEditorPage() {
               }
             />
           ) : (
-            grouped.map(({ meta, entries }) => (
+            visibleGroups.map(({ meta, entries }) => (
               <section className="deck-editor__group" key={meta.type}>
-                <h2 className="deck-editor__group-title">
-                  {meta.label}
-                  <span className="deck-editor__group-count">{entries.length}</span>
-                </h2>
+                {!showMobileTypeTabs ? (
+                  <h2 className="deck-editor__group-title">
+                    {meta.label}
+                    <span className="deck-editor__group-count">{entries.length}</span>
+                  </h2>
+                ) : null}
                 <div
                   className={`deck-editor__cards${
                     isLandscapeCatalogType(meta.type) ? ' deck-editor__cards--landscape' : ''
@@ -845,5 +922,7 @@ export default function DeckEditorPage() {
         onApplyPrinting={isOwner ? applyPrinting : undefined}
       />
     </div>
+    {showMobileNav ? <MobileBottomNav /> : null}
+    </>
   );
 }
