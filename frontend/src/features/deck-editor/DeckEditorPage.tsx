@@ -538,9 +538,20 @@ export default function DeckEditorPage() {
 
   const applyPrinting = (printingId: string) => {
     if (!selected?.instanceId || !isOwner) return;
+    const entry = cards.find((c) => c.instanceId === selected.instanceId);
+    if (!entry) return;
+
     const deckType = CATALOG_TYPE_BY_SLUG[selected.type].deckType;
-    const targetCard = cardIndex.get(`${deckType}:${printingId}`);
+    const targetCard =
+      cardIndex.get(`${deckType}:${printingId}`) ??
+      cardIndex.get(`${normalizeDeckCardType(deckType)}:${printingId}`) ??
+      cardIndex.get(printingId) ??
+      (catalogBySlug.get(selected.type) ?? []).find((c) => c.id === printingId);
     if (!targetCard) return;
+
+    const previousCardId = entry.cardId;
+    const imagePath =
+      (targetCard.image_path as string) || (targetCard.image as string) || undefined;
 
     setCards((prev) =>
       prev.map((c) =>
@@ -548,13 +559,27 @@ export default function DeckEditorPage() {
           ? {
               ...c,
               cardId: printingId,
-              defaultImage: (targetCard.image_path as string) || (targetCard.image as string),
+              defaultImage: imagePath,
               is_foil: isFoilCard(targetCard),
               name: cardDisplayName(targetCard),
             }
           : c,
       ),
     );
+
+    if (entry.type === 'character' && previousCardId !== printingId) {
+      if (reserveCharacterId === previousCardId) {
+        setReserveCharacterId(printingId);
+      }
+      setKoCharacterIds((prev) => {
+        if (!prev.has(previousCardId)) return prev;
+        const next = new Set(prev);
+        next.delete(previousCardId);
+        next.add(printingId);
+        return next;
+      });
+    }
+
     setSelected((prev) => (prev ? { ...prev, card: targetCard } : null));
     setDirty(true);
   };

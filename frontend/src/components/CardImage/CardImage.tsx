@@ -90,6 +90,7 @@ export function CardImage({
   if (useProgressive) {
     return (
       <ProgressiveCardImage
+        key={`${imagePath ?? ''}|${catalogType ?? ''}`}
         imagePath={imagePath}
         catalogType={catalogType}
         alt={alt}
@@ -103,6 +104,7 @@ export function CardImage({
 
   return (
     <SingleLayerCardImage
+      key={`${imagePath ?? ''}|${catalogType ?? ''}`}
       imagePath={imagePath}
       catalogType={catalogType}
       alt={alt}
