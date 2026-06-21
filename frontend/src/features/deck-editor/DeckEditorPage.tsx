@@ -83,6 +83,7 @@ import type {
 } from '../../lib/api/types';
 import type { StackCardEntry } from '../../lib/catalog/characterStacks';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { useDeckCardDetailHistory } from '../../lib/layout/useDeckCardDetailHistory';
 import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import './DeckEditorPage.css';
@@ -194,8 +195,12 @@ export default function DeckEditorPage() {
   const [mobileDeckTypeTab, setMobileDeckTypeTab] = useState<CatalogType | null>(null);
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const typeTabsRef = useRef<HTMLDivElement>(null);
   const canSimulateKo = Boolean(user);
+
+  const { close: closeCardDetail } = useDeckCardDetailHistory(Boolean(selected), () => setSelected(null));
 
   useEffect(() => {
     loadedRef.current = false;
@@ -391,9 +396,19 @@ export default function DeckEditorPage() {
     return active ? [active] : [deckTypeTabs[0]];
   }, [isMobile, grouped, deckTypeTabs, mobileDeckTypeTab]);
 
+  const scrollContainerRef = isMobile ? mainRef : contentRef;
+
   useEffect(() => {
     if (!isMobile) return;
-    contentRef.current?.scrollTo({ top: 0 });
+    mainRef.current?.scrollTo({ top: 0 });
+  }, [mobileDeckTypeTab, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !mobileDeckTypeTab || !typeTabsRef.current) return;
+    const activeTab = typeTabsRef.current.querySelector<HTMLElement>(
+      `[data-deck-type="${mobileDeckTypeTab}"]`,
+    );
+    activeTab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [mobileDeckTypeTab, isMobile]);
 
   const goToRelativeDeckType = useCallback(
@@ -408,7 +423,7 @@ export default function DeckEditorPage() {
   );
 
   useHorizontalSwipe({
-    targetRef: contentRef,
+    targetRef: scrollContainerRef,
     enabled: isMobile && !immersiveOpen && deckTypeTabs.length > 1,
     onSwipeLeft: () => goToRelativeDeckType(1),
     onSwipeRight: () => goToRelativeDeckType(-1),
@@ -456,6 +471,22 @@ export default function DeckEditorPage() {
   const closeDrawHand = () => {
     setDrawHandOpen(false);
     setDrawnCards([]);
+  };
+
+  const handleBackToDecks = () => {
+    if (selected) {
+      closeCardDetail();
+      return;
+    }
+    if (drawHandOpen) {
+      closeDrawHand();
+      return;
+    }
+    if (addOpen) {
+      setAddOpen(false);
+      return;
+    }
+    navigate(`/users/${user?.id ?? userId}/decks`);
   };
 
   const handleDrawHandToggle = () => {
@@ -655,11 +686,11 @@ export default function DeckEditorPage() {
         </nav>
       </aside>
 
-      <div className="deck-editor__main">
+      <div className="deck-editor__main" ref={mainRef}>
         <header className="deck-editor__header">
           <div className="deck-editor__topbar">
             <div className="deck-editor__topbar-leading">
-              <button type="button" className="deck-editor__back" onClick={() => navigate(`/users/${user?.id ?? userId}/decks`)} aria-label="Back to decks">
+              <button type="button" className="deck-editor__back" onClick={handleBackToDecks} aria-label="Back to decks">
                 <IconChevronLeft />
               </button>
 
@@ -721,12 +752,18 @@ export default function DeckEditorPage() {
         </header>
 
         {showMobileTypeTabs ? (
-          <div className="deck-editor__type-tabs" role="tablist" aria-label="Deck card types">
+          <div
+            className="deck-editor__type-tabs"
+            ref={typeTabsRef}
+            role="tablist"
+            aria-label="Deck card types"
+          >
             {deckTypeTabs.map(({ meta, entries }) => (
               <button
                 key={meta.type}
                 type="button"
                 role="tab"
+                data-deck-type={meta.type}
                 aria-selected={mobileDeckTypeTab === meta.type}
                 className={`deck-editor__type ${mobileDeckTypeTab === meta.type ? 'is-active' : ''}`}
                 onClick={() => setMobileDeckTypeTab(meta.type)}
@@ -821,6 +858,7 @@ export default function DeckEditorPage() {
                             catalogType={catalogType}
                             alt={cardName}
                             useThumbnail={deckEditorUsesThumbnail(catalogType)}
+                            progressive={deckEditorUsesThumbnail(catalogType)}
                             className="card-image--contain"
                           />
                         </button>
@@ -906,7 +944,7 @@ export default function DeckEditorPage() {
         card={selected?.card ?? null}
         type={selected?.type ?? null}
         open={Boolean(selected)}
-        onClose={() => setSelected(null)}
+        onClose={closeCardDetail}
         hasFoil={
           selected ? cardHasFoilVersion(selected.card, foilLookup.baseToFoil) : undefined
         }

@@ -3035,14 +3035,19 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
 - **Trailing** (`.deck-editor__actions`): Draw Hand, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
-- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`), actions full-width (`order: 6`)
+- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`, column stack), compact actions full-width (`order: 6`, chip-sized buttons)
+
+### Mobile scroll model (`.layout-mobile`)
+
+- **Desktop:** `.deck-editor__main` is `overflow: hidden`; `.deck-editor__header` is `flex-shrink: 0` (sticky); `.deck-editor__content` scrolls (`overflow-y: auto`).
+- **Mobile:** `.deck-editor__main` scrolls (`overflow-y: auto`); header and type tabs scroll with the page (`position: static`); `.deck-editor__content` has natural height (`overflow-y: visible`, `flex: none`). Swipe listeners attach to `mainRef`.
 
 ### Container — `.deck-editor__stats-panel`
 
 - `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-6); padding: 0; transform: translateX(calc(-1 * var(--space-3)))`
 - No `border-top` — stats live in the center column of the topbar, not a separate row
 - Two blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): `flex: 1 1 100%; justify-content: flex-start`; blocks stack full-width with `border-top` between them
+- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `18px + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values; border-top between rows
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
@@ -3056,6 +3061,18 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - Each group: muted stat PNG icon + bold value in global stat color (`.stat-energy`, `.stat-combat`, `.stat-brute-force`, `.stat-intelligence`)
 - Vertical divider between groups: `border-right: 1px solid var(--color-border)` (except last)
 - Per-stat `title` tooltip (e.g. *"Energy: 5"*)
+- Mobile: subgrid alignment (see Container above); values `font-size: var(--font-size-sm)`; `font-variant-numeric: tabular-nums; text-align: right` on `.deck-editor__stat-val`
+
+### Mobile actions — `.layout-mobile .deck-editor__actions .btn`
+
+- Match type chip sizing: `padding: 4px 10px`, `font-size: var(--font-size-xs)`, `border-radius: var(--radius-full)`, icon `14×14px`
+
+### Mobile type tabs — `.deck-editor__type-tabs`
+
+- Scroll with page on mobile (`position: static`, not sticky)
+- `flex-shrink: 0` on mobile — tab strip must not compress inside `.deck-editor__main` flex column (header also `flex-shrink: 0`)
+- `align-items: center`, `overflow-y: hidden`, `padding-bottom: calc(var(--space-2) + var(--space-1))` — keeps pills fully visible above the horizontal scrollbar (same pattern as DBV `.db__types`)
+- On type change (swipe or tap): page scrolls to top; active tab `scrollIntoView({ inline: 'center' })` via `data-deck-type` attribute
 
 ### Icon — `.deck-editor__stat-group-icon`
 
@@ -3080,6 +3097,7 @@ The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type
 - Default (portrait type groups): `grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))`
 - Landscape type groups (`.deck-editor__cards--landscape`): `repeat(auto-fill, 285px)` with `justify-content: start` — fixed column width so sparse rows (one location, two events) do not stretch to full section width like character rows
 - Mobile (`.layout-mobile`): **one card per row** for all types — `grid-template-columns: minmax(0, 1fr)` on `.deck-editor__cards` and `.deck-editor__cards--landscape` (main body) and `.add-cards__grid--*` (Add Cards panel). Matches DBV mobile single-column pattern.
+- Mobile main deck **portrait** tiles only: `.deck-editor__card-media:has(.deck-editor__card-img--portrait)` gets `padding: 5%` so art renders at ~90% width with a 5% buffer on each side; landscape types (characters, locations, events) stay full-bleed.
 
 ### Image frame — `.deck-editor__card-img` + orientation modifiers
 
@@ -3105,9 +3123,11 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 ### Tile chrome — `.deck-editor__card`
 
 - `padding: 0`, `overflow: hidden` — image flush to top/left/right; only `.deck-editor__card-footer` has `padding: var(--space-1) var(--space-2)` for controls.
+- Mobile portrait exception: see Grid section — 5% inset on `.deck-editor__card-media` (landscape types unchanged).
 
 ### Image fit — `CardImage` (deck editor)
 
+- **Loading**: thumb-first **progressive** upgrade to full-res (`progressive={deckEditorUsesThumbnail}`) for specials, power, missions, universe, characters — matches Add Cards / DBV; skipped on `saveData` / `prefers-reduced-data`. Locations and events load full-res only (thumb letterbox incompatible with cover framing).
 - Portrait types (power, special, missions, universe, etc.): **`object-fit: contain`** — thumbnails are normalized to `350×490` (`PRESET_PORTRAIT`) so every card reads at the same scale; `cover` cropped power art unevenly.
 - **Characters**: thumbnail + **`object-fit: cover`** (`center top`) for edge-to-edge fill in the `380:280` frame.
 - **Locations**: full-res + **`object-fit: cover`** in a **`502 / 359`** frame (~5020×3590 art) — fills width/height with no letterbox; less crop than the old `236 / 151` frame.

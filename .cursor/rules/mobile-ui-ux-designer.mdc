@@ -68,11 +68,11 @@ Avoid:
 
 On mobile (`.layout-mobile`), the deck list and **Add Cards** panel use **one card per row for every catalog type** (characters, specials, missions, universe cards, etc.). Card art should span the full content width — no 2- or 3-column cramming on phone. This matches the DBV mobile single-column pattern (`minmax(0, 1fr)`).
 
-**Main deck view (mobile):** Show **one catalog type at a time** via a horizontal chip strip (same `shortLabel` / `CATALOG_TYPES` order as Add Cards, but **only types with cards in the deck** — no All or Stacks). Hide the strip when the deck has only one type. **Swipe left/right** on the card list (including on card art) cycles types cyclically; swipes are ignored when the gesture starts on footer controls (KO, reserve, trash), type tabs, or header actions. Section headings are hidden when tabs are shown (type + count live on the active chip).
+**Main deck view (mobile):** Show **one catalog type at a time** via a horizontal chip strip (same `shortLabel` / `CATALOG_TYPES` order as Add Cards, but **only types with cards in the deck** — no All or Stacks). Hide the strip when the deck has only one type. **Header metadata** (name, chips, stats, actions) and **type tabs scroll with the page** — not pinned like desktop — so card art gets maximum viewport. **Swipe left/right** on the card list (including on card art) cycles types cyclically; swipes are ignored when the gesture starts on footer controls (KO, reserve, trash), type tabs, or header actions. On type change, scroll to top and center the active chip in the tab strip so the current type is immediately obvious. Section headings are hidden when tabs are shown (type + count live on the active chip).
 
 **Exception:** Draw Hand uses a horizontal snap carousel (intentional; not a vertical deck grid).
 
-Implementation: [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css) — `.layout-mobile .deck-editor__cards`, `.add-cards__grid--*`, `.deck-editor__type-tabs`. Add Cards pagination on mobile: **8 cards/page** (8 rows × 1 column). Swipe: [`useHorizontalSwipe.ts`](frontend/src/lib/layout/useHorizontalSwipe.ts).
+Implementation: [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css) — `.layout-mobile .deck-editor__cards`, `.add-cards__grid--*`, `.deck-editor__type-tabs`, `.deck-editor__main` scroll model. Add Cards pagination on mobile: **8 cards/page** (8 rows × 1 column). Swipe: [`useHorizontalSwipe.ts`](frontend/src/lib/layout/useHorizontalSwipe.ts) on `.deck-editor__main`.
 
 ## Cursor Behavior
 

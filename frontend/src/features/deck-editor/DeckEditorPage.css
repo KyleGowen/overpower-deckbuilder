@@ -798,6 +798,18 @@
   order: 6;
   flex-wrap: wrap;
   justify-self: auto;
+  gap: var(--space-2);
+}
+.layout-mobile .deck-editor__actions .btn {
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  gap: var(--space-1);
+}
+.layout-mobile .deck-editor__actions .btn svg {
+  width: 14px;
+  height: 14px;
 }
 .layout-mobile .deck-editor__name-input,
 .layout-mobile .deck-editor__name {
@@ -807,8 +819,10 @@
 .layout-mobile .deck-editor__stats-panel {
   order: 5;
   flex: 1 1 100%;
-  justify-content: flex-start;
-  gap: var(--space-3);
+  display: grid;
+  grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr));
+  column-gap: var(--space-2);
+  row-gap: var(--space-2);
   padding: 0;
   transform: none;
 }
@@ -833,7 +847,10 @@
   flex: 1;
 }
 .layout-mobile .deck-editor__stats-block {
-  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
 }
 .layout-mobile .deck-editor__stats-block + .deck-editor__stats-block {
   padding-left: 0;
@@ -842,12 +859,37 @@
   border-top: 1px solid var(--color-border);
 }
 .layout-mobile .deck-editor__stats-row {
-  gap: var(--space-2);
+  display: contents;
 }
 .layout-mobile .deck-editor__stat-group {
-  padding-right: var(--space-2);
+  display: grid;
+  grid-template-columns: 18px 2ch;
+  gap: 6px;
+  align-items: center;
+  justify-self: end;
+  width: calc(18px + 6px + 2ch);
+  min-width: 0;
+  padding-right: 0;
+  border-right: none;
+}
+.layout-mobile .deck-editor__stat-val {
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.layout-mobile .deck-editor__main {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.layout-mobile .deck-editor__header {
+  flex-shrink: 0;
+  position: static;
 }
 .layout-mobile .deck-editor__content {
+  overflow-y: visible;
+  flex: none;
+  min-height: auto;
   padding: var(--space-2) var(--space-3)
     calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-2));
   --deck-editor-portrait-col: 165px;
@@ -856,22 +898,24 @@
 /* Mobile deck type tabs */
 .deck-editor__type-tabs {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   padding: var(--space-2) var(--space-3);
+  padding-bottom: calc(var(--space-2) + var(--space-1));
   flex-shrink: 0;
   background: rgba(8, 13, 24, 0.9);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--color-border);
 }
 .layout-mobile .deck-editor__type-tabs {
-  position: sticky;
-  top: 0;
-  z-index: calc(var(--z-sticky) - 1);
+  position: static;
+  flex-shrink: 0;
 }
 .deck-editor__type {
   display: inline-flex;
@@ -908,6 +952,11 @@
 .layout-mobile .deck-editor__cards,
 .layout-mobile .deck-editor__cards--landscape {
   grid-template-columns: minmax(0, 1fr);
+}
+/* Portrait deck tiles — inset art (~90% width, 5% buffer each side) */
+.layout-mobile .deck-editor__cards .deck-editor__card-media:has(.deck-editor__card-img--portrait) {
+  padding: 5%;
+  box-sizing: border-box;
 }
 /* Add Cards — one tile per row (all grid variants) */
 .layout-mobile .add-cards__grid--portrait,
