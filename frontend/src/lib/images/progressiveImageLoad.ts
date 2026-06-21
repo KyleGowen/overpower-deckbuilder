@@ -4,7 +4,7 @@
  * See docs/current/PROGRESSIVE_IMAGE_LOADING.md.
  */
 
-export type ProgressiveImageSessionScope = 'database';
+export type ProgressiveImageSessionScope = 'database' | 'deck-editor';
 
 export const PROGRESSIVE_SESSION_MAX_ENTRIES = 400;
 const IDLE_TTL_MS = 30 * 60 * 1000;

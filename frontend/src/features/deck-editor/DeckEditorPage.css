@@ -318,14 +318,16 @@
 .deck-editor__card-img--events {
   aspect-ratio: 236 / 151;
 }
-/* Fill the frame edge-to-edge; contain letterboxing is too heavy in deck tiles. */
+/* Progressive layers fill the aspect-ratio frame; intrinsic bitmap size must not affect layout. */
 .deck-editor__card-img .card-image {
+  width: 100%;
+  height: 100%;
   background: var(--color-bg-elevated);
 }
 .deck-editor__card-img--characters .card-image__img,
-.deck-editor__card-img--characters.card-image--contain .card-image__img {
-  object-fit: cover;
-  object-position: center top;
+.deck-editor__card-img--characters .card-image--contain .card-image__img {
+  object-fit: contain;
+  object-position: center center;
 }
 .deck-editor__card-img--locations .card-image__img,
 .deck-editor__card-img--locations .card-image--contain .card-image__img {

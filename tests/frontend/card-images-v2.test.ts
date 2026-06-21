@@ -171,7 +171,8 @@ describe('CardImage progressive CSS', () => {
     expect(css).toContain('.card-image__img--full');
     expect(css).toContain('.card-image__full--loaded');
     expect(css).toContain('.card-image--progressive');
-    expect(css).not.toContain('visibility: hidden');
+    expect(css).toContain('position: absolute');
+    expect(css).toContain('visibility: hidden');
     expect(css).toContain('.card-image--progressive.card-image--loading .card-image__img--thumb');
     expect(css).toContain('.card-image--contain.card-image--progressive .card-image__img--full');
   });

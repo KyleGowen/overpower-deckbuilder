@@ -16,6 +16,8 @@
 }
 
 .card-image--progressive .card-image__img--thumb {
+  position: absolute;
+  inset: 0;
   transition: none;
 }
 
@@ -80,4 +82,9 @@
   transition: none;
 }
 
-/* Full layer stacks above thumb; thumb remains visible as letterbox backing (no blank gap on swap). */
+/* Once full-res paints, hide thumb so contain letterbox / edge bleed never double-frames the swap. */
+.card-image--progressive:has(.card-image__full--loaded) .card-image__img--thumb {
+  visibility: hidden;
+}
+
+/* Full layer stacks above thumb; thumb remains visible as letterbox backing until full loads. */

@@ -15,6 +15,7 @@ import {
   isFullResRevealed,
   preloadAndRevealFullRes,
   shouldSkipFullResUpgrade,
+  type ProgressiveImageSessionScope,
 } from '../../lib/images/progressiveImageLoad';
 import './CardImage.css';
 
@@ -37,6 +38,8 @@ interface CardImageProps {
   loading?: 'lazy' | 'eager';
   /** Fired when thumb + full-res both fail (single-layer mode only). */
   onImageFailed?: () => void;
+  /** Session cache scope for progressive full-res reveal (e.g. deck editor tab switches). */
+  progressiveSessionScope?: ProgressiveImageSessionScope;
 }
 
 function catalogTypeSupportsProgressiveThumb(type?: CatalogType): boolean {
@@ -44,11 +47,12 @@ function catalogTypeSupportsProgressiveThumb(type?: CatalogType): boolean {
   return isLandscapeCatalogType(type) || catalogTypeUsesPortraitThumb(type);
 }
 
-function useInView(rootMargin = '200px'): [RefObject<HTMLSpanElement | null>, boolean] {
+function useInView(rootMargin = '200px', eager = false): [RefObject<HTMLSpanElement | null>, boolean] {
   const ref = useRef<HTMLSpanElement>(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(eager);
 
   useEffect(() => {
+    if (eager) return undefined;
     const el = ref.current;
     if (!el) return undefined;
 
@@ -63,7 +67,7 @@ function useInView(rootMargin = '200px'): [RefObject<HTMLSpanElement | null>, bo
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [eager]);
 
   return [ref, inView];
 }
@@ -82,6 +86,7 @@ export function CardImage({
   style,
   loading = 'lazy',
   onImageFailed,
+  progressiveSessionScope = 'database',
 }: CardImageProps) {
   const useProgressive =
     progressive && canProgressiveLoad(imagePath, catalogType) && !shouldSkipFullResUpgrade();
@@ -98,6 +103,7 @@ export function CardImage({
         style={style}
         loading={loading}
         progressiveThumb={progressiveThumb}
+        progressiveSessionScope={progressiveSessionScope}
       />
     );
   }
@@ -197,6 +203,7 @@ function ProgressiveCardImage({
   style,
   loading,
   progressiveThumb,
+  progressiveSessionScope,
 }: {
   imagePath?: string | null;
   catalogType?: CatalogType;
@@ -205,14 +212,17 @@ function ProgressiveCardImage({
   style?: CSSProperties;
   loading: 'lazy' | 'eager';
   progressiveThumb: boolean;
+  progressiveSessionScope: ProgressiveImageSessionScope;
 }) {
-  const [wrapperRef, inView] = useInView();
+  const [wrapperRef, inView] = useInView('200px', loading === 'eager');
   const thumbRef = useRef<HTMLImageElement>(null);
   const fullImgRef = useRef<HTMLImageElement>(null);
   const [thumbLoaded, setThumbLoaded] = useState(!progressiveThumb);
   const [thumbFailed, setThumbFailed] = useState(false);
   const fullSrc = resolveImageUrl(imagePath, catalogType);
-  const [fullLoaded, setFullLoaded] = useState(() => isFullResRevealed(fullSrc));
+  const [fullLoaded, setFullLoaded] = useState(() =>
+    isFullResRevealed(fullSrc, progressiveSessionScope),
+  );
 
   const thumbSrc = thumbFailed ? placeholderImageUrl() : resolveThumbUrl(imagePath, catalogType);
 
@@ -227,7 +237,7 @@ function ProgressiveCardImage({
   }, [thumbSrc, progressiveThumb]);
 
   useLayoutEffect(() => {
-    if (!isFullResRevealed(fullSrc)) return;
+    if (!isFullResRevealed(fullSrc, progressiveSessionScope)) return;
     const fullImg = fullImgRef.current;
     if (!fullImg) return;
 
@@ -242,7 +252,7 @@ function ProgressiveCardImage({
       .decode()
       .then(() => setFullLoaded(true))
       .catch(() => setFullLoaded(true));
-  }, [fullSrc]);
+  }, [fullSrc, progressiveSessionScope]);
 
   const revealFullIfReady = (img: HTMLImageElement | null) => {
     if (!img || !imageElementMatchesUrl(img, fullSrc) || !syncImageLoaded(img)) return;
@@ -253,7 +263,7 @@ function ProgressiveCardImage({
   };
 
   useEffect(() => {
-    if (fullLoaded || isFullResRevealed(fullSrc)) return undefined;
+    if (fullLoaded || isFullResRevealed(fullSrc, progressiveSessionScope)) return undefined;
     if (!inView) return undefined;
 
     const fullImg = fullImgRef.current;
@@ -264,12 +274,14 @@ function ProgressiveCardImage({
       return undefined;
     }
 
-    const handle = preloadAndRevealFullRes(fullSrc, fullImg, () => setFullLoaded(true));
+    const handle = preloadAndRevealFullRes(fullSrc, fullImg, () => setFullLoaded(true), {
+      scope: progressiveSessionScope,
+    });
     return () => {
       handle.cancel();
       revealFullIfReady(fullImg);
     };
-  }, [inView, fullSrc, fullLoaded, imagePath]);
+  }, [inView, fullSrc, fullLoaded, imagePath, progressiveSessionScope]);
 
   return (
     <span

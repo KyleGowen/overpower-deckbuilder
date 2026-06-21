@@ -3127,12 +3127,13 @@ Orientation is set in `deckCardImgOrientationClass()` from `catalogType` (via de
 
 ### Image fit — `CardImage` (deck editor)
 
-- **Loading**: thumb-first **progressive** upgrade to full-res (`progressive={deckEditorUsesThumbnail}`) for specials, power, missions, universe, characters — matches Add Cards / DBV; skipped on `saveData` / `prefers-reduced-data`. Locations and events load full-res only (thumb letterbox incompatible with cover framing).
+- **Loading**: thumb-first **progressive** upgrade to full-res (`progressive={deckEditorUsesThumbnail}`) for characters, specials, power, missions, universe types — same as Add Cards / DBV; skipped on `saveData` / `prefers-reduced-data`. **Locations** and **events** load **full-res only** (thumb letterbox incompatible with cover framing). Deck grid uses `loading="eager"` + `progressiveSessionScope="deck-editor"` so thumbs paint immediately and full-res upgrades cache across type-tab switches within the editor.
 - Portrait types (power, special, missions, universe, etc.): **`object-fit: contain`** — thumbnails are normalized to `350×490` (`PRESET_PORTRAIT`) so every card reads at the same scale; `cover` cropped power art unevenly.
-- **Characters**: thumbnail + **`object-fit: cover`** (`center top`) for edge-to-edge fill in the `380:280` frame.
+- **Characters**: thumbnail + **`object-fit: contain`** (`center center`) in the `380:280` frame — matches `PRESET_CHARACTER` thumbs; progressive thumb paints first, full-res swaps with thumb hidden after decode (no vertical reframing).
 - **Locations**: full-res + **`object-fit: cover`** in a **`502 / 359`** frame (~5020×3590 art) — fills width/height with no letterbox; less crop than the old `236 / 151` frame.
 - **Events**: full-res + **`object-fit: cover`** in the `236 / 151` frame.
 - `catalogType` is passed to `CardImage` for correct thumbnail URLs.
+- **Frame lock**: `.deck-editor__card-img .card-image` uses `width: 100%; height: 100%` inside the `aspect-ratio` button so progressive layers never affect tile layout.
 
 ### Per-card controls — `.deck-editor__card-footer`
 

@@ -84,6 +84,7 @@ import type {
 import type { StackCardEntry } from '../../lib/catalog/characterStacks';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { useDeckCardDetailHistory } from '../../lib/layout/useDeckCardDetailHistory';
+import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import './DeckEditorPage.css';
@@ -96,7 +97,7 @@ function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   return 'deck-editor__card-img--portrait';
 }
 
-/** Location/event thumbs bake contain letterbox; full-res + cover fills the 236:151 frame like characters. */
+/** Location/event thumbs bake contain letterbox incompatible with cover framing. */
 function deckEditorUsesThumbnail(catalogType?: CatalogType): boolean {
   return catalogType !== 'locations' && catalogType !== 'events';
 }
@@ -208,6 +209,8 @@ export default function DeckEditorPage() {
     setDrawHandOpen(false);
     setDrawnCards([]);
   }, [deckId]);
+
+  useEffect(() => () => clearProgressiveImageSession('deck-editor'), []);
 
   useEffect(() => {
     if (deck && !loadedRef.current) {
@@ -884,6 +887,8 @@ export default function DeckEditorPage() {
                             alt={cardName}
                             useThumbnail={deckEditorUsesThumbnail(catalogType)}
                             progressive={deckEditorUsesThumbnail(catalogType)}
+                            progressiveSessionScope="deck-editor"
+                            loading="eager"
                             className="card-image--contain"
                           />
                         </button>
