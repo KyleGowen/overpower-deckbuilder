@@ -3051,7 +3051,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - **Threat** (`.deck-editor__threat-stat`): first child — `threat.png` icon (`STAT_ICON_PATHS.threat_level` via `assetUrl()`) + value in `.stat-threat` (`var(--color-text-muted)`); `formatThreatDisplay` shows `total/76` when over cap; `title` tooltip *"Threat: N"*
 - Desktop: threat sits **left of Character max** with `border-right` divider (same pattern as stat groups)
 - Two stat blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `18px + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values; border-top between stat rows
+- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; **`.deck-editor__meta`** has `margin-bottom: var(--space-2)` for breathing room above the stats rows; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `calc(18px * 1.1) + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values at `calc(var(--font-size-sm) * 1.1)`; border-top between stat rows
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
@@ -3065,7 +3065,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - Each group: muted stat PNG icon + bold value in global stat color (`.stat-energy`, `.stat-combat`, `.stat-brute-force`, `.stat-intelligence`)
 - Vertical divider between groups: `border-right: 1px solid var(--color-border)` (except last)
 - Per-stat `title` tooltip (e.g. *"Energy: 5"*)
-- Mobile: subgrid alignment (see Container above); values `font-size: var(--font-size-sm)`; `font-variant-numeric: tabular-nums; text-align: right` on `.deck-editor__stat-val`
+- Mobile: subgrid alignment (see Container above); values `font-size: calc(var(--font-size-sm) * 1.1)`; `font-variant-numeric: tabular-nums; text-align: right` on `.deck-editor__stat-val`
 
 ### Header actions — `.deck-editor__actions .btn`
 
@@ -3073,7 +3073,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - `padding: 4px 10px`, `font-size: var(--font-size-xs)`, `font-weight: var(--font-weight-semibold)`, `border-radius: var(--radius-full)`, `gap: var(--space-1)`
 - Icon `14×14px` (explicit SVG sizing; matches type tab chips)
 - Draw Hand open state: `.btn-ghost.is-active` — accent border/background (see `DeckEditorPage.css`)
-- Mobile layout only (`.layout-mobile .deck-editor__actions`): `width: 100%`, `order: 6`, flex-wrap
+- Mobile layout only (`.layout-mobile .deck-editor__actions`): `width: 100%`, `order: 6`, flex-wrap, `padding-top: var(--space-2)` for extra space above the action chip row
 
 ### Mobile type tabs — `.deck-editor__type-tabs`
 
@@ -3084,7 +3084,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 
 ### Icon — `.deck-editor__stat-group-icon`
 
-- `18×18px` PNG from `STAT_ICON_PATHS` via `assetUrl()`
+- `18×18px` PNG from `STAT_ICON_PATHS` via `assetUrl()` (mobile: `calc(18px * 1.1)` ≈ 19.8px for threat + stat-type icons)
 - Light muting: `opacity: 0.9; filter: saturate(0.92) brightness(0.95)`
 
 ### Value — `.deck-editor__stat-val`
