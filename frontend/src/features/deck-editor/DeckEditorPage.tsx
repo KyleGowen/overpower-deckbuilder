@@ -55,6 +55,8 @@ import {
   IconPlus,
   IconTrash,
   IconCards,
+  IconList,
+  IconGrid,
 } from '../../components/icons';
 import {
   buildKoDimmingContext,
@@ -73,6 +75,7 @@ import {
 } from '../../lib/decks/deckCardCatalog';
 import { AddCardsPanel } from './AddCardsPanel';
 import { DrawHandPanel } from './DrawHandPanel';
+import { DeckListView, persistDeckViewMode, readDeckViewMode } from './DeckListView';
 import { KoToggleButton } from './KoToggleButton';
 import { ReserveCharacterButton } from './ReserveCharacterButton';
 import type {
@@ -139,15 +142,36 @@ function DeckStatRow({
   );
 }
 
+function DeckThreatStat({ totalThreat }: { totalThreat: number }) {
+  const display = formatThreatDisplay(totalThreat);
+  return (
+    <span
+      className="deck-editor__threat-stat"
+      aria-label="Deck total threat"
+      title={`Threat: ${display}`}
+    >
+      <span className="deck-editor__stat-group-icon" aria-hidden="true">
+        <img src={assetUrl(STAT_ICON_PATHS.threat_level)} alt="" />
+      </span>
+      <span className="deck-editor__stat-val stat-threat">{display}</span>
+    </span>
+  );
+}
+
 function DeckStatsPanel({
   maxStats,
   iconTotals,
+  totalThreat,
+  showThreatInPanel = true,
 }: {
   maxStats: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
   iconTotals: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
+  totalThreat: number;
+  showThreatInPanel?: boolean;
 }) {
   return (
     <div className="deck-editor__stats-panel">
+      {showThreatInPanel ? <DeckThreatStat totalThreat={totalThreat} /> : null}
       <DeckStatRow
         label="Character max"
         ariaLabel="Character maximums"
@@ -194,6 +218,7 @@ export default function DeckEditorPage() {
   const [drawHandOpen, setDrawHandOpen] = useState(false);
   const [drawnCards, setDrawnCards] = useState<DeckCardEntry[]>([]);
   const [mobileDeckTypeTab, setMobileDeckTypeTab] = useState<CatalogType | null>(null);
+  const [deckViewMode, setDeckViewMode] = useState(readDeckViewMode);
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -392,12 +417,12 @@ export default function DeckEditorPage() {
   }, [isMobile, deckTypeTabs]);
 
   const visibleGroups = useMemo(() => {
-    if (!isMobile) return grouped;
+    if (!isMobile || deckViewMode === 'list') return grouped;
     if (deckTypeTabs.length === 0) return [];
     const type = mobileDeckTypeTab ?? deckTypeTabs[0].meta.type;
     const active = grouped.find((g) => g.meta.type === type);
     return active ? [active] : [deckTypeTabs[0]];
-  }, [isMobile, grouped, deckTypeTabs, mobileDeckTypeTab]);
+  }, [isMobile, deckViewMode, grouped, deckTypeTabs, mobileDeckTypeTab]);
 
   const scrollContainerRef = isMobile ? mainRef : contentRef;
 
@@ -427,7 +452,8 @@ export default function DeckEditorPage() {
 
   useHorizontalSwipe({
     targetRef: scrollContainerRef,
-    enabled: isMobile && !immersiveOpen && deckTypeTabs.length > 1,
+    enabled:
+      isMobile && deckViewMode === 'card' && !immersiveOpen && deckTypeTabs.length > 1,
     onSwipeLeft: () => goToRelativeDeckType(1),
     onSwipeRight: () => goToRelativeDeckType(-1),
   });
@@ -499,6 +525,14 @@ export default function DeckEditorPage() {
     }
     setDrawnCards(drawRandomHand(cards));
     setDrawHandOpen(true);
+  };
+
+  const handleViewModeToggle = () => {
+    setDeckViewMode((prev) => {
+      const next = prev === 'card' ? 'list' : 'card';
+      persistDeckViewMode(next);
+      return next;
+    });
   };
 
   const handleDrawHandRedraw = () => {
@@ -697,7 +731,8 @@ export default function DeckEditorPage() {
 
   const legality = validity ?? { valid: deck.metadata.is_valid ?? false };
   const showMobileNav = isMobile && !immersiveOpen;
-  const showMobileTypeTabs = isMobile && cards.length > 0 && deckTypeTabs.length > 1;
+  const showMobileTypeTabs =
+    isMobile && deckViewMode === 'card' && cards.length > 0 && deckTypeTabs.length > 1;
 
   return (
     <>
@@ -739,16 +774,37 @@ export default function DeckEditorPage() {
 
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
-                <span className="deck-editor__chip">Threat {formatThreatDisplay(totalThreat)}</span>
                 <span className={`badge ${legality.valid ? 'badge-legal' : 'badge-not-legal'}`} title={legality.message}>
                   {legality.valid ? 'Legal' : 'Not Legal'}
                 </span>
+                {isMobile ? <DeckThreatStat totalThreat={totalThreat} /> : null}
               </div>
             </div>
 
-            <DeckStatsPanel maxStats={maxStats} iconTotals={iconTotals} />
+            <DeckStatsPanel
+              maxStats={maxStats}
+              iconTotals={iconTotals}
+              totalThreat={totalThreat}
+              showThreatInPanel={!isMobile}
+            />
 
             <div className="deck-editor__actions">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={handleViewModeToggle}
+                title={deckViewMode === 'card' ? 'Switch to list view' : 'Switch to card view'}
+              >
+                {deckViewMode === 'card' ? (
+                  <>
+                    <IconList /> List View
+                  </>
+                ) : (
+                  <>
+                    <IconGrid /> Card View
+                  </>
+                )}
+              </button>
               <button
                 type="button"
                 className={`btn btn-ghost${drawHandOpen ? ' is-active' : ''}`}
@@ -817,6 +873,25 @@ export default function DeckEditorPage() {
                   </button>
                 ) : null
               }
+            />
+          ) : deckViewMode === 'list' ? (
+            <DeckListView
+              groups={visibleGroups}
+              cardIndex={cardIndex}
+              isMobile={isMobile}
+              isOwner={isOwner}
+              koCtx={koCtx}
+              koCharacterIds={koCharacterIds}
+              reserveCharacterId={reserveCharacterId}
+              characterEntries={characterEntries}
+              canSimulateKo={canSimulateKo}
+              selectedInstanceId={selected?.instanceId ?? null}
+              onSelectCard={selectDeckCard}
+              onToggleKo={(cardId) =>
+                setKoCharacterIds((prev) => toggleKoCharacterId(prev, cardId))
+              }
+              onSelectReserve={selectReserveCharacter}
+              onDeselectReserve={deselectReserveCharacter}
             />
           ) : (
             visibleGroups.map(({ meta, entries }) => (

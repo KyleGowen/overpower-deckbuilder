@@ -44,6 +44,7 @@
 41. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
 42. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
 43. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
+44. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
 
 ## Overview
 
@@ -3031,11 +3032,12 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 ### Topbar — `.deck-editor__topbar` (three-zone grid)
 
 - `display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; gap: var(--space-4)`
-- **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta chips (card count, threat, legality badge)
-- **Center** (`.deck-editor__stats-panel`): Character max + Icon totals, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
+- **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta row (card count chip, legality badge; on mobile, threat icon stat right-aligned on the same line)
+- **Center** (`.deck-editor__stats-panel`): deck total **threat** icon stat (`.deck-editor__threat-stat`) left of **Character max** + **Icon totals**, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
 - **Trailing** (`.deck-editor__actions`): Draw Hand, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
-- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`, column stack), compact actions full-width (`order: 6`, chip-sized buttons)
+- **Desktop compact (`.layout-desktop`)** — header ~10% shorter: topbar `padding-block: 11px` (was 12px), back `34×34px` (was 38px), name input `padding: 9px 12px` (overrides global input `12px 16px`), name `font-size: var(--font-size-base)` (was `lg`), stats icons `16×16px` (was 18px), stat values `0.9rem`, block labels `9px`, inter-block gaps `22px` / `11px` (~90% of base)
+- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`, column stack), actions full-width (`order: 6`)
 
 ### Mobile scroll model (`.layout-mobile`)
 
@@ -3046,8 +3048,10 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 
 - `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-6); padding: 0; transform: translateX(calc(-1 * var(--space-3)))`
 - No `border-top` — stats live in the center column of the topbar, not a separate row
-- Two blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `18px + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values; border-top between rows
+- **Threat** (`.deck-editor__threat-stat`): first child — `threat.png` icon (`STAT_ICON_PATHS.threat_level` via `assetUrl()`) + value in `.stat-threat` (`var(--color-text-muted)`); `formatThreatDisplay` shows `total/76` when over cap; `title` tooltip *"Threat: N"*
+- Desktop: threat sits **left of Character max** with `border-right` divider (same pattern as stat groups)
+- Two stat blocks side by side on desktop, separated by `border-left` on the second block
+- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `18px + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values; border-top between stat rows
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
@@ -3063,9 +3067,13 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - Per-stat `title` tooltip (e.g. *"Energy: 5"*)
 - Mobile: subgrid alignment (see Container above); values `font-size: var(--font-size-sm)`; `font-variant-numeric: tabular-nums; text-align: right` on `.deck-editor__stat-val`
 
-### Mobile actions — `.layout-mobile .deck-editor__actions .btn`
+### Header actions — `.deck-editor__actions .btn`
 
-- Match type chip sizing: `padding: 4px 10px`, `font-size: var(--font-size-xs)`, `border-radius: var(--radius-full)`, icon `14×14px`
+- Draw Hand (`btn-ghost`), Add Cards (`btn-secondary`), Save (`btn-primary`) — chip-sized on **both DTV and MV**
+- `padding: 4px 10px`, `font-size: var(--font-size-xs)`, `font-weight: var(--font-weight-semibold)`, `border-radius: var(--radius-full)`, `gap: var(--space-1)`
+- Icon `14×14px` (explicit SVG sizing; matches type tab chips)
+- Draw Hand open state: `.btn-ghost.is-active` — accent border/background (see `DeckEditorPage.css`)
+- Mobile layout only (`.layout-mobile .deck-editor__actions`): `width: 100%`, `order: 6`, flex-wrap
 
 ### Mobile type tabs — `.deck-editor__type-tabs`
 
@@ -3172,6 +3180,39 @@ Controls sit in a footer row **below** the card image (no overlays on art, no ti
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
 - **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned.
 - **Mobile**: `SlideOutPanel` right variant becomes full viewport width (`100vw`) per component CSS; width prop applies on desktop only.
+
+## Deck Editor list view (v2 SPA)
+
+The v2 deck editor supports **Card View** (image tile grid) and **List View** (text rows grouped by catalog type). Toggle in `.deck-editor__actions` **before Draw Hand**: `btn btn-ghost` with `IconList` + **List View** when in card mode, `IconGrid` + **Card View** when in list mode (label always shows the destination view). Preference persists in `sessionStorage` (`deck-editor-view-mode`).
+
+### Layout — `.deck-editor__list`
+
+| Region | Class | Behavior |
+|---|---|---|
+| Root | `.deck-editor__list` | Column flex, full width |
+| Desktop columns | `.deck-editor__list-columns` | `display: flex`, `gap: var(--space-5)` |
+| Column | `.deck-editor__list-column` | `flex: 1`, stacks sections |
+| Section | `.deck-editor__list-section` | Collapsible category block |
+| Section header | `.deck-editor__list-section-header` | Teal tint `rgba(0, 200, 232, 0.08)`, border `var(--color-border-accent)`, title + count + chevron |
+| Rows | `.deck-editor__list-items` | Vertical stack, `gap: 2px` |
+| Row | `.deck-editor__list-row` | Flex row, `min-height: 40px` (44px mobile) |
+| Row main (click) | `.deck-editor__list-row-main` | Opens `CardDetailPanel` via `selectDeckCard` |
+| Quantity | `.deck-editor__list-qty` | `flex: 0 0 40px`, right-aligned, `font-weight: 600`, `color: var(--color-accent-bright)` |
+| Name + icons | `.deck-editor__list-name` | Label + inline `.deck-editor__list-icons` (18×18 PNGs from `STAT_ICON_PATHS`) |
+| Character sub-group | `.deck-editor__list-char-group-header` | Special cards grouped by linked character; **Any Character** first; count in `.deck-editor__list-char-group-count` with `margin-left: var(--space-2)` after name |
+| KO dim | `.deck-editor__list-row--ko-dimmed` | `opacity: 0.375`, `grayscale(0.4)` |
+| Selected | `.deck-editor__list-row.is-selected` | Teal inset ring when detail panel open |
+
+**Desktop**: two columns; sections assigned greedily by row count so columns stay balanced (sections never split). **Desktop typography** (`.layout-desktop`): list text is **+2px** over base tokens — section title/count, character sub-group header, row name, and quantity (`calc(var(--font-size-*) + 2px)`); attack icons **20×20px** (18px on mobile). **Mobile** (`.layout-mobile`): `.deck-editor__list-columns { flex-direction: column }` — single column, no thumbnails; **no type chip strip** — all catalog sections in one vertical scroll with collapsible section headers (Characters, Special, Power, …). Type tabs and swipe-to-cycle apply to **card view only** on mobile.
+
+### Row content
+
+- Instances with the same `type + cardId` aggregate to one row; quantity = instance count.
+- Attack-type icons on power, teamwork, ally-universe, special, and aspect rows (Energy / Combat / Brute Force / Intelligence / Any-Power).
+- Character rows: compact KO + reserve in `.deck-editor__list-row-actions` (same controls as card tiles). **Reserve** sits left of **KO**; reserve slot is fixed width (`5.25rem`) so KO buttons align in a vertical column on every character row (hidden reserve slots keep width when another character is reserved).
+- No +/- quantity steppers in list view — editing remains in card view or slideout.
+
+Implementation: [`DeckListView.tsx`](../../frontend/src/features/deck-editor/DeckListView.tsx), helpers in [`deckListView.ts`](../../frontend/src/lib/decks/deckListView.ts), styles in [`DeckEditorPage.css`](../../frontend/src/features/deck-editor/DeckEditorPage.css).
 
 ## Add Cards Stacks tab (v2 SPA)
 
