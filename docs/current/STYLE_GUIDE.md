@@ -920,7 +920,7 @@ Consider implementing CSS custom properties for easier theme management:
   - **Email** — `.profile-menu__email`: `var(--font-size-sm)`, `var(--color-text-muted)` (hidden for GUEST)
   - **Deck count** — `.profile-menu__deck-count`: same size/color as email (e.g. `12 decks`)
 - **Actions** (`.profile-menu__item`): Create New Deck, Change Email, Change Password (USER/ADMIN only), Log Out / Exit Guest.
-- **Inline sub-forms** (`.profile-menu__subform`): expand below Change Email / Change Password rows; only one open at a time. Password fields use [`PasswordInput`](../../frontend/src/components/PasswordInput/PasswordInput.tsx) with per-field eye toggle (`.password-input__eye`).
+- **Inline sub-forms** (`.profile-menu__subform`): expand below Change Email / Change Password rows; only one open at a time. **Spacing:** `padding-top: var(--space-4)` (16px) between the active menu row and the first field label; `gap: var(--space-3)` between fields. Password fields use [`PasswordInput`](../../frontend/src/components/PasswordInput/PasswordInput.tsx) with per-field eye toggle (`.password-input__eye`).
 - **Validation UX**: client shows **"Passwords do not match."** when both password fields are non-empty and unequal; Save disabled until match. Email emptiness/format checked client-side; server is authoritative via `/api/v1/users/change-email` and `/api/v1/users/change-password`.
 - **Create New Deck**: navigates to `/users/:userId/decks?create=1` (opens existing New Deck slide-out on deck selection).
 

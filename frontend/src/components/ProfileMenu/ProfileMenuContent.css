@@ -65,8 +65,8 @@
 .profile-menu__subform {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: 0 var(--space-3) var(--space-3);
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3) var(--space-3);
 }
 
 .profile-menu__field {
