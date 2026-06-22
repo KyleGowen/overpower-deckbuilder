@@ -3327,19 +3327,19 @@ Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../fr
 
 ### Overlay — `.draw-hand-slideout`
 
-- `SlideOutPanel`: `side="top"`, `position="absolute"` — deck grid remains visible behind blurred scrim.
-- Panel `max-height`: **70vh** desktop; **55vh** under `.layout-mobile`.
+- `SlideOutPanel`: `side="top"`. **Desktop:** `position="absolute"` — deck grid remains visible behind blurred scrim; panel `max-height` **70vh**. **Mobile:** `position="fixed"`, **100dvh** full viewport (`border-radius: 0`); immersive overlay hides deck chrome.
 
 ### Row — `.draw-hand__row` / `.draw-hand__row-inner`
 
-- Desktop: flex row, centered; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when 8–9 cards overflow width.
-- Mobile: horizontal scroll, `scroll-snap-type: x mandatory`; **no** scale transform (`transform: none !important`).
+- **Desktop:** flex row, centered; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when 8–9 cards overflow width.
+- **Mobile:** `flex-direction: column`, centered slots; vertical scroll in `.slideout__body` (no horizontal snap).
 
 ### Slot — `.draw-hand__slot`
 
-- Fixed width: `var(--deck-editor-portrait-col)` — **210px** desktop, **165px** mobile (`DeckEditorPage.css` on `.deck-editor__content`).
+- **Desktop:** fixed width `var(--deck-editor-portrait-col)` — **210px** (`DeckEditorPage.css` on `.deck-editor__content`).
+- **Mobile:** `width: min(280px, 100%)`, centered; portrait art **5% inset** on `.deck-editor__card-media` (matches main deck grid).
 - Gap between slots: `var(--space-4)`.
-- Fine-pointer drag: `.draw-hand__slot--dragging` (opacity 0.45), `.draw-hand__slot--drag-target` (`translateY(-4px)`).
+- Fine-pointer drag (desktop only): `.draw-hand__slot--dragging` (opacity 0.45), `.draw-hand__slot--drag-target` (`translateY(-4px)`).
 
 ### Events — `.draw-hand__event-portrait` / `.draw-hand__event-rotate`
 
@@ -3351,7 +3351,7 @@ Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../fr
 
 ### Footer — `.draw-hand__redraw`
 
-- Centered **Draw again**; `min-width: 140px`.
+- **Draw again** button; `min-width: 140px` desktop; **full width** on mobile.
 
 ### KO dimming
 

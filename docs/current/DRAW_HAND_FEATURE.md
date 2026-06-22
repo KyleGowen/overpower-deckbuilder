@@ -40,9 +40,9 @@
 | Enable threshold | ≥8 playable | `canDrawHand()` | **Parity** |
 | `exclude_from_draw` | Supported | Supported | **Parity** |
 | Entry control | `#drawHandBtn` in utility row | **Draw Hand** in `.deck-editor__actions` | Playtest placeholder removed in v2 |
-| Panel UX | Replaces deck contents / mobile vertical fan | **Top slide-out overlay** — grid stays visible behind blur | **V2 UX** |
+| Panel UX | Replaces deck contents / mobile vertical fan | **Desktop:** top slide-out over deck grid. **Mobile:** full-viewport overlay (`position: fixed`, `100dvh`) | **V2 UX** |
 | Desktop layout | Grid or horizontal row by viewport | Single row, **210px** portrait slots, scale-to-fit | **V2 UX** |
-| Mobile layout | Vertical accordion fan + thumb-drag | **Horizontal snap carousel**, **165px** slots | **V2 UX** |
+| Mobile layout | Vertical accordion fan + thumb-drag | **Full-screen vertical stack** — centered `min(280px, 100%)` slots, scroll in panel body | **V2 UX** |
 | Event rotation | 90° CCW in portrait slot | Same — `.draw-hand__event-rotate` | **Parity** |
 | Drag reorder | Desktop fine pointer | Desktop fine pointer only | **Parity** |
 | KO dimming | `ko-dimmed` on whole card | Art-only `.deck-editor__card--ko-dimmed` | Matches v2 KO presentation |
@@ -60,9 +60,9 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 
 1. **Draw Hand** button in the sticky header (`.deck-editor__actions`). Disabled with tooltip when playable count &lt; 8.
 2. First click **opens** the panel and draws; button gets `.is-active`. Second click, **×**, or backdrop **closes** and clears the hand.
-3. **Drawn hand** panel slides down from the top (`SlideOutPanel` `side="top"`, `position="absolute"`). Deck grid remains visible behind the shared blurred scrim.
+3. **Drawn hand** panel: **Desktop** — slides down from the top (`SlideOutPanel` `side="top"`, `position="absolute"`); deck grid remains visible behind blurred scrim. **Mobile** — full-viewport overlay (`position="fixed"`, `100dvh`); deck chrome hidden behind opaque panel.
 4. **Desktop**: one horizontal row of 8–9 cards at deck-editor portrait width; `ResizeObserver` scales the row to fit. Drag-and-drop reorder on fine pointers.
-5. **Mobile** (`.layout-mobile`): horizontal scroll with `scroll-snap-type: x mandatory`; no uniform scale-down.
+5. **Mobile** (`.layout-mobile`): vertical scroll through stacked cards in the panel body; centered `min(280px, 100%)` portrait slots with 5% art inset; full-width **Draw again** footer.
 6. **Events** display landscape art rotated 90° CCW inside the portrait slot (draw-hand only).
 7. **Draw again** in the panel footer redraws without closing.
 8. Tapping a drawn card opens **CardDetailPanel** when catalog data resolves.

@@ -13,6 +13,7 @@ import {
   resolveDeckCatalogCard,
   type DeckCardIndex,
 } from '../../lib/decks/deckCardCatalog';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { useDrawHandScale } from './useDrawHandScale';
 import './DrawHandPanel.css';
 
@@ -58,6 +59,7 @@ export function DrawHandPanel({
   onReorder,
   onCardClick,
 }: DrawHandPanelProps) {
+  const { isMobile } = useLayoutMode();
   const canDrag = useFinePointer();
   const rowRef = useRef<HTMLDivElement>(null);
   const scale = useDrawHandScale(rowRef, drawnCards.length);
@@ -128,7 +130,7 @@ export function DrawHandPanel({
       open={open}
       onClose={onClose}
       side="top"
-      position="absolute"
+      position={isMobile ? 'fixed' : 'absolute'}
       className="draw-hand-slideout"
       title="Drawn hand"
       ariaLabel="Drawn hand"
