@@ -1,26 +1,20 @@
 import { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { SlideOutPanel } from '../SlideOutPanel';
-import { IconProfile, IconLogout, IconDecks, IconCollection } from '../icons';
+import { ProfileMenuContent } from '../ProfileMenu/ProfileMenuContent';
+import { IconProfile } from '../icons';
 import { MOBILE_NAV_ORDER, NAV_ITEMS } from './navConfig';
 import '../AppShell/AppShell.css';
 
 export function MobileBottomNav() {
-  const { user, isGuest, logout } = useAuth();
+  const { user } = useAuth();
   const { preferDesktop, setPreferDesktop } = useLayoutMode();
   const location = useLocation();
-  const navigate = useNavigate();
   const [accountOpen, setAccountOpen] = useState(false);
 
   const userId = user?.id ?? '';
-
-  const handleLogout = async () => {
-    setAccountOpen(false);
-    await logout();
-    navigate('/login');
-  };
 
   return (
     <>
@@ -52,30 +46,11 @@ export function MobileBottomNav() {
         open={accountOpen}
         onClose={() => setAccountOpen(false)}
         side="bottom"
-        title={isGuest ? 'Guest' : user?.username}
+        title="Account"
         ariaLabel="Account"
       >
         <div className="account-sheet">
-          <button
-            type="button"
-            className="account-sheet__item"
-            onClick={() => {
-              setAccountOpen(false);
-              navigate(`/users/${userId}/decks`);
-            }}
-          >
-            <IconDecks /> My Decks
-          </button>
-          <button
-            type="button"
-            className="account-sheet__item"
-            onClick={() => {
-              setAccountOpen(false);
-              navigate(`/users/${userId}/collection`);
-            }}
-          >
-            <IconCollection /> Collection
-          </button>
+          <ProfileMenuContent onClose={() => setAccountOpen(false)} variant="sheet" />
           <label className="account-sheet__toggle">
             <span>Use desktop layout</span>
             <input
@@ -84,9 +59,6 @@ export function MobileBottomNav() {
               onChange={(e) => setPreferDesktop(e.target.checked)}
             />
           </label>
-          <button type="button" className="account-sheet__item account-sheet__item--danger" onClick={handleLogout}>
-            <IconLogout /> {isGuest ? 'Exit Guest' : 'Log Out'}
-          </button>
         </div>
       </SlideOutPanel>
     </>

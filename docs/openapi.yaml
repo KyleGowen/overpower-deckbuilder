@@ -367,6 +367,49 @@ paths:
           description: User envelope.
         '401':
           description: Not authenticated.
+  /api/v1/users/change-email:
+    post:
+      tags: [Users]
+      summary: Change the authenticated user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Email updated.
+        '400':
+          description: Validation error (EMAIL_INVALID, EMAIL_UNCHANGED, etc.).
+        '403':
+          description: Forbidden (GUEST or GOOGLE_EMAIL_LOCKED).
+        '409':
+          description: EMAIL_TAKEN.
+  /api/v1/users/change-password:
+    post:
+      tags: [Users]
+      summary: Change the authenticated user's password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword, confirmPassword]
+              properties:
+                newPassword: { type: string }
+                confirmPassword: { type: string }
+      responses:
+        '200':
+          description: Password updated.
+        '400':
+          description: PASSWORD_MISMATCH or validation error.
+        '403':
+          description: Forbidden (GUEST or GOOGLE_PASSWORD_LOCKED).
   /api/v1/catalog/characters:
     get:
       tags: [Catalog]

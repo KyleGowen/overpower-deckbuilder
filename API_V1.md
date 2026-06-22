@@ -71,22 +71,23 @@ All v1 JSON responses use:
 ## Table of contents
 
 1. [Auth](#auth)
-2. [DBV catalog](#dbv-catalog)
-3. [DBV support](#dbv-support)
-4. [Recent updates](#recent-updates)
-5. [User decks (list)](#user-decks-list)
-6. [User decks (create + validate)](#user-decks-create--validate)
-7. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
-8. [User decks (cards)](#user-decks-cards)
-9. [User decks (UI preferences)](#user-decks-ui-preferences)
-10. [Guest decks (session memory)](#guest-decks-session-memory)
-11. [Collections (current user)](#collections-current-user)
-12. [Admin](#admin)
-13. [Image URL contract](#image-url-contract)
-14. [Caching & conditional GET](#caching--conditional-get)
-15. [Error catalog](#error-catalog)
-16. [Changelog](#changelog)
-17. [Deprecation policy](#deprecation-policy)
+2. [User account](#user-account)
+3. [DBV catalog](#dbv-catalog)
+4. [DBV support](#dbv-support)
+5. [Recent updates](#recent-updates)
+6. [User decks (list)](#user-decks-list)
+7. [User decks (create + validate)](#user-decks-create--validate)
+8. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
+9. [User decks (cards)](#user-decks-cards)
+10. [User decks (UI preferences)](#user-decks-ui-preferences)
+11. [Guest decks (session memory)](#guest-decks-session-memory)
+12. [Collections (current user)](#collections-current-user)
+13. [Admin](#admin)
+14. [Image URL contract](#image-url-contract)
+15. [Caching & conditional GET](#caching--conditional-get)
+16. [Error catalog](#error-catalog)
+17. [Changelog](#changelog)
+18. [Deprecation policy](#deprecation-policy)
 
 ---
 
@@ -196,6 +197,62 @@ See `[docs/current/API_V1_AUTH_REFRESH.md](docs/current/API_V1_AUTH_REFRESH.md)`
 ```json
 { "data": { "loggedOut": true }, "meta": {}, "errors": [] }
 ```
+
+---
+
+## User account
+
+Self-service account updates for **USER** and **ADMIN** (session cookie). **GUEST** receives **403**.
+
+### `POST /api/v1/users/change-email`
+
+**Auth:** Session cookie (`sessionId`).
+
+**Request model:** `[src/api/http/models/users/ChangeEmailRequestBody.ts](src/api/http/models/users/ChangeEmailRequestBody.ts)`
+
+**Body:**
+
+```json
+{ "email": "new@example.com" }
+```
+
+**Response 200** (`data`):
+
+```json
+{ "email": "new@example.com" }
+```
+
+**Response 400:** `EMAIL_REQUIRED`, `EMAIL_INVALID`, `EMAIL_UNCHANGED`, or `VALIDATION_ERROR`.
+
+**Response 403:** `FORBIDDEN` (GUEST) or `GOOGLE_EMAIL_LOCKED` (Google-linked account).
+
+**Response 409:** `EMAIL_TAKEN`.
+
+---
+
+### `POST /api/v1/users/change-password`
+
+**Auth:** Session cookie (`sessionId`).
+
+**Request model:** `[src/api/http/models/users/ChangePasswordRequestBody.ts](src/api/http/models/users/ChangePasswordRequestBody.ts)`
+
+**Body:**
+
+```json
+{ "newPassword": "secret", "confirmPassword": "secret" }
+```
+
+**Response 200** (`data`):
+
+```json
+{ "message": "Password updated" }
+```
+
+**Response 400:** `PASSWORD_REQUIRED`, `PASSWORD_MISMATCH` (`"Passwords do not match."`), or `VALIDATION_ERROR`.
+
+**Response 403:** `FORBIDDEN` (GUEST) or `GOOGLE_PASSWORD_LOCKED` (Google-linked account).
+
+Legacy `POST /api/users/change-password` remains for backward compatibility and delegates to the same service (accepts `{ newPassword }` only).
 
 ---
 

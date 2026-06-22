@@ -15,6 +15,7 @@ export interface AppUser {
   email?: string | null;
   role: UserRole;
   lastLoginAt?: string | null;
+  authProvider?: string | null;
 }
 
 export interface AppConfig {

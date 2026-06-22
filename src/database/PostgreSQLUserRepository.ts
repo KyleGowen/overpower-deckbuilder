@@ -28,13 +28,7 @@ export class PostgreSQLUserRepository implements UserRepository {
       );
       
       const user = result.rows[0];
-      return {
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role,
-        lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
-      };
+      return this.mapRowToUser(user);
     } finally {
       client.release();
     }
@@ -53,13 +47,24 @@ export class PostgreSQLUserRepository implements UserRepository {
       }
       
       const user = result.rows[0];
-      return {
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role,
-        lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
-      };
+      return this.mapRowToUser(user);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserAuthMeta(id: string): Promise<{ auth_provider: string | null } | undefined> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT auth_provider FROM users WHERE id = $1',
+        [id]
+      );
+      if (result.rows.length === 0) {
+        return undefined;
+      }
+      const row = result.rows[0];
+      return { auth_provider: (row.auth_provider as string | null) ?? null };
     } finally {
       client.release();
     }
@@ -163,13 +168,18 @@ export class PostgreSQLUserRepository implements UserRepository {
     }
   }
 
+  private normalizeAuthProvider(value: unknown): string {
+    return typeof value === 'string' && value.length > 0 ? value : 'password';
+  }
+
   private mapRowToUser(user: Record<string, unknown>): User {
     return {
       id: user.id as string,
       name: user.username as string,
       email: user.email as string,
       role: user.role as UserRole,
-      lastLoginAt: user.last_login_at ? new Date(user.last_login_at as string) : null
+      lastLoginAt: user.last_login_at ? new Date(user.last_login_at as string) : null,
+      authProvider: this.normalizeAuthProvider(user.auth_provider)
     };
   }
 
@@ -198,12 +208,7 @@ export class PostgreSQLUserRepository implements UserRepository {
         return undefined;
       }
       
-      return {
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role
-      };
+      return this.mapRowToUser(user);
     } finally {
       client.release();
     }
@@ -214,13 +219,7 @@ export class PostgreSQLUserRepository implements UserRepository {
     try {
       const result = await client.query('SELECT * FROM users ORDER BY created_at');
       
-      return result.rows.map(user => ({
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role,
-        lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
-      }));
+      return result.rows.map((user) => this.mapRowToUser(user));
     } finally {
       client.release();
     }

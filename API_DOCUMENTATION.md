@@ -203,7 +203,9 @@ Host: localhost:8085
   "data": {
     "userId": "uuid",
     "username": "kyle",
-    "role": "USER"
+    "email": "user@example.com",
+    "role": "USER",
+    "authProvider": "password"
   }
 }
 ```
@@ -278,6 +280,7 @@ Clears server session and `sessionId` cookie.
     "name": "kyle",
     "email": "kyle@example.com",
     "role": "USER",
+    "authProvider": "password",
     "lastLoginAt": "2026-04-03T10:00:00.000Z"
   }
 }

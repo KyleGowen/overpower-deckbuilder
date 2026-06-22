@@ -5,6 +5,9 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- `POST /api/v1/users/change-email` and `POST /api/v1/users/change-password` — self-service
+  account updates for USER/ADMIN (session cookie). Google-linked accounts cannot
+  change email (`GOOGLE_EMAIL_LOCKED`) or password (`GOOGLE_PASSWORD_LOCKED`).
 - V1 envelopes now include backwards-compatible top-level `success` and optional
   `error` / `message` fields while preserving canonical `data`, `meta`, and
   `errors`. New clients should continue to use HTTP status and `errors[]`.

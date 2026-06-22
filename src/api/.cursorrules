@@ -71,6 +71,7 @@ Any change to a **published HTTP contract** must update the right doc(s) in the 
 6. `guest-decks.http.ts` — **`/guest/decks...`** (`GuestDeckService`, GUEST + `sessionId` cookie).
 7. `collections.http.ts` — **`/collections/me...`** (`CollectionService`, session auth).
 8. `admin.http.ts` — **`/admin/users`**, **`/admin/debug/*`**, **`/admin/database/status`** (`AdminService`, session + **ADMIN**).
+9. `users.http.ts` — **`/users/change-email`**, **`/users/change-password`** (`UserAccountService`, session + USER/ADMIN).
 
 Register via **`registerApiV1Routes`** in `registerApiV1Routes.ts`.
 

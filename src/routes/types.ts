@@ -48,13 +48,24 @@ export interface RouteDependencies {
   blockGuestMutation: (req: Request, res: Response, operation: string) => boolean;
   requireDeckOwner: (deckUserId: string, reqUserId: string, res: Response) => boolean | Promise<boolean>;
   transformDeckList: (decks: unknown[]) => unknown[];
+  userAccountService: {
+    changePassword: (
+      userId: string,
+      role: import('../types').UserRole | undefined,
+      newPassword: string,
+      confirmPassword: string
+    ) => Promise<
+      | { ok: true; status: number; data: { message: string } }
+      | { ok: false; status: number; code: string; message: string }
+    >;
+  };
 }
 
 /** Dependencies for auth and config routes only. */
 export type AuthRoutesDeps = Pick<RouteDependencies, 'authService'>;
 
 /** Dependencies for legacy `POST /api/users/change-password` only. */
-export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'userRepository'>;
+export type UsersDebugRoutesDeps = Pick<RouteDependencies, 'authenticateUser' | 'userAccountService'>;
 
 /** Dependencies for page/SPA routes. */
 export type PageRoutesDeps = Pick<RouteDependencies, 'authService' | 'authenticateUser'>;

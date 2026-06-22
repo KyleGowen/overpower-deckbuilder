@@ -30,6 +30,7 @@ import { DeckCardsService } from '../api/services/deckCardsService';
 import { DeckUIPreferencesService } from '../api/services/deckUIPreferencesService';
 import { GuestDeckService } from '../api/services/guestDeckService';
 import { AdminService } from '../api/services/adminService';
+import { UserAccountService } from '../api/services/userAccountService';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
 import { registerLegacyDeckReadCompatRoutes } from '../api/http/legacyDeckReadCompat.http';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
@@ -98,6 +99,8 @@ const adminService = new AdminService({
   databaseInit
 });
 
+const userAccountService = new UserAccountService(userRepository);
+
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
 const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -159,7 +162,8 @@ const testDeps = {
   requireAdmin,
   blockGuestMutation,
   requireDeckOwner,
-  transformDeckList
+  transformDeckList,
+  userAccountService
 } as unknown as RouteDependencies;
 
 const app = express();
@@ -199,7 +203,8 @@ registerApiV1Routes(app, {
   deckUIPreferencesService,
   collectionService,
   guestDeckService,
-  adminService
+  adminService,
+  userAccountService
 });
 
 registerLegacyDeckReadCompatRoutes(app, {

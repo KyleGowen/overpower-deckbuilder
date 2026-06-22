@@ -9,6 +9,7 @@ import { NewUserSampleDeckService } from './newUserSampleDeckService';
 import { type ISessionRepository, SESSION_TTL_MS } from '../database/sessionRepository';
 import { buildSessionCookieOptions, clearSessionCookieOptions } from './authCookieOptions';
 import { debugAuth, requestAuthContext, tokenPrefix } from './authDebug';
+import { isValidEmail } from '../utils/emailValidation';
 
 export interface LoginCredentials {
   username: string;
@@ -156,7 +157,9 @@ export class AuthenticationService {
           data: {
             userId: user.id,
             username: user.name,
-            role: user.role
+            email: user.email,
+            role: user.role,
+            authProvider: user.authProvider ?? 'password'
           }
         });
       } else {
@@ -264,7 +267,13 @@ export class AuthenticationService {
 
       res.json({
         success: true,
-        data: { userId: user.id, username: user.name, role: user.role }
+        data: {
+          userId: user.id,
+          username: user.name,
+          email: user.email,
+          role: user.role,
+          authProvider: 'google'
+        }
       });
     } catch (error) {
       if (error instanceof Error && (error as Error & { statusCode?: number }).statusCode === 429) {
@@ -378,9 +387,6 @@ export class AuthenticationService {
     return user;
   }
 
-  /** Simple email format validation - requires local@domain.tld pattern */
-  private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   /**
    * Handle signup request (public, unauthenticated).
    * Creates user, applies rate limit (5/IP/min, 10 global/min), establishes session.
@@ -405,7 +411,7 @@ export class AuthenticationService {
       const trimmedUsername = username.trim();
       const trimmedEmail = email.trim();
 
-      if (!AuthenticationService.EMAIL_REGEX.test(trimmedEmail)) {
+      if (!isValidEmail(trimmedEmail)) {
         res.status(400).json({ success: false, error: 'Invalid email format' });
         return;
       }

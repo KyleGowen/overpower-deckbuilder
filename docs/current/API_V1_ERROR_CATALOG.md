@@ -26,6 +26,17 @@ to [`docs/openapi.yaml`](../openapi.yaml)) in the same PR.**
 | `ADMIN_REQUIRED`              | 403  | Route is ADMIN-only.                                                     | Log in as an ADMIN account.                                                          |
 | `GUEST_ONLY`                  | 403  | Route is only for GUEST sessions.                                        | Use a guest session cookie.                                                          |
 | `GUEST_FORBIDDEN`             | 403  | GUESTs may not perform this operation.                                   | Log in as a persistent user.                                                         |
+| `FORBIDDEN`                   | 403  | Caller role may not perform this operation.                              | Log in as USER or ADMIN.                                                             |
+| `EMAIL_REQUIRED`              | 400  | Change-email body missing/empty email.                                   | Supply a non-empty email.                                                            |
+| `EMAIL_INVALID`               | 400  | Email failed format validation.                                          | Use a valid email address.                                                           |
+| `EMAIL_UNCHANGED`             | 400  | New email matches current email.                                         | Supply a different email.                                                            |
+| `EMAIL_TAKEN`                 | 409  | Email already registered to another user.                                | Choose a different email.                                                            |
+| `GOOGLE_EMAIL_LOCKED`         | 403  | Google-linked account cannot self-service change email.                    | Use Google account settings or contact support.                                        |
+| `GOOGLE_PASSWORD_LOCKED`      | 403  | Google-linked account cannot set a local password.                         | Continue signing in with Google.                                                       |
+| `PASSWORD_REQUIRED`           | 400  | Change-password body missing password field(s).                          | Supply newPassword and confirmPassword.                                              |
+| `PASSWORD_MISMATCH`           | 400  | newPassword and confirmPassword differ.                                  | Re-enter matching passwords.                                                           |
+| `CHANGE_EMAIL_ERROR`          | 500  | Change email failed unexpectedly.                                        | Retry; report `requestId`.                                                           |
+| `CHANGE_PASSWORD_ERROR`       | 500  | Change password failed unexpectedly.                                     | Retry; report `requestId`.                                                           |
 | `SESSION_REQUIRED`            | 401  | Guest deck APIs need a session cookie.                                   | Allow cookies or call `/api/auth/...` first.                                         |
 | `VALIDATION_ERROR`            | 400  | Body/params/query failed validation (zod).                               | Fix the field listed in `errors[].field` and retry.                                  |
 | `RATE_LIMITED`                | 429  | Too many requests per window.                                            | Honor `X-RateLimit-Reset`; retry after.                                              |

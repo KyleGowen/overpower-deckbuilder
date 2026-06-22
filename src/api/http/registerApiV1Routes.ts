@@ -18,6 +18,7 @@ import { registerCollectionsV1HttpRoutes } from './collections.http';
 import { registerGuestDecksV1HttpRoutes } from './guest-decks.http';
 import { registerAdminV1HttpRoutes } from './admin.http';
 import { registerRecentUpdatesV1HttpRoutes } from './recent-updates.http';
+import { registerUsersV1HttpRoutes } from './users.http';
 import type { AdminService } from '../services/adminService';
 import type { CollectionService } from '../../services/collectionService';
 import type { GuestDeckService } from '../services/guestDeckService';
@@ -27,6 +28,7 @@ import type { DeckWriteService } from '../services/deckWriteService';
 import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCardsService } from '../services/deckCardsService';
 import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
+import type { UserAccountService } from '../services/userAccountService';
 import type { Pool } from 'pg';
 import { COMMUNITY_DECKS_USER_ID } from '../../constants/communityDecksUser';
 import { TOURNAMENT_DECKS_USER_ID } from '../../constants/tournamentDecksUser';
@@ -55,6 +57,7 @@ export interface RegisterApiV1Deps {
   collectionService: CollectionService;
   guestDeckService: GuestDeckService;
   adminService: AdminService;
+  userAccountService: UserAccountService;
   /** Phase 2: when provided, enables refresh tokens + Bearer on decks/collections. */
   pool?: Pool;
 }
@@ -155,6 +158,11 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
 
   registerAdminV1HttpRoutes(router, {
     adminService: deps.adminService,
+    authenticateUser: deps.authenticateUser
+  });
+
+  registerUsersV1HttpRoutes(router, {
+    userAccountService: deps.userAccountService,
     authenticateUser: deps.authenticateUser
   });
 

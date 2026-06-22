@@ -28,6 +28,7 @@ import { DeckCardsService } from './api/services/deckCardsService';
 import { DeckUIPreferencesService } from './api/services/deckUIPreferencesService';
 import { GuestDeckService } from './api/services/guestDeckService';
 import { AdminService } from './api/services/adminService';
+import { UserAccountService } from './api/services/userAccountService';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import {
@@ -122,6 +123,8 @@ const adminService = new AdminService({
   cardRepository,
   databaseInit
 });
+
+const userAccountService = new UserAccountService(userRepository);
 
 // Function to get git information
 function getGitInfo() {
@@ -275,7 +278,8 @@ registerRoutes(app, {
   requireAdmin,
   blockGuestMutation,
   requireDeckOwner,
-  transformDeckList
+  transformDeckList,
+  userAccountService
 } as unknown as RouteDependencies);
 
 registerApiV1Routes(app, {
@@ -295,6 +299,7 @@ registerApiV1Routes(app, {
   collectionService,
   guestDeckService,
   adminService,
+  userAccountService,
   pool: dataSource.getPool()
 });
 

@@ -7,6 +7,8 @@ export interface UserRepository {
   // User management
   createUser(name: string, email: string, password: string, role?: UserRole): Promise<User>;
   getUserById(id: string): Promise<User | undefined>;
+  /** Returns auth_provider for self-service account checks (e.g. Google email lock). */
+  getUserAuthMeta(id: string): Promise<{ auth_provider: string | null } | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;

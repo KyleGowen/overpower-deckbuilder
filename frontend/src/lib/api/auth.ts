@@ -12,7 +12,11 @@ interface RawMe {
   email?: string | null;
   role: UserRole;
   lastLoginAt?: string | null;
+  authProvider?: string | null;
+  auth_provider?: string | null;
 }
+
+import { resolveAuthProvider } from '../auth/resolveAuthProvider';
 
 function normaliseUser(raw: RawMe | null | undefined): AppUser | null {
   const id = raw?.id || raw?.userId;
@@ -23,6 +27,7 @@ function normaliseUser(raw: RawMe | null | undefined): AppUser | null {
     email: raw.email ?? null,
     role: raw.role,
     lastLoginAt: raw.lastLoginAt ?? null,
+    authProvider: resolveAuthProvider(raw),
   };
 }
 

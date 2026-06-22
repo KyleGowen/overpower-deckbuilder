@@ -13,6 +13,8 @@ export interface User {
   email: string;
   role: UserRole;
   lastLoginAt?: Date | null;
+  /** `'password'` (default) or `'google'` for Firebase/Google SSO. */
+  authProvider?: string;
 }
 
 // Deck table

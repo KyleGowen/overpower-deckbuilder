@@ -47,6 +47,7 @@ describe('AuthenticationService', () => {
     mockUserRepository = {
       authenticateUser: jest.fn(),
       getUserById: jest.fn(),
+      getUserAuthMeta: jest.fn(),
       getUserByUsername: jest.fn(),
       getUserByEmail: jest.fn(),
       getUserByFirebaseUid: jest.fn(),
@@ -293,7 +294,9 @@ describe('AuthenticationService', () => {
         data: {
           userId: user.id,
           username: user.name,
-          role: user.role
+          email: user.email,
+          role: user.role,
+          authProvider: 'password'
         }
       });
       expect((mockUserRepository as any).updateLastLoginAt).toHaveBeenCalledWith(user.id);
@@ -570,7 +573,13 @@ describe('AuthenticationService', () => {
       expect(mockResponse.cookie).toHaveBeenCalledWith('sessionId', expect.any(String), expect.any(Object));
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: existingUser.id, username: existingUser.name, role: existingUser.role }
+        data: {
+          userId: existingUser.id,
+          username: existingUser.name,
+          email: existingUser.email,
+          role: existingUser.role,
+          authProvider: 'google'
+        }
       });
     });
 
@@ -602,7 +611,13 @@ describe('AuthenticationService', () => {
       expect(mockUserRepository.createGoogleUser).not.toHaveBeenCalled();
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: existingUser.id, username: existingUser.name, role: existingUser.role }
+        data: {
+          userId: existingUser.id,
+          username: existingUser.name,
+          email: existingUser.email,
+          role: existingUser.role,
+          authProvider: 'google'
+        }
       });
     });
 
@@ -677,7 +692,13 @@ describe('AuthenticationService', () => {
       expect(recordCreation).toHaveBeenCalledWith('192.168.1.1');
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: true,
-        data: { userId: newUser.id, username: newUser.name, role: newUser.role }
+        data: {
+          userId: newUser.id,
+          username: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          authProvider: 'google'
+        }
       });
     });
 

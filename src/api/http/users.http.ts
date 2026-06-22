@@ -1,0 +1,79 @@
+import type { Request, RequestHandler, Response, Router } from 'express';
+import type { UserAccountService } from '../services/userAccountService';
+import { ChangeEmailRequestBody } from './models/users/ChangeEmailRequestBody';
+import { ChangePasswordRequestBody } from './models/users/ChangePasswordRequestBody';
+import { sendV1Json, sendV1Success } from './v1Envelope';
+
+export interface UsersV1HttpDeps {
+  userAccountService: UserAccountService;
+  authenticateUser: RequestHandler;
+}
+
+function requireSelfServiceUser(req: Request, res: Response): boolean {
+  if (!req.user) {
+    sendV1Json(res, 401, null, [{ code: 'UNAUTHORIZED', message: 'Authentication required' }]);
+    return false;
+  }
+  if (req.user.role !== 'USER' && req.user.role !== 'ADMIN') {
+    sendV1Json(res, 403, null, [
+      { code: 'FORBIDDEN', message: 'Only USER or ADMIN may change account settings' }
+    ]);
+    return false;
+  }
+  return true;
+}
+
+export function registerUsersV1HttpRoutes(router: Router, deps: UsersV1HttpDeps): void {
+  router.post('/users/change-email', deps.authenticateUser, async (req, res) => {
+    if (!requireSelfServiceUser(req, res)) return;
+    const parsed = ChangeEmailRequestBody.parse(req.body);
+    if (!parsed.ok) {
+      sendV1Json(res, 400, null, parsed.errors);
+      return;
+    }
+    try {
+      const result = await deps.userAccountService.changeEmail(
+        req.user!.id,
+        req.user!.role,
+        parsed.value.email
+      );
+      if (!result.ok) {
+        sendV1Json(res, result.status, null, [{ code: result.code, message: result.message }]);
+        return;
+      }
+      sendV1Success(res, result.data, result.status);
+    } catch (error) {
+      console.error('v1 POST /users/change-email error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CHANGE_EMAIL_ERROR', message: 'Failed to change email' }
+      ]);
+    }
+  });
+
+  router.post('/users/change-password', deps.authenticateUser, async (req, res) => {
+    if (!requireSelfServiceUser(req, res)) return;
+    const parsed = ChangePasswordRequestBody.parse(req.body);
+    if (!parsed.ok) {
+      sendV1Json(res, 400, null, parsed.errors);
+      return;
+    }
+    try {
+      const result = await deps.userAccountService.changePassword(
+        req.user!.id,
+        req.user!.role,
+        parsed.value.newPassword,
+        parsed.value.confirmPassword
+      );
+      if (!result.ok) {
+        sendV1Json(res, result.status, null, [{ code: result.code, message: result.message }]);
+        return;
+      }
+      sendV1Success(res, result.data, result.status);
+    } catch (error) {
+      console.error('v1 POST /users/change-password error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'CHANGE_PASSWORD_ERROR', message: 'Failed to change password' }
+      ]);
+    }
+  });
+}

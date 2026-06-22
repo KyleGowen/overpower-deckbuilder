@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
-import { IconChevronDown, IconCollection, IconLogout, IconProfile, IconPlus } from '../icons';
+import { IconChevronDown } from '../icons';
+import { ProfileMenuContent } from '../ProfileMenu/ProfileMenuContent';
 import './UserMenu.css';
 
 export function UserMenu() {
-  const { user, isGuest, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, isGuest } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -30,12 +29,6 @@ export function UserMenu() {
 
   const initial = (user.username || '?').charAt(0).toUpperCase();
 
-  const handleLogout = async () => {
-    setOpen(false);
-    await logout();
-    navigate('/login');
-  };
-
   return (
     <div className="user-menu" ref={ref}>
       <button
@@ -52,43 +45,7 @@ export function UserMenu() {
 
       {open ? (
         <div className="user-menu__dropdown" role="menu">
-          <div className="user-menu__header">
-            <span className="user-menu__avatar user-menu__avatar--lg" aria-hidden="true">{initial}</span>
-            <div>
-              <div className="user-menu__dropdown-name">{isGuest ? 'Guest' : user.username}</div>
-              <div className="user-menu__role">{user.role}</div>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="user-menu__item"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              navigate(`/users/${user.id}/decks`);
-            }}
-          >
-            <IconPlus /> My Decks
-          </button>
-          <button
-            type="button"
-            className="user-menu__item"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              navigate(`/users/${user.id}/collection`);
-            }}
-          >
-            <IconCollection /> Collection
-          </button>
-          <button type="button" className="user-menu__item" role="menuitem" disabled>
-            <IconProfile /> Profile
-            <span className="user-menu__soon">Soon</span>
-          </button>
-          <div className="user-menu__divider" />
-          <button type="button" className="user-menu__item user-menu__item--danger" role="menuitem" onClick={handleLogout}>
-            <IconLogout /> {isGuest ? 'Exit Guest' : 'Log Out'}
-          </button>
+          <ProfileMenuContent onClose={() => setOpen(false)} variant="dropdown" />
         </div>
       ) : null}
     </div>

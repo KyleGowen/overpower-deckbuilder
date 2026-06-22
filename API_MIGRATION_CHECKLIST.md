@@ -184,6 +184,17 @@ Legacy **DELETE** requires query `cardType` (see `API_DOCUMENTATION.md`); keep t
 
 ---
 
+## P4b — User account (self-service)
+
+| Legacy | v1 | Migrated |
+| ------ | -- | -------- |
+| POST /api/users/change-password | POST /api/v1/users/change-password | [x] |
+| — | POST /api/v1/users/change-email | [x] |
+
+Service: `UserAccountService` + `users.http.ts`. Legacy change-password delegates to the same service.
+
+---
+
 ## P5 — Admin only (`/api/v1/admin/...`)
 
 All elevated operations must live under `/api/v1/admin/...` (no client “admin” flags).
