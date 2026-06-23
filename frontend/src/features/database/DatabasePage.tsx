@@ -20,7 +20,7 @@ import {
 import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
-import { useCollection } from '../../lib/collection/useCollection';
+import { useCollection, type UseCollectionResult } from '../../lib/collection/useCollection';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { CatalogAllList } from '../../components/CatalogAllList';
@@ -30,7 +30,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
-import type { CatalogCard, CatalogType } from '../../lib/api/types';
+import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
 import { DbvFilterRail } from './components/DbvFilterRail';
 import { cardMatchesDbvFilters } from './filters/dbvFilterPredicates';
 import { useDbvFilters } from './filters/useDbvFilters';
@@ -62,6 +62,8 @@ export default function DatabasePage() {
   const isAllTab = tab === 'all';
   const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
   const activeCatalogType = isAllTab ? selectedCatalogType : tab;
+  /** Pin catalog/deck type to the selected card so tab switches cannot miscategorize adds. */
+  const detailCatalogType = selected ? selectedCatalogType : activeCatalogType;
 
   const debouncedSearch = useDebounced(search);
   const dbvFilters = useDbvFilters(isAllTab ? 'characters' : tab);
@@ -140,7 +142,7 @@ export default function DatabasePage() {
 
   const isLoading = isAllTab ? allCatalogQuery.isLoading : catalogQuery.isLoading;
   const isError = isAllTab ? allCatalogQuery.isError : catalogQuery.isError;
-  const detailCollectionType = CATALOG_TYPE_BY_SLUG[activeCatalogType].collectionType;
+  const detailCollectionType = CATALOG_TYPE_BY_SLUG[detailCatalogType].collectionType;
 
   const selectCard = (card: CatalogCard, catalogType: CatalogType) => {
     setSelected(card);
@@ -199,7 +201,9 @@ export default function DatabasePage() {
               className={`db__type ${tab === meta.type ? 'is-active' : ''}`}
               onClick={() => {
                 setTab(meta.type);
-                setSelectedCatalogType(meta.type);
+                if (!selected) {
+                  setSelectedCatalogType(meta.type);
+                }
               }}
             >
               {isMobile ? meta.shortLabel : meta.label}
@@ -253,29 +257,19 @@ export default function DatabasePage() {
 
       <CardDetailPanel
         card={selected}
-        type={activeCatalogType}
+        type={detailCatalogType}
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         actions={
           selected ? (
-            <div className="db__detail-actions">
-              <AddToDeck card={selected} type={activeCatalogType} />
-              <button
-                type="button"
-                className="btn btn-secondary db__add-collection"
-                onClick={() =>
-                  void collection.setQuantity(
-                    selected,
-                    detailCollectionType,
-                    collection.quantityFor(selected.id, detailCollectionType) + 1,
-                  )
-                }
-              >
-                <IconPlus /> Collection
-              </button>
-            </div>
+            <DbDetailActions
+              card={selected}
+              type={detailCatalogType}
+              collectionType={detailCollectionType}
+              collection={collection}
+            />
           ) : null
         }
       />
@@ -285,66 +279,115 @@ export default function DatabasePage() {
 }
 
 /**
- * + Deck control. Per product rules, this is disabled for GUEST (with the
- * "log in to add to decks" message). For logged-in users it lists their decks
- * and adds the card via POST /api/v1/decks/:id/cards.
+ * Slide-out action row: fixed pill buttons + shared panel for deck picker and feedback.
+ * Per product rules, +Deck is disabled for GUEST (see GUEST_DECK_LESSONS_LEARNED.md).
  */
-function AddToDeck({ card, type }: { card: CatalogCard; type: CatalogType }) {
+type ActionStatus = { kind: 'success' | 'error'; message: string };
+
+function DbDetailActions({
+  card,
+  type,
+  collectionType,
+  collection,
+}: {
+  card: CatalogCard;
+  type: CatalogType;
+  collectionType: CollectionCardType;
+  collection: UseCollectionResult;
+}) {
   const { isGuest, user } = useAuth();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [deckMenuOpen, setDeckMenuOpen] = useState(false);
+  const [status, setStatus] = useState<ActionStatus | null>(null);
 
   const decksQuery = useQuery({
     queryKey: ['decks', 'mine', user?.id],
     queryFn: () => fetchUserDecks(),
-    enabled: open && !isGuest,
+    enabled: deckMenuOpen && !isGuest,
   });
 
-  if (isGuest) {
-    return (
-      <div className="db__add-deck-wrap">
-        <button type="button" className="btn btn-secondary db__add-deck" disabled title="Log in to add to decks">
-          <IconLock /> Log in to add to decks
-        </button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    setDeckMenuOpen(false);
+    setStatus(null);
+  }, [card.id, collectionType]);
 
   const deckType = CATALOG_TYPE_BY_SLUG[type]?.deckType ?? metaForDeckType(type)?.deckType ?? type;
 
-  const add = async (deckId: string, deckName: string) => {
+  const toggleDeckMenu = () => {
+    setStatus(null);
+    setDeckMenuOpen((open) => !open);
+  };
+
+  const addToDeck = async (deckId: string, deckName: string) => {
     setStatus(null);
     try {
       await addCardToDeck(deckId, { cardType: deckType, cardId: card.id, quantity: 1 });
-      setStatus(`Added to ${deckName}`);
+      setStatus({ kind: 'success', message: `Added to ${deckName}` });
       queryClient.invalidateQueries({ queryKey: ['decks'] });
     } catch (err) {
-      setStatus((err as Error)?.message || 'Could not add card');
+      setStatus({ kind: 'error', message: (err as Error)?.message || 'Could not add card' });
     }
   };
 
+  const addToCollection = async () => {
+    setDeckMenuOpen(false);
+    setStatus(null);
+    try {
+      const next = collection.quantityFor(card.id, collectionType) + 1;
+      await collection.setQuantity(card, collectionType, next);
+      setStatus({ kind: 'success', message: 'Added to collection' });
+    } catch (err) {
+      setStatus({ kind: 'error', message: (err as Error)?.message || 'Could not add to collection' });
+    }
+  };
+
+  const showPanel = deckMenuOpen || status !== null;
+
   return (
-    <div className="db__add-deck-wrap">
-      <button type="button" className="btn btn-primary db__add-deck" onClick={() => setOpen((o) => !o)}>
-        <IconPlus /> Add to Deck
-      </button>
-      {open ? (
-        <div className="db__deck-menu">
-          {decksQuery.isLoading ? (
-            <div className="db__deck-menu-empty">Loading decks...</div>
-          ) : (decksQuery.data ?? []).length === 0 ? (
-            <div className="db__deck-menu-empty">You have no decks yet.</div>
-          ) : (
-            (decksQuery.data ?? []).map((d) => (
-              <button key={d.metadata.id} type="button" className="db__deck-menu-item" onClick={() => add(d.metadata.id, d.metadata.name)}>
-                {d.metadata.name}
-              </button>
-            ))
-          )}
+    <div className="db__detail-actions">
+      <div className="db__detail-actions-row">
+        {isGuest ? (
+          <button type="button" className="btn btn-ghost db__add-deck" disabled title="Log in to add to decks">
+            <IconLock /> Log in to add to decks
+          </button>
+        ) : (
+          <button type="button" className="btn btn-ghost db__add-deck" onClick={toggleDeckMenu}>
+            <IconPlus /> Add to Deck
+          </button>
+        )}
+        <button type="button" className="btn btn-ghost db__add-collection" onClick={() => void addToCollection()}>
+          <IconPlus /> Collection
+        </button>
+      </div>
+      {showPanel ? (
+        <div className="db__detail-actions-panel">
+          {deckMenuOpen && !isGuest ? (
+            <div className="db__deck-menu">
+              {decksQuery.isLoading ? (
+                <div className="db__deck-menu-empty">Loading decks...</div>
+              ) : (decksQuery.data ?? []).length === 0 ? (
+                <div className="db__deck-menu-empty">You have no decks yet.</div>
+              ) : (
+                (decksQuery.data ?? []).map((d) => (
+                  <button
+                    key={d.metadata.id}
+                    type="button"
+                    className="db__deck-menu-item"
+                    onClick={() => void addToDeck(d.metadata.id, d.metadata.name)}
+                  >
+                    {d.metadata.name}
+                  </button>
+                ))
+              )}
+            </div>
+          ) : null}
+          {status ? (
+            <div className={`db__add-status${status.kind === 'error' ? ' db__add-status--error' : ''}`}>
+              {status.message}
+            </div>
+          ) : null}
         </div>
       ) : null}
-      {status ? <div className="db__add-status">{status}</div> : null}
     </div>
   );
 }

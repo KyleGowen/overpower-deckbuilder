@@ -166,15 +166,15 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
       }
     }
 
-    if (characterCards.length > DECK_ADD_RULES.EXACT_CHARACTERS) {
+    if (cardType === 'character' && characterCards.length > DECK_ADD_RULES.EXACT_CHARACTERS) {
       return `Deck cannot have more than ${DECK_ADD_RULES.EXACT_CHARACTERS} characters (would have ${characterCards.length})`;
     }
 
-    if (missionCards.length > DECK_ADD_RULES.EXACT_MISSION_CARDS) {
+    if (cardType === 'mission' && missionCards.length > DECK_ADD_RULES.EXACT_MISSION_CARDS) {
       return `Deck cannot have more than ${DECK_ADD_RULES.EXACT_MISSION_CARDS} mission cards (would have ${missionCards.length})`;
     }
 
-    if (locationCards.length > DECK_ADD_RULES.MAX_LOCATIONS) {
+    if (cardType === 'location' && locationCards.length > DECK_ADD_RULES.MAX_LOCATIONS) {
       return `Deck cannot have more than ${DECK_ADD_RULES.MAX_LOCATIONS} location (would have ${locationCards.length})`;
     }
 

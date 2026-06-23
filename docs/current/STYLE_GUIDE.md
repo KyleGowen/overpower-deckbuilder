@@ -536,9 +536,9 @@ Full rationale, per-surface map, and deprecation rules: [MOBILE_DESIGN.md §10.8
 ## Images and Assets
 
 ### Logo
-- **Primary Logo**: `/src/resources/images/logo/logo5.png`
-- **Usage**: Header navigation, login modals, main branding
-- **Sizing**: Max-width 300px for main display, 120px for header
+- **Wordmark** (`logo5.png`): `/src/resources/images/logo/logo5.png` — EXCELSIOR crest with text. Used on v2 login (hero + card), legacy header, and login modals.
+- **Emblem** (`logo6.png`): `/src/resources/images/logo/logo6.png` — transparent symbol-only cyan triangle mark. Used in v2 desktop top nav (`AppShell`, `Logo variant="emblem"`, height 30px) and deck editor left rail (height 26px).
+- **Sizing**: Wordmark max-width 300px for main display, 120px for legacy header; emblem scales by height only via `.app-logo` (`object-fit: contain`, cyan drop-shadow).
 
 ### Icons
 - **Threat Icon**: `/resources/images/icons/threat.png`
@@ -3044,7 +3044,12 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
   - **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280`.
   - **Locations & events**: `.card-detail__image--locations` / `.card-detail__image--events` — `aspect-ratio: 236 / 151`.
   - **All other types**: default `.card-detail__image` — `aspect-ratio: 5 / 7`.
-- **Action row**: `.db__detail-actions` — equal-width **Add to Deck** (`.db__add-deck`, primary) and **+ Collection** (`.db__add-collection`, secondary); deck picker menu still expands below the deck button inside `.db__add-deck-wrap`.
+- **Action row**: `.db__detail-actions` — two-zone layout: `.db__detail-actions-row` (fixed pill buttons) + `.db__detail-actions-panel` (full-width deck menu and feedback below). Pills use compact accent-outline styling (same family as `.home__hero-cta` and deck-editor header chips). Classes: `btn btn-ghost` + `.db__add-deck` / `.db__add-collection`.
+  - **Sizing**: `padding: 4px 12px`, `font-size: var(--font-size-xs)`, `border-radius: var(--radius-full)`, icon SVGs `14×14px`, `gap: var(--space-1)`.
+  - **Add to Deck** (`.db__add-deck`): accent-outline primary — `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, transparent bg; hover `rgba(0, 200, 232, 0.08)`. Guest: same pill, `disabled` (~50% opacity), label may wrap on mobile.
+  - **Collection** (`.db__add-collection`): muted secondary — `color: var(--color-text-muted)`, `border-color: var(--color-border)`; hover lightens text and border.
+  - **Panel**: deck picker (`.db__deck-menu`, `width: 100%`) and `.db__add-status` feedback render only in `.db__detail-actions-panel`; panel growth pushes stats/ability/details down uniformly — pills in the row do not move.
+  - **Feedback**: `.db__add-status` success uses accent text (`Added to {deckName}` / `Added to collection`); `.db__add-status--error` uses `var(--color-danger)` for validation errors. Invoking the other action clears prior feedback and closes the deck menu.
 - **Character stats**: fifth tile is gray **Threat** (`.card-detail__stat--threat`, `.stat-threat` → `var(--color-text-muted)`) showing `threat_level`; other stat types keep purple **Total** (`.card-detail__stat--total`).
 - **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.
 - **Details — Set**: `setDisplayName` from `GET /api/v1/dbv/sets` via `resolveSetDisplayName()` (DatabasePage passes the friendly name; badge tags still use the set code).
