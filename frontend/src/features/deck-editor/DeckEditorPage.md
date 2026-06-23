@@ -7,7 +7,7 @@ are read-only automatically).
 ## Layout
 - **Left rail**: quick nav (Home, Decks, Collection).
 - **Sticky page header** (`.deck-editor__header`): on **desktop**, stays pinned while the card list scrolls. On **mobile**, the header, type tabs, and card list share one scroll container (`.deck-editor__main`) so metadata scrolls off-screen for more card space. Single **topbar row** (`.deck-editor__topbar`) with three zones:
-  - **Leading** (`.deck-editor__topbar-leading`): back button, editable deck name, card count + legality badge
+  - **Leading** (`.deck-editor__topbar-leading`): back button, editable deck name, draw-pile card count (excludes characters, locations, missions) + legality badge
   - **Center** (`.deck-editor__stats-panel`): **Threat** icon stat (`threat.png` + total via `calculateDeckTotalThreat` / `formatThreatDisplay`) left of **Character max** (highest character primaries) and **Icon totals** (deck-wide icon counts via `calculateDeckIconTotals`) — each stat row with a small uppercase label and four inline icon + value groups in stat color
   - **Trailing** (`.deck-editor__actions`): **List View** / **Card View** toggle (`btn btn-ghost`, label shows destination mode), **Draw Hand**, **Add Cards**, and **Save** (shows "Saved" when clean, "Saving…" while in flight)
   - **Mobile**: stats use subgrid alignment; threat icon stat lives in the **meta row** (same horizontal line as card count + legality, threat right-aligned via `margin-left: auto`); Character max and Icon totals rows below; action buttons use compact chip-sized pills (`4px 10px`, `font-size-xs`); actions full-width below stats

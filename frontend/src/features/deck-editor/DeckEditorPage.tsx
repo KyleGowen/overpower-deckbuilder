@@ -64,7 +64,7 @@ import {
   shouldDimDeckCard,
   toggleKoCharacterId,
 } from '../../lib/decks/simulateKo';
-import { canDrawHand, drawRandomHand } from '../../lib/decks/drawHand';
+import { canDrawHand, countPlayableCards, drawRandomHand } from '../../lib/decks/drawHand';
 import {
   buildDeckCardIndex,
   catalogSlugForDeckType,
@@ -320,7 +320,7 @@ export default function DeckEditorPage() {
     return map;
   }, [catalogQueries, deckCatalogTypes]);
 
-  const totalCards = cards.length;
+  const totalCards = countPlayableCards(cards);
 
   const koCtx = useMemo(
     () =>
