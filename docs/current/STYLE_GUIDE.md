@@ -3033,6 +3033,14 @@ set → non-foil before foil → set_number → name.
 
 `GET /api/v1/catalog/foil-card-map` drives one row per logical card: foil duplicates are hidden when the base row exists in the same catalog tab; **foil-only** promos (no base row) stay visible. A silver **✦** starburst (`.card-tile__foil-badge`, bottom-right on the full `.card-tile`, `title="has foil"`) appears when the row has a foil variant per the map, or when the displayed row is foil-only.
 
+### Filter rail — `.dbv-filter-rail`
+
+Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → scrollable controls (`.dbv-filter-rail__controls`) → trailing cluster (`.dbv-filter-rail__trailing`, `margin-left: auto`).
+
+- **Has Foil toggle** (`.dbv-filter-rail__foil-toggle`, rightmost in trailing): checkbox + label (`.dbv-filter-rail__foil-toggle-label`, text "Has Foil"). `font-size: var(--font-size-sm)`, `color: var(--color-text)`, `gap: var(--space-2)`, checkbox `accent-color: var(--color-accent)`. When checked, grid shows only foil-capable cards (`matchesHasFoilFilter` via `foil_card_map`); unchecked restores full deduped catalog. State persists across type tab switches (not cleared by **Clear** or per-tab rail reset). Hidden when rail is collapsed (`is-collapsed`).
+- **Active filter chips** (`.dbv-filter-rail__chip`) and **Clear** (`.dbv-filter-rail__clear`) sit left of the Has Foil toggle in the trailing cluster.
+- Mobile (`.layout-mobile`): trailing row wraps full width with `justify-content: flex-end`.
+
 ### Set line — `.card-tile__sub`
 
 Bottom-left set label: set code, then a space and `set_number` when present (e.g. `ERB 12`); code only when number is absent. Rarity stays right-aligned in the same row.

@@ -19,6 +19,8 @@ interface DbvFilterRailProps {
   allCards: CatalogCard[];
   collapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
+  hasFoilFilter: boolean;
+  onHasFoilFilterChange: (checked: boolean) => void;
 }
 
 function FilterChips({
@@ -61,6 +63,8 @@ export function DbvFilterRail({
   allCards,
   collapsed,
   onCollapsedChange,
+  hasFoilFilter,
+  onHasFoilFilterChange,
 }: DbvFilterRailProps) {
   const config = getDbvFilterConfig(catalogType);
   const hasFilterGroups = config.groups.length > 0;
@@ -126,6 +130,15 @@ export function DbvFilterRail({
                 Clear
               </button>
             ) : null}
+            <label className="dbv-filter-rail__foil-toggle">
+              <input
+                type="checkbox"
+                checked={hasFoilFilter}
+                onChange={(e) => onHasFoilFilterChange(e.target.checked)}
+                aria-label="Has Foil"
+              />
+              <span className="dbv-filter-rail__foil-toggle-label">Has Foil</span>
+            </label>
           </div>
         </>
       ) : null}

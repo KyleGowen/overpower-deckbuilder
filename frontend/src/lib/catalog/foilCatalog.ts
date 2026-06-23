@@ -41,3 +41,12 @@ export function cardHasFoilVersion(card: CatalogCard, baseToFoil: Map<string, st
   if (isFoilCard(card)) return true;
   return baseToFoil.has(card.id);
 }
+
+/** DBV "Has Foil" filter: pass all cards when disabled; foil-capable only when enabled. */
+export function matchesHasFoilFilter(
+  card: CatalogCard,
+  baseToFoil: Map<string, string>,
+  enabled: boolean,
+): boolean {
+  return !enabled || cardHasFoilVersion(card, baseToFoil);
+}

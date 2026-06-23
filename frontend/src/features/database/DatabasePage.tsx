@@ -6,6 +6,7 @@ import {
   buildFoilCardMapLookup,
   cardHasFoilVersion,
   dedupeFoilCatalogCards,
+  matchesHasFoilFilter,
 } from '../../lib/catalog/foilCatalog';
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
@@ -58,6 +59,7 @@ export default function DatabasePage() {
   const [selected, setSelected] = useState<CatalogCard | null>(null);
   const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
   const [filterRailCollapsed, setFilterRailCollapsed] = useState(false);
+  const [hasFoilFilter, setHasFoilFilter] = useState(false);
 
   const isAllTab = tab === 'all';
   const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
@@ -109,11 +111,12 @@ export default function DatabasePage() {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
       if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
+      if (!matchesHasFoilFilter(c, foilLookup.baseToFoil, hasFoilFilter)) return false;
       return true;
     });
     result.sort((a, b) => compareDbvCatalogCards(a, b, catalogType));
     return result;
-  }, [perTypeCards, debouncedSearch, setFilter, tab, dbvFilters.state, isAllTab]);
+  }, [perTypeCards, debouncedSearch, setFilter, tab, dbvFilters.state, hasFoilFilter, foilLookup.baseToFoil, isAllTab]);
 
   const allTabFiltered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
@@ -130,7 +133,7 @@ export default function DatabasePage() {
 
   useEffect(() => {
     setPage(1);
-  }, [tab, debouncedSearch, setFilter, dbvFilters.state]);
+  }, [tab, debouncedSearch, setFilter, dbvFilters.state, hasFoilFilter]);
 
   useEffect(() => () => clearProgressiveImageSession('database'), []);
 
@@ -218,6 +221,8 @@ export default function DatabasePage() {
             allCards={perTypeCards}
             collapsed={filterRailCollapsed}
             onCollapsedChange={setFilterRailCollapsed}
+            hasFoilFilter={hasFoilFilter}
+            onHasFoilFilterChange={setHasFoilFilter}
           />
         ) : null}
 

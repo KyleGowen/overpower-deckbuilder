@@ -179,6 +179,22 @@
   text-decoration: underline;
 }
 
+.dbv-filter-rail__foil-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.dbv-filter-rail__foil-toggle input {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
 /* Inline stat cells: [icon][op][value] per stat */
 .dbv-stat-inline {
   display: flex;

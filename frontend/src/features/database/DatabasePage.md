@@ -12,10 +12,14 @@ Browse, search, filter, and sort the full modern OverPower catalog.
 - **Filter rail** (`DbvFilterRail`) visible on per-type tabs only (hidden on **All**).
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
   mission-set select) are config-driven via `filters/dbvFilterConfig.ts`. Advanced filters
-  reset on tab change; search and set persist. Active constraints show as removable chips
-  at the rail end with a **Clear** action. Optional **collapse** via left chevron (default
-  expanded; collapsed state is a thin rule with left-aligned chevron-down; collapse
-  preference persists across tab switches).
+  reset on tab change; search, set, **Has Foil**, and collapse persist. Active constraints
+  show as removable chips at the rail end with a **Clear** action (Clear does not reset Has
+  Foil). Optional **collapse** via left chevron (default expanded; collapsed state is a thin
+  rule with left-aligned chevron-down; collapse preference persists across tab switches).
+- **Has Foil** toggle (`.dbv-filter-rail__foil-toggle`, trailing end of filter rail): when
+  checked, only cards with a foil variant per `foil_card_map` remain (base rows with a foil
+  counterpart or foil-only promos). Uses `matchesHasFoilFilter` / `cardHasFoilVersion` after
+  foil dedup. Persists across type tab switches; off restores the full deduped catalog.
 - Sort is fixed per tab: all per-type tabs sort by **set** → **set_number**, then tab tiebreakers
   (Special Cards: character with `Any Character` last; Power Cards: power type → value; others: name).
   **All** tab: set → foil tier → set_number → name (`compareAllCatalogCards`).
