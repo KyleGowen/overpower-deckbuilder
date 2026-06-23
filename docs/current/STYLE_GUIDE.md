@@ -2889,6 +2889,24 @@ This section covers the "Welcome to Excelsior" hero on the React v2 SPA home scr
 
 The hero art lives on an absolutely-positioned layer `.home__hero-art` (a child of `.home__hero`), containing an `<img class="home__hero-art-image">` sourced from `src/resources/images/home/home-hero.png` via `assetUrl()`. A `::after` pseudo-element on the same layer carries the shading. Text (`.home__hero-text`) sits above on `z-index: 1`.
 
+### Hero CTA — `.home__hero-cta`
+
+The "Explore Decks" button uses a compact **accent-outline pill** (not `btn-primary` gradient). Classes: `btn btn-ghost home__hero-cta`.
+
+| Property | Value |
+|---|---|
+| Shape | `border-radius: var(--radius-full)` (`999px`) |
+| Padding | `4px 12px` |
+| Font | `var(--font-size-xs)`, `var(--font-weight-semibold)` |
+| Gap | `var(--space-1)` between icon and label |
+| Icon | `IconDecks` SVG at `14px × 14px` |
+| Default colors | `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, `background: transparent` |
+| Hover | `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, `background: rgba(0, 200, 232, 0.08)` |
+| Focus-visible | `outline: 2px solid var(--color-border-accent)`, `outline-offset: 2px` |
+| Spacing | `margin-top: var(--space-6)` |
+
+Matches the deck-editor header chip / legality badge pill family. Navigates logged-in users to `/users/{id}/decks`; guests to `/data`.
+
 ### Hero image — `.home__hero-art` + `.home__hero-art-image`
 
 - **Asset:** `src/resources/images/home/home-hero.png` (1× master) and generated `home-hero-2x.png` (2× retina) — dedicated landscape Victory Harben crop (face centered in the image file). Not card catalog art. Use the `-2x` suffix (not `@2x`) so asset URLs are safe on all CDNs and retina browsers.

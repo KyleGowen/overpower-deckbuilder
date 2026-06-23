@@ -103,6 +103,7 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 | `.btn .btn-ghost` | Transparent, text only | Tertiary / inline |
 | `.btn .btn-danger` | Red (`--color-danger`) | Destructive (Delete) |
 
+- **Home hero CTA** (`.home__hero-cta`): accent-outline pill (`btn-ghost` + local overrides), not `btn-primary` gradient — compact chip sizing aligned with deck-editor header actions.
 - Disabled buttons drop to ~50% opacity and `cursor: not-allowed`; loading buttons show
   text like `Saving...` / `Creating...` and are disabled.
 - Inputs/selects/textareas use `--color-bg-input`, `--color-border`, `--radius-md`, and a

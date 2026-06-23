@@ -74,7 +74,7 @@ export default function HomePage() {
             </p>
             <button
               type="button"
-              className="btn btn-primary home__hero-cta"
+              className="btn btn-ghost home__hero-cta"
               onClick={() => navigate(user ? `/users/${user.id}/decks` : '/data')}
             >
               <IconDecks /> Explore Decks

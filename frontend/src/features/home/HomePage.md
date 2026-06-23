@@ -2,7 +2,7 @@
 
 Landing page after login. Sections, top to bottom:
 
-1. **Hero** — "Welcome to Excelsior" over dedicated landscape character art (`src/resources/images/home/home-hero.png` + generated `home-hero-2x.png` via `assetUrl()` / `srcSet`), right-aligned in the welcome tile. Art scales fluidly in the right two-thirds until the hero tile reaches ~2000px wide (≈ 2048px viewport); wider viewports freeze art width and grow the left panel behind copy. Regenerate `home-hero-2x.png` with `npm run generate:home-hero` after editing the master PNG.
+1. **Hero** — "Welcome to Excelsior" over dedicated landscape character art (`src/resources/images/home/home-hero.png` + generated `home-hero-2x.png` via `assetUrl()` / `srcSet`), right-aligned in the welcome tile. Art scales fluidly in the right two-thirds until the hero tile reaches ~2000px wide (≈ 2048px viewport); wider viewports freeze art width and grow the left panel behind copy. Regenerate `home-hero-2x.png` with `npm run generate:home-hero` after editing the master PNG. CTA is a compact accent-outline pill (`btn btn-ghost home__hero-cta`), not a filled primary button.
 2. **Recent Updates** — news cards from
    `GET /api/v1/recent-updates` (`fetchRecentUpdates`; rows in `recent_updates` table).
    The cards form a single-open accordion: every card is a button
