@@ -320,6 +320,15 @@ Full rationale, per-surface map, and deprecation rules: [MOBILE_DESIGN.md §10.8
 - **Padding**: `0.75rem`
 - <span style="display: inline-block; width: 20px; height: 20px; background-color: #ffffff; border: 1px solid #ccc; vertical-align: middle;"></span> (90% opacity)
 
+### Pagination (v2 SPA)
+
+Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`](../../frontend/src/components/Pagination/Pagination.tsx). Used on Card Database, Collection, and Deck Editor Add Cards.
+
+- **Layout:** `.pagination__controls` is three fixed groups — `.pagination__nav` (first/prev), `.pagination__pages` (numbered slots), `.pagination__nav` (next/last). Chevron buttons stay at stable screen positions while paging so users can click `>` repeatedly without the control shifting under the cursor.
+- **Collapsed pages (`totalPages > 7`):** `.pagination__pages--collapsed` has fixed width `calc(7 * var(--pagination-slot-size) + 6 * var(--space-1))`. Slots are padded symmetrically with invisible `.pagination__slot--empty` placeholders so the visible page numbers change inside a constant-width strip.
+- **Slot size:** `--pagination-slot-size: 36px` on `.pagination` (44px when `totalPages >= 100`). `.pagination__btn`, `.pagination__ellipsis`, and `.pagination__slot--empty` share this width.
+- **Summary:** `.pagination__summary` is `position: absolute; right: var(--space-4)` on full-width pages; static and centered under `.layout-mobile` and `.add-cards__pagination`.
+
 ## Screen-Specific Styling
 
 ### Collection view — mobile (`layout-mobile`)
@@ -3222,7 +3231,7 @@ Controls sit in a footer row **below** the card image (no overlays on art, no ti
 - **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
-- **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned.
+- **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned. Controls use the shared fixed-width nav + page-slot layout (no `flex-wrap` on `.pagination__controls`) so chevrons stay put while paging.
 - **Mobile**: `SlideOutPanel` right variant becomes full viewport width (`100vw`) per component CSS; width prop applies on desktop only.
 
 ## Deck Editor list view (v2 SPA)

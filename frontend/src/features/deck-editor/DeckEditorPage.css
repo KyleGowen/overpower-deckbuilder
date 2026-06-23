@@ -670,7 +670,6 @@
   padding-right: 0;
 }
 .add-cards__pagination .pagination__controls {
-  flex-wrap: wrap;
   justify-content: center;
   max-width: 100%;
 }

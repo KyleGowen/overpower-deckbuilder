@@ -1,4 +1,5 @@
 .pagination {
+  --pagination-slot-size: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,13 +13,33 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.pagination__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.pagination__pages--collapsed {
+  width: calc(7 * var(--pagination-slot-size) + 6 * var(--space-1));
 }
 
 .pagination__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
+  min-width: var(--pagination-slot-size);
   height: 36px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-md);
@@ -43,8 +64,20 @@
 }
 
 .pagination__ellipsis {
-  padding: 0 var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--pagination-slot-size);
+  height: 36px;
   color: var(--color-text-dim);
+}
+
+.pagination__slot--empty {
+  display: inline-flex;
+  min-width: var(--pagination-slot-size);
+  height: 36px;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .pagination__summary {
