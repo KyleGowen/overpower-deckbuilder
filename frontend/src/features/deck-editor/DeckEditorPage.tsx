@@ -740,7 +740,7 @@ export default function DeckEditorPage() {
       {/* Left rail (desktop) */}
       <aside className="deck-editor__rail">
         <button type="button" className="deck-editor__rail-logo" onClick={() => navigate('/home')} aria-label="Home">
-          <Logo height={26} />
+          <Logo variant="emblem" height={26} />
         </button>
         <nav className="deck-editor__rail-nav">
           <button type="button" onClick={() => navigate('/home')} title="Home"><IconHome /></button>

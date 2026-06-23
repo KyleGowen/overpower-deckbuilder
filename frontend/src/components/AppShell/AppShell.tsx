@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="top-nav">
         <div className="top-nav__inner">
           <NavLink to="/home" className="top-nav__brand" aria-label="Excelsior home">
-            <Logo height={30} />
+            <Logo variant="emblem" height={30} />
           </NavLink>
 
           <nav className="top-nav__tabs" aria-label="Primary">

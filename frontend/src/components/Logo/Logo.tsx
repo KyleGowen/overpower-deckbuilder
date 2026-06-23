@@ -1,21 +1,33 @@
 import { assetUrl } from '../../lib/images/cardImages';
 import './Logo.css';
 
-const LOGO_PATH = '/src/resources/images/logo/logo5.png';
+const LOGO_PATHS = {
+  wordmark: '/src/resources/images/logo/logo5.png',
+  emblem: '/src/resources/images/logo/logo6.png',
+} as const;
+
+type LogoVariant = keyof typeof LOGO_PATHS;
 
 interface LogoProps {
+  /** `wordmark` = EXCELSIOR crest text; `emblem` = symbol-only triangle mark. */
+  variant?: LogoVariant;
   className?: string;
   /** Rendered height in px (width auto). */
   height?: number;
   alt?: string;
 }
 
-/** The Excelsior wordmark logo (existing repo asset, served via CDN in prod). */
-export function Logo({ className = '', height = 34, alt = 'Excelsior' }: LogoProps) {
+/** Excelsior logo (wordmark or emblem), served via CDN in prod. */
+export function Logo({
+  variant = 'wordmark',
+  className = '',
+  height = 34,
+  alt = 'Excelsior',
+}: LogoProps) {
   return (
     <img
       className={`app-logo ${className}`}
-      src={assetUrl(LOGO_PATH)}
+      src={assetUrl(LOGO_PATHS[variant])}
       alt={alt}
       height={height}
       style={{ height }}
