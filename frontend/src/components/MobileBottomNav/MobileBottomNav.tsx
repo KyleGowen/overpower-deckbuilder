@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
@@ -13,6 +13,10 @@ export function MobileBottomNav() {
   const { preferDesktop, setPreferDesktop } = useLayoutMode();
   const location = useLocation();
   const [accountOpen, setAccountOpen] = useState(false);
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [location.pathname]);
 
   const userId = user?.id ?? '';
 

@@ -914,7 +914,7 @@ Consider implementing CSS custom properties for easier theme management:
 ### v2 Profile menu (React SPA)
 
 - **Desktop**: [`UserMenu.tsx`](../../frontend/src/components/UserMenu/UserMenu.tsx) dropdown — min-width **280px**, `z-index: var(--z-nav)`.
-- **Mobile**: [`MobileBottomNav.tsx`](../../frontend/src/components/MobileBottomNav/MobileBottomNav.tsx) bottom **Account** sheet via `SlideOutPanel`; shared body [`ProfileMenuContent.tsx`](../../frontend/src/components/ProfileMenu/ProfileMenuContent.tsx).
+- **Mobile**: [`MobileBottomNav.tsx`](../../frontend/src/components/MobileBottomNav/MobileBottomNav.tsx) bottom **Account** sheet via `SlideOutPanel`; shared body [`ProfileMenuContent.tsx`](../../frontend/src/components/ProfileMenu/ProfileMenuContent.tsx). **Dismiss on route change:** the Account sheet closes when the user navigates via bottom nav or any other route change (`location.pathname`).
 - **Read-only header** (`.profile-menu__header`):
   - **Username** — `.profile-menu__username`: `var(--font-size-md)`, `font-weight-semibold`
   - **Email** — `.profile-menu__email`: `var(--font-size-sm)`, `var(--color-text-muted)` (hidden for GUEST)
