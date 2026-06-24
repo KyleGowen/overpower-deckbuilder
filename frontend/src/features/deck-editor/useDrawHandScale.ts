@@ -16,9 +16,11 @@ function readPortraitColWidth(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 210;
 }
 
+const DRAW_HAND_COLUMNS = 2;
+
 /**
- * Uniform scale so N portrait-width cards fit in one row (desktop/tablet only).
- * Returns 1 on layout-mobile — carousel handles narrow viewports instead.
+ * Uniform scale so two portrait-width columns fit in the panel (desktop/tablet only).
+ * Returns 1 on layout-mobile — the grid scrolls in the panel body instead.
  */
 export function useDrawHandScale(
   rowRef: RefObject<HTMLElement | null>,
@@ -41,7 +43,8 @@ export function useDrawHandScale(
       const baseWidth = readPortraitColWidth();
       const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap) || 16;
       const available = el.clientWidth;
-      const needed = cardCount * baseWidth + Math.max(0, cardCount - 1) * gap;
+      const needed =
+        DRAW_HAND_COLUMNS * baseWidth + Math.max(0, DRAW_HAND_COLUMNS - 1) * gap;
       setScale(needed > 0 && available > 0 ? Math.min(1, available / needed) : 1);
     };
 

@@ -14,14 +14,14 @@
   color: var(--color-text-muted);
 }
 
-/* Single horizontal row — desktop scales; mobile scrolls */
+/* Two cards per row — desktop may scale; mobile scrolls */
 .draw-hand__row {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   width: 100%;
   overflow: hidden;
-  min-height: calc(var(--deck-editor-portrait-col) * 7 / 5 * var(--draw-hand-scale, 1));
+  min-height: 0;
 }
 
 .draw-hand__row--drag-over {
@@ -31,16 +31,19 @@
 }
 
 .draw-hand__row-inner {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
   gap: var(--space-4);
+  width: 100%;
+  max-width: calc(2 * var(--deck-editor-portrait-col) + var(--space-4));
   transform-origin: top center;
 }
 
 .draw-hand__slot {
-  flex: 0 0 auto;
-  width: var(--deck-editor-portrait-col);
+  width: 100%;
+  max-width: var(--deck-editor-portrait-col);
   transition: transform var(--dur-fast) var(--ease-out);
 }
 
@@ -132,7 +135,7 @@
   }
 }
 
-/* Mobile: full-viewport vertical stack */
+/* Mobile: full-viewport two-column grid */
 .layout-mobile .slideout--absolute:has(.draw-hand-slideout) {
   position: fixed;
   inset: 0;
@@ -163,15 +166,15 @@
 }
 
 .layout-mobile .draw-hand__row-inner {
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+  max-width: none;
   transform: none !important;
   padding-inline: 0;
+  gap: var(--space-3);
 }
 
 .layout-mobile .draw-hand__slot {
-  width: min(280px, 100%);
+  width: 100%;
+  max-width: none;
 }
 
 .layout-mobile .draw-hand__card .deck-editor__card-media:has(.deck-editor__card-img--portrait) {

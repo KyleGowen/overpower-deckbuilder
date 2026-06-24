@@ -3546,13 +3546,13 @@ Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../fr
 
 ### Row — `.draw-hand__row` / `.draw-hand__row-inner`
 
-- **Desktop:** flex row, centered; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when 8–9 cards overflow width.
-- **Mobile:** `flex-direction: column`, centered slots; vertical scroll in `.slideout__body` (no horizontal snap).
+- **Desktop:** 2-column CSS grid, centered; `max-width: calc(2 * var(--deck-editor-portrait-col) + var(--space-4))`; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when two columns overflow panel width.
+- **Mobile:** same 2-column grid at full content width; vertical scroll in `.slideout__body` (no horizontal snap).
 
 ### Slot — `.draw-hand__slot`
 
-- **Desktop:** fixed width `var(--deck-editor-portrait-col)` — **210px** (`DeckEditorPage.css` on `.deck-editor__content`).
-- **Mobile:** `width: min(280px, 100%)`, centered; portrait art **5% inset** on `.deck-editor__card-media` (matches main deck grid).
+- **Desktop:** `width: 100%`, `max-width: var(--deck-editor-portrait-col)` per slot — **210px** cap (`DeckEditorPage.css` on `.deck-editor__content`).
+- **Mobile:** full half-column width (`max-width: none`); portrait art **5% inset** on `.deck-editor__card-media` (matches main deck grid).
 - Gap between slots: `var(--space-4)`.
 - Fine-pointer drag (desktop only): `.draw-hand__slot--dragging` (opacity 0.45), `.draw-hand__slot--drag-target` (`translateY(-4px)`).
 
