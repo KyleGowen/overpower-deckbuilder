@@ -1,0 +1,14 @@
+"🏥 Server Health Check\n\
+┌─────────────────────────────────────────────────────────────┐\n\
+│ Status: " + (if .status == "OK" then "✅ OK" else "❌ ERROR" end) + "                                               │\n\
+│ Uptime: " + (.uptime | floor | . / 3600 | floor | tostring) + "h " + ((.uptime | floor) % 3600 / 60 | floor | tostring) + "m " + ((.uptime | floor) % 60 | tostring) + "s                                         │\n\
+│ Database: " + (if .database.status == "OK" then "✅ Connected" else "❌ Error" end) + " (" + (.database.latency // "N/A") + ")                      │\n\
+│ Response Time: " + .latency + "                                        │\n\
+│ Environment: " + .environment + "                                   │\n\
+├─────────────────────────────────────────────────────────────┤\n\
+│ Latest Git Commit:                                          │\n\
+│ " + .git.shortCommit + " - " + .git.commitMessage + " │\n\
+├─────────────────────────────────────────────────────────────┤\n\
+│ Latest Migration:                                           │\n\
+│ V" + .database.migrations.latest.version + " - " + .database.migrations.latest.description + " │\n\
+└─────────────────────────────────────────────────────────────┘"
