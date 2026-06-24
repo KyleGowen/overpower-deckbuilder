@@ -10,7 +10,7 @@ per-card quantity steppers and an "Owned only" toggle.
 - Header shows `totalOwned` and `uniqueCards`.
 - Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.
 - **All** tab: `CatalogAllList` spread grid rows (set code, number, type, name, set badge, stepper).
-  **Mobile:** set code and number columns auto-fit content (`max-content`); numbers omit `#` (e.g. `001`, `512F`); **4px** gap between scan columns; type badge stays fixed width with compact abbreviations (`Spc`, `Chr`, …).
+  **Mobile:** set code **`4ch`** + number **`4ch`** fixed scan band (plain, foil **`F`**, and **`—`** share the same width so type/name columns align); numbers omit `#`; **4px** gap; type badge fixed width with compact abbreviations (`Spc`, `Chr`, …).
   **Desktop:** fixed-width `#` and type columns for aligned skimming. Special and Advanced Universe rows prefix the linked character on **desktop** only
   (`Anubis - Book of the Dead`); mobile uses the card name alone to save width.
   checklist sort (`compareAllCatalogCards`). Detail panel also exposes a stepper and

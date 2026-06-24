@@ -349,7 +349,7 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
 
 - **When it applies:** v2 Collection tab **All** at **`http://localhost:5173`** when **`html.layout-mobile`** (viewport ≤900px). Component: [`frontend/src/components/CatalogAllList/CatalogAllList.tsx`](frontend/src/components/CatalogAllList/CatalogAllList.tsx); styles in [`CatalogAllList.css`](frontend/src/components/CatalogAllList/CatalogAllList.css) modifier **`catalog-all-list--type-after-number`**.
 - **Row order (single line):** set code → card number → type badge → card name → **`QuantityStepper`** (trailing).
-- **Set code / number columns:** **`grid-template-columns: max-content max-content …`** — columns hug 3–4 char set codes and 3-digit numbers with optional **`F`** suffix; no fixed **`2.5rem` / `3.25rem`** bands on mobile.
+- **Set code / number columns:** **`4ch`** each (`--catalog-all-setcode-width-mobile`, `--catalog-all-num-width-mobile`) — fixed scan band for 3–4 char set codes and 3-digit numbers with optional **`F`**; missing numbers show **`—`** right-aligned in the same **`4ch`** slot so type and name columns do not stagger.
 - **Card number:** **`#`** lives in **`.catalog-all-list__number-hash`**; **`display: none`** under **`.layout-mobile`** (Collection + DBV All). Desktop keeps **`#`** prefix.
 - **Scan gap:** **`gap: var(--space-1)`** (4px) between set code, number, type, and name inside **`.catalog-all-list__main`**.
 - **Unchanged on mobile:** type badge width **`--catalog-all-type-width-mobile: 2.75rem`**; compact type labels (`Spc`, `Chr`, …); trailing stepper sizing.
@@ -3173,6 +3173,7 @@ The `/data` database page (`DatabasePage.tsx`) renders catalog cards with `CardT
 - **Landscape tabs** (Characters, Locations, Events): `.db__grid--landscape` → `grid-template-columns: repeat(auto-fill, minmax(290px, 1fr))` — scales from ~4 columns at typical desktop widths to more on ultrawide.
 - **Portrait tabs** (all other catalog types): `.db__grid--portrait` → `grid-template-columns: repeat(auto-fill, minmax(195px, 1fr))` — scales from ~6 columns at typical desktop widths to more on ultrawide.
 - **Mobile** (`.layout-mobile .db__grid`): `repeat(1, minmax(0, 1fr))` for both orientations (one card per row).
+- **Mobile type-tab swipe** (`.layout-mobile .db`): horizontal swipe on card grid, All list, or content cycles type tabs cyclically (`DBV_TAB_ORDER`: All → Characters → … → Basic → wrap). Uses shared `useHorizontalSwipe` (50px threshold, 12px axis lock): swipe left = next tab, swipe right = previous tab. `touch-action: pan-y` on `.db` preserves vertical page scroll. Blocked regions (`DBV_SWIPE_BLOCK_SELECTOR`): `.db__types`, `.db__header`, `.dbv-filter-rail`, `.pagination`, `input`/`textarea`/`select`. Disabled while `CardDetailPanel` is open. On tab change: `window.scrollTo(0,0)` and active `[data-db-tab]` chip `scrollIntoView` in `.db__types`.
 - `gap: var(--space-4)`; page content is full-width (`--content-max-width: none`) with `--space-6` horizontal padding on `.db__inner`.
 
 ### Tile orientation — `CardTile` + `catalogType`
