@@ -331,6 +331,7 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
 - **Collapsed pages (`totalPages > 7`):** `.pagination__pages--collapsed` has fixed width `calc(7 * var(--pagination-slot-size) + 6 * var(--space-1))`. Slots are padded symmetrically with invisible `.pagination__slot--empty` placeholders so the visible page numbers change inside a constant-width strip.
 - **Slot size:** `--pagination-slot-size: 36px` on `.pagination` (44px when `totalPages >= 100`). `.pagination__btn`, `.pagination__ellipsis`, and `.pagination__slot--empty` share this width.
 - **Summary:** `.pagination__summary` is `position: absolute; right: var(--space-4)` on full-width pages; static and centered under `.layout-mobile` and `.add-cards__pagination`.
+- **Mobile Database + Collection:** `.layout-mobile .db__inner > .pagination` and `.layout-mobile .col__inner > .pagination` use **`padding-bottom: calc(var(--space-8) + var(--space-2))`** (40px) — one full extra line plus a half line below the page controls so pagination clears the bottom nav comfortably (base `.pagination` padding remains **`var(--space-4)`** top / sides).
 
 ## Screen-Specific Styling
 
@@ -349,7 +350,7 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
 
 - **When it applies:** v2 Collection tab **All** at **`http://localhost:5173`** when **`html.layout-mobile`** (viewport ≤900px). Component: [`frontend/src/components/CatalogAllList/CatalogAllList.tsx`](frontend/src/components/CatalogAllList/CatalogAllList.tsx); styles in [`CatalogAllList.css`](frontend/src/components/CatalogAllList/CatalogAllList.css) modifier **`catalog-all-list--type-after-number`**.
 - **Row order (single line):** set code → card number → type badge → card name → **`QuantityStepper`** (trailing).
-- **Set code / number columns:** **`4ch`** each (`--catalog-all-setcode-width-mobile`, `--catalog-all-num-width-mobile`) — fixed scan band for 3–4 char set codes and 3-digit numbers with optional **`F`**; missing numbers show **`—`** right-aligned in the same **`4ch`** slot so type and name columns do not stagger.
+- **Set code / number (mobile):** **`.catalog-all-list__scan-id`** sub-grid — set **`4ch`** left, **`1ch`** space, number **`4ch`** right-aligned (`533F` / `—` share the same right edge); type/name columns stay aligned.
 - **Card number:** **`#`** lives in **`.catalog-all-list__number-hash`**; **`display: none`** under **`.layout-mobile`** (Collection + DBV All). Desktop keeps **`#`** prefix.
 - **Scan gap:** **`gap: var(--space-1)`** (4px) between set code, number, type, and name inside **`.catalog-all-list__main`**.
 - **Unchanged on mobile:** type badge width **`--catalog-all-type-width-mobile: 2.75rem`**; compact type labels (`Spc`, `Chr`, …); trailing stepper sizing.

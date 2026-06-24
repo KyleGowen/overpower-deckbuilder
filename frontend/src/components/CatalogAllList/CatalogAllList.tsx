@@ -34,6 +34,11 @@ function setCodeForCard(card: CatalogCard): string {
   return String(card.set ?? (card.universe as string) ?? '').trim();
 }
 
+/** Mobile Collection All scan band parts (no `#`). */
+function mobileScanNumLabel(setNumber: string): string {
+  return setNumber || '—';
+}
+
 const EMPTY_SET_LOOKUP = new Map<string, string>();
 
 export function CatalogAllList({
@@ -97,6 +102,17 @@ export function CatalogAllList({
           </span>
         );
 
+        const scanIdEl = (
+          <span
+            className="catalog-all-list__scan-id"
+            aria-hidden="true"
+            title={setLabel && setLabel !== setCode ? setLabel : undefined}
+          >
+            <span className="catalog-all-list__scan-set">{setCode || '\u00a0'}</span>
+            <span className="catalog-all-list__scan-num">{mobileScanNumLabel(setNumber)}</span>
+          </span>
+        );
+
         const nameEl = (
           <span className="catalog-all-list__name" title={displayName}>
             {displayName}
@@ -141,6 +157,7 @@ export function CatalogAllList({
             >
               {setCodeEl}
               {numberEl}
+              {scanIdEl}
               {typeBetweenNumberAndName ? (
                 <>
                   {typeEl}

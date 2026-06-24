@@ -147,6 +147,9 @@
 .layout-mobile .col__inner {
   padding: var(--space-4);
 }
+.layout-mobile .col__inner > .pagination {
+  padding-bottom: calc(var(--space-8) + var(--space-2));
+}
 .layout-mobile .col__header {
   flex-direction: column;
   align-items: stretch;

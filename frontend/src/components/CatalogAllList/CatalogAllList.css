@@ -133,9 +133,14 @@
   --catalog-all-type-width: 5.75rem;
   --catalog-all-type-width-mobile: 2.75rem;
   --catalog-all-setcode-width: 2.5rem;
-  /* Mobile scan band: max set code (4) + max number sans # (4 incl. F) */
-  --catalog-all-setcode-width-mobile: 4ch;
-  --catalog-all-num-width-mobile: 4ch;
+  /* Mobile scan band: 4ch set + 0.75ch gap + 4ch number (right) */
+  --catalog-all-scan-set-width-mobile: 4ch;
+  --catalog-all-scan-num-width-mobile: 4ch;
+  --catalog-all-scan-gap-mobile: 0.75ch;
+  --catalog-all-scan-width-mobile: calc(
+    var(--catalog-all-scan-set-width-mobile) + var(--catalog-all-scan-gap-mobile) +
+      var(--catalog-all-scan-num-width-mobile)
+  );
 }
 .catalog-all-list--type-after-number .catalog-all-list__row {
   grid-template-columns:
@@ -227,7 +232,11 @@
   padding-right: var(--space-1);
 }
 
-/* Collection All mobile: set code + number + type + name on one row (fixed scan band) */
+.catalog-all-list__scan-id {
+  display: none;
+}
+
+/* Collection All mobile: scan id + type + name on one row (fixed scan band) */
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__row {
   grid-template-rows: auto;
 }
@@ -235,34 +244,51 @@
   display: none;
 }
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__main {
-  gap: var(--space-1);
+  column-gap: 0;
+  row-gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-1);
   grid-template-columns:
-    var(--catalog-all-setcode-width-mobile)
-    var(--catalog-all-num-width-mobile)
+    var(--catalog-all-scan-width-mobile)
     var(--catalog-all-type-width-mobile)
     minmax(0, 1fr);
   grid-template-rows: auto;
 }
-.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__set-code {
-  width: 100%;
-}
-.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__set-code:empty {
-  display: block;
-  visibility: hidden;
-}
+.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__set-code,
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__number {
+  display: none;
+}
+.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__scan-id {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  column-gap: var(--catalog-all-scan-gap-mobile);
+  grid-template-columns:
+    var(--catalog-all-scan-set-width-mobile)
+    var(--catalog-all-scan-num-width-mobile);
+  align-items: center;
   width: 100%;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+}
+.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__scan-set {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__scan-num {
   text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__type-badge {
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 1;
   justify-self: stretch;
   width: 100%;
   justify-content: center;
 }
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__name {
-  grid-column: 4;
+  grid-column: 3;
   grid-row: 1;
 }

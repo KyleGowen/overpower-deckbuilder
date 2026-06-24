@@ -33,7 +33,7 @@ Default (`layout-mobile`):
 Collection (`catalog-all-list--type-after-number`):
 
 - **Row 1:** set code + number + type + name (+ stepper); single row.
-- **Mobile:** set code **`4ch`** and number **`4ch`** fixed scan columns (fits `ERBP` + `533F`; emdash **`—`** right-aligned in the number slot); **`gap: var(--space-1)`** (4px); type badge stays **`2.75rem`** (`--catalog-all-type-width-mobile`). Empty set code keeps column width via **`visibility: hidden`** (not `display: none`).
+- **Mobile:** **`.catalog-all-list__scan-id`** inner grid — **`4ch`** set (left) + **`1ch`** space + **`4ch`** number (right, so **`—`** hugs the type column); type badge **`2.75rem`**; **`2px`** gap before type.
 - **Desktop:** fixed scan-band widths (`--catalog-all-num-width`, `--catalog-all-type-width`) keep names aligned for skimming; `#` prefix visible.
 - **Mobile `#`:** wrapped in **`.catalog-all-list__number-hash`**; hidden under **`.layout-mobile`** on all CatalogAllList rows (Collection + DBV All).
 - `compactTypeLabels`: mobile uses 3-letter type abbreviations (`Spc`, `Chr`, …); `title` holds full label.
