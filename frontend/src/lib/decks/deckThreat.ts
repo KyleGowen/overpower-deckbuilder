@@ -57,10 +57,14 @@ export function calculateDeckTotalThreat(
   return totalThreat;
 }
 
-/** v1 parity: show denominator when over the legal cap. */
+/** Tooltip copy: show denominator when over the legal cap (never use on icon overlay). */
 export function formatThreatDisplay(total: number): string {
   if (total > MAX_TOTAL_THREAT) {
     return `${total}/${MAX_TOTAL_THREAT}`;
   }
   return String(total);
+}
+
+export function formatThreatTooltip(total: number): string {
+  return `Threat: ${formatThreatDisplay(total)}`;
 }

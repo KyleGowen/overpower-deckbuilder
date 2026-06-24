@@ -9,9 +9,9 @@ per-card quantity steppers and an "Owned only" toggle.
 - Search uses `cardMatchesSearchQuery` (same as DBV). The keyword **`foil`** filters to foil printing rows only (`is_foil = true`); combine with name/text (e.g. `foil tarzan`). Distinct from DBV **Has Foil** checkbox (foil-capable base cards).
 - Header shows `totalOwned` and `uniqueCards`.
 - Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.
-- **All** tab: `CatalogAllList` spread grid rows (`#`, type, name, set badge, stepper);
-  fixed-width `#` and type columns for aligned skimming; mobile type badges use compact
-  abbreviations (`Spc`, `Chr`, …). Special and Advanced Universe rows prefix the linked character on **desktop** only
+- **All** tab: `CatalogAllList` spread grid rows (set code, number, type, name, set badge, stepper).
+  **Mobile:** set code and number columns auto-fit content (`max-content`); numbers omit `#` (e.g. `001`, `512F`); **4px** gap between scan columns; type badge stays fixed width with compact abbreviations (`Spc`, `Chr`, …).
+  **Desktop:** fixed-width `#` and type columns for aligned skimming. Special and Advanced Universe rows prefix the linked character on **desktop** only
   (`Anubis - Book of the Dead`); mobile uses the card name alone to save width.
   checklist sort (`compareAllCatalogCards`). Detail panel also exposes a stepper and
   **Is Foil** Yes/No (`card.is_foil` via `isFoilCard`).

@@ -7,9 +7,9 @@ Reusable badge: power-type or threat PNG with a **bold black number** centered o
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `type` | `StatIconType` | – | `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` |
-| `value` | `number \| string` | – | Displayed on the icon (e.g. `6`, `74`, or `74/76`) |
+| `value` | `number \| string` | – | Displayed on the icon (e.g. `6`, `74`) — always a single number for threat |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | `sm` = 18×18 (meta bar threat); `md` = 32×32 (deck tile stat row); `lg` = 36×36 (deck editor header) |
-| `title` | `string` | – | Tooltip; defaults to `{label}: {value}` |
+| `title` | `string` | – | Tooltip and `aria-label`; defaults to `{label}: {value}`. Threat uses `formatThreatTooltip()` for `74/76` when over cap |
 | `className` | `string` | – | Extra class on root `.stat-icon-badge` |
 
 ## CSS

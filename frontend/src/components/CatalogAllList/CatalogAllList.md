@@ -27,12 +27,15 @@ Collection rows add `catalog-all-list__row--has-trailing` for a sixth column.
 
 Default (`layout-mobile`):
 
-- **Row 1:** set **code** (monospace) + `#` + name; trailing stepper pinned right when present.
+- **Row 1:** set **code** (monospace) + number + name; trailing stepper pinned right when present. **`#`** prefix hidden (`.catalog-all-list__number-hash { display: none }`).
 - **Row 2:** type badge only (friendly set name hidden; set code `title` holds full name when known).
 
 Collection (`catalog-all-list--type-after-number`):
 
-- **Row 1:** set code + `#` + type + name (+ stepper); single row, fixed scan-band widths.
+- **Row 1:** set code + number + type + name (+ stepper); single row.
+- **Mobile:** set code and number columns use **`max-content`** (3–4 char set codes; numbers like `001` / `512F` without `#`); **`gap: var(--space-1)`** (4px) between scan columns; type badge stays **`2.75rem`** (`--catalog-all-type-width-mobile`).
+- **Desktop:** fixed scan-band widths (`--catalog-all-num-width`, `--catalog-all-type-width`) keep names aligned for skimming; `#` prefix visible.
+- **Mobile `#`:** wrapped in **`.catalog-all-list__number-hash`**; hidden under **`.layout-mobile`** on all CatalogAllList rows (Collection + DBV All).
 - `compactTypeLabels`: mobile uses 3-letter type abbreviations (`Spc`, `Chr`, …); `title` holds full label.
 
 ## Props

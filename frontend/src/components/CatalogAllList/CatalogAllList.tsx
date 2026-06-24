@@ -84,7 +84,16 @@ export function CatalogAllList({
 
         const numberEl = (
           <span className="catalog-all-list__number" aria-hidden="true">
-            {setNumber ? `#${setNumber}` : '—'}
+            {setNumber ? (
+              <>
+                <span className="catalog-all-list__number-hash" aria-hidden="true">
+                  #
+                </span>
+                {setNumber}
+              </>
+            ) : (
+              '—'
+            )}
           </span>
         );
 

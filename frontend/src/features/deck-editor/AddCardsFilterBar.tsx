@@ -1,3 +1,4 @@
+import { Checkbox } from '../../components/Checkbox';
 import type { SetInfo } from '../../lib/api/types';
 
 export interface AddCardsFilterBarProps {
@@ -40,20 +41,17 @@ export function AddCardsFilterBar({
           ))}
         </select>
       </div>
-      <div className="add-cards__filters-block">
-        <label
-          className={`add-cards__filters-toggle${hideUnusablesDisabled ? ' is-disabled' : ''}`}
-          title={hideUnusablesDisabled ? hideUnusablesDisabledReason : undefined}
-        >
-          <input
-            type="checkbox"
-            checked={hideUnusables}
-            disabled={hideUnusablesDisabled}
-            onChange={(e) => onHideUnusablesChange(e.target.checked)}
-            aria-label="Hide unusables"
-          />
-          <span className="add-cards__filters-toggle-label">Hide Unusables</span>
-        </label>
+      <div
+        className="add-cards__filters-block"
+        title={hideUnusablesDisabled ? hideUnusablesDisabledReason : undefined}
+      >
+        <Checkbox
+          className="add-cards__filters-toggle"
+          label="Hide Unusables"
+          checked={hideUnusables}
+          disabled={hideUnusablesDisabled}
+          onChange={onHideUnusablesChange}
+        />
       </div>
     </div>
   );

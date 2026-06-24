@@ -345,6 +345,15 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
 - **Detail sheet:** **`#collectionMobileDetail`** — **`position: fixed`**, full-viewport scrim, **`z-index: 10000`**; **`.collection-mobile-detail-panel`** is a bottom sheet (**`max-height: min(92vh, 100%)`**, rounded top **16px**, teal border). **`.collection-mobile-detail-back`** min height **44px**; detail steppers **`calc(32px × 0.9)`** (~**29×29px**, 10% under the prior 32px baseline). Full card image **`.collection-mobile-detail-image`**: **`max-height: 42vh`**, **`object-fit: contain`**, centered.
 - **Spec file:** `[public/css/collection-view.css](public/css/collection-view.css)` (all rules scoped under **`html.layout-mobile`** for these components).
 
+#### v2 SPA — Collection All list (`CatalogAllList`, `layout-mobile`)
+
+- **When it applies:** v2 Collection tab **All** at **`http://localhost:5173`** when **`html.layout-mobile`** (viewport ≤900px). Component: [`frontend/src/components/CatalogAllList/CatalogAllList.tsx`](frontend/src/components/CatalogAllList/CatalogAllList.tsx); styles in [`CatalogAllList.css`](frontend/src/components/CatalogAllList/CatalogAllList.css) modifier **`catalog-all-list--type-after-number`**.
+- **Row order (single line):** set code → card number → type badge → card name → **`QuantityStepper`** (trailing).
+- **Set code / number columns:** **`grid-template-columns: max-content max-content …`** — columns hug 3–4 char set codes and 3-digit numbers with optional **`F`** suffix; no fixed **`2.5rem` / `3.25rem`** bands on mobile.
+- **Card number:** **`#`** lives in **`.catalog-all-list__number-hash`**; **`display: none`** under **`.layout-mobile`** (Collection + DBV All). Desktop keeps **`#`** prefix.
+- **Scan gap:** **`gap: var(--space-1)`** (4px) between set code, number, type, and name inside **`.catalog-all-list__main`**.
+- **Unchanged on mobile:** type badge width **`--catalog-all-type-width-mobile: 2.75rem`**; compact type labels (`Spc`, `Chr`, …); trailing stepper sizing.
+
 ### Card Database — Universe: Teamwork (desktop filters)
 
 - **Where**: Card Database tab **Universe: Teamwork**, desktop layout (`#teamwork-table`). A second header row (`tr.teamwork-desktop-filter-row`) sits below the column titles and aligns filters under each data column.
@@ -3199,7 +3208,7 @@ set → non-foil before foil → set_number → name.
 
 Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → body (`.dbv-filter-rail__body`) → on desktop, scroll wrapper (`.dbv-filter-rail__scroll`, `display: contents`) is layout-transparent; controls (`.dbv-filter-rail__controls`) + trailing (`.dbv-filter-rail__trailing`, `margin-left: auto` on desktop).
 
-- **Has Foil toggle** (`.dbv-filter-rail__foil-toggle`, rightmost in trailing): checkbox + label (`.dbv-filter-rail__foil-toggle-label`, text "Has Foil"). `font-size: var(--font-size-sm)`, `color: var(--color-text)`, `gap: var(--space-2)`, checkbox `accent-color: var(--color-accent)`. When checked, grid shows only foil-capable cards (`matchesHasFoilFilter` via `foil_card_map`); unchecked restores full deduped catalog. State persists across type tab switches (not cleared by **Clear** or per-tab rail reset). Hidden when rail is collapsed (`is-collapsed`).
+- **Has Foil toggle** (`.dbv-filter-rail__foil-toggle`, rightmost in trailing): shared v2 `Checkbox` component (custom 20×20px accent face + `IconCheck`; see [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md) § Checkbox). Label text "Has Foil", `color: var(--color-text)`. When checked, grid shows only foil-capable cards (`matchesHasFoilFilter` via `foil_card_map`); unchecked restores full deduped catalog. State persists across type tab switches (not cleared by **Clear** or per-tab rail reset). Hidden when rail is collapsed (`is-collapsed`).
 - **Active filter chips** (`.dbv-filter-rail__chip`) and **Clear** (`.dbv-filter-rail__clear`) sit left of the Has Foil toggle in the trailing cluster.
 - Mobile (`.layout-mobile`): collapse chevron stays fixed outside the scroll region; controls, chips, Clear, and Has Foil scroll inside `.dbv-filter-rail__scroll` (`overflow-x: auto`), clipped by `.dbv-filter-rail__body` + rail (`overflow: hidden`) so scrolled filters never paint left of the chevron.
 
@@ -3239,12 +3248,12 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 ### Topbar — `.deck-editor__topbar` (three-zone grid)
 
 - `display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; align-items: center; gap: var(--space-4)`
-- **Leading** (`.deck-editor__topbar-leading`): back button, deck name input/`h1`, meta row (card count chip, legality badge; on mobile, threat icon stat right-aligned on the same line)
+- **Leading** (`.deck-editor__topbar-leading`): back button + deck name in **`.deck-editor__topbar-name-row`**; meta row below (card count chip, legality badge; on mobile, threat icon stat right-aligned on the same line). On mobile, **Save/Saved** sits top-right on the name row (`.deck-editor__save-btn`, subtle outline when saved)
 - **Center** (`.deck-editor__stats-panel`): deck total **threat** icon stat (`.deck-editor__threat-stat`) left of **Character max** + **Icon totals**, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
 - **Trailing** (`.deck-editor__actions`): Draw Hand, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
 - **Desktop compact (`.layout-desktop`)** — header ~10% shorter: topbar `padding-block: 11px` (was 12px), back `34×34px` (was 38px), name input `padding: 9px 12px` (overrides global input `12px 16px`), name `font-size: var(--font-size-base)` (was `lg`), block labels `9px`, inter-block gaps `22px` / `11px` (~90% of base)
-- Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`, column stack), actions full-width (`order: 6`)
+- Mobile (`.layout-mobile`): flex wrap — name row (back + title + Save top-right), meta row, stats full-width (`order: 5`, column stack), actions full-width (`order: 6`, List View / Draw Hand / Add Cards only)
 
 ### Mobile scroll model (`.layout-mobile`)
 
@@ -3255,10 +3264,10 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 
 - `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-6); padding: 0; transform: translateX(calc(-1 * var(--space-3)))`
 - No `border-top` — stats live in the center column of the topbar, not a separate row
-- **Threat** (`.deck-editor__threat-stat`): first child — `StatIconBadge` `type="threat_level"` `size="lg"`; `formatThreatDisplay` shows `total/76` when over cap
+- **Threat** (`.deck-editor__threat-stat`): first child — `StatIconBadge` `type="threat_level"` `size="lg"` with numeric `value`; `formatThreatTooltip()` shows `total/76` in tooltip when over cap
 - Desktop: threat sits **left of Character max** with `border-right` divider (same pattern as stat groups)
 - Two stat blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.5rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; **`.deck-editor__meta`** has `margin-bottom: var(--space-2)` for breathing room above the stats rows; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with `StatIconBadge` `lg` (36×36); border-top between stat rows
+- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.5rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; **`.deck-editor__meta`** has `margin-bottom: var(--space-2)` for breathing room above the stats rows; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with `StatIconBadge` `lg` at **85%** (~30.6×30.6px, 15.3px value); border-top between stat rows
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
@@ -3272,7 +3281,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - Each group: one `StatIconBadge` (`lg`) — icon with black number overlay (see [Stat icon badges](#stat-icon-badges-v2-spa))
 - Vertical divider between groups: `border-right: 1px solid var(--color-border)` (except last)
 - Per-stat `title` tooltip (e.g. *"Energy: 5"*)
-- Mobile: subgrid alignment (see Container above); badges `lg` (36×36)
+- Mobile: subgrid alignment (see Container above); badges `lg` at **85%** (~30.6×30.6px) via `.layout-mobile .deck-editor__header .stat-icon-badge--lg`
 
 ### Header actions — `.deck-editor__actions .btn`
 

@@ -110,6 +110,29 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 - Inputs/selects/textareas use `--color-bg-input`, `--color-border`, `--radius-md`, and a
   cyan focus ring (`--color-border-accent`).
 
+### Checkbox (`Checkbox` component)
+
+Reusable stylized checkbox for filter toggles. Component:
+[`frontend/src/components/Checkbox/`](frontend/src/components/Checkbox/). Native
+`<input type="checkbox">` is sr-only; custom face is `.checkbox__control`.
+
+| Element | Tokens / values |
+|---|---|
+| Root (`.checkbox`) | `inline-flex`, `gap: var(--space-2)`, `--font-size-sm`, `--color-text-muted`; checked (`.is-checked`) brightens label to `--color-text` |
+| Control face (`.checkbox__control`) | **20×20px**, `--radius-sm`, `--color-bg-input` bg, `1px solid --color-border` |
+| Hover (enabled) | `--color-bg-hover` bg, `--color-border-accent` border |
+| Checked | `--color-accent-soft` bg, `--color-border-accent` border, `box-shadow: 0 0 0 1px var(--color-accent-glow)`; `IconCheck` at 12px in `--color-accent-bright` |
+| Focus | `outline: 2px solid --color-border-accent; outline-offset: 2px` on control when input `:focus-visible` |
+| Disabled (`.is-disabled`) | `opacity: 0.45`, `cursor: not-allowed` |
+| Mobile (`.layout-mobile .checkbox`) | `min-height: 44px`, `padding-inline: var(--space-1)` for thumb-friendly tap rows |
+
+**`labelPosition`:** default `'start'` (box before label) for filter toggles; `'end'` for
+account-sheet row (`.account-sheet__toggle`) with `justify-content: space-between`.
+
+**Usages:** Collection **Owned only** (`.col__owned-toggle`), DBV **Has Foil**
+(`.dbv-filter-rail__foil-toggle`), deck editor Add Cards **Hide Unusables**
+(`.add-cards__filters-toggle`), mobile account sheet **Use desktop layout**.
+
 ## Layout & Navigation
 - Full-width layout: `--content-max-width: none`; page `*__inner` wrappers and `.top-nav__inner` span the viewport with horizontal padding (`--space-6` desktop, `--space-4` mobile) as side gutters. Deck editor uses the same full-bleed pattern with its own chrome (no AppShell wrapper); on mobile it still mounts the shared [`MobileBottomNav`](frontend/src/components/MobileBottomNav/MobileBottomNav.tsx).
 - **`html.layout-desktop { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
@@ -271,6 +294,7 @@ Always-visible per-type filter rail on DBV (`/data`), inserted between `.db__typ
 | Active stat cell (`.dbv-stat-cell.has-filter`) | `--color-border-accent`, `--color-accent-soft` |
 | Chips (`.dbv-filter-rail__chip`) | `--color-accent-soft`, `--color-border-accent`, `--font-size-xs` |
 | Clear (`.dbv-filter-rail__clear`) | `--color-accent-bright` |
+| Has Foil (`.dbv-filter-rail__foil-toggle`) | Shared `Checkbox` component; label `--color-text`; persists across tab switches; hidden when rail collapsed |
 | Stat op/value (`.dbv-stat-cell__op`, `.dbv-stat-cell__value`) | `width: calc(2.75rem * 1.15)`, `min-height: calc(1.5rem * 1.15)`, `font-size: calc(var(--font-size-xs) * 1.15)`; mobile `min-height: calc(36px * 1.15)` |
 | Collapse toggle (`.dbv-filter-rail__toggle`) | Left-edge chevron; `28×28px` desktop, `44×44px` mobile; `--color-text-muted`, hover `--color-bg-hover` |
 | Collapsed rail (`.dbv-filter-rail.is-collapsed`) | Transparent, no border; keeps `--space-3` horizontal padding so the chevron stays aligned with expanded; chevron locked left in `.dbv-filter-rail__toggle-icon-wrap` (28px); `1px` rule (`.dbv-filter-rail__toggle-line`) extends right |

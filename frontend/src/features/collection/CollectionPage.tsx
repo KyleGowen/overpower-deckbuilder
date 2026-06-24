@@ -23,6 +23,7 @@ import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { Checkbox } from '../../components/Checkbox';
 import { IconSearch, IconCollection } from '../../components/icons';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
 import './CollectionPage.css';
@@ -158,10 +159,12 @@ export default function CollectionPage() {
                 ))}
               </select>
             </div>
-            <label className="col__owned-toggle">
-              <input type="checkbox" checked={ownedOnly} onChange={(e) => setOwnedOnly(e.target.checked)} />
-              Owned only
-            </label>
+            <Checkbox
+              className="col__owned-toggle"
+              label="Owned only"
+              checked={ownedOnly}
+              onChange={setOwnedOnly}
+            />
           </div>
         </header>
 

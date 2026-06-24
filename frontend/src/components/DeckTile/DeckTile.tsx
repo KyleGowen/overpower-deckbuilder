@@ -5,6 +5,7 @@ import { IconCards, IconDots } from '../icons';
 import { StatIconBadge } from '../StatIconBadge';
 import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
 import type { StatIconType } from '../../lib/icons/statIconTypes';
+import { formatThreatTooltip } from '../../lib/decks/deckThreat';
 import { deckTileLegalityBadge } from './deckTileLegality';
 import './DeckTile.css';
 
@@ -204,8 +205,13 @@ export function DeckTile({
               <span className="deck-tile__chip-text">{missionChipLabel}</span>
             </span>
           ) : null}
-          <span className="deck-tile__metric deck-tile__metric--end" title="Threat">
-            <StatIconBadge type="threat_level" value={meta.threat ?? 0} size="sm" />
+          <span className="deck-tile__metric deck-tile__metric--end">
+            <StatIconBadge
+              type="threat_level"
+              value={meta.threat ?? 0}
+              size="sm"
+              title={formatThreatTooltip(meta.threat ?? 0)}
+            />
           </span>
         </div>
 

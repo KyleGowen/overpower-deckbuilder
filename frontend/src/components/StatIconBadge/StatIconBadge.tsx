@@ -33,8 +33,9 @@ export function StatIconBadge({
   className,
 }: StatIconBadgeProps) {
   const displayValue = String(value);
-  const ariaLabel = buildStatIconBadgeLabel(type, value);
-  const tooltip = title ?? ariaLabel;
+  const defaultLabel = buildStatIconBadgeLabel(type, value);
+  const ariaLabel = title ?? defaultLabel;
+  const tooltip = title ?? defaultLabel;
   const isWide = displayValue.length >= 2;
 
   return (

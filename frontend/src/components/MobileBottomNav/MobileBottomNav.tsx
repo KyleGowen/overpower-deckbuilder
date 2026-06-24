@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { Checkbox } from '../Checkbox';
 import { SlideOutPanel } from '../SlideOutPanel';
 import { ProfileMenuContent } from '../ProfileMenu/ProfileMenuContent';
 import { IconProfile } from '../icons';
@@ -55,14 +56,13 @@ export function MobileBottomNav() {
       >
         <div className="account-sheet">
           <ProfileMenuContent onClose={() => setAccountOpen(false)} variant="sheet" />
-          <label className="account-sheet__toggle">
-            <span>Use desktop layout</span>
-            <input
-              type="checkbox"
-              checked={preferDesktop}
-              onChange={(e) => setPreferDesktop(e.target.checked)}
-            />
-          </label>
+          <Checkbox
+            className="account-sheet__toggle"
+            label="Use desktop layout"
+            labelPosition="end"
+            checked={preferDesktop}
+            onChange={setPreferDesktop}
+          />
         </div>
       </SlideOutPanel>
     </>

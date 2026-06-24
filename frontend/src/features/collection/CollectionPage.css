@@ -84,17 +84,6 @@
   max-width: 200px;
   padding-right: var(--space-6);
 }
-.col__owned-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-.col__owned-toggle input {
-  width: auto;
-}
 
 .col__types {
   display: flex;

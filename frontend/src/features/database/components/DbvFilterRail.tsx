@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { IconChevronDown } from '../../../components/icons';
+import { Checkbox } from '../../../components/Checkbox';
 import type { CatalogCard, CatalogType } from '../../../lib/api/types';
 import { collectMissionSetOptions } from '../filters/dbvFilterPredicates';
 import { getDbvFilterConfig } from '../filters/dbvFilterConfig';
@@ -131,15 +132,12 @@ export function DbvFilterRail({
                 Clear
               </button>
             ) : null}
-            <label className="dbv-filter-rail__foil-toggle">
-              <input
-                type="checkbox"
-                checked={hasFoilFilter}
-                onChange={(e) => onHasFoilFilterChange(e.target.checked)}
-                aria-label="Has Foil"
-              />
-              <span className="dbv-filter-rail__foil-toggle-label">Has Foil</span>
-            </label>
+            <Checkbox
+              className="dbv-filter-rail__foil-toggle"
+              label="Has Foil"
+              checked={hasFoilFilter}
+              onChange={onHasFoilFilterChange}
+            />
           </div>
           </div>
         </div>

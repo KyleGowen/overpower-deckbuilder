@@ -11,7 +11,7 @@ import {
   type UpdateDeckMetaInput,
 } from '../../lib/api/decks';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
-import { calculateDeckTotalThreat, formatThreatDisplay } from '../../lib/decks/deckThreat';
+import { calculateDeckTotalThreat, formatThreatTooltip } from '../../lib/decks/deckThreat';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
   characterDeckEntries,
@@ -140,11 +140,42 @@ function DeckStatRow({
 }
 
 function DeckThreatStat({ totalThreat }: { totalThreat: number }) {
-  const display = formatThreatDisplay(totalThreat);
   return (
-    <span className="deck-editor__threat-stat" title={`Threat: ${display}`}>
-      <StatIconBadge type="threat_level" value={display} size="lg" />
+    <span className="deck-editor__threat-stat">
+      <StatIconBadge
+        type="threat_level"
+        value={totalThreat}
+        size="lg"
+        title={formatThreatTooltip(totalThreat)}
+      />
     </span>
+  );
+}
+
+function DeckSaveButton({
+  dirty,
+  saving,
+  onSave,
+}: {
+  dirty: boolean;
+  saving: boolean;
+  onSave: () => void;
+}) {
+  const label = saving ? 'Saving...' : dirty ? 'Save' : 'Saved';
+  return (
+    <button
+      type="button"
+      className={[
+        'btn btn-primary deck-editor__save-btn',
+        !dirty && !saving ? 'deck-editor__save-btn--saved' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={onSave}
+      disabled={saving || !dirty}
+    >
+      <IconSave /> {label}
+    </button>
   );
 }
 
@@ -743,24 +774,33 @@ export default function DeckEditorPage() {
         <header className="deck-editor__header">
           <div className="deck-editor__topbar">
             <div className="deck-editor__topbar-leading">
-              <button type="button" className="deck-editor__back" onClick={handleBackToDecks} aria-label="Back to decks">
-                <IconChevronLeft />
-              </button>
+              <div className="deck-editor__topbar-name-row">
+                <button type="button" className="deck-editor__back" onClick={handleBackToDecks} aria-label="Back to decks">
+                  <IconChevronLeft />
+                </button>
 
-              {isOwner ? (
-                <input
-                  className="deck-editor__name-input"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    setDirty(true);
-                  }}
-                  aria-label="Deck name"
-                  maxLength={100}
-                />
-              ) : (
-                <h1 className="deck-editor__name">{deck.metadata.name}</h1>
-              )}
+                {isOwner ? (
+                  <input
+                    className="deck-editor__name-input"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setDirty(true);
+                    }}
+                    aria-label="Deck name"
+                    maxLength={100}
+                  />
+                ) : (
+                  <h1 className="deck-editor__name">{deck.metadata.name}</h1>
+                )}
+
+                {isMobile && isOwner ? (
+                  <div className="deck-editor__save-group">
+                    {saveMsg ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
+                    <DeckSaveButton dirty={dirty} saving={saving} onSave={handleSave} />
+                  </div>
+                ) : null}
+              </div>
 
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
@@ -813,14 +853,14 @@ export default function DeckEditorPage() {
                   <button type="button" className="btn btn-secondary" onClick={() => setAddOpen(true)}>
                     <IconPlus /> Add Cards
                   </button>
-                  <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving || !dirty}>
-                    <IconSave /> {saving ? 'Saving...' : dirty ? 'Save' : 'Saved'}
-                  </button>
+                  {!isMobile ? (
+                    <DeckSaveButton dirty={dirty} saving={saving} onSave={handleSave} />
+                  ) : null}
                 </>
               ) : (
                 <span className="deck-editor__readonly-tag">Read-only</span>
               )}
-              {saveMsg ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
+              {saveMsg && !isMobile ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
             </div>
           </div>
         </header>

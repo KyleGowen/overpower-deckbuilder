@@ -224,23 +224,23 @@
   padding-right: var(--space-1);
 }
 
-/* Collection All mobile: set code + # + type + name on one row (fixed scan columns) */
+/* Collection All mobile: set code + number + type + name on one row (content-sized scan columns) */
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__row {
   grid-template-rows: auto;
 }
+.layout-mobile .catalog-all-list__number-hash {
+  display: none;
+}
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__main {
+  gap: var(--space-1);
   grid-template-columns:
-    var(--catalog-all-setcode-width)
-    var(--catalog-all-num-width)
+    max-content
+    max-content
     var(--catalog-all-type-width-mobile)
     minmax(0, 1fr);
   grid-template-rows: auto;
 }
-.layout-mobile .catalog-all-list--type-after-number .catalog-all-list__set-code {
-  width: 100%;
-}
 .layout-mobile .catalog-all-list--type-after-number .catalog-all-list__number {
-  width: 100%;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }

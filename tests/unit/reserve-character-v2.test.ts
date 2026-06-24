@@ -5,6 +5,7 @@ import {
 import {
   calculateDeckTotalThreat,
   formatThreatDisplay,
+  formatThreatTooltip,
   MAX_TOTAL_THREAT,
 } from '../../frontend/src/lib/decks/deckThreat';
 import type { CatalogCard, DeckCardEntry } from '../../frontend/src/lib/api/types';
@@ -114,5 +115,16 @@ describe('formatThreatDisplay', () => {
 
   it('shows denominator when over cap', () => {
     expect(formatThreatDisplay(77)).toBe(`77/${MAX_TOTAL_THREAT}`);
+  });
+});
+
+describe('formatThreatTooltip', () => {
+  it('uses plain total at or below cap', () => {
+    expect(formatThreatTooltip(60)).toBe('Threat: 60');
+    expect(formatThreatTooltip(MAX_TOTAL_THREAT)).toBe(`Threat: ${MAX_TOTAL_THREAT}`);
+  });
+
+  it('includes denominator when over cap', () => {
+    expect(formatThreatTooltip(79)).toBe(`Threat: 79/${MAX_TOTAL_THREAT}`);
   });
 });

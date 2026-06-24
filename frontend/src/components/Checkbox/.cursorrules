@@ -1,0 +1,6 @@
+# Checkbox component
+
+Reusable stylized checkbox for v2 filter toggles. Lives in `Checkbox.tsx` + `Checkbox.css`.
+Pattern: sr-only native `<input type="checkbox">` + `.checkbox__control` custom face + label.
+Used on Collection (Owned only), DBV filter rail (Has Foil), deck editor Add Cards (Hide
+Unusables), and mobile account sheet (Use desktop layout). See `Checkbox.md` for props.
