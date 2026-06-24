@@ -22,6 +22,9 @@ const BADGE_PX: Record<NonNullable<StatIconBadgeProps['size']>, number> = {
   lg: 36,
 };
 
+const LIGHTER_VALUE_GLOW_TYPES: StatIconType[] = ['combat', 'brute_force'];
+const STRONGER_VALUE_GLOW_TYPES: StatIconType[] = ['energy'];
+
 export function StatIconBadge({
   type,
   value,
@@ -39,6 +42,8 @@ export function StatIconBadge({
       className={[
         'stat-icon-badge',
         `stat-icon-badge--${size}`,
+        LIGHTER_VALUE_GLOW_TYPES.includes(type) ? 'stat-icon-badge--lighter-value-glow' : '',
+        STRONGER_VALUE_GLOW_TYPES.includes(type) ? 'stat-icon-badge--stronger-value-glow' : '',
         className,
       ]
         .filter(Boolean)
@@ -53,6 +58,7 @@ export function StatIconBadge({
         width={BADGE_PX[size]}
         height={BADGE_PX[size]}
       />
+      <span className="stat-icon-badge__value-halo" aria-hidden="true" />
       <span
         className={[
           'stat-icon-badge__value',

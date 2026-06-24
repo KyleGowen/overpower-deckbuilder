@@ -14,9 +14,10 @@ Reusable badge: power-type or threat PNG with a **bold black number** centered o
 
 ## CSS
 
-- Root: `.stat-icon-badge`, size modifiers `.stat-icon-badge--sm`, `.stat-icon-badge--md`, `.stat-icon-badge--lg` (`overflow: visible`)
+- Root: `.stat-icon-badge`, size modifiers; `.stat-icon-badge--lighter-value-glow` for `combat` / `brute_force`; `.stat-icon-badge--stronger-value-glow` for `energy`
 - Icon: `.stat-icon-badge__icon` — **110%** of container width/height (PNG 10% larger; overlay numbers stay same font size)
-- Overlay value: `.stat-icon-badge__value` (black, centered); `.stat-icon-badge__value--wide` for 2+ characters at `sm`
+- Value halo: `.stat-icon-badge__value-halo` — soft semi-transparent white radial glow behind the number (always rendered)
+- Overlay value: `.stat-icon-badge__value` (black, centered, light white text-shadow); `.stat-icon-badge__value--wide` for 2+ characters at `sm`
 
 ## Usage
 

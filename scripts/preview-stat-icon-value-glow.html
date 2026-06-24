@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stat icon badges — white value glow preview</title>
+  <style>
+    :root {
+      --bg: #080d18;
+      --panel: #0d1526;
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #e8ecf1;
+      --muted: #8b95a8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.45;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 8px; }
+    .lead { color: var(--muted); margin: 0 0 24px; max-width: 56rem; }
+    .lead code { color: #9ee; font-size: 0.9em; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 960px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background: rgba(0, 0, 0, 0.25);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    tr.section td {
+      background: rgba(0, 200, 232, 0.08);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7dd3e8;
+      text-align: left;
+      padding: 10px 14px;
+    }
+    .variant-label { font-weight: 600; font-size: 0.95rem; }
+    .variant-desc { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+    /* StatIconBadge base (from StatIconBadge.css) */
+    .stat-icon-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+      overflow: visible;
+    }
+    .stat-icon-badge--sm { width: 18px; height: 18px; }
+    .stat-icon-badge--md { width: 32px; height: 32px; }
+    .stat-icon-badge--lg { width: 36px; height: 36px; }
+    .stat-icon-badge__icon {
+      position: relative;
+      z-index: 0;
+      width: 110%;
+      height: 110%;
+      object-fit: contain;
+      display: block;
+    }
+    .stat-icon-badge__value {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      line-height: 1;
+      color: #000;
+      pointer-events: none;
+    }
+    .stat-icon-badge--sm .stat-icon-badge__value { font-size: 9px; }
+    .stat-icon-badge--sm .stat-icon-badge__value--wide { font-size: 7px; }
+    .stat-icon-badge--md .stat-icon-badge__value { font-size: 13px; }
+    .stat-icon-badge--md .stat-icon-badge__value--wide { font-size: 11px; }
+    .stat-icon-badge--lg .stat-icon-badge__value { font-size: 18px; }
+    .stat-icon-badge--lg .stat-icon-badge__value--wide { font-size: 14px; }
+
+    /* Proposed: soft translucent white glow behind overlay numbers (icons unchanged) */
+    .stat-icon-badge__value-halo {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.48) 0%,
+        rgba(255, 255, 255, 0.28) 32%,
+        rgba(255, 255, 255, 0.1) 52%,
+        rgba(255, 255, 255, 0) 68%
+      );
+    }
+    .stat-icon-badge--value-glow .stat-icon-badge__value-halo {
+      display: block;
+    }
+    .stat-icon-badge--value-glow.stat-icon-badge--sm .stat-icon-badge__value-halo {
+      width: 15px;
+      height: 15px;
+      filter: blur(1px);
+    }
+    .stat-icon-badge--value-glow.stat-icon-badge--md .stat-icon-badge__value-halo {
+      width: 25.5px;
+      height: 25.5px;
+      filter: blur(1.2px);
+    }
+    .stat-icon-badge--value-glow.stat-icon-badge--lg .stat-icon-badge__value-halo {
+      width: 28.5px;
+      height: 28.5px;
+      filter: blur(1.2px);
+    }
+    .stat-icon-badge--value-glow .stat-icon-badge__value {
+      text-shadow:
+        0 0 1px rgba(255, 255, 255, 0.45),
+        0 0 3px rgba(255, 255, 255, 0.25);
+    }
+    /* Solid-fill icons (combat, brute force) — 20% lighter halo */
+    .stat-icon-badge--value-glow.stat-icon-badge--value-glow-lighter .stat-icon-badge__value-halo {
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.384) 0%,
+        rgba(255, 255, 255, 0.224) 32%,
+        rgba(255, 255, 255, 0.08) 52%,
+        rgba(255, 255, 255, 0) 68%
+      );
+    }
+    .stat-icon-badge--value-glow.stat-icon-badge--value-glow-lighter .stat-icon-badge__value {
+      text-shadow:
+        0 0 1px rgba(255, 255, 255, 0.36),
+        0 0 3px rgba(255, 255, 255, 0.2);
+    }
+    /* Wireframe energy — 20% stronger halo */
+    .stat-icon-badge--value-glow.stat-icon-badge--value-glow-stronger .stat-icon-badge__value-halo {
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.576) 0%,
+        rgba(255, 255, 255, 0.336) 32%,
+        rgba(255, 255, 255, 0.12) 52%,
+        rgba(255, 255, 255, 0) 68%
+      );
+    }
+    .stat-icon-badge--value-glow.stat-icon-badge--value-glow-stronger .stat-icon-badge__value {
+      text-shadow:
+        0 0 1px rgba(255, 255, 255, 0.54),
+        0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .badge-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .badge-cell span.size-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; }
+
+    .header-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 960px;
+      margin-bottom: 24px;
+    }
+    .header-panel {
+      padding: 12px 16px;
+      background: rgba(8, 13, 24, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .header-panel .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .note {
+      margin-top: 8px;
+      padding: 16px;
+      border-left: 3px solid #00c8e8;
+      background: rgba(0, 200, 232, 0.06);
+      max-width: 56rem;
+      font-size: 0.9rem;
+    }
+    .note strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <h1>Stat icon badges — white value glow</h1>
+  <p class="lead">
+    Keep current production PNGs; add a soft, semi-transparent white halo behind every overlay number
+    (especially energy’s wireframe center). Compare <strong>Current</strong> vs
+    <strong>White glow</strong> at each <code>StatIconBadge</code> size.
+  </p>
+
+  <div class="header-strip" aria-label="Deck editor header comparison">
+    <div class="header-panel">
+      <div class="label">Deck editor strip — current</div>
+      <div class="badge-row" id="header-current"></div>
+    </div>
+    <div class="header-panel">
+      <div class="label">Deck editor strip — white glow</div>
+      <div class="badge-row" id="header-glow"></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Variant</th>
+        <th>sm (18px)</th>
+        <th>md (32px)</th>
+        <th>lg (36px)</th>
+      </tr>
+    </thead>
+    <tbody id="grid"></tbody>
+  </table>
+
+  <p class="note">
+    <strong>Proposed CSS</strong> — smaller translucent radial <code>.stat-icon-badge__value-halo</code>
+    (~48% peak opacity, extra blur) + very light <code>text-shadow</code> on the number.
+    Opt-in via <code>stat-icon-badge--value-glow</code> (combat + brute force: <code>--value-glow-lighter</code>; energy: <code>--value-glow-stronger</code>).<br />
+    <strong>Icons</strong> — unchanged files in <code>src/resources/images/icons/</code>.
+  </p>
+
+  <script>
+    const ICON_BASE = '../src/resources/images/icons';
+
+    const statTypes = [
+      {
+        id: 'energy',
+        label: 'Energy',
+        file: 'energy.png',
+        sm: [4, 15],
+        md: [4, 15],
+        lg: [8, 15],
+      },
+      {
+        id: 'combat',
+        label: 'Combat',
+        file: 'combat.png',
+        sm: [4, 15],
+        md: [4, 15],
+        lg: [8, 15],
+      },
+      {
+        id: 'brute_force',
+        label: 'Brute Force',
+        file: 'brute_force.png',
+        sm: [4, 15],
+        md: [4, 15],
+        lg: [8, 15],
+      },
+      {
+        id: 'intelligence',
+        label: 'Intelligence',
+        file: 'intelligence.png',
+        sm: [4, 15],
+        md: [4, 15],
+        lg: [8, 15],
+      },
+      {
+        id: 'threat',
+        label: 'Threat',
+        file: 'threat.png',
+        sm: [74, 15],
+        md: [74, 15],
+        lg: [74, 15],
+      },
+    ];
+
+    function badge(src, size, value, label, withGlow, statId) {
+      const wide = String(value).length >= 2 ? ' stat-icon-badge__value--wide' : '';
+      const glowClass = withGlow ? ' stat-icon-badge--value-glow' : '';
+      const lighterGlowClass =
+        withGlow && (statId === 'combat' || statId === 'brute_force')
+          ? ' stat-icon-badge--value-glow-lighter'
+          : '';
+      const strongerGlowClass =
+        withGlow && statId === 'energy' ? ' stat-icon-badge--value-glow-stronger' : '';
+      const px = size === 'sm' ? 18 : size === 'md' ? 32 : 36;
+      const halo = withGlow ? '<span class="stat-icon-badge__value-halo" aria-hidden="true"></span>' : '';
+      return `<span class="stat-icon-badge stat-icon-badge--${size}${glowClass}${lighterGlowClass}${strongerGlowClass}" title="${label}: ${value}">
+        <img src="${src}" alt="" class="stat-icon-badge__icon" width="${px}" height="${px}" />
+        ${halo}
+        <span class="stat-icon-badge__value${wide}" aria-hidden="true">${value}</span>
+      </span>`;
+    }
+
+    function badgePair(src, size, values, label, withGlow, statId) {
+      return values.map((v) =>
+        `<div class="badge-cell">${badge(src, size, v, label, withGlow, statId)}<span class="size-label">${v}</span></div>`
+      ).join('');
+    }
+
+    function addRow(grid, variantTitle, variantDesc, src, stat, withGlow) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="variant-label">${variantTitle}</div>
+          <div class="variant-desc">${variantDesc}</div>
+        </td>
+        <td><div class="badge-row">${badgePair(src, 'sm', stat.sm, stat.label, withGlow, stat.id)}</div></td>
+        <td><div class="badge-row">${badgePair(src, 'md', stat.md, stat.label, withGlow, stat.id)}</div></td>
+        <td><div class="badge-row">${badgePair(src, 'lg', stat.lg, stat.label, withGlow, stat.id)}</div></td>
+      `;
+      grid.appendChild(tr);
+    }
+
+    const grid = document.getElementById('grid');
+    for (const stat of statTypes) {
+      const src = `${ICON_BASE}/${stat.file}`;
+      const section = document.createElement('tr');
+      section.className = 'section';
+      section.innerHTML = `<td colspan="4">${stat.label}</td>`;
+      grid.appendChild(section);
+
+      addRow(grid, 'Current', 'Black number on icon only', src, stat, false);
+      addRow(
+        grid,
+        'White glow',
+        stat.id === 'combat' || stat.id === 'brute_force'
+          ? 'Soft halo (−20% opacity on combat / brute force)'
+          : stat.id === 'energy'
+            ? 'Soft halo (+20% opacity on energy)'
+            : 'Soft halo behind number',
+        src,
+        stat,
+        true,
+      );
+    }
+
+    const headerSamples = [
+      { stat: statTypes[4], value: 74 },
+      { stat: statTypes[0], value: 4 },
+      { stat: statTypes[1], value: 8 },
+      { stat: statTypes[2], value: 6 },
+      { stat: statTypes[3], value: 7 },
+    ];
+
+    for (const { stat, value } of headerSamples) {
+      const src = `${ICON_BASE}/${stat.file}`;
+      for (const [containerId, withGlow] of [
+        ['header-current', false],
+        ['header-glow', true],
+      ]) {
+        const cell = document.createElement('div');
+        cell.className = 'badge-cell';
+        cell.innerHTML = `${badge(src, 'lg', value, stat.label, withGlow, stat.id)}<span class="size-label">${stat.label}</span>`;
+        document.getElementById(containerId).appendChild(cell);
+      }
+    }
+  </script>
+</body>
+</html>

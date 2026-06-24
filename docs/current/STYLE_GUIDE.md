@@ -3055,9 +3055,16 @@ Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconB
 | Element | Class | Notes |
 |---|---|---|
 | Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md`, `.stat-icon-badge--lg` | `position: relative; inline-flex`; `overflow: visible` |
-| Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **110%** of container (10% larger than box); value font unchanged |
-| Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700` |
+| Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **110%** of container (10% larger than box); value font unchanged; `z-index: 0` |
+| Value halo | `.stat-icon-badge__value-halo` | Soft translucent white radial glow behind number (`z-index: 1`); sizes **15px** (`sm`), **25.5px** (`md`), **28.5px** (`lg`); `filter: blur(1–1.2px)` |
+| Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700`; light white `text-shadow`; `z-index: 2` |
 | Wide value | `.stat-icon-badge__value--wide` | Smaller font when value has 2+ characters (mainly `sm` threat) |
+| Lighter glow | `.stat-icon-badge--lighter-value-glow` on root when `type` is `combat` or `brute_force` | Halo + text-shadow **20% lower opacity** (solid icon fill already legible) |
+| Stronger glow | `.stat-icon-badge--stronger-value-glow` on root when `type` is `energy` | Halo + text-shadow **20% higher opacity** (wireframe atom center) |
+
+### Value halo (readability)
+
+Production PNGs unchanged. Every badge renders `.stat-icon-badge__value-halo` between icon and number so wireframe energy centers and similar low-contrast areas stay readable. Default gradient peak **rgba(255,255,255,0.48)**; `energy` uses **0.576** (+20%); `combat` and `brute_force` use **0.384** (−20%).
 
 ### Sizes
 

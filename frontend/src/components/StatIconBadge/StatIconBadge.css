@@ -24,15 +24,53 @@
 }
 
 .stat-icon-badge__icon {
+  position: relative;
+  z-index: 0;
   width: 110%;
   height: 110%;
   object-fit: contain;
   display: block;
 }
 
+.stat-icon-badge__value-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.48) 0%,
+    rgba(255, 255, 255, 0.28) 32%,
+    rgba(255, 255, 255, 0.1) 52%,
+    rgba(255, 255, 255, 0) 68%
+  );
+}
+
+.stat-icon-badge--sm .stat-icon-badge__value-halo {
+  width: 15px;
+  height: 15px;
+  filter: blur(1px);
+}
+
+.stat-icon-badge--md .stat-icon-badge__value-halo {
+  width: 25.5px;
+  height: 25.5px;
+  filter: blur(1.2px);
+}
+
+.stat-icon-badge--lg .stat-icon-badge__value-halo {
+  width: 28.5px;
+  height: 28.5px;
+  filter: blur(1.2px);
+}
+
 .stat-icon-badge__value {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,6 +78,43 @@
   line-height: 1;
   color: #000;
   pointer-events: none;
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* Solid-fill icons (combat shield, brute force gem) — 20% lighter halo */
+.stat-icon-badge--lighter-value-glow .stat-icon-badge__value-halo {
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.384) 0%,
+    rgba(255, 255, 255, 0.224) 32%,
+    rgba(255, 255, 255, 0.08) 52%,
+    rgba(255, 255, 255, 0) 68%
+  );
+}
+
+.stat-icon-badge--lighter-value-glow .stat-icon-badge__value {
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.36),
+    0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+/* Wireframe energy center — 20% stronger halo than default */
+.stat-icon-badge--stronger-value-glow .stat-icon-badge__value-halo {
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.576) 0%,
+    rgba(255, 255, 255, 0.336) 32%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 255, 255, 0) 68%
+  );
+}
+
+.stat-icon-badge--stronger-value-glow .stat-icon-badge__value {
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.54),
+    0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .stat-icon-badge--sm .stat-icon-badge__value {
