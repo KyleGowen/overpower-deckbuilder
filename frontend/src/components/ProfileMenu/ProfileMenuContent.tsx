@@ -178,10 +178,10 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
                 </label>
                 {emailError ? <div className="profile-menu__error" role="alert">{emailError}</div> : null}
                 <div className="profile-menu__subform-actions">
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpenForm(null)}>
+                  <button type="button" className="btn btn-ghost" onClick={() => setOpenForm(null)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary btn-sm" disabled={emailBusy}>
+                  <button type="submit" className="btn btn-primary" disabled={emailBusy}>
                     {emailBusy ? 'Saving...' : 'Save'}
                   </button>
                 </div>
@@ -218,12 +218,12 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
                   <div className="profile-menu__error" role="alert">{passwordError}</div>
                 ) : null}
                 <div className="profile-menu__subform-actions">
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpenForm(null)}>
+                  <button type="button" className="btn btn-ghost" onClick={() => setOpenForm(null)}>
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary"
                     disabled={passwordBusy || !passwordsFilled || !passwordsMatch}
                   >
                     {passwordBusy ? 'Saving...' : 'Save'}

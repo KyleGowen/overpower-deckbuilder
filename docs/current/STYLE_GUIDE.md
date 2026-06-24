@@ -933,6 +933,7 @@ Consider implementing CSS custom properties for easier theme management:
   - **Deck count** — `.profile-menu__deck-count`: same size/color as email (e.g. `12 decks`)
 - **Actions** (`.profile-menu__item`): Create New Deck, Change Email, Change Password (USER/ADMIN only), Log Out / Exit Guest.
 - **Inline sub-forms** (`.profile-menu__subform`): expand below Change Email / Change Password rows; only one open at a time. **Spacing:** `padding-top: var(--space-4)` (16px) between the active menu row and the first field label; `gap: var(--space-3)` between fields. Password fields use [`PasswordInput`](../../frontend/src/components/PasswordInput/PasswordInput.tsx) with per-field eye toggle (`.password-input__eye`).
+- **Subform actions** (`.profile-menu__subform-actions`): right-aligned chip pills. **Cancel** — `btn btn-ghost` accent-outline (`color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, transparent bg; hover `rgba(0, 200, 232, 0.08)`). **Save** — `btn btn-primary` chip pill (`padding: 4px 10px`, `font-size-xs`, `border-radius: var(--radius-full)`, `width: auto`). Same pattern for Change Email and Change Password.
 - **Validation UX**: client shows **"Passwords do not match."** when both password fields are non-empty and unequal; Save disabled until match. Email emptiness/format checked client-side; server is authoritative via `/api/v1/users/change-email` and `/api/v1/users/change-password`.
 - **Create New Deck**: navigates to `/users/:userId/decks?create=1` (opens existing New Deck slide-out on deck selection).
 
