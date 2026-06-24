@@ -61,18 +61,8 @@ export const POWER_TYPE_LABELS = {
   AnyPower: 'Any-Power',
 } as const;
 
-export const STAT_ICON_PATHS: Record<string, string> = {
-  energy: '/src/resources/images/icons/energy.png',
-  combat: '/src/resources/images/icons/combat.png',
-  brute_force: '/src/resources/images/icons/brute_force.png',
-  intelligence: '/src/resources/images/icons/intelligence.png',
-  threat_level: '/src/resources/images/icons/threat.png',
-  Energy: '/src/resources/images/icons/energy.png',
-  Combat: '/src/resources/images/icons/combat.png',
-  'Brute Force': '/src/resources/images/icons/brute_force.png',
-  Intelligence: '/src/resources/images/icons/intelligence.png',
-  'Any-Power': '/src/resources/images/icons/any-power.png',
-};
+export { STAT_ICON_PATHS } from '../../../lib/icons/statIconTypes';
+export type { StatIconType } from '../../../lib/icons/statIconTypes';
 
 export const FUNCTION_ICON_DEFS: {
   field: FunctionIconField;

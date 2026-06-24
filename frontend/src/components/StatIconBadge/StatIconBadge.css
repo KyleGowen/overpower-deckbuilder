@@ -1,0 +1,53 @@
+.stat-icon-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.stat-icon-badge--sm {
+  width: 18px;
+  height: 18px;
+}
+
+.stat-icon-badge--md {
+  width: 32px;
+  height: 32px;
+}
+
+.stat-icon-badge__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.stat-icon-badge__value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  pointer-events: none;
+}
+
+.stat-icon-badge--sm .stat-icon-badge__value {
+  font-size: 9px;
+}
+
+.stat-icon-badge--sm .stat-icon-badge__value--wide {
+  font-size: 7px;
+}
+
+.stat-icon-badge--md .stat-icon-badge__value {
+  font-size: 13px;
+}
+
+.stat-icon-badge--md .stat-icon-badge__value--wide {
+  font-size: 11px;
+}

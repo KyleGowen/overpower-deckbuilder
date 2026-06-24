@@ -678,8 +678,28 @@
   width: 100%;
   text-align: center;
 }
-.add-cards__done {
+
+.add-cards__footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
+}
+
+/* Footer Done — chip pill at 1.2× toolbar chip size, centered in slide-out footer */
+.add-cards__done {
+  width: auto;
+  padding: 5px 12px;
+  font-size: calc(var(--font-size-xs) * 1.2);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  gap: calc(var(--space-2) * 0.8);
+}
+.add-cards__done svg {
+  width: 17px;
+  height: 17px;
 }
 
 /* Stacks tab — character + linked specials/UA */

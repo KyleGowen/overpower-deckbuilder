@@ -212,29 +212,12 @@
 }
 
 .deck-tile__stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: var(--space-2);
   margin-top: var(--space-1);
-}
-.deck-tile__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-2) 0;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-input);
-}
-.deck-tile__stat-val {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-}
-.deck-tile__stat-label {
-  font-size: 8px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-dim);
+  padding: var(--space-1) 0;
 }
 
 .deck-tile__footer {

@@ -38,15 +38,16 @@
 35. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
 36. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
 37. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
-38. [Deck Selection toolbar (v2 SPA)](#deck-selection-toolbar-v2-spa)
-39. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
-40. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
-41. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
-42. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
-43. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
-44. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
-45. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
-46. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
+38. [Stat icon badges (v2 SPA)](#stat-icon-badges-v2-spa)
+39. [Deck Selection toolbar (v2 SPA)](#deck-selection-toolbar-v2-spa)
+40. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
+41. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
+42. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
+43. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
+44. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
+45. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
+46. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
+47. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
 
 ## Overview
 
@@ -3028,7 +3029,7 @@ Every card is a `<button class="home__news-item">` (`aria-expanded`). Clicking a
 
 ## Home Deck Rails (v2 SPA)
 
-Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail` markup (`HomePage.tsx`) and rail CSS (`HomePage.css`). Each tile is a `DeckTile` with `variant="compact"`.
+Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail` markup (`HomePage.tsx`) and rail CSS (`HomePage.css`). Each tile is a `DeckTile` with `variant="compact"`. Threat in the meta bar uses `StatIconBadge` (`sm`) — see [Stat icon badges (v2 SPA)](#stat-icon-badges-v2-spa).
 
 ### Rail grid — `.home__rail`
 
@@ -3043,6 +3044,39 @@ Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail
 ### Rationale
 
 Previously `grid-auto-columns: minmax(230px, 1fr)` let columns expand to fill the row, so rails with only two tournament decks rendered oversized tiles. Capped columns match community tile size and leave trailing space until more decks are added.
+
+## Stat icon badges (v2 SPA)
+
+Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconBadge.tsx) overlays a **bold black number** on a power-type or threat PNG (character-card style). Icon paths live in [`statIconTypes.ts`](../../frontend/src/lib/icons/statIconTypes.ts); URLs resolved via `assetUrl()`.
+
+### Component — `.stat-icon-badge`
+
+| Element | Class | Notes |
+|---|---|---|
+| Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md` | `position: relative; inline-flex` |
+| Icon | `.stat-icon-badge__icon` | `object-fit: contain`, full bleed |
+| Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700` |
+| Wide value | `.stat-icon-badge__value--wide` | Smaller font when value has 2+ characters (mainly `sm` threat) |
+
+### Sizes
+
+| Size | Container | Value font | Use |
+|---|---|---|---|
+| `sm` | 18×18px | 9px (7px wide) | Deck tile meta bar threat |
+| `md` | 32×32px | 13px (11px wide) | Deck tile character max row |
+
+### Icon types (`StatIconType`)
+
+- `energy` → `energy.png`
+- `combat` → `combat.png`
+- `brute_force` → `brute_force.png`
+- `intelligence` → `intelligence.png`
+- `threat_level` → `threat.png`
+
+### Deck tile usage — `DeckTile`
+
+- **Meta bar threat** (`.deck-tile__metric--end`): single `StatIconBadge` `type="threat_level"` `size="sm"` (replaces separate icon + adjacent number).
+- **Character max row** (`.deck-tile__stats`, `variant="full"` only): four `StatIconBadge` `size="md"` in a flex row (`justify-content: space-between`) — icons only, no text labels. Replaces the former four dark boxes with colored numbers + `ENERGY` / `COMBAT` labels.
 
 ## Deck Selection toolbar (v2 SPA)
 
@@ -3092,6 +3126,20 @@ The Import Deck slide-out ([`ImportDeckPanel.tsx`](../../frontend/src/features/d
 | Shape | `border-radius: var(--radius-full)` |
 | Width | `auto` (overrides footer stretch) |
 | Icon | SVG `14px × 14px` |
+
+### Create deck form submit — `.dsel__submit`
+
+The New Deck slide-out create form ([`DeckSelectionPage.tsx`](../../frontend/src/features/deck-selection/DeckSelectionPage.tsx)) submit uses the same chip-sized primary pill as the Import panel footer (not full-width default `.btn`):
+
+| Property | Value |
+|---|---|
+| Classes | `btn btn-primary dsel__submit` |
+| Footer layout | `.dsel__form-footer` — `justify-content: flex-end` (pill right-aligned inside the form) |
+| Padding | `4px 10px` |
+| Font | `var(--font-size-xs)`, `var(--font-weight-semibold)` |
+| Shape | `border-radius: var(--radius-full)` |
+| Width | `auto` |
+| Icon | SVG `14px × 14px` (reserved; submit is text-only today) |
 
 ### Mobile — `.layout-mobile`
 
@@ -3328,6 +3376,7 @@ Controls sit in a footer row **below** the card image (no overlays on art, no ti
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).
 - **Pagination**: `.add-cards__pagination` — **16** items/page on All (8 rows at landscape width); per-type **24** (portrait, 8×3) or **16** (landscape, 8×2). In the 575px panel, pagination stacks vertically (controls above, centered “Showing X–Y of Z” below) so the summary does not overlap page buttons — unlike full-width pages where `.pagination__summary` is right-aligned. Controls use the shared fixed-width nav + page-slot layout (no `flex-wrap` on `.pagination__controls`) so chevrons stay put while paging.
+- **Done footer** — `.add-cards__footer` / `.add-cards__done`: primary pill in `SlideOutPanel` footer, **centered** (`justify-content: center`). Classes: `btn btn-primary add-cards__done`. Sized at **1.2×** the standard chip pill: `padding: 5px 12px`, `font-size: calc(var(--font-size-xs) * 1.2)`, `border-radius: var(--radius-full)`, `width: auto`; icon SVG `17px × 17px`.
 - **Mobile**: `SlideOutPanel` right variant becomes full viewport width (`100vw`) per component CSS; width prop applies on desktop only.
 
 ## Deck Editor list view (v2 SPA)

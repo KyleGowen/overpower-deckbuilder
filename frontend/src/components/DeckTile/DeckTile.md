@@ -8,8 +8,8 @@ Summary tile for a deck. Layout ("hero" art + info panel):
   cycles every 1.5s through characters and, when set, the **location** card; pointer leave stops
   and keeps the last shown slide. Bottom gradient scrim keeps the deck name readable.
 - **On the scrim:** the deck name (`<h3>`).
-- **Info panel:** single **meta bar** (cards + threat metrics, optional mission-set chip on `full`),
-  max stats (`full` only), then a **footer** row (updated date left, optional legality badge lower-right).
+- **Info panel:** single **meta bar** (cards + threat `StatIconBadge`, optional mission-set chip on `full`),
+  character max stats as four `StatIconBadge` icons (`full` only), then a **footer** row (updated date left, optional legality badge lower-right).
 
 Used on Home (Community Decks rail, `compact`) and Deck Selection (`full`).
 
@@ -27,7 +27,11 @@ Used on Home (Community Decks rail, `compact`) and Deck Selection (`full`).
 
 ## Meta bar
 
-One row: card count on the **left**, mission set chip **centered** when known, threat on the **right**. Long mission set names ellipsize; legality is not shown here. Applies to **compact** (Home rails) and **full** (deck selection).
+One row: card count on the **left**, mission set chip **centered** when known, threat `StatIconBadge` (`sm`) on the **right**. Long mission set names ellipsize; legality is not shown here. Applies to **compact** (Home rails) and **full** (deck selection).
+
+## Stats row (`full` only)
+
+When `maxStats` is provided, four `StatIconBadge` components (`md`) show character maximum primaries — energy, combat, brute force, intelligence — as icon-with-black-number overlays (no text labels).
 
 ## Footer
 

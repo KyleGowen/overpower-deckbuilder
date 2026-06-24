@@ -431,7 +431,20 @@ export function AddCardsPanel({
   const hasResults = totalItems > 0;
 
   return (
-    <SlideOutPanel open={open} onClose={onClose} title="Add Cards" ariaLabel="Add cards" width={575}>
+    <SlideOutPanel
+      open={open}
+      onClose={onClose}
+      title="Add Cards"
+      ariaLabel="Add cards"
+      width={575}
+      footer={
+        <div className="add-cards__footer">
+          <button type="button" className="btn btn-primary add-cards__done" onClick={onClose}>
+            <IconClose /> Done
+          </button>
+        </div>
+      }
+    >
       <div className="add-cards">
         <div className="add-cards__search">
           <IconSearch className="add-cards__search-icon" />
@@ -574,9 +587,6 @@ export function AddCardsPanel({
           />
         ) : null}
       </div>
-      <button type="button" className="add-cards__done btn btn-primary" onClick={onClose}>
-        <IconClose /> Done
-      </button>
     </SlideOutPanel>
   );
 }

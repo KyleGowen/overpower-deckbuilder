@@ -235,9 +235,15 @@ export default function DeckSelectionPage() {
             <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="What's the game plan?" maxLength={500} rows={4} />
           </label>
           {createError ? <div className="dsel__error" role="alert">{createError}</div> : null}
-          <button type="submit" className="btn btn-primary" disabled={busy || !newName.trim()}>
-            {busy ? 'Creating...' : 'Create Deck'}
-          </button>
+          <div className="dsel__form-footer">
+            <button
+              type="submit"
+              className="btn btn-primary dsel__submit"
+              disabled={busy || !newName.trim()}
+            >
+              {busy ? 'Creating...' : 'Create Deck'}
+            </button>
+          </div>
         </form>
       </SlideOutPanel>
 

@@ -2,12 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
 import { IconCards, IconDots } from '../icons';
+import { StatIconBadge } from '../StatIconBadge';
 import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
-import { assetUrl } from '../../lib/images/cardImages';
+import type { StatIconType } from '../../lib/icons/statIconTypes';
 import { deckTileLegalityBadge } from './deckTileLegality';
 import './DeckTile.css';
-
-const THREAT_ICON_URL = assetUrl('/src/resources/images/icons/threat.png');
 
 const ART_CYCLE_MS = 1500;
 /** Wait before first advance — current slide is already visible on hover enter. */
@@ -69,11 +68,11 @@ function deckArtSlides(deck: DeckListItem): ArtSlide[] {
   return slides;
 }
 
-const STAT_DEFS: Array<{ key: keyof DeckStatLine; label: string; cls: string }> = [
-  { key: 'energy', label: 'Energy', cls: 'stat-energy' },
-  { key: 'combat', label: 'Combat', cls: 'stat-combat' },
-  { key: 'bruteForce', label: 'Brute Force', cls: 'stat-brute-force' },
-  { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
+const STAT_DEFS: Array<{ key: keyof DeckStatLine; iconKey: StatIconType }> = [
+  { key: 'energy', iconKey: 'energy' },
+  { key: 'combat', iconKey: 'combat' },
+  { key: 'bruteForce', iconKey: 'brute_force' },
+  { key: 'intelligence', iconKey: 'intelligence' },
 ];
 
 export function DeckTile({
@@ -206,20 +205,19 @@ export function DeckTile({
             </span>
           ) : null}
           <span className="deck-tile__metric deck-tile__metric--end" title="Threat">
-            <span className="deck-tile__metric-icon" aria-hidden="true">
-              <img src={THREAT_ICON_URL} alt="" className="deck-tile__metric-img" width={18} height={18} />
-            </span>
-            {meta.threat ?? 0}
+            <StatIconBadge type="threat_level" value={meta.threat ?? 0} size="sm" />
           </span>
         </div>
 
         {variant === 'full' && maxStats ? (
-          <div className="deck-tile__stats">
+          <div className="deck-tile__stats" aria-label="Character maximums">
             {STAT_DEFS.map((s) => (
-              <div className="deck-tile__stat" key={s.key}>
-                <span className={`deck-tile__stat-val ${s.cls}`}>{maxStats[s.key]}</span>
-                <span className="deck-tile__stat-label">{s.label}</span>
-              </div>
+              <StatIconBadge
+                key={s.key}
+                type={s.iconKey}
+                value={maxStats[s.key]}
+                size="md"
+              />
             ))}
           </div>
         ) : null}
