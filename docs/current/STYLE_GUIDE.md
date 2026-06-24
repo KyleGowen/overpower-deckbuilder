@@ -3386,7 +3386,8 @@ Controls sit in a footer row **below** the card image (no overlays on art, no ti
 ### Add Cards slide-out (`SlideOutPanel`)
 
 - **Width**: `575px` on desktop (`width={575}` on `SlideOutPanel` in `AddCardsPanel`) — 25% wider than the prior `460px` width to fit more card tiles per row.
-- **Type chips**: **All** first (default on open), **Stacks** second, then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
+- **Type chips**: **All** first (default on open), **Stacks** second, then the 12 `CATALOG_TYPES` short labels (`.add-cards__types` / `.add-cards__type`, `.is-active`). Single horizontally scrollable row (`overflow-x: auto`, `flex-shrink: 0`, `white-space: nowrap` on pills) — matches DBV/Collection pill strip; no multi-row wrap.
+- **Mobile swipe between type tabs**: swipe left/right on card grids, stacks, missions, or empty content cycles tabs in `ADD_CARDS_TAB_ORDER` (All → Stacks → Characters → … → Basic → All). Gestures starting on `.add-cards__types`, `.add-cards__search`, `.add-cards__filters`, `.add-cards__pagination`, slide-out header/footer, or form controls are blocked (`ADD_CARDS_SWIPE_BLOCK_SELECTOR`). On tab change, `.slideout__body` scrolls to top and the active chip centers in the strip (`scrollIntoView`). CSS: `.layout-mobile .add-cards { touch-action: pan-y }`. Search, set filter, and Hide Unusables **persist** across tab/swipe changes (only pagination resets).
 - **Search**: placeholder *"Search name, character, card text, or foil..."* on Collection; *"Search name, character, or card text..."* on DBV and Add Cards **All** / per-type tabs; uses `cardMatchesSearchQuery` (DBV/Collection parity). Keyword **`foil`** filters to foil printing rows (`is_foil = true`). On **Stacks**, placeholder switches to *"Search character names..."* (`aria-label`: *Search character names*).
 - **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
@@ -3502,7 +3503,7 @@ The **Add Cards** slideout (`AddCardsPanel.tsx`) includes a horizontal filter ba
 - `display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: var(--space-4)`
 - `padding: var(--space-2) 0 0; border-top: 1px solid var(--color-border)`
 - Tight gap to card grid below: `margin-bottom: calc(-1 * var(--space-3) / 3)` (~8px total with parent flex `gap`, ~2/3 less than prior `padding-bottom` + `gap`)
-- Two blocks side by side on desktop; mobile (`.layout-mobile`) stacks blocks full-width with `border-top` between them
+- Two blocks side by side on desktop and mobile: **Set** left-aligned, **Hide Unusables** right-aligned (`justify-content: space-between`; second block `margin-left: auto`, `flex-shrink: 0`)
 
 ### Set filter — `.add-cards__filters-block` / `.add-cards__filters-select`
 

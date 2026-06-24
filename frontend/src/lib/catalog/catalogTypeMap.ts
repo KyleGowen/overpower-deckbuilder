@@ -49,6 +49,13 @@ export const DBV_TAB_ORDER: readonly CatalogTabSelection[] = [
   ...CATALOG_TYPES.map((m) => m.type),
 ];
 
+/** Add Cards panel tab order (All, Stacks, then CATALOG_TYPES) for mobile swipe cycling. */
+export const ADD_CARDS_TAB_ORDER: readonly CatalogTabSelection[] = [
+  'all',
+  'stacks',
+  ...CATALOG_TYPES.map((m) => m.type),
+];
+
 export const CATALOG_TYPE_BY_SLUG: Record<CatalogType, CatalogTypeMeta> = CATALOG_TYPES.reduce(
   (acc, meta) => {
     acc[meta.type] = meta;

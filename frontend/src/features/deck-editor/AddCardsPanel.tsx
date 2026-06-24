@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
+  ADD_CARDS_TAB_ORDER,
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
   type CatalogTabSelection,
@@ -37,6 +38,11 @@ import {
   type MissionSet,
 } from '../../lib/catalog/missionSets';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
+import {
+  ADD_CARDS_SWIPE_BLOCK_SELECTOR,
+  useHorizontalSwipe,
+} from '../../lib/layout/useHorizontalSwipe';
 import {
   addCardsGridClassName,
   addCardsPageSizeAll,
@@ -109,6 +115,8 @@ export function AddCardsPanel({
   deckCatalogIndex,
 }: AddCardsPanelProps) {
   const { isMobile } = useLayoutMode();
+  const addCardsRef = useRef<HTMLDivElement>(null);
+  const typeTabsRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
@@ -134,6 +142,39 @@ export function AddCardsPanel({
   useEffect(() => {
     setPage(1);
   }, [tab, debouncedSearch, setFilter, hideUnusables]);
+
+  const goToRelativeTab = useCallback(
+    (delta: 1 | -1) => {
+      const idx = ADD_CARDS_TAB_ORDER.indexOf(tab);
+      const next =
+        ADD_CARDS_TAB_ORDER[
+          stepCyclicalIndex(idx >= 0 ? idx : 0, ADD_CARDS_TAB_ORDER.length, delta)
+        ];
+      setTab(next);
+    },
+    [tab],
+  );
+
+  useHorizontalSwipe({
+    targetRef: addCardsRef,
+    enabled: isMobile && open,
+    blockSelector: ADD_CARDS_SWIPE_BLOCK_SELECTOR,
+    onSwipeLeft: () => goToRelativeTab(1),
+    onSwipeRight: () => goToRelativeTab(-1),
+  });
+
+  useEffect(() => {
+    if (!isMobile) return;
+    addCardsRef.current?.closest('.slideout__body')?.scrollTo({ top: 0 });
+  }, [tab, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !typeTabsRef.current) return;
+    const activeTab = typeTabsRef.current.querySelector<HTMLElement>(
+      `[data-add-cards-tab="${tab}"]`,
+    );
+    activeTab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [tab, isMobile]);
 
   const foilMapQuery = useQuery({
     queryKey: ['foil-card-map'],
@@ -445,7 +486,7 @@ export function AddCardsPanel({
         </div>
       }
     >
-      <div className="add-cards">
+      <div className="add-cards" ref={addCardsRef}>
         <div className="add-cards__search">
           <IconSearch className="add-cards__search-icon" />
           <input
@@ -456,11 +497,12 @@ export function AddCardsPanel({
             aria-label={isStacksTab ? STACKS_SEARCH_ARIA_LABEL : ADD_CARDS_SEARCH_ARIA_LABEL}
           />
         </div>
-        <div className="add-cards__types" role="tablist" aria-label="Card types">
+        <div className="add-cards__types" ref={typeTabsRef} role="tablist" aria-label="Card types">
           <button
             type="button"
             role="tab"
             aria-selected={isAllTab}
+            data-add-cards-tab="all"
             className={`add-cards__type ${isAllTab ? 'is-active' : ''}`}
             onClick={() => setTab('all')}
           >
@@ -470,6 +512,7 @@ export function AddCardsPanel({
             type="button"
             role="tab"
             aria-selected={isStacksTab}
+            data-add-cards-tab="stacks"
             className={`add-cards__type ${isStacksTab ? 'is-active' : ''}`}
             onClick={() => setTab('stacks')}
           >
@@ -481,6 +524,7 @@ export function AddCardsPanel({
               type="button"
               role="tab"
               aria-selected={tab === meta.type}
+              data-add-cards-tab={meta.type}
               className={`add-cards__type ${tab === meta.type ? 'is-active' : ''}`}
               onClick={() => setTab(meta.type)}
             >
