@@ -12,6 +12,7 @@ import type {
   CatalogCard,
 } from '../api/types';
 import { compareSetThenSetNumber } from './catalogSetSort';
+import { isFoilCard } from './foilCatalog';
 
 /** Per-type catalog tab, All list, or character Stacks tab in Add Cards. */
 export type CatalogTabSelection = CatalogType | 'all' | 'stacks';
@@ -280,11 +281,22 @@ export function cardSearchHaystack(card: Partial<CatalogCard> | null | undefined
     .toLowerCase();
 }
 
+/** Split search query into foil keyword flag and remaining text tokens. */
+export function parseSearchTokens(query: string): { textQuery: string; requireFoil: boolean } {
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const requireFoil = tokens.includes('foil');
+  const textQuery = tokens.filter((t) => t !== 'foil').join(' ');
+  return { textQuery, requireFoil };
+}
+
 export function cardMatchesSearchQuery(
   card: Partial<CatalogCard> | null | undefined,
   query: string,
 ): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  return cardSearchHaystack(card).includes(q);
+  const { textQuery, requireFoil } = parseSearchTokens(q);
+  if (requireFoil && !isFoilCard(card)) return false;
+  if (!textQuery) return true;
+  return cardSearchHaystack(card).includes(textQuery);
 }

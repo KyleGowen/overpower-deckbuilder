@@ -3175,7 +3175,7 @@ Art uses the same no-crop strategy as v2 `DeckTile` hero cards: full card visibl
 
 ### Header controls — `.db__header-controls`
 
-Single row after the page title: **search bar** (`.db__search`, `flex: 1`) then **Set** dropdown (`.db__set`, `flex-shrink: 0`, `min-width: 140px`, `max-width: 200px`). Character name is covered by the header search (`cardMatchesSearchQuery`); there is no separate character filter or filter row below the type tabs. Mobile: `.db__header-controls` spans full width; set select `min-width: 120px`.
+Single row after the page title: **search bar** (`.db__search`, `flex: 1`) then **Set** dropdown (`.db__set`, `flex-shrink: 0`, `min-width: 140px`, `max-width: 200px`). Character name is covered by the header search (`cardMatchesSearchQuery`); there is no separate character filter or filter row below the type tabs. Search keyword **`foil`** (whole word) limits results to foil printing rows (`is_foil = true`); combine with name/text (e.g. `foil tarzan`). Distinct from the **Has Foil** filter rail toggle (foil-capable cards via `foil_card_map`). Mobile: `.db__header-controls` spans full width; set select `min-width: 120px`.
 
 ### Sort order
 
@@ -3190,11 +3190,11 @@ set → non-foil before foil → set_number → name.
 
 ### Filter rail — `.dbv-filter-rail`
 
-Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → scrollable controls (`.dbv-filter-rail__controls`) → trailing cluster (`.dbv-filter-rail__trailing`, `margin-left: auto`).
+Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → body (`.dbv-filter-rail__body`: scrollable controls `.dbv-filter-rail__controls` + trailing cluster `.dbv-filter-rail__trailing`, `margin-left: auto` on desktop).
 
 - **Has Foil toggle** (`.dbv-filter-rail__foil-toggle`, rightmost in trailing): checkbox + label (`.dbv-filter-rail__foil-toggle-label`, text "Has Foil"). `font-size: var(--font-size-sm)`, `color: var(--color-text)`, `gap: var(--space-2)`, checkbox `accent-color: var(--color-accent)`. When checked, grid shows only foil-capable cards (`matchesHasFoilFilter` via `foil_card_map`); unchecked restores full deduped catalog. State persists across type tab switches (not cleared by **Clear** or per-tab rail reset). Hidden when rail is collapsed (`is-collapsed`).
 - **Active filter chips** (`.dbv-filter-rail__chip`) and **Clear** (`.dbv-filter-rail__clear`) sit left of the Has Foil toggle in the trailing cluster.
-- Mobile (`.layout-mobile`): trailing row wraps full width with `justify-content: flex-end`.
+- Mobile (`.layout-mobile`): collapse chevron stays fixed outside the scroll region; controls, chips, Clear, and Has Foil scroll horizontally inside `.dbv-filter-rail__body` (`overflow-x: auto`) so content is clipped at the chevron edge and never paints to its left.
 
 ### Set line — `.card-tile__sub`
 
@@ -3369,7 +3369,7 @@ Controls sit in a footer row **below** the card image (no overlays on art, no ti
 
 - **Width**: `575px` on desktop (`width={575}` on `SlideOutPanel` in `AddCardsPanel`) — 25% wider than the prior `460px` width to fit more card tiles per row.
 - **Type chips**: **All** first (default on open), **Stacks** second, then the 12 `CATALOG_TYPES` short labels (`.add-cards__type`, `.is-active`).
-- **Search**: placeholder *"Search name, character, or card text..."* on **All** and per-type tabs; uses `cardMatchesSearchQuery` (DBV/Collection parity). On **Stacks**, placeholder switches to *"Search character names..."* (`aria-label`: *Search character names*).
+- **Search**: placeholder *"Search name, character, card text, or foil..."* on Collection; *"Search name, character, or card text..."* on DBV and Add Cards **All** / per-type tabs; uses `cardMatchesSearchQuery` (DBV/Collection parity). Keyword **`foil`** filters to foil printing rows (`is_foil = true`). On **Stacks**, placeholder switches to *"Search character names..."* (`aria-label`: *Search character names*).
 - **All tab**: `.add-cards__sections` stacks `.add-cards__section` blocks per catalog type (empty types hidden after filter). Each section has `.add-cards__section-title` + count badge (`.add-cards__section-count`) and its own grid: `.add-cards__grid--portrait` (**3** columns) or `.add-cards__grid--landscape` (**2** columns for characters, locations, events) so incomplete portrait/landscape rows do not bleed into the next type.
 - **Per-type tab**: `.add-cards__grid--portrait` (3 columns) or `.add-cards__grid--landscape` (2 columns) of `CardTile` art only (`showMeta={false}`), plus/add overlay badges.
 - **Default art only**: foil duplicates and alternate-art rows are hidden; one tile per logical card (default art). In-deck overlay counts any variant already in the deck (`defaultCatalogCards.ts`).

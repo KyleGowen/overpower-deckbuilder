@@ -1,5 +1,45 @@
 import type { CatalogCard } from '../../frontend/src/lib/api/types';
-import { compareCatalogCards } from '../../frontend/src/lib/catalog/catalogTypeMap';
+import {
+  cardMatchesSearchQuery,
+  compareCatalogCards,
+  parseSearchTokens,
+} from '../../frontend/src/lib/catalog/catalogTypeMap';
+
+describe('cardMatchesSearchQuery foil keyword', () => {
+  const foilCard: CatalogCard = {
+    id: 'foil-1',
+    name: 'Tarzan',
+    is_foil: true,
+  };
+  const baseCard: CatalogCard = {
+    id: 'base-1',
+    name: 'Tarzan',
+    is_foil: false,
+  };
+
+  it('parseSearchTokens detects foil keyword and strips it', () => {
+    expect(parseSearchTokens('foil')).toEqual({ textQuery: '', requireFoil: true });
+    expect(parseSearchTokens('foil tarzan')).toEqual({ textQuery: 'tarzan', requireFoil: true });
+    expect(parseSearchTokens('tarzan foil')).toEqual({ textQuery: 'tarzan', requireFoil: true });
+    expect(parseSearchTokens('tarzan')).toEqual({ textQuery: 'tarzan', requireFoil: false });
+  });
+
+  it('matches all foil cards when query is foil only', () => {
+    expect(cardMatchesSearchQuery(foilCard, 'foil')).toBe(true);
+    expect(cardMatchesSearchQuery(baseCard, 'foil')).toBe(false);
+  });
+
+  it('combines foil keyword with text search', () => {
+    expect(cardMatchesSearchQuery(foilCard, 'foil tarzan')).toBe(true);
+    expect(cardMatchesSearchQuery(baseCard, 'foil tarzan')).toBe(false);
+    expect(cardMatchesSearchQuery(foilCard, 'foil batman')).toBe(false);
+  });
+
+  it('does not require foil for plain text queries', () => {
+    expect(cardMatchesSearchQuery(baseCard, 'tarzan')).toBe(true);
+    expect(cardMatchesSearchQuery(foilCard, 'tarzan')).toBe(true);
+  });
+});
 
 describe('compareCatalogCards power-cards', () => {
   const card = (id: string, power_type: string, value: number): CatalogCard => ({
