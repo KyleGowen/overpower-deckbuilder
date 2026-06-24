@@ -56,6 +56,9 @@
 }
 .dsel__search {
   width: 220px;
+  padding: 4px 12px;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-full);
 }
 
 .dsel__action-buttons {
@@ -63,6 +66,21 @@
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
+}
+
+/* Toolbar action buttons — chip-sized pills (matches .deck-editor__actions .btn) */
+.dsel__action-buttons .btn,
+.dsel__empty-actions .btn {
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  gap: var(--space-1);
+}
+.dsel__action-buttons .btn svg,
+.dsel__empty-actions .btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .dsel__action-buttons .btn-ghost.is-active {
