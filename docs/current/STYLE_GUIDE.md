@@ -3053,8 +3053,8 @@ Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconB
 
 | Element | Class | Notes |
 |---|---|---|
-| Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md` | `position: relative; inline-flex` |
-| Icon | `.stat-icon-badge__icon` | `object-fit: contain`, full bleed |
+| Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md` | `position: relative; inline-flex`; `overflow: visible` |
+| Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **110%** of container (10% larger than box); value font unchanged |
 | Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700` |
 | Wide value | `.stat-icon-badge__value--wide` | Smaller font when value has 2+ characters (mainly `sm` threat) |
 
@@ -3296,6 +3296,10 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 ## Deck Editor card grid (v2 SPA)
 
 The v2 deck editor main body (`DeckEditorPage.tsx`) groups cards by catalog type. Each tile uses type-specific aspect ratios so **characters, locations, and events** render landscape (horizontal) and all other types stay portrait — matching Add Cards / DBV `CardTile` framing.
+
+### Empty deck — `.deck-editor__empty-add`
+
+When `cards.length === 0`, owners see shared `EmptyState` (“This deck is empty”) with a centered primary CTA. Classes: `btn btn-primary deck-editor__empty-add`. Same **1.2×** chip pill as [Add Cards Done footer](#add-cards-slide-out-slideoutpanel): `padding: 5px 12px`, `font-size: calc(var(--font-size-xs) * 1.2)`, `border-radius: var(--radius-full)`, `width: auto`; icon SVG `17px × 17px`. Opens the Add Cards slide-out (`setAddOpen(true)`).
 
 ### Grid — `.deck-editor__cards`
 

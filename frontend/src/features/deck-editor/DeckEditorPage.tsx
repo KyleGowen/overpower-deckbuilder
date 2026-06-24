@@ -868,7 +868,11 @@ export default function DeckEditorPage() {
               icon={<IconDecks />}
               action={
                 isOwner ? (
-                  <button type="button" className="btn btn-primary" onClick={() => setAddOpen(true)}>
+                  <button
+                    type="button"
+                    className="btn btn-primary deck-editor__empty-add"
+                    onClick={() => setAddOpen(true)}
+                  >
                     <IconPlus /> Add Cards
                   </button>
                 ) : null

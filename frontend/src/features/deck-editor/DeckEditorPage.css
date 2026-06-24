@@ -250,6 +250,21 @@
   --deck-editor-portrait-col: 210px;
   gap: var(--space-6);
 }
+
+/* Empty deck CTA — primary pill at 1.2× chip size (matches .add-cards__done) */
+.deck-editor__empty-add {
+  width: auto;
+  padding: 5px 12px;
+  font-size: calc(var(--font-size-xs) * 1.2);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  gap: calc(var(--space-2) * 0.8);
+}
+.deck-editor__empty-add svg {
+  width: 17px;
+  height: 17px;
+}
+
 .deck-editor__group-title {
   display: flex;
   align-items: center;
