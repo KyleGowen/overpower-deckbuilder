@@ -98,8 +98,9 @@ export function DbvFilterRail({
       </button>
 
       {!collapsed ? (
-        <>
-          <div className="dbv-filter-rail__controls">
+        <div className="dbv-filter-rail__body">
+          <div className="dbv-filter-rail__scroll">
+            <div className="dbv-filter-rail__controls">
             {config.groups.includes('numeric') && config.numericFields ? (
               <DbvNumericStatInline fields={config.numericFields} filters={filters} />
             ) : null}
@@ -140,7 +141,8 @@ export function DbvFilterRail({
               <span className="dbv-filter-rail__foil-toggle-label">Has Foil</span>
             </label>
           </div>
-        </>
+          </div>
+        </div>
       ) : null}
     </div>
   );

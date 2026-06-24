@@ -3190,11 +3190,11 @@ set → non-foil before foil → set_number → name.
 
 ### Filter rail — `.dbv-filter-rail`
 
-Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → body (`.dbv-filter-rail__body`: scrollable controls `.dbv-filter-rail__controls` + trailing cluster `.dbv-filter-rail__trailing`, `margin-left: auto` on desktop).
+Per-type tabs only (hidden on **All**). Layout: collapse chevron (`.dbv-filter-rail__toggle`) → body (`.dbv-filter-rail__body`) → on desktop, scroll wrapper (`.dbv-filter-rail__scroll`, `display: contents`) is layout-transparent; controls (`.dbv-filter-rail__controls`) + trailing (`.dbv-filter-rail__trailing`, `margin-left: auto` on desktop).
 
 - **Has Foil toggle** (`.dbv-filter-rail__foil-toggle`, rightmost in trailing): checkbox + label (`.dbv-filter-rail__foil-toggle-label`, text "Has Foil"). `font-size: var(--font-size-sm)`, `color: var(--color-text)`, `gap: var(--space-2)`, checkbox `accent-color: var(--color-accent)`. When checked, grid shows only foil-capable cards (`matchesHasFoilFilter` via `foil_card_map`); unchecked restores full deduped catalog. State persists across type tab switches (not cleared by **Clear** or per-tab rail reset). Hidden when rail is collapsed (`is-collapsed`).
 - **Active filter chips** (`.dbv-filter-rail__chip`) and **Clear** (`.dbv-filter-rail__clear`) sit left of the Has Foil toggle in the trailing cluster.
-- Mobile (`.layout-mobile`): collapse chevron stays fixed outside the scroll region; controls, chips, Clear, and Has Foil scroll horizontally inside `.dbv-filter-rail__body` (`overflow-x: auto`) so content is clipped at the chevron edge and never paints to its left.
+- Mobile (`.layout-mobile`): collapse chevron stays fixed outside the scroll region; controls, chips, Clear, and Has Foil scroll inside `.dbv-filter-rail__scroll` (`overflow-x: auto`), clipped by `.dbv-filter-rail__body` + rail (`overflow: hidden`) so scrolled filters never paint left of the chevron.
 
 ### Set line — `.card-tile__sub`
 
