@@ -7,6 +7,10 @@ const AXIS_LOCK_PX = 12;
 export const DECK_EDITOR_SWIPE_BLOCK_SELECTOR =
   '.deck-editor__type-tabs, .deck-editor__card-footer, .deck-editor__card-reserve-wrap, .deck-editor__topbar, .deck-editor__actions, input, textarea, select';
 
+/** Card Database — block header, type tabs, filter rail, and pagination controls. */
+export const DBV_SWIPE_BLOCK_SELECTOR =
+  '.db__types, .db__header, .dbv-filter-rail, .pagination, input, textarea, select';
+
 export interface UseHorizontalSwipeOptions {
   targetRef: RefObject<HTMLElement | null>;
   enabled?: boolean;

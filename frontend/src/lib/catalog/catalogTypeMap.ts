@@ -43,6 +43,12 @@ export const CATALOG_TYPES: CatalogTypeMeta[] = [
   { type: 'basic-universe', label: 'Universe: Basic', shortLabel: 'Basic', compactLabel: 'Bas', deckType: 'basic-universe', collectionType: 'basic_universe' },
 ];
 
+/** Card Database type tab order (All first, then CATALOG_TYPES) for UI and mobile swipe cycling. */
+export const DBV_TAB_ORDER: readonly CatalogTabSelection[] = [
+  'all',
+  ...CATALOG_TYPES.map((m) => m.type),
+];
+
 export const CATALOG_TYPE_BY_SLUG: Record<CatalogType, CatalogTypeMeta> = CATALOG_TYPES.reduce(
   (acc, meta) => {
     acc[meta.type] = meta;

@@ -8,6 +8,13 @@ Browse, search, filter, and sort the full modern OverPower catalog.
 - **Type tabs**: Characters, Special Cards, Power Cards, Locations, Missions, Events,
   Aspects, and the Universe types (Advanced/Teamwork/Ally/Training/Basic) — vocab via
   `catalogTypeMap`. **All** is the first tab (default selection remains Characters): text list across every type (no images).
+- **Mobile swipe** (`.layout-mobile` only): swipe left/right on card grid, All list, or
+  empty content cycles type tabs cyclically in `DBV_TAB_ORDER` (All → Characters → … → Basic → All).
+  Same gesture model as deck editor card view (`useHorizontalSwipe`, 50px threshold). Swipe left
+  = next tab; swipe right = previous tab. Disabled while `CardDetailPanel` is open. Gestures
+  starting on `.db__types`, `.db__header`, `.dbv-filter-rail`, `.pagination`, or form controls
+  are ignored (`DBV_SWIPE_BLOCK_SELECTOR`). On tab change: scroll page to top; active chip
+  `scrollIntoView` in the type strip.
 - **Set** dropdown inline with the header search bar (all tabs).
 - **Filter rail** (`DbvFilterRail`) visible on per-type tabs only (hidden on **All**).
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
@@ -54,3 +61,4 @@ Browse, search, filter, and sort the full modern OverPower catalog.
 - Cards legitimately without art show the "No image" placeholder.
 - Type tabs use short labels under `.layout-mobile`.
 - Type tab strip (`.db__types`) scrolls horizontally inside the page; page-level sideways pan is blocked by mobile `overflow-x: clip` on the document/shell chain.
+- **Mobile swipe between type tabs:** swipe left/right on the card grid, All list, or content area cycles tabs in `DBV_TAB_ORDER` (cyclical wrap). Swipe is disabled while card detail is open. See `useHorizontalSwipe` + `DBV_SWIPE_BLOCK_SELECTOR`.

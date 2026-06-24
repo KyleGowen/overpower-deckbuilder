@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
@@ -11,6 +11,7 @@ import {
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
   CATALOG_TYPES,
+  DBV_TAB_ORDER,
   cardMatchesSearchQuery,
   compareDbvCatalogCards,
   isLandscapeCatalogType,
@@ -29,6 +30,8 @@ import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
+import { DBV_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
@@ -52,6 +55,8 @@ function useDebounced<T>(value: T, delay = 250): T {
 export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
   const collection = useCollection();
+  const dbRef = useRef<HTMLDivElement>(null);
+  const typeTabsRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<CatalogTabSelection>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
@@ -137,6 +142,37 @@ export default function DatabasePage() {
 
   useEffect(() => () => clearProgressiveImageSession('database'), []);
 
+  const goToRelativeTab = useCallback(
+    (delta: 1 | -1) => {
+      const idx = DBV_TAB_ORDER.indexOf(tab);
+      const next = DBV_TAB_ORDER[stepCyclicalIndex(idx >= 0 ? idx : 0, DBV_TAB_ORDER.length, delta)];
+      setTab(next);
+      if (!selected && next !== 'all') {
+        setSelectedCatalogType(next);
+      }
+    },
+    [tab, selected],
+  );
+
+  useHorizontalSwipe({
+    targetRef: dbRef,
+    enabled: isMobile && !selected,
+    blockSelector: DBV_SWIPE_BLOCK_SELECTOR,
+    onSwipeLeft: () => goToRelativeTab(1),
+    onSwipeRight: () => goToRelativeTab(-1),
+  });
+
+  useEffect(() => {
+    if (!isMobile) return;
+    window.scrollTo({ top: 0 });
+  }, [tab, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !typeTabsRef.current) return;
+    const activeTab = typeTabsRef.current.querySelector<HTMLElement>(`[data-db-tab="${tab}"]`);
+    activeTab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [tab, isMobile]);
+
   const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
   const effectivePage = Math.min(page, maxPage);
   const pageStart = (effectivePage - 1) * pageSize;
@@ -153,7 +189,7 @@ export default function DatabasePage() {
   };
 
   return (
-    <div className="db">
+    <div className="db" ref={dbRef}>
       <div className="db__inner">
         <header className="db__header">
           <h1 className="db__title"><IconDatabase /> Card Database</h1>
@@ -185,12 +221,13 @@ export default function DatabasePage() {
           </div>
         </header>
 
-        <div className="db__types" role="tablist" aria-label="Card types">
+        <div className="db__types" ref={typeTabsRef} role="tablist" aria-label="Card types">
           <button
             type="button"
             role="tab"
             aria-selected={isAllTab}
             className={`db__type ${isAllTab ? 'is-active' : ''}`}
+            data-db-tab="all"
             onClick={() => setTab('all')}
           >
             All
@@ -202,6 +239,7 @@ export default function DatabasePage() {
               role="tab"
               aria-selected={tab === meta.type}
               className={`db__type ${tab === meta.type ? 'is-active' : ''}`}
+              data-db-tab={meta.type}
               onClick={() => {
                 setTab(meta.type);
                 if (!selected) {
