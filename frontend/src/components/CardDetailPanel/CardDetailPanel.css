@@ -37,38 +37,6 @@
   gap: var(--space-2);
 }
 
-.card-detail__stats {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-2);
-}
-.card-detail__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-3) var(--space-1);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-input);
-}
-.card-detail__stat--total {
-  background: rgba(176, 107, 255, 0.1);
-}
-.card-detail__stat--threat {
-  background: rgba(138, 160, 194, 0.12);
-}
-.card-detail__stat-val {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-}
-.card-detail__stat-label {
-  font-size: 9px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--color-text-dim);
-  text-align: center;
-}
-
 .card-detail__section-title {
   font-size: var(--font-size-sm);
   text-transform: uppercase;

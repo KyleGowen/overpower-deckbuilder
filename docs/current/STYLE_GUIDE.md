@@ -3209,11 +3209,12 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
   - **Sizing**: `padding: 4px 12px`, `font-size: var(--font-size-xs)`, `border-radius: var(--radius-full)`, icon SVGs `14×14px`, `gap: var(--space-1)`.
   - **Add to Deck** (`.db__add-deck`): accent-outline primary — `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, transparent bg; hover `rgba(0, 200, 232, 0.08)`. Guest: same pill, `disabled` (~50% opacity), label may wrap on mobile.
   - **Collection** (`.db__add-collection`): muted secondary — `color: var(--color-text-muted)`, `border-color: var(--color-border)`; hover lightens text and border.
-  - **Panel**: deck picker (`.db__deck-menu`, `width: 100%`) and `.db__add-status` feedback render only in `.db__detail-actions-panel`; panel growth pushes stats/ability/details down uniformly — pills in the row do not move.
+  - **Panel**: deck picker (`.db__deck-menu`, `width: 100%`) and `.db__add-status` feedback render only in `.db__detail-actions-panel`; panel growth pushes ability/details down uniformly — pills in the row do not move.
   - **Feedback**: `.db__add-status` success uses accent text (`Added to {deckName}` / `Added to collection`); `.db__add-status--error` uses `var(--color-danger)` for validation errors. Invoking the other action clears prior feedback and closes the deck menu.
-- **Character stats**: fifth tile is gray **Threat** (`.card-detail__stat--threat`, `.stat-threat` → `var(--color-text-muted)`) showing `threat_level`; other stat types keep purple **Total** (`.card-detail__stat--total`).
+- **Stats**: no separate stat row — primary stats are read from card art (characters show Energy/Combat/Brute Force/Intelligence and Threat on the image).
 - **Details — Has Foil**: `hasFoil` prop from foil-card map (`cardHasFoilVersion`); replaces raw **Is Foil** on the card row. Yes when the row has a foil counterpart or is foil-only; No when no foil version exists.
 - **Details — Set**: `setDisplayName` from `GET /api/v1/dbv/sets` via `resolveSetDisplayName()` (DatabasePage passes the friendly name; badge tags still use the set code).
+- **Details — Cataclysm / Assist / Ambush**: **Is Cataclysm**, **Is Assist**, and **Is Ambush** rows appear only for **Any Character** specials (`character` / `character_name` === `Any Character`, case-insensitive). Character-linked specials omit these fields from the Details list.
 
 ## Deck Editor stats strip (v2 SPA)
 

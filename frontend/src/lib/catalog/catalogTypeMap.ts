@@ -114,7 +114,7 @@ export function cardLinkedDisplayName(
   return `${character} - ${name}`;
 }
 
-function isAnyCharacterName(value: string): boolean {
+export function isAnyCharacterName(value: string): boolean {
   return value.trim().toLowerCase() === 'any character';
 }
 

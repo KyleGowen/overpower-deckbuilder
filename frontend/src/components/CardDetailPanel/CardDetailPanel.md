@@ -1,8 +1,7 @@
 # CardDetailPanel
 
 Slide-out panel showing full detail for a catalog card: full art, type/set/rarity/number
-chips, an action slot, the color-coded stat row (+ total), an Ability section, and an
-auto-generated Details key/value list.
+chips, an action slot, an Ability section, and an auto-generated Details key/value list.
 
 ## Props
 | Prop | Type | Notes |
@@ -22,15 +21,18 @@ stats, ability/effect fields, timestamps, `is_foil`, `threat_level`, `set`). Key
 (`set_number` → "Set Number"); booleans render Yes/No; arrays join with commas; empty
 values are skipped. Pass `hasFoil` to show foil availability from the foil-card map.
 
+**Any Character special flags:** `is_cataclysm`, `is_assist`, and `is_ambush` render as
+**Is Cataclysm**, **Is Assist**, and **Is Ambush** only when `type === 'special-cards'`
+and the linked character is **Any Character** (`cardCharacterName` + `isAnyCharacterName`).
+Character-linked specials omit these rows. Logic lives in `cardDetailFields.ts`
+(`shouldShowCardDetailField`).
+
 ## Landscape art frames (characters, locations, events)
 - **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280` (matches DB grid `CardTile`).
 - **Locations & events**: `.card-detail__image--locations` / `.card-detail__image--events` — `aspect-ratio: 236 / 151` (matches DB grid `CardTile`).
 - **All other types**: default portrait `.card-detail__image` — `aspect-ratio: 5 / 7`.
 - Full art uses `CardImage` with `useThumbnail={false}` + `.card-image--contain`.
 
-## Character-specific layout
-- The fifth stat tile shows gray **Threat** (`threat_level`) instead of purple **Total**.
-
 ## Notes
-- Uses `cardStats` / `cardAbilityText` from `catalogTypeMap` so stat/ability extraction is
-  consistent across card types.
+- Uses `cardAbilityText` from `catalogTypeMap` so ability extraction is consistent across card types.
+- Primary stats (Energy, Combat, Brute Force, Intelligence, Threat) are shown on character card art — no duplicate stat row in the slide-out.

@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react';
 import { SlideOutPanel } from '../SlideOutPanel';
 import { CardImage } from '../CardImage';
-import { cardDisplayName, cardStats, cardAbilityText, labelForCatalogType } from '../../lib/catalog/catalogTypeMap';
+import {
+  cardDisplayName,
+  cardAbilityText,
+  labelForCatalogType,
+} from '../../lib/catalog/catalogTypeMap';
+import { shouldShowCardDetailField } from './cardDetailFields';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardDetailPanel.css';
 
@@ -75,13 +80,6 @@ function formatValue(value: unknown): string | null {
   return String(value);
 }
 
-const STAT_ROWS: Array<{ key: 'energy' | 'combat' | 'bruteForce' | 'intelligence'; label: string; cls: string }> = [
-  { key: 'energy', label: 'Energy', cls: 'stat-energy' },
-  { key: 'combat', label: 'Combat', cls: 'stat-combat' },
-  { key: 'bruteForce', label: 'Brute Force', cls: 'stat-brute-force' },
-  { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence' },
-];
-
 function detailImageClass(type: CatalogType | null): string {
   if (type === 'characters') return ' card-detail__image--characters';
   if (type === 'locations') return ' card-detail__image--locations';
@@ -104,14 +102,12 @@ export function CardDetailPanel({
   if (!card) return null;
 
   const name = cardDisplayName(card);
-  const stats = cardStats(card);
   const ability = cardAbilityText(card);
   const typeLabel = type ? labelForCatalogType(type) : '';
-  const isCharacter = type === 'characters';
-  const threatLevel = isCharacter ? Number(card.threat_level ?? 0) : null;
 
   const extraFields = Object.entries(card)
     .filter(([key]) => !HIDDEN_FIELDS.has(key))
+    .filter(([key]) => shouldShowCardDetailField(key, type, card))
     .map(([key, value]) => [key, formatValue(value)] as const)
     .filter(([, value]) => value !== null);
 
@@ -141,28 +137,6 @@ export function CardDetailPanel({
         </div>
 
         {actions ? <div className="card-detail__actions">{actions}</div> : null}
-
-        {stats ? (
-          <div className="card-detail__stats">
-            {STAT_ROWS.map((s) => (
-              <div className="card-detail__stat" key={s.key}>
-                <span className={`card-detail__stat-val ${s.cls}`}>{stats[s.key]}</span>
-                <span className="card-detail__stat-label">{s.label}</span>
-              </div>
-            ))}
-            {isCharacter ? (
-              <div className="card-detail__stat card-detail__stat--threat">
-                <span className="card-detail__stat-val stat-threat">{threatLevel}</span>
-                <span className="card-detail__stat-label">Threat</span>
-              </div>
-            ) : (
-              <div className="card-detail__stat card-detail__stat--total">
-                <span className="card-detail__stat-val stat-total">{stats.total}</span>
-                <span className="card-detail__stat-label">Total</span>
-              </div>
-            )}
-          </div>
-        ) : null}
 
         {ability ? (
           <section className="card-detail__section">
