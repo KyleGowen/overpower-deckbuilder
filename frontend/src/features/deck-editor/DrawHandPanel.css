@@ -90,8 +90,23 @@
   object-position: center center;
 }
 
+/* Footer Draw again — accent-outline ghost pill (matches .deck-editor__actions .btn-ghost.is-active) */
 .draw-hand__redraw {
-  min-width: 140px;
+  width: auto;
+  padding: 5px 12px;
+  font-size: calc(var(--font-size-xs) * 1.2);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  gap: calc(var(--space-2) * 0.8);
+  color: var(--color-accent-bright);
+  border-color: var(--color-border-accent);
+  background: rgba(0, 200, 232, 0.08);
+  box-shadow: none;
+}
+.draw-hand__redraw:hover:not(:disabled) {
+  color: var(--color-accent-bright);
+  border-color: var(--color-border-accent);
+  background: rgba(0, 200, 232, 0.12);
 }
 
 .draw-hand__missing-art {
@@ -171,9 +186,4 @@
 .layout-mobile .draw-hand__event-rotate {
   width: calc(100% * 7 / 5);
   height: calc(100% * 5 / 7);
-}
-
-.layout-mobile .draw-hand__redraw {
-  width: 100%;
-  min-width: 0;
 }

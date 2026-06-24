@@ -3053,7 +3053,7 @@ Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconB
 
 | Element | Class | Notes |
 |---|---|---|
-| Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md` | `position: relative; inline-flex`; `overflow: visible` |
+| Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md`, `.stat-icon-badge--lg` | `position: relative; inline-flex`; `overflow: visible` |
 | Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **110%** of container (10% larger than box); value font unchanged |
 | Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700` |
 | Wide value | `.stat-icon-badge__value--wide` | Smaller font when value has 2+ characters (mainly `sm` threat) |
@@ -3064,6 +3064,7 @@ Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconB
 |---|---|---|---|
 | `sm` | 18×18px | 9px (7px wide) | Deck tile meta bar threat |
 | `md` | 32×32px | 13px (11px wide) | Deck tile character max row |
+| `lg` | 36×36px | 18px (14px wide) | Deck editor header stats |
 
 ### Icon types (`StatIconType`)
 
@@ -3218,7 +3219,7 @@ Bottom-left set label: set code, then a space and `set_number` when present (e.g
 
 ## Deck Editor stats strip (v2 SPA)
 
-The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon totals** inline in the sticky page header — each with four icon + value groups. Values use toned stat colors; icons are lightly desaturated so card art below remains the visual focus.
+The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon totals** inline in the sticky page header — each with four `StatIconBadge` (`lg`, 36×36) overlays (black number on PNG). Threat uses the same badge pattern.
 
 ### Sticky header — `.deck-editor__header`
 
@@ -3234,7 +3235,7 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - **Center** (`.deck-editor__stats-panel`): deck total **threat** icon stat (`.deck-editor__threat-stat`) left of **Character max** + **Icon totals**, `justify-content: center` with `transform: translateX(calc(-1 * var(--space-3)))` (~1/3 nudge left of center)
 - **Trailing** (`.deck-editor__actions`): Draw Hand, Add Cards, Save — `justify-self: end`
 - Deck name input: `min-width: 160px; max-width: 280px` (no `flex: 1` — preserves center column for stats)
-- **Desktop compact (`.layout-desktop`)** — header ~10% shorter: topbar `padding-block: 11px` (was 12px), back `34×34px` (was 38px), name input `padding: 9px 12px` (overrides global input `12px 16px`), name `font-size: var(--font-size-base)` (was `lg`), stats icons `16×16px` (was 18px), stat values `0.9rem`, block labels `9px`, inter-block gaps `22px` / `11px` (~90% of base)
+- **Desktop compact (`.layout-desktop`)** — header ~10% shorter: topbar `padding-block: 11px` (was 12px), back `34×34px` (was 38px), name input `padding: 9px 12px` (overrides global input `12px 16px`), name `font-size: var(--font-size-base)` (was `lg`), block labels `9px`, inter-block gaps `22px` / `11px` (~90% of base)
 - Mobile (`.layout-mobile`): flex wrap — leading row, stats full-width (`order: 5`, column stack), actions full-width (`order: 6`)
 
 ### Mobile scroll model (`.layout-mobile`)
@@ -3246,10 +3247,10 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 
 - `display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: nowrap; gap: var(--space-6); padding: 0; transform: translateX(calc(-1 * var(--space-3)))`
 - No `border-top` — stats live in the center column of the topbar, not a separate row
-- **Threat** (`.deck-editor__threat-stat`): first child — `threat.png` icon (`STAT_ICON_PATHS.threat_level` via `assetUrl()`) + value in `.stat-threat` (`var(--color-text-muted)`); `formatThreatDisplay` shows `total/76` when over cap; `title` tooltip *"Threat: N"*
+- **Threat** (`.deck-editor__threat-stat`): first child — `StatIconBadge` `type="threat_level"` `size="lg"`; `formatThreatDisplay` shows `total/76` when over cap
 - Desktop: threat sits **left of Character max** with `border-right` divider (same pattern as stat groups)
 - Two stat blocks side by side on desktop, separated by `border-left` on the second block
-- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.25rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; **`.deck-editor__meta`** has `margin-bottom: var(--space-2)` for breathing room above the stats rows; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with internal `calc(18px * 1.1) + 2ch` grid (`gap: 6px`) so icon and value stay paired; tabular-nums values at `calc(var(--font-size-sm) * 1.1)`; border-top between stat rows
+- Mobile (`.layout-mobile`): CSS **subgrid** — panel `display: grid; grid-template-columns: max-content repeat(4, minmax(2.5rem, 1fr))`; threat renders in **`.deck-editor__meta`** (not the stats panel) on the same row as card count + legality badge, right-aligned via `margin-left: auto`; **`.deck-editor__meta`** has `margin-bottom: var(--space-2)` for breathing room above the stats rows; Character max and Icon totals fill the stats grid; each block spans all columns with `grid-template-columns: subgrid`; stats row uses `display: contents` so four stat groups share column tracks across Character max and Icon totals rows (icons align vertically); stat groups compact `justify-self: end` with `StatIconBadge` `lg` (36×36); border-top between stat rows
 
 ### Block — `.deck-editor__stats-block` / `.deck-editor__stats-block-label`
 
@@ -3260,10 +3261,10 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 ### Values row — `.deck-editor__stats-row` / `.deck-editor__stat-group`
 
 - `display: flex; flex-wrap: wrap; gap: var(--space-3)`
-- Each group: muted stat PNG icon + bold value in global stat color (`.stat-energy`, `.stat-combat`, `.stat-brute-force`, `.stat-intelligence`)
+- Each group: one `StatIconBadge` (`lg`) — icon with black number overlay (see [Stat icon badges](#stat-icon-badges-v2-spa))
 - Vertical divider between groups: `border-right: 1px solid var(--color-border)` (except last)
 - Per-stat `title` tooltip (e.g. *"Energy: 5"*)
-- Mobile: subgrid alignment (see Container above); values `font-size: calc(var(--font-size-sm) * 1.1)`; `font-variant-numeric: tabular-nums; text-align: right` on `.deck-editor__stat-val`
+- Mobile: subgrid alignment (see Container above); badges `lg` (36×36)
 
 ### Header actions — `.deck-editor__actions .btn`
 
@@ -3279,15 +3280,6 @@ The v2 deck editor (`DeckEditorPage.tsx`) shows **Character max** and **Icon tot
 - `flex-shrink: 0` on mobile — tab strip must not compress inside `.deck-editor__main` flex column (header also `flex-shrink: 0`)
 - `align-items: center`, `overflow-y: hidden`, `padding-bottom: calc(var(--space-2) + var(--space-1))` — keeps pills fully visible above the horizontal scrollbar (same pattern as DBV `.db__types`)
 - On type change (swipe or tap): page scrolls to top; active tab `scrollIntoView({ inline: 'center' })` via `data-deck-type` attribute
-
-### Icon — `.deck-editor__stat-group-icon`
-
-- `18×18px` PNG from `STAT_ICON_PATHS` via `assetUrl()` (mobile: `calc(18px * 1.1)` ≈ 19.8px for threat + stat-type icons)
-- Light muting: `opacity: 0.9; filter: saturate(0.92) brightness(0.95)`
-
-### Value — `.deck-editor__stat-val`
-
-- `font-size: var(--font-size-md); font-weight: var(--font-weight-bold)` + stat color utility class
 
 ### Logic
 
@@ -3554,7 +3546,7 @@ Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../fr
 
 ### Footer — `.draw-hand__redraw`
 
-- **Draw again** button; `min-width: 140px` desktop; **full width** on mobile.
+- **Draw again** button in centered `.slideout__footer` (`justify-content: center`). Classes: `btn btn-ghost draw-hand__redraw`. **Accent-outline ghost pill** (same family as header **Draw Hand** when open — `.deck-editor__actions .btn-ghost.is-active`), not `btn-primary` gradient. Sized at **1.2×** chip: `padding: 5px 12px`, `font-size: calc(var(--font-size-xs) * 1.2)`, `border-radius: var(--radius-full)`, `width: auto`. Colors: `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, `background: rgba(0, 200, 232, 0.08)`; hover `background: rgba(0, 200, 232, 0.12)`.
 
 ### KO dimming
 

@@ -135,7 +135,7 @@ export function DrawHandPanel({
       title="Drawn hand"
       ariaLabel="Drawn hand"
       footer={
-        <button type="button" className="btn btn-secondary draw-hand__redraw" onClick={onRedraw}>
+        <button type="button" className="btn btn-ghost draw-hand__redraw" onClick={onRedraw}>
           Draw again
         </button>
       }

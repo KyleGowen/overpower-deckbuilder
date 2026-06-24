@@ -32,16 +32,16 @@ import {
   cardStats,
   isLandscapeCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
-import { assetUrl } from '../../lib/images/cardImages';
 import {
   buildFoilCardMapLookup,
   cardHasFoilVersion,
   isFoilCard,
 } from '../../lib/catalog/foilCatalog';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
-import { STAT_ICON_PATHS } from '../database/filters/dbvFilterTypes';
+import type { StatIconType } from '../../lib/icons/statIconTypes';
 import { CardImage } from '../../components/CardImage';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
+import { StatIconBadge } from '../../components/StatIconBadge';
 import { MobileBottomNav } from '../../components/MobileBottomNav';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -105,12 +105,16 @@ function deckEditorUsesThumbnail(catalogType?: CatalogType): boolean {
   return catalogType !== 'locations' && catalogType !== 'events';
 }
 
-const DECK_STAT_ROWS = [
-  { key: 'energy', label: 'Energy', cls: 'stat-energy', iconKey: 'energy' },
-  { key: 'combat', label: 'Combat', cls: 'stat-combat', iconKey: 'combat' },
-  { key: 'bruteForce', label: 'Brute Force', cls: 'stat-brute-force', iconKey: 'brute_force' },
-  { key: 'intelligence', label: 'Intelligence', cls: 'stat-intelligence', iconKey: 'intelligence' },
-] as const;
+const DECK_STAT_ROWS: Array<{
+  key: 'energy' | 'combat' | 'bruteForce' | 'intelligence';
+  label: string;
+  iconKey: StatIconType;
+}> = [
+  { key: 'energy', label: 'Energy', iconKey: 'energy' },
+  { key: 'combat', label: 'Combat', iconKey: 'combat' },
+  { key: 'bruteForce', label: 'Brute Force', iconKey: 'brute_force' },
+  { key: 'intelligence', label: 'Intelligence', iconKey: 'intelligence' },
+];
 
 function DeckStatRow({
   label,
@@ -125,16 +129,9 @@ function DeckStatRow({
     <section className="deck-editor__stats-block" aria-label={ariaLabel}>
       <span className="deck-editor__stats-block-label">{label}</span>
       <div className="deck-editor__stats-row">
-        {DECK_STAT_ROWS.map(({ key, label: statLabel, cls, iconKey }) => (
-          <span
-            className="deck-editor__stat-group"
-            key={key}
-            title={`${statLabel}: ${values[key]}`}
-          >
-            <span className="deck-editor__stat-group-icon" aria-hidden="true">
-              <img src={assetUrl(STAT_ICON_PATHS[iconKey])} alt="" />
-            </span>
-            <span className={`deck-editor__stat-val ${cls}`}>{values[key]}</span>
+        {DECK_STAT_ROWS.map(({ key, label: statLabel, iconKey }) => (
+          <span className="deck-editor__stat-group" key={key} title={`${statLabel}: ${values[key]}`}>
+            <StatIconBadge type={iconKey} value={values[key]} size="lg" />
           </span>
         ))}
       </div>
@@ -145,15 +142,8 @@ function DeckStatRow({
 function DeckThreatStat({ totalThreat }: { totalThreat: number }) {
   const display = formatThreatDisplay(totalThreat);
   return (
-    <span
-      className="deck-editor__threat-stat"
-      aria-label="Deck total threat"
-      title={`Threat: ${display}`}
-    >
-      <span className="deck-editor__stat-group-icon" aria-hidden="true">
-        <img src={assetUrl(STAT_ICON_PATHS.threat_level)} alt="" />
-      </span>
-      <span className="deck-editor__stat-val stat-threat">{display}</span>
+    <span className="deck-editor__threat-stat" title={`Threat: ${display}`}>
+      <StatIconBadge type="threat_level" value={display} size="lg" />
     </span>
   );
 }

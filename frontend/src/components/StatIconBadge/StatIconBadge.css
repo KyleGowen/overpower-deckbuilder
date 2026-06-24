@@ -18,6 +18,11 @@
   height: 32px;
 }
 
+.stat-icon-badge--lg {
+  width: 36px;
+  height: 36px;
+}
+
 .stat-icon-badge__icon {
   width: 110%;
   height: 110%;
@@ -51,4 +56,12 @@
 
 .stat-icon-badge--md .stat-icon-badge__value--wide {
   font-size: 11px;
+}
+
+.stat-icon-badge--lg .stat-icon-badge__value {
+  font-size: 18px;
+}
+
+.stat-icon-badge--lg .stat-icon-badge__value--wide {
+  font-size: 14px;
 }

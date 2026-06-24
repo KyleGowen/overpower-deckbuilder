@@ -11,10 +11,16 @@ export { buildStatIconBadgeLabel } from '../../lib/icons/statIconTypes';
 export interface StatIconBadgeProps {
   type: StatIconType;
   value: number | string;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   title?: string;
   className?: string;
 }
+
+const BADGE_PX: Record<NonNullable<StatIconBadgeProps['size']>, number> = {
+  sm: 18,
+  md: 32,
+  lg: 36,
+};
 
 export function StatIconBadge({
   type,
@@ -44,8 +50,8 @@ export function StatIconBadge({
         src={assetUrl(STAT_ICON_PATHS[type])}
         alt=""
         className="stat-icon-badge__icon"
-        width={size === 'sm' ? 18 : 32}
-        height={size === 'sm' ? 18 : 32}
+        width={BADGE_PX[size]}
+        height={BADGE_PX[size]}
       />
       <span
         className={[
