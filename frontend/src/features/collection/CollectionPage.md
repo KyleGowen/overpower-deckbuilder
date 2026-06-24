@@ -5,6 +5,7 @@ per-card quantity steppers and an "Owned only" toggle.
 
 ## Controls
 - Search (debounced), type tabs (**All** first; default **All**), set dropdown, **Owned only** checkbox.
+- **Mobile header** (`layout-mobile`): four rows — title + counts, full-width search, set filter (20% wider select, left-aligned) + Owned only, then type chips (see `CollectionPage.css` / `STYLE_GUIDE_V2.md`).
 - Search uses `cardMatchesSearchQuery` (same as DBV). The keyword **`foil`** filters to foil printing rows only (`is_foil = true`); combine with name/text (e.g. `foil tarzan`). Distinct from DBV **Has Foil** checkbox (foil-capable base cards).
 - Header shows `totalOwned` and `uniqueCards`.
 - Per-type tabs: `CardTile` grid with footer `QuantityStepper`; unowned cards are dimmed.

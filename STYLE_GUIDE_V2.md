@@ -115,6 +115,7 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 - **`html.layout-desktop { scrollbar-gutter: stable; }`** reserves vertical scrollbar space so the centered
   top nav does not shift when shorter pages (e.g. Decks) hide the document scrollbar.
 - **Mobile horizontal containment:** `html.layout-mobile`, `body`, `#root`, and `.app-shell` / `.app-shell__content` use `overflow-x: clip` and `max-width: 100%` so the page cannot pan sideways. Intentional horizontal scroll stays on inner regions (`.db__types`, `.col__types`, `.dbv-filter-rail__controls`, `.home__rail`) via `overflow-x: auto`, `min-width: 0`, and `overscroll-behavior-x: contain`.
+- **Collection mobile header** (`layout-mobile`, [`CollectionPage.css`](frontend/src/features/collection/CollectionPage.css)): four stacked rows — (1) `.col__heading` flex row with `.col__title` left and `.col__stats` right on one line (`margin-top: 0` on stats); (2) `.col__search` full width (`flex: 1 1 100%`); (3) `.col__set` + `.col__owned-toggle` on the next line (set select `min-width: 173px` / `max-width: 230px`, left-aligned; toggle `margin-left: auto`); (4) `.col__types` horizontal chip scroll below the header. Desktop keeps the original side-by-side header band.
 - **Desktop** (`> 900px`): sticky **top nav** (`--top-nav-height: 60px`) with the logo,
   primary links (Home, Database, Decks, Collection), and the user menu on the right. The
   active link is cyan with a soft pill background.
