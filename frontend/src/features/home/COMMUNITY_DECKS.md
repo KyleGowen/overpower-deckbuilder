@@ -12,6 +12,8 @@ The Home "Community Decks" rail shows decks owned by the internal **`community_d
   Requires an authenticated session.
 - Frontend: `fetchCommunityDecks()` in [`src/lib/api/decks.ts`](../../lib/api/decks.ts), filtered to
   `communityDecksUserId` on Home, rendered as `DeckTile`s.
+- Tile **card count** comes from `decks.card_count` (playable cards only — excludes character, location,
+  mission), maintained by DB triggers on `deck_cards` changes; exposed as `metadata.cardCount` on the list API.
 
 ## Managing community decks
 - **Import via Cursor skill:** `.cursor/skills/add-community-deck/SKILL.md` — paste exported deck JSON v2.0.

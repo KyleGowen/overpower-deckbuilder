@@ -81,4 +81,32 @@ describe('GET /api/v1/decks/community', () => {
     await deckRepository.deleteDeck(older.id);
     createdDeckId = null;
   });
+
+  it('returns cardCount matching playable deck_cards quantity sum for each community deck', async () => {
+    const res = await request(app)
+      .get('/api/v1/decks/community')
+      .set('Cookie', authCookie)
+      .expect(200);
+
+    const communityDecks = res.body.data.filter(
+      (d: { metadata: { userId: string } }) => d.metadata.userId === COMMUNITY_DECKS_USER_ID
+    );
+    expect(communityDecks.length).toBeGreaterThan(0);
+
+    const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
+    const pool = DataSourceConfig.getInstance().getPool();
+
+    for (const deck of communityDecks) {
+      const deckId = deck.metadata.id as string;
+      const countResult = await pool.query<{ expected: string }>(
+        `SELECT COALESCE(SUM(quantity), 0)::text AS expected
+         FROM deck_cards
+         WHERE deck_id = $1
+         AND card_type NOT IN ('character', 'location', 'mission')`,
+        [deckId]
+      );
+      const expectedCount = parseInt(countResult.rows[0].expected, 10);
+      expect(deck.metadata.cardCount).toBe(expectedCount);
+    }
+  });
 });

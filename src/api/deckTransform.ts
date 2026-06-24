@@ -2,6 +2,7 @@
 // Extracted from src/index.ts to reduce file size while preserving behavior.
 
 import type { Deck, DeckData } from '../types';
+import { DeckUtils } from '../utils/deckUtils';
 
 export function transformDeckListItem(deck: Deck) {
   return {
@@ -60,7 +61,7 @@ export function transformDeckDetail(deck: Deck, viewerUserId: string) {
       description: deck.description,
       created: deck.created_at,
       lastModified: deck.updated_at,
-      cardCount: deck.cards?.length || 0,
+      cardCount: deck.card_count ?? DeckUtils.calculateCardCount(deck.cards ?? []),
       threat: deck.threat ?? 0,
       is_valid: deck.is_valid ?? false,
       userId: deck.user_id,
