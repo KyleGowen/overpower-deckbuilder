@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/AuthProvider';
+import { AppBackground } from '../../components/AppBackground';
 import { Logo } from '../../components/Logo';
-import { assetUrl } from '../../lib/images/cardImages';
 import { IconBuild, IconCollection, IconDatabase, IconEye, IconEyeOff, IconGoogle, IconProfile, IconLock } from '../../components/icons';
 import './LoginPage.css';
 
@@ -55,16 +55,7 @@ export default function LoginPage() {
 
   return (
     <div className="login">
-      <div className="login__bg" aria-hidden="true">
-        <img
-          className="login__bg-image"
-          src={assetUrl('/src/resources/images/login/login-bg.png')}
-          alt=""
-          loading="eager"
-          draggable={false}
-        />
-        <div className="login__bg-veil" />
-      </div>
+      <AppBackground variant="hero" className="login__bg" />
 
       <aside className="login__brand">
         <Logo height={210} className="login__brand-logo" />

@@ -10,35 +10,6 @@
   overflow: hidden;
 }
 
-.login__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: var(--color-bg-base);
-}
-
-/* Full-bleed nebula background, dimmed to 80% brightness. */
-.login__bg-image {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: brightness(0.8);
-  transform: scaleX(-1);
-}
-
-.login__bg-veil {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(7, 11, 22, 0.55) 0%, rgba(7, 11, 22, 0.25) 45%, rgba(7, 11, 22, 0.4) 100%),
-    radial-gradient(1200px 900px at 60% 10%, rgba(0, 200, 232, 0.05), transparent 60%);
-}
-
 /* ---- Brand column ---- */
 .login__brand {
   position: relative;
@@ -275,7 +246,7 @@
   display: block;
   margin-bottom: var(--space-5);
 }
-.layout-mobile .login__bg-veil {
+.layout-mobile .login .app-bg__veil {
   background:
     linear-gradient(180deg, rgba(7, 11, 22, 0.55) 0%, var(--color-bg-base) 55%);
 }

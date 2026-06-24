@@ -33,18 +33,20 @@
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
 31. [Collection view — mobile (`layout-mobile`)](#collection-view--mobile-layout-mobile)
 32. [Draw Hand mobile — legacy v1 (`layout-mobile`)](#draw-hand-mobile-legacy-v1-layout-mobile)
-33. [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa)
-34. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
-35. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
-36. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
-37. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
-38. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
-39. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
-40. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
-41. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
-42. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
-43. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
-44. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
+33. [Global App Background (v2 SPA)](#global-app-background-v2-spa)
+34. [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa)
+35. [Home Hero Art Shading (v2 SPA)](#home-hero-art-shading-v2-spa)
+36. [Home Recent Updates Cards (v2 SPA)](#home-recent-updates-cards-v2-spa)
+37. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
+38. [Deck Selection toolbar (v2 SPA)](#deck-selection-toolbar-v2-spa)
+39. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
+40. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
+41. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
+42. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
+43. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
+44. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
+45. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
+46. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
 
 ## Overview
 
@@ -2833,6 +2835,46 @@ Character Stacks intentionally reuses existing Available Cards styling to match 
 
 Character Stacks uses the same responsive behavior as other Available Cards categories because it reuses existing card category and group classes; no additional breakpoints are introduced.
 
+## Global App Background (v2 SPA)
+
+Site-wide decorative nebula background for the React v2 SPA. Implemented in [frontend/src/components/AppBackground/AppBackground.tsx](../../frontend/src/components/AppBackground/AppBackground.tsx) and [AppBackground.css](../../frontend/src/components/AppBackground/AppBackground.css). Mounted from [frontend/src/app/RootLayout.tsx](../../frontend/src/app/RootLayout.tsx) for all routes **except** `/login`.
+
+### Asset
+
+- **Image**: `src/resources/images/login/login-bg.png` (same cosmic nebula as the login screen).
+- **URL**: resolved via `assetUrl()` in [cardImages.ts](../../frontend/src/lib/images/cardImages.ts).
+
+### Variants
+
+| Variant | Used on | Position | Image brightness | Image opacity | Veil |
+|---------|---------|----------|------------------|---------------|------|
+| `subtle` | Home, DBV, Collection, Deck Selection, Deck Editor | `position: fixed; inset: 0` | `0.45` | `0.55` | `rgba(7, 11, 22, 0.62)` + faint teal radial at `0.03` opacity |
+| `hero` | Login only (`/login`) | `position: absolute` within `.login` | `0.8` | `1` | Horizontal dark gradient + teal radial at `0.05` opacity |
+
+Both variants mirror the image horizontally (`transform: scaleX(-1)`).
+
+### CSS classes
+
+- `.app-bg` — root layer; `background: var(--color-bg-base)` fallback; `pointer-events: none`.
+- `.app-bg--hero` / `.app-bg--subtle` — variant modifiers (positioning and veil/image tuning).
+- `.app-bg__image` — full-bleed `<img>` (`object-fit: cover`).
+- `.app-bg__veil` — gradient/dark wash overlay above the image.
+- `.app-root` / `.app-root__content` — `RootLayout` wrapper; content sits at `z-index: 1` above the fixed subtle background.
+
+### Body fallback
+
+[global.css](../../frontend/src/styles/global.css) `body` keeps `background-color: var(--color-bg-base)` only (no radial gradients). The nebula image provides atmosphere on routed pages.
+
+### Login exclusion
+
+`RootLayout` does not mount `AppBackground variant="subtle"` when `pathname === '/login'`. Login renders its own `AppBackground variant="hero"` inside [LoginPage.tsx](../../frontend/src/features/login/LoginPage.tsx). Mobile login veil override: `.layout-mobile .login .app-bg__veil` in [LoginPage.css](../../frontend/src/features/login/LoginPage.css).
+
+### Deck editor
+
+`.deck-editor` root uses `background: transparent` so the subtle nebula shows through; panels/rails keep `--color-bg-panel` / `--color-bg-elevated` surfaces for readability.
+
+See also [Login Page Layout (v2 SPA)](#login-page-layout-v2-spa).
+
 ## Login Page Layout (v2 SPA)
 
 This section covers the React v2 SPA login screen at `/login` (markup in [frontend/src/features/login/LoginPage.tsx](../../frontend/src/features/login/LoginPage.tsx), styles in [frontend/src/features/login/LoginPage.css](../../frontend/src/features/login/LoginPage.css)). It is distinct from the legacy `public/components/login/` modal documented in the Google Sign-In / Sign Up sections above.
@@ -3001,6 +3043,60 @@ Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail
 ### Rationale
 
 Previously `grid-auto-columns: minmax(230px, 1fr)` let columns expand to fill the row, so rails with only two tournament decks rendered oversized tiles. Capped columns match community tile size and leave trailing space until more decks are added.
+
+## Deck Selection toolbar (v2 SPA)
+
+The `/users/:userId/decks` deck selection page ([`DeckSelectionPage.tsx`](../../frontend/src/features/deck-selection/DeckSelectionPage.tsx), styles in [`DeckSelectionPage.css`](../../frontend/src/features/deck-selection/DeckSelectionPage.css)) uses compact **pill** controls in the header toolbar — same chip-sized family as [Deck Editor header actions](#header-actions--deck-editor__actions-btn).
+
+### Structure — `.dsel__actions`
+
+- `display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap`
+- **Search** (`.dsel__search`) then **action buttons** (`.dsel__action-buttons`: Import Deck, New Deck)
+- Empty state duplicates the same buttons via `.dsel__empty-actions`
+
+### Search — `.dsel__search`
+
+Compact pill aligned in height with the button row (overrides global input `12px 16px` / `--radius-md`):
+
+| Property | Value |
+|---|---|
+| Width | `220px` (desktop); mobile: `flex: 1; width: auto` under `.layout-mobile` |
+| Padding | `4px 12px` |
+| Font | `var(--font-size-sm)` |
+| Shape | `border-radius: var(--radius-full)` |
+
+### Action buttons — `.dsel__action-buttons .btn`, `.dsel__empty-actions .btn`
+
+Import Deck (`btn btn-ghost`), New Deck (`btn btn-primary`) — chip-sized pills matching `.deck-editor__actions .btn`:
+
+| Property | Value |
+|---|---|
+| Padding | `4px 10px` |
+| Font | `var(--font-size-xs)`, `var(--font-weight-semibold)` |
+| Shape | `border-radius: var(--radius-full)` |
+| Gap | `var(--space-1)` between icon and label |
+| Icon | SVG `14px × 14px` |
+
+**Import open state:** `.dsel__action-buttons .btn-ghost.is-active` — `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, `background: rgba(0, 200, 232, 0.08)`.
+
+### Import panel footer — `.import-deck-panel__submit`
+
+The Import Deck slide-out ([`ImportDeckPanel.tsx`](../../frontend/src/features/deck-selection/ImportDeckPanel.tsx), [`ImportDeckPanel.css`](../../frontend/src/features/deck-selection/ImportDeckPanel.css)) footer submit uses the same chip-sized primary pill as the toolbar (not full-width default `.btn`):
+
+| Property | Value |
+|---|---|
+| Classes | `btn btn-primary import-deck-panel__submit` |
+| Footer layout | `.import-deck-panel__footer` — `justify-content: flex-end` (pill right-aligned) |
+| Padding | `4px 10px` |
+| Font | `var(--font-size-xs)`, `var(--font-weight-semibold)` |
+| Shape | `border-radius: var(--radius-full)` |
+| Width | `auto` (overrides footer stretch) |
+| Icon | SVG `14px × 14px` |
+
+### Mobile — `.layout-mobile`
+
+- `.dsel__actions { width: 100% }` — toolbar spans full width
+- `.dsel__search { flex: 1; width: auto }` — search stretches; buttons wrap on the next row via `flex-wrap`
 
 ## Card Database grid (v2 SPA)
 

@@ -1,0 +1,73 @@
+/* ---- Root layout (RootLayout.tsx) ---- */
+.app-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.app-root__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+}
+
+/* ---- Shared nebula background ---- */
+.app-bg {
+  background: var(--color-bg-base);
+  pointer-events: none;
+}
+
+.app-bg--hero {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.app-bg--subtle {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.app-bg__image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scaleX(-1);
+}
+
+.app-bg--hero .app-bg__image {
+  filter: brightness(0.8);
+  opacity: 1;
+}
+
+.app-bg--subtle .app-bg__image {
+  filter: brightness(0.45);
+  opacity: 0.55;
+}
+
+.app-bg__veil {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+
+.app-bg--hero .app-bg__veil {
+  background:
+    linear-gradient(90deg, rgba(7, 11, 22, 0.55) 0%, rgba(7, 11, 22, 0.25) 45%, rgba(7, 11, 22, 0.4) 100%),
+    radial-gradient(1200px 900px at 60% 10%, rgba(0, 200, 232, 0.05), transparent 60%);
+}
+
+.app-bg--subtle .app-bg__veil {
+  background:
+    radial-gradient(1200px 900px at 60% 10%, rgba(0, 200, 232, 0.03), transparent 60%),
+    rgba(7, 11, 22, 0.62);
+}

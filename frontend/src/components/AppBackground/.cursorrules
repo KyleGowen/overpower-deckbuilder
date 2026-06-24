@@ -1,0 +1,9 @@
+# AppBackground
+
+Fixed/absolute full-viewport nebula background for the v2 SPA.
+
+- **Component**: `AppBackground.tsx` — `variant` prop: `hero` (login) or `subtle` (site-wide).
+- **Styles**: `AppBackground.css` — BEM `.app-bg`, `.app-bg__image`, `.app-bg__veil`; includes `.app-root` layout helpers used by `RootLayout`.
+- **Asset**: `src/resources/images/login/login-bg.png` via `assetUrl()`.
+- **Mount points**: `RootLayout.tsx` renders `subtle` on all routes except `/login`; `LoginPage.tsx` renders `hero` locally.
+- When tuning darkness, adjust `subtle` brightness/opacity/veil in `AppBackground.css` — keep login `hero` values unchanged unless intentionally updating the login screen.

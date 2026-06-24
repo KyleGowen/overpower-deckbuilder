@@ -5,7 +5,7 @@
   height: 100vh;
   min-height: 0;
   overflow: hidden;
-  background: var(--color-bg-base);
+  background: transparent;
 }
 .deck-editor--error {
   grid-template-columns: 1fr;
