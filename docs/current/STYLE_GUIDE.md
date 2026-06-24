@@ -3052,6 +3052,10 @@ Community Decks and Tournament Winning Decks on `/home` share the same `DeckRail
 
 - `grid-auto-columns: clamp(210px, 78vw, 280px)` — one tile mostly visible per swipe; still capped, no stretch.
 
+### Mobile bottom clearance — `.layout-mobile .home__inner`
+
+- `padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-4))` — full fixed tab-bar offset plus 16px breathing room. Home scrolls on the document; this padding on `.home__inner` (not AppShell alone) ensures the last deck rail clears the bottom nav when scrolled to the end.
+
 ### Rationale
 
 Previously `grid-auto-columns: minmax(230px, 1fr)` let columns expand to fill the row, so rails with only two tournament decks rendered oversized tiles. Capped columns match community tile size and leave trailing space until more decks are added.

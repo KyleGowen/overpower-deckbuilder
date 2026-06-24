@@ -270,6 +270,10 @@
 /* ---- Mobile ---- */
 .layout-mobile .home__inner {
   padding: var(--space-4);
+  /* Full bottom-nav clearance + breathing room (AppShell padding alone does not extend scroll on flex). */
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-4)
+  );
   gap: var(--space-6);
 }
 .layout-mobile .home__hero {
