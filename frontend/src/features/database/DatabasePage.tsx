@@ -32,6 +32,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { DBV_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
 import { IconSearch, IconPlus, IconLock, IconDatabase } from '../../components/icons';
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
@@ -65,6 +66,8 @@ export default function DatabasePage() {
   const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
   const [filterRailCollapsed, setFilterRailCollapsed] = useState(false);
   const [hasFoilFilter, setHasFoilFilter] = useState(false);
+
+  const { close: closeCardDetail } = useCardDetailHistory(Boolean(selected), () => setSelected(null));
 
   const isAllTab = tab === 'all';
   const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
@@ -302,7 +305,7 @@ export default function DatabasePage() {
         card={selected}
         type={detailCatalogType}
         open={Boolean(selected)}
-        onClose={() => setSelected(null)}
+        onClose={closeCardDetail}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         actions={

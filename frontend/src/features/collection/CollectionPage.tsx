@@ -26,6 +26,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { COLLECTION_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
 import { Checkbox } from '../../components/Checkbox';
 import { IconSearch, IconCollection } from '../../components/icons';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
@@ -55,6 +56,8 @@ export default function CollectionPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CatalogCard | null>(null);
   const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
+
+  const { close: closeCardDetail } = useCardDetailHistory(Boolean(selected), () => setSelected(null));
 
   const isAllTab = tab === 'all';
   const pageSize = isAllTab ? PAGE_SIZE_ALL : PAGE_SIZE_GRID;
@@ -313,7 +316,7 @@ export default function CollectionPage() {
         card={selected}
         type={activeCatalogType}
         open={Boolean(selected)}
-        onClose={() => setSelected(null)}
+        onClose={closeCardDetail}
         isFoil={selected ? isFoilCard(selected) : undefined}
         actions={
           selected ? (

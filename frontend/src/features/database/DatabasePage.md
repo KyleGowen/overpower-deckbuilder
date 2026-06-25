@@ -15,6 +15,10 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   starting on `.db__types`, `.db__header`, `.dbv-filter-rail`, `.pagination`, or form controls
   are ignored (`DBV_SWIPE_BLOCK_SELECTOR`). On tab change: scroll page to top; active chip
   `scrollIntoView` in the type strip.
+- **Mobile back / swipe-back** from card detail: `useCardDetailHistory` pushes one React Router
+  history entry while `CardDetailPanel` is open so OS back closes the slide-out without leaving
+  `/data` (tab, filters, pagination, and scroll preserved). Backdrop/Escape use the same `close`
+  helper (`navigate(-1)` pops the dummy entry).
 - **Set** dropdown inline with the header search bar (all tabs).
 - **Filter rail** (`DbvFilterRail`) visible on per-type tabs only (hidden on **All**).
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
