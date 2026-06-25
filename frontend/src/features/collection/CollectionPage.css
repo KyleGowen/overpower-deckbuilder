@@ -144,6 +144,9 @@
   justify-content: center;
 }
 
+.layout-mobile .col {
+  touch-action: pan-y;
+}
 .layout-mobile .col__inner {
   padding: var(--space-4);
 }

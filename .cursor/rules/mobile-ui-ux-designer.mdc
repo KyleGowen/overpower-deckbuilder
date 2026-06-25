@@ -80,6 +80,10 @@ Implementation: [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEdi
 
 On mobile (`.layout-mobile`), the `/data` database page uses the same horizontal swipe model as deck editor card view: **swipe left** advances to the next type tab, **swipe right** to the previous tab, with cyclical wrap across all 13 tabs (`DBV_TAB_ORDER`: All, then `CATALOG_TYPES`). Swipes on card tiles and All-tab list rows change tabs; gestures starting on the type chip strip (`.db__types`), header search/set (`.db__header`), filter rail (`.dbv-filter-rail`), or pagination are blocked. Swipe is disabled while `CardDetailPanel` is open. On tab change, the page scrolls to top and the active chip centers in the tab strip. CSS: `.layout-mobile .db { touch-action: pan-y }`. Implementation: [`DatabasePage.tsx`](frontend/src/features/database/DatabasePage.tsx), [`useHorizontalSwipe.ts`](frontend/src/lib/layout/useHorizontalSwipe.ts) (`DBV_SWIPE_BLOCK_SELECTOR`).
 
+## Collection (v2)
+
+On mobile (`.layout-mobile`), the Collection page (`/users/:userId/collection`) uses the same horizontal swipe model as DBV: **swipe left** advances to the next type tab, **swipe right** to the previous tab, with cyclical wrap across all 13 tabs (`DBV_TAB_ORDER`: All, then `CATALOG_TYPES`). Swipes on card tiles and All-list rows change tabs; gestures starting on the type chip strip (`.col__types`), header search/set/owned toggle (`.col__header`), pagination, or quantity steppers (`.qty-stepper`) are blocked. Swipe is disabled while `CardDetailPanel` is open. On tab change, the page scrolls to top and the active chip centers in the tab strip. CSS: `.layout-mobile .col { touch-action: pan-y }`. Implementation: [`CollectionPage.tsx`](frontend/src/features/collection/CollectionPage.tsx), [`useHorizontalSwipe.ts`](frontend/src/lib/layout/useHorizontalSwipe.ts) (`COLLECTION_SWIPE_BLOCK_SELECTOR`).
+
 ## Cursor Behavior
 
 When working in Cursor:

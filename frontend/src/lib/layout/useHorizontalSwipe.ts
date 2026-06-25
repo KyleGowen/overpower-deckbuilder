@@ -11,6 +11,10 @@ export const DECK_EDITOR_SWIPE_BLOCK_SELECTOR =
 export const DBV_SWIPE_BLOCK_SELECTOR =
   '.db__types, .db__header, .dbv-filter-rail, .pagination, input, textarea, select';
 
+/** Collection — block header, type tabs, pagination, and quantity steppers on tiles/rows. */
+export const COLLECTION_SWIPE_BLOCK_SELECTOR =
+  '.col__types, .col__header, .pagination, .qty-stepper, input, textarea, select';
+
 /** Add Cards slide-out — block header, type tabs, search, filters, pagination, and footer. */
 export const ADD_CARDS_SWIPE_BLOCK_SELECTOR =
   '.add-cards__types, .add-cards__search, .add-cards__filters, .add-cards__pagination, .slideout__header, .slideout__footer, input, textarea, select';

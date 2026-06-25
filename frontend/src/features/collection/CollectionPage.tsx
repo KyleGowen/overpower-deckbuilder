@@ -1,17 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCatalog, fetchSets } from '../../lib/api/catalog';
 import { useCollection } from '../../lib/collection/useCollection';
 import {
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
+  DBV_TAB_ORDER,
   cardDisplayName,
   cardLinkedDisplayName,
   cardMatchesSearchQuery,
   isLandscapeCatalogType,
   type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
-import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
+import { compareCollectionCatalogCards } from '../../lib/catalog/allCatalogSort';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { isFoilCard } from '../../lib/catalog/foilCatalog';
 import { buildSetNameLookup } from '../../lib/catalog/setNames';
@@ -23,6 +24,8 @@ import { Pagination } from '../../components/Pagination';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
+import { COLLECTION_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { Checkbox } from '../../components/Checkbox';
 import { IconSearch, IconCollection } from '../../components/icons';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
@@ -42,6 +45,8 @@ function useDebounced<T>(value: T, delay = 250): T {
 
 export default function CollectionPage() {
   const { isMobile } = useLayoutMode();
+  const colRef = useRef<HTMLDivElement>(null);
+  const typeTabsRef = useRef<HTMLDivElement>(null);
   const collection = useCollection();
   const [tab, setTab] = useState<CatalogTabSelection>('all');
   const [search, setSearch] = useState('');
@@ -77,12 +82,14 @@ export default function CollectionPage() {
     if (isAllTab) return [];
     const q = debouncedSearch.trim().toLowerCase();
     const collectionType = CATALOG_TYPE_BY_SLUG[tab].collectionType;
-    return perTypeCards.filter((c) => {
+    const result = perTypeCards.filter((c) => {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
       if (ownedOnly && collection.quantityFor(c.id, collectionType) <= 0) return false;
       return true;
     });
+    result.sort((a, b) => compareCollectionCatalogCards(a, b));
+    return result;
   }, [perTypeCards, debouncedSearch, setFilter, ownedOnly, collection, tab, isAllTab]);
 
   const allTabFiltered = useMemo(() => {
@@ -94,7 +101,7 @@ export default function CollectionPage() {
       if (ownedOnly && collection.quantityFor(card.id, collectionType) <= 0) return false;
       return true;
     });
-    result.sort((a, b) => compareAllCatalogCards(a.card, b.card));
+    result.sort((a, b) => compareCollectionCatalogCards(a.card, b.card));
     return result;
   }, [allCatalogQuery.cards, debouncedSearch, setFilter, ownedOnly, collection]);
 
@@ -103,6 +110,37 @@ export default function CollectionPage() {
   useEffect(() => {
     setPage(1);
   }, [tab, debouncedSearch, setFilter, ownedOnly]);
+
+  const goToRelativeTab = useCallback(
+    (delta: 1 | -1) => {
+      const idx = DBV_TAB_ORDER.indexOf(tab);
+      const next = DBV_TAB_ORDER[stepCyclicalIndex(idx >= 0 ? idx : 0, DBV_TAB_ORDER.length, delta)];
+      setTab(next);
+      if (!selected && next !== 'all') {
+        setSelectedCatalogType(next);
+      }
+    },
+    [tab, selected],
+  );
+
+  useHorizontalSwipe({
+    targetRef: colRef,
+    enabled: isMobile && !selected,
+    blockSelector: COLLECTION_SWIPE_BLOCK_SELECTOR,
+    onSwipeLeft: () => goToRelativeTab(1),
+    onSwipeRight: () => goToRelativeTab(-1),
+  });
+
+  useEffect(() => {
+    if (!isMobile) return;
+    window.scrollTo({ top: 0 });
+  }, [tab, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !typeTabsRef.current) return;
+    const activeTab = typeTabsRef.current.querySelector<HTMLElement>(`[data-col-tab="${tab}"]`);
+    activeTab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [tab, isMobile]);
 
   const maxPage = Math.max(1, Math.ceil(filtered.length / pageSize));
   const effectivePage = Math.min(page, maxPage);
@@ -123,7 +161,7 @@ export default function CollectionPage() {
     collection.quantityFor(cardId, collectionType);
 
   return (
-    <div className="col">
+    <div className="col" ref={colRef}>
       <div className="col__inner">
         <header className="col__header">
           <div className="col__heading">
@@ -168,11 +206,12 @@ export default function CollectionPage() {
           </div>
         </header>
 
-        <div className="col__types" role="tablist" aria-label="Card types">
+        <div className="col__types" role="tablist" aria-label="Card types" ref={typeTabsRef}>
           <button
             type="button"
             role="tab"
             aria-selected={isAllTab}
+            data-col-tab="all"
             className={`col__type ${isAllTab ? 'is-active' : ''}`}
             onClick={() => setTab('all')}
           >
@@ -184,6 +223,7 @@ export default function CollectionPage() {
               type="button"
               role="tab"
               aria-selected={tab === meta.type}
+              data-col-tab={meta.type}
               className={`col__type ${tab === meta.type ? 'is-active' : ''}`}
               onClick={() => {
                 setTab(meta.type);

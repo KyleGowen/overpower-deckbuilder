@@ -1,5 +1,6 @@
 import {
   ADD_CARDS_SWIPE_BLOCK_SELECTOR,
+  COLLECTION_SWIPE_BLOCK_SELECTOR,
   DBV_SWIPE_BLOCK_SELECTOR,
   DECK_EDITOR_SWIPE_BLOCK_SELECTOR,
 } from '../../frontend/src/lib/layout/useHorizontalSwipe';
@@ -27,6 +28,19 @@ describe('DBV_SWIPE_BLOCK_SELECTOR', () => {
 
   it('does not blanket-block buttons so swipe works on card tiles', () => {
     expect(DBV_SWIPE_BLOCK_SELECTOR).not.toContain('button');
+  });
+});
+
+describe('COLLECTION_SWIPE_BLOCK_SELECTOR', () => {
+  it('blocks type tabs, header, pagination, and quantity steppers', () => {
+    expect(COLLECTION_SWIPE_BLOCK_SELECTOR).toContain('.col__types');
+    expect(COLLECTION_SWIPE_BLOCK_SELECTOR).toContain('.col__header');
+    expect(COLLECTION_SWIPE_BLOCK_SELECTOR).toContain('.pagination');
+    expect(COLLECTION_SWIPE_BLOCK_SELECTOR).toContain('.qty-stepper');
+  });
+
+  it('does not blanket-block buttons so swipe works on card tiles', () => {
+    expect(COLLECTION_SWIPE_BLOCK_SELECTOR).not.toContain('button');
   });
 });
 

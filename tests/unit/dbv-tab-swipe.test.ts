@@ -32,3 +32,10 @@ describe('DBV mobile tab swipe cycling', () => {
     expect(tabAfterSwipe('all', 1)).toBe('characters');
   });
 });
+
+describe('Collection mobile tab swipe cycling', () => {
+  it('reuses DBV_TAB_ORDER for cyclical tab order', () => {
+    expect(tabAfterSwipe('all', -1)).toBe('basic-universe');
+    expect(tabAfterSwipe('basic-universe', 1)).toBe('all');
+  });
+});

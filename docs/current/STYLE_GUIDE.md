@@ -356,6 +356,14 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
 - **Scan gap:** **`gap: var(--space-1)`** (4px) between set code, number, type, and name inside **`.catalog-all-list__main`**.
 - **Unchanged on mobile:** type badge width **`--catalog-all-type-width-mobile: 2.75rem`**; compact type labels (`Spc`, `Chr`, …); trailing stepper sizing.
 
+#### v2 SPA — Collection type-tab swipe (`layout-mobile`)
+
+- **When it applies:** v2 Collection at **`http://localhost:5173`** when **`html.layout-mobile`** (viewport ≤900px). Implementation: [`CollectionPage.tsx`](../../frontend/src/features/collection/CollectionPage.tsx), [`useHorizontalSwipe.ts`](../../frontend/src/lib/layout/useHorizontalSwipe.ts).
+- **Gesture:** horizontal swipe on card grid, All list, or empty content cycles type tabs cyclically (`DBV_TAB_ORDER`: All → Characters → … → Basic → wrap). Swipe left = next tab, swipe right = previous tab (50px threshold, 12px axis lock).
+- **CSS:** `.layout-mobile .col { touch-action: pan-y }` preserves vertical page scroll.
+- **Blocked regions** (`COLLECTION_SWIPE_BLOCK_SELECTOR`): `.col__types`, `.col__header`, `.pagination`, `.qty-stepper`, `input`/`textarea`/`select`.
+- **Disabled while** `CardDetailPanel` is open. On tab change: `window.scrollTo(0,0)` and active `[data-col-tab]` chip `scrollIntoView` in `.col__types`.
+
 ### Card Database — Universe: Teamwork (desktop filters)
 
 - **Where**: Card Database tab **Universe: Teamwork**, desktop layout (`#teamwork-table`). A second header row (`tr.teamwork-desktop-filter-row`) sits below the column titles and aligns filters under each data column.
@@ -478,6 +486,7 @@ Shared client-side control: [`frontend/src/components/Pagination/Pagination.tsx`
   - **Active**: `background: rgba(255, 255, 255, 0.15)`
   - **CSS Classes**: `.add-to-deck-btn`, `.add-to-collection-btn`, `.remove-from-collection-btn` (in `database-view.css`). -Collection is disabled when the card variant is not in the collection (`opacity: 0.5`, `cursor: not-allowed`).
   - **Collection table sort** (`public/js/collection-view.js`): sort by **#** uses `data-card-set-code` (raw `ERB` / `ERBP` / `SKY`, …) as the **primary** key, then foil vs non-foil, then numeric `data-set-number` (checklist # with trailing `F` stripped for the numeric tier). Do **not** sort on translated set display names — that split ERB rows and hid prize-pack hero #s (536–544) out of sequence.
+  - **v2 Collection per-type grid + All list** (`frontend/src/features/collection/CollectionPage.tsx`, `compareCollectionCatalogCards` in `frontend/src/lib/catalog/allCatalogSort.ts`): same checklist order as legacy **#** sort — raw set code → non-foil before foil → numeric `set_number` → card name **only when both cards lack a set_number**. Applied client-side after filter (not API `ORDER BY`). Uniform across all 12 types (no DBV-style power-type or linked-character tiebreakers).
 - **Search Results**: Gold highlights for matching text
 - **Search Bar Styling**: 
   - **Advanced Universe Card Effect Search**: 480px width with centered alignment
