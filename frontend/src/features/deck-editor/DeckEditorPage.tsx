@@ -40,6 +40,7 @@ import {
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
 import type { StatIconType } from '../../lib/icons/statIconTypes';
 import { CardImage } from '../../components/CardImage';
+import { buildFoilSeed } from '../../lib/visual/foilEffect';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { StatIconBadge } from '../../components/StatIconBadge';
 import { MobileBottomNav } from '../../components/MobileBottomNav';
@@ -972,6 +973,8 @@ export default function DeckEditorPage() {
                       showKoOnCharacter;
                     const koDimmed =
                       koCtx !== null && shouldDimDeckCard(entry, catalogCard, koCtx);
+                    const entryIsFoil = Boolean(entry.is_foil || (catalogCard && isFoilCard(catalogCard)));
+                    const foilSeed = buildFoilSeed(entry.cardId, entry.instanceId);
                     return (
                     <div
                       className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}`}
@@ -999,6 +1002,8 @@ export default function DeckEditorPage() {
                             progressiveSessionScope="deck-editor"
                             loading="eager"
                             className="card-image--contain"
+                            isFoil={entryIsFoil}
+                            foilSeed={foilSeed}
                           />
                         </button>
                       </div>

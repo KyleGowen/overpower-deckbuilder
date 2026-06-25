@@ -27,7 +27,7 @@
 24. [Google Sign-In Button Styling](#google-sign-in-button-styling)
 25. [Sign Up and Account Creation Styling](#sign-up-and-account-creation-styling)
 26. [Create Your First Deck Tile and Sample Decks](#create-your-first-deck-tile-and-sample-decks)
-27. [Foil Card Shimmer Effect](#foil-card-shimmer-effect)
+27. [Foil Card Shimmer Effect (legacy v1)](#foil-card-shimmer-effect)
 28. [Reserve Button Styling](#reserve-button-styling)
 29. [Deck Editor Available Cards Character Stacks](#deck-editor-available-cards-character-stacks)
 30. [Card Database — Universe: Teamwork (desktop filters)](#card-database--universe-teamwork-desktop-filters)
@@ -48,6 +48,7 @@
 45. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
 46. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
 47. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
+48. [v2 Prismatic Foil Effect](#v2-prismatic-foil-effect)
 
 ## Overview
 
@@ -2500,6 +2501,8 @@ The login modal supports three views: Login, Sign Up, and Google new-account con
 
 ## Foil Card Shimmer Effect
 
+> **Legacy v1 only** (`public/` UI). The v2 React SPA uses [v2 Prismatic Foil Effect](#v2-prismatic-foil-effect) instead.
+
 ### Overview
 
 FOIL cards are special versions of existing cards with a metallic sheen overlaid on the original card image. The effect is **CSS-only and fully encapsulated** in [`public/css/foil-effect.css`](../../public/css/foil-effect.css) — no separate image files are needed. The JavaScript driver lives in [`public/js/foil-animation.js`](../../public/js/foil-animation.js).
@@ -2753,6 +2756,75 @@ All button states are defined in `foil-effect.css` alongside the shimmer, so all
 - `FOIL_ANGLE_MIN/MAX` — sweep angle range
 
 **No other files need to change** to modify the visual effect.
+
+---
+
+## v2 Prismatic Foil Effect
+
+### Overview
+
+FOIL printings in the **v2 React SPA** (`frontend/`) use a **Prismatic Laminate** overlay: multiple blend-mode layers on top of the unchanged card image. No separate foil image assets. Each card instance gets a **seed-derived** pattern so foils do not look identical. A **one-shot intro glint** plays the first time a seed is seen per page session, then the effect stays **static** (no loop, no hover re-trigger).
+
+### Source files
+
+| File | Responsibility |
+|------|----------------|
+| [`frontend/src/lib/visual/foilEffect.ts`](../../frontend/src/lib/visual/foilEffect.ts) | Seeded PRNG → CSS custom properties; `shouldShowFoilEffect`, `buildFoilSeed`, session intro tracking |
+| [`frontend/src/components/FoilCard/FoilCard.tsx`](../../frontend/src/components/FoilCard/FoilCard.tsx) | Wrapper: layer stack, `IntersectionObserver` intro, settled state |
+| [`frontend/src/components/FoilCard/FoilCard.css`](../../frontend/src/components/FoilCard/FoilCard.css) | Luster, facets, hotspots, intro keyframes, thumb/hero modifiers |
+| [`frontend/src/components/CardImage/CardImage.tsx`](../../frontend/src/components/CardImage/CardImage.tsx) | Optional `isFoil`, `foilSeed`, `foilSize`, `foilEagerIntro` props |
+
+### Layer stack (bottom → top)
+
+| Class | Blend mode | Role |
+|-------|------------|------|
+| `.foil-card__luster` | `overlay` | Broad metallic wash (gold/cyan/white) |
+| `.foil-card__prism` | `color-dodge` | Full-card conic iridescent tint (seed rotation) |
+| `.foil-card__facets` | `soft-light` | `repeating-conic-gradient` micro-facets at seed rotation |
+| `.foil-card__sheen` | `soft-light` | **Static** diagonal prismatic band (`--foil-sheen-shift` per seed) — primary foil-at-rest cue |
+| `.foil-card__hotspots` | `screen` | 3 seed-positioned radial specular glints (all sizes) |
+| `.foil-card__intro-glint` | `soft-light` | One-shot masked sweep; hidden after intro settles |
+
+**Intensity (2025-06 tune):** Thumb modifiers sit slightly below hero strength (~70–80%) so deck-editor tiles read as foil at a glance without overpowering art; blend modes prevent v1-style blow-out.
+
+Wrapper: `.foil-card` — `position: relative; isolation: isolate; overflow: hidden; border-radius: inherit`.
+
+### CSS custom properties (set per seed)
+
+| Property | Description |
+|----------|-------------|
+| `--foil-luster-angle` | Primary metallic gradient angle |
+| `--foil-facet-rotate` | Conic facet rotation |
+| `--foil-warm-hue` / `--foil-cool-hue` | Gold vs cyan iridescence bias |
+| `--foil-hotspot-1-x/y/scale` … `3` | Specular glint positions and size |
+| `--foil-sheen-shift` | Center of the static diagonal sheen band (40–60%) |
+| `--foil-intro-duration` | Intro animation length (~0.5–0.85 s) |
+
+### Size modifiers
+
+| Class | Use |
+|-------|-----|
+| `.foil-card--thumb` | DBV/collection grids, deck editor thumbs — lower layer opacity |
+| `.foil-card--hero` | Card detail slide-out, deck selection hero — third hotspot, full intensity |
+
+### Animation policy
+
+- **Intro**: `.foil-card--intro` on first viewport entry for grid thumbs; `foilIntroPlayedKeys` session `Set` prevents replay for the same seed in grids.
+- **Detail hero** (`foilEagerIntro`): intro plays on every open and every printing **Apply** (seed change); session dedup is skipped so switching between foil printings re-triggers the glint.
+- **Settled**: `.foil-card--settled` — static metallic finish only.
+- **`prefers-reduced-motion: reduce`**: skip intro; show settled layers immediately.
+
+### When the effect is shown
+
+`isFoil` on `CardImage` when the catalog row or deck entry is a foil printing (`is_foil` / `isFoilCard`). **Not** shown for base cards that merely have a foil variant (`hasFoilVersion` ✦ badge).
+
+**Surfaces:** card detail slide-out, collection/DBV grid tiles (foil rows), deck editor grid, Draw Hand, deck selection character hero.
+
+**Deck editor:** Printings → Apply to foil updates `DeckCardEntry.is_foil` and remounts art; foil seed uses `buildFoilSeed(cardId, instanceId)` so duplicate instances differ.
+
+### Editing the effect
+
+Adjust blend opacities and gradients in `FoilCard.css`. Adjust seed ranges in `deriveFoilVars()` in `foilEffect.ts`. Do not put overlay layers on `<img>` — always wrap via `FoilCard` / `CardImage isFoil`.
 
 ---
 

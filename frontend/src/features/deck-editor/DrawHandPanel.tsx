@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent } from 'react';
 import { CardImage } from '../../components/CardImage';
+import { isFoilCard } from '../../lib/catalog/foilCatalog';
+import { buildFoilSeed } from '../../lib/visual/foilEffect';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
 import { imagePathFromCard } from '../../lib/images/cardImages';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/types';
@@ -161,6 +163,8 @@ export function DrawHandPanel({
               const canOpenDetail = Boolean(catalogCard && catalogType && entry.instanceId && onCardClick);
               const isDragging = draggedIndex === index;
               const isDragTarget = dragOverIndex === index && draggedIndex !== index;
+              const entryIsFoil = Boolean(entry.is_foil || (catalogCard && isFoilCard(catalogCard)));
+              const foilSeed = buildFoilSeed(entry.cardId, entry.instanceId);
 
               return (
                 <div
@@ -198,6 +202,8 @@ export function DrawHandPanel({
                               loading="eager"
                               className="card-image--contain"
                               onImageFailed={() => markImageFailed(index)}
+                              isFoil={entryIsFoil}
+                              foilSeed={foilSeed}
                             />
                           </span>
                         ) : (
@@ -209,6 +215,8 @@ export function DrawHandPanel({
                             loading="eager"
                             className="card-image--contain"
                             onImageFailed={() => markImageFailed(index)}
+                            isFoil={entryIsFoil}
+                            foilSeed={foilSeed}
                           />
                         )}
                       </button>

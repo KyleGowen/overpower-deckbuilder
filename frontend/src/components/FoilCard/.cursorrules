@@ -1,0 +1,5 @@
+# FoilCard component
+
+v2 Prismatic Laminate foil overlay for foil printings.
+
+Entry: `FoilCard.tsx`, styles in `FoilCard.css`. Used from `CardImage` when `isFoil` is true.

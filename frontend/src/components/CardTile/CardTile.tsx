@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { CardImage } from '../CardImage';
 import { cardDisplayName } from '../../lib/catalog/catalogTypeMap';
+import { isFoilCard } from '../../lib/catalog/foilCatalog';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardTile.css';
 
@@ -59,6 +60,8 @@ export function CardTile({
           progressive={Boolean(catalogType)}
           catalogType={catalogType}
           className={catalogType ? 'card-image--contain' : ''}
+          isFoil={isFoilCard(card)}
+          foilSeed={card.id}
         />
         {overlay ? <span className="card-tile__overlay">{overlay}</span> : null}
       </button>

@@ -1,0 +1,7 @@
+# Visual effects (frontend lib)
+
+Seeded CSS-driven visual utilities for card presentation.
+
+- `foilEffect.ts` — PRNG → CSS custom properties for foil laminate; session intro tracking (`foilIntroPlayedKeys`).
+
+Consumed by `components/FoilCard/`.

@@ -37,6 +37,7 @@ interface ArtSlide {
   name?: string;
   imagePath?: string | null;
   catalogType?: CatalogType;
+  isFoil?: boolean;
 }
 
 function deckCharacters(deck: DeckListItem): ArtSlide[] {
@@ -47,7 +48,8 @@ function deckCharacters(deck: DeckListItem): ArtSlide[] {
       cardId: c.cardId,
       name: c.name,
       imagePath: c.defaultImage,
-      catalogType: 'characters',
+      catalogType: 'characters' as const,
+      isFoil: Boolean(c.is_foil),
     }));
 }
 
@@ -163,6 +165,9 @@ export function DeckTile({
               useThumbnail={!isLocationSlide}
               loading="eager"
               className={isLocationSlide ? undefined : 'card-image--contain'}
+              isFoil={shownSlide.isFoil}
+              foilSeed={shownSlide.cardId}
+              foilSize="hero"
             />
           </div>
         ) : (

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { SlideOutPanel } from '../SlideOutPanel';
 import { CardImage } from '../CardImage';
+import { isFoilCard } from '../../lib/catalog/foilCatalog';
 import {
   cardDisplayName,
   cardAbilityText,
@@ -121,11 +122,16 @@ export function CardDetailPanel({
       <div className="card-detail">
         <div className={`card-detail__image${detailImageClass(type)}`}>
           <CardImage
+            key={card.id}
             imagePath={(card.image_path as string) || (card.image as string)}
             catalogType={type ?? undefined}
             alt={name}
             useThumbnail={false}
             className="card-image--contain"
+            isFoil={Boolean(isFoil ?? isFoilCard(card))}
+            foilSeed={card.id}
+            foilSize="hero"
+            foilEagerIntro
           />
         </div>
 

@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import type { CatalogType } from '../../lib/api/types';
+import { FoilCard, type FoilCardSize } from '../FoilCard';
 import {
   catalogTypeUsesPortraitThumb,
   isLandscapeCatalogType,
@@ -40,6 +41,32 @@ interface CardImageProps {
   onImageFailed?: () => void;
   /** Session cache scope for progressive full-res reveal (e.g. deck editor tab switches). */
   progressiveSessionScope?: ProgressiveImageSessionScope;
+  /** When true, wraps the image in the v2 Prismatic Laminate foil overlay. */
+  isFoil?: boolean;
+  /** Seed for per-card foil uniqueness; defaults to imagePath. */
+  foilSeed?: string;
+  foilSize?: FoilCardSize;
+  /** Start foil intro on mount (detail hero) instead of waiting for intersection. */
+  foilEagerIntro?: boolean;
+}
+
+function wrapWithFoil(
+  node: ReactNode,
+  opts: {
+    isFoil?: boolean;
+    foilSeed?: string;
+    imagePath?: string | null;
+    foilSize?: FoilCardSize;
+    foilEagerIntro?: boolean;
+  },
+): ReactNode {
+  if (!opts.isFoil) return node;
+  const seed = opts.foilSeed ?? opts.imagePath ?? 'foil-default';
+  return (
+    <FoilCard seed={seed} size={opts.foilSize ?? 'thumb'} eagerIntro={opts.foilEagerIntro}>
+      {node}
+    </FoilCard>
+  );
 }
 
 function catalogTypeSupportsProgressiveThumb(type?: CatalogType): boolean {
@@ -87,13 +114,19 @@ export function CardImage({
   loading = 'lazy',
   onImageFailed,
   progressiveSessionScope = 'database',
+  isFoil,
+  foilSeed,
+  foilSize,
+  foilEagerIntro,
 }: CardImageProps) {
   const useProgressive =
     progressive && canProgressiveLoad(imagePath, catalogType) && !shouldSkipFullResUpgrade();
   const progressiveThumb = catalogTypeSupportsProgressiveThumb(catalogType);
+  const foilWrap = (node: ReactNode) =>
+    wrapWithFoil(node, { isFoil, foilSeed, imagePath, foilSize, foilEagerIntro });
 
   if (useProgressive) {
-    return (
+    return foilWrap(
       <ProgressiveCardImage
         key={`${imagePath ?? ''}|${catalogType ?? ''}`}
         imagePath={imagePath}
@@ -104,11 +137,11 @@ export function CardImage({
         loading={loading}
         progressiveThumb={progressiveThumb}
         progressiveSessionScope={progressiveSessionScope}
-      />
+      />,
     );
   }
 
-  return (
+  return foilWrap(
     <SingleLayerCardImage
       key={`${imagePath ?? ''}|${catalogType ?? ''}`}
       imagePath={imagePath}
@@ -119,7 +152,7 @@ export function CardImage({
       style={style}
       loading={loading}
       onImageFailed={onImageFailed}
-    />
+    />,
   );
 }
 

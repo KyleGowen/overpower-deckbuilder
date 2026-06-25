@@ -1,0 +1,212 @@
+/* v2 Prismatic Laminate — metallic foil overlay stack (see STYLE_GUIDE.md) */
+
+.foil-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: inherit;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.foil-card__stack {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Broad metallic wash — enhances art via blend, does not cover it */
+.foil-card__luster {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--foil-luster-angle, 120deg),
+    hsla(var(--foil-cool-hue, 200), 60%, 74%, 0.09) 0%,
+    hsla(var(--foil-warm-hue, 45), 80%, 70%, 0.13) 30%,
+    hsla(0, 0%, 100%, 0.15) 50%,
+    hsla(var(--foil-cool-hue, 200), 55%, 80%, 0.1) 70%,
+    transparent 100%
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.82;
+}
+
+/* Static diagonal prismatic band — visible at rest, unique angle + center per seed */
+.foil-card__sheen {
+  position: absolute;
+  inset: -8%;
+  background: linear-gradient(
+    var(--foil-luster-angle, 120deg),
+    transparent calc(var(--foil-sheen-shift, 50%) - 12%),
+    hsla(0, 0%, 100%, 0.26) calc(var(--foil-sheen-shift, 50%) - 4%),
+    hsla(var(--foil-cool-hue, 200), 85%, 78%, 0.19) var(--foil-sheen-shift, 50%),
+    hsla(var(--foil-warm-hue, 45), 92%, 72%, 0.22) calc(var(--foil-sheen-shift, 50%) + 4%),
+    hsla(280, 70%, 82%, 0.14) calc(var(--foil-sheen-shift, 50%) + 7%),
+    transparent calc(var(--foil-sheen-shift, 50%) + 14%)
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.72;
+}
+
+/* Full-card iridescent tint — subtle rainbow shift without washing art */
+.foil-card__prism {
+  position: absolute;
+  inset: -25%;
+  background: conic-gradient(
+    from var(--foil-facet-rotate, 0deg) at 50% 50%,
+    hsla(var(--foil-warm-hue, 45), 90%, 68%, 0.08) 0deg,
+    hsla(var(--foil-cool-hue, 200), 80%, 76%, 0.09) 72deg,
+    hsla(280, 75%, 80%, 0.07) 144deg,
+    hsla(var(--foil-warm-hue, 45), 85%, 72%, 0.08) 216deg,
+    hsla(0, 0%, 100%, 0.06) 288deg,
+    hsla(var(--foil-warm-hue, 45), 90%, 68%, 0.08) 360deg
+  );
+  mix-blend-mode: color-dodge;
+  opacity: 0.28;
+}
+
+/* Micro-facet grain — breaks up uniformity per seed rotation */
+.foil-card__facets {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(
+    from var(--foil-facet-rotate, 0deg) at 50% 50%,
+    hsla(0, 0%, 100%, 0.04) 0deg 6deg,
+    transparent 6deg 12deg
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.52;
+}
+
+/* Localized specular glints — three hotspots on all sizes for clearer foil read */
+.foil-card__hotspots {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse calc(var(--foil-hotspot-1-scale, 0.5) * 62%) calc(var(--foil-hotspot-1-scale, 0.5) * 46%)
+        at var(--foil-hotspot-1-x, 30%) var(--foil-hotspot-1-y, 25%),
+      hsla(0, 0%, 100%, 0.36) 0%,
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse calc(var(--foil-hotspot-2-scale, 0.4) * 56%) calc(var(--foil-hotspot-2-scale, 0.4) * 42%)
+        at var(--foil-hotspot-2-x, 70%) var(--foil-hotspot-2-y, 60%),
+      hsla(var(--foil-warm-hue, 45), 90%, 76%, 0.27) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse calc(var(--foil-hotspot-3-scale, 0.3) * 50%) calc(var(--foil-hotspot-3-scale, 0.3) * 38%)
+        at var(--foil-hotspot-3-x, 45%) var(--foil-hotspot-3-y, 80%),
+      hsla(var(--foil-cool-hue, 200), 75%, 84%, 0.2) 0%,
+      transparent 58%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.44;
+}
+
+.foil-card--hero .foil-card__hotspots {
+  opacity: 0.52;
+}
+
+.foil-card--hero .foil-card__sheen {
+  opacity: 0.8;
+}
+
+.foil-card--hero .foil-card__prism {
+  opacity: 0.34;
+}
+
+/* Thumb grids — slightly softer than hero but still clearly metallic */
+.foil-card--thumb .foil-card__luster {
+  opacity: 0.8;
+}
+
+.foil-card--thumb .foil-card__sheen {
+  opacity: 0.66;
+}
+
+.foil-card--thumb .foil-card__prism {
+  opacity: 0.25;
+}
+
+.foil-card--thumb .foil-card__facets {
+  opacity: 0.44;
+}
+
+.foil-card--thumb .foil-card__hotspots {
+  opacity: 0.38;
+}
+
+/* One-shot intro glint — sweeps once then hides */
+.foil-card__intro-glint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 36%,
+    hsla(0, 0%, 100%, 0.55) 46%,
+    hsla(var(--foil-warm-hue, 45), 80%, 84%, 0.45) 50%,
+    hsla(0, 0%, 100%, 0.5) 54%,
+    transparent 64%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  mask-size: 22% 100%;
+  mask-repeat: no-repeat;
+  mask-position: -25% 0;
+}
+
+.foil-card--intro .foil-card__stack {
+  animation: foil-intro-settle var(--foil-intro-duration, 0.65s) ease-out forwards;
+}
+
+.foil-card--intro .foil-card__intro-glint {
+  animation: foil-intro-sweep var(--foil-intro-duration, 0.65s) ease-out forwards;
+}
+
+.foil-card--settled .foil-card__intro-glint {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes foil-intro-settle {
+  0% {
+    opacity: 0.62;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes foil-intro-sweep {
+  0% {
+    mask-position: -25% 0;
+    opacity: 0.65;
+  }
+  70% {
+    opacity: 0.4;
+  }
+  100% {
+    mask-position: 125% 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil-card--intro .foil-card__stack,
+  .foil-card--intro .foil-card__intro-glint {
+    animation: none;
+    opacity: 1;
+  }
+
+  .foil-card--intro .foil-card__intro-glint,
+  .foil-card--settled .foil-card__intro-glint {
+    opacity: 0;
+  }
+}

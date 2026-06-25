@@ -24,6 +24,10 @@
 .card-detail__image .card-image {
   background: transparent;
 }
+.card-detail__image .foil-card {
+  width: 100%;
+  height: 100%;
+}
 
 .card-detail__tags {
   display: flex;
