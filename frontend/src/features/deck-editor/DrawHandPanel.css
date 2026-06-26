@@ -14,7 +14,7 @@
   color: var(--color-text-muted);
 }
 
-/* Two cards per row — desktop may scale; mobile scrolls */
+/* Desktop: single horizontal row (may scale); mobile: two cards per row */
 .draw-hand__row {
   display: flex;
   justify-content: center;
@@ -31,18 +31,19 @@
 }
 
 .draw-hand__row-inner {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  justify-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: center;
   gap: var(--space-4);
-  width: 100%;
-  max-width: calc(2 * var(--deck-editor-portrait-col) + var(--space-4));
+  width: max-content;
+  max-width: 100%;
   transform-origin: top center;
 }
 
 .draw-hand__slot {
-  width: 100%;
+  flex: 0 0 auto;
+  width: var(--deck-editor-portrait-col);
   max-width: var(--deck-editor-portrait-col);
   transition: transform var(--dur-fast) var(--ease-out);
 }
@@ -166,6 +167,11 @@
 }
 
 .layout-mobile .draw-hand__row-inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  width: 100%;
   max-width: none;
   transform: none !important;
   padding-inline: 0;

@@ -16,11 +16,9 @@ function readPortraitColWidth(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 210;
 }
 
-const DRAW_HAND_COLUMNS = 2;
-
 /**
- * Uniform scale so two portrait-width columns fit in the panel (desktop/tablet only).
- * Returns 1 on layout-mobile — the grid scrolls in the panel body instead.
+ * Uniform scale so the full drawn hand fits in the panel width (desktop/tablet only).
+ * Returns 1 on layout-mobile — the two-column grid scrolls in the panel body instead.
  */
 export function useDrawHandScale(
   rowRef: RefObject<HTMLElement | null>,
@@ -41,10 +39,14 @@ export function useDrawHandScale(
         return;
       }
       const baseWidth = readPortraitColWidth();
-      const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap) || 16;
+      const inner = el.firstElementChild;
+      const gapSource = inner instanceof HTMLElement ? inner : el;
+      const gap =
+        parseFloat(getComputedStyle(gapSource).columnGap || getComputedStyle(gapSource).gap) ||
+        16;
       const available = el.clientWidth;
       const needed =
-        DRAW_HAND_COLUMNS * baseWidth + Math.max(0, DRAW_HAND_COLUMNS - 1) * gap;
+        cardCount * baseWidth + Math.max(0, cardCount - 1) * gap;
       setScale(needed > 0 && available > 0 ? Math.min(1, available / needed) : 1);
     };
 

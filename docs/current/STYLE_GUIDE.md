@@ -3628,8 +3628,8 @@ Top slide-out overlay on `.deck-editor__content` ([`DrawHandPanel.tsx`](../../fr
 
 ### Row — `.draw-hand__row` / `.draw-hand__row-inner`
 
-- **Desktop:** 2-column CSS grid, centered; `max-width: calc(2 * var(--deck-editor-portrait-col) + var(--space-4))`; `transform: scale(var(--draw-hand-scale))` from `useDrawHandScale` when two columns overflow panel width.
-- **Mobile:** same 2-column grid at full content width; vertical scroll in `.slideout__body` (no horizontal snap).
+- **Desktop:** single horizontal flex row (`flex-wrap: nowrap`), centered; each slot `width: var(--deck-editor-portrait-col)` (**210px**); `transform: scale(...)` from `useDrawHandScale` when the full hand overflows panel width.
+- **Mobile:** 2-column CSS grid (`grid-template-columns: repeat(2, minmax(0, 1fr))`) at full content width; vertical scroll in `.slideout__body`.
 
 ### Slot — `.draw-hand__slot`
 

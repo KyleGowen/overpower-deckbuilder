@@ -61,7 +61,7 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 1. **Draw Hand** button in the sticky header (`.deck-editor__actions`). Disabled with tooltip when playable count &lt; 8.
 2. First click **opens** the panel and draws; button gets `.is-active`. Second click, **×**, or backdrop **closes** and clears the hand.
 3. **Drawn hand** panel: **Desktop** — slides down from the top (`SlideOutPanel` `side="top"`, `position="absolute"`); deck grid remains visible behind blurred scrim. **Mobile** — full-viewport overlay (`position="fixed"`, `100dvh`); deck chrome hidden behind opaque panel.
-4. **Desktop**: two-column grid of 8–9 cards at deck-editor portrait width; `ResizeObserver` scales the grid when the panel is narrower than two columns. Drag-and-drop reorder on fine pointers.
+4. **Desktop**: single horizontal row of 8–9 cards at deck-editor portrait width; `ResizeObserver` scales the row when the panel is narrower than the full hand. Drag-and-drop reorder on fine pointers.
 5. **Mobile** (`.layout-mobile`): vertical scroll through a **2-column grid** in the panel body; equal half-width portrait slots with 5% art inset; full-width **Draw again** footer.
 6. **Events** display landscape art rotated 90° CCW inside the portrait slot (draw-hand only).
 7. **Draw again** in the panel footer redraws without closing.
