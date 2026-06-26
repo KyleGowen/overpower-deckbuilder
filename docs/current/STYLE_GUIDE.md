@@ -3150,24 +3150,21 @@ Reusable [`StatIconBadge`](../../frontend/src/components/StatIconBadge/StatIconB
 | Element | Class | Notes |
 |---|---|---|
 | Root | `.stat-icon-badge`, `.stat-icon-badge--sm`, `.stat-icon-badge--md`, `.stat-icon-badge--lg` | `position: relative; inline-flex`; `overflow: visible` |
-| Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **110%** of container (10% larger than box); value font unchanged; `z-index: 0` |
-| Value halo | `.stat-icon-badge__value-halo` | Soft translucent white radial glow behind number (`z-index: 1`); sizes **15px** (`sm`), **25.5px** (`md`), **28.5px** (`lg`); `filter: blur(1–1.2px)` |
-| Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `color: #000`; `font-weight: 700`; light white `text-shadow`; `z-index: 2` |
-| Wide value | `.stat-icon-badge__value--wide` | Smaller font when value has 2+ characters (mainly `sm` threat) |
-| Lighter glow | `.stat-icon-badge--lighter-value-glow` on root when `type` is `combat` or `brute_force` | Halo + text-shadow **20% lower opacity** (solid icon fill already legible) |
-| Stronger glow | `.stat-icon-badge--stronger-value-glow` on root when `type` is `energy` | Halo + text-shadow **20% higher opacity** (wireframe atom center) |
+| Icon | `.stat-icon-badge__icon` | `object-fit: contain`; **130%** of container (icon art larger than box; numerals sized separately); `z-index: 0` |
+| Value | `.stat-icon-badge__value` | `position: absolute; inset: 0`; centered flex; `font-family: var(--font-stat-value)` (`Poppins` bundled via `@fontsource/poppins/800`); `font-weight: 800`; `translateY` **1px** / **2px** / **2px** (`sm` / `md` / `lg`); `letter-spacing: -0.02em`; `font-variant-numeric: tabular-nums`; `font-synthesis: none`; `color: #000`; no halo or text-shadow; `z-index: 1` |
+| Wide value | `.stat-icon-badge__value--wide` | 2+ characters keep the single-digit font size and compress horizontally via `transform: scaleX(0.7)` (combined with the size's `translateY`) so double digits like `10` / `13` / `79` stay tall and fill the disc, matching the card art — instead of shrinking to a smaller font |
 
-### Value halo (readability)
+### Stat value typography
 
-Production PNGs unchanged. Every badge renders `.stat-icon-badge__value-halo` between icon and number so wireframe energy centers and similar low-contrast areas stay readable. Default gradient peak **rgba(255,255,255,0.48)**; `energy` uses **0.576** (+20%); `combat` and `brute_force` use **0.384** (−20%).
+Overlay numbers use **`--font-stat-value`** (`'Poppins', Impact, 'Arial Black', sans-serif`) — not body `--font-sans` — so dynamic badge values match the heavy, rounded geometric numerals baked into the printed character card art (chosen over Roboto Condensed, which was too narrow/light). Font is bundled locally in the SPA (`@fontsource/poppins` weight **800**); no Google Fonts CDN. Icon PNG renders at **130%** of the badge box so numbers sit in the center disc with card-like padding. Single digits are sized to fill the disc (per badge size below); double+ digits keep that height and use `scaleX(0.7)` to fit the round disc. All stat values use a small downward `translateY` (**1px** / **2px** / **2px** by size) so numerals sit in the icon center disc.
 
 ### Sizes
 
 | Size | Container | Value font | Use |
 |---|---|---|---|
-| `sm` | 18×18px | 9px (7px wide) | Deck tile meta bar threat |
-| `md` | 32×32px | 13px (11px wide) | Deck tile character max row |
-| `lg` | 36×36px | 18px (14px wide) | Deck editor header stats |
+| `sm` | 18×18px | 8px (wide: same size, `scaleX(0.7)`) | Deck tile meta bar threat |
+| `md` | 32×32px | 13px (wide: same size, `scaleX(0.7)`) | Deck tile character max row |
+| `lg` | 40×40px | 16px (wide: same size, `scaleX(0.7)`) | Deck editor header stats |
 
 ### Icon types (`StatIconType`)
 

@@ -19,11 +19,8 @@ export interface StatIconBadgeProps {
 const BADGE_PX: Record<NonNullable<StatIconBadgeProps['size']>, number> = {
   sm: 18,
   md: 32,
-  lg: 36,
+  lg: 40,
 };
-
-const LIGHTER_VALUE_GLOW_TYPES: StatIconType[] = ['combat', 'brute_force'];
-const STRONGER_VALUE_GLOW_TYPES: StatIconType[] = ['energy'];
 
 export function StatIconBadge({
   type,
@@ -40,15 +37,7 @@ export function StatIconBadge({
 
   return (
     <span
-      className={[
-        'stat-icon-badge',
-        `stat-icon-badge--${size}`,
-        LIGHTER_VALUE_GLOW_TYPES.includes(type) ? 'stat-icon-badge--lighter-value-glow' : '',
-        STRONGER_VALUE_GLOW_TYPES.includes(type) ? 'stat-icon-badge--stronger-value-glow' : '',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={['stat-icon-badge', `stat-icon-badge--${size}`, className].filter(Boolean).join(' ')}
       aria-label={ariaLabel}
       title={tooltip}
     >
@@ -59,7 +48,6 @@ export function StatIconBadge({
         width={BADGE_PX[size]}
         height={BADGE_PX[size]}
       />
-      <span className="stat-icon-badge__value-halo" aria-hidden="true" />
       <span
         className={[
           'stat-icon-badge__value',

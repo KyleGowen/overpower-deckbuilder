@@ -1,4 +1,6 @@
 @import './tokens.css';
+/* Stat-value numerals: heavy geometric sans matching the baked card-art digits */
+@import '@fontsource/poppins/800.css';
 
 /* ---- Reset ---- */
 *,
