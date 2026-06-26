@@ -16,8 +16,8 @@ Reusable badge: power-type or threat PNG with a **bold black number** centered o
 
 - Root: `.stat-icon-badge`, size modifiers
 - Icon: `.stat-icon-badge__icon` — **130%** of container width/height (PNG larger than box so numerals sit in the center disc; overlay font sized separately)
-- Overlay value: `.stat-icon-badge__value` — `font-family: var(--font-stat-value)` (Poppins 800, bundled via `@fontsource/poppins/800`); `font-weight: 800`; single-digit font sized to fill the disc per size (`8px` `sm`, `13px` `md`, `16px` `lg`); all values shifted down slightly (`translateY` **1px** `sm`, **2px** `md`, **2px** `lg`); `letter-spacing: -0.02em`; `font-variant-numeric: tabular-nums`; black, centered, no glow
-- Double+ digits: `.stat-icon-badge__value--wide` keeps the single-digit font size and adds `transform: scaleX(0.7)` (with the size's `translateY`) so values like `10` / `13` / `79` stay tall and fill the round disc like the card art (no font shrink)
+- Overlay value: `.stat-icon-badge__value` — `font-family: var(--font-stat-value)` (Poppins 800, bundled via `@fontsource/poppins/800`); `font-weight: 800`; single-digit font sized to fill the disc per size (`8px` `sm`, `13px` `md`, `16px` `lg`); `transform: translateY(...) scaleY(0.9)` — shifted down slightly (`translateY` **1px** `sm`, **2px** `md`, **2px** `lg`) plus a 10% vertical squash (width unchanged) so numerals aren't taller than the card art; `letter-spacing: -0.02em`; `font-variant-numeric: tabular-nums`; black, centered, no glow
+- Double+ digits: `.stat-icon-badge__value--wide` keeps the single-digit font size and adds `scaleX(0.7)` (combined with the size's `translateY` and `scaleY(0.9)`) so values like `10` / `13` / `79` stay tall and fill the round disc like the card art (no font shrink)
 
 ## Usage
 

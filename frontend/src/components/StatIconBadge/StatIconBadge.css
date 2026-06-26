@@ -50,34 +50,36 @@
 }
 
 /*
- * Single digits are sized to fill the icon disc like the baked card art.
- * Double+ digits keep the same height and are compressed horizontally
+ * Single digits are sized to fill the icon disc like the baked card art,
+ * with a slight vertical squash (scaleY 0.9, width unchanged) so the
+ * numerals are not a touch taller than the card version.
+ * Double+ digits keep the same height and are also compressed horizontally
  * (scaleX) so they stay tall and fit the round disc, matching how the
  * cards render values such as 10 / 13 / 79.
  */
 .stat-icon-badge--sm .stat-icon-badge__value {
   font-size: 8px;
-  transform: translateY(1px);
+  transform: translateY(1px) scaleY(0.9);
 }
 
 .stat-icon-badge--sm .stat-icon-badge__value--wide {
-  transform: translateY(1px) scaleX(0.7);
+  transform: translateY(1px) scaleX(0.7) scaleY(0.9);
 }
 
 .stat-icon-badge--md .stat-icon-badge__value {
   font-size: 13px;
-  transform: translateY(2px);
+  transform: translateY(2px) scaleY(0.9);
 }
 
 .stat-icon-badge--md .stat-icon-badge__value--wide {
-  transform: translateY(2px) scaleX(0.7);
+  transform: translateY(2px) scaleX(0.7) scaleY(0.9);
 }
 
 .stat-icon-badge--lg .stat-icon-badge__value {
   font-size: 16px;
-  transform: translateY(2px);
+  transform: translateY(2px) scaleY(0.9);
 }
 
 .stat-icon-badge--lg .stat-icon-badge__value--wide {
-  transform: translateY(2px) scaleX(0.7);
+  transform: translateY(2px) scaleX(0.7) scaleY(0.9);
 }

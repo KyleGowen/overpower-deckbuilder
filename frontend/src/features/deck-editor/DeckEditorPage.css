@@ -1006,7 +1006,7 @@
 
 /* Double+ digits keep height and compress horizontally to fit the disc */
 .layout-mobile .deck-editor__header .stat-icon-badge--lg .stat-icon-badge__value--wide {
-  transform: translateY(2px) scaleX(0.7);
+  transform: translateY(2px) scaleX(0.7) scaleY(0.9);
 }
 
 .layout-mobile .deck-editor__main {
