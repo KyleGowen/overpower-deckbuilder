@@ -50,6 +50,7 @@ import { Logo } from '../../components/Logo';
 import {
   IconChevronLeft,
   IconHome,
+  IconDatabase,
   IconDecks,
   IconCollection,
   IconSave,
@@ -766,6 +767,7 @@ export default function DeckEditorPage() {
         </button>
         <nav className="deck-editor__rail-nav">
           <button type="button" onClick={() => navigate('/home')} title="Home"><IconHome /></button>
+          <button type="button" onClick={() => navigate('/data')} title="Card Database"><IconDatabase /></button>
           <button type="button" onClick={() => navigate(`/users/${user?.id ?? userId}/decks`)} title="Decks"><IconDecks /></button>
           <button type="button" onClick={() => navigate(`/users/${user?.id ?? userId}/collection`)} title="Collection"><IconCollection /></button>
         </nav>
