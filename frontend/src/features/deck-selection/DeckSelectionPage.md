@@ -24,6 +24,10 @@ per-deck actions. Titled "My Decks" (or "Guest Decks").
 ## Notes
 - Guest decks (ids prefixed `guest_`) are session/local only; delete is allowed for guest's
   own session decks.
+- **Mobile layout** (`.layout-mobile`): `.dsel__grid` uses `repeat(2, minmax(0, 1fr))` with
+  `gap: var(--space-3)` — two `DeckTile` cards per row. Tile density is scaled via
+  `.layout-mobile` rules in `DeckTile.css` (mission chip and updated date hidden; stats
+  shrunk; 1-line name). See `DeckSelectionPage.css` and `STYLE_GUIDE.md` § Mobile deck grid.
 - Import logic lives in `frontend/src/lib/decks/` (`extractCardsFromImportJson`,
   `resolveImportCardIds`, `importDeckFromJson`, `importCatalogLoader`). Contract matches
   [`public/js/components/deck-import.md`](public/js/components/deck-import.md) for parsing and

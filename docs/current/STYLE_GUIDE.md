@@ -3176,6 +3176,7 @@ Overlay numbers use **`--font-stat-value`** (`'Poppins', Impact, 'Arial Black', 
 
 ### Deck tile usage — `DeckTile`
 
+- **Art cycling:** desktop hover on `.deck-tile__art` waits 1s then advances every 1.5s through characters + location; mobile **press-and-hold** uses native touch listeners with the same 1.5s cadence (`DeckTile.tsx`). The art sets `touch-action: pan-x pan-y` so a still hold cycles (engages after a ~0.75s delay, no OS long-press needed) while a drag in either axis scrolls (vertical lists or horizontal Home rails) — both supported from the same touch on the art. Card images inside the art use `pointer-events: none` and `-webkit-touch-callout: none` to block OS image long-press menus. Release stops cycling, keeps the last slide, and suppresses the tile open click. A quick tap still opens the deck.
 - **Meta bar threat** (`.deck-tile__metric--end`): single `StatIconBadge` `type="threat_level"` `size="sm"` (replaces separate icon + adjacent number).
 - **Character max row** (`.deck-tile__stats`, `variant="full"` only): four `StatIconBadge` `size="md"` in a flex row (`justify-content: space-between`) — icons only, no text labels. Replaces the former four dark boxes with colored numbers + `ENERGY` / `COMBAT` labels.
 
@@ -3246,6 +3247,20 @@ The New Deck slide-out create form ([`DeckSelectionPage.tsx`](../../frontend/src
 
 - `.dsel__actions { width: 100% }` — toolbar spans full width
 - `.dsel__search { flex: 1; width: auto }` — search stretches; buttons wrap on the next row via `flex-wrap`
+
+### Mobile deck grid — `.layout-mobile .dsel__grid`
+
+Two deck tiles per row (matches Collection mobile density pattern):
+
+| Property | Value |
+|---|---|
+| Columns | `repeat(2, minmax(0, 1fr))` |
+| Gap | `var(--space-3)` (12px) |
+| Tile scaling | `.layout-mobile` rules in [`DeckTile.css`](../../frontend/src/components/DeckTile/DeckTile.css) |
+
+**Visible on mobile tiles:** hero art, deck name (1 line), card count, legality badge (centered in meta bar), threat badge, four primary stat icons (shrunk to ~22px), ⋯ menu (44×44px hit area). Meta bar has `margin-bottom: calc(var(--space-1) / 2)` (2px) before the stats row.
+
+**Hidden on mobile tiles:** mission set chip (`.deck-tile__chip`), footer row (`.deck-tile__footer` — updated date and footer legality). Hover lift disabled on mobile.
 
 ## Card Database grid (v2 SPA)
 

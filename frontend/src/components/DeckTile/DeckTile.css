@@ -33,6 +33,27 @@
   padding: 1px;
   background: var(--color-bg-elevated);
   overflow: hidden;
+  /* Allow page scroll in both axes (vertical lists + horizontal Home rails) to start on the art
+     via a drag, while a still hold cycles. */
+  touch-action: pan-x pan-y;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Route touches to the art shell — prevents browser image long-press menus on <img>. */
+.deck-tile__art .deck-tile__hero,
+.deck-tile__art .card-image,
+.deck-tile__art .card-image__img,
+.deck-tile__art .foil-card {
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.deck-tile__art .deck-tile__art-veil,
+.deck-tile__art .deck-tile__overlay {
+  pointer-events: none;
 }
 
 .deck-tile__hero {
@@ -211,6 +232,11 @@
   white-space: nowrap;
 }
 
+/* Legality badge — footer on desktop; meta bar center on mobile */
+.deck-tile__legality--meta {
+  display: none;
+}
+
 .deck-tile__stats {
   display: flex;
   justify-content: space-between;
@@ -232,4 +258,108 @@
 .deck-tile__updated {
   font-size: var(--font-size-xs);
   color: var(--color-text-dim);
+}
+
+/* ---- Mobile density (2-col deck selection grid, Home rails) ---- */
+.layout-mobile .deck-tile:hover {
+  transform: none;
+}
+
+.layout-mobile .deck-tile__overlay {
+  padding: var(--space-2) var(--space-2);
+  gap: var(--space-1);
+}
+
+.layout-mobile .deck-tile__name {
+  font-size: var(--font-size-sm);
+  -webkit-line-clamp: 1;
+}
+
+.layout-mobile .deck-tile--compact .deck-tile__name {
+  font-size: var(--font-size-sm);
+}
+
+.layout-mobile .deck-tile__menu {
+  width: 28px;
+  height: 28px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0 0;
+  padding: 0;
+}
+
+.layout-mobile .deck-tile__body {
+  padding: var(--space-2);
+  gap: var(--space-1);
+}
+
+.layout-mobile .deck-tile--compact .deck-tile__body {
+  padding: var(--space-2);
+  gap: var(--space-1);
+}
+
+.layout-mobile .deck-tile__metric {
+  gap: 4px;
+  font-size: var(--font-size-xs);
+}
+
+.layout-mobile .deck-tile__metric-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+.layout-mobile .deck-tile__chip {
+  display: none;
+}
+
+.layout-mobile .deck-tile__meta-bar {
+  margin-bottom: calc(var(--space-1) / 2);
+}
+
+.layout-mobile .deck-tile__stats {
+  gap: var(--space-1);
+  margin-top: 0;
+  padding: 0;
+}
+
+.layout-mobile .deck-tile__stats .stat-icon-badge--md {
+  width: 22px;
+  height: 22px;
+}
+
+.layout-mobile .deck-tile__stats .stat-icon-badge--md .stat-icon-badge__value {
+  font-size: 9px;
+  transform: translateY(1px) scaleY(0.9);
+}
+
+.layout-mobile .deck-tile__stats .stat-icon-badge--md .stat-icon-badge__value--wide {
+  transform: translateY(1px) scaleX(0.7) scaleY(0.9);
+}
+
+.layout-mobile .deck-tile__updated {
+  display: none;
+}
+
+.layout-mobile .deck-tile__legality--meta {
+  display: inline-flex;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 0;
+  max-width: calc(100% - 5.5rem);
+  padding: 1px 6px;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layout-mobile .deck-tile__legality--footer {
+  display: none;
+}
+
+.layout-mobile .deck-tile__footer {
+  display: none;
 }

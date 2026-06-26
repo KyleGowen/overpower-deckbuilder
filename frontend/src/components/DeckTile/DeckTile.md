@@ -4,9 +4,17 @@ Summary tile for a deck. Layout ("hero" art + info panel):
 
 - **Art zone:** feature character via `CardImage` with `card-image--contain` — full landscape card
   (380:280), 1px padding, no zoom/crop. **Location** slides use full-res art with `object-fit: cover`
-  so the narrower location frame fills the hero slot (thumbs are letterboxed at 236:151). **Hover:** waits 1s (current slide already visible), then
+  so the narrower location frame fills the hero slot (thumbs are letterboxed at 236:151). **Hover** (mouse / fine pointer): waits 1s, then
   cycles every 1.5s through characters and, when set, the **location** card; pointer leave stops
-  and keeps the last shown slide. Bottom gradient scrim keeps the deck name readable.
+  and keeps the last shown slide. **Press-and-hold** (touch): native `touchstart` / `touchend` on
+  `.deck-tile__art`, which sets `touch-action: pan-x pan-y`. A still hold engages cycling after a
+  ~0.75s delay (no OS long-press needed), then advances every 1.5s; a drag in either axis
+  instead scrolls (vertical lists or horizontal Home rails — the browser fires `touchcancel`, which
+  stops the cycle so scrolling is unblocked) — so the same touch on the art supports both scrolling
+  and cycling. Child images use
+  `pointer-events: none` and `-webkit-touch-callout: none` so the browser image long-press menu does
+  not steal the gesture. Release stops cycling and suppresses the tile open click; a quick tap still
+  opens the deck.
 - **On the scrim:** the deck name (`<h3>`).
 - **Info panel:** single **meta bar** (cards + threat `StatIconBadge`, optional mission-set chip on `full`),
   character max stats as four `StatIconBadge` icons (`full` only), then a **footer** row (updated date left, optional legality badge lower-right).
@@ -36,6 +44,20 @@ When `maxStats` is provided, four `StatIconBadge` components (`md`) show charact
 ## Footer
 
 `.deck-tile__footer`: **Updated** date on the left; optional legality badge on the lower-right (`compact` and `full`). Legal decks show date only.
+
+## Mobile density (`.layout-mobile`)
+
+When deck tiles appear in the 2-column deck selection grid (~175px column width), mobile CSS scales the tile down:
+
+- **Name:** 1-line clamp, smaller font
+- **Meta bar:** card count + threat only; mission set chip hidden
+- **Meta bar (legality):** legality badge centered between card count and threat (footer row hidden); `margin-bottom: calc(var(--space-1) / 2)` before stats row
+- **Stats row (`full`):** four `md` badges shrunk to ~22px via CSS override
+- **Footer:** hidden on mobile (updated date and footer legality omitted)
+- **Menu:** 44×44px tap target; hover lift disabled
+- **Art preview:** press-and-hold on the art zone cycles characters + location (same timing as desktop hover); release keeps last slide and does not open the deck
+
+Same rules apply to Home rail `compact` tiles harmlessly (rails are horizontal scroll, not a 2-col grid).
 
 ## Legality badge
 

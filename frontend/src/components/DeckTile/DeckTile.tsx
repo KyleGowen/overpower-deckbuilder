@@ -10,8 +10,14 @@ import { deckTileLegalityBadge } from './deckTileLegality';
 import './DeckTile.css';
 
 const ART_CYCLE_MS = 1500;
-/** Wait before first advance — current slide is already visible on hover enter. */
+/** Hover (desktop): current slide is already visible, so wait before the first advance. */
 const ART_CYCLE_HOVER_DELAY_MS = 1000;
+/**
+ * Touch hold: engage cycling after a brief delay so a press-and-hold cycles without needing the OS
+ * long-press (the "hold till the phone vibrates" gesture). Long enough that a quick tap opens the
+ * deck and a hold-then-scroll drag scrolls cleanly before the cycle would start.
+ */
+const ART_TOUCH_HOLD_DELAY_MS = 750;
 
 export interface DeckStatLine {
   energy: number;
@@ -93,6 +99,12 @@ export function DeckTile({
   const [slideIndex, setSlideIndex] = useState(0);
   const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const cycleDelayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdEngagedRef = useRef(false);
+  const suppressOpenClickRef = useRef(false);
+  const touchHoldActiveRef = useRef(false);
+  const artRef = useRef<HTMLDivElement>(null);
+  const startArtCycleRef = useRef<(delayMs?: number) => void>(() => {});
+  const stopArtCycleRef = useRef<() => void>(() => {});
   const shownSlide = artSlides[slideIndex] ?? artSlides[0];
   const isLocationSlide = shownSlide?.catalogType === 'locations';
 
@@ -107,21 +119,88 @@ export function DeckTile({
     }
   }, []);
 
-  const handleArtPointerEnter = useCallback(() => {
-    if (artSlides.length <= 1) return;
-    stopArtCycle();
-    cycleDelayTimer.current = setTimeout(() => {
-      cycleDelayTimer.current = null;
-      setSlideIndex((i) => (i + 1) % artSlides.length);
-      cycleTimer.current = setInterval(() => {
+  const startArtCycle = useCallback(
+    (delayMs: number = ART_CYCLE_HOVER_DELAY_MS) => {
+      if (artSlides.length <= 1) return;
+      stopArtCycle();
+      cycleDelayTimer.current = setTimeout(() => {
+        cycleDelayTimer.current = null;
+        holdEngagedRef.current = true;
         setSlideIndex((i) => (i + 1) % artSlides.length);
-      }, ART_CYCLE_MS);
-    }, ART_CYCLE_HOVER_DELAY_MS);
-  }, [artSlides.length, stopArtCycle]);
+        cycleTimer.current = setInterval(() => {
+          setSlideIndex((i) => (i + 1) % artSlides.length);
+        }, ART_CYCLE_MS);
+      }, delayMs);
+    },
+    [artSlides.length, stopArtCycle],
+  );
 
-  const handleArtPointerLeave = useCallback(() => {
-    stopArtCycle();
-  }, [stopArtCycle]);
+  startArtCycleRef.current = startArtCycle;
+  stopArtCycleRef.current = stopArtCycle;
+
+  const handleArtPointerEnter = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === 'touch') return;
+      startArtCycle();
+    },
+    [startArtCycle],
+  );
+
+  const handleArtPointerLeave = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === 'touch') return;
+      stopArtCycle();
+    },
+    [stopArtCycle],
+  );
+
+  useEffect(() => {
+    const el = artRef.current;
+    if (!el) return;
+
+    const finishTouchHold = () => {
+      if (!touchHoldActiveRef.current) return;
+      touchHoldActiveRef.current = false;
+      const wasCycling = holdEngagedRef.current;
+      stopArtCycleRef.current();
+      if (wasCycling) {
+        suppressOpenClickRef.current = true;
+      }
+    };
+
+    const onTouchStart = () => {
+      touchHoldActiveRef.current = true;
+      holdEngagedRef.current = false;
+      // Engage cycling on a short hold (no OS long-press needed). touch-action: pan-x pan-y lets a
+      // drag in either axis scroll instead (vertical lists, horizontal Home rails) — the browser
+      // fires touchcancel when it claims the gesture for scrolling, which stops the cycle so the
+      // page/rail can scroll freely.
+      startArtCycleRef.current(ART_TOUCH_HOLD_DELAY_MS);
+    };
+
+    const onTouchEnd = () => finishTouchHold();
+    const onContextMenu = (e: Event) => e.preventDefault();
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
+    el.addEventListener('contextmenu', onContextMenu);
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+      el.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, []);
+
+  const handleTileClick = useCallback(() => {
+    if (suppressOpenClickRef.current) {
+      suppressOpenClickRef.current = false;
+      return;
+    }
+    onOpen?.();
+  }, [onOpen]);
 
   useEffect(() => () => stopArtCycle(), [stopArtCycle]);
 
@@ -138,7 +217,7 @@ export function DeckTile({
   return (
     <article
       className={`deck-tile deck-tile--${variant}`}
-      onClick={onOpen}
+      onClick={onOpen ? handleTileClick : undefined}
       role={onOpen ? 'button' : undefined}
       tabIndex={onOpen ? 0 : undefined}
       onKeyDown={(e) => {
@@ -149,9 +228,11 @@ export function DeckTile({
       }}
     >
       <div
+        ref={artRef}
         className="deck-tile__art"
         onPointerEnter={handleArtPointerEnter}
         onPointerLeave={handleArtPointerLeave}
+        onContextMenu={(e) => e.preventDefault()}
       >
         {shownSlide ? (
           <div
@@ -210,6 +291,15 @@ export function DeckTile({
               <span className="deck-tile__chip-text">{missionChipLabel}</span>
             </span>
           ) : null}
+          {legalityBadge ? (
+            <span
+              className={`deck-tile__legality deck-tile__legality--meta badge ${
+                legalityBadge.variant === 'not-legal' ? 'badge-not-legal' : ''
+              }`}
+            >
+              {legalityBadge.label}
+            </span>
+          ) : null}
           <span className="deck-tile__metric deck-tile__metric--end">
             <StatIconBadge
               type="threat_level"
@@ -242,7 +332,7 @@ export function DeckTile({
             )}
             {legalityBadge ? (
               <span
-                className={`badge ${
+                className={`deck-tile__legality deck-tile__legality--footer badge ${
                   legalityBadge.variant === 'not-legal' ? 'badge-not-legal' : ''
                 }`}
               >
