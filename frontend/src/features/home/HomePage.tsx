@@ -106,7 +106,7 @@ export default function HomePage() {
 
         <DeckRail
           icon={<IconTrophy />}
-          title="Tournament Winning Decks"
+          title="Tournament Winners"
           loading={tournamentQuery.isLoading}
           error={tournamentQuery.isError}
           decks={tournamentDecks}
