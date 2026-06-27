@@ -178,7 +178,7 @@ See [`src/metrics/.cursorrules`](src/metrics/.cursorrules). Key rule: register a
 - `npm run dev` (`frontend/`) - Start v2 React SPA on **:5173** (open this in the browser)
 
 ## Flyway migrations — local dev
-See [`migrations/.cursorrules`](migrations/.cursorrules). Summary: after adding/editing SQL, run `npm run migrate` then restart **both** dev servers (root `npm run dev` + `frontend/npm run dev`); browse the app at **http://localhost:5173**.
+See [`migrations/.cursorrules`](migrations/.cursorrules) and [`docs/current/LOCAL_FLYWAY.md`](docs/current/LOCAL_FLYWAY.md). **Local Postgres:** `overpower-postgres` (`postgres:15`) on port **1337**. **Flyway CLI is not on the host** — use `bash scripts/flyway-docker.sh migrate` (or `.\scripts\flyway-docker.ps1 migrate`), not `npm run migrate`, unless Flyway CLI is installed. Do not install Flyway CLI or loop on PATH errors. After migrating, restart **both** dev servers; browse **http://localhost:5173**.
 
 ## Integration Test Output Format
 - **ALWAYS provide table-style output when running integration tests**

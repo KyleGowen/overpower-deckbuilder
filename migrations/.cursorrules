@@ -4,7 +4,7 @@
 
 - Files are named `V<NNN>__<snake_case_description>.sql`, version monotonically increasing, never edited after a merge reaches any shared env.
 - **Additive only by default.** `DROP`, `ALTER TYPE`, or column rename requires explicit approval and a reversible partner migration checked in under `migrations/reversible/` but NOT auto-applied.
-- After adding or editing any file here, run `npm run migrate` locally and restart **both** dev servers (root `npm run dev` + `frontend/npm run dev`); browse the app at **http://localhost:5173** per [`.cursorrules`](../.cursorrules).
+- After adding or editing any file here, apply migrations locally (see **Local migrate** below) and restart **both** dev servers (root `npm run dev` + `frontend/npm run dev`); browse the app at **http://localhost:5173** per [`.cursorrules`](../.cursorrules).
 
 ## Retention / audit-log contract
 
@@ -15,6 +15,25 @@
 ## Local dev workflow
 
 1. Add/edit SQL under `migrations/`.
-2. Run `npm run migrate`.
+2. Apply migrations (see **Local migrate**).
 3. Restart root `npm run dev` and `frontend/npm run dev`; open **http://localhost:5173** (caches held in-process are only refreshed on restart).
 4. Update the relevant `docs/current/*.md` and `AGENTS.md` / `.cursorrules` in the same PR if the schema is user-visible.
+
+## Local migrate — Docker Flyway (no host CLI)
+
+**Postgres:** `overpower-postgres` (`postgres:15`) on host port **1337** — [`docker/docker-compose.yml`](../docker/docker-compose.yml).
+
+**Flyway CLI is not installed on Kyle's dev machine.** Do **not** install it or retry `npm run migrate` when `flyway` is missing from `PATH`.
+
+Use the official Flyway Docker image (correct checksums, valid `flyway_schema_history`):
+
+```bash
+bash scripts/flyway-docker.sh migrate    # Git Bash / WSL
+.\scripts\flyway-docker.ps1 migrate      # PowerShell
+```
+
+Also: `info`, `validate`, `repair`, `clean` as the script argument. Config: [`conf/flyway.docker.conf`](../conf/flyway.docker.conf).
+
+Full doc: [`docs/current/LOCAL_FLYWAY.md`](../docs/current/LOCAL_FLYWAY.md). Cursor rule: [`.cursor/rules/local-flyway-docker.mdc`](../.cursor/rules/local-flyway-docker.mdc).
+
+`npm run migrate` shells out to host `flyway` ([`src/scripts/flywayRunner.ts`](../src/scripts/flywayRunner.ts)) and fails without the CLI. Use **`npm run migrate:docker`** or `bash scripts/flyway-docker.sh migrate` instead.

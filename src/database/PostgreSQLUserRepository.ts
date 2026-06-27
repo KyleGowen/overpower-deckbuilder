@@ -179,7 +179,8 @@ export class PostgreSQLUserRepository implements UserRepository {
       email: user.email as string,
       role: user.role as UserRole,
       lastLoginAt: user.last_login_at ? new Date(user.last_login_at as string) : null,
-      authProvider: this.normalizeAuthProvider(user.auth_provider)
+      authProvider: this.normalizeAuthProvider(user.auth_provider),
+      displayName: (user.display_name as string | null) ?? null
     };
   }
 
@@ -244,6 +245,10 @@ export class PostgreSQLUserRepository implements UserRepository {
         setClause.push(`role = $${paramCount++}`);
         values.push(updates.role);
       }
+      if (updates.displayName !== undefined) {
+        setClause.push(`display_name = $${paramCount++}`);
+        values.push(updates.displayName);
+      }
 
       if (setClause.length === 0) {
         return this.getUserById(id);
@@ -262,14 +267,7 @@ export class PostgreSQLUserRepository implements UserRepository {
         return undefined;
       }
 
-      const user = result.rows[0];
-      return {
-        id: user.id,
-        name: user.username, // Map username to name for compatibility
-        email: user.email,
-        role: user.role,
-        lastLoginAt: user.last_login_at ? new Date(user.last_login_at) : null
-      };
+      return this.mapRowToUser(result.rows[0]);
     } finally {
       client.release();
     }

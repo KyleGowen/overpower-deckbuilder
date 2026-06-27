@@ -1,0 +1,19 @@
+# `docker/` — local PostgreSQL for dev and integration tests
+
+## `overpower-postgres`
+
+- **Image:** `postgres:15`
+- **Container name:** `overpower-postgres`
+- **Port:** host **1337** → container 5432
+- **Database / credentials:** `overpower`, user `postgres`, password `password`
+- **Start:** `cd docker && docker compose up -d`
+
+## Flyway migrations
+
+Flyway CLI is **not** on the host. Run migrations with the official Flyway Docker image:
+
+```bash
+bash scripts/flyway-docker.sh migrate
+```
+
+See [`docs/current/LOCAL_FLYWAY.md`](../docs/current/LOCAL_FLYWAY.md) and [`.cursor/rules/local-flyway-docker.mdc`](../.cursor/rules/local-flyway-docker.mdc).

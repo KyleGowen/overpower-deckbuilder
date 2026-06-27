@@ -22,7 +22,7 @@ Browse and automate at **`http://localhost:5173`**, not `:8085`.
 4. **If either is down:** start the missing process in the **background** from the correct directory. Do not start duplicate servers if one is already healthy.
 5. **Restart when the change requires it** (do this yourself, without asking):
    - Backend edits (`src/`, migrations, env) → restart **root** `npm run dev` (restart both if unsure).
-   - After `npm run migrate` → restart **both**.
+   - After applying Flyway migrations (`bash scripts/flyway-docker.sh migrate` locally — see `local-flyway-docker.mdc`) → restart **both**.
    - Vite config / env changes in `frontend/` → restart **frontend** `npm run dev`.
    - Stale HMR or API proxy errors → restart **both**.
 

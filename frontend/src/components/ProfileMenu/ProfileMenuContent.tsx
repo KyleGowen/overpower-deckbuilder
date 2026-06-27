@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import { fetchDecksForUser } from '../../lib/api/decks';
-import { changeEmail, changePassword } from '../../lib/api/account';
+import { changeEmail, changePassword, setDisplayName } from '../../lib/api/account';
+import { resolveUserDisplayName } from '../../lib/auth/resolveUserDisplayName';
 import { isValidEmail } from '../../lib/validation/email';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
-import { IconPlus, IconLogout, IconLock, IconSettings } from '../icons';
+import { IconPlus, IconLogout, IconLock, IconSettings, IconProfile } from '../icons';
 import './ProfileMenuContent.css';
 
-type OpenForm = 'email' | 'password' | null;
+type OpenForm = 'displayName' | 'email' | 'password' | null;
 
 export interface ProfileMenuContentProps {
   onClose: () => void;
@@ -31,6 +32,10 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordBusy, setPasswordBusy] = useState(false);
 
+  const [displayNameValue, setDisplayNameValue] = useState('');
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+  const [displayNameBusy, setDisplayNameBusy] = useState(false);
+
   const userId = user?.id ?? '';
 
   const decksQuery = useQuery({
@@ -46,29 +51,40 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
   }, [isGuest, user, refresh]);
 
   useEffect(() => {
-    if (user?.authProvider === 'google' && openForm) {
+    // Google users can't change email/password, but they CAN set a display name.
+    if (user?.authProvider === 'google' && (openForm === 'email' || openForm === 'password')) {
       setOpenForm(null);
     }
   }, [user?.authProvider, openForm]);
 
   if (!user) return null;
 
-  const displayName = isGuest ? 'Guest' : user.username;
+  const isGoogleUser = user.authProvider === 'google';
+  const headerName = isGuest ? 'Guest' : resolveUserDisplayName(user);
   const deckCount = decksQuery.data?.length ?? 0;
   const deckLabel = deckCount === 1 ? '1 deck' : `${deckCount} decks`;
-  const isGoogleUser = user.authProvider === 'google';
   const canChangeAccountSettings = !isGuest && !isGoogleUser;
+  const canSetDisplayName = !isGuest;
+  // Password users edit their (unique) username; SSO users set a separate display name.
+  const displayNameFieldLabel = isGoogleUser ? 'Display name' : 'Username';
+  const displayNameHint = isGoogleUser
+    ? 'Shown on your public decks. You still sign in with Google.'
+    : 'This is your unique name and your sign-in id.';
 
   const toggleForm = (form: OpenForm) => {
     setOpenForm((current) => (current === form ? null : form));
     setEmailError(null);
     setPasswordError(null);
+    setDisplayNameError(null);
     if (form === 'email') {
       setEmailValue(user.email ?? '');
     }
     if (form === 'password') {
       setNewPassword('');
       setConfirmPassword('');
+    }
+    if (form === 'displayName') {
+      setDisplayNameValue(isGoogleUser ? (user.displayName ?? '') : user.username);
     }
   };
 
@@ -108,6 +124,27 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
     }
   };
 
+  const handleDisplayNameSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = displayNameValue.trim();
+    if (!trimmed) {
+      setDisplayNameError('Name is required.');
+      return;
+    }
+    setDisplayNameBusy(true);
+    setDisplayNameError(null);
+    try {
+      await setDisplayName(trimmed);
+      await refresh();
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      setOpenForm(null);
+    } catch (err) {
+      setDisplayNameError((err as Error)?.message || 'Could not update name');
+    } finally {
+      setDisplayNameBusy(false);
+    }
+  };
+
   const passwordsFilled = newPassword.length > 0 && confirmPassword.length > 0;
   const passwordsMatch = newPassword === confirmPassword;
   const showPasswordMismatch = passwordsFilled && !passwordsMatch;
@@ -141,7 +178,7 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
   return (
     <div className={rootClass}>
       <div className="profile-menu__header">
-        <div className="profile-menu__username">{displayName}</div>
+        <div className="profile-menu__username">{headerName}</div>
         {!isGuest && user.email ? (
           <div className="profile-menu__email">{user.email}</div>
         ) : null}
@@ -152,6 +189,47 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
         <button type="button" className="profile-menu__item" role="menuitem" onClick={handleCreateDeck}>
           <IconPlus /> Create New Deck
         </button>
+
+        {canSetDisplayName ? (
+          <>
+            <button
+              type="button"
+              className={`profile-menu__item${openForm === 'displayName' ? ' is-active' : ''}`}
+              role="menuitem"
+              onClick={() => toggleForm('displayName')}
+              aria-expanded={openForm === 'displayName'}
+            >
+              <IconProfile /> Set Display Name
+            </button>
+            {openForm === 'displayName' ? (
+              <form className="profile-menu__subform" onSubmit={handleDisplayNameSubmit}>
+                <label className="profile-menu__field">
+                  <span>{displayNameFieldLabel}</span>
+                  <input
+                    type="text"
+                    value={displayNameValue}
+                    onChange={(e) => setDisplayNameValue(e.target.value)}
+                    maxLength={255}
+                    autoComplete="off"
+                    required
+                  />
+                </label>
+                <div className="profile-menu__hint">{displayNameHint}</div>
+                {displayNameError ? (
+                  <div className="profile-menu__error" role="alert">{displayNameError}</div>
+                ) : null}
+                <div className="profile-menu__subform-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setOpenForm(null)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={displayNameBusy}>
+                    {displayNameBusy ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            ) : null}
+          </>
+        ) : null}
 
         {canChangeAccountSettings ? (
           <>

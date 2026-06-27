@@ -2,6 +2,7 @@ import type { Request, RequestHandler, Response, Router } from 'express';
 import type { UserAccountService } from '../services/userAccountService';
 import { ChangeEmailRequestBody } from './models/users/ChangeEmailRequestBody';
 import { ChangePasswordRequestBody } from './models/users/ChangePasswordRequestBody';
+import { SetDisplayNameRequestBody } from './models/users/SetDisplayNameRequestBody';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 
 export interface UsersV1HttpDeps {
@@ -73,6 +74,32 @@ export function registerUsersV1HttpRoutes(router: Router, deps: UsersV1HttpDeps)
       console.error('v1 POST /users/change-password error:', error);
       sendV1Json(res, 500, null, [
         { code: 'CHANGE_PASSWORD_ERROR', message: 'Failed to change password' }
+      ]);
+    }
+  });
+
+  router.post('/users/display-name', deps.authenticateUser, async (req, res) => {
+    if (!requireSelfServiceUser(req, res)) return;
+    const parsed = SetDisplayNameRequestBody.parse(req.body);
+    if (!parsed.ok) {
+      sendV1Json(res, 400, null, parsed.errors);
+      return;
+    }
+    try {
+      const result = await deps.userAccountService.setDisplayName(
+        req.user!.id,
+        req.user!.role,
+        parsed.value.displayName
+      );
+      if (!result.ok) {
+        sendV1Json(res, result.status, null, [{ code: result.code, message: result.message }]);
+        return;
+      }
+      sendV1Success(res, result.data, result.status);
+    } catch (error) {
+      console.error('v1 POST /users/display-name error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'SET_DISPLAY_NAME_ERROR', message: 'Failed to set display name' }
       ]);
     }
   });

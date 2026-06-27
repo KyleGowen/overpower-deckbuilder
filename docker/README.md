@@ -55,3 +55,13 @@ docker ps
 ```
 
 The container should show "healthy" status when ready.
+
+## Flyway migrations
+
+Flyway CLI is **not** installed on the host. Apply SQL migrations with the official Flyway Docker image:
+
+```bash
+bash scripts/flyway-docker.sh migrate
+```
+
+See [`docs/current/LOCAL_FLYWAY.md`](../docs/current/LOCAL_FLYWAY.md).

@@ -9,4 +9,8 @@ export interface AuthMeDataDto {
   email: string;
   role: UserRole;
   lastLoginAt: string | null;
+  /** Optional public display name (SSO users); null for password users. */
+  displayName: string | null;
+  /** `'password'` or `'google'`. */
+  authProvider: string;
 }

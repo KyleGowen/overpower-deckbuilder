@@ -13,3 +13,17 @@ export async function changePassword(
     confirmPassword,
   });
 }
+
+export interface SetDisplayNameResult {
+  username: string;
+  displayName: string | null;
+  resolvedName: string;
+}
+
+/**
+ * Set the user's public name. For password users this renames their (unique)
+ * username/login id; for SSO users it sets display_name only.
+ */
+export async function setDisplayName(displayName: string): Promise<SetDisplayNameResult> {
+  return api.post<SetDisplayNameResult>('/api/v1/users/display-name', { displayName });
+}

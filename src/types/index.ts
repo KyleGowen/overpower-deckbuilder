@@ -15,6 +15,12 @@ export interface User {
   lastLoginAt?: Date | null;
   /** `'password'` (default) or `'google'` for Firebase/Google SSO. */
   authProvider?: string;
+  /**
+   * Optional public display name. Primarily used by SSO users (who cannot rename
+   * `name`/username). Password users display `name`; for them this stays null.
+   * See `resolveUserDisplayName`.
+   */
+  displayName?: string | null;
 }
 
 // Deck table

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../app/AuthProvider';
 import { IconChevronDown } from '../icons';
 import { ProfileMenuContent } from '../ProfileMenu/ProfileMenuContent';
+import { resolveUserDisplayName } from '../../lib/auth/resolveUserDisplayName';
 import './UserMenu.css';
 
 export function UserMenu() {
@@ -27,7 +28,8 @@ export function UserMenu() {
 
   if (!user) return null;
 
-  const initial = (user.username || '?').charAt(0).toUpperCase();
+  const shownName = isGuest ? 'Guest' : resolveUserDisplayName(user);
+  const initial = (shownName || '?').charAt(0).toUpperCase();
 
   return (
     <div className="user-menu" ref={ref}>
@@ -39,7 +41,7 @@ export function UserMenu() {
         aria-expanded={open}
       >
         <span className="user-menu__avatar" aria-hidden="true">{initial}</span>
-        <span className="user-menu__name">{isGuest ? 'Guest' : user.username}</span>
+        <span className="user-menu__name">{shownName}</span>
         <IconChevronDown className="user-menu__caret" />
       </button>
 

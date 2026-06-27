@@ -1,5 +1,6 @@
 import type { User, UserRole } from '../../types';
 import { isValidEmail } from '../../utils/emailValidation';
+import { resolveUserDisplayName } from '../../utils/resolveUserDisplayName';
 
 type Fail = { ok: false; status: number; code: string; message: string };
 type Ok<T> = { ok: true; status: number; data: T };
@@ -15,6 +16,7 @@ function ok<T>(status: number, data: T): Ok<T> {
 export interface UserAccountRepository {
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   getUserAuthMeta(id: string): Promise<{ auth_provider: string | null } | undefined>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   updateUserPassword(id: string, newPlainPassword: string): Promise<boolean>;
@@ -22,6 +24,9 @@ export interface UserAccountRepository {
 
 export type ChangeEmailResult = Ok<{ email: string }> | Fail;
 export type ChangePasswordResult = Ok<{ message: string }> | Fail;
+export type SetDisplayNameResult =
+  | Ok<{ username: string; displayName: string | null; resolvedName: string }>
+  | Fail;
 
 function assertSelfServiceRole(role: UserRole | undefined): Fail | null {
   if (!role || (role !== 'USER' && role !== 'ADMIN')) {
@@ -108,5 +113,64 @@ export class UserAccountService {
     }
 
     return ok(200, { message: 'Password updated' });
+  }
+
+  /**
+   * Set the user's public name.
+   * - Password users: renames their (globally-unique) username/login id. After this
+   *   they log in with the new value. `display_name` is left untouched (null).
+   * - SSO (Google) users: sets `display_name` only; they still log in via SSO and
+   *   cannot log in with the display name. No password required.
+   */
+  async setDisplayName(
+    userId: string,
+    role: UserRole | undefined,
+    rawDisplayName: string
+  ): Promise<SetDisplayNameResult> {
+    const roleError = assertSelfServiceRole(role);
+    if (roleError) return roleError;
+
+    const trimmed = rawDisplayName.trim();
+    if (!trimmed) {
+      return fail(400, 'DISPLAY_NAME_REQUIRED', 'Display name is required');
+    }
+
+    const current = await this.userRepository.getUserById(userId);
+    if (!current) {
+      return fail(404, 'USER_NOT_FOUND', 'User not found');
+    }
+
+    const authMeta = await this.userRepository.getUserAuthMeta(userId);
+    const isSso = authMeta?.auth_provider === 'google';
+
+    if (isSso) {
+      const updated = await this.userRepository.updateUser(userId, { displayName: trimmed });
+      if (!updated) {
+        return fail(404, 'USER_NOT_FOUND', 'User not found');
+      }
+      return ok(200, {
+        username: updated.name,
+        displayName: updated.displayName ?? trimmed,
+        resolvedName: resolveUserDisplayName(updated)
+      });
+    }
+
+    // Password users: the control edits the actual username (login id). Enforce uniqueness.
+    if (current.name !== trimmed) {
+      const existing = await this.userRepository.getUserByUsername(trimmed);
+      if (existing && existing.id !== userId) {
+        return fail(409, 'USERNAME_TAKEN', 'That name is already taken');
+      }
+    }
+
+    const updated = await this.userRepository.updateUser(userId, { name: trimmed });
+    if (!updated) {
+      return fail(404, 'USER_NOT_FOUND', 'User not found');
+    }
+    return ok(200, {
+      username: updated.name,
+      displayName: updated.displayName ?? null,
+      resolvedName: resolveUserDisplayName(updated)
+    });
   }
 }

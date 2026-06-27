@@ -16,6 +16,8 @@ export interface AppUser {
   role: UserRole;
   lastLoginAt?: string | null;
   authProvider?: string | null;
+  /** Optional public display name (SSO users). Null/absent for password users. */
+  displayName?: string | null;
 }
 
 export interface AppConfig {

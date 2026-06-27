@@ -186,6 +186,13 @@ export const IconStar = (p: IconProps) => (
   </Svg>
 );
 
+/** Heart icon. Pass `filled` to render a solid heart (favorited state). */
+export const IconHeart = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <Svg {...p} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M12 20.5 4.4 13a5 5 0 0 1 7.1-7l.5.5.5-.5a5 5 0 0 1 7.1 7L12 20.5Z" />
+  </Svg>
+);
+
 export const IconLock = (p: IconProps) => (
   <Svg {...p}>
     <rect x="4.5" y="10" width="15" height="10" rx="2" />

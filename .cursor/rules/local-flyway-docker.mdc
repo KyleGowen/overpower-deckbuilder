@@ -1,0 +1,22 @@
+---
+description: Local Flyway runs via Docker against overpower-postgres on port 1337 — no host Flyway CLI.
+alwaysApply: true
+---
+
+# Local Flyway — Docker only (no host CLI)
+
+Kyle's local Postgres is the **`overpower-postgres`** container (`postgres:15`, [`docker/docker-compose.yml`](docker/docker-compose.yml)), published on host port **1337**.
+
+**Flyway CLI is not installed on the host.** When migrations are needed locally:
+
+1. **Use the official Flyway Docker image** — do not install Flyway CLI, do not debug `PATH`, do not retry `npm run migrate` in a loop when the error is `flyway` not found.
+2. **Run from repo root:**
+   - Git Bash / WSL: `bash scripts/flyway-docker.sh migrate`
+   - PowerShell: `.\scripts\flyway-docker.ps1 migrate`
+   - Also: `info`, `validate`, `repair`, `clean` as the script argument.
+3. Config inside the container: [`conf/flyway.docker.conf`](conf/flyway.docker.conf) (`host.docker.internal:1337`, not `localhost`).
+4. After migrating, restart **both** dev servers; browse **http://localhost:5173**.
+
+Full reference: [`docs/current/LOCAL_FLYWAY.md`](docs/current/LOCAL_FLYWAY.md).
+
+**API boot note:** `npm run dev` still invokes `npm run migrate` via [`databaseInitialization.ts`](src/services/databaseInitialization.ts). If Flyway CLI is missing, apply SQL with `flyway-docker` first; use `SKIP_MIGRATIONS=true` when starting the API if boot keeps failing on migrate.

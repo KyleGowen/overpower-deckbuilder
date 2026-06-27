@@ -125,6 +125,12 @@
   background: rgba(0, 200, 232, 0.08);
 }
 
+.profile-menu__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
 .profile-menu__error {
   font-size: var(--font-size-xs);
   color: var(--color-danger);

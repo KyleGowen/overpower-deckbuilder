@@ -11,6 +11,7 @@ const baseUser: User = {
 function stubRepo(over: Partial<{
   getUserById: jest.Mock;
   getUserByEmail: jest.Mock;
+  getUserByUsername: jest.Mock;
   getUserAuthMeta: jest.Mock;
   updateUser: jest.Mock;
   updateUserPassword: jest.Mock;
@@ -18,6 +19,7 @@ function stubRepo(over: Partial<{
   return {
     getUserById: jest.fn().mockResolvedValue(baseUser),
     getUserByEmail: jest.fn().mockResolvedValue(undefined),
+    getUserByUsername: jest.fn().mockResolvedValue(undefined),
     getUserAuthMeta: jest.fn().mockResolvedValue({ auth_provider: null }),
     updateUser: jest.fn().mockResolvedValue({ ...baseUser, email: 'new@example.com' }),
     updateUserPassword: jest.fn().mockResolvedValue(true),

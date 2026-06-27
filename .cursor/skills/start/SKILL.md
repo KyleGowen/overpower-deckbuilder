@@ -15,12 +15,14 @@ disable-model-invocation: true
 
 When the user says **`/start`**, start the **v2 dev stack** so the app is available at **`http://localhost:5173`** and on **LAN** (Vite `host: true`), and verify.
 
-**Migrations are not a separate step.** They run automatically when the Express API starts — same as normal `npm run dev`:
+**Migrations are not a separate step for `/start`.** They run automatically when the Express API starts — same as normal `npm run dev`:
 
 ```
 npm run dev → src/index.ts → DatabaseInitializationService.initializeDatabase()
   → npm run migrate → flyway -configFiles=conf/flyway.conf migrate
 ```
+
+**Local Flyway CLI is not installed on Kyle's machine.** If API boot fails because `flyway` is missing from `PATH`, apply pending SQL with `bash scripts/flyway-docker.sh migrate` (see [`docs/current/LOCAL_FLYWAY.md`](docs/current/LOCAL_FLYWAY.md)) — do **not** install Flyway CLI or loop on `npm run migrate`. Then restart API with `SKIP_MIGRATIONS=true` if needed.
 
 See [`src/services/databaseInitialization.ts`](src/services/databaseInitialization.ts). Skip only when `SKIP_MIGRATIONS=true`.
 

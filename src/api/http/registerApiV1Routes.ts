@@ -37,7 +37,15 @@ export interface RegisterApiV1Deps {
   authenticationService: AuthenticationService;
   userRepository: {
     getUserById: (id: string) => Promise<
-      | { id: string; name: string; email: string; role: UserRole; lastLoginAt?: Date | null }
+      | {
+          id: string;
+          name: string;
+          email: string;
+          role: UserRole;
+          lastLoginAt?: Date | null;
+          displayName?: string | null;
+          authProvider?: string;
+        }
       | undefined
       | null
     >;
