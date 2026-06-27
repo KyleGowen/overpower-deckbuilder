@@ -20,7 +20,7 @@ export const deckValidationMessages = {
         return `Deck threat level must be 76 or less (found ${found})`;
     },
     deckSize(required: number, found: number): string {
-        return `Deck must have at least ${required} cards (found ${found})`;
+        return `Deck must have at least ${required} cards in draw pile (${found}/${required})`;
     },
     angryMobLimit(): string {
         return 'Only one "Angry Mob" character is allowed per deck';

@@ -230,7 +230,7 @@ describe('Tooltip and Legality Icon Tests', () => {
                 { id: 'deck-card-9', type: 'mission', cardId: 'mission5', quantity: 1 },
                 { id: 'deck-card-10', type: 'mission', cardId: 'mission6', quantity: 1 },
                 { id: 'deck-card-11', type: 'mission', cardId: 'mission7', quantity: 1 },
-                { id: 'deck-card-12', type: 'power', cardId: 'power1', quantity: 40 }
+                { id: 'deck-card-12', type: 'power', cardId: 'power1', quantity: 51 }
             ];
 
             const validation = await deckValidationService.validateDeck(validDeckCards);

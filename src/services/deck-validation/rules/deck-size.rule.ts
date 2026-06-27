@@ -8,7 +8,13 @@ export class DeckSizeRule implements DeckValidationRule {
 
     validate(ctx: DeckValidationContext): ValidationError[] {
         const requiredSize = ctx.eventCards.length > 0 ? 56 : 51;
-        const totalCards = ctx.cards.reduce((sum, card) => sum + card.quantity, 0);
+        // Only the draw pile counts toward the deck-size minimum. Characters,
+        // missions, and locations are structural cards and are excluded
+        // (matches the rulebook and the legacy client validator).
+        const nonDrawPileTypes = new Set(['character', 'mission', 'location']);
+        const totalCards = ctx.cards
+            .filter(card => !nonDrawPileTypes.has(card.type))
+            .reduce((sum, card) => sum + card.quantity, 0);
         if (totalCards < requiredSize) {
             return [
                 {
