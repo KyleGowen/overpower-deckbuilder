@@ -20,6 +20,8 @@ import {
   type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
+import { resolveDefaultCardForDeckAdd } from '../../lib/catalog/defaultCatalogCards';
+import type { FoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
 import { useCollection, type UseCollectionResult } from '../../lib/collection/useCollection';
@@ -105,6 +107,15 @@ export default function DatabasePage() {
     enabled: isAllTab,
     foilToBase: foilLookup.foilToBase,
   });
+
+  const detailTypeCatalogQuery = useQuery({
+    queryKey: ['catalog', detailCatalogType],
+    queryFn: () => fetchCatalog(detailCatalogType),
+    enabled: Boolean(selected),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const detailTypeCatalogCards = detailTypeCatalogQuery.data ?? [];
 
   const perTypeCards = useMemo(
     () => dedupeFoilCatalogCards(catalogQuery.data ?? [], foilLookup.foilToBase),
@@ -315,6 +326,8 @@ export default function DatabasePage() {
               type={detailCatalogType}
               collectionType={detailCollectionType}
               collection={collection}
+              catalogCards={detailTypeCatalogCards}
+              foilLookup={foilLookup}
             />
           ) : null
         }
@@ -335,11 +348,15 @@ function DbDetailActions({
   type,
   collectionType,
   collection,
+  catalogCards,
+  foilLookup,
 }: {
   card: CatalogCard;
   type: CatalogType;
   collectionType: CollectionCardType;
   collection: UseCollectionResult;
+  catalogCards: CatalogCard[];
+  foilLookup: FoilCardMapLookup;
 }) {
   const { isGuest, user } = useAuth();
   const queryClient = useQueryClient();
@@ -367,7 +384,8 @@ function DbDetailActions({
   const addToDeck = async (deckId: string, deckName: string) => {
     setStatus(null);
     try {
-      await addCardToDeck(deckId, { cardType: deckType, cardId: card.id, quantity: 1 });
+      const resolved = resolveDefaultCardForDeckAdd(card, type, catalogCards, foilLookup);
+      await addCardToDeck(deckId, { cardType: deckType, cardId: resolved.id, quantity: 1 });
       setStatus({ kind: 'success', message: `Added to ${deckName}` });
       queryClient.invalidateQueries({ queryKey: ['decks'] });
     } catch (err) {

@@ -50,15 +50,26 @@ function getPlayableArtChoices(cardType, allCards) {
         return [];
     }
 
-    // Special cards should default to non-foil variants for deck editor add flow.
-    if (cardType === 'special') {
-        const nonFoilCards = allCards.filter(card => !resolveIsFoilFromArtChoicePayload(card));
-        if (nonFoilCards.length > 0) {
-            return nonFoilCards;
-        }
+    const nonFoilCards = allCards.filter(card => !resolveIsFoilFromArtChoicePayload(card));
+    if (nonFoilCards.length > 0) {
+        return nonFoilCards;
     }
 
     return allCards;
+}
+
+/**
+ * Default printing for deck adds: non-foil when available, else foil-only; lowest checklist #.
+ */
+function pickDefaultPlayableArtChoice(cardType, allCards) {
+    const playable = getPlayableArtChoices(cardType, allCards);
+    if (playable.length === 0) {
+        return null;
+    }
+    if (typeof compareArtChoicesBySetThenNumber === 'function') {
+        return [...playable].sort(compareArtChoicesBySetThenNumber)[0];
+    }
+    return playable[0];
 }
 
 // Setup drag and drop functionality
@@ -139,22 +150,14 @@ function handlePlusButtonClick(event, cardType, cardId, cardName, allCardsJson =
     const resolvedAllCardsJson =
         (allCardsFromData && allCardsFromData.trim() !== '') ? allCardsFromData : allCardsJson;
 
-    // If alternate-art JSON is available, show selection when multiple playable arts exist
+    // If alternate-art JSON is available, pick the default non-foil printing (lowest #)
     if (resolvedAllCardsJson && resolvedAllCardsJson.trim() !== '') {
         try {
             const allCards = JSON.parse(resolvedAllCardsJson.replace(/&quot;/g, '"'));
 
-            const playableChoices = getPlayableArtChoices(cardType, allCards);
-            if (playableChoices.length > 1) {
-                // Show alternate art selection modal
-                if (typeof showAlternateArtSelectionModal === 'function') {
-                    showAlternateArtSelectionModal(cardType, cardName, playableChoices);
-                    return;
-                }
-            }
-
-            if (playableChoices.length === 1) {
-                cardId = playableChoices[0].id;
+            const defaultChoice = pickDefaultPlayableArtChoice(cardType, allCards);
+            if (defaultChoice) {
+                cardId = defaultChoice.id;
             }
         } catch (e) {
             console.error('Error parsing allCardsJson:', e);
@@ -188,18 +191,9 @@ function handleCardClick(event, cardType, cardId, cardName) {
     if (allCardsJson && allCardsJson.trim() !== '') {
         try {
             const allCards = JSON.parse(allCardsJson.replace(/&quot;/g, '"'));
-            const playableChoices = getPlayableArtChoices(cardType, allCards);
-            if (playableChoices.length > 1) {
-                // Show alternate art selection modal
-                if (typeof showAlternateArtSelectionModal === 'function') {
-                    event.stopPropagation();
-                    showAlternateArtSelectionModal(cardType, cardName, playableChoices);
-                    return;
-                }
-            }
-
-            if (playableChoices.length === 1) {
-                cardId = playableChoices[0].id;
+            const defaultChoice = pickDefaultPlayableArtChoice(cardType, allCards);
+            if (defaultChoice) {
+                cardId = defaultChoice.id;
             }
         } catch (e) {
             console.error('Error parsing allCardsJson:', e);

@@ -5,6 +5,46 @@ function escapeJsSingleQuoted(value) {
     return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
+function setNumberSortTupleForDeckAdd(setNumRaw) {
+    const s = setNumRaw != null ? String(setNumRaw).trim().toUpperCase() : '';
+    if (!s) return [Number.MAX_SAFE_INTEGER, 1, ''];
+    const foil = s.endsWith('F');
+    const core = foil ? s.slice(0, -1) : s;
+    const n = parseInt(core, 10);
+    const num = Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+    return [num, foil ? 1 : 0, s];
+}
+
+/** Default printing for deck adds: non-foil, non-alternate art, lowest checklist #. */
+function compareDeckAddDefaultPrinting(a, b, options = {}) {
+    const aFoil = !!a.is_foil;
+    const bFoil = !!b.is_foil;
+    if (aFoil !== bFoil) return aFoil ? 1 : -1;
+
+    const aImage = a.image_path || a.image || '';
+    const bImage = b.image_path || b.image || '';
+    const aIsAlternate = aImage.includes('/alternate/') || aImage.includes('alternate/');
+    const bIsAlternate = bImage.includes('/alternate/') || bImage.includes('alternate/');
+    if (aIsAlternate !== bIsAlternate) return aIsAlternate ? 1 : -1;
+
+    const [numA, foilSuffixA, rawA] = setNumberSortTupleForDeckAdd(a.set_number);
+    const [numB, foilSuffixB, rawB] = setNumberSortTupleForDeckAdd(b.set_number);
+    if (numA !== numB) return numA - numB;
+    if (foilSuffixA !== foilSuffixB) return foilSuffixA - foilSuffixB;
+    const numCmp = rawA.localeCompare(rawB);
+    if (numCmp !== 0) return numCmp;
+
+    if (options.preferErb) {
+        const aSet = (a.set || 'ERB').trim();
+        const bSet = (b.set || 'ERB').trim();
+        const aIsERB = aSet === 'ERB';
+        const bIsERB = bSet === 'ERB';
+        if (aIsERB !== bIsERB) return aIsERB ? -1 : 1;
+    }
+
+    return 0;
+}
+
 async function loadAvailableCardsData() {
     try {
         const categories = [
@@ -395,18 +435,9 @@ async function loadAvailableCards() {
                             groups.get(key).push(card);
                         });
                         
-                        // Sort each group: original art first, then alternates
+                        // Sort each group: default printing first (non-foil, non-alternate, lowest #)
                         groups.forEach((group, key) => {
-                            group.sort((a, b) => {
-                                const aImage = a.image_path || a.image || '';
-                                const bImage = b.image_path || b.image || '';
-                                const aIsAlternate = aImage.includes('/alternate/');
-                                const bIsAlternate = bImage.includes('/alternate/');
-                                
-                                if (aIsAlternate && !bIsAlternate) return 1;
-                                if (!aIsAlternate && bIsAlternate) return -1;
-                                return 0;
-                            });
+                            group.sort((a, b) => compareDeckAddDefaultPrinting(a, b));
                         });
                         
                         
@@ -443,7 +474,8 @@ async function loadAvailableCards() {
                                 name: card.name,
                                 set: (card.set || 'ERB'),
                                 set_number: card.set_number != null ? card.set_number : null,
-                                rarity: card.rarity != null ? card.rarity : null
+                                rarity: card.rarity != null ? card.rarity : null,
+                                is_foil: !!card.is_foil
                             }));
                             const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                             
@@ -669,18 +701,9 @@ async function loadAvailableCards() {
                         // Add to total count
                         totalUniqueSpecialCards += cardGroups.size;
                         
-                        // Sort each group: original art first, then alternates
+                        // Sort each group: default printing first (non-foil, non-alternate, lowest #)
                         cardGroups.forEach((group, key) => {
-                            group.sort((a, b) => {
-                                const aImage = a.image_path || a.image || '';
-                                const bImage = b.image_path || b.image || '';
-                                const aIsAlternate = aImage.includes('/alternate/');
-                                const bIsAlternate = bImage.includes('/alternate/');
-                                
-                                if (aIsAlternate && !bIsAlternate) return 1;
-                                if (!aIsAlternate && bIsAlternate) return -1;
-                                return 0;
-                            });
+                            group.sort((a, b) => compareDeckAddDefaultPrinting(a, b));
                         });
                         
                         // Track rendered cards to prevent duplicates
@@ -707,10 +730,10 @@ async function loadAvailableCards() {
                                 id: card.id,
                                 imagePath: getCardImagePath(card, category.type),
                                 name: card.name,
-                                is_foil: !!card.is_foil,
                                 set: (card.set || 'ERB'),
                                 set_number: card.set_number != null ? card.set_number : null,
-                                rarity: card.rarity != null ? card.rarity : null
+                                rarity: card.rarity != null ? card.rarity : null,
+                                is_foil: !!card.is_foil
                             }));
                             const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                             
@@ -1057,28 +1080,9 @@ async function loadAvailableCards() {
                         // Add to total count
                         totalUniquePowerCards += cardGroups.size;
                         
-                        // Sort each group: ERB set first, then other sets; original art first, then alternates
+                        // Sort each group: default printing first (non-foil, non-alternate, lowest #; ERB tiebreak)
                         cardGroups.forEach((group, key) => {
-                            group.sort((a, b) => {
-                                // First, prioritize ERB set
-                                const aSet = (a.set || 'ERB').trim();
-                                const bSet = (b.set || 'ERB').trim();
-                                const aIsERB = aSet === 'ERB';
-                                const bIsERB = bSet === 'ERB';
-                                
-                                if (aIsERB && !bIsERB) return -1; // ERB first
-                                if (!aIsERB && bIsERB) return 1;  // ERB first
-                                
-                                // If same set priority, then sort by original vs alternate art
-                                const aImage = a.image_path || a.image || '';
-                                const bImage = b.image_path || b.image || '';
-                                const aIsAlternate = aImage.includes('/alternate/');
-                                const bIsAlternate = bImage.includes('/alternate/');
-                                
-                                if (aIsAlternate && !bIsAlternate) return 1;
-                                if (!aIsAlternate && bIsAlternate) return -1;
-                                return 0;
-                            });
+                            group.sort((a, b) => compareDeckAddDefaultPrinting(a, b, { preferErb: true }));
                         });
                         
                         // Sort groups by value (key is now just the value, not value|set)
@@ -1116,7 +1120,8 @@ async function loadAvailableCards() {
                                 name: `${card.value} - ${card.power_type}`,
                                 set: (card.set || 'ERB'),
                                 set_number: card.set_number != null ? card.set_number : null,
-                                rarity: card.rarity != null ? card.rarity : null
+                                rarity: card.rarity != null ? card.rarity : null,
+                                is_foil: !!card.is_foil
                             }));
                             const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                             
@@ -1188,17 +1193,9 @@ async function loadAvailableCards() {
                         groups.get(key).push(card);
                     });
                     
-                    // Sort each group: original art first, then alternates
+                    // Sort each group: default printing first (non-foil, non-alternate, lowest #)
                     groups.forEach((group) => {
-                        group.sort((a, b) => {
-                            const aImage = a.image_path || a.image || '';
-                            const bImage = b.image_path || b.image || '';
-                            const aIsAlternate = aImage.includes('/alternate/');
-                            const bIsAlternate = bImage.includes('/alternate/');
-                            if (aIsAlternate && !bIsAlternate) return 1;
-                            if (!aIsAlternate && bIsAlternate) return -1;
-                            return 0;
-                        });
+                        group.sort((a, b) => compareDeckAddDefaultPrinting(a, b));
                     });
                     
                     locationTileCount = groups.size;
@@ -1220,7 +1217,8 @@ async function loadAvailableCards() {
                             name: card.name,
                             set: (card.set || 'ERB'),
                             set_number: card.set_number != null ? card.set_number : null,
-                            rarity: card.rarity != null ? card.rarity : null
+                            rarity: card.rarity != null ? card.rarity : null,
+                            is_foil: !!card.is_foil
                         }));
                         const allCardsJson = JSON.stringify(allCards).replace(/"/g, '&quot;');
                         const displayCard = allCards[0];

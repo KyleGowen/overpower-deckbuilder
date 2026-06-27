@@ -1,6 +1,6 @@
 import type { CatalogCard, CatalogType } from '../api/types';
 import { cardCharacterName, cardDisplayName } from './catalogTypeMap';
-import { dedupeFoilCatalogCards } from './foilCatalog';
+import { dedupeFoilCatalogCards, isFoilCard, type FoilCardMapLookup } from './foilCatalog';
 
 export interface DefaultCatalogCardsResult {
   cards: CatalogCard[];
@@ -22,7 +22,34 @@ function normalizeSet(set: string | undefined): string {
   return trimmed === 'ERBP' ? 'ERB' : trimmed;
 }
 
+/** Sort key for checklist # (209, 519, 519F). Missing # sorts last. */
+function setNumberSortTuple(setNumRaw: string | null | undefined): [number, number, string] {
+  const s = setNumRaw != null ? String(setNumRaw).trim().toUpperCase() : '';
+  if (!s) return [Number.MAX_SAFE_INTEGER, 1, ''];
+  const foil = s.endsWith('F');
+  const core = foil ? s.slice(0, -1) : s;
+  const n = parseInt(core, 10);
+  const num = Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+  const foilOrder = foil ? 1 : 0;
+  return [num, foilOrder, s];
+}
+
 function compareDefaultRepresentative(a: CatalogCard, b: CatalogCard, catalogType: CatalogType): number {
+  const aFoil = isFoilCard(a);
+  const bFoil = isFoilCard(b);
+  if (aFoil !== bFoil) return aFoil ? 1 : -1;
+
+  const aIsAlternate = isAlternateArtCard(a);
+  const bIsAlternate = isAlternateArtCard(b);
+  if (aIsAlternate !== bIsAlternate) return aIsAlternate ? 1 : -1;
+
+  const [numA, foilSuffixA, rawA] = setNumberSortTuple(a.set_number as string | null | undefined);
+  const [numB, foilSuffixB, rawB] = setNumberSortTuple(b.set_number as string | null | undefined);
+  if (numA !== numB) return numA - numB;
+  if (foilSuffixA !== foilSuffixB) return foilSuffixA - foilSuffixB;
+  const numCmp = rawA.localeCompare(rawB);
+  if (numCmp !== 0) return numCmp;
+
   if (catalogType === 'power-cards') {
     const aSet = normalizeSet(a.set as string | undefined);
     const bSet = normalizeSet(b.set as string | undefined);
@@ -30,10 +57,6 @@ function compareDefaultRepresentative(a: CatalogCard, b: CatalogCard, catalogTyp
     const bIsErb = bSet === 'ERB';
     if (aIsErb !== bIsErb) return aIsErb ? -1 : 1;
   }
-
-  const aIsAlternate = isAlternateArtCard(a);
-  const bIsAlternate = isAlternateArtCard(b);
-  if (aIsAlternate !== bIsAlternate) return aIsAlternate ? 1 : -1;
 
   return 0;
 }
@@ -73,6 +96,58 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
 
 function pickDefaultRepresentative(group: CatalogCard[], catalogType: CatalogType): CatalogCard {
   return group.slice().sort((a, b) => compareDefaultRepresentative(a, b, catalogType))[0];
+}
+
+/**
+ * Resolve the catalog row to store when adding a card to a deck: non-foil when available,
+ * otherwise foil-only; prefer default (non-alternate) art; lowest checklist # among ties.
+ */
+export function resolveDefaultCardForDeckAdd(
+  card: CatalogCard,
+  catalogType: CatalogType,
+  allCatalogCards: CatalogCard[],
+  foilLookup?: Pick<FoilCardMapLookup, 'foilToBase' | 'baseToFoil'>,
+): CatalogCard {
+  const foilToBase = foilLookup?.foilToBase ?? new Map<string, string>();
+  const baseToFoil = foilLookup?.baseToFoil ?? new Map<string, string>();
+
+  const anchor = (() => {
+    if (isFoilCard(card)) {
+      const baseId = foilToBase.get(card.id);
+      if (baseId) {
+        const base = allCatalogCards.find((c) => c.id === baseId);
+        if (base) return base;
+      }
+      return card;
+    }
+    return card;
+  })();
+
+  const key = variantGroupKey(anchor, catalogType);
+  if (!key) return card;
+
+  const group: CatalogCard[] = [];
+  const seen = new Set<string>();
+  const add = (row: CatalogCard | undefined) => {
+    if (!row || seen.has(row.id)) return;
+    seen.add(row.id);
+    group.push(row);
+  };
+
+  for (const row of allCatalogCards) {
+    if (variantGroupKey(row, catalogType) === key) {
+      add(row);
+    }
+  }
+
+  for (const row of [...group]) {
+    if (!isFoilCard(row)) {
+      add(allCatalogCards.find((c) => c.id === baseToFoil.get(row.id)));
+    }
+  }
+
+  if (group.length === 0) return card;
+  return pickDefaultRepresentative(group, catalogType);
 }
 
 /**

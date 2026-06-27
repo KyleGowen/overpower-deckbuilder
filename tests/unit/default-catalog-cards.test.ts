@@ -4,6 +4,7 @@ import {
   isAlternateArtCard,
   prepareAddCardsCatalogList,
   qtyInDeckForRepresentative,
+  resolveDefaultCardForDeckAdd,
 } from '../../frontend/src/lib/catalog/defaultCatalogCards';
 
 function card(id: string, extra: Partial<CatalogCard> = {}): CatalogCard {
@@ -201,6 +202,85 @@ describe('defaultCatalogCards', () => {
       expect(cards).toHaveLength(1);
       expect(cards[0].id).toBe('tw-base');
       expect(variantIdsByRepresentative.get('tw-base')?.sort()).toEqual(['tw-alt', 'tw-base']);
+    });
+
+    it('prefers non-foil over foil and lowest checklist number', () => {
+      const foil = card('foil', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '5F',
+        is_foil: true,
+        image_path: 'dracula_foil.webp',
+      });
+      const lowNum = card('low', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '12',
+        is_foil: false,
+        image_path: 'dracula.webp',
+      });
+      const highNum = card('high', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '99',
+        is_foil: false,
+        image_path: 'characters/alternate/dracula2.png',
+      });
+
+      const { cards } = dedupeToDefaultCatalogCards([foil, highNum, lowNum], 'characters');
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('low');
+    });
+
+    it('uses foil when only foil printing exists', () => {
+      const foilOnly = card('foil-only', {
+        name: 'Foil Promo',
+        set: 'ERB',
+        set_number: '1F',
+        is_foil: true,
+        image_path: 'foil_promo.webp',
+      });
+
+      const { cards } = dedupeToDefaultCatalogCards([foilOnly], 'characters');
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('foil-only');
+    });
+  });
+
+  describe('resolveDefaultCardForDeckAdd', () => {
+    const foilLookup = {
+      foilToBase: new Map([['foil', 'low']]),
+      baseToFoil: new Map([['low', 'foil']]),
+    };
+
+    it('resolves alternate or foil selection to default non-foil printing', () => {
+      const low = card('low', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '12',
+        is_foil: false,
+        image_path: 'dracula.webp',
+      });
+      const alt = card('alt', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '99',
+        is_foil: false,
+        image_path: 'characters/alternate/dracula2.png',
+      });
+      const foil = card('foil', {
+        name: 'Dracula',
+        set: 'ERB',
+        set_number: '12F',
+        is_foil: true,
+        image_path: 'dracula_foil.webp',
+      });
+      const catalog = [low, alt, foil];
+
+      expect(resolveDefaultCardForDeckAdd(alt, 'characters', catalog, foilLookup).id).toBe('low');
+      expect(resolveDefaultCardForDeckAdd(foil, 'characters', catalog, foilLookup).id).toBe('low');
     });
   });
 
