@@ -3,7 +3,7 @@
  * in-memory `/api/v1/guest/decks/*` endpoints. Guest session deck ids are
  * prefixed `guest_`, which lets us route reads correctly even for shared links.
  */
-import { api } from './client';
+import { api, ApiError } from './client';
 import type {
   DeckListItem,
   DeckDetail,
@@ -76,6 +76,7 @@ export interface UpdateDeckMetaInput {
   name?: string;
   description?: string | null;
   is_limited?: boolean;
+  is_private?: boolean;
   reserve_character?: string | null;
   display_mission_card_id?: string | null;
   background_image_path?: string | null;
@@ -130,7 +131,7 @@ export function addCardToDeck(
   });
 }
 
-export function validateDeck(cards: DeckCardEntry[]): Promise<DeckValidationResult> {
+export async function validateDeck(cards: DeckCardEntry[]): Promise<DeckValidationResult> {
   // The validate endpoint's rules read each card's `type` (not `cardType`, which
   // the deck *card* mutation endpoints use). Sending `cardType` here makes the
   // server-side rules see `type === undefined` and 500.
@@ -139,5 +140,17 @@ export function validateDeck(cards: DeckCardEntry[]): Promise<DeckValidationResu
     cardId: c.cardId,
     quantity: c.quantity,
   }));
-  return api.post<DeckValidationResult>('/api/v1/decks/validate', { cards: payload });
+  try {
+    return await api.post<DeckValidationResult>('/api/v1/decks/validate', { cards: payload });
+  } catch (err) {
+    // The endpoint returns HTTP 400 (code DECK_VALIDATION_FAILED) when the deck
+    // breaks legality rules. That is a successful validation that found the deck
+    // "not legal" — not a request failure. Surface it as { valid: false } so the
+    // deck editor's live badge reflects legality instead of silently falling back
+    // to a stale persisted value.
+    if (err instanceof ApiError && err.code === 'DECK_VALIDATION_FAILED') {
+      return { valid: false, message: err.message };
+    }
+    throw err;
+  }
 }

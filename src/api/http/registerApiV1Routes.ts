@@ -12,8 +12,10 @@ import { registerAuthV1HttpRoutes } from './auth.http';
 import { registerDbvCatalogV1HttpRoutes } from './dbv-catalog.http';
 import { registerDbvSupportV1HttpRoutes, type DeckBackgroundListReader } from './dbv-support.http';
 import { createV1SessionOrBearerAuthMiddleware } from './middleware/v1SessionOrBearerAuth';
+import { createV1OptionalSessionOrBearerAuthMiddleware } from './middleware/v1OptionalSessionOrBearerAuth';
 import { createApiAccessLogMiddleware } from './middleware/apiAccessLog';
 import { registerDecksV1HttpRoutes } from './decks.http';
+import { registerCommunityV1HttpRoutes } from './community.http';
 import { registerCollectionsV1HttpRoutes } from './collections.http';
 import { registerGuestDecksV1HttpRoutes } from './guest-decks.http';
 import { registerAdminV1HttpRoutes } from './admin.http';
@@ -29,6 +31,7 @@ import type { DeckDetailService } from '../services/deckDetailService';
 import type { DeckCardsService } from '../services/deckCardsService';
 import type { DeckUIPreferencesService } from '../services/deckUIPreferencesService';
 import type { UserAccountService } from '../services/userAccountService';
+import type { CommunityService } from '../services/communityService';
 import type { Pool } from 'pg';
 import { COMMUNITY_DECKS_USER_ID } from '../../constants/communityDecksUser';
 import { TOURNAMENT_DECKS_USER_ID } from '../../constants/tournamentDecksUser';
@@ -55,6 +58,8 @@ export interface RegisterApiV1Deps {
   dbvSupportService: DbvSupportService;
   recentUpdatesService: RecentUpdatesService;
   authenticateUser: RequestHandler;
+  /** Optional auth: attaches req.user when present, never rejects (guest-viewable reads). */
+  optionalAuthenticate: RequestHandler;
   deckBackgroundService: DeckBackgroundListReader;
   deckListService: DeckListService;
   deckStatsService: DeckStatsService;
@@ -66,6 +71,7 @@ export interface RegisterApiV1Deps {
   guestDeckService: GuestDeckService;
   adminService: AdminService;
   userAccountService: UserAccountService;
+  communityService: CommunityService;
   /** Phase 2: when provided, enables refresh tokens + Bearer on decks/collections. */
   pool?: Pool;
 }
@@ -139,6 +145,24 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
   registerRecentUpdatesV1HttpRoutes(router, {
     recentUpdatesService: deps.recentUpdatesService,
     catalogAuth
+  });
+
+  // Optional auth for guest-viewable community reads (feed + public profiles):
+  // attaches req.user when a session cookie or Bearer JWT is present, never rejects.
+  const optionalOwnedAuth: RequestHandler =
+    process.env.DISABLE_BEARER_DECKS_COLLECTIONS === '1'
+      ? deps.optionalAuthenticate
+      : createV1OptionalSessionOrBearerAuthMiddleware({
+          jwtTokenService,
+          getUserById,
+          optionalAuthenticate: deps.optionalAuthenticate
+        });
+
+  // Register BEFORE decks so `GET /decks/favorites` beats the `/decks/:id` param route.
+  registerCommunityV1HttpRoutes(router, {
+    communityService: deps.communityService,
+    authenticateUser: ownedAuth,
+    optionalAuth: optionalOwnedAuth
   });
 
   registerDecksV1HttpRoutes(router, {

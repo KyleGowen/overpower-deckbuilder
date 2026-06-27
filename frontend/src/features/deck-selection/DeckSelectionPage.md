@@ -3,6 +3,22 @@
 Grid of the user's decks (`DeckTile`, `full` variant) with create, search, and
 per-deck actions. Titled "My Decks" (or "Guest Decks").
 
+## Two modes (branch on `params.userId`)
+- **Owner mode** (`params.userId === user.id`, or own decks): the editable view described below.
+- **Read-only public profile** (`params.userId` is another user, including guests): fetches
+  `GET /api/v1/users/:userId/public-decks` via `fetchPublicDecksForUser`, hides
+  create/import/edit/delete and the search bar, renders tiles via `CommunityDeckGrid`
+  (tiles open `?readonly=true`, show favorite hearts + clickable owner name), and shows a
+  friendly empty state when the user has no public decks.
+
+## Mobile tabs (owner mode only)
+On `.layout-mobile`, four swipeable pill tabs — **My Decks / Favorites / Community /
+Tournament** (`DECK_SELECTION_TAB_ORDER`) — built with `useHorizontalSwipe` +
+`stepCyclicalIndex` and `DECK_SELECTION_SWIPE_BLOCK_SELECTOR` (from
+`frontend/src/lib/layout/useHorizontalSwipe.ts`). The bottom nav is **unchanged** (no new
+buttons). Per-tab rules match desktop: My Decks editable; Favorites/Community/Tournament
+read-only with favorite hearts; the Community tab keeps the character/location search bar.
+
 ## Capabilities
 - **New Deck**: opens a `SlideOutPanel` form (name + optional description) → `createDeck` →
   navigates to the editor. `createDeck` returns a normalized `{ id, userId }` (the create

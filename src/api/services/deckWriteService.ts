@@ -8,6 +8,7 @@ export interface DeckBusinessCreatePort {
     description?: string,
     characterIds?: string[]
   ) => Promise<Deck>;
+  updateDeck: (deckId: string, updates: Partial<Deck>) => Promise<Deck | undefined>;
 }
 
 export interface DeckValidationPort {
@@ -23,13 +24,35 @@ export class DeckWriteService {
     private readonly deckValidation: DeckValidationPort
   ) {}
 
-  createDeck(
+  async createDeck(
     userId: string,
     name: string,
     description: string | undefined,
     characters: string[] | undefined
   ): Promise<Deck> {
-    return this.deckBusiness.createDeck(userId, name, description, characters);
+    const deck = await this.deckBusiness.createDeck(userId, name, description, characters);
+    await this.syncCreatedDeckValidity(deck, characters);
+    return deck;
+  }
+
+  /**
+   * Recompute and persist `decks.is_valid` for a freshly created deck so legality
+   * is server-owned from the moment a deck exists (a new deck with only characters
+   * is never legal, but this keeps the column authoritative regardless of inputs).
+   */
+  private async syncCreatedDeckValidity(deck: Deck, characters: string[] | undefined): Promise<void> {
+    try {
+      const cards: DeckCard[] = (deck.cards
+        ?? (characters ?? []).map((cardId) => ({ id: '', type: 'character', cardId, quantity: 1 }))) as DeckCard[];
+      const errors = await this.deckValidation.validateDeck(cards);
+      const isValid = errors.length === 0;
+      if ((deck.is_valid ?? false) !== isValid) {
+        await this.deckBusiness.updateDeck(deck.id, { is_valid: isValid });
+      }
+      deck.is_valid = isValid;
+    } catch (error) {
+      console.error('Failed to recompute created deck validity:', error);
+    }
   }
 
   validateDeckCards(cards: unknown[]): Promise<ValidationError[]> {

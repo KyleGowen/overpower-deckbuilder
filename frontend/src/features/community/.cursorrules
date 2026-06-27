@@ -1,0 +1,28 @@
+# frontend/src/features/community — Community decks (v2 SPA)
+
+Desktop `/community` page plus the shared community deck grid used by the page, the
+read-only public profile, and the mobile Decks tabs.
+
+## Files
+- `CommunityPage.tsx` — desktop `/community` route. Tabbed layout (Community with
+  character/location search, Your Favorites, Tournament). See `CommunityPage.md`.
+- `CommunityDeckGrid.tsx` — reusable grid of `DeckTile variant="full"` with max-stat icons
+  (`deckMaxStats`/`buildCharStatsById` from `lib/decks/deckMaxStats.ts`), owner display
+  names, and favorite hearts. Reused by `DeckSelectionPage` (public profile + mobile tabs).
+- `CommunityPage.css` — page + tab toolbar styling (`.community__tabs`, `.community__toolbar`).
+
+## Data / API
+- `lib/api/favorites.ts`: `fetchCommunityFeed(search?)`, `fetchFavoriteDecks()`,
+  `fetchPublicDecksForUser(userId)`, `addFavorite`/`removeFavorite`.
+- Favorite mutations: `lib/decks/useFavoriteToggle.ts` (optimistic + invalidate).
+- Backend: `GET /api/v1/community/decks`, `GET /api/v1/users/:userId/public-decks`,
+  `GET /api/v1/decks/favorites`, `POST`/`DELETE /api/v1/decks/:id/favorite`
+  (`CommunityService` / `src/api/http/community.http.ts`). See `API_V1.md`.
+
+## Conventions
+- Only `is_private = false` decks appear here; curated accounts are excluded from the feed.
+- Hearts/owner names hidden for the deck owner and for guests (guests see no heart).
+- Tournament decks lack server-side `isFavorited`; `CommunityPage` derives their heart state
+  from the favorites cache and toggles that cache so hearts stay correct on reload.
+- Visual spec: `docs/current/STYLE_GUIDE.md` § "Community page (v2 SPA)" and
+  § "Public/private visibility chip & favorite heart (v2 SPA)".

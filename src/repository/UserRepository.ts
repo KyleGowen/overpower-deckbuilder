@@ -16,6 +16,8 @@ export interface UserRepository {
   createGoogleUser(email: string, name: string, firebaseUid: string): Promise<User>;
   linkGoogleToUser(userId: string, firebaseUid: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
+  /** Batch lookup for enriching lists with owner display names. */
+  getUsersByIds(ids: string[]): Promise<User[]>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   updateLastLoginAt(id: string): Promise<void>;
   // Security

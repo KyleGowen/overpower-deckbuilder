@@ -5,6 +5,13 @@
 
 import { UserRepository } from '../repository/UserRepository';
 import { DeckRepository } from '../repository/DeckRepository';
+import type { DeckCard } from '../types';
+import type { ValidationError } from './deckValidationService';
+
+/** Full-deck legality check used to keep the copied deck's `is_valid` authoritative. */
+export interface SampleDeckValidationPort {
+  validateDeck: (cards: DeckCard[]) => Promise<ValidationError[]>;
+}
 
 /** Map DB card_type (underscores) to API cardType (hyphens) for replaceAllCardsInDeck */
 function dbCardTypeToApi(dbType: string): string {
@@ -19,7 +26,8 @@ function dbCardTypeToApi(dbType: string): string {
 export class NewUserSampleDeckService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly deckRepository: DeckRepository
+    private readonly deckRepository: DeckRepository,
+    private readonly deckValidation?: SampleDeckValidationPort
   ) {}
 
   /**
@@ -82,6 +90,24 @@ export class NewUserSampleDeckService {
       });
 
       await this.deckRepository.replaceAllCardsInDeck(newDeckId, cardsForReplace);
+
+      // Keep decks.is_valid authoritative for the copied deck (server-owned legality):
+      // the source is a full deck, so the copy may well be legal and must not stay
+      // at the create-time DEFAULT false.
+      if (this.deckValidation) {
+        try {
+          const cardsForValidation = sourceCards.map((card) => ({
+            id: '',
+            type: card.type,
+            cardId: card.cardId,
+            quantity: card.quantity,
+          })) as DeckCard[];
+          const errors = await this.deckValidation.validateDeck(cardsForValidation);
+          await this.deckRepository.updateDeck(newDeckId, { is_valid: errors.length === 0 });
+        } catch (error) {
+          console.error('NewUserSampleDeck: failed to recompute is_valid for copied deck:', error);
+        }
+      }
 
       console.log(
         `NewUserSampleDeck: copied "${fullDeck.name}" as "${newDeckName}" for user ${newUserId}`

@@ -28,6 +28,11 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 | `GET /api/v1/config/app` | — | — | Open — no auth required |
 | `GET /api/v1/decks*` | ✓ | ✓ | USER/ADMIN; GUEST→403 on write routes |
 | `POST/PUT/DELETE /api/v1/decks*` | ✓ | ✓ | Owner only; GUEST→403 |
+| `GET /api/v1/community/decks` | ✓ (optional) | ✓ (optional) | Public read; guests allowed (`isFavorited:false`) |
+| `GET /api/v1/users/:id/public-decks` | ✓ (optional) | ✓ (optional) | Public read; guests allowed |
+| `GET /api/v1/decks/favorites` | ✓ | ✓ | USER/ADMIN; guests→401/403 |
+| `POST/DELETE /api/v1/decks/:id/favorite` | ✓ | ✓ | USER/ADMIN; guests→403; cannot favorite own |
+| `POST /api/v1/users/display-name` | ✓ | — | USER/ADMIN; GUEST→403 |
 | `/api/v1/guest/decks*` | ✓ (GUEST only) | ✗ | GUEST role required; wrong role→403 |
 | `/api/v1/collections/me*` | ✓ | ✗ | USER/ADMIN; GUEST→401 (no collection) |
 | `/api/v1/admin/*` | ✓ | — | ADMIN role required; other roles→403 |
@@ -80,14 +85,15 @@ All v1 JSON responses use:
 8. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
 9. [User decks (cards)](#user-decks-cards)
 10. [User decks (UI preferences)](#user-decks-ui-preferences)
-11. [Guest decks (session memory)](#guest-decks-session-memory)
-12. [Collections (current user)](#collections-current-user)
-13. [Admin](#admin)
-14. [Image URL contract](#image-url-contract)
-15. [Caching & conditional GET](#caching--conditional-get)
-16. [Error catalog](#error-catalog)
-17. [Changelog](#changelog)
-18. [Deprecation policy](#deprecation-policy)
+11. [Community, favorites, and public profiles](#community-favorites-and-public-profiles)
+12. [Guest decks (session memory)](#guest-decks-session-memory)
+13. [Collections (current user)](#collections-current-user)
+14. [Admin](#admin)
+15. [Image URL contract](#image-url-contract)
+16. [Caching & conditional GET](#caching--conditional-get)
+17. [Error catalog](#error-catalog)
+18. [Changelog](#changelog)
+19. [Deprecation policy](#deprecation-policy)
 
 ---
 
@@ -253,6 +259,43 @@ Self-service account updates for **USER** and **ADMIN** (session cookie). **GUES
 **Response 403:** `FORBIDDEN` (GUEST) or `GOOGLE_PASSWORD_LOCKED` (Google-linked account).
 
 Legacy `POST /api/users/change-password` remains for backward compatibility and delegates to the same service (accepts `{ newPassword }` only).
+
+---
+
+### `POST /api/v1/users/display-name`
+
+Sets the user's public name. The semantics deliberately differ by auth provider:
+
+- **Password users:** renames their globally-unique `username` (login id). After this they log in with the new value; `display_name` stays `null`.
+- **SSO (Google) users:** sets `display_name` only. They still log in via SSO and cannot log in with the display name.
+
+The resolved public name everywhere in the app comes from `resolveUserDisplayName` (`display_name` → SSO `email` fallback → `username`).
+
+**Auth:** Session cookie (`sessionId`).
+
+**Request model:** `[src/api/http/models/users/SetDisplayNameRequestBody.ts](src/api/http/models/users/SetDisplayNameRequestBody.ts)`
+
+**Body:**
+
+```json
+{ "displayName": "Spider Fan" }
+```
+
+**Response 200** (`data`):
+
+```json
+{ "username": "Spider Fan", "displayName": null, "resolvedName": "Spider Fan" }
+```
+
+(For SSO users `username` is unchanged and `displayName` holds the new value.)
+
+**Response 400:** `DISPLAY_NAME_REQUIRED` or `VALIDATION_ERROR`.
+
+**Response 403:** `FORBIDDEN` (GUEST).
+
+**Response 409:** `USERNAME_TAKEN` (password user, name already in use).
+
+**Implementation:** `[UserAccountService.setDisplayName](src/api/services/userAccountService.ts)`, `[src/api/http/users.http.ts](src/api/http/users.http.ts)`.
 
 ---
 
@@ -722,6 +765,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
       "cardCount": 1,
       "threat": 20,
       "is_valid": false,
+      "is_private": true,
       "userId": "c567175f-a07b-41b7-b274-e82901d1b4f1",
       "uiPreferences": null,
       "isOwner": true,
@@ -746,7 +790,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 }
 ```
 
-Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid`, `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
+Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid` (server-owned — recomputed/persisted on every card mutation, create, import, and sample-deck copy; read-only for clients), `is_private` (boolean — deck visibility; `true` = private/owner-only, `false` = public; defaults `true`), `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
 
 Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, `exclude_from_draw`.
 
@@ -772,7 +816,7 @@ Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (ca
 
 **Rate limiting / read-only:** Same pattern as `**POST /api/v1/decks`** (**429** `RATE_LIMIT_EXCEEDED`, **403** `READ_ONLY_MODE`).
 
-**Request model:** partial JSON (same fields as legacy `**PUT /api/decks/:id`**): optional `**name`**, `**description**`, `**is_limited**`, `**is_valid**`, `**reserve_character**`, `**display_mission_card_id**`, `**background_image_path**` (non-empty paths validated via `**DeckBackgroundService.validateBackgroundPath**`). Validated in `[UpdateDeckRequestBody.ts](src/api/http/models/decks/UpdateDeckRequestBody.ts)`.
+**Request model:** partial JSON (same fields as legacy `**PUT /api/decks/:id`**): optional `**name`**, `**description**`, `**is_limited**`, `**is_private**` (boolean — flip deck visibility public/private; owner-only), `**reserve_character**`, `**display_mission_card_id**`, `**background_image_path**` (non-empty paths validated via `**DeckBackgroundService.validateBackgroundPath**`). Validated in `[UpdateDeckRequestBody.ts](src/api/http/models/decks/UpdateDeckRequestBody.ts)`. **`is_valid` is server-owned and ignored on this route** — it is recomputed and persisted from the deck's cards on every card mutation, create, import, and sample-deck copy; clients cannot set it.
 
 **Response 200:** v1 envelope; `**data`** = `{ "metadata", "cards": [] }` (updated metadata, empty cards array on success path).
 
@@ -896,6 +940,83 @@ All fields are optional: `dividerPosition` (number), `expansionState` (Record<st
 **Response 400 / 404 / 500:** `**VALIDATION_ERROR`**, `**DECK_NOT_FOUND`**, `**UI_PREFERENCES_UPDATE_ERROR**`.
 
 **Implementation:** `[DeckUIPreferencesService](src/api/services/deckUIPreferencesService.ts)` · HTTP `[decks.http.ts](src/api/http/decks.http.ts)`
+
+---
+
+## Community, favorites, and public profiles
+
+Read-only community feed, deck favorites, and public user profiles. These power the desktop `/community` page and the mobile Decks tabs.
+
+**Enriched list items:** the responses below return deck list items in the same `{ "metadata", "cards" }` shape as `GET /api/v1/decks`, plus two extra `metadata` fields:
+
+- `ownerDisplayName` (string or `null`) — the resolved public name of the deck owner (`resolveUserDisplayName`).
+- `isFavorited` (boolean) — whether the **current viewer** has favorited this deck (always `false` for guests).
+
+**Visibility rule:** only decks with `is_private = false` are ever returned by the community feed, search, public profiles, and favorites. Curated internal accounts (`community_decks` `…0002`, `tournament_decks` `…0003`) are **excluded** from the community feed/search (they have their own `GET /api/v1/decks/community` and `GET /api/v1/decks/tournament` rails).
+
+> **Naming:** `GET /api/v1/community/decks` (this section, user-submitted public feed) is distinct from `GET /api/v1/decks/community` (the curated `community_decks` account rail used by Home).
+
+### `GET /api/v1/community/decks`
+
+**Auth:** Optional session cookie or Bearer. Authenticated viewers get `isFavorited` populated; guests are allowed and always see `isFavorited: false`.
+
+**Query:** optional `**search**` — when omitted/blank, returns the **20 most-recent** public, legal, non-limited decks; when present, name-matches characters (slots 1–4 + reserve) or location across **all** public/legal/non-limited decks.
+
+**Response 200:** v1 envelope; `**data`** = array of enriched deck list items.
+
+**Implementation:** `[CommunityService.getCommunityDecks](src/api/services/communityService.ts)` · HTTP `[community.http.ts](src/api/http/community.http.ts)`
+
+---
+
+### `GET /api/v1/users/:userId/public-decks`
+
+Read-only public profile feed: the target user's `is_private = false` decks.
+
+**Auth:** Optional session cookie or Bearer (guests allowed).
+
+**Response 200:** v1 envelope; `**data`** = array of enriched deck list items (empty array if the user has no public decks).
+
+**Implementation:** `[CommunityService.getPublicDecksForUser](src/api/services/communityService.ts)` · HTTP `[community.http.ts](src/api/http/community.http.ts)`
+
+---
+
+### `GET /api/v1/decks/favorites`
+
+The current viewer's favorited decks (filters out private/deleted decks).
+
+**Auth:** Session cookie or Bearer (required). **GUEST/unauthenticated** → **401/403**.
+
+**Response 200:** v1 envelope; `**data`** = array of enriched deck list items (`isFavorited: true`).
+
+**Implementation:** `[CommunityService.getFavorites](src/api/services/communityService.ts)` · HTTP `[community.http.ts](src/api/http/community.http.ts)`
+
+---
+
+### `POST /api/v1/decks/:id/favorite`
+
+Favorite a deck. Idempotent (unique on `(user_id, deck_id)`).
+
+**Auth:** Session cookie or Bearer (required).
+
+**Response 200** (`data`): `{ "deckId": "<id>", "isFavorited": true }`
+
+**Response 400:** `CANNOT_FAVORITE_OWN` (you cannot favorite your own deck).
+
+**Response 404:** `DECK_NOT_FOUND`.
+
+**Implementation:** `[CommunityService.addFavorite](src/api/services/communityService.ts)` · HTTP `[community.http.ts](src/api/http/community.http.ts)`
+
+---
+
+### `DELETE /api/v1/decks/:id/favorite`
+
+Unfavorite a deck. Idempotent.
+
+**Auth:** Session cookie or Bearer (required).
+
+**Response 200** (`data`): `{ "deckId": "<id>", "isFavorited": false }`
+
+**Implementation:** `[CommunityService.removeFavorite](src/api/services/communityService.ts)` · HTTP `[community.http.ts](src/api/http/community.http.ts)`
 
 ---
 
@@ -1096,6 +1217,9 @@ Clears card repository caches.
 | POST   | /api/v1/auth/refresh                    | auth.http.ts        |
 | GET    | /api/v1/auth/me                         | auth.http.ts        |
 | POST   | /api/v1/auth/logout                     | auth.http.ts        |
+| POST   | /api/v1/users/change-email              | users.http.ts       |
+| POST   | /api/v1/users/change-password           | users.http.ts       |
+| POST   | /api/v1/users/display-name              | users.http.ts       |
 | GET    | /api/v1/catalog/characters              | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/locations               | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/special-cards           | dbv-catalog.http.ts |
@@ -1112,6 +1236,11 @@ Clears card repository caches.
 | GET    | /api/v1/dbv/sets                        | dbv-support.http.ts |
 | GET    | /api/v1/dbv/deck-backgrounds            | dbv-support.http.ts |
 | GET    | /api/v1/recent-updates                  | recent-updates.http.ts |
+| GET    | /api/v1/decks/favorites                 | community.http.ts   |
+| POST   | /api/v1/decks/:id/favorite              | community.http.ts   |
+| DELETE | /api/v1/decks/:id/favorite              | community.http.ts   |
+| GET    | /api/v1/community/decks                 | community.http.ts   |
+| GET    | /api/v1/users/:userId/public-decks      | community.http.ts   |
 | GET    | /api/v1/decks                           | decks.http.ts       |
 | GET    | /api/v1/decks/stats                     | decks.http.ts       |
 | POST   | /api/v1/decks                           | decks.http.ts       |

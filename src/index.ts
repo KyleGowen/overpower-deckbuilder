@@ -29,6 +29,9 @@ import { DeckUIPreferencesService } from './api/services/deckUIPreferencesServic
 import { GuestDeckService } from './api/services/guestDeckService';
 import { AdminService } from './api/services/adminService';
 import { UserAccountService } from './api/services/userAccountService';
+import { CommunityService } from './api/services/communityService';
+import { GUEST_USER_ID } from './constants/guestUser';
+import { TOURNAMENT_DECKS_USER_ID } from './constants/tournamentDecksUser';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
 import { setupMiddleware } from './middleware/setup';
 import {
@@ -72,7 +75,7 @@ const deckValidationService = new DeckValidationService(cardRepository);
 const deckBusinessService = new DeckService(deckRepository);
 
 // Initialize authentication service
-const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository);
+const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository, deckValidationService);
 const sessionRepository = createSessionRepositoryFromDataSource(dataSource);
 const authService = new AuthenticationService(userRepository, sessionRepository, newUserSampleDeckService);
 
@@ -105,7 +108,8 @@ const deckCardsService = new DeckCardsService(deckRepository, {
   checkIfCardIsAssist,
   checkIfCardIsAmbush,
   checkIfCardIsFortification,
-  checkIfCardIsOnePerDeck
+  checkIfCardIsOnePerDeck,
+  validateDeck: (cards) => deckValidationService.validateDeck(cards)
 });
 const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
@@ -125,6 +129,12 @@ const adminService = new AdminService({
 });
 
 const userAccountService = new UserAccountService(userRepository);
+
+// Community feed excludes internal/curated accounts (guest + tournament).
+const communityService = new CommunityService(deckRepository, userRepository, [
+  GUEST_USER_ID,
+  TOURNAMENT_DECKS_USER_ID
+]);
 
 // Function to get git information
 function getGitInfo() {
@@ -253,6 +263,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Authentication middleware
 const authenticateUser = authService.createAuthMiddleware();
+const optionalAuthenticate = authService.createOptionalAuthMiddleware();
 
 registerRoutes(app, {
   authService,
@@ -289,6 +300,7 @@ registerApiV1Routes(app, {
   dbvSupportService,
   recentUpdatesService,
   authenticateUser,
+  optionalAuthenticate,
   deckBackgroundService,
   deckListService,
   deckStatsService,
@@ -300,6 +312,7 @@ registerApiV1Routes(app, {
   guestDeckService,
   adminService,
   userAccountService,
+  communityService,
   pool: dataSource.getPool()
 });
 

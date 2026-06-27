@@ -4,7 +4,7 @@
 import type { Deck, DeckData } from '../types';
 import { DeckUtils } from '../utils/deckUtils';
 
-export function transformDeckListItem(deck: Deck) {
+export function transformDeckListItem(deck: Deck, viewerUserId?: string) {
   return {
     metadata: {
       id: deck.id,
@@ -15,7 +15,9 @@ export function transformDeckListItem(deck: Deck) {
       cardCount: deck.card_count || 0, // Use metadata column instead of cards.length
       threat: deck.threat || 0, // Use metadata column
       is_valid: deck.is_valid || false, // Use metadata column
+      is_private: deck.is_private ?? true, // default private when unknown
       userId: deck.user_id,
+      ...(viewerUserId !== undefined && { isOwner: deck.user_id === viewerUserId }),
       uiPreferences: deck.ui_preferences,
       is_limited: deck.is_limited,
       reserve_character: deck.reserve_character ?? null,
@@ -25,8 +27,8 @@ export function transformDeckListItem(deck: Deck) {
   };
 }
 
-export function transformDeckList(decks: Deck[]) {
-  return decks.map(transformDeckListItem);
+export function transformDeckList(decks: Deck[], viewerUserId?: string) {
+  return decks.map((deck) => transformDeckListItem(deck, viewerUserId));
 }
 
 /** Guest session deck → same list shape as `transformDeckListItem` for merged GUEST deck list. */
@@ -64,6 +66,7 @@ export function transformDeckDetail(deck: Deck, viewerUserId: string) {
       cardCount: deck.card_count ?? DeckUtils.calculateCardCount(deck.cards ?? []),
       threat: deck.threat ?? 0,
       is_valid: deck.is_valid ?? false,
+      is_private: deck.is_private ?? true,
       userId: deck.user_id,
       uiPreferences: deck.ui_preferences,
       isOwner,
@@ -92,6 +95,7 @@ export function transformDeckAfterMetadataUpdate(deck: Deck, viewerUserId: strin
       created: deck.created_at,
       lastModified: deck.updated_at,
       cardCount: deck.card_count || 0,
+      is_private: deck.is_private ?? true,
       userId: deck.user_id,
       uiPreferences: deck.ui_preferences,
       isOwner,

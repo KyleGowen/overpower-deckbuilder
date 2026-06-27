@@ -226,6 +226,17 @@ export class PostgreSQLUserRepository implements UserRepository {
     }
   }
 
+  async getUsersByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE id = ANY($1::uuid[])', [ids]);
+      return result.rows.map((user) => this.mapRowToUser(user));
+    } finally {
+      client.release();
+    }
+  }
+
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
     const client = await this.pool.connect();
     try {

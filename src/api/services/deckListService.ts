@@ -15,7 +15,8 @@ export class DeckListService {
 
   async getTransformedListForUser(userId: string): Promise<ReturnType<typeof transformDeckList>> {
     const decks = await this.deckRepository.getDecksByUserId(userId);
-    return transformDeckList(decks);
+    // Viewer is the owner here ("My Decks"), so isOwner is set on every item.
+    return transformDeckList(decks, userId);
   }
 
   async getTransformedCommunityListForUser(

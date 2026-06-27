@@ -55,6 +55,7 @@ describe('AuthenticationService', () => {
       createGoogleUser: jest.fn(),
       linkGoogleToUser: jest.fn(),
       getAllUsers: jest.fn(),
+      getUsersByIds: jest.fn(),
       updateUser: jest.fn(),
       updateLastLoginAt: jest.fn(),
       updateUserPassword: jest.fn(),

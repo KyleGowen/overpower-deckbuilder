@@ -137,6 +137,8 @@ export interface DeckMetadata {
   cardCount: number;
   threat?: number;
   is_valid?: boolean;
+  /** Deck visibility. true = private (owner only), false = public. */
+  is_private?: boolean;
   userId: string;
   isOwner: boolean;
   is_limited?: boolean;
@@ -144,6 +146,10 @@ export interface DeckMetadata {
   display_mission_card_id?: string | null;
   background_image_path?: string | null;
   uiPreferences?: Record<string, unknown> | null;
+  /** Whether the current viewer has favorited this deck (set on community/favorites/profile lists). */
+  isFavorited?: boolean;
+  /** Resolved public display name of the deck owner (set on community/favorites/profile lists). */
+  ownerDisplayName?: string | null;
 }
 
 export interface DeckDetail {

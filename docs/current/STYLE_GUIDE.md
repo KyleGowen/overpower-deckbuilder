@@ -40,15 +40,17 @@
 37. [Home Deck Rails (v2 SPA)](#home-deck-rails-v2-spa)
 38. [Stat icon badges (v2 SPA)](#stat-icon-badges-v2-spa)
 39. [Deck Selection toolbar (v2 SPA)](#deck-selection-toolbar-v2-spa)
-40. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
-41. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
-42. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
-43. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
-44. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
-45. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
-46. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
-47. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
-48. [v2 Prismatic Foil Effect](#v2-prismatic-foil-effect)
+40. [Public/private visibility chip & favorite heart (v2 SPA)](#publicprivate-visibility-chip--favorite-heart-v2-spa)
+41. [Community page (v2 SPA)](#community-page-v2-spa)
+42. [Card Database grid (v2 SPA)](#card-database-grid-v2-spa)
+43. [Deck Editor stats strip (v2 SPA)](#deck-editor-stats-strip-v2-spa)
+44. [Deck Editor card grid (v2 SPA)](#deck-editor-card-grid-v2-spa)
+45. [Add Cards Stacks tab (v2 SPA)](#add-cards-stacks-tab-v2-spa)
+46. [Add Cards Missions tab (v2 SPA)](#add-cards-missions-tab-v2-spa)
+47. [Add Cards filter strip (v2 SPA)](#add-cards-filter-strip-v2-spa)
+48. [Deck Editor Draw Hand (v2 SPA)](#deck-editor-draw-hand-v2-spa)
+49. [Deck Editor list view (v2 SPA)](#deck-editor-list-view-v2-spa)
+50. [v2 Prismatic Foil Effect](#v2-prismatic-foil-effect)
 
 ## Overview
 
@@ -3260,7 +3262,81 @@ Two deck tiles per row (matches Collection mobile density pattern):
 
 **Visible on mobile tiles:** hero art, deck name (1 line), card count, legality badge (centered in meta bar), threat badge, four primary stat icons (shrunk to ~22px), ⋯ menu (44×44px hit area). Meta bar has `margin-bottom: calc(var(--space-1) / 2)` (2px) before the stats row.
 
-**Hidden on mobile tiles:** mission set chip (`.deck-tile__chip`), footer row (`.deck-tile__footer` — updated date and footer legality). Hover lift disabled on mobile.
+**Hidden on mobile tiles:** mission set chip (`.deck-tile__chip`), footer updated date and footer legality (footer row itself is shown only when an owner name is present — `.deck-tile__footer:has(.deck-tile__owner)`). Hover lift disabled on mobile.
+
+### Mobile deck tabs — `.dsel__tabs` / `.dsel__tab`
+
+On `.layout-mobile`, the deck selection screen surfaces four **swipeable pill tabs** — **My Decks**, **Favorites**, **Community**, **Tournament** — mirroring the DBV type-tab strip (`.db__types`). Tabs are **not** added to the bottom nav (`MOBILE_NAV_ORDER` stays at its existing count); they live inside the Decks screen only.
+
+| Property | Value |
+|---|---|
+| Strip | `.dsel__tabs` — `display: flex; gap: var(--space-2); overflow-x: auto; scrollbar hidden` |
+| Pill | `.dsel__tab` — `border-radius: var(--radius-full)`, `padding: 4px 12px`, `var(--font-size-xs)`, `var(--font-weight-semibold)` |
+| Active | `.dsel__tab.is-active` — `color: var(--color-accent-bright)`, `border-color: var(--color-border-accent)`, `background: rgba(0, 200, 232, 0.08)` |
+| Swipe | `useHorizontalSwipe` + `stepCyclicalIndex`; swipes blocked over `DECK_SELECTION_SWIPE_BLOCK_SELECTOR` (tab strip, search, scroll areas) |
+
+Per-tab rules: **My Decks** is the editable owner view (create/import/edit/delete). **Favorites/Community/Tournament** are read-only lists — tiles open `?readonly=true`, with favorite hearts and clickable owner names. The **Community** tab keeps the character/location **search** field (`.dsel__community-search`).
+
+## Public/private visibility chip & favorite heart (v2 SPA)
+
+These two deck-tile controls support the Community feature ([`DeckTile.tsx`](../../frontend/src/components/DeckTile/DeckTile.tsx) + [`.css`](../../frontend/src/components/DeckTile/DeckTile.css); legality/visibility helpers in [`deckTileLegality.ts`](../../frontend/src/components/DeckTile/deckTileLegality.ts)).
+
+### Legality badge — `deckLegalityBadge` (single source of truth)
+
+One shared helper drives the legality chip on **every** v2 surface (deck tiles, Home/Community rails, and the deck editor header) so the same deck never disagrees between pages. Precedence: **Limited** > **Not Legal** > **Legal**; the chip is **always shown** (legality is explicit). Color classes via `legalityBadgeClass()`:
+
+| State | Label | Class | Color |
+|---|---|---|---|
+| `is_limited = true` | "Limited" | `badge-limited` | `--color-warning` (amber) |
+| `!is_valid` | "Not Legal" | `badge-not-legal` | `--color-not-legal` (red) |
+| valid | "Legal" | `badge-legal` | `--color-legal` (green) |
+
+`is_valid` is **server-owned** — recomputed and persisted on every deck mutation (card add/replace/delete, create, import, new-user sample copy). The deck editor also live-validates via `POST /api/v1/decks/validate` (which now returns `{ valid: false }` for invalid decks instead of throwing), and feeds that result through the same `deckLegalityBadge` helper, honoring the Limited toggle.
+
+### Visibility chip — `deckTileVisibilityBadge`
+
+A small display-only chip beside the legality badge in the tile meta bar, shown when `showVisibility` is enabled. Two states:
+
+| State | Label | Treatment |
+|---|---|---|
+| Private (`is_private = true`) | "Private" | Muted chip — `var(--font-2xs)`, `border-radius: var(--radius-full)`, neutral border/text |
+| Public (`is_private = false`) | "Public" | Accent chip — same shape, `color: var(--color-accent-bright)` |
+
+In the **deck editor**, the owner sees an interactive **toggle** chip (next to the legality badge) that flips `is_private` via `PUT /api/v1/decks/:id` and updates the `['deck', deckId]` cache — rendered only when `isOwner`. Non-owners/guests never see the toggle.
+
+### Favorite heart — `.deck-tile__fav`
+
+Top-right control on tiles in community/profile/favorites contexts (hidden for guests and for the deck owner):
+
+| Property | Value |
+|---|---|
+| Hit area | 32×32px (`44×44` on `.layout-mobile`) |
+| Idle | `IconHeart` outline, `color: var(--color-text-muted)` |
+| Active (`isFavorited`) | filled heart, `color: var(--color-danger)` / red accent |
+| Busy | `favoriteBusy` disables the button during the optimistic mutation |
+| `aria-label` | "Add to favorites" / "Remove from favorites" |
+
+Toggling is optimistic (TanStack Query `setQueryData`) then reconciled by invalidating the favorites query. In the read-only deck editor topbar a larger labeled favorite control mirrors the same state.
+
+## Community page (v2 SPA)
+
+The desktop `/community` page ([`CommunityPage.tsx`](../../frontend/src/features/community/CommunityPage.tsx) + [`.css`](../../frontend/src/features/community/CommunityPage.css); shared grid [`CommunityDeckGrid.tsx`](../../frontend/src/features/community/CommunityDeckGrid.tsx)) uses a **tabbed layout** (Moxfield-style): pill tabs select one collection at a time; only the active tab's deck grid is shown.
+
+### Layout — `.community` / `.community__tabs`
+
+| Element | Notes |
+|---|---|
+| `.community__inner` | Page max-width container, centered |
+| `.community__page-head` | `IconUsers` + "Community" title (`.community__page-title`) and subtitle |
+| `.community__toolbar` | Flex row: tab strip left, search right (search visible only on Community tab) |
+| `.community__tabs` / `.community__tab` | Pill tab strip (mirrors `.dsel__tabs` / `.db__types`); `.is-active` uses accent soft fill |
+| `.community__search` | Pill search input; shown only when **Community Decks** tab is active |
+| `.community__panel` | Single `role="tabpanel"` — renders one `CommunityDeckGrid` for the active tab |
+| Grid | `CommunityDeckGrid` renders `DeckTile variant="full"` with max-stat icons (`deckMaxStats`) + owner display name |
+
+**Tabs (left to right):** (1) **Community Decks** — `GET /api/v1/community/decks` (20 most-recent public/legal/non-limited), with the **search bar** (placeholder "Search by character or location name"). (2) **Your Favorites** — logged-in users only; hearts filled, click-to-unfavorite. (3) **Tournament Winning Decks** — `tournament_decks` account. Home "View All" links deep-link via hash (`#tournament`, `#community`); hash selects the matching tab. Mobile: horizontal swipe between tabs (`useHorizontalSwipe`); swipe blocked on `.community__tabs`, `.community__toolbar`, and `.community__search`.
+
+Empty states use the shared `EmptyState` component. The desktop nav gains a **Community** entry (`IconUsers`) via `NAV_ITEMS` in [`navConfig.tsx`](../../frontend/src/components/MobileBottomNav/navConfig.tsx).
 
 ## Card Database grid (v2 SPA)
 

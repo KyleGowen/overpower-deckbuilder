@@ -251,13 +251,85 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  min-width: 0;
 }
 .deck-tile__footer-spacer {
   flex: 1 1 auto;
 }
+.deck-tile__footer-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-left: auto;
+  flex-shrink: 0;
+  min-width: 0;
+}
 .deck-tile__updated {
   font-size: var(--font-size-xs);
   color: var(--color-text-dim);
+  white-space: nowrap;
+}
+
+/* ---- Favorite heart (decks not owned by the viewer) ---- */
+.deck-tile__fav {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 4;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-scrim);
+  color: var(--color-text);
+  font-size: 1.05rem;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.deck-tile__fav:hover {
+  color: var(--color-danger);
+  transform: scale(1.08);
+}
+.deck-tile__fav.is-active {
+  color: var(--color-danger);
+}
+.deck-tile__fav:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---- Owner name (footer left) + visibility sub-row ---- */
+.deck-tile__subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.deck-tile__subrow-spacer {
+  flex: 1 1 auto;
+}
+.deck-tile__owner {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-tile__owner--link {
+  color: var(--color-accent-bright);
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+}
+.deck-tile__owner--link:hover {
+  text-decoration: underline;
 }
 
 /* ---- Mobile density (2-col deck selection grid, Home rails) ---- */
@@ -362,4 +434,7 @@
 
 .layout-mobile .deck-tile__footer {
   display: none;
+}
+.layout-mobile .deck-tile__footer:has(.deck-tile__owner) {
+  display: flex;
 }

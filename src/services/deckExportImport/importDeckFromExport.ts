@@ -1,12 +1,13 @@
 import type { DeckRepository } from '../../repository/DeckRepository';
 import type { CardRepository } from '../../repository/CardRepository';
-import type { Deck } from '../../types';
+import type { Deck, DeckCard } from '../../types';
 import { COMMUNITY_DECKS_USER_ID } from '../../constants/communityDecksUser';
 import { extractCardsFromExportJson } from './extractCardsFromExportJson';
 import { loadDeckCatalogBundle } from './loadDeckCatalogBundle';
 import { resolveExportCardIds } from './resolveExportCardIds';
 import type { ExportDeckJson } from './types';
 import { buildAvailableCardsMap } from '../deck-validation/build-available-cards-map';
+import { DeckValidationService } from '../deckValidationService';
 
 export interface ImportDeckResult {
   deckId: string;
@@ -55,6 +56,16 @@ export async function importDeckFromExport(
   );
 
   const updates: Partial<Deck> = {};
+
+  // Keep decks.is_valid authoritative for imported decks (community/tournament).
+  const cardsForValidation = resolved.map((c) => ({
+    id: '',
+    type: c.cardType,
+    cardId: c.cardId,
+    quantity: c.quantity,
+  })) as DeckCard[];
+  const validationErrors = await new DeckValidationService(cardRepository).validateDeck(cardsForValidation);
+  updates.is_valid = validationErrors.length === 0;
 
   if (typeof exportData.limited === 'boolean') {
     updates.is_limited = exportData.limited;

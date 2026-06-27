@@ -1,21 +1,51 @@
-import { useMemo, useState, useEffect, type FormEvent } from 'react';
+import { useMemo, useRef, useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
-import { fetchDecksForUser, createDeck, deleteDeck } from '../../lib/api/decks';
+import { fetchDecksForUser, createDeck, deleteDeck, fetchTournamentDecks } from '../../lib/api/decks';
+import { fetchPublicDecksForUser, fetchFavoriteDecks, fetchCommunityFeed } from '../../lib/api/favorites';
+import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
 import { fetchCatalog } from '../../lib/api/catalog';
-import { cardStats } from '../../lib/catalog/catalogTypeMap';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
+import { buildCharStatsById, deckMaxStats as computeDeckMaxStats } from '../../lib/decks/deckMaxStats';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
+import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
+import { DECK_SELECTION_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { DeckTile, type DeckStatLine } from '../../components/DeckTile';
+import { CommunityDeckGrid } from '../community/CommunityDeckGrid';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
-import { IconPlus, IconDecks, IconEdit, IconTrash, IconPlay, IconImport, IconExport } from '../../components/icons';
+import {
+  IconPlus,
+  IconDecks,
+  IconEdit,
+  IconTrash,
+  IconPlay,
+  IconImport,
+  IconExport,
+  IconHeart,
+  IconUsers,
+  IconTrophy,
+  IconSearch,
+} from '../../components/icons';
 import type { DeckListItem } from '../../lib/api/types';
 import { ExportDeckPanel } from '../deck-editor/ExportDeckPanel';
 import { ImportDeckPanel } from './ImportDeckPanel';
 import { useDeckExportInput, createStubDeckExportInput } from './useDeckExportInput';
 import './DeckSelectionPage.css';
+
+type DeckTab = 'mine' | 'favorites' | 'community' | 'tournament';
+const DECK_SELECTION_TAB_ORDER: DeckTab[] = ['mine', 'favorites', 'community', 'tournament'];
+const DECK_TAB_LABELS: Record<DeckTab, string> = {
+  mine: 'My Decks',
+  favorites: 'Favorites',
+  community: 'Community',
+  tournament: 'Tournament',
+};
+const COMMUNITY_FEED_KEY = (search: string) => ['decks', 'community-feed', search] as const;
+const FAVORITES_KEY = ['decks', 'favorites'] as const;
+const TOURNAMENT_KEY = ['decks', 'tournament'] as const;
 
 export default function DeckSelectionPage() {
   const { user, isGuest } = useAuth();
@@ -24,7 +54,13 @@ export default function DeckSelectionPage() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const ownerId = user?.id ?? params.userId ?? '';
+  const viewerId = user?.id ?? null;
+  const profileUserId = params.userId;
+  // Read-only public profile: viewing another user's decks (not your own, not guest's own).
+  const isReadOnlyProfile = Boolean(profileUserId) && profileUserId !== viewerId;
+  const ownerId = viewerId ?? profileUserId ?? '';
+
+  const publicDecksKey = ['decks', 'public', profileUserId ?? ''] as const;
 
   useEffect(() => {
     if (searchParams.get('create') === '1') {
@@ -35,10 +71,37 @@ export default function DeckSelectionPage() {
     }
   }, [searchParams, setSearchParams]);
 
-  const decksQuery = useQuery({
+  const myDecksQuery = useQuery({
     queryKey: ['decks', 'mine', ownerId],
     queryFn: () => fetchDecksForUser(isGuest),
+    enabled: !isReadOnlyProfile,
   });
+  const profileDecksQuery = useQuery({
+    queryKey: publicDecksKey,
+    queryFn: () => fetchPublicDecksForUser(profileUserId as string),
+    enabled: isReadOnlyProfile,
+  });
+  const decksQuery = isReadOnlyProfile ? profileDecksQuery : myDecksQuery;
+
+  const favoriteToggle = useFavoriteToggle([[...publicDecksKey]]);
+
+  // Optimistically flip the heart on the public-profile list before the refetch lands.
+  const handleToggleFavorite = (deck: DeckListItem) => {
+    const next = !deck.metadata.isFavorited;
+    queryClient.setQueryData<DeckListItem[]>(publicDecksKey, (prev) =>
+      (prev ?? []).map((d) =>
+        d.metadata.id === deck.metadata.id
+          ? { ...d, metadata: { ...d.metadata, isFavorited: next } }
+          : d,
+      ),
+    );
+    favoriteToggle.mutate({ deckId: deck.metadata.id, next });
+  };
+
+  // Owner display name for the profile header (from any returned deck).
+  const profileOwnerName =
+    (profileDecksQuery.data ?? []).find((d) => d.metadata.ownerDisplayName)?.metadata
+      .ownerDisplayName ?? null;
   const charactersQuery = useQuery({
     queryKey: ['catalog', 'characters'],
     queryFn: () => fetchCatalog('characters'),
@@ -48,6 +111,62 @@ export default function DeckSelectionPage() {
     queryKey: ['catalog', 'missions'],
     queryFn: () => fetchCatalog('missions'),
     staleTime: 30 * 60 * 1000,
+  });
+
+  // ---- Mobile-only tabs (My Decks / Favorites / Community / Tournament) ----
+  const { isMobile } = useLayoutMode();
+  const [activeTab, setActiveTab] = useState<DeckTab>('mine');
+  // Desktop always shows My Decks here; the desktop Community page lives at /community.
+  const tab: DeckTab = isMobile && !isReadOnlyProfile ? activeTab : 'mine';
+  const showTabs = isMobile && !isReadOnlyProfile;
+
+  const swipeRef = useRef<HTMLDivElement>(null);
+  const tabStripRef = useRef<HTMLDivElement>(null);
+  const goToRelativeTab = (delta: 1 | -1) => {
+    const idx = DECK_SELECTION_TAB_ORDER.indexOf(activeTab);
+    setActiveTab(
+      DECK_SELECTION_TAB_ORDER[
+        stepCyclicalIndex(idx >= 0 ? idx : 0, DECK_SELECTION_TAB_ORDER.length, delta)
+      ],
+    );
+  };
+  useHorizontalSwipe({
+    targetRef: swipeRef,
+    enabled: showTabs,
+    blockSelector: DECK_SELECTION_SWIPE_BLOCK_SELECTOR,
+    onSwipeLeft: () => goToRelativeTab(1),
+    onSwipeRight: () => goToRelativeTab(-1),
+  });
+  useEffect(() => {
+    if (!showTabs || !tabStripRef.current) return;
+    const el = tabStripRef.current.querySelector<HTMLElement>(`[data-dsel-tab="${tab}"]`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [tab, showTabs]);
+
+  const [communitySearchInput, setCommunitySearchInput] = useState('');
+  const [communitySearch, setCommunitySearch] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setCommunitySearch(communitySearchInput.trim()), 300);
+    return () => clearTimeout(t);
+  }, [communitySearchInput]);
+
+  const favoritesQuery = useQuery({
+    queryKey: FAVORITES_KEY,
+    queryFn: () => fetchFavoriteDecks(),
+    enabled: showTabs && tab === 'favorites',
+    staleTime: 60 * 1000,
+  });
+  const communityFeedQuery = useQuery({
+    queryKey: COMMUNITY_FEED_KEY(communitySearch),
+    queryFn: () => fetchCommunityFeed(communitySearch),
+    enabled: showTabs && tab === 'community',
+    staleTime: 60 * 1000,
+  });
+  const tournamentQuery = useQuery({
+    queryKey: TOURNAMENT_KEY,
+    queryFn: () => fetchTournamentDecks(),
+    enabled: showTabs && tab === 'tournament',
+    staleTime: 10 * 60 * 1000,
   });
 
   const [search, setSearch] = useState('');
@@ -66,14 +185,10 @@ export default function DeckSelectionPage() {
     Boolean(exportDeckId),
   );
 
-  const charStatsById = useMemo(() => {
-    const m = new Map<string, ReturnType<typeof cardStats>>();
-    (charactersQuery.data ?? []).forEach((c) => {
-      const s = cardStats(c);
-      if (s) m.set(c.id, s);
-    });
-    return m;
-  }, [charactersQuery.data]);
+  const charStatsById = useMemo(
+    () => buildCharStatsById(charactersQuery.data),
+    [charactersQuery.data],
+  );
 
   const missionSetByCardId = useMemo(
     () => buildMissionSetByCardId(missionsQuery.data ?? []),
@@ -83,26 +198,8 @@ export default function DeckSelectionPage() {
   const deckMissionSetLabel = (deck: DeckListItem): string | null =>
     deckMissionSetName(deck, missionSetByCardId);
 
-  const deckMaxStats = (deck: DeckListItem): DeckStatLine | null => {
-    const chars = (deck.cards ?? []).filter((c) => c.type === 'character');
-    if (chars.length === 0) return null;
-    let energy = 0;
-    let combat = 0;
-    let bruteForce = 0;
-    let intelligence = 0;
-    let found = false;
-    chars.forEach((c) => {
-      const s = charStatsById.get(c.cardId);
-      if (s) {
-        found = true;
-        energy = Math.max(energy, s.energy);
-        combat = Math.max(combat, s.combat);
-        bruteForce = Math.max(bruteForce, s.bruteForce);
-        intelligence = Math.max(intelligence, s.intelligence);
-      }
-    });
-    return found ? { energy, combat, bruteForce, intelligence } : null;
-  };
+  const deckMaxStats = (deck: DeckListItem): DeckStatLine | null =>
+    computeDeckMaxStats(deck, charStatsById);
 
   const decks = decksQuery.data ?? [];
   const filtered = useMemo(() => {
@@ -112,7 +209,36 @@ export default function DeckSelectionPage() {
   }, [decks, search]);
 
   const openDeck = (deck: DeckListItem) => {
-    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}`);
+    const suffix = isReadOnlyProfile ? '?readonly=true' : '';
+    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}${suffix}`);
+  };
+
+  const canFavorite = Boolean(viewerId) && !isGuest;
+
+  const openReadonly = (deck: DeckListItem) =>
+    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}?readonly=true`);
+  const openProfile = (deck: DeckListItem) =>
+    navigate(`/users/${deck.metadata.userId}/decks`);
+
+  // Mobile community/tournament tab: optimistic heart on the active list.
+  const toggleListFavorite = (deck: DeckListItem) => {
+    const key = tab === 'tournament' ? TOURNAMENT_KEY : COMMUNITY_FEED_KEY(communitySearch);
+    const next = !deck.metadata.isFavorited;
+    queryClient.setQueryData<DeckListItem[]>(key, (prev) =>
+      (prev ?? []).map((d) =>
+        d.metadata.id === deck.metadata.id
+          ? { ...d, metadata: { ...d.metadata, isFavorited: next } }
+          : d,
+      ),
+    );
+    favoriteToggle.mutate({ deckId: deck.metadata.id, next });
+  };
+  // Mobile favorites tab: unfavorite removes the tile.
+  const removeListFavorite = (deck: DeckListItem) => {
+    queryClient.setQueryData<DeckListItem[]>(FAVORITES_KEY, (prev) =>
+      (prev ?? []).filter((d) => d.metadata.id !== deck.metadata.id),
+    );
+    favoriteToggle.mutate({ deckId: deck.metadata.id, next: false });
   };
 
   const handleCreate = async (e: FormEvent) => {
@@ -149,77 +275,248 @@ export default function DeckSelectionPage() {
     navigate(`/users/${userId}/decks/${deckId}`);
   };
 
+  if (isReadOnlyProfile) {
+    const profileTitle = profileOwnerName ? `${profileOwnerName}'s Decks` : 'Public Decks';
+    return (
+      <div className="dsel">
+        <div className="dsel__inner">
+          <header className="dsel__header">
+            <div>
+              <h1 className="dsel__title"><IconDecks /> {profileTitle}</h1>
+              <div className="dsel__stats">
+                <span><strong>{decks.length}</strong> public decks</span>
+              </div>
+            </div>
+          </header>
+
+          {decksQuery.isLoading ? (
+            <LoadingState label="Loading decks..." />
+          ) : decksQuery.isError ? (
+            <EmptyState variant="error" title="Couldn't load decks" message="Please try again." icon={<IconDecks />} />
+          ) : decks.length === 0 ? (
+            <EmptyState
+              title="No public decks yet"
+              message="This user has no public decks yet."
+              icon={<IconDecks />}
+            />
+          ) : (
+            <div className="dsel__grid">
+              {decks.map((deck) => (
+                <DeckTile
+                  key={deck.metadata.id}
+                  deck={deck}
+                  variant="full"
+                  maxStats={deckMaxStats(deck)}
+                  missionSetName={deckMissionSetLabel(deck)}
+                  onOpen={() => openDeck(deck)}
+                  onToggleFavorite={
+                    canFavorite ? () => handleToggleFavorite(deck) : undefined
+                  }
+                  isFavorited={Boolean(deck.metadata.isFavorited)}
+                  favoriteBusy={favoriteToggle.isPending}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const tabTitle =
+    tab === 'mine' ? (
+      <><IconDecks /> {isGuest ? 'Guest Decks' : 'My Decks'}</>
+    ) : tab === 'favorites' ? (
+      <><IconHeart filled /> Favorites</>
+    ) : tab === 'community' ? (
+      <><IconUsers /> Community</>
+    ) : (
+      <><IconTrophy /> Tournament</>
+    );
+
+  const communityDecks = communityFeedQuery.data ?? [];
+  const favoriteDecks = favoritesQuery.data ?? [];
+  const tournamentDecks = tournamentQuery.data ?? [];
+
   return (
-    <div className="dsel">
+    <div className="dsel" ref={swipeRef}>
       <div className="dsel__inner">
         <header className="dsel__header">
           <div>
-            <h1 className="dsel__title"><IconDecks /> {isGuest ? 'Guest Decks' : 'My Decks'}</h1>
-            <div className="dsel__stats">
-              <span><strong>{decks.length}</strong> decks</span>
-              {isGuest ? <span className="dsel__guest-note">Stored for this session</span> : null}
-            </div>
+            <h1 className="dsel__title">{tabTitle}</h1>
+            {tab === 'mine' ? (
+              <div className="dsel__stats">
+                <span><strong>{decks.length}</strong> decks</span>
+                {isGuest ? <span className="dsel__guest-note">Stored for this session</span> : null}
+              </div>
+            ) : null}
           </div>
-          <div className="dsel__actions">
-            <input
-              type="search"
-              className="dsel__search"
-              placeholder="Search decks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search decks"
-            />
-            <div className="dsel__action-buttons">
-              <button
-                type="button"
-                className={`btn btn-ghost${importOpen ? ' is-active' : ''}`}
-                onClick={() => setImportOpen(true)}
-              >
-                <IconImport /> Import Deck
-              </button>
-              <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-                <IconPlus /> New Deck
-              </button>
+          {tab === 'mine' ? (
+            <div className="dsel__actions">
+              <input
+                type="search"
+                className="dsel__search"
+                placeholder="Search decks..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search decks"
+              />
+              <div className="dsel__action-buttons">
+                <button
+                  type="button"
+                  className={`btn btn-ghost${importOpen ? ' is-active' : ''}`}
+                  onClick={() => setImportOpen(true)}
+                >
+                  <IconImport /> Import Deck
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                  <IconPlus /> New Deck
+                </button>
+              </div>
             </div>
-          </div>
+          ) : tab === 'community' ? (
+            <form
+              className="dsel__community-search"
+              role="search"
+              onSubmit={(e: FormEvent) => e.preventDefault()}
+            >
+              <IconSearch />
+              <input
+                type="search"
+                placeholder="Search by character or location name"
+                value={communitySearchInput}
+                onChange={(e) => setCommunitySearchInput(e.target.value)}
+                aria-label="Search community decks by character or location"
+              />
+            </form>
+          ) : null}
         </header>
 
-        {decksQuery.isLoading ? (
-          <LoadingState label="Loading decks..." />
-        ) : decksQuery.isError ? (
-          <EmptyState variant="error" title="Couldn't load decks" message="Please try again." icon={<IconDecks />} />
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            title={search ? 'No decks match' : 'No decks yet'}
-            message={search ? 'Try a different search.' : 'Create your first deck to get started.'}
-            icon={<IconDecks />}
-            action={
-              !search ? (
-                <div className="dsel__empty-actions">
-                  <button type="button" className="btn btn-ghost" onClick={() => setImportOpen(true)}>
-                    <IconImport /> Import Deck
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-                    <IconPlus /> New Deck
-                  </button>
-                </div>
-              ) : null
-            }
-          />
-        ) : (
-          <div className="dsel__grid">
-            {filtered.map((deck) => (
-              <DeckTile
-                key={deck.metadata.id}
-                deck={deck}
-                variant="full"
-                maxStats={deckMaxStats(deck)}
-                missionSetName={deckMissionSetLabel(deck)}
-                onOpen={() => openDeck(deck)}
-                onMenu={() => setMenuDeck(deck)}
-              />
+        {showTabs ? (
+          <div className="dsel__tabs" ref={tabStripRef} role="tablist" aria-label="Deck collections">
+            {DECK_SELECTION_TAB_ORDER.map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                data-dsel-tab={t}
+                className={`dsel__tab ${tab === t ? 'is-active' : ''}`}
+                onClick={() => setActiveTab(t)}
+              >
+                {DECK_TAB_LABELS[t]}
+              </button>
             ))}
           </div>
+        ) : null}
+
+        {tab === 'mine' ? (
+          decksQuery.isLoading ? (
+            <LoadingState label="Loading decks..." />
+          ) : decksQuery.isError ? (
+            <EmptyState variant="error" title="Couldn't load decks" message="Please try again." icon={<IconDecks />} />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              title={search ? 'No decks match' : 'No decks yet'}
+              message={search ? 'Try a different search.' : 'Create your first deck to get started.'}
+              icon={<IconDecks />}
+              action={
+                !search ? (
+                  <div className="dsel__empty-actions">
+                    <button type="button" className="btn btn-ghost" onClick={() => setImportOpen(true)}>
+                      <IconImport /> Import Deck
+                    </button>
+                    <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                      <IconPlus /> New Deck
+                    </button>
+                  </div>
+                ) : null
+              }
+            />
+          ) : (
+            <div className="dsel__grid">
+              {filtered.map((deck) => (
+                <DeckTile
+                  key={deck.metadata.id}
+                  deck={deck}
+                  variant="full"
+                  maxStats={deckMaxStats(deck)}
+                  missionSetName={deckMissionSetLabel(deck)}
+                  showVisibility={!isGuest}
+                  onOpen={() => openDeck(deck)}
+                  onMenu={() => setMenuDeck(deck)}
+                />
+              ))}
+            </div>
+          )
+        ) : tab === 'favorites' ? (
+          !canFavorite ? (
+            <EmptyState title="Favorites" message="Log in to favorite community decks." icon={<IconHeart />} />
+          ) : favoritesQuery.isLoading ? (
+            <LoadingState label="Loading favorites..." />
+          ) : favoritesQuery.isError ? (
+            <EmptyState variant="error" title="Couldn't load favorites" message="Please try again." icon={<IconHeart />} />
+          ) : favoriteDecks.length === 0 ? (
+            <EmptyState title="No favorites yet" message="Tap the heart on any community deck to save it here." icon={<IconHeart />} />
+          ) : (
+            <CommunityDeckGrid
+              className="dsel__grid"
+              decks={favoriteDecks}
+              characters={charactersQuery.data}
+              missions={missionsQuery.data}
+              viewerId={viewerId}
+              canFavorite={canFavorite}
+              favoriteBusy={favoriteToggle.isPending}
+              onToggleFavorite={removeListFavorite}
+              favoriteFilled
+              onOpen={openReadonly}
+              onOwnerClick={openProfile}
+            />
+          )
+        ) : tab === 'community' ? (
+          communityFeedQuery.isLoading ? (
+            <LoadingState label="Loading decks..." />
+          ) : communityFeedQuery.isError ? (
+            <EmptyState variant="error" title="Couldn't load decks" message="Please try again." icon={<IconUsers />} />
+          ) : communityDecks.length === 0 ? (
+            <EmptyState
+              title={communitySearch ? 'No decks match' : 'Nothing here yet'}
+              message={communitySearch ? 'Try a different character or location name.' : 'Public decks will appear here as they are shared.'}
+              icon={<IconUsers />}
+            />
+          ) : (
+            <CommunityDeckGrid
+              className="dsel__grid"
+              decks={communityDecks}
+              characters={charactersQuery.data}
+              missions={missionsQuery.data}
+              viewerId={viewerId}
+              canFavorite={canFavorite}
+              favoriteBusy={favoriteToggle.isPending}
+              onToggleFavorite={toggleListFavorite}
+              onOpen={openReadonly}
+              onOwnerClick={openProfile}
+            />
+          )
+        ) : tournamentQuery.isLoading ? (
+          <LoadingState label="Loading decks..." />
+        ) : tournamentQuery.isError ? (
+          <EmptyState variant="error" title="Couldn't load decks" message="Please try again." icon={<IconTrophy />} />
+        ) : tournamentDecks.length === 0 ? (
+          <EmptyState title="Nothing here yet" message="Tournament-winning decks will appear here as they are added." icon={<IconTrophy />} />
+        ) : (
+          <CommunityDeckGrid
+            className="dsel__grid"
+            decks={tournamentDecks}
+            characters={charactersQuery.data}
+            missions={missionsQuery.data}
+            viewerId={viewerId}
+            canFavorite={canFavorite}
+            favoriteBusy={favoriteToggle.isPending}
+            onToggleFavorite={toggleListFavorite}
+            onOpen={openReadonly}
+            onOwnerClick={openProfile}
+          />
         )}
       </div>
 

@@ -11,6 +11,10 @@ export const DECK_EDITOR_SWIPE_BLOCK_SELECTOR =
 export const DBV_SWIPE_BLOCK_SELECTOR =
   '.db__types, .db__header, .dbv-filter-rail, .pagination, input, textarea, select';
 
+/** Decks screen (mobile tabs) — block the tab strip, header/actions, and search. */
+export const DECK_SELECTION_SWIPE_BLOCK_SELECTOR =
+  '.dsel__tabs, .dsel__header, .dsel__actions, .dsel__search, .dsel__community-search, input, textarea, select';
+
 /** Collection — block header, type tabs, pagination, and quantity steppers on tiles/rows. */
 export const COLLECTION_SWIPE_BLOCK_SELECTOR =
   '.col__types, .col__header, .pagination, .qty-stepper, input, textarea, select';

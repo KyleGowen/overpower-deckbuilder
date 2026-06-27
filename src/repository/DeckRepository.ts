@@ -34,6 +34,15 @@ export interface DeckRepository {
   // Authorization
   userOwnsDeck(deckId: string, userId: string): Promise<boolean>;
 
+  // Community feed / public profiles / favorites
+  getCommunityFeedDecks(opts?: { limit?: number; excludeUserIds?: string[] }): Promise<Deck[]>;
+  searchCommunityDecks(opts: { search: string; limit?: number; excludeUserIds?: string[] }): Promise<Deck[]>;
+  getPublicDecksByUserId(userId: string): Promise<Deck[]>;
+  getFavoriteDecksForUser(userId: string): Promise<Deck[]>;
+  addDeckFavorite(userId: string, deckId: string): Promise<boolean>;
+  removeDeckFavorite(userId: string, deckId: string): Promise<boolean>;
+  getFavoritedDeckIds(userId: string, deckIds: string[]): Promise<Set<string>>;
+
   /** Optional: in-memory cache clear (e.g. PostgreSQL implementation; admin debug). */
   clearCache?(): void;
 }

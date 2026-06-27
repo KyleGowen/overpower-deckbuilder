@@ -1,4 +1,5 @@
-import type { Deck } from '../../types';
+import type { Deck, DeckCard } from '../../types';
+import type { ValidationError } from '../../services/deckValidationService';
 import { transformDeckDetail } from '../deckTransform';
 import type { DeckDetailView } from './deckDetailService';
 
@@ -21,6 +22,7 @@ export interface DeckCardsRepository {
   removeCardFromDeck: (deckId: string, cardType: string, cardId: string, quantity: number) => Promise<boolean>;
   removeAllCardsFromDeck: (deckId: string) => Promise<boolean>;
   doesCardExistInDeck: (deckId: string, cardType: string, cardId: string) => Promise<boolean>;
+  updateDeck: (deckId: string, updates: Partial<Deck>) => Promise<Deck | undefined>;
 }
 
 export interface DeckCardsValidationDeps {
@@ -35,6 +37,8 @@ export interface DeckCardsValidationDeps {
   checkIfCardIsAssist: (cardType: string, cardId: string) => Promise<boolean>;
   checkIfCardIsAmbush: (cardType: string, cardId: string) => Promise<boolean>;
   checkIfCardIsFortification: (cardType: string, cardId: string) => Promise<boolean>;
+  /** Full-deck legality check, used to keep decks.is_valid in sync after card changes. */
+  validateDeck: (cards: DeckCard[]) => Promise<ValidationError[]>;
 }
 
 type CardRow = { type: string; cardId: string; quantity: number };
@@ -47,6 +51,25 @@ export class DeckCardsService {
     private readonly repo: DeckCardsRepository,
     private readonly validators: DeckCardsValidationDeps
   ) {}
+
+  /**
+   * Recompute the deck's full legality from its current cards and persist it to
+   * `decks.is_valid` when it changed. Mutates `deck.is_valid` in place so the
+   * detail response (via `transformDeckDetail`) reflects the fresh value —
+   * `getDeckById` does not copy `is_valid` onto the returned row.
+   */
+  private async syncDeckValidity(deck: Deck): Promise<void> {
+    try {
+      const errors = await this.validators.validateDeck(deck.cards ?? []);
+      const isValid = errors.length === 0;
+      if ((deck.is_valid ?? false) !== isValid) {
+        await this.repo.updateDeck(deck.id, { is_valid: isValid });
+      }
+      deck.is_valid = isValid;
+    } catch (error) {
+      console.error('Failed to recompute deck validity:', error);
+    }
+  }
 
   /**
    * GET deck cards — matches legacy: no ownership check; any authenticated user.
@@ -170,6 +193,7 @@ export class DeckCardsService {
       if (!updatedDeck) {
         return { ok: false, kind: 'not_found', message: 'Deck not found' };
       }
+      await this.syncDeckValidity(updatedDeck);
       return { ok: true, data: transformDeckDetail(updatedDeck, ownerUserId) };
     } catch {
       return { ok: false, kind: 'server_error', message: 'Failed to add card to deck' };
@@ -214,6 +238,7 @@ export class DeckCardsService {
       if (!updatedDeck) {
         return { ok: false, kind: 'server_error', message: 'Deck not found after replace' };
       }
+      await this.syncDeckValidity(updatedDeck);
       return { ok: true, data: transformDeckDetail(updatedDeck, ownerUserId) };
     } catch (error) {
       console.error('Error replacing cards in deck:', error);
@@ -255,6 +280,7 @@ export class DeckCardsService {
       if (!updatedDeck) {
         return { ok: false, kind: 'not_found', message: 'Deck not found' };
       }
+      await this.syncDeckValidity(updatedDeck);
       return { ok: true, data: transformDeckDetail(updatedDeck, ownerUserId) };
     } catch {
       return { ok: false, kind: 'server_error', message: 'Failed to remove card from deck' };

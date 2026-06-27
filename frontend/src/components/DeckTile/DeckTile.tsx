@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
-import { IconCards, IconDots } from '../icons';
+import { IconCards, IconDots, IconHeart } from '../icons';
 import { StatIconBadge } from '../StatIconBadge';
 import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
 import type { StatIconType } from '../../lib/icons/statIconTypes';
 import { formatThreatTooltip } from '../../lib/decks/deckThreat';
-import { deckTileLegalityBadge } from './deckTileLegality';
+import { deckLegalityBadge, deckTileVisibilityBadge, legalityBadgeClass } from './deckTileLegality';
 import './DeckTile.css';
 
 const ART_CYCLE_MS = 1500;
@@ -36,6 +36,16 @@ interface DeckTileProps {
   rankLabel?: string;
   onOpen?: () => void;
   onMenu?: () => void;
+  /** Show the Public/Private chip (display-only). Use on the owner's own decks. */
+  showVisibility?: boolean;
+  /** When provided, renders an upper-right favorite heart (for decks not owned by the viewer). */
+  onToggleFavorite?: () => void;
+  isFavorited?: boolean;
+  favoriteBusy?: boolean;
+  /** Owner display name (community / favorites / public profile tiles). */
+  ownerName?: string | null;
+  /** Click handler for the owner name (navigate to public profile). */
+  onOwnerClick?: () => void;
 }
 
 interface ArtSlide {
@@ -92,10 +102,17 @@ export function DeckTile({
   rankLabel,
   onOpen,
   onMenu,
+  showVisibility,
+  onToggleFavorite,
+  isFavorited,
+  favoriteBusy,
+  ownerName,
+  onOwnerClick,
 }: DeckTileProps) {
   const meta = deck.metadata;
   const artSlides = useMemo(() => deckArtSlides(deck), [deck]);
-  const legalityBadge = deckTileLegalityBadge(meta);
+  const legalityBadge = deckLegalityBadge(meta);
+  const visibilityBadge = showVisibility ? deckTileVisibilityBadge(meta) : null;
   const [slideIndex, setSlideIndex] = useState(0);
   const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const cycleDelayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -259,6 +276,21 @@ export function DeckTile({
         <div className="deck-tile__art-veil" />
 
         {rankLabel ? <span className="deck-tile__rank">{rankLabel}</span> : null}
+        {onToggleFavorite ? (
+          <button
+            type="button"
+            className={`deck-tile__fav${isFavorited ? ' is-active' : ''}`}
+            aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={Boolean(isFavorited)}
+            disabled={favoriteBusy}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }}
+          >
+            <IconHeart filled={isFavorited} />
+          </button>
+        ) : null}
         {onMenu ? (
           <button
             type="button"
@@ -291,15 +323,13 @@ export function DeckTile({
               <span className="deck-tile__chip-text">{missionChipLabel}</span>
             </span>
           ) : null}
-          {legalityBadge ? (
-            <span
-              className={`deck-tile__legality deck-tile__legality--meta badge ${
-                legalityBadge.variant === 'not-legal' ? 'badge-not-legal' : ''
-              }`}
-            >
-              {legalityBadge.label}
-            </span>
-          ) : null}
+          <span
+            className={`deck-tile__legality deck-tile__legality--meta badge ${legalityBadgeClass(
+              legalityBadge.variant,
+            )}`}
+          >
+            {legalityBadge.label}
+          </span>
           <span className="deck-tile__metric deck-tile__metric--end">
             <StatIconBadge
               type="threat_level"
@@ -309,6 +339,15 @@ export function DeckTile({
             />
           </span>
         </div>
+
+        {visibilityBadge ? (
+          <div className="deck-tile__subrow">
+            <span className="deck-tile__subrow-spacer" aria-hidden="true" />
+            <span className={`deck-tile__visibility badge badge-visibility--${visibilityBadge.variant}`}>
+              {visibilityBadge.label}
+            </span>
+          </div>
+        ) : null}
 
         {variant === 'full' && maxStats ? (
           <div className="deck-tile__stats" aria-label="Character maximums">
@@ -323,22 +362,40 @@ export function DeckTile({
           </div>
         ) : null}
 
-        {updatedLabel || legalityBadge ? (
+        {ownerName || updatedLabel || legalityBadge ? (
           <div className="deck-tile__footer">
-            {updatedLabel ? (
-              <span className="deck-tile__updated">Updated {updatedLabel}</span>
+            {/* legalityBadge is always present (legal/limited/not-legal). */}
+            {ownerName ? (
+              onOwnerClick ? (
+                <button
+                  type="button"
+                  className="deck-tile__owner deck-tile__owner--link"
+                  title={`View ${ownerName}'s public decks`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOwnerClick();
+                  }}
+                >
+                  {ownerName}
+                </button>
+              ) : (
+                <span className="deck-tile__owner">{ownerName}</span>
+              )
             ) : (
               <span className="deck-tile__footer-spacer" aria-hidden="true" />
             )}
-            {legalityBadge ? (
+            <div className="deck-tile__footer-end">
+              {updatedLabel ? (
+                <span className="deck-tile__updated">Updated {updatedLabel}</span>
+              ) : null}
               <span
-                className={`deck-tile__legality deck-tile__legality--footer badge ${
-                  legalityBadge.variant === 'not-legal' ? 'badge-not-legal' : ''
-                }`}
+                className={`deck-tile__legality deck-tile__legality--footer badge ${legalityBadgeClass(
+                  legalityBadge.variant,
+                )}`}
               >
                 {legalityBadge.label}
               </span>
-            ) : null}
+            </div>
           </div>
         ) : null}
       </div>

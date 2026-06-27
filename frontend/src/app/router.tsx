@@ -10,6 +10,7 @@ const HomePage = lazy(() => import('../features/home/HomePage'));
 const DatabasePage = lazy(() => import('../features/database/DatabasePage'));
 const CollectionPage = lazy(() => import('../features/collection/CollectionPage'));
 const DeckSelectionPage = lazy(() => import('../features/deck-selection/DeckSelectionPage'));
+const CommunityPage = lazy(() => import('../features/community/CommunityPage'));
 const DeckEditorPage = lazy(() => import('../features/deck-editor/DeckEditorPage'));
 
 function Lazy({ children }: { children: ReactNode }) {
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <Navigate to="/home" replace /> },
           { path: '/home', element: <HomePage /> },
           { path: '/data', element: <DatabasePage /> },
+          { path: '/community', element: <CommunityPage /> },
           { path: '/users/:userId/decks', element: <DeckSelectionPage /> },
           { path: '/users/:userId/collection', element: <CollectionPage /> },
         ],

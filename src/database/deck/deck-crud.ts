@@ -144,6 +144,8 @@ export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
   const desc = deckRow.description as string | undefined;
   const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
   const isLimited = deckRow.is_limited as boolean | undefined;
+  const isValid = deckRow.is_valid as boolean | undefined;
+  const isPrivate = deckRow.is_private as boolean | undefined;
   const reserveChar = deckRow.reserve_character as string | undefined;
   const displayMission = (deckRow.display_mission_card_id as string | null) ?? null;
   const bgPath = deckRow.background_image_path as string | undefined;
@@ -157,6 +159,8 @@ export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
     ...(desc !== undefined && { description: desc }),
     ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
     ...(isLimited !== undefined && { is_limited: isLimited }),
+    ...(isValid !== undefined && { is_valid: isValid }),
+    ...(isPrivate !== undefined && { is_private: isPrivate }),
     ...(reserveChar !== undefined && { reserve_character: reserveChar }),
     ...(displayMission !== null && { display_mission_card_id: displayMission }),
     ...(bgPath !== undefined && { background_image_path: bgPath }),
@@ -190,6 +194,7 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
   const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
   const isLimited = deckRow.is_limited as boolean | undefined;
   const isValid = deckRow.is_valid as boolean | undefined;
+  const isPrivate = deckRow.is_private as boolean | undefined;
   const cardCount = deckRow.card_count as number | undefined;
   const threatVal = deckRow.threat as number | undefined;
   const reserveChar = deckRow.reserve_character as string | undefined;
@@ -205,6 +210,7 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
     ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
     ...(isLimited !== undefined && { is_limited: isLimited }),
     ...(isValid !== undefined && { is_valid: isValid }),
+    ...(isPrivate !== undefined && { is_private: isPrivate }),
     ...(cardCount !== undefined && { card_count: cardCount }),
     ...(threatVal !== undefined && { threat: threatVal }),
     ...(reserveChar !== undefined && { reserve_character: reserveChar }),
@@ -221,6 +227,7 @@ export function mapDeckRowBasic(deckRow: DeckRow): Deck {
   const uiPrefs = deckRow.ui_preferences as Deck['ui_preferences'] | undefined;
   const isLimited = deckRow.is_limited as boolean | undefined;
   const isValid = deckRow.is_valid as boolean | undefined;
+  const isPrivate = deckRow.is_private as boolean | undefined;
   const cardCount = deckRow.card_count as number | undefined;
   const threatVal = deckRow.threat as number | undefined;
   const reserveChar = deckRow.reserve_character as string | undefined;
@@ -236,6 +243,7 @@ export function mapDeckRowBasic(deckRow: DeckRow): Deck {
     ...(uiPrefs !== undefined && { ui_preferences: uiPrefs }),
     ...(isLimited !== undefined && { is_limited: isLimited }),
     ...(isValid !== undefined && { is_valid: isValid }),
+    ...(isPrivate !== undefined && { is_private: isPrivate }),
     ...(cardCount !== undefined && { card_count: cardCount }),
     ...(threatVal !== undefined && { threat: threatVal }),
     ...(reserveChar !== undefined && { reserve_character: reserveChar }),
@@ -420,6 +428,205 @@ ${characterJoinSql}
   }
 }
 
+/**
+ * Builds the shared deck-list SELECT (with character/location/mission preview
+ * joins). `extraJoins`, `where`, and `orderBy` are fixed SQL strings written by
+ * callers (never user input — user values go through bound params). `limit` is a
+ * number we control. Used by community / favorites / public-profile reads.
+ */
+function buildDeckListSelectSql(opts: {
+  extraJoins?: string;
+  where: string;
+  orderBy: string;
+  limit?: number;
+}): string {
+  const { selectFragment, joinFragment } = buildCharacterListSqlFragments();
+  const limitSql =
+    opts.limit != null ? `\n        LIMIT ${Math.max(0, Math.floor(opts.limit))}` : '';
+  return `
+        SELECT 
+          d.*,
+          ${selectFragment},
+          l.name as location_name,
+          l.image_path as location_default_image,
+          dm1.mission_id as mission_1_id,
+          dm1.mission_name as mission_1_name,
+          dm1.mission_image_path as mission_1_default_image
+        FROM decks d
+${joinFragment}
+        LEFT JOIN locations l ON d.location_id = l.id
+        LEFT JOIN LATERAL (
+          SELECT 
+            dc.card_id as mission_id,
+            m.name as mission_name,
+            m.image_path as mission_image_path
+          FROM deck_cards dc
+          JOIN missions m ON m.id = dc.card_id::uuid
+          WHERE dc.deck_id = d.id AND dc.card_type = 'mission'
+          ORDER BY
+            CASE
+              WHEN d.display_mission_card_id IS NOT NULL AND dc.card_id::uuid = d.display_mission_card_id THEN 0
+              ELSE 1
+            END,
+            m.set_number_int ASC NULLS LAST,
+            m.name ASC,
+            dc.card_id ASC
+          LIMIT 1
+        ) dm1 ON true
+        ${opts.extraJoins ?? ''}
+        WHERE ${opts.where}
+        ORDER BY ${opts.orderBy}${limitSql}
+  `;
+}
+
+/** Public decks owned by a specific user (for the read-only public profile). */
+export async function getPublicDecksByUserId(
+  ctx: DeckRepositoryContext,
+  userId: string
+): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const sql = buildDeckListSelectSql({
+      where: 'd.user_id = $1 AND d.is_private = false',
+      orderBy: 'd.updated_at DESC',
+    });
+    // SQL fragments are fixed; $1 is the only user input.
+    const result = await client.query(sql, [userId]); // nosemgrep: pg-sql-template-interpolation
+    return (result.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Community feed: public + legal (is_valid) + non-limited decks across all users,
+ * most-recently-updated first. `excludeUserIds` removes internal/curated accounts.
+ */
+export async function getCommunityFeedDecks(
+  ctx: DeckRepositoryContext,
+  opts: { limit?: number; excludeUserIds?: string[] } = {}
+): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const sql = buildDeckListSelectSql({
+      where:
+        'd.is_private = false AND d.is_valid = true AND d.is_limited = false AND d.user_id <> ALL($1::uuid[])',
+      orderBy: 'd.updated_at DESC',
+      limit: opts.limit ?? 20,
+    });
+    // SQL fragments are fixed; $1 is the only user input (bound array).
+    const result = await client.query(sql, [opts.excludeUserIds ?? []]); // nosemgrep: pg-sql-template-interpolation
+    return (result.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Community search: same public/legal/non-limited pool, filtered to decks whose
+ * any-of-4 character, reserve character, or location name matches `search`.
+ */
+export async function searchCommunityDecks(
+  ctx: DeckRepositoryContext,
+  opts: { search: string; limit?: number; excludeUserIds?: string[] }
+): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const sql = buildDeckListSelectSql({
+      extraJoins: 'LEFT JOIN characters rc ON d.reserve_character::uuid = rc.id',
+      where:
+        'd.is_private = false AND d.is_valid = true AND d.is_limited = false AND d.user_id <> ALL($1::uuid[]) ' +
+        'AND (c1.name ILIKE $2 OR c2.name ILIKE $2 OR c3.name ILIKE $2 OR c4.name ILIKE $2 OR rc.name ILIKE $2 OR l.name ILIKE $2)',
+      orderBy: 'd.updated_at DESC',
+      limit: opts.limit ?? 50,
+    });
+    const pattern = `%${opts.search}%`;
+    // SQL fragments are fixed; user input is bound ($1 array, $2 ILIKE pattern).
+    const result = await client.query(sql, [opts.excludeUserIds ?? [], pattern]); // nosemgrep: pg-sql-template-interpolation
+    return (result.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+  } finally {
+    client.release();
+  }
+}
+
+/** A user's favorited decks (public + still-existing), newest-favorited first. */
+export async function getFavoriteDecksForUser(
+  ctx: DeckRepositoryContext,
+  userId: string
+): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const sql = buildDeckListSelectSql({
+      extraJoins: 'JOIN deck_favorites fav ON fav.deck_id = d.id AND fav.user_id = $1',
+      where: 'd.is_private = false',
+      orderBy: 'fav.created_at DESC',
+    });
+    // SQL fragments are fixed; $1 is the only user input.
+    const result = await client.query(sql, [userId]); // nosemgrep: pg-sql-template-interpolation
+    return (result.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+  } finally {
+    client.release();
+  }
+}
+
+/** Adds a favorite (idempotent). Returns true if a new row was inserted. */
+export async function addDeckFavorite(
+  ctx: DeckRepositoryContext,
+  userId: string,
+  deckId: string
+): Promise<boolean> {
+  if (!UUID_REGEX.test(deckId)) return false;
+  const client = await ctx.pool.connect();
+  try {
+    const result = await client.query(
+      `INSERT INTO deck_favorites (user_id, deck_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, deck_id) DO NOTHING`,
+      [userId, deckId]
+    );
+    return (result.rowCount ?? 0) > 0;
+  } finally {
+    client.release();
+  }
+}
+
+/** Removes a favorite. Returns true if a row was deleted. */
+export async function removeDeckFavorite(
+  ctx: DeckRepositoryContext,
+  userId: string,
+  deckId: string
+): Promise<boolean> {
+  if (!UUID_REGEX.test(deckId)) return false;
+  const client = await ctx.pool.connect();
+  try {
+    const result = await client.query(
+      'DELETE FROM deck_favorites WHERE user_id = $1 AND deck_id = $2',
+      [userId, deckId]
+    );
+    return (result.rowCount ?? 0) > 0;
+  } finally {
+    client.release();
+  }
+}
+
+/** Returns the subset of `deckIds` favorited by `userId` (for hydrating isFavorited). */
+export async function getFavoritedDeckIds(
+  ctx: DeckRepositoryContext,
+  userId: string,
+  deckIds: string[]
+): Promise<Set<string>> {
+  if (deckIds.length === 0) return new Set();
+  const client = await ctx.pool.connect();
+  try {
+    const result = await client.query(
+      'SELECT deck_id FROM deck_favorites WHERE user_id = $1 AND deck_id = ANY($2::uuid[])',
+      [userId, deckIds]
+    );
+    return new Set((result.rows as Array<{ deck_id: string }>).map((r) => r.deck_id));
+  } finally {
+    client.release();
+  }
+}
+
 export async function getDeckSummaryWithAllCards(
   ctx: DeckRepositoryContext,
   deckId: string
@@ -496,6 +703,10 @@ export async function updateDeck(
     if (updates.is_valid !== undefined) {
       setClause.push(`is_valid = $${paramCount++}`);
       values.push(updates.is_valid);
+    }
+    if (updates.is_private !== undefined) {
+      setClause.push(`is_private = $${paramCount++}`);
+      values.push(updates.is_private);
     }
     if (updates.reserve_character !== undefined) {
       setClause.push(`reserve_character = $${paramCount++}`);

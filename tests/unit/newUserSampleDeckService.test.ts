@@ -128,6 +128,71 @@ describe('NewUserSampleDeckService', () => {
     ]);
   });
 
+  it('recomputes and persists is_valid for the copied deck when a validator is provided', async () => {
+    const guestUser = { id: 'guest-id', name: 'guest', email: 'guest@example.com', role: 'GUEST' as const };
+    const fullDeck = {
+      id: 'deck-1',
+      user_id: 'guest-id',
+      name: 'Legal Deck',
+      description: '',
+      cards: [],
+    };
+    const deckCards = [
+      { id: 'c1', type: 'character', cardId: 'char-1', quantity: 1 },
+      { id: 'm1', type: 'mission', cardId: 'mission-1', quantity: 7 },
+    ];
+    const newDeck = { id: 'new-deck-id', user_id: 'new-user-123', name: 'Sample: Legal Deck', description: '' };
+
+    mockUserRepository.getUserByUsername!.mockResolvedValue(guestUser);
+    mockDeckRepository.getDecksByUserId!.mockResolvedValue([
+      { id: 'deck-1', user_id: 'guest-id', name: 'Legal Deck', description: '' },
+    ]);
+    mockDeckRepository.getDeckSummaryWithAllCards!.mockResolvedValue(fullDeck as any);
+    mockDeckRepository.createDeck!.mockResolvedValue(newDeck as any);
+    mockDeckRepository.getDeckCards!.mockResolvedValue(deckCards as any);
+    mockDeckRepository.updateDeck!.mockResolvedValue(newDeck as any);
+    mockDeckRepository.replaceAllCardsInDeck!.mockResolvedValue(undefined);
+
+    const validateDeck = jest.fn().mockResolvedValue([]); // legal -> no errors
+    const serviceWithValidation = new NewUserSampleDeckService(
+      mockUserRepository,
+      mockDeckRepository,
+      { validateDeck },
+    );
+
+    const result = await serviceWithValidation.copyRandomGuestDeckForUser('new-user-123');
+
+    expect(result).toBe('new-deck-id');
+    expect(validateDeck).toHaveBeenCalled();
+    expect(mockDeckRepository.updateDeck).toHaveBeenCalledWith('new-deck-id', { is_valid: true });
+  });
+
+  it('persists is_valid=false for the copied deck when it fails validation', async () => {
+    const guestUser = { id: 'guest-id', name: 'guest', email: 'guest@example.com', role: 'GUEST' as const };
+    mockUserRepository.getUserByUsername!.mockResolvedValue(guestUser);
+    mockDeckRepository.getDecksByUserId!.mockResolvedValue([
+      { id: 'deck-1', user_id: 'guest-id', name: 'Broken Deck', description: '' },
+    ]);
+    mockDeckRepository.getDeckSummaryWithAllCards!.mockResolvedValue({
+      id: 'deck-1', user_id: 'guest-id', name: 'Broken Deck', description: '', cards: [],
+    } as any);
+    mockDeckRepository.createDeck!.mockResolvedValue({ id: 'new-id', user_id: 'u', name: 'Sample: Broken Deck', description: '' } as any);
+    mockDeckRepository.getDeckCards!.mockResolvedValue([{ id: 'c1', type: 'character', cardId: 'char-1', quantity: 1 }] as any);
+    mockDeckRepository.updateDeck!.mockResolvedValue({} as any);
+    mockDeckRepository.replaceAllCardsInDeck!.mockResolvedValue(undefined);
+
+    const validateDeck = jest.fn().mockResolvedValue([{ rule: 'deck_size', message: 'too small' }]);
+    const serviceWithValidation = new NewUserSampleDeckService(
+      mockUserRepository,
+      mockDeckRepository,
+      { validateDeck },
+    );
+
+    await serviceWithValidation.copyRandomGuestDeckForUser('new-user-123');
+
+    expect(mockDeckRepository.updateDeck).toHaveBeenCalledWith('new-id', { is_valid: false });
+  });
+
   it('returns null and does not throw when replaceAllCardsInDeck fails', async () => {
     mockUserRepository.getUserByUsername!.mockResolvedValue({
       id: 'guest-id',

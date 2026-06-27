@@ -124,4 +124,82 @@ describe('UserAccountService', () => {
       expect(repo.updateUserPassword).toHaveBeenCalledWith('user-1', 'newpass');
     });
   });
+
+  describe('setDisplayName', () => {
+    it('rejects guests', async () => {
+      const service = new UserAccountService(stubRepo());
+      const result = await service.setDisplayName('user-1', 'GUEST', 'New Name');
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.status).toBe(403);
+    });
+
+    it('rejects empty display name', async () => {
+      const service = new UserAccountService(stubRepo());
+      const result = await service.setDisplayName('user-1', 'USER', '   ');
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.code).toBe('DISPLAY_NAME_REQUIRED');
+    });
+
+    it('password user: renames the username and reports resolved name', async () => {
+      const repo = stubRepo({
+        updateUser: jest.fn().mockResolvedValue({ ...baseUser, name: 'NewName' }),
+      });
+      const service = new UserAccountService(repo);
+      const result = await service.setDisplayName('user-1', 'USER', 'NewName');
+      expect(result.ok).toBe(true);
+      expect(repo.updateUser).toHaveBeenCalledWith('user-1', { name: 'NewName' });
+      if (result.ok) {
+        expect(result.data.username).toBe('NewName');
+        expect(result.data.displayName).toBeNull();
+        expect(result.data.resolvedName).toBe('NewName');
+      }
+    });
+
+    it('password user: rejects a username already taken by someone else', async () => {
+      const repo = stubRepo({
+        getUserByUsername: jest.fn().mockResolvedValue({ ...baseUser, id: 'other' }),
+      });
+      const service = new UserAccountService(repo);
+      const result = await service.setDisplayName('user-1', 'USER', 'taken');
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.code).toBe('USERNAME_TAKEN');
+      expect(repo.updateUser).not.toHaveBeenCalled();
+    });
+
+    it('password user: keeping the same username does not check uniqueness', async () => {
+      const repo = stubRepo({
+        getUserById: jest.fn().mockResolvedValue({ ...baseUser, name: 'tester' }),
+        updateUser: jest.fn().mockResolvedValue({ ...baseUser, name: 'tester' }),
+      });
+      const service = new UserAccountService(repo);
+      const result = await service.setDisplayName('user-1', 'USER', 'tester');
+      expect(result.ok).toBe(true);
+      expect(repo.getUserByUsername).not.toHaveBeenCalled();
+    });
+
+    it('SSO user: sets display_name only (no rename) and resolves to it', async () => {
+      const ssoUser: User = {
+        ...baseUser,
+        name: 'sso-login',
+        email: 'sso@b.com',
+        authProvider: 'google',
+      };
+      const repo = stubRepo({
+        getUserById: jest.fn().mockResolvedValue(ssoUser),
+        getUserAuthMeta: jest.fn().mockResolvedValue({ auth_provider: 'google' }),
+        updateUser: jest
+          .fn()
+          .mockResolvedValue({ ...ssoUser, displayName: 'SSO Display' }),
+      });
+      const service = new UserAccountService(repo);
+      const result = await service.setDisplayName('user-1', 'USER', 'SSO Display');
+      expect(result.ok).toBe(true);
+      expect(repo.updateUser).toHaveBeenCalledWith('user-1', { displayName: 'SSO Display' });
+      if (result.ok) {
+        expect(result.data.displayName).toBe('SSO Display');
+        expect(result.data.resolvedName).toBe('SSO Display');
+      }
+      expect(repo.getUserByUsername).not.toHaveBeenCalled();
+    });
+  });
 });

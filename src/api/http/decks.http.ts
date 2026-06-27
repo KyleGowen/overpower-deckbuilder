@@ -34,7 +34,9 @@ function toDeckPartialUpdates(u: UpdateDeckParsed): Partial<Deck> {
     out.description = u.description === null ? null : u.description;
   }
   if (u.is_limited !== undefined) out.is_limited = u.is_limited;
-  if (u.is_valid !== undefined) out.is_valid = u.is_valid;
+  // `is_valid` is server-owned: recomputed from cards on every card mutation / import /
+  // create / sample-copy. Never trust a client-supplied value on metadata PUT.
+  if (u.is_private !== undefined) out.is_private = u.is_private;
   if (u.reserve_character !== undefined) {
     out.reserve_character = u.reserve_character === null ? null : u.reserve_character;
   }

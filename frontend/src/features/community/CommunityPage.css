@@ -1,0 +1,130 @@
+.community {
+  flex: 1;
+  width: 100%;
+  touch-action: pan-y;
+}
+.community__inner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ---- Page header ---- */
+.community__page-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.community__page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-3xl);
+}
+.community__page-title svg {
+  color: var(--color-accent-bright);
+}
+.community__page-sub {
+  color: var(--color-text-muted);
+}
+
+/* ---- Tab toolbar (Moxfield-style: tabs left, search right) ---- */
+.community__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.community__tabs {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-1);
+  flex: 1 1 auto;
+}
+.community__tab {
+  white-space: nowrap;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--dur-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+.community__tab:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-accent);
+}
+.community__tab.is-active {
+  background: var(--color-accent-soft);
+  border-color: var(--color-border-accent);
+  color: var(--color-accent-bright);
+}
+
+/* ---- Search (Community tab only) ---- */
+.community__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  min-width: 260px;
+  flex: 0 1 320px;
+  background: var(--color-bg-input, var(--color-bg-panel));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+.community__search svg {
+  color: var(--color-text-muted);
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+.community__search input {
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  padding: var(--space-2) 0;
+  width: 100%;
+  outline: none;
+  font-size: var(--font-size-sm);
+}
+
+/* ---- Active tab panel ---- */
+.community__panel {
+  min-height: 200px;
+}
+
+/* ---- Deck grid ---- */
+.community__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-4);
+}
+
+.layout-mobile .community__inner {
+  padding: var(--space-4);
+  gap: var(--space-4);
+}
+.layout-mobile .community__toolbar {
+  flex-direction: column;
+  align-items: stretch;
+}
+.layout-mobile .community__search {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+.layout-mobile .community__grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}

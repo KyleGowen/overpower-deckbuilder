@@ -5,6 +5,20 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- **`decks.is_valid` is now server-authoritative.** Deck card mutations
+  (`POST`/`PUT`/`DELETE /api/v1/decks/:id/cards`) recompute the full deck legality
+  via `DeckValidationService` and persist `is_valid`, and `importDeckFromExport`
+  does the same. Previously the column was only written when a client explicitly
+  PUT it, so deck tiles and the community feed (which filters `is_valid = true`)
+  could disagree with the editor's live validation. Run
+  `npm run backfill:deck-validity` once to correct historical rows.
+- **Community decks, favorites, public profiles, display names** (V2 UI). New endpoints:
+  `GET /api/v1/community/decks` (`?search=`), `GET /api/v1/users/:userId/public-decks`,
+  `GET /api/v1/decks/favorites`, `POST`/`DELETE /api/v1/decks/:id/favorite`, and
+  `POST /api/v1/users/display-name`. Deck metadata gains `is_private` (default `true`);
+  `PUT /api/v1/decks/:id` accepts `is_private`. Community/profile/favorites list items add
+  `ownerDisplayName` + `isFavorited`. Backed by migrations V284 (`users.display_name`),
+  V285 (`decks.is_private`), V286 (`deck_favorites`), V287 (curated accounts public).
 - `POST /api/v1/users/change-email` and `POST /api/v1/users/change-password` — self-service
   account updates for USER/ADMIN (session cookie). Google-linked accounts cannot
   change email (`GOOGLE_EMAIL_LOCKED`) or password (`GOOGLE_PASSWORD_LOCKED`).

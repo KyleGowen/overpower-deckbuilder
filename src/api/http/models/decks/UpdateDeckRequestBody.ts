@@ -5,6 +5,7 @@ export type UpdateDeckParsed = {
   description?: string | null;
   is_limited?: boolean;
   is_valid?: boolean;
+  is_private?: boolean;
   reserve_character?: string | null;
   display_mission_card_id?: string | null;
   background_image_path?: string | null;
@@ -62,6 +63,13 @@ export const UpdateDeckRequestBody = {
         return { ok: false, errors: err('is_valid', 'is_valid must be a boolean value') };
       }
       value.is_valid = o.is_valid;
+    }
+
+    if ('is_private' in o && o.is_private !== undefined) {
+      if (typeof o.is_private !== 'boolean') {
+        return { ok: false, errors: err('is_private', 'is_private must be a boolean value') };
+      }
+      value.is_private = o.is_private;
     }
 
     if ('reserve_character' in o) {

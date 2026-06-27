@@ -31,6 +31,9 @@ import { DeckUIPreferencesService } from '../api/services/deckUIPreferencesServi
 import { GuestDeckService } from '../api/services/guestDeckService';
 import { AdminService } from '../api/services/adminService';
 import { UserAccountService } from '../api/services/userAccountService';
+import { CommunityService } from '../api/services/communityService';
+import { GUEST_USER_ID } from '../constants/guestUser';
+import { TOURNAMENT_DECKS_USER_ID } from '../constants/tournamentDecksUser';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
 import { registerLegacyDeckReadCompatRoutes } from '../api/http/legacyDeckReadCompat.http';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from '../middleware/authorizationHelpers';
@@ -60,7 +63,7 @@ const deckRepository = dataSource.getDeckRepository();
 const cardRepository = dataSource.getCardRepository();
 const deckValidationService = new DeckValidationService(cardRepository);
 const deckBusinessService = new DeckService(deckRepository);
-const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository);
+const newUserSampleDeckService = new NewUserSampleDeckService(userRepository, deckRepository, deckValidationService);
 const sessionRepository = createSessionRepositoryFromDataSource(dataSource);
 const authService = new AuthenticationService(userRepository, sessionRepository, newUserSampleDeckService);
 const collectionsRepository = new CollectionsRepository(dataSource.getPool());
@@ -80,7 +83,8 @@ const deckCardsService = new DeckCardsService(deckRepository, {
   checkIfCardIsAssist,
   checkIfCardIsAmbush,
   checkIfCardIsFortification,
-  checkIfCardIsOnePerDeck
+  checkIfCardIsOnePerDeck,
+  validateDeck: (cards) => deckValidationService.validateDeck(cards)
 });
 const deckUIPreferencesService = new DeckUIPreferencesService(deckRepository);
 
@@ -100,6 +104,10 @@ const adminService = new AdminService({
 });
 
 const userAccountService = new UserAccountService(userRepository);
+const communityService = new CommunityService(deckRepository, userRepository, [
+  GUEST_USER_ID,
+  TOURNAMENT_DECKS_USER_ID
+]);
 
 // Test auth: session cookie or x-test-user-id header; otherwise 401 (so routes that require auth still get 401 when unauthenticated)
 const authenticateUser = authService.createAuthMiddleware();
@@ -124,6 +132,25 @@ const optionalAuth = async (req: Request, res: Response, next: NextFunction) => 
   } catch {
     next();
   }
+};
+
+// Truly-optional auth: attaches req.user when a session cookie or x-test-user-id
+// header is present, but NEVER rejects (guest-viewable community reads).
+const optionalAuthNeverReject = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (req.headers.cookie && req.headers.cookie.includes('sessionId=')) {
+      return optionalAuth(req, res, next);
+    }
+    const testUserId = req.headers['x-test-user-id'];
+    if (testUserId) {
+      const userId = Array.isArray(testUserId) ? testUserId[0] : (testUserId as string);
+      const user = await userRepository.getUserById(userId);
+      if (user) req.user = user;
+    }
+  } catch {
+    // Optional auth must never block a public read.
+  }
+  next();
 };
 
 function getGitInfo() {
@@ -194,6 +221,7 @@ registerApiV1Routes(app, {
   dbvSupportService,
   recentUpdatesService,
   authenticateUser: optionalAuth,
+  optionalAuthenticate: optionalAuthNeverReject,
   deckBackgroundService,
   deckListService,
   deckStatsService,
@@ -204,7 +232,8 @@ registerApiV1Routes(app, {
   collectionService,
   guestDeckService,
   adminService,
-  userAccountService
+  userAccountService,
+  communityService
 });
 
 registerLegacyDeckReadCompatRoutes(app, {

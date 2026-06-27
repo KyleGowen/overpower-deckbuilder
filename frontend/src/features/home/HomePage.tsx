@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import { fetchCommunityDecks, fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { fetchRecentUpdates } from '../../lib/api/recent-updates';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
-import { resolveImageUrl, resolveThumbUrl, assetUrl } from '../../lib/images/cardImages';
+import { resolveThumbUrl, assetUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -96,6 +96,7 @@ export default function HomePage() {
         <DeckRail
           icon={<IconUsers />}
           title="Community Decks"
+          viewAllTo="/community#community"
           loading={communityQuery.isLoading}
           error={communityQuery.isError}
           decks={communityDecks}
@@ -107,6 +108,7 @@ export default function HomePage() {
         <DeckRail
           icon={<IconTrophy />}
           title="Tournament Winners"
+          viewAllTo="/community#tournament"
           loading={tournamentQuery.isLoading}
           error={tournamentQuery.isError}
           decks={tournamentDecks}
@@ -122,6 +124,7 @@ export default function HomePage() {
 interface DeckRailProps {
   icon: React.ReactNode;
   title: string;
+  viewAllTo?: string;
   loading: boolean;
   error: boolean;
   decks: DeckListItem[];
@@ -133,6 +136,7 @@ interface DeckRailProps {
 function DeckRail({
   icon,
   title,
+  viewAllTo,
   loading,
   error,
   decks,
@@ -147,8 +151,8 @@ function DeckRail({
           <span className="home__section-icon">{icon}</span>
           {title}
         </h2>
-        {decks.length > 0 ? (
-          <span className="home__view-all">View All <IconChevronRight /></span>
+        {decks.length > 0 && viewAllTo ? (
+          <Link className="home__view-all" to={viewAllTo}>View All <IconChevronRight /></Link>
         ) : null}
       </header>
 

@@ -97,6 +97,34 @@ class MockDeckRepository {
     return this.decks.get(deckId);
   }
 
+  async getCommunityFeedDecks(): Promise<any[]> {
+    return [];
+  }
+
+  async searchCommunityDecks(): Promise<any[]> {
+    return [];
+  }
+
+  async getPublicDecksByUserId(): Promise<any[]> {
+    return [];
+  }
+
+  async getFavoriteDecksForUser(): Promise<any[]> {
+    return [];
+  }
+
+  async addDeckFavorite(): Promise<boolean> {
+    return true;
+  }
+
+  async removeDeckFavorite(): Promise<boolean> {
+    return true;
+  }
+
+  async getFavoritedDeckIds(): Promise<Set<string>> {
+    return new Set<string>();
+  }
+
   async initialize(): Promise<void> {
     // Mock implementation
   }

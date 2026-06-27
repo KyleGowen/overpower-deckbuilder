@@ -11,6 +11,8 @@ import {
   type UpdateDeckMetaInput,
 } from '../../lib/api/decks';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
+import { fetchFavoriteDecks } from '../../lib/api/favorites';
+import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
 import { calculateDeckTotalThreat, formatThreatTooltip } from '../../lib/decks/deckThreat';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
@@ -43,6 +45,7 @@ import { CardImage } from '../../components/CardImage';
 import { buildFoilSeed } from '../../lib/visual/foilEffect';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { StatIconBadge } from '../../components/StatIconBadge';
+import { deckLegalityBadgeFromValidity, legalityBadgeClass } from '../../components/DeckTile/deckTileLegality';
 import { MobileBottomNav } from '../../components/MobileBottomNav';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -53,12 +56,14 @@ import {
   IconDatabase,
   IconDecks,
   IconCollection,
+  IconUsers,
   IconSave,
   IconPlus,
   IconTrash,
   IconCards,
   IconList,
   IconGrid,
+  IconHeart,
 } from '../../components/icons';
 import {
   buildKoDimmingContext,
@@ -223,12 +228,25 @@ export default function DeckEditorPage() {
 
   const deck = deckQuery.data;
   const isOwner = Boolean(deck?.metadata.isOwner) && !forceReadonly;
+  // A real (non-guest) user can favorite any deck that isn't their own.
+  const canFavorite =
+    Boolean(user) && !isGuest && Boolean(deck) && deck?.metadata.userId !== user?.id;
+  const favoritesQuery = useQuery({
+    queryKey: ['decks', 'favorites', user?.id],
+    queryFn: fetchFavoriteDecks,
+    enabled: canFavorite,
+  });
+  const favoriteToggle = useFavoriteToggle();
+  const [favOverride, setFavOverride] = useState<boolean | null>(null);
+  const isFavorited =
+    favOverride ?? Boolean(favoritesQuery.data?.some((d) => d.metadata.id === deckId));
 
   const [cards, setCards] = useState<DeckCardEntry[]>([]);
   const [name, setName] = useState('');
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [privacyBusy, setPrivacyBusy] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selected, setSelected] = useState<{
     card: CatalogCard;
@@ -724,11 +742,47 @@ export default function DeckEditorPage() {
       setDirty(false);
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(null), 2500);
+      // Card changes recompute decks.is_valid server-side; refresh the deck lists
+      // (My Decks, community feed, favorites, tournament) so tile legality matches.
+      void queryClient.invalidateQueries({ queryKey: ['decks'] });
     } catch (err) {
       setSaveMsg((err as Error)?.message || 'Save failed');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleTogglePrivacy = async () => {
+    if (!isOwner || privacyBusy || !deck) return;
+    const nextPrivate = !(deck.metadata.is_private ?? true);
+    setPrivacyBusy(true);
+    try {
+      const updated = await updateDeckMeta(deckId, { is_private: nextPrivate }, isGuest);
+      queryClient.setQueryData(['deck', deckId], (prev: typeof deck | undefined) => {
+        const base = prev ?? updated;
+        return {
+          ...base,
+          metadata: { ...base.metadata, is_private: updated.metadata.is_private ?? nextPrivate },
+        };
+      });
+    } catch {
+      /* leave state unchanged on failure */
+    } finally {
+      setPrivacyBusy(false);
+    }
+  };
+
+  const handleToggleFavorite = () => {
+    if (!canFavorite || favoriteToggle.isPending) return;
+    const next = !isFavorited;
+    setFavOverride(next);
+    favoriteToggle.mutate(
+      { deckId, next },
+      {
+        onError: () => setFavOverride(null),
+        onSettled: () => setFavOverride(null),
+      },
+    );
   };
 
   if (deckQuery.isLoading) {
@@ -752,7 +806,12 @@ export default function DeckEditorPage() {
     );
   }
 
-  const legality = validity ?? { valid: deck.metadata.is_valid ?? false };
+  // Single source of truth for the badge: live validate result when available
+  // (now correct for invalid decks), else the persisted server-owned is_valid.
+  // The Limited toggle wins via the shared helper so the editor matches tiles.
+  const liveValid = validity?.valid ?? (deck.metadata.is_valid ?? false);
+  const legalityBadgeInfo = deckLegalityBadgeFromValidity(deck.metadata.is_limited, liveValid);
+  const legalityTitle = legalityBadgeInfo.variant === 'not-legal' ? validity?.message : undefined;
   const showMobileNav = isMobile && !immersiveOpen;
   const showMobileTypeTabs =
     isMobile && deckViewMode === 'card' && cards.length > 0 && deckTypeTabs.length > 1;
@@ -770,6 +829,7 @@ export default function DeckEditorPage() {
           <button type="button" onClick={() => navigate('/data')} title="Card Database"><IconDatabase /></button>
           <button type="button" onClick={() => navigate(`/users/${user?.id ?? userId}/decks`)} title="Decks"><IconDecks /></button>
           <button type="button" onClick={() => navigate(`/users/${user?.id ?? userId}/collection`)} title="Collection"><IconCollection /></button>
+          <button type="button" onClick={() => navigate('/community')} title="Community"><IconUsers /></button>
         </nav>
       </aside>
 
@@ -807,9 +867,31 @@ export default function DeckEditorPage() {
 
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
-                <span className={`badge ${legality.valid ? 'badge-legal' : 'badge-not-legal'}`} title={legality.message}>
-                  {legality.valid ? 'Legal' : 'Not Legal'}
+                <span className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)}`} title={legalityTitle}>
+                  {legalityBadgeInfo.label}
                 </span>
+                {isOwner ? (
+                  <button
+                    type="button"
+                    className={`badge badge-visibility--${(deck.metadata.is_private ?? true) ? 'private' : 'public'} deck-editor__visibility-toggle`}
+                    onClick={handleTogglePrivacy}
+                    disabled={privacyBusy}
+                    title={
+                      (deck.metadata.is_private ?? true)
+                        ? 'Private — only you can see this deck. Click to make it public.'
+                        : 'Public — visible in Community. Click to make it private.'
+                    }
+                    aria-pressed={!(deck.metadata.is_private ?? true)}
+                  >
+                    {(deck.metadata.is_private ?? true) ? 'Private' : 'Public'}
+                  </button>
+                ) : (
+                  <span
+                    className={`badge badge-visibility--${(deck.metadata.is_private ?? true) ? 'private' : 'public'}`}
+                  >
+                    {(deck.metadata.is_private ?? true) ? 'Private' : 'Public'}
+                  </span>
+                )}
                 {isMobile ? <DeckThreatStat totalThreat={totalThreat} /> : null}
               </div>
             </div>
@@ -861,7 +943,21 @@ export default function DeckEditorPage() {
                   ) : null}
                 </>
               ) : (
-                <span className="deck-editor__readonly-tag">Read-only</span>
+                <>
+                  {canFavorite ? (
+                    <button
+                      type="button"
+                      className={`btn btn-ghost deck-editor__favorite${isFavorited ? ' is-active' : ''}`}
+                      onClick={handleToggleFavorite}
+                      disabled={favoriteToggle.isPending}
+                      aria-pressed={isFavorited}
+                      title={isFavorited ? 'Remove from your favorites' : 'Add to your favorites'}
+                    >
+                      <IconHeart filled={isFavorited} /> {isFavorited ? 'Favorited' : 'Favorite'}
+                    </button>
+                  ) : null}
+                  <span className="deck-editor__readonly-tag">Read-only</span>
+                </>
               )}
               {saveMsg && !isMobile ? <span className="deck-editor__save-msg">{saveMsg}</span> : null}
             </div>

@@ -4,6 +4,7 @@ import {
   IconDatabase,
   IconDecks,
   IconCollection,
+  IconUsers,
 } from '../icons';
 
 export interface NavItem {
@@ -38,6 +39,14 @@ export const NAV_ITEMS: NavItem[] = [
     icon: <IconDecks />,
     to: (userId) => `/users/${userId}/decks`,
     match: (p) => /\/users\/[^/]+\/decks/.test(p),
+  },
+  // Desktop-only: not in MOBILE_NAV_ORDER, so the mobile bottom nav stays at 5 buttons.
+  {
+    key: 'community',
+    label: 'Community',
+    icon: <IconUsers />,
+    to: () => '/community',
+    match: (p) => p.startsWith('/community'),
   },
   {
     key: 'collection',

@@ -208,6 +208,26 @@ a:focus-visible,
 }
 .badge-legal { color: var(--color-legal); border-color: rgba(54, 211, 153, 0.4); }
 .badge-not-legal { color: var(--color-not-legal); border-color: rgba(239, 77, 90, 0.4); }
+.badge-limited { color: var(--color-warning); border-color: rgba(246, 166, 35, 0.4); }
+
+/* Public/Private visibility chips (deck tiles + deck editor). */
+.badge-visibility--public {
+  color: var(--color-accent-bright);
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-soft);
+}
+.badge-visibility--private {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  background: var(--color-bg-elevated);
+}
+.deck-editor__visibility-toggle {
+  cursor: pointer;
+}
+.deck-editor__visibility-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 /* ---- Accessibility ---- */
 .sr-only {

@@ -32,6 +32,8 @@ export interface Deck {
   ui_preferences?: UIPreferences;
   is_limited?: boolean;
   is_valid?: boolean;
+  /** Deck visibility. TRUE = private (owner only), FALSE = public. Independent of is_limited/is_valid. */
+  is_private?: boolean;
   card_count?: number;
   threat?: number;
   reserve_character?: string; // UUID of the character card that serves as the reserve character

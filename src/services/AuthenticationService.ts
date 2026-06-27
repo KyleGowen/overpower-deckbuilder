@@ -582,6 +582,29 @@ export class AuthenticationService {
   }
 
   /**
+   * Optional auth: attaches `req.user` when a valid session cookie is present,
+   * but NEVER rejects — guests (no/invalid session) simply proceed with no user.
+   * Used by guest-viewable routes (community feed, public profiles).
+   */
+  public createOptionalAuthMiddleware() {
+    return async (req: Request, _res: Response, next: NextFunction) => {
+      try {
+        const sessionId = req.cookies?.sessionId;
+        if (!sessionId) return next();
+        const session = await this.validateSession(sessionId);
+        if (!session) return next();
+        const user = await this.getUserById(session.userId);
+        if (user) {
+          (req as unknown as Record<string, unknown>).user = user;
+        }
+      } catch {
+        // Swallow errors — optional auth must never block a public read.
+      }
+      next();
+    };
+  }
+
+  /**
    * Generate a unique session ID
    */
   private generateSessionId(): string {

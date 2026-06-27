@@ -61,6 +61,41 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     return deckCrud.getDecksByUserId(this.getContext(), userId, orderBy);
   }
 
+  async getPublicDecksByUserId(userId: string): Promise<Deck[]> {
+    return deckCrud.getPublicDecksByUserId(this.getContext(), userId);
+  }
+
+  async getCommunityFeedDecks(opts?: {
+    limit?: number;
+    excludeUserIds?: string[];
+  }): Promise<Deck[]> {
+    return deckCrud.getCommunityFeedDecks(this.getContext(), opts);
+  }
+
+  async searchCommunityDecks(opts: {
+    search: string;
+    limit?: number;
+    excludeUserIds?: string[];
+  }): Promise<Deck[]> {
+    return deckCrud.searchCommunityDecks(this.getContext(), opts);
+  }
+
+  async getFavoriteDecksForUser(userId: string): Promise<Deck[]> {
+    return deckCrud.getFavoriteDecksForUser(this.getContext(), userId);
+  }
+
+  async addDeckFavorite(userId: string, deckId: string): Promise<boolean> {
+    return deckCrud.addDeckFavorite(this.getContext(), userId, deckId);
+  }
+
+  async removeDeckFavorite(userId: string, deckId: string): Promise<boolean> {
+    return deckCrud.removeDeckFavorite(this.getContext(), userId, deckId);
+  }
+
+  async getFavoritedDeckIds(userId: string, deckIds: string[]): Promise<Set<string>> {
+    return deckCrud.getFavoritedDeckIds(this.getContext(), userId, deckIds);
+  }
+
   async getDeckSummaryWithAllCards(deckId: string): Promise<Deck | undefined> {
     return deckCrud.getDeckSummaryWithAllCards(this.getContext(), deckId);
   }

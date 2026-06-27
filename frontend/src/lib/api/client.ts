@@ -14,7 +14,8 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
     this.status = status;
-    this.code = code;
+    // Guard so we never assign an explicit `undefined` (exactOptionalPropertyTypes).
+    if (code !== undefined) this.code = code;
   }
 }
 
@@ -42,10 +43,9 @@ function extractErrorMessage(payload: unknown, fallback: string): { message: str
       if (typeof first === 'string') return { message: first };
       if (first && typeof first === 'object') {
         const e = first as Record<string, unknown>;
-        return {
-          message: (e.message as string) || (e.detail as string) || fallback,
-          code: e.code as string | undefined,
-        };
+        const message = (e.message as string) || (e.detail as string) || fallback;
+        const code = e.code as string | undefined;
+        return code !== undefined ? { message, code } : { message };
       }
     }
     if (typeof obj.message === 'string') return { message: obj.message };
@@ -64,15 +64,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     bodyInit = JSON.stringify(body);
   }
 
+  // Build init without explicit `undefined` props (exactOptionalPropertyTypes).
+  const init: RequestInit = { method, headers, credentials: 'include' };
+  if (bodyInit !== undefined) init.body = bodyInit;
+  if (signal) init.signal = signal;
+
   let response: Response;
   try {
-    response = await fetch(path, {
-      method,
-      headers,
-      body: bodyInit,
-      credentials: 'include',
-      signal,
-    });
+    response = await fetch(path, init);
   } catch (err) {
     if ((err as Error)?.name === 'AbortError') throw err;
     throw new ApiError('Network error. Please check your connection.', 0);
@@ -103,7 +102,8 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 }
 
 export const api = {
-  get: <T>(path: string, signal?: AbortSignal) => apiRequest<T>(path, { method: 'GET', signal }),
+  get: <T>(path: string, signal?: AbortSignal) =>
+    apiRequest<T>(path, signal ? { method: 'GET', signal } : { method: 'GET' }),
   post: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'POST', body }),
   put: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PUT', body }),
   del: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'DELETE', body }),

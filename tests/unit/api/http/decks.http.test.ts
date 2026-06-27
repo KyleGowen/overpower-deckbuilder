@@ -652,6 +652,32 @@ describe('decks.http', () => {
     });
   });
 
+  it('PUT /decks/:id ignores a client-supplied is_valid (server-owned legality)', async () => {
+    const updated = { metadata: { ...sampleDetail.metadata, name: 'X' }, cards: [] };
+    const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
+    const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
+    const deckDetailService = {
+      getDeckDetail: jest.fn(),
+      getDeckFullDetail: jest.fn(),
+      updateDeckMetadata: jest.fn().mockResolvedValue({ ok: true, data: updated }),
+      deleteDeckIfOwner: jest.fn()
+    } as unknown as DeckDetailService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService,
+      deckWriteService,
+      deckDetailService,
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth
+    };
+    await request(buildApp(deps)).put('/decks/d1').send({ name: 'X', is_valid: true }).expect(200);
+    const passedUpdates = (deckDetailService.updateDeckMetadata as jest.Mock).mock.calls[0][2];
+    expect(passedUpdates).toEqual({ name: 'X' });
+    expect(passedUpdates).not.toHaveProperty('is_valid');
+  });
+
   it('PUT /decks/:id returns 403 for GUEST', async () => {
     const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
     const deckWriteService = { createDeck: jest.fn(), validateDeckCards: jest.fn() } as unknown as DeckWriteService;
