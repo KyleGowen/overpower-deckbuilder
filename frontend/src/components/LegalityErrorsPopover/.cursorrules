@@ -1,0 +1,5 @@
+# LegalityErrorsPopover
+
+Hover/focus popover for deck validation failures on the "Not Legal" badge (deck editor).
+- `LegalityErrorsPopover.tsx` — wraps the badge; `inline` mode shows a persistent bullet list on mobile.
+- `LegalityErrorsPopover.css` — dark elevated panel, red error bullets, `z-index: 9999`.

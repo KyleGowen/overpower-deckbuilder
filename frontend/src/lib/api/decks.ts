@@ -149,7 +149,18 @@ export async function validateDeck(cards: DeckCardEntry[]): Promise<DeckValidati
     // deck editor's live badge reflects legality instead of silently falling back
     // to a stale persisted value.
     if (err instanceof ApiError && err.code === 'DECK_VALIDATION_FAILED') {
-      return { valid: false, message: err.message };
+      const payload = err.data as
+        | { validationErrors?: Array<{ message: string } | string> }
+        | null
+        | undefined;
+      const validationErrors = (payload?.validationErrors ?? []).map((entry) =>
+        typeof entry === 'string' ? entry : entry.message,
+      );
+      return {
+        valid: false,
+        message: err.message,
+        ...(validationErrors.length > 0 ? { validationErrors } : {}),
+      };
     }
     throw err;
   }

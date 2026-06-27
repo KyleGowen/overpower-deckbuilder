@@ -3293,6 +3293,19 @@ One shared helper drives the legality chip on **every** v2 surface (deck tiles, 
 
 `is_valid` is **server-owned** — recomputed and persisted on every deck mutation (card add/replace/delete, create, import, new-user sample copy). The deck editor also live-validates via `POST /api/v1/decks/validate` (which now returns `{ valid: false }` for invalid decks instead of throwing), and feeds that result through the same `deckLegalityBadge` helper, honoring the Limited toggle.
 
+### Legality errors popover — `LegalityErrorsPopover` (v2 deck editor)
+
+When the badge is **Not Legal**, validation failures appear as a **bulleted list** instead of a dense native `title` tooltip:
+
+| Surface | Behavior |
+|---|---|
+| Desktop (`layout-desktop`) | Hover/focus on the badge opens `LegalityErrorsPopover` — dark elevated panel (`--color-bg-elevated`), red border (`rgba(239, 77, 90, 0.45)`), `z-index: 9999`, scrollable up to `280px` |
+| Mobile (`layout-mobile`) | Same errors render as a persistent disc list under the badge (`inline` mode) — no hover tooltip |
+
+List items use `--color-not-legal`, `var(--font-size-xs)`, `line-height: 1.45`. Errors come from `validationErrors[]` on the validate API response (fallback: split joined `message` on `;`).
+
+Component: [`LegalityErrorsPopover.tsx`](../../frontend/src/components/LegalityErrorsPopover/LegalityErrorsPopover.tsx) + [`.css`](../../frontend/src/components/LegalityErrorsPopover/LegalityErrorsPopover.css). Wired in [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx).
+
 ### Visibility chip — `deckTileVisibilityBadge`
 
 A small display-only chip beside the legality badge in the tile meta bar, shown when `showVisibility` is enabled. Two states:

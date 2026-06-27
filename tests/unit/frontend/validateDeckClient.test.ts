@@ -48,6 +48,7 @@ describe('validateDeck client', () => {
 
     expect(result.valid).toBe(false);
     expect(result.message).toContain('7 mission cards');
+    expect(result.validationErrors).toEqual(['Deck must have exactly 7 mission cards (found 0)']);
   });
 
   it('rethrows non-validation errors (e.g. 500)', async () => {

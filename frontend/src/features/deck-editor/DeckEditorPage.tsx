@@ -46,6 +46,8 @@ import { buildFoilSeed } from '../../lib/visual/foilEffect';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { StatIconBadge } from '../../components/StatIconBadge';
 import { deckLegalityBadgeFromValidity, legalityBadgeClass } from '../../components/DeckTile/deckTileLegality';
+import { LegalityErrorsPopover } from '../../components/LegalityErrorsPopover';
+import { normalizeValidationErrors } from '../../lib/decks/validationErrors';
 import { MobileBottomNav } from '../../components/MobileBottomNav';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
@@ -253,7 +255,11 @@ export default function DeckEditorPage() {
     type: CatalogType;
     instanceId: string;
   } | null>(null);
-  const [validity, setValidity] = useState<{ valid: boolean; message?: string } | null>(null);
+  const [validity, setValidity] = useState<{
+    valid: boolean;
+    message?: string;
+    validationErrors?: string[];
+  } | null>(null);
   const [reserveCharacterId, setReserveCharacterId] = useState<string | null>(null);
   const [koCharacterIds, setKoCharacterIds] = useState<Set<string>>(() => new Set());
   const [drawHandOpen, setDrawHandOpen] = useState(false);
@@ -297,7 +303,13 @@ export default function DeckEditorPage() {
     }
     const t = setTimeout(() => {
       validateDeck(cards)
-        .then((r) => setValidity({ valid: r.valid, message: r.message }))
+        .then((r) =>
+          setValidity({
+            valid: r.valid,
+            message: r.message,
+            validationErrors: r.validationErrors,
+          }),
+        )
         .catch(() => setValidity(null));
     }, 500);
     return () => clearTimeout(t);
@@ -811,7 +823,10 @@ export default function DeckEditorPage() {
   // The Limited toggle wins via the shared helper so the editor matches tiles.
   const liveValid = validity?.valid ?? (deck.metadata.is_valid ?? false);
   const legalityBadgeInfo = deckLegalityBadgeFromValidity(deck.metadata.is_limited, liveValid);
-  const legalityTitle = legalityBadgeInfo.variant === 'not-legal' ? validity?.message : undefined;
+  const legalityErrors =
+    legalityBadgeInfo.variant === 'not-legal'
+      ? normalizeValidationErrors(validity?.validationErrors, validity?.message)
+      : [];
   const showMobileNav = isMobile && !immersiveOpen;
   const showMobileTypeTabs =
     isMobile && deckViewMode === 'card' && cards.length > 0 && deckTypeTabs.length > 1;
@@ -867,9 +882,11 @@ export default function DeckEditorPage() {
 
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
-                <span className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)}`} title={legalityTitle}>
-                  {legalityBadgeInfo.label}
-                </span>
+                <LegalityErrorsPopover errors={legalityErrors} inline={isMobile}>
+                  <span className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)}`}>
+                    {legalityBadgeInfo.label}
+                  </span>
+                </LegalityErrorsPopover>
                 {isOwner ? (
                   <button
                     type="button"

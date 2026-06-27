@@ -10,12 +10,15 @@
 export class ApiError extends Error {
   status: number;
   code?: string;
-  constructor(message: string, status: number, code?: string) {
+  /** v1 envelope `data` on error responses (e.g. structured validationErrors). */
+  data?: unknown;
+  constructor(message: string, status: number, code?: string, data?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     // Guard so we never assign an explicit `undefined` (exactOptionalPropertyTypes).
     if (code !== undefined) this.code = code;
+    if (data !== undefined) this.data = data;
   }
 }
 
@@ -89,7 +92,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!response.ok) {
     const { message, code } = extractErrorMessage(parsed, `Request failed (${response.status})`);
-    throw new ApiError(message, response.status, code);
+    const envelopeData =
+      parsed && typeof parsed === 'object' && 'data' in (parsed as object)
+        ? (parsed as V1Envelope<unknown>).data
+        : undefined;
+    throw new ApiError(message, response.status, code, envelopeData);
   }
 
   if (raw) return parsed as T;

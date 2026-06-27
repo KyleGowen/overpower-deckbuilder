@@ -1,0 +1,72 @@
+.legality-errors-popover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.legality-errors-popover__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 9999;
+  min-width: 260px;
+  max-width: min(420px, 92vw);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: var(--space-3);
+  background: var(--color-bg-elevated);
+  border: 1px solid rgba(239, 77, 90, 0.45);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease, visibility 0.12s ease;
+}
+
+.legality-errors-popover:hover .legality-errors-popover__panel,
+.legality-errors-popover:focus-within .legality-errors-popover__panel,
+.legality-errors-popover--open .legality-errors-popover__panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.legality-errors-popover__list {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  list-style: disc;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.45;
+}
+
+.legality-errors-popover__list li {
+  margin: 0 0 var(--space-1);
+  color: var(--color-not-legal);
+}
+
+.legality-errors-popover__list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Mobile: always-visible list under the badge (hover tooltips are unreliable). */
+.legality-errors-popover--inline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.legality-errors-popover--inline .legality-errors-popover__panel {
+  display: none;
+}
+
+.legality-errors-popover__inline-panel {
+  width: 100%;
+  max-width: min(100%, 520px);
+}
+
+.legality-errors-popover--inline .legality-errors-popover__list {
+  padding-left: 1rem;
+}
