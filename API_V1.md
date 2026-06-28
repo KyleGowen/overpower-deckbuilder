@@ -717,7 +717,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Auth:** Valid **session cookie** or Bearer JWT. Unauthenticated → **401** v1 envelope.
 
-**Request model:** `[src/api/http/models/decks/ValidateDeckRequestBody.ts](src/api/http/models/decks/ValidateDeckRequestBody.ts)` — `{ "cards": [ ... ] }` (array required; card shapes match legacy `**POST /api/decks/validate`**).
+**Request model:** `[src/api/http/models/decks/ValidateDeckRequestBody.ts](src/api/http/models/decks/ValidateDeckRequestBody.ts)` — `{ "cards": [ ... ] }` (array required; card shapes match legacy `**POST /api/decks/validate`**). Each card accepts an optional `**exclude_from_draw`** boolean (pre-placed cards); the pre-placed Basic Universe / Training limit + uniqueness rules read it. Omitted/false means the card is treated as a normal draw-pile card.
 
 **Response 200:** v1 envelope; `**data`** is `{ "valid": true, "message": "Deck is valid" }` (`[DeckValidateV1SuccessDto](src/api/dto/v1/DeckValidateV1SuccessDto.ts)`).
 

@@ -368,20 +368,54 @@
   object-fit: cover;
   object-position: center center;
 }
+/* Three zones: empty spacer | centered Pre-Placed chip | right-aligned controls.
+   Equal 1fr side columns keep the chip centered relative to the card frame
+   regardless of how many controls (KO, trash) sit on the right. */
 .deck-editor__card-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: flex-end;
   min-height: 28px;
   padding: var(--space-1) var(--space-2);
   flex-shrink: 0;
 }
+.deck-editor__card-footer-side {
+  min-width: 0;
+}
+.deck-editor__card-footer-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
 .deck-editor__card-controls {
+  justify-self: end;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-1);
+}
+/* Pre-Placed indicator chip — centered in the footer row when a card is
+   marked Pre-Placed (excluded from Draw Hand). */
+.deck-editor__preplaced-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  max-width: 100%;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-scrim);
+  color: var(--color-text-dim);
+  font-size: 10px;
+  font-weight: var(--font-weight-medium, 500);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .deck-editor__card-remove {
   width: 26px;

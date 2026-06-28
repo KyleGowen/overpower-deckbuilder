@@ -139,6 +139,7 @@ export async function validateDeck(cards: DeckCardEntry[]): Promise<DeckValidati
     type: c.type,
     cardId: c.cardId,
     quantity: c.quantity,
+    exclude_from_draw: c.exclude_from_draw === true,
   }));
   try {
     return await api.post<DeckValidationResult>('/api/v1/decks/validate', { cards: payload });

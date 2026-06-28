@@ -37,6 +37,15 @@ interface CardDetailPanelProps {
   /** Deck editor: alternate printings with Apply actions (hidden when length <= 1). */
   printings?: CardDetailPrintingRow[];
   onApplyPrinting?: (printingId: string) => void;
+  /**
+   * Deck editor: show the Pre-Placed toggle (card is eligible per character /
+   * location rules and the viewer owns the deck). Renders nothing when false.
+   */
+  prePlacedEligible?: boolean;
+  /** Deck editor: current Pre-Placed state (excluded from Draw Hand). */
+  prePlaced?: boolean;
+  /** Deck editor: toggle Pre-Placed for the selected deck card. */
+  onTogglePrePlaced?: () => void;
 }
 
 /** Internal / non-display fields hidden from the auto-generated field list. */
@@ -99,6 +108,9 @@ export function CardDetailPanel({
   setDisplayName,
   printings,
   onApplyPrinting,
+  prePlacedEligible,
+  prePlaced,
+  onTogglePrePlaced,
 }: CardDetailPanelProps) {
   if (!card) return null;
 
@@ -143,6 +155,29 @@ export function CardDetailPanel({
         </div>
 
         {actions ? <div className="card-detail__actions">{actions}</div> : null}
+
+        {prePlacedEligible && onTogglePrePlaced ? (
+          <div className="card-detail__preplaced">
+            <button
+              type="button"
+              className={`card-detail__preplaced-btn${prePlaced ? ' is-active' : ''}`}
+              onClick={onTogglePrePlaced}
+              aria-pressed={Boolean(prePlaced)}
+              title={
+                prePlaced
+                  ? 'Unmark as Pre-Placed (include in Draw Hand)'
+                  : 'Mark as Pre-Placed (exclude from Draw Hand)'
+              }
+            >
+              Pre-Placed
+            </button>
+            <p className="card-detail__preplaced-hint">
+              {prePlaced
+                ? 'Placed at game start — excluded from Draw Hand.'
+                : 'Place at game start to exclude this card from Draw Hand.'}
+            </p>
+          </div>
+        ) : null}
 
         {ability ? (
           <section className="card-detail__section">

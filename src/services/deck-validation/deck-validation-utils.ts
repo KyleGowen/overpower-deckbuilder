@@ -1,4 +1,5 @@
 import type { DeckCard } from '../../types';
+import type { DeckValidationContext } from './deck-validation-context';
 
 /** API / editor deck rows use hyphenated types; map keys use underscores. */
 export function deckCardTypeKeyPrefix(type: string): string {
@@ -7,6 +8,17 @@ export function deckCardTypeKeyPrefix(type: string): string {
 
 export function deckCardMapKey(card: Pick<DeckCard, 'type' | 'cardId'>): string {
     return `${deckCardTypeKeyPrefix(card.type)}_${card.cardId}`;
+}
+
+/** True when the deck contains a location whose catalog name matches `name` (exact). */
+export function deckHasLocationNamed(ctx: DeckValidationContext, name: string): boolean {
+    return ctx.locationCards.some((loc) => {
+        const available = ctx.availableCardsMap.get(deckCardMapKey(loc));
+        const locName = String(
+            (available?.name as string) || (available?.card_name as string) || ''
+        ).trim();
+        return locName === name;
+    });
 }
 
 export function characterThreatValue(availableCard: { threat?: number; threat_level?: number }): number {

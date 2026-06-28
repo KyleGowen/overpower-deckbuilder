@@ -6,6 +6,8 @@ import { DeckSizeRule } from './deck-size.rule';
 import { LocationCountRule } from './location-count.rule';
 import { MissionCountAndSetRule } from './mission-count-and-set.rule';
 import { OnePerDeckRule } from './one-per-deck.rule';
+import { PrePlacedBasicUniverseRule } from './pre-placed-basic-universe.rule';
+import { PrePlacedTrainingRule } from './pre-placed-training.rule';
 import { ThreatLevelRule } from './threat-level.rule';
 import { UnusableAdvancedUniverseRule } from './unusable-advanced-universe.rule';
 import { UnusableAllyUniverseRule } from './unusable-ally-universe.rule';
@@ -26,6 +28,8 @@ export function defaultDeckValidationRuleList(): DeckValidationRuleList {
         new BannedCardsRule(),
         new MissionCountAndSetRule(),
         new LocationCountRule(),
+        new PrePlacedBasicUniverseRule(),
+        new PrePlacedTrainingRule(),
         new ThreatLevelRule(),
         new DeckSizeRule(),
         new AngryMobLimitRule(),

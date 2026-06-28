@@ -41,6 +41,47 @@
   gap: var(--space-2);
 }
 
+/* Pre-Placed toggle (deck editor): small pill that excludes the card from Draw Hand. */
+.card-detail__preplaced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: flex-start;
+}
+.card-detail__preplaced-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid var(--color-accent-bright);
+  background: transparent;
+  color: var(--color-accent-bright);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.card-detail__preplaced-btn:hover {
+  background: var(--color-accent-soft);
+}
+.card-detail__preplaced-btn.is-active {
+  background: var(--color-accent-bright);
+  border-color: var(--color-accent-bright);
+  color: var(--color-text-on-accent);
+}
+.card-detail__preplaced-btn:focus-visible {
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: 2px;
+}
+.card-detail__preplaced-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
 .card-detail__section-title {
   font-size: var(--font-size-sm);
   text-transform: uppercase;

@@ -195,7 +195,11 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
 - **Deck tile legality** (`DeckTile` footer): show **Limited** when `is_limited`; else **Not
   Legal** when `!is_valid`; else no badge. Never show Legal + Limited together.
 - **Legality** (deck editor, etc.): `Legal` uses `--color-legal` (green), `Not Legal` uses
-  `--color-not-legal` (red); `Limited` is a neutral/info chip.
+  `--color-not-legal` (red); `Limited` uses `--color-warning` (yellow `#f6a623`, `.badge-limited`).
+- **Legality chip is interactive in the deck editor for the owner**: rendered as a clickable
+  `<button>` (`.deck-editor__legality-toggle`, `cursor: pointer`). Clicking a Legal/Not-Legal chip
+  toggles the deck to the yellow **Limited** chip (skips legality validation); clicking Limited
+  reverts. Non-owners/read-only see a static chip. All other surfaces remain display-only.
 - **Rarity** dots/labels use the `--color-rarity-*` ramp.
 - Quantity badges (`x2`) overlay the top-right of a card tile in an accent pill.
 
@@ -238,6 +242,17 @@ Each screen has a companion doc in its feature folder:
 | KO toggle (`.deck-editor__ko-btn`) | `--color-ko-soft` fill, `--color-ko` text, `--color-ko-border` border; `min-width: 36px`, `font-size-xs`, semibold |
 | KO active (`.deck-editor__ko-btn.is-active`) | `--color-ko` fill, `--color-text-on-accent` label |
 | KO-dimmed card (`.deck-editor__card--ko-dimmed .deck-editor__card-media`) | `filter: grayscale(0.7) brightness(0.55)` on art only — matches `CardTile` dimming; footer controls stay full contrast |
+
+### Deck Editor — Pre-Placed
+Owner-only toggle (eligible cards) that marks a card as placed at game start (`exclude_from_draw`). Full spec: [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md#pre-placed). Eligibility: [`prePlaced.ts`](frontend/src/lib/decks/prePlaced.ts).
+
+| Element | Tokens / values |
+|---|---|
+| Toggle button (`.card-detail__preplaced-btn`) | Pill (`--radius-pill`); `--color-accent-bright` border/text, transparent fill; hover `--color-accent-soft`; `font-size-xs`, semibold. In `CardDetailPanel` slide-out |
+| Toggle active (`.card-detail__preplaced-btn.is-active`) | `--color-accent-bright` fill, `--color-text-on-accent` label |
+| Hint (`.card-detail__preplaced-hint`) | `--font-size-xs`, `--color-text-muted` |
+| Tile chip (`.deck-editor__preplaced-chip`) | Subtle — matches Reserve button: `--color-bg-scrim` fill, `--color-text-dim` text, `--color-border` border, `--radius-sm`, `height: 26px`, `font-size: 10px`, medium weight; **center-aligned** in footer |
+| Footer layout (`.deck-editor__card-footer`) | `display: grid; grid-template-columns: 1fr auto 1fr` — spacer / centered chip / right-aligned `.deck-editor__card-controls` |
 
 ### Deck Editor — Draw Hand
 Top slide-out overlay ([`DrawHandPanel.css`](frontend/src/features/deck-editor/DrawHandPanel.css)). Full spec: [`docs/current/DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md).

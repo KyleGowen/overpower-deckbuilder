@@ -228,6 +228,13 @@ a:focus-visible,
   opacity: 0.6;
   cursor: default;
 }
+.deck-editor__legality-toggle {
+  cursor: pointer;
+}
+.deck-editor__legality-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 /* ---- Accessibility ---- */
 .sr-only {

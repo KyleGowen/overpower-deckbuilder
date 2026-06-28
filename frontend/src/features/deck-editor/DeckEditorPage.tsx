@@ -75,6 +75,12 @@ import {
 } from '../../lib/decks/simulateKo';
 import { canDrawHand, countPlayableCards, drawRandomHand } from '../../lib/decks/drawHand';
 import {
+  computePrePlacedFlags,
+  isPrePlaced,
+  isPrePlacedEligible,
+  reconcilePrePlaced,
+} from '../../lib/decks/prePlaced';
+import {
   buildDeckCardIndex,
   catalogSlugForDeckType,
   deckCardDisplayName,
@@ -249,6 +255,7 @@ export default function DeckEditorPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [privacyBusy, setPrivacyBusy] = useState(false);
+  const [limitedBusy, setLimitedBusy] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [selected, setSelected] = useState<{
     card: CatalogCard;
@@ -525,7 +532,7 @@ export default function DeckEditorPage() {
         return next;
       });
     }
-    setCards((prev) => removeInstance(prev, instanceId));
+    setCards((prev) => reconcilePrePlaced(removeInstance(prev, instanceId), cardIndex));
     if (selected?.instanceId === instanceId) {
       setSelected(null);
     }
@@ -674,6 +681,29 @@ export default function DeckEditorPage() {
     setDirty(true);
   };
 
+  // Deck-level enablers for Pre-Placed (Spartan Training Ground / Dracula's
+  // Armory / Lancelot). Computed once so per-card eligibility is O(1).
+  const prePlacedFlags = useMemo(
+    () => computePrePlacedFlags(cards, cardIndex),
+    [cards, cardIndex],
+  );
+
+  const togglePrePlaced = useCallback((instanceId: string) => {
+    setCards((prev) =>
+      prev.map((c) =>
+        c.instanceId === instanceId
+          ? { ...c, exclude_from_draw: !(c.exclude_from_draw === true) }
+          : c,
+      ),
+    );
+    setDirty(true);
+  }, []);
+
+  const selectedPrePlacedEligible =
+    isOwner && selectedDeckEntry
+      ? isPrePlacedEligible(selectedDeckEntry, prePlacedFlags, cardIndex)
+      : false;
+
   const addCard = (card: CatalogCard, type: CatalogType) => {
     const deckType = CATALOG_TYPE_BY_SLUG[type].deckType;
     setCards((prev) => [
@@ -784,6 +814,28 @@ export default function DeckEditorPage() {
     }
   };
 
+  const handleToggleLimited = async () => {
+    if (!isOwner || limitedBusy || !deck) return;
+    const nextLimited = !(deck.metadata.is_limited ?? false);
+    setLimitedBusy(true);
+    try {
+      const updated = await updateDeckMeta(deckId, { is_limited: nextLimited }, isGuest);
+      queryClient.setQueryData(['deck', deckId], (prev: typeof deck | undefined) => {
+        const base = prev ?? updated;
+        return {
+          ...base,
+          metadata: { ...base.metadata, is_limited: updated.metadata.is_limited ?? nextLimited },
+        };
+      });
+      // Refresh deck lists so tile chips reflect Limited everywhere.
+      void queryClient.invalidateQueries({ queryKey: ['decks'] });
+    } catch {
+      /* leave state unchanged on failure */
+    } finally {
+      setLimitedBusy(false);
+    }
+  };
+
   const handleToggleFavorite = () => {
     if (!canFavorite || favoriteToggle.isPending) return;
     const next = !isFavorited;
@@ -883,9 +935,26 @@ export default function DeckEditorPage() {
               <div className="deck-editor__meta">
                 <span className="deck-editor__chip">{totalCards} cards</span>
                 <LegalityErrorsPopover errors={legalityErrors} inline={isMobile}>
-                  <span className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)}`}>
-                    {legalityBadgeInfo.label}
-                  </span>
+                  {isOwner ? (
+                    <button
+                      type="button"
+                      className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)} deck-editor__legality-toggle`}
+                      onClick={handleToggleLimited}
+                      disabled={limitedBusy}
+                      aria-pressed={legalityBadgeInfo.variant === 'limited'}
+                      title={
+                        legalityBadgeInfo.variant === 'limited'
+                          ? 'Limited - legality checks are skipped. Click to re-enable legality.'
+                          : 'Click to mark this deck Limited (skips legality validation).'
+                      }
+                    >
+                      {legalityBadgeInfo.label}
+                    </button>
+                  ) : (
+                    <span className={`badge ${legalityBadgeClass(legalityBadgeInfo.variant)}`}>
+                      {legalityBadgeInfo.label}
+                    </span>
+                  )}
                 </LegalityErrorsPopover>
                 {isOwner ? (
                   <button
@@ -1088,6 +1157,7 @@ export default function DeckEditorPage() {
                       showKoOnCharacter;
                     const koDimmed =
                       koCtx !== null && shouldDimDeckCard(entry, catalogCard, koCtx);
+                    const entryPrePlaced = isPrePlaced(entry);
                     const entryIsFoil = Boolean(entry.is_foil || (catalogCard && isFoilCard(catalogCard)));
                     const foilSeed = buildFoilSeed(entry.cardId, entry.instanceId);
                     return (
@@ -1136,6 +1206,15 @@ export default function DeckEditorPage() {
                       ) : null}
                       {showCardFooter ? (
                         <div className="deck-editor__card-footer">
+                          <span
+                            className="deck-editor__card-footer-side"
+                            aria-hidden="true"
+                          />
+                          <div className="deck-editor__card-footer-center">
+                            {entryPrePlaced ? (
+                              <span className="deck-editor__preplaced-chip">Pre-Placed</span>
+                            ) : null}
+                          </div>
                           <div className="deck-editor__card-controls">
                             {showKoOnCharacter ? (
                               <KoToggleButton
@@ -1217,6 +1296,13 @@ export default function DeckEditorPage() {
         }
         printings={printingRows}
         onApplyPrinting={isOwner ? applyPrinting : undefined}
+        prePlacedEligible={selectedPrePlacedEligible}
+        prePlaced={Boolean(selectedDeckEntry?.exclude_from_draw)}
+        onTogglePrePlaced={
+          isOwner && selected?.instanceId
+            ? () => togglePrePlaced(selected.instanceId)
+            : undefined
+        }
       />
     </div>
     {showMobileNav ? <MobileBottomNav /> : null}
