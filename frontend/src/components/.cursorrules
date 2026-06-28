@@ -1,0 +1,32 @@
+# `frontend/src/components/` — reusable UI components (v2)
+
+Shared, presentational components composed by feature pages. No route/data-fetching logic
+beyond small self-contained hooks.
+
+## Folder convention (one folder per component)
+
+Each component is `frontend/src/components/<Name>/` containing:
+- `<Name>.tsx` — the component.
+- `<Name>.css` — its styles (BEM, scoped by a component root class).
+- `<Name>.md` — short context doc (purpose, props, behavior, gotchas). **Add/update this
+  when you add or change a component.**
+- `index.ts` — the public re-export (import via `../components/<Name>`, not deep paths).
+- Optional `.cursorrules` for components with non-obvious rules (e.g. `FoilCard`,
+  `AppBackground`, `LegalityErrorsPopover`).
+
+## Conventions
+
+- **CSS:** BEM class names rooted at a unique component class; keep styles in the component's
+  `.css`. Use design tokens from `src/styles/tokens.css` — no hardcoded colors/spacing where a
+  token exists. Update `STYLE_GUIDE_V2.md` when you change a visual pattern.
+- **z-index:** popovers/tooltips/menus that must sit above page content use **9999** (matches
+  the global-nav rule). See `LegalityErrorsPopover`, `ProfileMenu`, `UserMenu`.
+- **Responsive:** never branch on user-agent. Use `useLayoutMode()` and
+  `.layout-mobile` / `.layout-desktop` scoped CSS.
+- **Card images:** never hardcode image paths — use the `CardImage` component / `cardImages`
+  helpers so the CDN base + thumbnail rules apply.
+- **Data:** components stay presentational; pass data/handlers via props. Small read hooks
+  using the shared `lib/api` client + React Query are fine, but prefer lifting fetches to the
+  feature page.
+- Keep accessibility in mind: focus management for popovers/menus, `aria-*` on toggles,
+  keyboard close (Esc) for overlays.

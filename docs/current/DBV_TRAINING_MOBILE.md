@@ -1,5 +1,7 @@
 # DBV Universe: Training — mobile layout
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 ## Summary
 
 The Training tab uses the same mobile DBV pattern as Ally: stat-type icon toggles in a teal header shell, vertical card rows (image + actions + caption), and client-side filtering on `window.trainingData`. **DTV card-name field** (`#training-card-name-filter`) is built by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) (`data-dbv-name-filter="training-desktop-name"`); icon strips use [`DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md).

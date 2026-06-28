@@ -198,7 +198,7 @@ export function prepareAddCardsCatalogList(
 /** Sum deck quantities for any variant id in the representative's group. */
 export function qtyInDeckForRepresentative(
   representative: CatalogCard,
-  catalogType: CatalogType,
+  _catalogType: CatalogType,
   deckCards: { type: string; cardId: string; quantity: number }[],
   deckType: string,
   variantIdsByRepresentative: Map<string, string[]>,

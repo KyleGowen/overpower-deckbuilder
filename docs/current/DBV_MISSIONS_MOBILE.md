@@ -1,5 +1,7 @@
 # DBV Missions tab — mobile view (how it looks)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 This document explains **how the Missions tab** of the Card Database (`#missions-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.6** and the **Missions** bullet in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Card-name filter markup** (`#missions-mobile-card-name-filter`, `#missions-header-card-name-filter`) is created by [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md) from `[data-dbv-name-filter]` hosts in [`index.html`](../../public/index.html) / [`database-view-complete.html`](../../public/templates/database-view-complete.html). **Mission set `<select>`** (`#missions-mission-set-filter`) is built by [`dbv-mission-set-filter.js`](../../public/js/dbv-mission-set-filter.js) into **`[data-dbv-mission-set-filter="missions"]`** — see [`DBV_MISSION_SET_FILTER.md`](../../public/js/DBV_MISSION_SET_FILTER.md).
 
 ## Goals

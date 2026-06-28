@@ -17,6 +17,12 @@ import { isFoilCard } from './foilCatalog';
 /** Per-type catalog tab, All list, or character Stacks tab in Add Cards. */
 export type CatalogTabSelection = CatalogType | 'all' | 'stacks';
 
+/**
+ * Card Database / Collection tab selection: per-type tab or the All list.
+ * These views never expose the Add Cards "Stacks" tab, so they exclude `'stacks'`.
+ */
+export type DbvTabSelection = CatalogType | 'all';
+
 export interface CatalogTypeMeta {
   type: CatalogType;
   label: string;
@@ -44,7 +50,7 @@ export const CATALOG_TYPES: CatalogTypeMeta[] = [
 ];
 
 /** Card Database type tab order (All first, then CATALOG_TYPES) for UI and mobile swipe cycling. */
-export const DBV_TAB_ORDER: readonly CatalogTabSelection[] = [
+export const DBV_TAB_ORDER: readonly DbvTabSelection[] = [
   'all',
   ...CATALOG_TYPES.map((m) => m.type),
 ];

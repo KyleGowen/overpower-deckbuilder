@@ -1,5 +1,7 @@
 # DBV Aspects tab — mobile view (how it looks)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 This document explains **how the Aspects tab** of the Card Database (`#aspects-table`) is built for **mobile layout** (`html.layout-mobile`) and for **narrow viewports** (`max-width: 900px`) when the user forces **desktop layout** (`preferDesktopLayout`). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) §10.5 and the **Aspects** bullets in [`STYLE_GUIDE.md`](STYLE_GUIDE.md). **Reusable filter DOM:** power-type toggles — [`DBV_POWER_TYPE_FILTER_STRIP.md`](../../public/js/DBV_POWER_TYPE_FILTER_STRIP.md); card-name **`header-filter`** — [`DBV_CARD_NAME_FILTER.md`](../../public/js/DBV_CARD_NAME_FILTER.md).
 
 ## Goals

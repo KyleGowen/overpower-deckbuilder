@@ -1,0 +1,36 @@
+# `frontend/src/lib/layout/` — layout mode, swipe, card-detail history (v2)
+
+Non-UI helpers that drive responsive behavior and mobile gestures. **Never branch on
+user-agent** anywhere in the SPA — use these.
+
+## `LayoutModeProvider.tsx` + `useLayoutMode()`
+
+- Single source of truth for desktop vs mobile. Mobile = viewport `<= 900px`
+  (`MOBILE_MAX_PX`), unless `localStorage.preferDesktopLayout === '1'`.
+- Re-uses the FOUC globals from `index.html` (`window.isLayoutMobile`, `applyLayoutMode`,
+  `setPreferDesktopLayout`) so first paint matches React state; stays in sync via
+  `matchMedia` change, `resize`, and the `layout-mode-change` custom event.
+- Exposes `{ isMobile, isDesktop, preferDesktop, setPreferDesktop }`. Components read this
+  and switch behavior / `.layout-mobile` vs `.layout-desktop` scoped CSS. Throws if used
+  outside the provider (mounted in `main.tsx`).
+
+## `useHorizontalSwipe.ts` + `swipeBlockSelectors.ts`
+
+- `useHorizontalSwipe({ targetRef, enabled, blockSelector, onSwipeLeft, onSwipeRight })`
+  attaches native touch listeners (non-passive move/end) for card-tile swiping; locks axis
+  after 12px, fires at a 50px threshold, and suppresses the click after a swipe.
+- **Selector constants live in `swipeBlockSelectors.ts` (React-free)** so unit tests can
+  import them without resolving `react`. The hook re-exports them for call sites. If you add
+  a new block selector, add it to `swipeBlockSelectors.ts`, not the hook. Touches starting on
+  a `blockSelector` match (footer controls, tabs) are ignored.
+- Unit test: `tests/unit/use-horizontal-swipe.test.ts` imports from `swipeBlockSelectors.ts`.
+
+## Card-detail history (mobile back closes the slide-out)
+
+- `useCardDetailHistory(open, onClose, stateKey?)` pushes one Router history entry while a
+  card-detail slide-out is open so mobile Back / swipe-back closes the panel instead of
+  leaving the route. `useDeckCardDetailHistory.ts` is the deck-editor variant.
+- Logic lives in the React-free `cardDetailHistoryController.ts`; the hook is a thin wrapper.
+  Do **not** call `navigate(-1)` in effect cleanup (Strict Mode + router race) — use the
+  controller's `attach`/`detach`/`close`/`reset`.
+- `cyclicalIndex.ts` — wrap-around index helper for prev/next card navigation.

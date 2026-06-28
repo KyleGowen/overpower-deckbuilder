@@ -1,6 +1,6 @@
 # Agent orientation (Excelsior Deckbuilder)
 
-**Excelsior** is an Overpower card game database and deck-building web app. Backend is Node/Express/TypeScript in `src/`; frontend is vanilla JS and HTML in `public/` (no frameworks). Tests live in `tests/` (unit: `tests/unit/`, integration: `tests/integration/`, frontend: `tests/frontend/`).
+**Excelsior** is an Overpower card game database and deck-building web app. Backend is Node/Express/TypeScript in `src/`. **The production frontend is the v2 React SPA in `frontend/`** (React 19 + Vite + TypeScript); Express serves its build (`frontend/dist/`) whenever it exists (`isSpaBuilt()` in [`src/routes/spaIndexPath.ts`](src/routes/spaIndexPath.ts)). The legacy v1 vanilla-JS/HTML UI in `public/` is **deprecated** and kept only as an instant rollback (set `EXCELSIOR_DISABLE_SPA=1`) — do not build new features in `public/`. Tests live in `tests/` (unit: `tests/unit/`, integration: `tests/integration/`, frontend: `tests/frontend/`); v2 unit tests under `tests/unit/` import from `frontend/src/`.
 
 Before making changes:
 
@@ -10,6 +10,9 @@ Before making changes:
 
 Key docs:
 
+- [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) — **the v2 React SPA** (`frontend/`): architecture, routing, dev workflow, and how the production build is served. **Start here for frontend work.**
+- [STYLE_GUIDE_V2.md](STYLE_GUIDE_V2.md) — visual source of truth for the v2 React SPA. Update it for any v2 UI change (the legacy [docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md) covers v1).
+- [frontend/.cursorrules](frontend/.cursorrules) — conventions for the v2 SPA (component structure, lib map, API client, layout/query patterns).
 - [API_DOCUMENTATION.md](API_DOCUMENTATION.md) — **legacy** HTTP contract (`src/routes/`, `{ success, data, error }`, session cookies).
 - [API_V1.md](API_V1.md) — **`/api/v1`** contract (Bearer JWT, `{ data, meta, errors }`). Update this file whenever v1 paths or envelopes change.
 - [API_MIGRATION_CHECKLIST.md](API_MIGRATION_CHECKLIST.md) — migration progress; keep in sync when checking routes off.

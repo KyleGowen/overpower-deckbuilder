@@ -142,7 +142,7 @@ export default function CommunityPage() {
 
 
 
-  const stepTab = (delta: number) => {
+  const stepTab = (delta: 1 | -1) => {
 
     const idx = visibleTabs.indexOf(activeTab);
 

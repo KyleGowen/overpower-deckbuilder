@@ -521,6 +521,21 @@ jobs:
     - name: Generate card image thumbnails
       run: npm run generate:thumbnails
 
+    - name: Build v2 frontend (React SPA)
+      # Produces frontend/dist/ in the build context so the Dockerfile can COPY it
+      # into the image. This is the production cutover: Express serves v2 when
+      # frontend/dist/index.html exists (src/routes/spaIndexPath.ts isSpaBuilt()).
+      run: |
+        echo "🏗️ Building v2 React SPA (frontend/) for production cutover..."
+        npm --prefix frontend ci
+        npm --prefix frontend run build
+        if test -f frontend/dist/index.html; then
+          echo "✅ frontend/dist/index.html built"
+        else
+          echo "❌ frontend/dist/index.html missing after build — aborting (would not cut over to v2)"
+          exit 1
+        fi
+
     - name: Verify Git Information
       run: |
         echo "🔍 VERIFYING GIT INFORMATION:"
@@ -583,6 +598,12 @@ jobs:
           echo "❌ Main index.html file NOT found in source files"
           exit 1
         fi
+        if test -f frontend/dist/index.html; then
+          echo "✅ v2 SPA build (frontend/dist/index.html) found in source files"
+        else
+          echo "❌ v2 SPA build NOT found — the 'Build v2 frontend' step must run before docker build"
+          exit 1
+        fi
         
         BUILD_TIMESTAMP=$(date +%s)
         docker build --platform linux/amd64 \
@@ -605,6 +626,8 @@ jobs:
         
         echo "📋 Verifying build contents..."
         docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/public/index.html
+        echo "📋 Verifying v2 SPA is baked into the image (this is what cuts over to v2)..."
+        docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/frontend/dist/index.html
         docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG grep -c "replaceAllCardsInDeck" /app/src/database/PostgreSQLDeckRepository.ts || echo "0"
         
         echo "🔍 Verifying git information in container..."
@@ -643,6 +666,14 @@ jobs:
           echo "✅ index.html found"
         else
           echo "❌ index.html missing"
+        fi
+
+        echo "Testing v2 SPA build (frontend/dist/index.html) — required for v2 cutover..."
+        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG test -f /app/frontend/dist/index.html; then
+          echo "✅ v2 SPA index.html found — production will serve v2"
+        else
+          echo "❌ v2 SPA index.html MISSING — production would fall back to legacy v1"
+          exit 1
         fi
         
         echo "Checking for card duplication bug fix..."

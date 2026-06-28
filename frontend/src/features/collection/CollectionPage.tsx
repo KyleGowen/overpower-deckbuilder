@@ -10,7 +10,7 @@ import {
   cardLinkedDisplayName,
   cardMatchesSearchQuery,
   isLandscapeCatalogType,
-  type CatalogTabSelection,
+  type DbvTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import { compareCollectionCatalogCards } from '../../lib/catalog/allCatalogSort';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
@@ -49,7 +49,7 @@ export default function CollectionPage() {
   const colRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
   const collection = useCollection();
-  const [tab, setTab] = useState<CatalogTabSelection>('all');
+  const [tab, setTab] = useState<DbvTabSelection>('all');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);

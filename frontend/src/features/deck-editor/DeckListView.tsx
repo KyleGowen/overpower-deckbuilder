@@ -14,6 +14,7 @@ import {
   computeReserveRowState,
   reserveSlotVisible,
   type ReserveRowState,
+  type ReserveCharacterEntry,
 } from '../../lib/decks/reserveCharacter';
 import {
   shouldDimDeckCard,
@@ -54,7 +55,7 @@ export interface DeckListViewProps {
   koCtx: KoDimmingContext | null;
   koCharacterIds: Set<string>;
   reserveCharacterId: string | null;
-  characterEntries: DeckCardEntry[];
+  characterEntries: ReserveCharacterEntry[];
   canSimulateKo: boolean;
   selectedInstanceId: string | null;
   onSelectCard: (catalogCard: CatalogCard, catalogType: CatalogType, instanceId: string) => void;
@@ -104,7 +105,6 @@ function DeckListAttackIcons({ iconTypes }: { iconTypes: AttackIconType[] }) {
 
 function DeckListRowView({
   row,
-  cardIndex,
   isOwner,
   koCtx,
   koCharacterIds,
@@ -118,12 +118,11 @@ function DeckListRowView({
   onDeselectReserve,
 }: {
   row: DeckListRow;
-  cardIndex: DeckCardIndex;
   isOwner: boolean;
   koCtx: KoDimmingContext | null;
   koCharacterIds: Set<string>;
   reserveCharacterId: string | null;
-  characterEntries: DeckCardEntry[];
+  characterEntries: ReserveCharacterEntry[];
   canSimulateKo: boolean;
   selectedInstanceId: string | null;
   onSelectCard: DeckListViewProps['onSelectCard'];
@@ -213,7 +212,7 @@ function DeckListSectionView({
   koCtx: KoDimmingContext | null;
   koCharacterIds: Set<string>;
   reserveCharacterId: string | null;
-  characterEntries: DeckCardEntry[];
+  characterEntries: ReserveCharacterEntry[];
   canSimulateKo: boolean;
   selectedInstanceId: string | null;
   onSelectCard: DeckListViewProps['onSelectCard'];

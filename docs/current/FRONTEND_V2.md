@@ -18,7 +18,7 @@ frontend/src/
   app/        router.tsx, AuthProvider.tsx, ProtectedRoute.tsx
   components/ reusable UI (each: Component.tsx/.css/.md/index.ts)
   features/   route pages: login, home, database, collection,
-              deck-selection, deck-editor
+              community, deck-selection, deck-editor
   lib/
     api/        client.ts, types.ts, auth.ts, catalog.ts, decks.ts, collection.ts
     images/     cardImages.ts (CDN + thumbnail resolution, assetUrl)
@@ -39,7 +39,7 @@ Defined in [`frontend/src/app/router.tsx`](../../frontend/src/app/router.tsx):
 - `/login` — standalone (no shell).
 - `ShelledLayout` (`ProtectedRoute` + `AppShell`) wraps:
   - `/` → redirects to `/home`
-  - `/home`, `/data`, `/users/:userId/decks`, `/users/:userId/collection`
+  - `/home`, `/data`, `/community`, `/users/:userId/decks`, `/users/:userId/collection`
 - `/users/:userId/decks/:deckId` — Deck Editor, its **own** chrome (no AppShell) and
   **unguarded** so read-only/shared deck links work for signed-out visitors.
   **Simulate KO** (client-only character knockout simulation): see

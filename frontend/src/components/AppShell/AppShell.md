@@ -5,7 +5,8 @@ navigation frame around its `children`.
 
 ## Layout
 - **Desktop** (`useLayoutMode().isMobile === false`): sticky **top nav** with the `Logo`,
-  primary tabs (Home, Database, Decks, Collection), and `UserMenu` on the right.
+  primary tabs in `NAV_ITEMS` order (**Home, Database, Decks, Community, Collection**), and
+  `UserMenu` on the right. **Community** is **desktop-only** (excluded from `MOBILE_NAV_ORDER`).
 - **Mobile**: composes [`MobileBottomNav`](../MobileBottomNav/MobileBottomNav.tsx) — fixed
   **bottom nav** with icon+label tabs ordered **Database, Decks, Home, Collection, Profile**
   (Home centered; its icon is 15% larger via `.bottom-nav__item--home`). Profile opens a
@@ -15,7 +16,9 @@ navigation frame around its `children`.
 ## Nav model
 [`navConfig.tsx`](../MobileBottomNav/navConfig.tsx) — `NAV_ITEMS` defines each tab's
 `to(userId)` target and `match(pathname)` predicate. Decks and Collection are user-scoped
-(`/users/:userId/...`); Home and Database are global. Active state is computed from the
+(`/users/:userId/...`); Home, Database, and Community are global. `MOBILE_NAV_ORDER` lists the
+4 tabs shown in the mobile bottom nav (database, decks, home, collection) — **Community is
+omitted on mobile** (reached via Home "View All" links). Active state is computed from the
 current pathname. The Decks tab is active on both the deck list and deck editor URLs.
 
 ## Dependencies

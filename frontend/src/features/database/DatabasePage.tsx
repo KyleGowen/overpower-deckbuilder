@@ -17,7 +17,7 @@ import {
   isLandscapeCatalogType,
   metaForDeckType,
   CATALOG_TYPE_BY_SLUG,
-  type CatalogTabSelection,
+  type DbvTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
 import { resolveDefaultCardForDeckAdd } from '../../lib/catalog/defaultCatalogCards';
@@ -60,7 +60,7 @@ export default function DatabasePage() {
   const collection = useCollection();
   const dbRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
-  const [tab, setTab] = useState<CatalogTabSelection>('characters');
+  const [tab, setTab] = useState<DbvTabSelection>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [page, setPage] = useState(1);

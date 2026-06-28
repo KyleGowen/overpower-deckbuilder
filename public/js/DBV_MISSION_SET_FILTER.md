@@ -1,5 +1,7 @@
 # DBV mission set filter (reusable component)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 Vanilla JS component for the Card Database View **Missions** and **Events** tabs: the **Mission set** `<select>` (**All** + sorted distinct `mission_set` values). **Filter math** stays in [`search-filter-functions.js`](search-filter-functions.js); this module standardizes **DOM shape**, **options population**, and **`change` → `applyMissionFilters` / `applyEventsFilters`**.
 
 ## Source files

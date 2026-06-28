@@ -1,5 +1,7 @@
 # Overpower Deckbuilder Style Guide
 
+> ⚠️ **v1 (legacy) style guide.** This documents the visual design of the **deprecated v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`**, whose visual source of truth is **[`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md)** — update that for any v2 UI change. This file remains useful for shared brand tokens (colors, typography) and v1 maintenance/rollback, but new UI work should follow `STYLE_GUIDE_V2.md`.
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Color Palette](#color-palette)

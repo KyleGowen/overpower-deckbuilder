@@ -3,7 +3,7 @@ import {
   COLLECTION_SWIPE_BLOCK_SELECTOR,
   DBV_SWIPE_BLOCK_SELECTOR,
   DECK_EDITOR_SWIPE_BLOCK_SELECTOR,
-} from '../../frontend/src/lib/layout/useHorizontalSwipe';
+} from '../../frontend/src/lib/layout/swipeBlockSelectors';
 
 describe('DECK_EDITOR_SWIPE_BLOCK_SELECTOR', () => {
   it('blocks footer, tabs, and header controls', () => {

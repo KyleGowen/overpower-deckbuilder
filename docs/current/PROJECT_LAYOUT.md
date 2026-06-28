@@ -34,7 +34,29 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 └── 📄 jest.*.config.js             # Specific Jest configurations for different test types
 ```
 
-## 🎨 **Frontend Structure (`/public/`)**
+## 🎨 **Frontend Structure**
+
+> **The production frontend is the v2 React SPA in `/frontend/` (below).** The legacy `/public/` vanilla-JS UI is **deprecated** and served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`). Express chooses between them at runtime via `isSpaBuilt()` ([`src/routes/spaIndexPath.ts`](../../src/routes/spaIndexPath.ts)).
+
+### **v2 React SPA (`/frontend/`) — primary**
+```
+/frontend/
+├── 📄 index.html                   # Vite entry HTML (built to frontend/dist/index.html)
+├── 📄 vite.config.ts               # Vite config (base '/', host: true for LAN, /api proxy → :8085)
+├── 📄 .cursorrules                 # v2 conventions (components, lib map, API client, layout/query patterns)
+├── 📁 src/
+│   ├── 📁 app/                     # Provider tree, router, ProtectedRoute, lazy routes
+│   ├── 📁 features/                # Route-level pages: home, database, collection, community,
+│   │                              #   deck-selection, deck-editor, login
+│   ├── 📁 components/              # Reusable UI (AppShell, CardTile, DeckTile, CardDetailPanel, …)
+│   │                              #   each: Component.tsx + .css + .md + index.ts
+│   └── 📁 lib/                     # api/ (client + endpoints), catalog/, collection/, decks/,
+│                                  #   layout/ (LayoutModeProvider, useHorizontalSwipe), images/
+└── 📁 dist/                        # Production build output (gitignored; built in CI, copied into Docker image)
+```
+Full v2 reference: [`docs/current/FRONTEND_V2.md`](FRONTEND_V2.md). Visual source of truth: [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md).
+
+### **Legacy v1 UI (`/public/`) — deprecated**
 
 ### **Main Application Files**
 ```

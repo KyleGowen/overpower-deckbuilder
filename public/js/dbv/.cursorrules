@@ -1,4 +1,6 @@
-# Card Database View (DBV) — `public/js/dbv/`
+# Card Database View (DBV) — `public/js/dbv/` — ⚠️ LEGACY v1 (DEPRECATED)
+
+> **Legacy v1 UI.** Production frontend is the **v2 React SPA in `frontend/`** (the DBV is [`frontend/src/features/database`](../../../frontend/src/features/database)). This folder is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`). Do **not** add features here — see [`docs/current/FRONTEND_V2.md`](../../../docs/current/FRONTEND_V2.md). Removal tracked in [`DEAD_CODE_POLICY.md`](../../../DEAD_CODE_POLICY.md).
 
 This folder holds **DBV-specific** JavaScript loaded as plain `<script>` tags (no bundler). Shared utilities (`card-image-utils.js`, `modal-ui.js`, layout shell) stay outside unless a symbol is DBV-only.
 

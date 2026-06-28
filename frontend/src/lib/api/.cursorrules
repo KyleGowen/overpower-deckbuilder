@@ -1,0 +1,49 @@
+# `frontend/src/lib/api/` — typed API client (v2)
+
+Typed fetch wrappers for the Excelsior backend. UI never calls `fetch` directly — it
+imports the helpers here, and components consume them through TanStack Query.
+
+## `client.ts` — the shared transport
+
+- `apiRequest<T>(path, opts)` and the `api.get/post/put/del` shorthands are the **only**
+  place network requests originate.
+- **Always** sends `credentials: 'include'` so the session cookie from `/api/auth/*` login
+  flows to every `/api/v1` call. Do not add per-call credential handling.
+- **Unwraps the v1 envelope** `{ data, success, errors, meta }` and returns `.data`. Pass
+  `{ raw: true }` to get the whole envelope (used for legacy endpoints / when you need
+  `meta`).
+- Throws **`ApiError`** (`message`, `status`, `code?`, `data?`) on non-2xx. `ApiError.data`
+  carries the envelope `data` on errors (e.g. structured `validationErrors` from deck save).
+  Catch `ApiError` to branch on `status`/`code`; never assume a thrown value is an `Error`
+  string.
+- `exactOptionalPropertyTypes` is on: never assign explicit `undefined` to optional fields
+  (the client guards `code`/`data`/`body`/`signal` for this reason).
+
+## Endpoint modules
+
+`auth.ts`, `account.ts`, `decks.ts`, `collection.ts`, `catalog.ts`, `favorites.ts`,
+`recent-updates.ts`. Each exports small async functions returning typed values from
+`types.ts`. Targets:
+- Data: **`/api/v1/*`** (Bearer-less, session-cookie auth in browser).
+- Auth/session: legacy **`/api/auth/*`** (login, signup, guest, Google, logout, me).
+
+## React Query key catalog (keep keys consistent for cache hits + invalidation)
+
+- `['auth','me']`, `['app-config']` — current user + CDN/pool config (`AuthProvider`).
+- `['catalog', <type|slug|tab>]`, `['sets']`, `['dbv-sets']`, `['foil-card-map']` — card data.
+- `['deck', deckId]` — single deck detail.
+- `['decks']` (umbrella), `['decks','mine',userId]`, `['decks','favorites',userId]`,
+  `['decks','community']`, `['decks','tournament']` — deck lists.
+- `['collection','me']`, `['recent-updates']`.
+
+After any mutation, invalidate the **umbrella** key (`invalidateQueries({ queryKey: ['decks'] })`)
+or the specific subtree, matching the existing call sites. QueryClient defaults
+(`main.tsx`): `retry: 1`, `refetchOnWindowFocus: false`, `staleTime: 5m`. Use a longer
+`staleTime` for rarely-changing data (sets, config) as the existing queries do.
+
+## Rules
+
+- New endpoints: add a typed function in the matching module + its types in `types.ts`; do
+  not inline `fetch`/paths in components.
+- When the legacy/v1 HTTP contract changes, update `API_DOCUMENTATION.md` (legacy) or
+  `API_V1.md` (v1) per the repo rules.

@@ -1,5 +1,7 @@
 # DBV — Universe: Basic (mobile)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 ## Overview
 
 On `.layout-mobile` and in the narrow `#database-view` band (`max-width: 900px`), the Basic Universe tab uses the same patterns as **Training** (stat-type icon strip + inline Clear) and **Teamwork** (two numeric rows: equals / min / max / clear) for **Value to Use** and **Bonus**.

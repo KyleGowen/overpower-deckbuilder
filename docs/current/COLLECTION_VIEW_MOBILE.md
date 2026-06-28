@@ -1,5 +1,7 @@
 # Collection view — mobile layout (`layout-mobile`)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 This document describes the **Collection** tab (`#collection-view`) when **`html`** has **`layout-mobile`** (viewport-based layout mode, typically **≤900px**). It complements [`MOBILE_DESIGN.md`](../../MOBILE_DESIGN.md) **§10.7**, the **Collection view — mobile** section in [`STYLE_GUIDE.md`](STYLE_GUIDE.md), and [`public/js/.cursorrules`](../../public/js/.cursorrules).
 
 Desktop Collection (**DTV**) keeps the wide sortable table (`#collection-table`); mobile (**MV**) uses a **list + bottom-sheet detail** and does **not** mirror desktop column-sort UI inside the list panel.

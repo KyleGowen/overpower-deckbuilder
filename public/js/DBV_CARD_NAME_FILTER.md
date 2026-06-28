@@ -1,5 +1,7 @@
 # DBV card-name filter (reusable component)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 Vanilla JS component for the Card Database View (DBV): **card / name** text inputs in table headers and Missions mobile row. **Filter logic and event listeners** stay in `search-filter-functions.js`, `filter-functions.js`, and `card-filter-toggles.js`; this module only standardizes **DOM shape** and keeps stable **`id`**, **`class`**, and **`data-column`** values.
 
 ## See also

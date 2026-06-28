@@ -20,3 +20,8 @@ scripts
 # included in the image so GET /api/v1/dbv/deck-backgrounds can readdir() and validateBackgroundPath()
 # works on save.
 src/resources/cards/images/**
+
+# NOTE: frontend/dist (the built v2 React SPA) is intentionally NOT ignored — it
+# must be copied into the image (see Dockerfile) so Express serves v2. CI builds
+# it via `npm --prefix frontend run build` before `docker build`. The `node_modules`
+# rule above already excludes frontend/node_modules.

@@ -1,6 +1,8 @@
 # Mobile design — findings, strategy, and roadmap
 
-This document is the **source of truth** for mobile and dual–layout-mode work on Excelsior Deckbuilder. It complements `[docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md)` (visual specs) and repo `[.cursorrules](.cursorrules)`.
+> ⚠️ **LEGACY (v1) DOCUMENT.** The production frontend is now the **v2 React SPA in `frontend/`**, which has its own responsive desktop/mobile layouts driven by `LayoutModeProvider` (900px) and `useHorizontalSwipe` — see [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md) and [`STYLE_GUIDE_V2.md`](STYLE_GUIDE_V2.md). The architecture, milestones, and `layout-mobile`/`public/` patterns described below pertain to the **deprecated v1 `public/` UI**, retained for historical context and rollback only. Do not implement new mobile work from this doc; use the v2 feature/component docs under `frontend/src/`.
+
+This document is the **source of truth** for mobile and dual–layout-mode work on the **legacy v1** Excelsior Deckbuilder UI. It complements `[docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md)` (v1 visual specs) and repo `[.cursorrules](.cursorrules)`.
 
 ## Quick Navigation — Mobile Docs Index
 
@@ -26,7 +28,9 @@ Use this table to jump directly to the right doc. All per-tab specs stay in `doc
 
 ---
 
-## 1. Current architecture
+## 1. Current architecture (legacy v1 — superseded by the v2 SPA)
+
+> The section below describes the **deprecated v1 `public/` shell**. In production, Express now serves the v2 React SPA (`frontend/dist/`) whenever it is built (`isSpaBuilt()`); the v1 shell is only served as a rollback (`EXCELSIOR_DISABLE_SPA=1`).
 
 - **Single HTML shell:** Express serves `[public/index.html](public/index.html)` for `/`, deck routes, collection, and `/data` via `[src/routes/pages.routes.ts](src/routes/pages.routes.ts)`. No separate mobile HTML or server-side device routing.
 - **Views:** One global CSS/JS bundle; views toggle with classes such as `view-removed`.
@@ -78,6 +82,8 @@ Use this table to jump directly to the right doc. All per-tab specs stay in `doc
 ---
 
 ## 6. Roadmap — milestones
+
+> **Superseded by the v2 SPA.** This roadmap (including **M5** deck-editor-mobile and later rows still marked `pending`) tracked the **legacy v1 `public/`** mobile effort. Mobile parity is now delivered by the v2 React SPA's responsive layouts in `frontend/src/` (deck editor: [`frontend/src/features/deck-editor/`](frontend/src/features/deck-editor/)). The pending rows below are **not** active work items.
 
 ```mermaid
 flowchart TB

@@ -1,5 +1,7 @@
 # DBV power-type icon filter strip (reusable component)
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 Vanilla JS “component” for the Card Database View (DBV): the row of six power-type icon buttons plus the **MP** (Multi-Power / Multi Power) control. **Special** and **Aspects** can include the optional **No icon** checkbox in the same strip. Tab-specific **filter math** stays in existing modules (`search-filter-functions.js`, `card-filter-toggles.js`, etc.); this layer only standardizes **DOM shape** and **shared icon-matching rules** for Special/Aspects.
 
 ## Source files

@@ -1,5 +1,7 @@
 # Deck Editor Card View — Layout Pattern and Reusability
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 This document captures the **final, correct** Card View layout pattern so we never regress to the "noticeable frame" or wrong orientation issues. It is the single source of truth for how character, location, event, and portrait cards are styled.
 
 ## Orientation rule (do not change)

@@ -1,4 +1,6 @@
-# Public frontend (static assets)
+# Public frontend (static assets) — ⚠️ LEGACY v1 (DEPRECATED)
+
+> **This `public/` vanilla-JS/HTML UI is the deprecated v1 frontend.** The production UI is the **v2 React SPA in `frontend/`** (Express serves `frontend/dist/` via `isSpaBuilt()`). `public/` is retained **only** as an instant rollback (`EXCELSIOR_DISABLE_SPA=1`). **Do NOT build new features or fix non-rollback bugs here** — make UI changes in `frontend/`. See [`docs/current/FRONTEND_V2.md`](../docs/current/FRONTEND_V2.md) and [`frontend/.cursorrules`](../frontend/.cursorrules). Cleanup/removal of `public/` is tracked in [`DEAD_CODE_POLICY.md`](../DEAD_CODE_POLICY.md). The notes below describe the legacy v1 behavior.
 
 - **Mobile roadmap:** [/MOBILE_DESIGN.md](../MOBILE_DESIGN.md) — layout mode (`layout-mobile` / `layout-desktop`), milestones M0–M6, DBV M2a–M2c, Collection **M4**, deck M5a–M5b, and **§10** (global-nav 2×2 + DBV All / Characters / Special / Aspects / **Missions** + Collection mobile notes). **Aspects** detail: [docs/current/DBV_ASPECTS_MOBILE.md](../docs/current/DBV_ASPECTS_MOBILE.md). **Missions** detail: [docs/current/DBV_MISSIONS_MOBILE.md](../docs/current/DBV_MISSIONS_MOBILE.md). **Collection tab MV:** [docs/current/COLLECTION_VIEW_MOBILE.md](../docs/current/COLLECTION_VIEW_MOBILE.md).
 - **Global nav:** [`components/.cursorrules`](components/.cursorrules) (`globalNav.html` / `.js`, `header-nav-cluster`, `syncHeaderCollectionLayout`, mobile dropdown).

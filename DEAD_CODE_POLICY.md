@@ -2,6 +2,17 @@
 
 This document defines conventions for identifying, handling, and removing unused code in the Overpower Deckbuilder project.
 
+## Canonical UI surface
+
+**The production frontend is the v2 React SPA in `frontend/`.** New code belongs there. The legacy v1 vanilla-JS UI in `public/` is **deprecated** (served only as a rollback via `EXCELSIOR_DISABLE_SPA=1`) — see the dedicated section below before touching or removing it.
+
+## v1 `public/` deprecation and removal
+
+- **Do not build new features in `public/`.** It is the deprecated v1 UI. All UI work goes in `frontend/` (see [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md)).
+- **Do NOT bulk-delete `public/` yet.** Until the v2 cutover has been validated in production for a stable period, `public/` is the **instant rollback path**: Express serves it when `EXCELSIOR_DISABLE_SPA=1` (or when `frontend/dist/` is absent). It is intentionally still copied into the Docker image and committed to git for this reason.
+- **Knip / unused-code scans** continue to exclude `public/` (`knip.json`), so they will not flag legacy v1 files. Do not "clean up" `public/` based on Knip output.
+- **Planned removal (future, separate change):** once v2 is confirmed stable and the rollback is no longer needed, removing `public/` should be done as one deliberate change that also: drops the `public/` `COPY` from the [`Dockerfile`](Dockerfile), removes the v1 fallback branches in [`src/routes/spaIndexPath.ts`](src/routes/spaIndexPath.ts) / [`src/routes/static-health.routes.ts`](src/routes/static-health.routes.ts) / [`src/routes/pages.routes.ts`](src/routes/pages.routes.ts) and the `EXCELSIOR_DISABLE_SPA` escape hatch, deletes the `public/`-only docs, and updates the image-verification steps in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Until then, treat `public/` as frozen legacy, not dead code to delete.
+
 ## When to Remove vs. Archive
 
 ### Remove (Delete)

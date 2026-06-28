@@ -1,4 +1,6 @@
-# Frontend JavaScript
+# Frontend JavaScript — ⚠️ LEGACY v1 (DEPRECATED)
+
+> **Legacy v1 UI.** Production frontend is the **v2 React SPA in `frontend/`**; this `public/js/` is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`). Do **not** add features here — see [`docs/current/FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md). Removal tracked in [`DEAD_CODE_POLICY.md`](../../DEAD_CODE_POLICY.md).
 
 - **Vanilla JS only** — no frameworks. Entry points and load order are documented in [docs/FRONTEND_SCRIPT_MANIFEST.md](../../docs/FRONTEND_SCRIPT_MANIFEST.md).
 - **Deck legality (`validateDeck`):** [`validation-calculation-functions.js`](validation-calculation-functions.js) mirrors server `DeckValidationService` unusable rules. **`Any-Power`** client implementations: [`statForPowerGridClient`](validation-calculation-functions.js) (Power/Teamwork, max ≥) and [`trainingTypeAtOrBelowCapClient`](validation-calculation-functions.js) (Training, any ≤ cap). Rule semantics: [`src/services/deck-validation/.cursorrules`](../../src/services/deck-validation/.cursorrules).

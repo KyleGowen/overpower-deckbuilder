@@ -1,5 +1,7 @@
 # Deck Editor Card View Documentation
 
+> ⚠️ **LEGACY (v1) DOCUMENT.** This describes the deprecated **v1 vanilla-JS UI in `public/`**. The production frontend is the **v2 React SPA in `frontend/`** — see [`FRONTEND_V2.md`](FRONTEND_V2.md). The v1 UI is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`); do not build new features from this document. Use the v2 feature/component docs under `frontend/src/` instead.
+
 > **AUTHORITATIVE SSOT:** [`DECK_EDITOR_CARD_VIEW_LAYOUT.md`](DECK_EDITOR_CARD_VIEW_LAYOUT.md)
 >
 > That file is the single source of truth for Card View layout rules (orientation, no-frame/border policy, bevelled corners, portrait vs landscape, common mistakes). **Read it before making any Card View CSS or JS changes.**

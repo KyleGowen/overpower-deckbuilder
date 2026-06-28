@@ -1,0 +1,41 @@
+# `frontend/src/app/` — app wiring (router, auth, route guard) (v2)
+
+Cross-cutting app shell: provider tree, routing, and the auth context. No feature/page
+logic lives here.
+
+## Provider tree (`main.tsx`)
+
+```
+QueryClientProvider → LayoutModeProvider → AuthProvider → RouterProvider
+```
+
+QueryClient defaults: `retry: 1`, `refetchOnWindowFocus: false`, `staleTime: 5m`. Wrapped in
+`<StrictMode>` — effects run twice in dev, so keep them idempotent.
+
+## `router.tsx`
+
+- `createBrowserRouter`. All pages are `lazy()` + wrapped in `<Lazy>` (Suspense →
+  `LoadingState fullscreen`).
+- `RootLayout` is the top element (renders `AppBackground` except on `/login`).
+- **`ShelledLayout`** = `ProtectedRoute` → `AppShell` → page. Shelled routes: `/home`,
+  `/data`, `/community`, `/users/:userId/decks`, `/users/:userId/collection` (`/` redirects to
+  `/home`).
+- **Deck editor `/users/:userId/decks/:deckId` is intentionally OUTSIDE the shell and
+  UNGUARDED** — it has its own chrome and must work for shared / read-only deck links from
+  not-yet-authenticated visitors. Do not wrap it in `ProtectedRoute` or `AppShell`.
+- Unknown paths (`*`) redirect to `/home`.
+
+## `AuthProvider.tsx` + `useAuth()`
+
+- Session-cookie auth. Loads `['auth','me']` (`staleTime: 0`) and `['app-config']`
+  (CDN base + community/tournament pool user ids).
+- Exposes `{ user, isLoading, isGuest, isAdmin, communityDecksUserId, tournamentDecksUserId,
+  login, signUp, loginAsGuest, signInWithGoogle, logout, refresh }`.
+- Mutations set the cache via `setQueryData(['auth','me'], user)`; `logout` calls
+  `queryClient.clear()`. Google sign-in lazy-imports `firebase/*` only when invoked.
+- Throws if used outside the provider.
+
+## `ProtectedRoute.tsx`
+
+Shows `LoadingState` while auth loads, redirects to `/login` (with `state.from`) when there
+is no user, else renders children. Use it for new guarded routes; never gate the deck editor.

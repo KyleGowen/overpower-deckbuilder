@@ -1,4 +1,6 @@
-# Global navigation and shared components (`public/components/`)
+# Global navigation and shared components (`public/components/`) — ⚠️ LEGACY v1 (DEPRECATED)
+
+> **Legacy v1 UI.** Production frontend is the **v2 React SPA in `frontend/`** (global nav is [`frontend/src/components/AppShell`](../../frontend/src/components/AppShell)). This `public/components/` is served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`). Do **not** add features here — see [`docs/current/FRONTEND_V2.md`](../../docs/current/FRONTEND_V2.md). Removal tracked in [`DEAD_CODE_POLICY.md`](../../DEAD_CODE_POLICY.md).
 
 - **globalNav:** [`globalNav.html`](globalNav.html), [`globalNav.css`](globalNav.css), [`globalNav.js`](globalNav.js). Injected into `#globalNav` from [`public/js/app-initialization.js`](../js/app-initialization.js).
 - **Desktop layout:** **[`.header-nav-cluster`](globalNav.html)** wraps **`.header-center`** + **`.header-right`**. **[`globalNav.css`](globalNav.css)** sets **`.header-nav-cluster { display: contents }`** so flex children behave like **logo \| centered view tabs \| user area** — **+ Deck** (**`#newDeckBtn`**) is the first child of **`.header-right`**, immediately left of **`#userMenu`**.

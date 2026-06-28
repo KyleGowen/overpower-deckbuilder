@@ -1,4 +1,4 @@
-import type { DeckCardEntry } from '../api/types';
+import type { CatalogCard, DeckCardEntry } from '../api/types';
 
 const ICON_TYPES = ['Energy', 'Combat', 'Brute Force', 'Intelligence'] as const;
 
@@ -25,6 +25,13 @@ export interface IconCatalogFields {
   stat_type_to_use?: string;
 }
 
+/**
+ * Catalog row shape accepted by icon counting. A full `CatalogCard` carries these
+ * fields at runtime, but its `unknown` index signature is not assignable to the
+ * (weak) `IconCatalogFields` type, so the lookup accepts either form.
+ */
+export type IconCatalogSource = IconCatalogFields | CatalogCard;
+
 export type DeckIconCardRef = Pick<DeckCardEntry, 'type' | 'cardId' | 'quantity'>;
 
 /** Minimal deck row shape for icon counting (tests may use plain `type: string`). */
@@ -36,7 +43,7 @@ export interface DeckIconCardInput {
 
 function iconsForCard(
   deckType: string,
-  catalog: IconCatalogFields,
+  catalog: IconCatalogSource,
 ): string[] {
   if (deckType === 'power') {
     const type = String(catalog.power_type ?? '').trim();
@@ -70,7 +77,7 @@ function iconsForCard(
  */
 export function calculateDeckIconTotals(
   cards: DeckIconCardInput[],
-  lookup: (deckType: string, cardId: string) => IconCatalogFields | null | undefined,
+  lookup: (deckType: string, cardId: string) => IconCatalogSource | null | undefined,
 ): DeckIconTotals {
   const totals: DeckIconTotals = {
     energy: 0,

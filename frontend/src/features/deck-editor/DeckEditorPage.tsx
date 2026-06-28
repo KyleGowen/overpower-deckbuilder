@@ -98,6 +98,7 @@ import type {
   CatalogType,
   DeckCardEntry,
   DeckCardType,
+  DeckDetail,
 } from '../../lib/api/types';
 import type { StackCardEntry } from '../../lib/catalog/characterStacks';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
@@ -769,7 +770,7 @@ export default function DeckEditorPage() {
         exclude_from_draw: c.exclude_from_draw,
       }));
       const updatedCards = await replaceDeckCards(deckId, payload, isGuest);
-      queryClient.setQueryData(['deck', deckId], (prev) => {
+      queryClient.setQueryData<DeckDetail>(['deck', deckId], (prev) => {
         const base = prev ?? updatedCards;
         return {
           ...base,
