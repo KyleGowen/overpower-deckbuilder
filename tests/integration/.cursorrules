@@ -1,5 +1,13 @@
 # Integration Test Data Cleanup
 
+## Legacy v1 UI tests (disabled)
+
+After the v2 SPA cutover, integration tests that asserted on served `public/` HTML are
+**disabled** — see [`V1_FRONTEND_TESTS_DISABLED.md`](V1_FRONTEND_TESTS_DISABLED.md).
+Do **not** add new ITs that check `response.text` for v1 markup (`deckEditorModal`,
+`/js/deck-editor-*.js`, `/components/globalNav.html`). Use `/api/v1/*` and `/api/auth/*`
+for new coverage; v2 UI is verified in the browser at `:5173`.
+
 ## Mandatory Cleanup Rules
 
 - **ALL integration tests that create users or decks MUST clean up what they create**

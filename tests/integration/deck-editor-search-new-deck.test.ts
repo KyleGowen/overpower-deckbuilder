@@ -174,16 +174,29 @@ describe('Deck Editor Search - New Deck Integration', () => {
     expect(specialCardsResponse.body.data.length).toBeGreaterThan(0);
     console.log(`✅ Found ${specialCardsResponse.body.data.length} special cards`);
 
-    // Step 9: Verify deck statistics are updated
+    // Step 9: Add a power card so metadata.cardCount (draw pile only) updates
+    const powerSearchResponse = await request(app)
+      .get('/api/v1/catalog/power-cards')
+      .set('Cookie', authCookie);
+    expect(powerSearchResponse.status).toBe(200);
+    const firstPower = powerSearchResponse.body.data[0];
+    expect(firstPower).toBeDefined();
+
+    await request(app)
+      .post(`/api/v1/decks/${testDeckId}/cards`)
+      .set('Cookie', authCookie)
+      .send({ cardId: firstPower.id, cardType: 'power' })
+      .expect(200);
+
     const finalDeckResponse = await request(app)
       .get(`/api/v1/decks/${testDeckId}`)
       .set('Cookie', authCookie);
 
     expect(finalDeckResponse.status).toBe(200);
-    expect(finalDeckResponse.body.success).toBe(true);
+    expect(finalDeckResponse.body.errors ?? []).toEqual([]);
     expect(finalDeckResponse.body.data.cards.length).toBeGreaterThan(0);
-    
-    // Verify deck metadata is updated
+
+    // cardCount excludes characters, missions, and locations (draw-pile cards only)
     expect(finalDeckResponse.body.data.metadata.cardCount).toBeGreaterThan(0);
     console.log('✅ Deck statistics updated correctly');
 

@@ -40,13 +40,15 @@ describe('Last Login Timestamp Integration', () => {
       .send({ username: testUser.username || testUser.name, password: 'password123' })
       .expect(200);
 
-    // Verify last_login_at is set to recent timestamp
-    const result = await pool.query('SELECT last_login_at FROM users WHERE id = $1', [testUser.id]);
-    const ts = result.rows[0]?.last_login_at;
-    expect(ts).toBeTruthy();
-    const now = Date.now();
-    const delta = Math.abs(now - new Date(ts).getTime());
-    expect(delta).toBeLessThan(5 * 60 * 1000);
+    // Verify last_login_at is recent relative to database clock (avoids local TZ skew).
+    const result = await pool.query(
+      'SELECT EXTRACT(EPOCH FROM (NOW() - last_login_at)) AS age_seconds FROM users WHERE id = $1',
+      [testUser.id]
+    );
+    const ageSeconds = Number(result.rows[0]?.age_seconds);
+    expect(Number.isFinite(ageSeconds)).toBe(true);
+    expect(ageSeconds).toBeGreaterThanOrEqual(0);
+    expect(ageSeconds).toBeLessThan(5 * 60);
   });
 });
 

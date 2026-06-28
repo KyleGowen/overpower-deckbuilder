@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { describeV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Guest Add to Deck Buttons Integration Tests', () => {
     let guestUser: any;
@@ -76,7 +77,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         // No need for individual cleanup here
     });
 
-    describe('Guest User - Disabled Add to Deck Buttons', () => {
+    describeV1Frontend('Guest User - Disabled Add to Deck Buttons', () => {
         it('should have disabled Add to Deck buttons on characters tab', async () => {
             const response = await request(app)
                 .get('/users/guest/decks')
@@ -247,7 +248,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         });
     });
 
-    describe('Regular User - Enabled Add to Deck Buttons', () => {
+    describeV1Frontend('Regular User - Enabled Add to Deck Buttons', () => {
         it('should have enabled Add to Deck buttons on characters tab', async () => {
             const response = await request(app)
                 .get('/users/testuser/decks')
@@ -418,7 +419,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         });
     });
 
-    describe('Admin User - Enabled Add to Deck Buttons', () => {
+    describeV1Frontend('Admin User - Enabled Add to Deck Buttons', () => {
         it('should have enabled Add to Deck buttons on characters tab', async () => {
             const response = await request(app)
                 .get('/users/admin/decks')
@@ -589,7 +590,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         });
     });
 
-    describe('Cross-Role Button State Verification', () => {
+    describeV1Frontend('Cross-Role Button State Verification', () => {
         it('should show different button states for different user roles', async () => {
             // Test guest user
             const guestResponse = await request(app)
@@ -621,7 +622,7 @@ describe('Guest Add to Deck Buttons Integration Tests', () => {
         });
     });
 
-    describe('JavaScript Function Integration', () => {
+    describeV1Frontend('JavaScript Function Integration', () => {
         it('should have isGuestUser function defined', async () => {
             const response = await request(app)
                 .get('/users/guest/decks')

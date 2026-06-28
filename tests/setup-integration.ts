@@ -264,32 +264,34 @@ export const integrationTestUtils = {
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower'
     });
-    
+
+    const TEST_GUEST_ID = '00000000-0000-0000-0000-000000000004';
+
     try {
-      // Check if test guest user exists
-      const result = await pool.query('SELECT * FROM users WHERE username = $1', ['Test-Guest']);
-      const TEST_GUEST_ID = '00000000-0000-0000-0000-000000000002';
-      
-      if (result.rows.length === 0) {
-        // Hash the test guest password
-        const hashedPassword = await bcrypt.hash('test-guest', 10);
-        
-        // Create test guest user if it doesn't exist
+      const hashedPassword = await bcrypt.hash('test-guest', 10);
+
+      const existing = await pool.query('SELECT id FROM users WHERE username = $1', ['Test-Guest']);
+      if (existing.rows.length > 0) {
         await pool.query(
-          'INSERT INTO users (id, username, email, password_hash, role) VALUES ($1, $2, $3, $4, $5)',
-          [
-            TEST_GUEST_ID, // Different ID from production guest
-            'Test-Guest',
-            'test-guest@example.com',
-            hashedPassword,
-            'GUEST'
-          ]
+          `UPDATE users SET password_hash = $1, role = $2, updated_at = NOW() WHERE username = $3`,
+          [hashedPassword, 'GUEST', 'Test-Guest']
+        );
+        testCreatedUserIds.add(existing.rows[0].id);
+        console.log('✅ Test-Guest user updated for integration tests');
+      } else {
+        await pool.query(
+          `INSERT INTO users (id, username, email, password_hash, role)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (id) DO UPDATE SET
+             username = EXCLUDED.username,
+             email = EXCLUDED.email,
+             password_hash = EXCLUDED.password_hash,
+             role = EXCLUDED.role,
+             updated_at = NOW()`,
+          [TEST_GUEST_ID, 'Test-Guest', 'test-guest@example.com', hashedPassword, 'GUEST']
         );
         testCreatedUserIds.add(TEST_GUEST_ID);
-        console.log('✅ Test-Guest user created for integration tests');
-      } else {
-        testCreatedUserIds.add(TEST_GUEST_ID);
-        console.log('✅ Test-Guest user already exists');
+        console.log('✅ Test-Guest user ensured for integration tests');
       }
     } catch (err: any) {
       console.warn('⚠️ Skipping ensureGuestUser: database not reachable or query failed in CI environment.', err?.message || err);
@@ -339,6 +341,44 @@ export const integrationTestUtils = {
     }
   },
 
+  // Internal pool user for Home community decks rail (V279)
+  ensureCommunityDecksUser: async () => {
+    const { Pool } = require('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower'
+    });
+    const COMMUNITY_DECKS_USER_ID = '00000000-0000-0000-0000-000000000002';
+    const POOL_PASSWORD_HASH = '$2b$10$4y9lsEvvADN1Q2LuP4Pd2.VMFT4Qdt5HPpA6mmnq.LS3nBdXa15dW';
+
+    try {
+      await pool.query(
+        `INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         ON CONFLICT (id) DO UPDATE SET
+           username = EXCLUDED.username,
+           email = EXCLUDED.email,
+           password_hash = EXCLUDED.password_hash,
+           role = EXCLUDED.role,
+           updated_at = NOW()`,
+        [
+          COMMUNITY_DECKS_USER_ID,
+          'community_decks',
+          'community_decks@example.com',
+          POOL_PASSWORD_HASH,
+          'USER'
+        ]
+      );
+      console.log('✅ community_decks user ensured for integration tests');
+    } catch (err: any) {
+      console.warn(
+        '⚠️ Skipping ensureCommunityDecksUser: database not reachable or query failed.',
+        err?.message || err
+      );
+    } finally {
+      await pool.end();
+    }
+  },
+
   // Internal pool user for tournament deck integration tests (V280)
   ensureTournamentDecksUser: async () => {
     const { Pool } = require('pg');
@@ -349,21 +389,24 @@ export const integrationTestUtils = {
     const POOL_PASSWORD_HASH = '$2b$10$4y9lsEvvADN1Q2LuP4Pd2.VMFT4Qdt5HPpA6mmnq.LS3nBdXa15dW';
 
     try {
-      const result = await pool.query('SELECT id FROM users WHERE username = $1', ['tournament_decks']);
-      if (result.rows.length === 0) {
-        await pool.query(
-          `INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
-          [
-            TOURNAMENT_DECKS_USER_ID,
-            'tournament_decks',
-            'tournament_decks@example.com',
-            POOL_PASSWORD_HASH,
-            'USER'
-          ]
-        );
-        console.log('✅ tournament_decks user created for integration tests');
-      }
+      await pool.query(
+        `INSERT INTO users (id, username, email, password_hash, role, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         ON CONFLICT (id) DO UPDATE SET
+           username = EXCLUDED.username,
+           email = EXCLUDED.email,
+           password_hash = EXCLUDED.password_hash,
+           role = EXCLUDED.role,
+           updated_at = NOW()`,
+        [
+          TOURNAMENT_DECKS_USER_ID,
+          'tournament_decks',
+          'tournament_decks@example.com',
+          POOL_PASSWORD_HASH,
+          'USER'
+        ]
+      );
+      console.log('✅ tournament_decks user ensured for integration tests');
     } catch (err: any) {
       console.warn(
         '⚠️ Skipping ensureTournamentDecksUser: database not reachable or query failed.',
@@ -378,6 +421,7 @@ export const integrationTestUtils = {
 // Ensure guest user exists before running integration tests
 beforeAll(async () => {
   try {
+    await integrationTestUtils.ensureCommunityDecksUser();
     await integrationTestUtils.ensureGuestUser();
     await integrationTestUtils.ensureAdminUser();
     await integrationTestUtils.ensureTournamentDecksUser();

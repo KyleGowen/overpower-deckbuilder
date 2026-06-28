@@ -87,7 +87,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
       expect(locationsResult.rows.length).toBeGreaterThan(0);
       alternateLocationId = locationsResult.rows[0].id;
 
-      const loginResponse = await request(server)
+      const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({ username: testUser.username, password: 'password123' });
       expect(loginResponse.status).toBe(200);
@@ -106,7 +106,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
     });
 
     it('should persist alternate location and load correct cardId from deck', async () => {
-      const addResponse = await request(server)
+      const addResponse = await request(app)
         .post(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({ cardId: alternateLocationId, cardType: 'location', quantity: 1 });
@@ -114,7 +114,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
       expect(addResponse.status).toBe(200);
       expect(addResponse.body.success).toBe(true);
 
-      const deckResponse = await request(server)
+      const deckResponse = await request(app)
         .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
 
@@ -127,7 +127,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
     });
 
     it('should persist alternate location via PUT cards and load correct cardId', async () => {
-      const putResponse = await request(server)
+      const putResponse = await request(app)
         .put(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
@@ -137,7 +137,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
       expect(putResponse.status).toBe(200);
       expect(putResponse.body.success).toBe(true);
 
-      const deckResponse = await request(server)
+      const deckResponse = await request(app)
         .get(`/api/v1/decks/${testDeckId}`)
         .set('Cookie', authCookie);
 
@@ -148,7 +148,7 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
     });
 
     it('should have decks.location_id updated by trigger for alternate location', async () => {
-      await request(server)
+      await request(app)
         .put(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
@@ -164,14 +164,14 @@ describe('Location Alternate Art Persistence Integration Tests', () => {
     });
 
     it('should return correct defaultImage for alternate in deck list', async () => {
-      await request(server)
+      await request(app)
         .put(`/api/v1/decks/${testDeckId}/cards`)
         .set('Cookie', authCookie)
         .send({
           cards: [{ cardType: 'location', cardId: alternateLocationId, quantity: 1 }]
         });
 
-      const decksResponse = await request(server)
+      const decksResponse = await request(app)
         .get('/api/v1/decks')
         .set('Cookie', authCookie);
 

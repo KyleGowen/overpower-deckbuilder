@@ -18,7 +18,19 @@ module.exports = {
     '.*/tests/integration/guest-reserve-character-integration\\.test\\.ts$',
     '.*/tests/integration/deck-ownership-security.*\\.test\\.ts$',
     '.*/tests/integration/deck-save-security.*\\.test\\.ts$',
-    '.*/tests/integration/deck-save-frontend-validation\\.test\\.ts$'
+    '.*/tests/integration/deck-save-frontend-validation\\.test\\.ts$',
+    // Legacy v1 `public/` UI — disabled after v2 SPA cutover (see tests/integration/V1_FRONTEND_TESTS_DISABLED.md)
+    '.*/tests/integration/deck-editor-search-results-visible\\.test\\.ts$',
+    '.*/tests/integration/deck-editor-search-visible-results\\.test\\.ts$',
+    '.*/tests/integration/deck-editor-search-bar-basic\\.test\\.ts$',
+    '.*/tests/integration/deck-editor-character-stacks\\.test\\.ts$',
+    '.*/tests/integration/deckEditabilityHTML\\.test\\.ts$',
+    '.*/tests/integration/deckEditabilityBrowser\\.test\\.ts$',
+    '.*/tests/integration/deckClickability\\.test\\.ts$',
+    '.*/tests/integration/deckTitleDescriptionEditability\\.test\\.ts$',
+    '.*/tests/integration/view-button-readonly\\.test\\.ts$',
+    '.*/tests/integration/toast-notification-role-based\\.test\\.ts$',
+    '.*/tests/integration/collection/collection-guest-sandbox-ui\\.test\\.ts$'
   ],
   transform: {
     '^.+\\.ts$': 'ts-jest',

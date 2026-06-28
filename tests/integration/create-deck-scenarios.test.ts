@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app, integrationTestUtils } from '../setup-integration';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { Deck } from '../../src/types';
+import { describeV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Create Deck Scenarios Integration Tests', () => {
     let regularUser: any;
@@ -50,7 +51,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         if (adminUser) await userRepo.deleteUser(adminUser.id);
     });
 
-    describe('Create Deck Button Access', () => {
+    describeV1Frontend('Create Deck Button Access', () => {
         test('should allow all user roles to access create deck button', async () => {
             const roles = [
                 { role: 'USER', cookie: regularCookie, username: 'testuser_create_deck' },
@@ -96,7 +97,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         });
     });
 
-    describe('Temporary Deck Creation', () => {
+    describeV1Frontend('Temporary Deck Creation', () => {
         test('should create temporary deck with null ID for all roles', async () => {
             // This test verifies the client-side behavior by checking the JavaScript
             const roles = [
@@ -271,7 +272,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         });
     });
 
-    describe('Deck Editor UI Elements', () => {
+    describeV1Frontend('Deck Editor UI Elements', () => {
         test('should show correct UI elements for all roles', async () => {
             const roles = [
                 { role: 'USER', cookie: regularCookie, username: 'testuser_create_deck' },
@@ -315,7 +316,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         });
     });
 
-    describe('Role-Based Save Button Behavior', () => {
+    describeV1Frontend('Role-Based Save Button Behavior', () => {
         test('should enable save button for regular users', async () => {
             const response = await request(app)
                 .get(`/users/${regularUser.username}/decks`)
@@ -341,7 +342,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         });
     });
 
-    describe('Temporary Deck Data Structure', () => {
+    describeV1Frontend('Temporary Deck Data Structure', () => {
         test('should create temporary deck with correct metadata structure', async () => {
             const response = await request(app)
                 .get(`/users/${regularUser.username}/decks`)
@@ -385,7 +386,7 @@ describe('Create Deck Scenarios Integration Tests', () => {
         });
     });
 
-    describe('Error Handling', () => {
+    describeV1Frontend('Error Handling', () => {
         test('should handle missing deck editor elements gracefully', async () => {
             const response = await request(app)
                 .get(`/users/${regularUser.username}/decks`)

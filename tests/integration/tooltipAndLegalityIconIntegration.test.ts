@@ -1,12 +1,21 @@
 import request from 'supertest';
 import { app } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { Pool } from 'pg';
+import { fetchMinimalValidDeckCards, fetchMinimalValidDeckWithEvent, fetchMinimalValidDeckWithLocation } from './helpers/minimalValidDeckCards';
 
 describe('Tooltip and Legality Icon Integration Tests', () => {
     let authCookie: string;
     let testUserId: string;
+    let pool: Pool;
+    let minimalValidCards: Awaited<ReturnType<typeof fetchMinimalValidDeckCards>>;
 
     beforeAll(async () => {
+        pool = new Pool({
+            connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower',
+        });
+        minimalValidCards = await fetchMinimalValidDeckCards(pool);
+
         // Use the existing admin user for authentication
         const loginResponse = await request(app)
             .post('/api/auth/login')
@@ -15,6 +24,10 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
         expect(loginResponse.status).toBe(200);
         authCookie = loginResponse.headers['set-cookie'][0];
         testUserId = '00000000-0000-0000-0000-000000000001'; // Admin user ID
+    });
+
+    afterAll(async () => {
+        await pool.end();
     });
 
     afterEach(async () => {
@@ -61,25 +74,10 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
         });
 
         test('should return success for valid deck', async () => {
-            const validDeckCards = [
-                { type: 'character', cardId: 'char1', quantity: 1 },
-                { type: 'character', cardId: 'char2', quantity: 1 },
-                { type: 'character', cardId: 'char3', quantity: 1 },
-                { type: 'character', cardId: 'char4', quantity: 1 },
-                { type: 'mission', cardId: 'mission1', quantity: 1 },
-                { type: 'mission', cardId: 'mission2', quantity: 1 },
-                { type: 'mission', cardId: 'mission3', quantity: 1 },
-                { type: 'mission', cardId: 'mission4', quantity: 1 },
-                { type: 'mission', cardId: 'mission5', quantity: 1 },
-                { type: 'mission', cardId: 'mission6', quantity: 1 },
-                { type: 'mission', cardId: 'mission7', quantity: 1 },
-                { type: 'power_card', cardId: 'power1', quantity: 40 }
-            ];
-
             const response = await request(app)
                 .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
-                .send({ cards: validDeckCards });
+                .send({ cards: minimalValidCards });
 
             expect(response.status).toBe(200);
             expect(response.body.errors).toEqual([]);
@@ -300,25 +298,10 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
 
     describe('Legal Deck Validation', () => {
         test('should return success for completely legal deck', async () => {
-            const legalDeckCards = [
-                { type: 'character', cardId: 'char1', quantity: 1 },
-                { type: 'character', cardId: 'char2', quantity: 1 },
-                { type: 'character', cardId: 'char3', quantity: 1 },
-                { type: 'character', cardId: 'char4', quantity: 1 },
-                { type: 'mission', cardId: 'mission1', quantity: 1 },
-                { type: 'mission', cardId: 'mission2', quantity: 1 },
-                { type: 'mission', cardId: 'mission3', quantity: 1 },
-                { type: 'mission', cardId: 'mission4', quantity: 1 },
-                { type: 'mission', cardId: 'mission5', quantity: 1 },
-                { type: 'mission', cardId: 'mission6', quantity: 1 },
-                { type: 'mission', cardId: 'mission7', quantity: 1 },
-                { type: 'power_card', cardId: 'power1', quantity: 40 }
-            ];
-
             const response = await request(app)
                 .post('/api/v1/decks/validate')
                 .set('Cookie', authCookie)
-                .send({ cards: legalDeckCards });
+                .send({ cards: minimalValidCards });
 
             expect(response.status).toBe(200);
             expect(response.body.errors).toEqual([]);
@@ -328,21 +311,7 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
         });
 
         test('should return success for legal deck with events', async () => {
-            const legalDeckWithEvents = [
-                { type: 'character', cardId: 'char1', quantity: 1 },
-                { type: 'character', cardId: 'char2', quantity: 1 },
-                { type: 'character', cardId: 'char3', quantity: 1 },
-                { type: 'character', cardId: 'char4', quantity: 1 },
-                { type: 'mission', cardId: 'mission1', quantity: 1 },
-                { type: 'mission', cardId: 'mission2', quantity: 1 },
-                { type: 'mission', cardId: 'mission3', quantity: 1 },
-                { type: 'mission', cardId: 'mission4', quantity: 1 },
-                { type: 'mission', cardId: 'mission5', quantity: 1 },
-                { type: 'mission', cardId: 'mission6', quantity: 1 },
-                { type: 'mission', cardId: 'mission7', quantity: 1 },
-                { type: 'event', cardId: 'event1', quantity: 1 }, // Correct mission set
-                { type: 'power_card', cardId: 'power1', quantity: 45 } // 56 total cards
-            ];
+            const legalDeckWithEvents = await fetchMinimalValidDeckWithEvent(pool);
 
             const response = await request(app)
                 .post('/api/v1/decks/validate')
@@ -357,21 +326,7 @@ describe('Tooltip and Legality Icon Integration Tests', () => {
         });
 
         test('should return success for legal deck with location', async () => {
-            const legalDeckWithLocation = [
-                { type: 'character', cardId: 'char1', quantity: 1 },
-                { type: 'character', cardId: 'char2', quantity: 1 },
-                { type: 'character', cardId: 'char3', quantity: 1 },
-                { type: 'character', cardId: 'char4', quantity: 1 },
-                { type: 'mission', cardId: 'mission1', quantity: 1 },
-                { type: 'mission', cardId: 'mission2', quantity: 1 },
-                { type: 'mission', cardId: 'mission3', quantity: 1 },
-                { type: 'mission', cardId: 'mission4', quantity: 1 },
-                { type: 'mission', cardId: 'mission5', quantity: 1 },
-                { type: 'mission', cardId: 'mission6', quantity: 1 },
-                { type: 'mission', cardId: 'mission7', quantity: 1 },
-                { type: 'location', cardId: 'location1', quantity: 1 }, // Valid single location
-                { type: 'power_card', cardId: 'power1', quantity: 40 }
-            ];
+            const legalDeckWithLocation = await fetchMinimalValidDeckWithLocation(pool);
 
             const response = await request(app)
                 .post('/api/v1/decks/validate')

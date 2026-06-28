@@ -3,6 +3,7 @@ import { app, integrationTestUtils } from '../setup-integration';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { UserRepository } from '../../src/repository/UserRepository';
 import { DeckRepository } from '../../src/repository/DeckRepository';
+import { describeV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Deck Editor Role-Based Access Integration Tests', () => {
   let userRepository: UserRepository;
@@ -83,7 +84,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     }
   });
 
-  describe('Create Deck Button Access', () => {
+  describeV1Frontend('Create Deck Button Access', () => {
     it('should allow GUEST users to access the Create Deck button and open deck editor', async () => {
       // Test that guest users can access the main page with Create Deck button
       const response = await request(app)
@@ -139,7 +140,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     });
   });
 
-  describe('Deck Editor Initialization', () => {
+  describeV1Frontend('Deck Editor Initialization', () => {
     it('should initialize blank deck editor with "New Deck" title for all user roles', async () => {
       // Test that the initializeBlankDeck function is present and sets up correctly
       const response = await request(app)
@@ -164,7 +165,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     });
   });
 
-  describe('Deck Editor UI Elements', () => {
+  describeV1Frontend('Deck Editor UI Elements', () => {
     it('should have editable title and description fields for all user roles', async () => {
       const response = await request(app)
         .get('/users/test-guest-editor/decks')
@@ -408,7 +409,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     });
   });
 
-  describe('Frontend Save Button Behavior', () => {
+  describeV1Frontend('Frontend Save Button Behavior', () => {
     it('should have save button disabled for GUEST users in frontend', async () => {
       const response = await request(app)
         .get('/users/test-guest-editor/decks')
@@ -443,7 +444,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     });
   });
 
-  describe('Deck Editor JavaScript Functions', () => {
+  describeV1Frontend('Deck Editor JavaScript Functions', () => {
     it('should have all required JavaScript functions for deck editing', async () => {
       const response = await request(app)
         .get('/users/test-guest-editor/decks')
@@ -466,7 +467,7 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     });
   });
 
-  describe('Cross-Role Consistency', () => {
+  describeV1Frontend('Cross-Role Consistency', () => {
     it('should provide same deck editor UI for all user roles', async () => {
       const guestResponse = await request(app)
         .get('/users/test-guest-editor/decks')

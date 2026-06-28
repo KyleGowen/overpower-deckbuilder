@@ -2,18 +2,14 @@ import request from 'supertest';
 import { app } from '../../src/test-server';
 import { initializeTestServer } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { describeV1Frontend, itV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Global Nav Integration Tests', () => {
-  let server: any;
-  let agent: any;
   let userSessionCookie: string;
   let testUserId: string;
 
   beforeAll(async () => {
-    // Initialize test server
-    const testServer = await initializeTestServer();
-    server = testServer.server; // Use the already started server
-    agent = request(server);
+    await initializeTestServer();
 
     // Create a unique test user for this test suite
     const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
@@ -29,7 +25,7 @@ describe('Global Nav Integration Tests', () => {
     testUserId = testUser.id;
 
     // Login as test user to get session cookie
-    const loginResponse = await agent
+    const loginResponse = await request(app)
       .post('/api/auth/login')
       .send({
         username: 'test-global-nav-user',
@@ -57,14 +53,11 @@ describe('Global Nav Integration Tests', () => {
       }
     }
 
-    if (server) {
-      server.close();
-    }
   });
 
-  describe('View Switching Functionality', () => {
+  describeV1Frontend('View Switching Functionality', () => {
     test('should load main page with global nav component', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -74,7 +67,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should include global nav JavaScript and CSS files', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -85,7 +78,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should serve global nav HTML component', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.html')
         .expect(200);
 
@@ -102,7 +95,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should serve global nav CSS component', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.css')
         .expect(200);
 
@@ -119,7 +112,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should serve global nav JavaScript component', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.js')
         .expect(200);
 
@@ -133,8 +126,8 @@ describe('Global Nav Integration Tests', () => {
   });
 
   describe('Create Deck Functionality', () => {
-    test('should have create deck button in global nav', async () => {
-      const response = await agent
+    itV1Frontend('should have create deck button in global nav', async () => {
+      const response = await request(app)
         .get('/components/globalNav.html')
         .expect(200);
 
@@ -145,8 +138,8 @@ describe('Global Nav Integration Tests', () => {
       expect(response.text).toContain('+ Create Deck');
     });
 
-    test('should have create deck functionality', async () => {
-      const response = await agent
+    itV1Frontend('should have create deck functionality', async () => {
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -154,7 +147,7 @@ describe('Global Nav Integration Tests', () => {
       expect(response.text).toContain('deckEditorModal');
       
       // Check that the global nav JavaScript includes createNewDeck function
-      const jsResponse = await agent
+      const jsResponse = await request(app)
         .get('/components/globalNav.js')
         .expect(200);
       expect(jsResponse.text).toContain('function createNewDeck()');
@@ -162,7 +155,7 @@ describe('Global Nav Integration Tests', () => {
 
     test('should handle create deck API endpoint', async () => {
       // Test that the create deck API endpoint exists and is accessible
-      const response = await agent
+      const response = await request(app)
         .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
@@ -179,7 +172,7 @@ describe('Global Nav Integration Tests', () => {
 
     test('should validate deck creation with character limits', async () => {
       // Valid create: omit characters or use real character UUIDs (FK). Empty list exercises v1 + DB happy path.
-      const validResponse = await agent
+      const validResponse = await request(app)
         .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
@@ -192,7 +185,7 @@ describe('Global Nav Integration Tests', () => {
       expect(validResponse.body.errors).toEqual([]);
 
       // Test invalid deck creation (5+ character slots — rejected before persistence)
-      const invalidResponse = await agent
+      const invalidResponse = await request(app)
         .post('/api/v1/decks')
         .set('Cookie', userSessionCookie)
         .send({
@@ -213,8 +206,8 @@ describe('Global Nav Integration Tests', () => {
   });
 
   describe('Logout Functionality', () => {
-    test('should have logout button in global nav', async () => {
-      const response = await agent
+    itV1Frontend('should have logout button in global nav', async () => {
+      const response = await request(app)
         .get('/components/globalNav.html')
         .expect(200);
 
@@ -226,7 +219,7 @@ describe('Global Nav Integration Tests', () => {
 
     test('should handle logout API endpoint', async () => {
       // Test logout endpoint
-      const response = await agent
+      const response = await request(app)
         .post('/api/auth/logout')
         .expect(200);
 
@@ -243,7 +236,7 @@ describe('Global Nav Integration Tests', () => {
       });
 
       // Create a session by logging in
-      const loginResponse = await agent
+      const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({
           username: testUser.username,
@@ -254,14 +247,14 @@ describe('Global Nav Integration Tests', () => {
       expect(loginResponse.body.success).toBe(true);
 
       // Then logout
-      const logoutResponse = await agent
+      const logoutResponse = await request(app)
         .post('/api/auth/logout')
         .expect(200);
 
       expect(logoutResponse.body.success).toBe(true);
 
       // Verify session is cleared by checking auth status
-      const authResponse = await agent
+      const authResponse = await request(app)
         .get('/api/auth/me')
         .expect(401);
 
@@ -271,9 +264,9 @@ describe('Global Nav Integration Tests', () => {
     });
   });
 
-  describe('User Welcome Message', () => {
+  describeV1Frontend('User Welcome Message', () => {
     test('should display username in global nav', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -284,7 +277,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should handle guest user display', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/guest/decks')
         .expect(200);
 
@@ -295,9 +288,9 @@ describe('Global Nav Integration Tests', () => {
     });
   });
 
-  describe('Navigation State Management', () => {
+  describeV1Frontend('Navigation State Management', () => {
     test('should handle browser back/forward navigation', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -308,7 +301,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should update URL without page reload', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -319,9 +312,9 @@ describe('Global Nav Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeV1Frontend('Error Handling', () => {
     test('should handle missing DOM elements gracefully', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -332,7 +325,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should handle missing functions gracefully', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.js')
         .expect(200);
 
@@ -342,9 +335,9 @@ describe('Global Nav Integration Tests', () => {
     });
   });
 
-  describe('CSS Styling Integration', () => {
+  describeV1Frontend('CSS Styling Integration', () => {
     test('should have proper CSS classes for styling', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.css')
         .expect(200);
 
@@ -357,7 +350,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should have responsive design elements', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/components/globalNav.css')
         .expect(200);
 
@@ -368,10 +361,10 @@ describe('Global Nav Integration Tests', () => {
     });
   });
 
-  describe('Component Integration', () => {
+  describeV1Frontend('Component Integration', () => {
     test('should integrate with main application pages', async () => {
       // Test database view page
-      const dbResponse = await agent
+      const dbResponse = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 
@@ -379,7 +372,7 @@ describe('Global Nav Integration Tests', () => {
       expect(dbResponse.text).toContain('loadGlobalNav');
 
       // Test deck builder page
-      const deckResponse = await agent
+      const deckResponse = await request(app)
         .get('/deck-builder.html')
         .expect(200);
 
@@ -387,7 +380,7 @@ describe('Global Nav Integration Tests', () => {
     });
 
     test('should maintain state across view switches', async () => {
-      const response = await agent
+      const response = await request(app)
         .get('/users/${testUserId}/decks')
         .expect(200);
 

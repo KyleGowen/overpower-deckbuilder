@@ -83,6 +83,26 @@ describe('GET /api/v1/decks/community', () => {
   });
 
   it('returns cardCount matching playable deck_cards quantity sum for each community deck', async () => {
+    const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
+    const deckRepository = DataSourceConfig.getInstance().getDeckRepository();
+    const pool = DataSourceConfig.getInstance().getPool();
+
+    const seedDeck = await deckRepository.createDeck(
+      COMMUNITY_DECKS_USER_ID,
+      `IT Community cardCount ${Date.now()}`,
+      'cardCount fixture'
+    );
+    integrationTestUtils.trackTestDeck(seedDeck.id);
+
+    const powerRow = await pool.query<{ id: string }>(
+      `SELECT id FROM power_cards WHERE one_per_deck = false ORDER BY value ASC LIMIT 1`
+    );
+    expect(powerRow.rows.length).toBeGreaterThan(0);
+    await pool.query(
+      `INSERT INTO deck_cards (deck_id, card_type, card_id, quantity) VALUES ($1, $2, $3, $4)`,
+      [seedDeck.id, 'power', powerRow.rows[0].id, 3]
+    );
+
     const res = await request(app)
       .get('/api/v1/decks/community')
       .set('Cookie', authCookie)
@@ -92,9 +112,6 @@ describe('GET /api/v1/decks/community', () => {
       (d: { metadata: { userId: string } }) => d.metadata.userId === COMMUNITY_DECKS_USER_ID
     );
     expect(communityDecks.length).toBeGreaterThan(0);
-
-    const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
-    const pool = DataSourceConfig.getInstance().getPool();
 
     for (const deck of communityDecks) {
       const deckId = deck.metadata.id as string;
@@ -108,5 +125,7 @@ describe('GET /api/v1/decks/community', () => {
       const expectedCount = parseInt(countResult.rows[0].expected, 10);
       expect(deck.metadata.cardCount).toBe(expectedCount);
     }
+
+    await deckRepository.deleteDeck(seedDeck.id);
   });
 });

@@ -4,10 +4,23 @@
 import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
+import { Pool } from 'pg';
+import { fetchMinimalValidDeckCards } from './helpers/minimalValidDeckCards';
 
 describe('POST /api/v1/decks and /decks/validate', () => {
+  let pool: Pool;
+  let minimalValidCards: Awaited<ReturnType<typeof fetchMinimalValidDeckCards>>;
+
   beforeAll(async () => {
     await initializeTestServer();
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower',
+    });
+    minimalValidCards = await fetchMinimalValidDeckCards(pool);
+  });
+
+  afterAll(async () => {
+    await pool.end();
   });
 
   it('returns 401 without session for create', async () => {
@@ -55,22 +68,7 @@ describe('POST /api/v1/decks and /decks/validate', () => {
     const res = await request(app)
       .post('/api/v1/decks/validate')
       .set('Cookie', cookie)
-      .send({
-        cards: [
-          { type: 'character', cardId: 'char1', quantity: 1 },
-          { type: 'character', cardId: 'char2', quantity: 1 },
-          { type: 'character', cardId: 'char3', quantity: 1 },
-          { type: 'character', cardId: 'char4', quantity: 1 },
-          { type: 'mission', cardId: 'mission1', quantity: 1 },
-          { type: 'mission', cardId: 'mission2', quantity: 1 },
-          { type: 'mission', cardId: 'mission3', quantity: 1 },
-          { type: 'mission', cardId: 'mission4', quantity: 1 },
-          { type: 'mission', cardId: 'mission5', quantity: 1 },
-          { type: 'mission', cardId: 'mission6', quantity: 1 },
-          { type: 'mission', cardId: 'mission7', quantity: 1 },
-          { type: 'power_card', cardId: 'power1', quantity: 40 }
-        ]
-      })
+      .send({ cards: minimalValidCards })
       .expect(200);
 
     expect(res.body.errors).toEqual([]);

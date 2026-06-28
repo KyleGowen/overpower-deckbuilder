@@ -4,7 +4,7 @@
  * Full success flow requires Firebase Admin SDK (mocked in unit tests).
  */
 import request from 'supertest';
-import { app, initializeTestServer, closeTestServer } from '../../src/test-server';
+import { app, initializeTestServer } from '../../src/test-server';
 
 describe('Google Auth / Firebase Integration Tests', () => {
   beforeAll(async () => {
@@ -12,7 +12,7 @@ describe('Google Auth / Firebase Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await closeTestServer();
+    // Shared server lifecycle is managed by tests/setup-integration.ts global teardown.
   });
 
   describe('GET /api/config/firebase', () => {

@@ -102,9 +102,14 @@ describe('Guest Login Integration Tests', () => {
       const createdAt = new Date(result.rows[0].created_at);
       expect(createdAt).toBeInstanceOf(Date);
       expect(createdAt.getTime()).not.toBeNaN();
-      
-      // Verify it's not in the future
-      expect(createdAt.getTime()).toBeLessThanOrEqual(Date.now());
+
+      const ageResult = await pool.query(
+        'SELECT EXTRACT(EPOCH FROM (NOW() - created_at)) AS age_seconds FROM users WHERE username = $1',
+        ['Test-Guest']
+      );
+      const ageSeconds = Number(ageResult.rows[0]?.age_seconds);
+      expect(Number.isFinite(ageSeconds)).toBe(true);
+      expect(ageSeconds).toBeGreaterThanOrEqual(0);
       
       console.log('✅ Guest user creation timestamp verified:', createdAt);
     });

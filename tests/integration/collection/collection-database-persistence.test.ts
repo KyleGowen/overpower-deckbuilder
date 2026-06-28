@@ -123,7 +123,14 @@ describe('Collection Database Persistence Integration Tests', () => {
         [adminUser.id]
       );
       expect(collectionResult.rows[0].created_at).toBeDefined();
-      expect(new Date(collectionResult.rows[0].created_at).getTime()).toBeLessThanOrEqual(Date.now());
+      const ageResult = await pool.query(
+        'SELECT EXTRACT(EPOCH FROM (NOW() - created_at)) AS age_seconds FROM collections WHERE user_id = $1',
+        [adminUser.id]
+      );
+      const ageSeconds = Number(ageResult.rows[0]?.age_seconds);
+      expect(Number.isFinite(ageSeconds)).toBe(true);
+      expect(ageSeconds).toBeGreaterThanOrEqual(0);
+      expect(ageSeconds).toBeLessThan(5 * 60);
     });
   });
 
@@ -234,8 +241,21 @@ describe('Collection Database Persistence Integration Tests', () => {
 
       expect(cardResult.rows[0].created_at).toBeDefined();
       expect(cardResult.rows[0].updated_at).toBeDefined();
-      expect(new Date(cardResult.rows[0].created_at).getTime()).toBeLessThanOrEqual(Date.now());
-      expect(new Date(cardResult.rows[0].updated_at).getTime()).toBeLessThanOrEqual(Date.now());
+      const ageResult = await pool.query(
+        `SELECT
+           EXTRACT(EPOCH FROM (NOW() - created_at)) AS created_age_seconds,
+           EXTRACT(EPOCH FROM (NOW() - updated_at)) AS updated_age_seconds
+         FROM collection_cards WHERE collection_id = $1 AND card_id = $2`,
+        [collectionId, testCharacterId]
+      );
+      const createdAge = Number(ageResult.rows[0]?.created_age_seconds);
+      const updatedAge = Number(ageResult.rows[0]?.updated_age_seconds);
+      expect(Number.isFinite(createdAge)).toBe(true);
+      expect(Number.isFinite(updatedAge)).toBe(true);
+      expect(createdAge).toBeGreaterThanOrEqual(0);
+      expect(updatedAge).toBeGreaterThanOrEqual(0);
+      expect(createdAge).toBeLessThan(5 * 60);
+      expect(updatedAge).toBeLessThan(5 * 60);
     });
   });
 

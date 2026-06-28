@@ -6,6 +6,7 @@ import request from 'supertest';
 import { app } from '../../src/test-server';
 import { integrationTestUtils } from '../setup-integration';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
+import { describeV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Username Persistence Flow', () => {
     const assertWelcomeElements = async () => {
@@ -60,7 +61,7 @@ describe('Username Persistence Flow', () => {
         }
     });
 
-    describe('Username persistence after deck editor interactions', () => {
+    describeV1Frontend('Username persistence after deck editor interactions', () => {
         test('should maintain username display after opening and closing deck editor', async () => {
             // 1. Access the main deck builder page
             const mainPageResponse = await request(app)
@@ -158,7 +159,7 @@ describe('Username Persistence Flow', () => {
         });
     });
 
-    describe('Username display consistency', () => {
+    describeV1Frontend('Username display consistency', () => {
         test('should display username consistently across all page loads', async () => {
             const pages = [
                 `/users/${testUser.id}/decks`,
@@ -210,7 +211,7 @@ describe('Username Persistence Flow', () => {
         });
     });
 
-    describe('Error handling', () => {
+    describeV1Frontend('Error handling', () => {
         test('should handle missing username gracefully', async () => {
             // Create user with empty name
             const emptyNameUser = await integrationTestUtils.createTestUser({
