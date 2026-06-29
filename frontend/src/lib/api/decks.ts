@@ -15,6 +15,8 @@ function isGuestDeckId(deckId: string): boolean {
   return deckId.startsWith('guest_');
 }
 
+export { isGuestDeckId };
+
 export function fetchUserDecks(): Promise<DeckListItem[]> {
   return api.get<DeckListItem[]>('/api/v1/decks');
 }

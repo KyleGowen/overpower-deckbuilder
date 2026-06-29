@@ -10,10 +10,55 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
     await initializeTestServer();
   });
 
-  it('returns 401 without session for GET :id', async () => {
-    const res = await request(app).get('/api/v1/decks/some-uuid').expect(401);
-    expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+  it('returns 404 without session for GET :id on a private deck', async () => {
+    const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
+    expect(login.status).toBe(200);
+    const cookie = login.headers['set-cookie'][0].split(';')[0];
+
+    const name = `v1 private ${Date.now()}`;
+    const create = await request(app)
+      .post('/api/v1/decks')
+      .set('Cookie', cookie)
+      .send({ name, description: 'd' })
+      .expect(201);
+    const id = create.body.data.id as string;
+    integrationTestUtils.trackTestDeck(id);
+
+    const res = await request(app).get(`/api/v1/decks/${id}`).expect(404);
+    expect(res.body.errors?.[0]?.code).toBe('DECK_NOT_FOUND');
     expect(res.body.data).toBeNull();
+
+    await request(app).delete(`/api/v1/decks/${id}`).set('Cookie', cookie).expect(200);
+    integrationTestUtils.untrackTestDeck(id);
+  });
+
+  it('returns 200 without session for GET :id on a public deck', async () => {
+    const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
+    expect(login.status).toBe(200);
+    const cookie = login.headers['set-cookie'][0].split(';')[0];
+
+    const name = `v1 public ${Date.now()}`;
+    const create = await request(app)
+      .post('/api/v1/decks')
+      .set('Cookie', cookie)
+      .send({ name, description: 'd' })
+      .expect(201);
+    const id = create.body.data.id as string;
+    integrationTestUtils.trackTestDeck(id);
+
+    await request(app)
+      .put(`/api/v1/decks/${id}`)
+      .set('Cookie', cookie)
+      .send({ is_private: false })
+      .expect(200);
+
+    const res = await request(app).get(`/api/v1/decks/${id}`).expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data.metadata.id).toBe(id);
+    expect(res.body.data.metadata.isOwner).toBe(false);
+
+    await request(app).delete(`/api/v1/decks/${id}`).set('Cookie', cookie).expect(200);
+    integrationTestUtils.untrackTestDeck(id);
   });
 
   it('CRUD flow: create, GET, GET full, PUT, DELETE with v1 envelope', async () => {

@@ -101,11 +101,14 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     return u ?? null;
   };
 
-  const catalogAuth = createV1SessionOrBearerAuthMiddleware({
-    jwtTokenService,
-    getUserById,
-    authenticateUser: deps.authenticateUser
-  });
+  const catalogOptionalAuth: RequestHandler =
+    process.env.DISABLE_BEARER_DECKS_COLLECTIONS === '1'
+      ? deps.optionalAuthenticate
+      : createV1OptionalSessionOrBearerAuthMiddleware({
+          jwtTokenService,
+          getUserById,
+          optionalAuthenticate: deps.optionalAuthenticate
+        });
 
   /**
    * Phase 2 §6.1.5: decks + collections accept either a session cookie or a
@@ -133,18 +136,18 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
 
   registerDbvCatalogV1HttpRoutes(router, {
     catalogService: deps.catalogService,
-    catalogAuth
+    catalogAuth: catalogOptionalAuth
   });
 
   registerDbvSupportV1HttpRoutes(router, {
     dbvSupportService: deps.dbvSupportService,
-    catalogAuth,
+    catalogAuth: catalogOptionalAuth,
     deckBackgroundService: deps.deckBackgroundService
   });
 
   registerRecentUpdatesV1HttpRoutes(router, {
     recentUpdatesService: deps.recentUpdatesService,
-    catalogAuth
+    catalogAuth: catalogOptionalAuth
   });
 
   // Optional auth for guest-viewable community reads (feed + public profiles):
@@ -173,6 +176,7 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
     deckCardsService: deps.deckCardsService,
     deckBackgroundService: deps.deckBackgroundService,
     authenticateUser: ownedAuth,
+    optionalAuth: optionalOwnedAuth,
     deckUIPreferencesService: deps.deckUIPreferencesService,
     communityDecksUserId: COMMUNITY_DECKS_USER_ID,
     tournamentDecksUserId: TOURNAMENT_DECKS_USER_ID

@@ -7,6 +7,7 @@
 import request from 'supertest';
 import { app } from '../setup-integration';
 import { integrationTestUtils } from '../setup-integration';
+import { makeDeckPublic } from './helpers/makeDeckPublic';
 
 describe('New Deck Creation After Persisted Deck Integration', () => {
     let adminUser: any;
@@ -93,6 +94,7 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
         expect(createResponse.status).toBe(201);
         testDeckId = createResponse.body.data.id;
+        await makeDeckPublic(app, testDeckId, userAuthToken);
     });
 
     afterEach(async () => {
@@ -263,6 +265,9 @@ describe('New Deck Creation After Persisted Deck Integration', () => {
 
             expect(userCreateResponse.status).toBe(201);
             const userDeckId = userCreateResponse.body.data.id;
+
+            await makeDeckPublic(app, adminDeckId, adminAuthToken);
+            await makeDeckPublic(app, userDeckId, userAuthToken);
 
             // Step 4: Verify both decks are empty and separate
             const adminGetNewDeckResponse = await request(app)

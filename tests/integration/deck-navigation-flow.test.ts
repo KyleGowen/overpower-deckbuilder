@@ -47,6 +47,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
       'Test Navigation Deck',
       'A deck for testing navigation flow'
     );
+    await deckRepository.updateDeck(testDeck.id, { is_private: false });
     
     // Track this deck for cleanup
     integrationTestUtils.trackTestDeck(testDeck.id);

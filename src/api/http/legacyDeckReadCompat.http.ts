@@ -9,11 +9,18 @@ import { sendV1Json, sendV1Success } from './v1Envelope';
  */
 export function registerLegacyDeckReadCompatRoutes(
   app: Application,
-  deps: { authenticateUser: RequestHandler; deckDetailService: DeckDetailService }
+  deps: {
+    authenticateUser: RequestHandler;
+    optionalAuthenticate?: RequestHandler;
+    deckDetailService: DeckDetailService;
+  }
 ): void {
-  app.get('/api/decks/:id/full', deps.authenticateUser, async (req: Request, res: Response) => {
+  const deckViewAuth = deps.optionalAuthenticate ?? deps.authenticateUser;
+
+  app.get('/api/decks/:id/full', deckViewAuth, async (req: Request, res: Response) => {
     try {
-      const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, req.user!.id);
+      const viewerId = req.user?.id ?? '';
+      const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, viewerId);
       if (!detail) {
         sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
         return;
@@ -25,9 +32,10 @@ export function registerLegacyDeckReadCompatRoutes(
     }
   });
 
-  app.get('/api/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
+  app.get('/api/decks/:id', deckViewAuth, async (req: Request, res: Response) => {
     try {
-      const detail = await deps.deckDetailService.getDeckDetail(req.params.id, req.user!.id);
+      const viewerId = req.user?.id ?? '';
+      const detail = await deps.deckDetailService.getDeckDetail(req.params.id, viewerId);
       if (!detail) {
         sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
         return;

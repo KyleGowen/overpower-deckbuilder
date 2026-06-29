@@ -21,10 +21,10 @@ describe('API v1 integration', () => {
   });
 
   describe('dbv-catalog.http', () => {
-    it('GET /api/v1/catalog/characters returns 401 without session or bearer', async () => {
-      const res = await request(app).get('/api/v1/catalog/characters').expect(401);
-      expect(res.body.data).toBeNull();
-      expect(res.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
+    it('GET /api/v1/catalog/characters returns 200 without session (optional auth)', async () => {
+      const res = await request(app).get('/api/v1/catalog/characters').expect(200);
+      expect(res.body.errors).toEqual([]);
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
 
     it('GET /api/v1/catalog/characters returns v1 envelope and character rows', async () => {

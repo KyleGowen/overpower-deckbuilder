@@ -71,13 +71,13 @@ describe('Deck Background API Integration Tests', () => {
   });
 
   describe('GET /api/v1/dbv/deck-backgrounds', () => {
-    it('should require authentication', async () => {
+    it('should allow unauthenticated access to background list', async () => {
       const response = await request(app)
         .get('/api/v1/dbv/deck-backgrounds')
-        .expect(401);
+        .expect(200);
 
-      expect(response.body.errors?.[0]?.code).toBe('UNAUTHORIZED');
-      expect(response.body.data).toBeNull();
+      expect(response.body.errors).toEqual([]);
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should allow ADMIN users to access background list', async () => {

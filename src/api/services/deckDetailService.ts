@@ -12,12 +12,21 @@ export interface DeckDetailRepository {
 export type DeckDetailView = ReturnType<typeof transformDeckDetail>;
 export type DeckMetadataUpdateView = ReturnType<typeof transformDeckAfterMetadataUpdate>;
 
+/** Public decks are readable by anyone; private decks only by the owner. */
+export function canViewDeck(deck: Deck, viewerUserId: string | null | undefined): boolean {
+  const isPrivate = deck.is_private ?? true;
+  if (!isPrivate) {
+    return true;
+  }
+  return Boolean(viewerUserId) && deck.user_id === viewerUserId;
+}
+
 export class DeckDetailService {
   constructor(private readonly deckRepository: DeckDetailRepository) {}
 
   async getDeckDetail(deckId: string, viewerUserId: string): Promise<DeckDetailView | null> {
     const deck = await this.deckRepository.getDeckById(deckId);
-    if (!deck) {
+    if (!deck || !canViewDeck(deck, viewerUserId)) {
       return null;
     }
     return transformDeckDetail(deck, viewerUserId);
@@ -25,7 +34,7 @@ export class DeckDetailService {
 
   async getDeckFullDetail(deckId: string, viewerUserId: string): Promise<DeckDetailView | null> {
     const deck = await this.deckRepository.getDeckSummaryWithAllCards(deckId);
-    if (!deck) {
+    if (!deck || !canViewDeck(deck, viewerUserId)) {
       return null;
     }
     return transformDeckDetail(deck, viewerUserId);

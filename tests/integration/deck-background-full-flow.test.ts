@@ -7,6 +7,7 @@ import request from 'supertest';
 import { app } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
+import { makeDeckPublic } from './helpers/makeDeckPublic';
 
 describe('Deck Background Full Flow Integration Tests', () => {
   let adminUser: any;
@@ -81,6 +82,7 @@ describe('Deck Background Full Flow Integration Tests', () => {
       testDeckId = createDeckResponse.body.data.id;
       if (testDeckId) {
         integrationTestUtils.trackTestDeck(testDeckId);
+        await makeDeckPublic(app, testDeckId, adminAuthCookie);
       }
     }
   });

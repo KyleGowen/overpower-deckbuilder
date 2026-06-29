@@ -22,11 +22,12 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 | `POST /api/v1/auth/refresh` | — | — | Open — accepts refresh token in body |
 | `GET /api/v1/auth/me` | ✓ | ✓ | Returns current user; 401 if not authed |
 | `POST /api/v1/auth/logout` | ✓ | ✓ | Clears session / revokes refresh token |
-| `GET /api/v1/catalog/*` | ✓ | ✓ | GUEST, USER, ADMIN all allowed |
-| `GET /api/v1/dbv/*` | ✓ | ✓ | Same as catalog |
-| `GET /api/v1/recent-updates` | ✓ | ✓ | Same as catalog |
+| `GET /api/v1/catalog/*` | ✓ (optional) | ✓ (optional) | Unauthenticated allowed (guest catalog reads) |
+| `GET /api/v1/dbv/*` | ✓ (optional) | ✓ (optional) | Same as catalog |
+| `GET /api/v1/recent-updates` | ✓ (optional) | ✓ (optional) | Same as catalog |
 | `GET /api/v1/config/app` | — | — | Open — no auth required |
-| `GET /api/v1/decks*` | ✓ | ✓ | USER/ADMIN; GUEST→403 on write routes |
+| `GET /api/v1/decks/:id` (+ `/full`) | ✓ (optional) | ✓ (optional) | Public decks readable without login; private→404 |
+| `GET /api/v1/decks` (list), `/stats`, `/community`, `/tournament` | ✓ | ✓ | Auth required |
 | `POST/PUT/DELETE /api/v1/decks*` | ✓ | ✓ | Owner only; GUEST→403 |
 | `GET /api/v1/community/decks` | ✓ (optional) | ✓ (optional) | Public read; guests allowed (`isFavorited:false`) |
 | `GET /api/v1/users/:id/public-decks` | ✓ (optional) | ✓ (optional) | Public read; guests allowed |
@@ -747,7 +748,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 ### `GET /api/v1/decks/:id`
 
-**Auth:** Valid **session cookie** or Bearer JWT (`ownedAuth`). Unauthenticated → **401** v1 envelope.
+**Auth:** Optional **session cookie** or Bearer JWT (`optionalOwnedAuth`). Unauthenticated requests succeed only when `**is_private**` is `false`; private decks return **404** `DECK_NOT_FOUND` (no existence leak). Owners always see their own decks.
 
 **Request model:** none (path param `**id`** = deck UUID).
 
@@ -802,7 +803,7 @@ Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (ca
 
 ### `GET /api/v1/decks/:id/full`
 
-**Auth:** Valid **session cookie**.
+**Auth:** Same optional auth as `GET /api/v1/decks/:id` (public decks readable without login).
 
 **Request model:** none.
 

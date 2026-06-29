@@ -13,6 +13,7 @@ import {
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import { fetchFavoriteDecks } from '../../lib/api/favorites';
 import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
+import { clonePreloadedGuestDeck, guestNeedsCloneOnOpen } from '../../lib/decks/guestCloneOnOpen';
 import { calculateDeckTotalThreat, formatThreatTooltip } from '../../lib/decks/deckThreat';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
 import {
@@ -227,12 +228,38 @@ export default function DeckEditorPage() {
   const { isMobile } = useLayoutMode();
 
   const forceReadonly = searchParams.get('readonly') === 'true';
+  const needsGuestClone = guestNeedsCloneOnOpen(deckId, isGuest, forceReadonly);
+  const [guestCloning, setGuestCloning] = useState(needsGuestClone);
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!needsGuestClone || !user) {
+      setGuestCloning(false);
+      return;
+    }
+    let cancelled = false;
+    setGuestCloning(true);
+    clonePreloadedGuestDeck(deckId)
+      .then((guestDeckId) => {
+        if (!cancelled) {
+          navigate(`/users/${user.id}/decks/${guestDeckId}`, { replace: true });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setGuestCloning(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsGuestClone, deckId, user, navigate]);
+
   const deckQuery = useQuery({
     queryKey: ['deck', deckId],
     queryFn: () => fetchDeckFull(deckId, isGuest),
-    enabled: Boolean(deckId),
+    enabled: Boolean(deckId) && !needsGuestClone && !guestCloning,
   });
 
   const deck = deckQuery.data;
@@ -850,6 +877,9 @@ export default function DeckEditorPage() {
     );
   };
 
+  if (guestCloning) {
+    return <LoadingState fullscreen label="Preparing deck..." />;
+  }
   if (deckQuery.isLoading) {
     return <LoadingState fullscreen label="Loading deck..." />;
   }

@@ -57,6 +57,8 @@ export interface DecksV1HttpDeps {
   deckCardsService: DeckCardsService;
   deckBackgroundService: DeckBackgroundListReader;
   authenticateUser: RequestHandler;
+  /** Optional auth for guest-viewable deck GETs (public decks without login). */
+  optionalAuth?: RequestHandler;
   deckUIPreferencesService: DeckUIPreferencesService;
   /**
    * User id whose decks back the public "Community Decks" pool. Defaults to the
@@ -380,9 +382,12 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     }
   });
 
-  router.get('/decks/:id/full', deps.authenticateUser, async (req: Request, res: Response) => {
+  const deckViewAuth = deps.optionalAuth ?? deps.authenticateUser;
+
+  router.get('/decks/:id/full', deckViewAuth, async (req: Request, res: Response) => {
     try {
-      const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, req.user!.id);
+      const viewerId = req.user?.id ?? '';
+      const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, viewerId);
       if (!detail) {
         sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
         return;
@@ -394,9 +399,10 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
     }
   });
 
-  router.get('/decks/:id', deps.authenticateUser, async (req: Request, res: Response) => {
+  router.get('/decks/:id', deckViewAuth, async (req: Request, res: Response) => {
     try {
-      const detail = await deps.deckDetailService.getDeckDetail(req.params.id, req.user!.id);
+      const viewerId = req.user?.id ?? '';
+      const detail = await deps.deckDetailService.getDeckDetail(req.params.id, viewerId);
       if (!detail) {
         sendV1Json(res, 404, null, [{ code: 'DECK_NOT_FOUND', message: 'Deck not found' }]);
         return;

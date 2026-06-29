@@ -318,6 +318,7 @@ registerApiV1Routes(app, {
 
 registerLegacyDeckReadCompatRoutes(app, {
   authenticateUser,
+  optionalAuthenticate,
   deckDetailService
 });
 

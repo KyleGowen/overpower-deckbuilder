@@ -47,19 +47,8 @@ export function registerPageRoutes(app: express.Application, deps: PageRoutesDep
     sendAppShell(res, legacyIndex());
   });
   
-  // Deck Builder route (Image 2)
-  app.get('/users/:userId/decks', deps.authenticateUser, (req: Request, res) => {
-    const { userId } = req.params;
-    const user = req.user!;
-    
-    // Check if user has access to this route
-    const isGuestAccess = userId === 'guest' && user.role === 'GUEST';
-    const isOwnAccess = user.id === userId;
-    
-    if (!isGuestAccess && !isOwnAccess) {
-      return res.status(403).json({ success: false, error: 'Access denied' });
-    }
-
+  // Deck Builder route — SPA shell; auth enforced client-side via ProtectedRoute.
+  app.get('/users/:userId/decks', (_req: Request, res) => {
     sendAppShell(res, legacyIndex());
   });
   

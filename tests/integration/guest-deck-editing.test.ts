@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
+import { makeDeckPublic } from './helpers/makeDeckPublic';
 import { Pool } from 'pg';
 
 describe('Guest Deck Editing Restrictions Integration Tests', () => {
@@ -94,6 +95,8 @@ describe('Guest Deck Editing Restrictions Integration Tests', () => {
     
     // Track this deck for cleanup
     integrationTestUtils.trackTestDeck(testDeckId);
+    
+    await makeDeckPublic(app, testDeckId, userCookie);
     
     console.log('🔍 Created test deck with ID:', testDeckId);
   });

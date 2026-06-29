@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
+import { makeDeckPublic } from './helpers/makeDeckPublic';
 
 describe('Cross-User Deck Viewing Integration Tests', () => {
   let userRepository: any;
@@ -101,6 +102,8 @@ describe('Cross-User Deck Viewing Integration Tests', () => {
         expect(createDeckResponse.body.data).toBeDefined();
       expect(createDeckResponse.body.data.id).toBeDefined();
       createdDeck = createDeckResponse.body.data;
+
+      await makeDeckPublic(app, createdDeck.id, `sessionId=${testUserASessionId}`);
 
       // Step 5: User A logs out
       const logoutAResponse = await request(app)

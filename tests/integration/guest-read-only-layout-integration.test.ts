@@ -5,6 +5,7 @@
 
 import request from 'supertest';
 import { app, integrationTestUtils } from '../setup-integration';
+import { makeDeckPublic } from './helpers/makeDeckPublic';
 import { Pool } from 'pg';
 
 describe('Guest User Read-Only Layout Integration Tests', () => {
@@ -87,6 +88,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
         expect(createResponse.status).toBe(201);
         testDeckId = createResponse.body.data.id;
         integrationTestUtils.trackTestDeck(testDeckId);
+        await makeDeckPublic(app, testDeckId, `sessionId=${regularSessionId}`);
         
         // Add characters to the deck after creation (only add each character once)
         const uniqueCharacters = characterResult.rows.filter((char, index, self) => 
