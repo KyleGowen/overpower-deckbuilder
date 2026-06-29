@@ -44,6 +44,11 @@
 - Local dev works because `CDN_BASE_URL` is empty and Express static middleware serves `src/resources/cards/images` from disk.
 - **Never assume card images are in the Docker container.**
 
+## Production Migrations Use Docker Flyway on EC2
+- The `run-migrations` job logs into ECR and runs `docker run --entrypoint /usr/local/bin/flyway $ECR_URI:$GITHUB_SHA migrate` on the EC2 instance via SSM.
+- **Do not** invoke host `npm`/`flyway` on EC2 — they are not installed. Always wait for SSM `Success` before the deploy job runs.
+- Blue-green step 1b repeats migrate idempotently before boot; the app container uses `SKIP_MIGRATIONS=true`.
+
 ## Documentation Sync
 - If deployment flow changes, update `docs/current/DEPLOYMENT_STRATEGY.md`.
 - If CI expectations change for contributors, update `.github/README.md`.

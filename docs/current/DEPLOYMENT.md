@@ -28,9 +28,11 @@ GitHub (main branch push)
 - `CMD_ID` must be non-empty after `send-command`; empty = deploy never sent → fail immediately
 - `DEPLOY_DONE` loop exits only on `"Success"`; loop exhaustion → fail (never fall-through as success)
 
-**SSM timing budget** (Blue-Green Deploy step, `--timeout-seconds 540`):
-- ECR pull: ~1–2 min; container startup + health gate: ~3.5 min; nginx switch: ~15 s
-- GitHub Actions polls 90 × 5 s = 450 s max
+**SSM timing budget** (Blue-Green Deploy step, `--timeout-seconds 1200`):
+- ECR pull: up to 8 min (`timeout 480`); container startup + health gate: ~5 min; nginx switch: ~15 s
+- GitHub Actions polls 240 × 5 s = 1200 s max
+
+**Production migrations** (`run-migrations` job): Flyway runs **inside the deploy Docker image** on EC2 (`docker run --entrypoint flyway … migrate`), not via host `npm`/`flyway` (those binaries are not on the EC2 host). The job **waits for SSM Success** before deploy proceeds.
 
 **Docker image build:**
 - Multi-stage: `node:20-alpine` build stage → slim runtime stage with Flyway + `dumb-init`
