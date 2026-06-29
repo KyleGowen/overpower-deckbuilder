@@ -12,15 +12,16 @@ Landing page after login. Sections, top to bottom:
    card collapses any previously open one. On mobile the row stacks into a full-width
    column and expansion is vertical instead. No modal or navigation.
 3. **Community Decks** rail — horizontally scrolling `DeckTile`s backed by
-   `GET /api/v1/decks/community` (the `community_decks` account's decks only; see
-   [`COMMUNITY_DECKS.md`](./COMMUNITY_DECKS.md)).
+   `GET /api/v1/community/decks` (user-shared public legal decks; first 12 from
+   the feed). Same data as the Community page Community tab — see
+   [`COMMUNITY_DECKS.md`](./COMMUNITY_DECKS.md).
 4. **Tournament Winning Decks** rail — horizontally scrolling `DeckTile`s backed by
    `GET /api/v1/decks/tournament` (the `tournament_decks` account's decks only; see
    [`TOURNAMENT_DECKS.md`](./TOURNAMENT_DECKS.md)).
 
 ## Data
-- TanStack Query for recent updates (`fetchRecentUpdates`), community decks (`fetchCommunityDecks`),
-  and tournament decks (`fetchTournamentDecks`).
+- TanStack Query for recent updates (`fetchRecentUpdates`), community feed (`fetchCommunityFeed`,
+  key `['decks', 'community-feed', '']`), and tournament decks (`fetchTournamentDecks`).
 - Deck tiles use `compact` variant in the rail.
 
 ## Notes

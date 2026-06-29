@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
-import { fetchCommunityDecks, fetchTournamentDecks } from '../../lib/api/decks';
+import { fetchTournamentDecks } from '../../lib/api/decks';
+import { fetchCommunityFeed } from '../../lib/api/favorites';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { fetchRecentUpdates } from '../../lib/api/recent-updates';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
@@ -22,20 +23,22 @@ import './HomePage.css';
 
 const HERO_BANNER = '/src/resources/images/home/home-hero.png';
 const HERO_BANNER_2X = '/src/resources/images/home/home-hero-2x.png';
+/** Max tiles in the Home community rail (feed returns up to 20). */
+const HOME_COMMUNITY_RAIL_LIMIT = 12;
+
+const HOME_COMMUNITY_FEED_KEY = ['decks', 'community-feed', ''] as const;
 
 export default function HomePage() {
-  const { user, communityDecksUserId, tournamentDecksUserId } = useAuth();
+  const { user, tournamentDecksUserId } = useAuth();
   const navigate = useNavigate();
 
   const communityQuery = useQuery({
-    queryKey: ['decks', 'community'],
-    queryFn: () => fetchCommunityDecks(),
+    queryKey: HOME_COMMUNITY_FEED_KEY,
+    queryFn: () => fetchCommunityFeed(),
     staleTime: 10 * 60 * 1000,
   });
 
-  const communityDecks = (communityQuery.data ?? []).filter(
-    (deck) => !communityDecksUserId || deck.metadata.userId === communityDecksUserId,
-  );
+  const communityDecks = (communityQuery.data ?? []).slice(0, HOME_COMMUNITY_RAIL_LIMIT);
   const tournamentQuery = useQuery({
     queryKey: ['decks', 'tournament'],
     queryFn: () => fetchTournamentDecks(),
