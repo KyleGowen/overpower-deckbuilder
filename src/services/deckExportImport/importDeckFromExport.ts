@@ -2,6 +2,7 @@ import type { DeckRepository } from '../../repository/DeckRepository';
 import type { CardRepository } from '../../repository/CardRepository';
 import type { Deck, DeckCard } from '../../types';
 import { COMMUNITY_DECKS_USER_ID } from '../../constants/communityDecksUser';
+import { TOURNAMENT_DECKS_USER_ID } from '../../constants/tournamentDecksUser';
 import { extractCardsFromExportJson } from './extractCardsFromExportJson';
 import { loadDeckCatalogBundle } from './loadDeckCatalogBundle';
 import { resolveExportCardIds } from './resolveExportCardIds';
@@ -80,6 +81,11 @@ export async function importDeckFromExport(
         break;
       }
     }
+  }
+
+  // Curated Home-rail accounts must stay public (V285 default is private).
+  if (userId === TOURNAMENT_DECKS_USER_ID || userId === COMMUNITY_DECKS_USER_ID) {
+    updates.is_private = false;
   }
 
   if (Object.keys(updates).length > 0) {

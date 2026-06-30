@@ -34,7 +34,10 @@ Add tournament deck:
 - [ ] 3. Run `npm run import:tournament-deck -- tmp/tournament-deck-import.json`
 - [ ] 4. Report deck id, name, cards added; list any unresolved card names
 - [ ] 5. Delete temp file if created for this task
+- [ ] 6. (Production) Regenerate Flyway seed with `npm run generate:tournament-deck-migration` when adding to prod deploy
 ```
+
+Imported decks are **public** automatically (`is_private=false`) so users can open them from the Home rail. For production deploys, prefer including the deck in the generated `V288`-style migration so stable IDs and card rows ship with Flyway.
 
 ## Step details
 
@@ -51,7 +54,7 @@ Add tournament deck:
    - Exit 2: partial success — deck created but some cards unresolved; show the warning list
    - Exit 1: failure — show error message; do not claim success
 
-5. **Verify (optional):** `GET /api/v1/decks/tournament` as an authenticated user should include the new deck near the top (sorted by `updated_at`).
+5. **Verify (optional):** `GET /api/v1/decks/tournament` as an authenticated user should include the new deck near the top (sorted by `updated_at`). Click the tile — deck editor should load (not "Deck not found"); imports are public by default.
 
 ## Initial seed (not per-import)
 
