@@ -3612,8 +3612,8 @@ The v2 deck editor supports **Card View** (image tile grid) and **List View** (t
 
 - Instances with the same `type + cardId` aggregate to one row; quantity = instance count.
 - Attack-type icons on power, teamwork, ally-universe, special, and aspect rows (Energy / Combat / Brute Force / Intelligence / Any-Power).
-- Character rows: compact KO + reserve in `.deck-editor__list-row-actions` (same controls as card tiles). **Reserve** sits left of **KO**; reserve slot is fixed width (`5.25rem`) so KO buttons align in a vertical column on every character row (hidden reserve slots keep width when another character is reserved).
-- No +/- quantity steppers in list view — editing remains in card view or slideout.
+- Character rows: compact KO + reserve in `.deck-editor__list-row-actions` (same controls as card tiles). **Reserve** sits left of **KO**; reserve slot is fixed width (`5.25rem`) so KO buttons align in a vertical column on every character row (hidden reserve slots keep width when another character is reserved). **Owners** also get trash (`.deck-editor__list-remove`) rightmost on every row type — one instance per click; aggregated quantity decrements.
+- No +/- quantity steppers in list view — remove via trash or switch to card view.
 
 Implementation: [`DeckListView.tsx`](../../frontend/src/features/deck-editor/DeckListView.tsx), helpers in [`deckListView.ts`](../../frontend/src/lib/decks/deckListView.ts), styles in [`DeckEditorPage.css`](../../frontend/src/features/deck-editor/DeckEditorPage.css).
 

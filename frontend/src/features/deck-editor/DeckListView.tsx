@@ -24,6 +24,7 @@ import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/type
 import type { CatalogTypeMeta } from '../../lib/catalog/catalogTypeMap';
 import type { DeckCardIndex } from '../../lib/decks/deckCardCatalog';
 import { assetUrl } from '../../lib/images/cardImages';
+import { IconTrash } from '../../components/icons';
 import { KoToggleButton } from './KoToggleButton';
 import { ReserveCharacterButton } from './ReserveCharacterButton';
 
@@ -62,6 +63,7 @@ export interface DeckListViewProps {
   onToggleKo: (cardId: string) => void;
   onSelectReserve: (cardId: string) => void;
   onDeselectReserve: () => void;
+  onRemoveInstance: (instanceId: string) => void;
 }
 
 function attackIconPath(iconType: AttackIconType): string {
@@ -116,6 +118,7 @@ function DeckListRowView({
   onToggleKo,
   onSelectReserve,
   onDeselectReserve,
+  onRemoveInstance,
 }: {
   row: DeckListRow;
   isOwner: boolean;
@@ -129,6 +132,7 @@ function DeckListRowView({
   onToggleKo: (cardId: string) => void;
   onSelectReserve: (cardId: string) => void;
   onDeselectReserve: () => void;
+  onRemoveInstance: (instanceId: string) => void;
 }) {
   const catalogType = catalogSlugForDeckType(row.type);
   const instanceId = row.instanceIds[0];
@@ -150,6 +154,11 @@ function DeckListRowView({
   const showCharacterActions =
     isCharacter &&
     (showKoOnCharacter || (reserveRowState !== null && reserveSlotVisible(reserveRowState)));
+  const showTrash = isOwner && row.instanceIds.length > 0;
+  const showRowActions = showTrash || showCharacterActions;
+  const removeInstanceId = showTrash
+    ? row.instanceIds[row.instanceIds.length - 1]
+    : undefined;
 
   return (
     <div
@@ -173,7 +182,7 @@ function DeckListRowView({
           <DeckListAttackIcons iconTypes={row.iconTypes} />
         </span>
       </button>
-      {showCharacterActions ? (
+      {showRowActions ? (
         <div className="deck-editor__list-row-actions">
           {reserveRowState && reserveSlotVisible(reserveRowState) ? (
             <ReserveCharacterButton
@@ -189,6 +198,19 @@ function DeckListRowView({
               onToggle={() => onToggleKo(row.cardId)}
               cardName={row.label}
             />
+          ) : null}
+          {showTrash && removeInstanceId ? (
+            <button
+              type="button"
+              className="deck-editor__list-remove"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveInstance(removeInstanceId);
+              }}
+              aria-label={`Remove ${row.label}`}
+            >
+              <IconTrash />
+            </button>
           ) : null}
         </div>
       ) : null}
@@ -219,6 +241,7 @@ function DeckListSectionView({
   onToggleKo: (cardId: string) => void;
   onSelectReserve: (cardId: string) => void;
   onDeselectReserve: () => void;
+  onRemoveInstance: (instanceId: string) => void;
 }) {
   const cardCount = sectionCardCount(section);
 
@@ -279,6 +302,7 @@ export function DeckListView({
   onToggleKo,
   onSelectReserve,
   onDeselectReserve,
+  onRemoveInstance,
 }: DeckListViewProps) {
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set());
 
@@ -319,6 +343,7 @@ export function DeckListView({
     onToggleKo,
     onSelectReserve,
     onDeselectReserve,
+    onRemoveInstance,
   };
 
   const renderSection = (section: DeckListSectionInput) => (

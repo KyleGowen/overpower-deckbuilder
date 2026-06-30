@@ -1138,6 +1138,7 @@ export default function DeckEditorPage() {
               }
               onSelectReserve={selectReserveCharacter}
               onDeselectReserve={deselectReserveCharacter}
+              onRemoveInstance={removeDeckInstance}
             />
           ) : (
             visibleGroups.map(({ meta, entries }) => (

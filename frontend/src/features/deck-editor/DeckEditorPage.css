@@ -1319,6 +1319,28 @@
   display: inline-flex;
   justify-content: flex-end;
 }
+.deck-editor__list-remove {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-dim);
+  background: transparent;
+  border: none;
+}
+.deck-editor__list-row:hover .deck-editor__list-remove,
+.deck-editor__list-remove:hover,
+.deck-editor__list-remove:focus-visible {
+  color: var(--color-danger);
+  background: rgba(239, 77, 90, 0.1);
+}
+.layout-mobile .deck-editor__list-remove {
+  width: 44px;
+  height: 44px;
+}
 .layout-mobile .deck-editor__list-columns {
   flex-direction: column;
 }

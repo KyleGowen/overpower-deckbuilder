@@ -283,7 +283,14 @@ Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailP
 | Current / disabled (`.card-detail__printing-apply--current`) | `opacity: 0.45`; `--color-border` border; `--color-text-muted` text; `cursor: not-allowed` |
 
 ### Deck Editor — Instance tiles
-Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash (`.deck-editor__card-remove`) on every type; **Save** aggregates instances by `(type, cardId)` for the API.
+Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash on every type; **Save** aggregates instances by `(type, cardId)` for the API.
+
+| View | Control | Class |
+|---|---|---|
+| Card view | Trash in tile footer | `.deck-editor__card-remove` (26×26, scrim + border) |
+| List view | Trash at row end | `.deck-editor__list-remove` (24×24 desktop, 44×44 mobile; icon-only default, danger tint on hover/focus) |
+
+List rows aggregate duplicate `type + cardId` copies; each trash click removes one instance (last in `instanceIds`). Character list rows keep Reserve + KO left of trash.
 
 ### Deck Editor — Mobile bottom nav
 On `.layout-mobile`, the deck editor renders the shared `MobileBottomNav` (`--bottom-nav-height: 66px`,
