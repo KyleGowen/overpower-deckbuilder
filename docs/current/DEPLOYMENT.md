@@ -32,7 +32,7 @@ GitHub (main branch push)
 - ECR pull: up to 8 min (`timeout 480`); container startup + health gate: ~5 min; nginx switch: ~15 s
 - GitHub Actions polls 240 × 5 s = 1200 s max
 
-**Production migrations** (`run-migrations` job): Flyway runs **inside the deploy Docker image** on EC2 (`docker run --entrypoint flyway … migrate`), not via host `npm`/`flyway` (those binaries are not on the EC2 host). The job **waits for SSM Success** before deploy proceeds.
+**Production migrations** (`run-migrations` job): Flyway runs **inside the deploy Docker image** on EC2 (`docker run --entrypoint flyway … migrate`), not via host `npm`/`flyway` (those binaries are not on the EC2 host). The job **waits for SSM Success** before deploy proceeds. ECR pull + Flyway validate during `migrate` can take **10+ minutes** on a cold pull — the workflow must pass `--max-attempts 240 --delay 5` to `aws ssm wait command-executed` (default CLI waiter is only ~100 s and will false-fail while the SSM command is still running).
 
 **Docker image build:**
 - Multi-stage: `node:20-alpine` build stage → slim runtime stage with Flyway + `dumb-init`

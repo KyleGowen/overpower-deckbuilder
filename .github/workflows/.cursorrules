@@ -34,7 +34,10 @@
 - Deck background images (`src/resources/images/backgrounds/landscape/*.png`) ARE committed to git and don't need thumbnail generation — only the three `thumb/` directories under `cards/images` need it. They are synced to S3 in a separate `aws s3 sync src/resources/images/backgrounds/` step after card images.
 - **Symptom of missing thumbnails**: deck selection character/mission/location card slots are empty (teal outlined boxes); deck background images still load because backgrounds are committed. Console is clean (no JS errors) because the browser simply requests URLs that return 404/403 from S3.
 
-## CDN_BASE_URL Must Be in the Container
+## Production migrations (run-migrations job)
+- Flyway runs inside the deploy Docker image on EC2 (`docker run --entrypoint flyway …`), not host `npm`/`flyway`.
+- `aws ssm wait command-executed` defaults to ~100 s (20 × 5 s). Migration + verify steps **must** use `--max-attempts 240 --delay 5` (1200 s) because ECR pull + Flyway can exceed 10 min.
+- Blue-green deploy uses a manual 240 × 5 s poll loop for the same reason.
 - The deploy job starts the container with `--env-file /opt/app/.env`. The run-migrations job is responsible for appending `CDN_BASE_URL` to that file.
 - The deploy job verifies `CDN_BASE_URL` is present in `/opt/app/.env` via SSM before blue-green deploy. If missing, the deploy job fails early.
 - **Without CDN_BASE_URL**: `window.APP_CDN_BASE` is empty, `CDN_BASE` constant in `deckTileImages.js` is captured as `''` at module init, and all card image requests go to EC2 — which has no card images (Docker image excludes `src/resources/cards/images/` via `.dockerignore`).
