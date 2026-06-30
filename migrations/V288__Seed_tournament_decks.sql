@@ -70,7 +70,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000001', 'aspect', card_id_var::text, 1);
@@ -514,7 +514,7 @@ BEGIN
         END IF;
 
         -- aspect: Amaru: Dragon Legend
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Amaru: Dragon Legend' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Amaru: Dragon Legend' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'aspect', card_id_var::text, 1);
@@ -563,49 +563,49 @@ BEGIN
         END IF;
 
         -- mission: Gone Too Far
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Gone Too Far' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Gone Too Far' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Johansen's Widow
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Johansen''s Widow' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Johansen''s Widow' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: New Orleans, 1908
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'New Orleans, 1908' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'New Orleans, 1908' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Professor Angell's Investigation
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Professor Angell''s Investigation' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Professor Angell''s Investigation' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Alert
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Alert' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Alert' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Dreams of Men
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Dreams of Men' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Dreams of Men' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Worshipping the Great Old One
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Worshipping the Great Old One' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Worshipping the Great Old One' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000002', 'mission', card_id_var::text, 1);
@@ -972,7 +972,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000003', 'aspect', card_id_var::text, 1);
@@ -1395,7 +1395,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'aspect', card_id_var::text, 1);
@@ -1437,49 +1437,49 @@ BEGIN
         END IF;
 
         -- mission: Beasts of Tarzan
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Beasts of Tarzan' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Beasts of Tarzan' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan and the Castaways
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan and the Castaways' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan and the Castaways' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan and the City of Gold
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan and the City of Gold' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan and the City of Gold' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan and the Golden Lion
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan and the Golden Lion' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan and the Golden Lion' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan at the Earth's Core
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan at the Earth''s Core' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan at the Earth''s Core' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan of the Apes
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan of the Apes' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan of the Apes' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Tarzan's Quest
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Tarzan''s Quest' AND mission_set = 'King of the Jungle' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Tarzan''s Quest' AND mission_set = 'King of the Jungle' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000004', 'mission', card_id_var::text, 1);
@@ -1839,7 +1839,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'aspect', card_id_var::text, 1);
@@ -1881,49 +1881,49 @@ BEGIN
         END IF;
 
         -- mission: Gone Too Far
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Gone Too Far' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Gone Too Far' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Johansen's Widow
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Johansen''s Widow' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Johansen''s Widow' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: New Orleans, 1908
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'New Orleans, 1908' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'New Orleans, 1908' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Professor Angell's Investigation
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Professor Angell''s Investigation' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Professor Angell''s Investigation' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Alert
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Alert' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Alert' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Dreams of Men
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Dreams of Men' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Dreams of Men' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Worshipping the Great Old One
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Worshipping the Great Old One' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Worshipping the Great Old One' AND mission_set = 'The Call of Cthulhu' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000005', 'mission', card_id_var::text, 1);
@@ -2297,7 +2297,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'aspect', card_id_var::text, 1);
@@ -2339,49 +2339,49 @@ BEGIN
         END IF;
 
         -- mission: A Fighting Man of Mars
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'A Fighting Man of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'A Fighting Man of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Swords of Mars
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Swords of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Swords of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Battle of Kings
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Battle of Kings' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Battle of Kings' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Face of Death
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Face of Death' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Face of Death' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Invisible Men
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Invisible Men' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Invisible Men' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: The Loyalty of Woola
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'The Loyalty of Woola' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'The Loyalty of Woola' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
         END IF;
 
         -- mission: Under the Moons of Mars
-        SELECT id INTO card_id_var FROM missions WHERE card_name = 'Under the Moons of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
+        SELECT id INTO card_id_var FROM missions WHERE name = 'Under the Moons of Mars' AND mission_set = 'The Warlord of Mars' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000006', 'mission', card_id_var::text, 1);
@@ -2741,7 +2741,7 @@ BEGIN
         END IF;
 
         -- aspect: Isis
-        SELECT id INTO card_id_var FROM aspects WHERE card_name = 'Isis' LIMIT 1;
+        SELECT id INTO card_id_var FROM aspects WHERE name = 'Isis' LIMIT 1;
         IF card_id_var IS NOT NULL THEN
             INSERT INTO deck_cards (deck_id, card_type, card_id, quantity)
             VALUES ('a2880001-0000-4000-8000-000000000007', 'aspect', card_id_var::text, 1);

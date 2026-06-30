@@ -70,8 +70,11 @@ function findCatalogCard(
 }
 
 function sqlEq(column: string, value: string | null | undefined): string {
-  if (value === null || value === undefined || value === '') {
+  if (value === null || value === undefined) {
     return `${column} IS NULL`;
+  }
+  if (value === '') {
+    return `COALESCE(${column}, '') = ''`;
   }
   return `${column} = ${sqlLiteral(value)}`;
 }
@@ -92,11 +95,11 @@ function buildCardLookupSql(card: Record<string, unknown>, cardType: string): st
     case 'location':
       return `SELECT id INTO card_id_var FROM locations WHERE name = ${sqlLiteral(name)} LIMIT 1;`;
     case 'mission':
-      return `SELECT id INTO card_id_var FROM missions WHERE card_name = ${sqlLiteral(name)} AND mission_set = ${sqlLiteral(String(card.mission_set))} LIMIT 1;`;
+      return `SELECT id INTO card_id_var FROM missions WHERE name = ${sqlLiteral(name)} AND mission_set = ${sqlLiteral(String(card.mission_set))} LIMIT 1;`;
     case 'event':
       return `SELECT id INTO card_id_var FROM events WHERE name = ${sqlLiteral(name)} AND mission_set = ${sqlLiteral(String(card.mission_set))} LIMIT 1;`;
     case 'aspect':
-      return `SELECT id INTO card_id_var FROM aspects WHERE card_name = ${sqlLiteral(name)} LIMIT 1;`;
+      return `SELECT id INTO card_id_var FROM aspects WHERE name = ${sqlLiteral(name)} LIMIT 1;`;
     case 'advanced-universe':
       return `SELECT id INTO card_id_var FROM advanced_universe_cards WHERE name = ${sqlLiteral(name)} LIMIT 1;`;
     case 'teamwork':
