@@ -86,7 +86,8 @@ Full feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-edito
 | [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx) | `drawHandOpen`, `drawnCards`, toggle/redraw/reorder handlers |
 | [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts) | `countPlayableCards`, `canDrawHand`, `buildDrawPile`, `drawRandomHand` |
 | [`DrawHandPanel.tsx`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) | Top overlay UI, KO dimming, card detail wiring |
-| [`DrawHandPanel.css`](../../frontend/src/features/deck-editor/DrawHandPanel.css) | Row, scale, event rotation, mobile carousel |
+| [`DrawHandPanel.css`](../../frontend/src/features/deck-editor/DrawHandPanel.css) | Row, scale, event rotation, portrait frame fill, mobile carousel |
+| [`deckEditorCardImage.ts`](../../frontend/src/features/deck-editor/deckEditorCardImage.ts) | Shared `CardImage` loading props (grid + draw hand) |
 | [`useDrawHandScale.ts`](../../frontend/src/features/deck-editor/useDrawHandScale.ts) | Desktop `ResizeObserver` scale |
 | [`deckCardCatalog.ts`](../../frontend/src/lib/decks/deckCardCatalog.ts) | Catalog index build + `resolveDeckCatalogCard`, `deckCardDisplayName` |
 | [`CardImage`](../../frontend/src/components/CardImage/CardImage.tsx) | Thumb → full-res fallback; `onImageFailed` for missing-art label |
@@ -129,7 +130,7 @@ Deck rows from `GET /decks/:id/full` carry only `{ type, cardId, quantity }` —
 - **`resolveDeckCatalogCard`** — tries normalized key, raw key, then id-only.
 - **`deckCardDisplayName`** — `entry.name` → catalog name → `Unknown {Type} card` (never generic `"Card"`).
 
-**Images**: `entry.defaultImage` (alternate art on instance) → `imagePathFromCard(catalog)` → `CardImage` with deck-grid thumbnail policy (thumbs except locations/events; thumb failure falls back to full-res).
+**Images**: `entry.defaultImage` (alternate art on instance) → `imagePathFromCard(catalog)` → `CardImage` with the same loading policy as the deck grid via [`deckEditorCardImage.ts`](../../frontend/src/features/deck-editor/deckEditorCardImage.ts): portrait types use progressive thumb → full-res (`progressive`, `progressiveSessionScope="deck-editor"`, `card-image--contain`); locations/events use full-res only. Events in Draw Hand use single-layer full-res inside `.draw-hand__event-rotate` (rotation, not progressive).
 
 **Missing art**: `.draw-hand__missing-art` shows the resolved card name under the tile; `title` / `aria-label` on the image button match.
 

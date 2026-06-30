@@ -107,6 +107,7 @@ import { useDeckCardDetailHistory } from '../../lib/layout/useDeckCardDetailHist
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
 import './DeckEditorPage.css';
 
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
@@ -115,11 +116,6 @@ function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   if (catalogType === 'locations') return 'deck-editor__card-img--locations';
   if (catalogType === 'events') return 'deck-editor__card-img--events';
   return 'deck-editor__card-img--portrait';
-}
-
-/** Location/event thumbs bake contain letterbox incompatible with cover framing. */
-function deckEditorUsesThumbnail(catalogType?: CatalogType): boolean {
-  return catalogType !== 'locations' && catalogType !== 'events';
 }
 
 const DECK_STAT_ROWS: Array<{
@@ -1213,11 +1209,7 @@ export default function DeckEditorPage() {
                             imagePath={imagePath}
                             catalogType={catalogType}
                             alt={cardName}
-                            useThumbnail={deckEditorUsesThumbnail(catalogType)}
-                            progressive={deckEditorUsesThumbnail(catalogType)}
-                            progressiveSessionScope="deck-editor"
-                            loading="eager"
-                            className="card-image--contain"
+                            {...deckEditorCardImageLoadingProps(catalogType)}
                             isFoil={entryIsFoil}
                             foilSeed={foilSeed}
                           />

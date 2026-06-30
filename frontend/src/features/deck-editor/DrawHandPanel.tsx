@@ -17,12 +17,8 @@ import {
 } from '../../lib/decks/deckCardCatalog';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { useDrawHandScale } from './useDrawHandScale';
+import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
 import './DrawHandPanel.css';
-
-/** Match deck grid: thumbs for portrait types; locations/events use full-res. */
-function drawHandUsesThumbnail(catalogType?: CatalogType): boolean {
-  return catalogType !== 'locations' && catalogType !== 'events';
-}
 
 function resolveDrawHandImagePath(
   entry: DeckCardEntry,
@@ -211,9 +207,7 @@ export function DrawHandPanel({
                             imagePath={imagePath}
                             alt={cardName}
                             catalogType={catalogType}
-                            useThumbnail={drawHandUsesThumbnail(catalogType)}
-                            loading="eager"
-                            className="card-image--contain"
+                            {...deckEditorCardImageLoadingProps(catalogType)}
                             onImageFailed={() => markImageFailed(index)}
                             isFoil={entryIsFoil}
                             foilSeed={foilSeed}

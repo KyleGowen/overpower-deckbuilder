@@ -262,6 +262,7 @@ Top slide-out overlay ([`DrawHandPanel.css`](frontend/src/features/deck-editor/D
 | Trigger active (`.deck-editor__actions .btn-ghost.is-active`) | `--color-accent-bright` text, `--color-border-accent` border, `rgba(0, 200, 232, 0.08)` background |
 | Panel (`.draw-hand-slideout`) | `SlideOutPanel` `side="top"`; `max-height: 70vh` desktop, `55vh` mobile |
 | Card slot width | `--deck-editor-portrait-col`: **210px** desktop, **165px** mobile (`DeckEditorPage.css`) |
+| Portrait card art | Same progressive thumb → full-res as deck grid (`deckEditorCardImage.ts`; events excepted — rotated landscape in `.draw-hand__event-rotate`) |
 | Row gap | `var(--space-4)` between slots |
 | Event rotation | `.draw-hand__event-rotate` — landscape art `rotate(-90deg)` in portrait slot |
 | Missing art label (`.draw-hand__missing-art`) | `--font-size-xs`, `--color-text-muted`, ellipsis |
