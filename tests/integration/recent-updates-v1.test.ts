@@ -21,9 +21,10 @@ describe('GET /api/v1/recent-updates', () => {
 
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(3);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(5);
 
     const row = res.body.data[0];
+    expect(row.title).toBe('The Community Deck Section');
     expect(typeof row.id).toBe('string');
     expect(typeof row.title).toBe('string');
     expect(typeof row.type).toBe('string');

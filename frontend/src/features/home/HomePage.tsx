@@ -1,16 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import { fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchCommunityFeed } from '../../lib/api/favorites';
 import { fetchCatalog } from '../../lib/api/catalog';
-import { fetchRecentUpdates } from '../../lib/api/recent-updates';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
-import { resolveThumbUrl, assetUrl } from '../../lib/images/cardImages';
+import { assetUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
+import { RecentUpdatesList } from './RecentUpdatesList';
+import { useRecentUpdates } from './useRecentUpdates';
 import {
   IconUsers,
   IconTrophy,
@@ -20,11 +21,14 @@ import {
 } from '../../components/icons';
 import type { DeckListItem } from '../../lib/api/types';
 import './HomePage.css';
+import './recentUpdates.css';
 
 const HERO_BANNER = '/src/resources/images/home/home-hero.png';
 const HERO_BANNER_2X = '/src/resources/images/home/home-hero-2x.png';
 /** Max tiles in the Home community rail (feed returns up to 20). */
 const HOME_COMMUNITY_RAIL_LIMIT = 12;
+/** Max update tiles on the Home Recent Updates rail. */
+const HOME_RECENT_UPDATES_LIMIT = 3;
 
 const HOME_COMMUNITY_FEED_KEY = ['decks', 'community-feed', ''] as const;
 
@@ -190,23 +194,10 @@ function DeckRail({
   );
 }
 
-function formatUpdateTypeLabel(type: string): string {
-  if (type === 'new_cards') return 'NEW CARDS';
-  return type.replace(/_/g, ' ').toUpperCase();
-}
-
 function NewsSection() {
-  // Single-open accordion: clicking a tile expands it horizontally to reveal the
-  // full summary and collapses any previously open tile.
-  const [openId, setOpenId] = useState<string | null>(null);
-  const updatesQuery = useQuery({
-    queryKey: ['recent-updates'],
-    queryFn: () => fetchRecentUpdates(),
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id));
+  const updatesQuery = useRecentUpdates();
   const updates = updatesQuery.data ?? [];
+  const railUpdates = updates.slice(0, HOME_RECENT_UPDATES_LIMIT);
 
   return (
     <section className="home__section">
@@ -215,6 +206,9 @@ function NewsSection() {
           <span className="home__section-icon"><IconSparkles /></span>
           Recent Updates
         </h2>
+        {updates.length > HOME_RECENT_UPDATES_LIMIT ? (
+          <Link className="home__view-all" to="/home/updates">View All <IconChevronRight /></Link>
+        ) : null}
       </header>
 
       {updatesQuery.isLoading ? (
@@ -226,46 +220,7 @@ function NewsSection() {
           icon={<IconSparkles />}
         />
       ) : (
-        <div className="home__news">
-          {updates.map((item) => {
-            const isOpen = openId === item.id;
-            const typeLabel = formatUpdateTypeLabel(item.type);
-            const typeClass = item.type.replace(/_/g, '-');
-            return (
-              <button
-                type="button"
-                className={`home__news-item${isOpen ? ' home__news-item--open' : ''}`}
-                key={item.id}
-                aria-expanded={isOpen}
-                onClick={() => toggle(item.id)}
-              >
-                <div className="home__news-thumb">
-                  {item.cardImageUrl ? (
-                    <img src={resolveThumbUrl(item.cardImageUrl)} alt="" loading="lazy" draggable={false} />
-                  ) : (
-                    <span className="home__news-thumb-icon"><IconSparkles /></span>
-                  )}
-                </div>
-                <div className="home__news-body">
-                  <span className={`home__news-tag home__news-tag--${typeClass}`}>
-                    {typeLabel}
-                  </span>
-                  <h3 className="home__news-title">{item.title}</h3>
-                  <p className={`home__news-summary home__news-summary--${isOpen ? 'expanded' : 'clamped'}`}>
-                    {item.description}
-                  </p>
-                  <span className="home__news-date">
-                    {new Date(item.createdAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        <RecentUpdatesList updates={railUpdates} layout="rail" />
       )}
     </section>
   );

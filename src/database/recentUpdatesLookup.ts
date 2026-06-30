@@ -21,7 +21,7 @@ export async function listRecentUpdates(
     const result = await client.query<RecentUpdateRow>(
       `SELECT id, title, type, description, card_image_url, created_at, updated_at
        FROM recent_updates
-       ORDER BY created_at DESC`
+       ORDER BY updated_at DESC`
     );
     return result.rows;
   } finally {

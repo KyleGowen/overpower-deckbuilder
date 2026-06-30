@@ -23,6 +23,7 @@ guide describes the dark, neon, card-game-companion theme derived from the mocks
 10. [Motion](#motion)
 11. [Per-Screen Notes](#per-screen-notes)
 12. [Database Filter Rail](#database-filter-rail)
+13. [Home Recent Updates](#home-recent-updates)
 
 ---
 
@@ -231,6 +232,7 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
 Each screen has a companion doc in its feature folder:
 - Login — [`frontend/src/features/login/LoginPage.md`](frontend/src/features/login/LoginPage.md)
 - Home — [`frontend/src/features/home/HomePage.md`](frontend/src/features/home/HomePage.md)
+- Home Recent Updates list — [`frontend/src/features/home/HomeUpdatesPage.md`](frontend/src/features/home/HomeUpdatesPage.md)
 - Database (DBV) — [`frontend/src/features/database/DatabasePage.md`](frontend/src/features/database/DatabasePage.md)
 - Collection — [`frontend/src/features/collection/CollectionPage.md`](frontend/src/features/collection/CollectionPage.md)
 - Deck Selection — [`frontend/src/features/deck-selection/DeckSelectionPage.md`](frontend/src/features/deck-selection/DeckSelectionPage.md)
@@ -317,3 +319,26 @@ Always-visible per-type filter rail on DBV (`/data`), inserted between `.db__typ
 
 **Layout:** Controls scroll horizontally on narrow viewports; mobile icon/stat tap targets
 are **44px** under `.layout-mobile`. Trailing chips + Clear sit at the rail end.
+
+## Home Recent Updates
+
+News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Shared styles in
+[`recentUpdates.css`](frontend/src/features/home/recentUpdates.css); components
+[`RecentUpdateTile.tsx`](frontend/src/features/home/RecentUpdateTile.tsx),
+[`RecentUpdatesList.tsx`](frontend/src/features/home/RecentUpdatesList.tsx).
+
+| Element | Tokens / values |
+|---|---|
+| Section View All (`.home__view-all`) | `--color-accent-bright`, `--font-size-sm`, semibold; matches deck rails |
+| Tile (`.home__news-item`) | `--color-bg-panel` fill, `--color-border` border, `--radius-lg`, `134px` height on desktop rail |
+| Open tile (`.home__news-item--open`) | `flex-grow: 2.4` (horizontal expand on desktop rail) |
+| Thumbnail (`.home__news-thumb`) | `72×72px`, `--radius-md`, `object-position: center 22%` |
+| Type badge (`.home__news-tag`) | `10px` bold caps; default accent soft; `.home__news-tag--feature` uses `--color-info` |
+| Summary clamped (`.home__news-summary--clamped`) | `-webkit-line-clamp: 2` |
+| Summary expanded (`.home__news-summary--expanded`) | `-webkit-line-clamp: 6` |
+| Date (`.home__news-date`) | `--font-size-xs`, `--color-text-dim`; displays `updatedAt` |
+| Stacked list (`.recent-updates-list--stacked`) | Full-width column, `height: auto`, vertical expand — used on `/home/updates` and mobile home rail |
+| Updates page shell (`.home-updates__inner`) | `--content-max-width`, `--space-6` padding; pagination in `.home-updates__pagination` with `--space-4` top margin |
+
+**Home rail:** shows 3 newest tiles; View All appears when total count exceeds 3.
+**Updates page:** 10 tiles per page via shared `Pagination`; no global nav entry.

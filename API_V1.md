@@ -609,7 +609,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** `data` is an array of objects (newest `createdAt` first):
+**Response 200:** `data` is an array of objects (newest `updatedAt` first):
 
 ```json
 {

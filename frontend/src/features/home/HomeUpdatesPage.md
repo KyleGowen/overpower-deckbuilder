@@ -1,0 +1,18 @@
+# Recent Updates list (`/home/updates`)
+
+Full paginated list of hand-maintained feature/update cards. Reachable only via **View All** on the Home Recent Updates rail (no global nav link).
+
+## Data
+- Same source as Home: `GET /api/v1/recent-updates` via `useRecentUpdates()` (`['recent-updates']` query key).
+- Sorted by `updatedAt` descending (server-side).
+
+## Layout
+- Vertical stacked accordion tiles (`RecentUpdatesList` with `layout="stacked"`).
+- Reuses `RecentUpdateTile` from the Home rail.
+- **10 updates per page**; shared `Pagination` component when total exceeds page size.
+- Page change scrolls to top (`window.scrollTo({ top: 0 })`).
+
+## Files
+- [`HomeUpdatesPage.tsx`](./HomeUpdatesPage.tsx) — page shell
+- [`HomeUpdatesPage.css`](./HomeUpdatesPage.css) — page spacing
+- [`RecentUpdateTile.tsx`](./RecentUpdateTile.tsx), [`RecentUpdatesList.tsx`](./RecentUpdatesList.tsx), [`recentUpdates.css`](./recentUpdates.css)

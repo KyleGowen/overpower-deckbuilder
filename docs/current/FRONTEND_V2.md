@@ -39,7 +39,7 @@ Defined in [`frontend/src/app/router.tsx`](../../frontend/src/app/router.tsx):
 - `/login` — standalone (no shell).
 - `ShelledLayout` (`ProtectedRoute` + `AppShell`) wraps:
   - `/` → redirects to `/home`
-  - `/home`, `/data`, `/community`, `/users/:userId/decks`, `/users/:userId/collection`
+  - `/home`, `/home/updates`, `/data`, `/community`, `/users/:userId/decks`, `/users/:userId/collection`
 - `/users/:userId/decks/:deckId` — Deck Editor, its **own** chrome (no AppShell) and
   **unguarded** so read-only/shared deck links work for signed-out visitors.
   **Simulate KO** (client-only character knockout simulation): see
