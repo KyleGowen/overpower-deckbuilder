@@ -14,7 +14,8 @@ The Home "Tournament Winning Decks" rail shows decks owned by the internal **`to
   `tournamentDecksUserId` on Home, rendered as `DeckTile`s.
 
 ## Managing tournament decks
-- **Initial seed:** `npm run seed:tournament-decks` (fixtures in `data/seeds/tournament-decks/`)
+- **Production seed (Flyway):** `migrations/V288__Seed_tournament_decks.sql` seeds all decks owned by the local `tournament_decks` user at generation time (currently 7). Idempotent by deck name. Regenerate after local adds/edits with `npm run generate:tournament-deck-migration`.
+- **Local seed (Node):** `npm run seed:tournament-decks` imports JSON fixtures from `data/seeds/tournament-decks/` (2 files; skips if `tournament_decks` already owns any deck)
 - **Import via Cursor skill:** `.cursor/skills/add-tournament-deck/SKILL.md` — paste exported deck JSON v2.0
 - **CLI:** `npm run import:tournament-deck -- path/to/export.json`
 - **Manual edit:** log in as `tournament_decks` (password in migration `V280`) and use the normal deck editor

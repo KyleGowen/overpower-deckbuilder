@@ -75,6 +75,7 @@
     "import:community-deck": "ts-node scripts/import-community-deck.ts",
     "import:tournament-deck": "ts-node scripts/import-tournament-deck.ts",
     "seed:tournament-decks": "ts-node scripts/seed-tournament-decks.ts",
+    "generate:tournament-deck-migration": "ts-node scripts/generate-tournament-deck-migration.ts",
     "migrate:data": "ts-node src/scripts/migrateCardData.ts",
     "backfill:deck-validity": "ts-node src/scripts/backfillDeckValidity.ts",
     "generate:sql-migrations": "ts-node src/scripts/generateSqlDataMigrations.ts",
