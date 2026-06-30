@@ -6,6 +6,7 @@
 
 ## Current Usage
 - `append-firebase-env.json` is used by deploy workflow SSM commands to append Firebase-related environment settings on EC2.
+- `wait-ssm-command.sh` polls SSM Run Command status (replaces invalid `aws ssm wait --max-attempts` flags).
 
 ## Conventions
 - Keep payload files deterministic and environment-safe.
