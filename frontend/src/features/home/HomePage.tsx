@@ -65,6 +65,10 @@ export default function HomePage() {
     navigate(`/users/${m.userId}/decks/${m.id}?readonly=true`);
   };
 
+  const openProfile = (deck: DeckListItem) => {
+    navigate(`/users/${deck.metadata.userId}/decks`);
+  };
+
   return (
     <div className="home">
       <div className="home__inner">
@@ -106,6 +110,7 @@ export default function HomePage() {
           emptyMessage="Community decks will appear here as they are shared."
           missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}
+          onOwnerClick={openProfile}
         />
 
         <DeckRail
@@ -134,6 +139,7 @@ interface DeckRailProps {
   emptyMessage: string;
   missionSetByCardId: Map<string, string>;
   onOpen: (deck: DeckListItem) => void;
+  onOwnerClick?: (deck: DeckListItem) => void;
 }
 
 function DeckRail({
@@ -146,6 +152,7 @@ function DeckRail({
   emptyMessage,
   missionSetByCardId,
   onOpen,
+  onOwnerClick,
 }: DeckRailProps) {
   return (
     <section className="home__section">
@@ -171,6 +178,8 @@ function DeckRail({
                 deck={deck}
                 variant="compact"
                 missionSetName={deckMissionSetName(deck, missionSetByCardId)}
+                ownerName={onOwnerClick ? (deck.metadata.ownerDisplayName ?? null) : undefined}
+                onOwnerClick={onOwnerClick ? () => onOwnerClick(deck) : undefined}
                 onOpen={() => onOpen(deck)}
               />
             </div>
