@@ -947,6 +947,14 @@ jobs:
       cancel-in-progress: false
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        sparse-checkout: |
+          .github/scripts
+        sparse-checkout-cone-mode: false
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
