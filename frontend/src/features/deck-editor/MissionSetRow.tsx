@@ -8,7 +8,7 @@ export interface MissionSetRowProps {
   missionSet: MissionSet;
   qtyInDeck: (card: CatalogCard) => number;
   missionLimitReached: boolean;
-  renderOverlay: (inDeck: number) => ReactNode;
+  renderOverlay: (card: CatalogCard, inDeck: number) => ReactNode;
   onAddMission: (card: CatalogCard) => void;
   onAddSet: () => void;
 }
@@ -55,7 +55,7 @@ export function MissionSetRow({
               catalogType="missions"
               showMeta={false}
               onClick={() => onAddMission(card)}
-              overlay={renderOverlay(inDeck)}
+              overlay={renderOverlay(card, inDeck)}
             />
           );
         })}

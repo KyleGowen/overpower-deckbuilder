@@ -1297,6 +1297,7 @@ export default function DeckEditorPage() {
           onClose={() => setAddOpen(false)}
           onAdd={addCard}
           onAddStack={addStack}
+          onRemoveInstance={removeDeckInstance}
           cards={cards}
           deckCatalogIndex={cardIndex}
         />

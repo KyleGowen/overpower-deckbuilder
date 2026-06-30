@@ -676,25 +676,6 @@
 .add-cards__grid--landscape {
   grid-template-columns: repeat(2, 1fr);
 }
-.add-cards__badge,
-.add-cards__add {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  background: var(--color-bg-scrim);
-}
-.add-cards__badge {
-  color: var(--color-success);
-  border: 1px solid rgba(54, 211, 153, 0.5);
-}
-.add-cards__add {
-  color: var(--color-accent-bright);
-  border: 1px solid var(--color-border-accent);
-}
 .add-cards__pagination {
   margin-top: var(--space-2);
   flex-direction: column;

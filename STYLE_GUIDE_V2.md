@@ -282,6 +282,18 @@ Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailP
 | Apply (`.card-detail__printing-apply`) | `--color-accent` border/text; `--radius-sm`; hover fills accent |
 | Current / disabled (`.card-detail__printing-apply--current`) | `opacity: 0.45`; `--color-border` border; `--color-text-muted` text; `cursor: not-allowed` |
 
+### Deck Editor — Add Cards quantity overlay
+Top-right overlay on Add Cards catalog tiles ([`AddCardsQtyOverlay.css`](frontend/src/features/deck-editor/AddCardsQtyOverlay.css)). Positioned via `.card-tile__overlay`.
+
+| State | Class | Visual |
+|---|---|---|
+| Zero in deck | `.add-cards__add` | `--color-bg-scrim` fill, `--color-accent-bright` `+`, `1px solid var(--color-border-accent)`, `--radius-full`, `--font-size-xs`, bold; `padding: 2px 8px` (mobile: `4px 10px`) |
+| One or more | `.add-cards__qty` | `--color-bg-scrim` fill, `1px solid rgba(54, 211, 153, 0.5)`, `--radius-full`, inline-flex, `gap: 2px`, `padding: 2px 4px` |
+| − / + buttons | `.add-cards__qty-btn` | 20×20 desktop, 28×28 mobile; transparent bg, `--color-text`; hover: `rgba(255,255,255,0.12)` + `--color-accent-bright`; disabled: `opacity: 0.35` |
+| Count | `.add-cards__qty-value` | `--font-size-xs`, bold, `--color-text`, read-only (no input) |
+
+Mobile swipe: `.add-cards__qty` and `.add-cards__add` are in `ADD_CARDS_SWIPE_BLOCK_SELECTOR` so tab swipes do not fire when adjusting quantity.
+
 ### Deck Editor — Instance tiles
 Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash on every type; **Save** aggregates instances by `(type, cardId)` for the API.
 

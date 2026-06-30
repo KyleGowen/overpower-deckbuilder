@@ -209,3 +209,21 @@ export function qtyInDeckForRepresentative(
     .filter((c) => c.type === deckType && variantSet.has(c.cardId))
     .reduce((sum, c) => sum + c.quantity, 0);
 }
+
+/** Last-added deck instance id for any variant in the representative's group (LIFO). */
+export function findLastInstanceIdForRepresentative(
+  representative: CatalogCard,
+  deckCards: { type: string; cardId: string; instanceId: string }[],
+  deckType: string,
+  variantIdsByRepresentative: Map<string, string[]>,
+): string | null {
+  const variantIds = variantIdsByRepresentative.get(representative.id) ?? [representative.id];
+  const variantSet = new Set(variantIds);
+  for (let i = deckCards.length - 1; i >= 0; i--) {
+    const entry = deckCards[i];
+    if (entry.type === deckType && variantSet.has(entry.cardId)) {
+      return entry.instanceId;
+    }
+  }
+  return null;
+}

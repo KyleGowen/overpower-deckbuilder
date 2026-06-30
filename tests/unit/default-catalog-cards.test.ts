@@ -3,6 +3,7 @@ import {
   dedupeToDefaultCatalogCards,
   isAlternateArtCard,
   prepareAddCardsCatalogList,
+  findLastInstanceIdForRepresentative,
   qtyInDeckForRepresentative,
   resolveDefaultCardForDeckAdd,
 } from '../../frontend/src/lib/catalog/defaultCatalogCards';
@@ -301,6 +302,40 @@ describe('defaultCatalogCards', () => {
       );
 
       expect(qty).toBe(1);
+    });
+  });
+
+  describe('findLastInstanceIdForRepresentative', () => {
+    it('returns the last-added instance id among variant ids in the group', () => {
+      const representative = card('base', { name: 'Dracula' });
+      const variantMap = new Map([['base', ['base', 'alt']]]);
+
+      const id = findLastInstanceIdForRepresentative(
+        representative,
+        [
+          { type: 'character', cardId: 'base', instanceId: 'inst-1' },
+          { type: 'character', cardId: 'alt', instanceId: 'inst-2' },
+          { type: 'power', cardId: 'alt', instanceId: 'inst-3' },
+        ],
+        'character',
+        variantMap,
+      );
+
+      expect(id).toBe('inst-2');
+    });
+
+    it('returns null when no matching instances exist', () => {
+      const representative = card('base', { name: 'Dracula' });
+      const variantMap = new Map([['base', ['base']]]);
+
+      const id = findLastInstanceIdForRepresentative(
+        representative,
+        [{ type: 'power', cardId: 'base', instanceId: 'inst-1' }],
+        'character',
+        variantMap,
+      );
+
+      expect(id).toBeNull();
     });
   });
 });

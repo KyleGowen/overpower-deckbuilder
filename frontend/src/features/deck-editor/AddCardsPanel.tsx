@@ -8,17 +8,20 @@ import {
   type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import {
+  findLastInstanceIdForRepresentative,
   prepareAddCardsCatalogList,
   qtyInDeckForRepresentative,
 } from '../../lib/catalog/defaultCatalogCards';
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
+import { isOnePerDeckCatalogCard } from '../../lib/decks/deckCardControls';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { CardTile } from '../../components/CardTile';
 import { Pagination } from '../../components/Pagination';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
-import { IconSearch, IconPlus, IconCheck, IconClose } from '../../components/icons';
+import { IconSearch, IconClose } from '../../components/icons';
+import { AddCardsQtyOverlay } from './AddCardsQtyOverlay';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/types';
 import {
   ADD_CARDS_STACKS_PAGE_SIZE,
@@ -86,24 +89,10 @@ export interface AddCardsPanelProps {
   onClose: () => void;
   onAdd: (card: CatalogCard, type: CatalogType) => void;
   onAddStack: (entries: StackCardEntry[]) => void;
+  onRemoveInstance: (instanceId: string) => void;
   cards: DeckCardEntry[];
   /** Resolved catalog rows for deck cards (`${deckType}:${cardId}`), from DeckEditorPage. */
   deckCatalogIndex?: Map<string, CatalogCard>;
-}
-
-function cardTileOverlay(inDeck: number) {
-  if (inDeck > 0) {
-    return (
-      <span className="add-cards__badge">
-        <IconCheck /> {inDeck}
-      </span>
-    );
-  }
-  return (
-    <span className="add-cards__add">
-      <IconPlus />
-    </span>
-  );
 }
 
 export function AddCardsPanel({
@@ -111,6 +100,7 @@ export function AddCardsPanel({
   onClose,
   onAdd,
   onAddStack,
+  onRemoveInstance,
   cards,
   deckCatalogIndex,
 }: AddCardsPanelProps) {
@@ -437,6 +427,29 @@ export function AddCardsPanel({
     return qtyInDeckForRepresentative(card, catalogType, cards, deckType, variantMap);
   };
 
+  const maxCopiesForCard = (card: CatalogCard) => (isOnePerDeckCatalogCard(card) ? 1 : 99);
+
+  const handleAddCard = (card: CatalogCard, catalogType: CatalogType) => {
+    if (qtyInDeck(card, catalogType) >= maxCopiesForCard(card)) return;
+    onAdd(card, catalogType);
+  };
+
+  const handleRemoveCard = (card: CatalogCard, catalogType: CatalogType) => {
+    const deckType = CATALOG_TYPE_BY_SLUG[catalogType].deckType;
+    const variantMap = variantLookupByType.get(catalogType) ?? new Map<string, string[]>();
+    const instanceId = findLastInstanceIdForRepresentative(card, cards, deckType, variantMap);
+    if (instanceId) onRemoveInstance(instanceId);
+  };
+
+  const renderQtyOverlay = (card: CatalogCard, catalogType: CatalogType) => (
+    <AddCardsQtyOverlay
+      value={qtyInDeck(card, catalogType)}
+      max={maxCopiesForCard(card)}
+      onIncrement={() => handleAddCard(card, catalogType)}
+      onDecrement={() => handleRemoveCard(card, catalogType)}
+    />
+  );
+
   const stackInDeckCount = (stack: CharacterStack) =>
     stackCardsInAddOrder(stack).filter(({ card, catalogType }) => qtyInDeck(card, catalogType) > 0)
       .length;
@@ -569,8 +582,8 @@ export function AddCardsPanel({
                 missionSet={set}
                 qtyInDeck={(card) => qtyInDeck(card, 'missions')}
                 missionLimitReached={missionLimitReached}
-                renderOverlay={cardTileOverlay}
-                onAddMission={(card) => onAdd(card, 'missions')}
+                renderOverlay={(card, _inDeck) => renderQtyOverlay(card, 'missions')}
+                onAddMission={(card) => handleAddCard(card, 'missions')}
                 onAddSet={() => handleAddMissionSet(set)}
               />
             ))}
@@ -586,15 +599,14 @@ export function AddCardsPanel({
                 <div className={addCardsGridClassName(block.meta.type)}>
                   {block.cards.map((card) => {
                     const catalogType = block.meta.type;
-                    const inDeck = qtyInDeck(card, catalogType);
                     return (
                       <CardTile
                         key={`${catalogType}-${card.id}`}
                         card={card}
                         catalogType={catalogType}
                         showMeta={false}
-                        onClick={() => onAdd(card, catalogType)}
-                        overlay={cardTileOverlay(inDeck)}
+                        onClick={() => handleAddCard(card, catalogType)}
+                        overlay={renderQtyOverlay(card, catalogType)}
                       />
                     );
                   })}
@@ -606,15 +618,14 @@ export function AddCardsPanel({
           <div className={addCardsGridClassName(activeType!)}>
             {pageTypeCards.map((card) => {
               const catalogType = activeType!;
-              const inDeck = qtyInDeck(card, catalogType);
               return (
                 <CardTile
                   key={card.id}
                   card={card}
                   catalogType={catalogType}
                   showMeta={false}
-                  onClick={() => onAdd(card, catalogType)}
-                  overlay={cardTileOverlay(inDeck)}
+                  onClick={() => handleAddCard(card, catalogType)}
+                  overlay={renderQtyOverlay(card, catalogType)}
                 />
               );
             })}

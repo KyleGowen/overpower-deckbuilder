@@ -50,6 +50,8 @@ describe('ADD_CARDS_SWIPE_BLOCK_SELECTOR', () => {
     expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.add-cards__search');
     expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.add-cards__filters');
     expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.add-cards__pagination');
+    expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.add-cards__qty');
+    expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.add-cards__add');
     expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.slideout__header');
     expect(ADD_CARDS_SWIPE_BLOCK_SELECTOR).toContain('.slideout__footer');
   });
