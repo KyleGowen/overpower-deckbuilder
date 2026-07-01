@@ -23,16 +23,23 @@ export function buildFoilCardMapLookup(entries: FoilMapEntry[]): FoilCardMapLook
 }
 
 /**
- * One row per logical card: hide foil duplicates when the base row is in the same catalog list.
- * Foil-only promos (no base row) remain visible.
+ * One row per logical card: hide foil duplicates when the mapped base row is in the
+ * same catalog list **and the same set** (e.g. ERB base + ERB foil in one view).
+ * Cross-set foil promos (TFCP foil → ERB base via foil_card_map) stay visible as
+ * their own tile — e.g. TFCP 7 - Combat foil art alongside 7_combat_2.jpg.
  */
 export function dedupeFoilCatalogCards(cards: CatalogCard[], foilToBase: Map<string, string>): CatalogCard[] {
-  const baseIds = new Set(cards.filter((c) => !isFoilCard(c)).map((c) => c.id));
+  const baseById = new Map(
+    cards.filter((c) => !isFoilCard(c)).map((c) => [c.id, c] as const),
+  );
   return cards.filter((card) => {
     if (!isFoilCard(card)) return true;
     const baseId = foilToBase.get(card.id);
     if (!baseId) return true;
-    return !baseIds.has(baseId);
+    const base = baseById.get(baseId);
+    if (!base) return true;
+    if (String(base.set ?? '') !== String(card.set ?? '')) return true;
+    return false;
   });
 }
 

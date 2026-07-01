@@ -1,4 +1,5 @@
 import type { CatalogCard } from '../../frontend/src/lib/api/types';
+import { dedupeFoilCatalogCards } from '../../frontend/src/lib/catalog/foilCatalog';
 import {
   dedupeToDefaultCatalogCards,
   isAlternateArtCard,
@@ -34,6 +35,30 @@ describe('defaultCatalogCards', () => {
       const result = prepareAddCardsCatalogList([base, foil, foilOnly], 'characters', foilToBase);
 
       expect(result.cards.map((c) => c.id).sort()).toEqual(['base-1', 'foil-only']);
+    });
+
+    it('keeps cross-set foil promo when mapped ERB base is in the same catalog list', () => {
+      const erbBase = card('erb-7c', {
+        name: '7 - Combat',
+        set: 'ERB',
+        is_foil: false,
+      });
+      const tfcpFoil = card('tfcp-7c-foil', {
+        name: '7 - Combat',
+        set: 'TFCP',
+        is_foil: true,
+        image_path: 'tfacp/power/7_combat.png',
+      });
+      const tfcpAlt = card('tfcp-7c-2', {
+        name: '7 - Combat',
+        set: 'TFCP',
+        image_path: 'tfacp/power/7_combat_2.jpg',
+      });
+      const foilToBase = new Map([['tfcp-7c-foil', 'erb-7c']]);
+
+      const deduped = dedupeFoilCatalogCards([erbBase, tfcpFoil, tfcpAlt], foilToBase);
+
+      expect(deduped.map((c) => c.id).sort()).toEqual(['erb-7c', 'tfcp-7c-2', 'tfcp-7c-foil']);
     });
   });
 
