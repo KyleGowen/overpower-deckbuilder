@@ -50,13 +50,38 @@ WHERE card_type = 'power'
         AND is_foil = FALSE
   );
 
+-- Merge collection quantities before card_id remaps (avoids collection_cards_unique violations).
+UPDATE collection_cards foil_row
+SET quantity = foil_row.quantity + dup.quantity,
+    updated_at = NOW()
+FROM collection_cards dup
+JOIN power_cards foil
+  ON foil.set = 'TFCP'
+ AND foil.image_path = 'tfacp/power/7_combat.png'
+ AND foil.is_foil = TRUE
+WHERE foil_row.collection_id = dup.collection_id
+  AND foil_row.card_type = dup.card_type
+  AND foil_row.card_type = 'power'
+  AND foil_row.card_id = foil.id
+  AND dup.card_id IN (
+      SELECT id FROM power_cards
+      WHERE set = 'TFCP'
+        AND image_path = 'tfacp/power/7_combat.png'
+        AND is_foil = FALSE
+  )
+  AND (
+    dup.image_path = 'tfacp/power/7_combat.png'
+    OR dup.image_path LIKE '%/tfacp/power/7_combat.png'
+  );
+
 DELETE FROM collection_cards
-WHERE card_id IN (
-    SELECT id FROM power_cards
-    WHERE set = 'TFCP'
-      AND image_path = 'tfacp/power/7_combat.png'
-      AND is_foil = FALSE
-);
+WHERE card_type = 'power'
+  AND card_id IN (
+      SELECT id FROM power_cards
+      WHERE set = 'TFCP'
+        AND image_path = 'tfacp/power/7_combat.png'
+        AND is_foil = FALSE
+  );
 
 UPDATE collection_cards cc
 SET card_id = foil.id,
@@ -66,7 +91,18 @@ WHERE foil.set = 'TFCP'
   AND foil.image_path = 'tfacp/power/7_combat.png'
   AND foil.is_foil = TRUE
   AND cc.card_type = 'power'
-  AND cc.image_path = 'tfacp/power/7_combat.png';
+  AND cc.card_id IS DISTINCT FROM foil.id
+  AND (
+    cc.image_path = 'tfacp/power/7_combat.png'
+    OR cc.image_path LIKE '%/tfacp/power/7_combat.png'
+  )
+  AND NOT EXISTS (
+      SELECT 1 FROM collection_cards existing
+      WHERE existing.collection_id = cc.collection_id
+        AND existing.card_type = cc.card_type
+        AND existing.card_id = foil.id
+        AND existing.image_path = cc.image_path
+  );
 
 DELETE FROM foil_card_map
 WHERE foil_card_id IN (
@@ -81,10 +117,40 @@ OR base_card_id IN (
       AND is_foil = FALSE
 );
 
+-- Promote sole non-foil row when no foil sibling exists (repairs V292-only inserts).
+UPDATE power_cards
+SET
+    is_foil = TRUE,
+    name = '7 - Combat',
+    power_type = 'Combat',
+    value = 7,
+    set = 'TFCP',
+    one_per_deck = TRUE,
+    set_number = NULL,
+    set_number_foil = NULL,
+    rarity = NULL,
+    updated_at = NOW()
+WHERE set = 'TFCP'
+  AND image_path = 'tfacp/power/7_combat.png'
+  AND is_foil = FALSE
+  AND NOT EXISTS (
+      SELECT 1 FROM power_cards x
+      WHERE x.set = 'TFCP'
+        AND x.image_path = 'tfacp/power/7_combat.png'
+        AND x.is_foil = TRUE
+  );
+
+-- Delete non-foil only when a foil row already exists.
 DELETE FROM power_cards
 WHERE set = 'TFCP'
   AND image_path = 'tfacp/power/7_combat.png'
-  AND is_foil = FALSE;
+  AND is_foil = FALSE
+  AND EXISTS (
+      SELECT 1 FROM power_cards x
+      WHERE x.set = 'TFCP'
+        AND x.image_path = 'tfacp/power/7_combat.png'
+        AND x.is_foil = TRUE
+  );
 
 UPDATE power_cards
 SET
@@ -111,7 +177,6 @@ JOIN power_cards b
  AND b.value = 7
  AND b.set = 'ERB'
  AND b.is_foil = FALSE
- AND b.image_path = 'power-cards/7_combat.webp'
 WHERE f.set = 'TFCP'
   AND f.image_path = 'tfacp/power/7_combat.png'
   AND f.is_foil = TRUE
