@@ -1,6 +1,6 @@
 -- Add Community Deck and Mobile Layout feature updates; index updated_at for sort order.
 
-CREATE INDEX idx_recent_updates_updated_at ON recent_updates(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_recent_updates_updated_at ON recent_updates(updated_at DESC);
 
 INSERT INTO recent_updates (id, title, type, description, card_image_url, created_at, updated_at) VALUES
     (
@@ -20,4 +20,5 @@ INSERT INTO recent_updates (id, title, type, description, card_image_url, create
         'characters/invisible_man.webp',
         '2026-06-28 12:00:00',
         '2026-06-28 12:00:00'
-    );
+    )
+ON CONFLICT (id) DO NOTHING;

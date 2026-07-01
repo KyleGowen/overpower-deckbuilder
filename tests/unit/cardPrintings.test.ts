@@ -90,5 +90,38 @@ describe('cardPrintings', () => {
 
       expect(printings.map((p) => p.id).sort()).toEqual(['base-1', 'foil-1']);
     });
+
+    it('includes TFCP foil-only promo and second non-foil printing for 7 Combat', () => {
+      const erbBase = card('erb-7c', {
+        name: '7 - Combat',
+        set: 'ERB',
+        power_type: 'Combat',
+        value: 7,
+        image_path: 'power-cards/7_combat.webp',
+      });
+      const tfcpFoil = card('tfcp-7c-foil', {
+        name: '7 - Combat',
+        set: 'TFCP',
+        power_type: 'Combat',
+        value: 7,
+        is_foil: true,
+        image_path: 'tfacp/power/7_combat.png',
+      });
+      const tfcpAlt = card('tfcp-7c-2', {
+        name: '7 - Combat',
+        set: 'TFCP',
+        power_type: 'Combat',
+        value: 7,
+        image_path: 'tfacp/power/7_combat_2.jpg',
+      });
+      const powerFoilLookup = buildFoilCardMapLookup([
+        { foilCardId: 'tfcp-7c-foil', baseCardId: 'erb-7c', cardType: 'power' },
+      ]);
+      const catalog = [erbBase, tfcpFoil, tfcpAlt];
+
+      const printings = collectPrintingsForCard(erbBase, 'power-cards', catalog, powerFoilLookup);
+
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-7c', 'tfcp-7c-2', 'tfcp-7c-foil']);
+    });
   });
 });

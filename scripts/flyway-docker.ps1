@@ -11,5 +11,5 @@ docker run --rm `
     -v "${Root}:/workspace" `
     -w /workspace `
     flyway/flyway:latest `
-    -configFiles=conf/flyway.docker.conf `
+    "-configFiles=conf/flyway.docker.conf" `
     $Command
