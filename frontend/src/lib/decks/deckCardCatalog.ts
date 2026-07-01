@@ -1,4 +1,10 @@
-import { cardDisplayName, compareDeckPowerCatalogCards, metaForDeckType } from '../catalog/catalogTypeMap';
+import {
+  cardCharacterName,
+  cardDisplayName,
+  compareDeckPowerCatalogCards,
+  compareCharacterNames,
+  metaForDeckType,
+} from '../catalog/catalogTypeMap';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../api/types';
 
 export type DeckCardIndex = Map<string, CatalogCard>;
@@ -65,6 +71,30 @@ export function sortDeckPowerEntries(
     if (!cardA || !cardB) return 0;
     return compareDeckPowerCatalogCards(cardA, cardB);
   });
+}
+
+/** Compare special deck entries: character name A→Z (Any Character last), then special name. */
+export function compareDeckSpecialEntries(
+  a: DeckCardEntry,
+  b: DeckCardEntry,
+  cardIndex: DeckCardIndex,
+): number {
+  const cardA = resolveDeckCatalogCard(a, cardIndex);
+  const cardB = resolveDeckCatalogCard(b, cardIndex);
+  const charCmp = compareCharacterNames(cardCharacterName(cardA), cardCharacterName(cardB));
+  if (charCmp !== 0) return charCmp;
+  return cardDisplayName(cardA).localeCompare(cardDisplayName(cardB), undefined, {
+    sensitivity: 'base',
+  });
+}
+
+/** Deck editor special section: character name then special card name (Any Character last). */
+export function sortDeckSpecialEntries(
+  entries: DeckCardEntry[],
+  cardIndex: DeckCardIndex,
+): DeckCardEntry[] {
+  if (entries.length <= 1) return entries;
+  return [...entries].sort((a, b) => compareDeckSpecialEntries(a, b, cardIndex));
 }
 
 /** Build lookup map for deck editor / draw hand (normalized keys + id-only). */

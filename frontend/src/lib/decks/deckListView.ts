@@ -184,11 +184,7 @@ export function aggregateDeckListRows(
   return rows.sort(compareListRowLabels);
 }
 
-function isAnyCharacterGroupName(name: string): boolean {
-  return name.trim().toLowerCase() === ANY_CHARACTER.toLowerCase();
-}
-
-/** Group special-card list rows by linked character (Any Character first). */
+/** Group special-card list rows by linked character (Any Character last). */
 export function groupSpecialCardsByCharacter(rows: DeckListRow[]): DeckListCharacterGroup[] {
   const byCharacter = new Map<string, DeckListRow[]>();
 
@@ -207,13 +203,7 @@ export function groupSpecialCardsByCharacter(rows: DeckListRow[]): DeckListChara
     });
   }
 
-  groups.sort((a, b) => {
-    const aAny = isAnyCharacterGroupName(a.characterName);
-    const bAny = isAnyCharacterGroupName(b.characterName);
-    if (aAny && !bAny) return -1;
-    if (!aAny && bAny) return 1;
-    return compareCharacterNames(a.characterName, b.characterName);
-  });
+  groups.sort((a, b) => compareCharacterNames(a.characterName, b.characterName));
 
   return groups;
 }

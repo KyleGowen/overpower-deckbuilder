@@ -60,12 +60,13 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 
 1. **Draw Hand** button in the sticky header (`.deck-editor__actions`). Disabled with tooltip when playable count &lt; 8.
 2. First click **opens** the panel and draws; button gets `.is-active`. Second click, **×**, or backdrop **closes** and clears the hand.
-3. **Drawn hand** panel: **Desktop** — slides down from the top (`SlideOutPanel` `side="top"`, `position="absolute"`); deck grid remains visible behind blurred scrim. **Mobile** — full-viewport overlay (`position="fixed"`, `100dvh`); deck chrome hidden behind opaque panel.
-4. **Desktop**: single horizontal row of 8–9 cards at deck-editor portrait width; `ResizeObserver` scales the row when the panel is narrower than the full hand. Drag-and-drop reorder on fine pointers.
-5. **Mobile** (`.layout-mobile`): vertical scroll through a **2-column grid** in the panel body; equal half-width portrait slots with 5% art inset; full-width **Draw again** footer.
-6. **Events** display landscape art rotated 90° CCW inside the portrait slot (draw-hand only).
-7. **Draw again** in the panel footer redraws without closing.
-8. Tapping a drawn card opens **CardDetailPanel** when catalog data resolves.
+3. After each draw or redraw, cards are **sorted for display** by deck-editor section order (`DECK_EDITOR_SECTION_ORDER`), then by the same within-type sort as the deck grid (power: value/type; special: character then name; others: name A→Z). Random selection is unchanged; manual drag reorder on desktop overrides until the next draw/redraw.
+4. **Drawn hand** panel: **Desktop** — slides down from the top (`SlideOutPanel` `side="top"`, `position="absolute"`); deck grid remains visible behind blurred scrim. **Mobile** — full-viewport overlay (`position="fixed"`, `100dvh`); deck chrome hidden behind opaque panel.
+5. **Desktop**: single horizontal row of 8–9 cards at deck-editor portrait width; `ResizeObserver` scales the row when the panel is narrower than the full hand. Drag-and-drop reorder on fine pointers.
+6. **Mobile** (`.layout-mobile`): vertical scroll through a **2-column grid** in the panel body; equal half-width portrait slots with 5% art inset; full-width **Draw again** footer.
+7. **Events** display landscape art rotated 90° CCW inside the portrait slot (draw-hand only).
+8. **Draw again** in the panel footer redraws without closing.
+9. Tapping a drawn card opens **CardDetailPanel** when catalog data resolves.
 
 Full feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md).
 
@@ -84,7 +85,7 @@ Full feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-edito
 | File | Role |
 |------|------|
 | [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx) | `drawHandOpen`, `drawnCards`, toggle/redraw/reorder handlers |
-| [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts) | `countPlayableCards`, `canDrawHand`, `buildDrawPile`, `drawRandomHand` |
+| [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts) | `countPlayableCards`, `canDrawHand`, `buildDrawPile`, `drawRandomHand`, `sortDrawnHandCards` |
 | [`DrawHandPanel.tsx`](../../frontend/src/features/deck-editor/DrawHandPanel.tsx) | Top overlay UI, KO dimming, card detail wiring |
 | [`DrawHandPanel.css`](../../frontend/src/features/deck-editor/DrawHandPanel.css) | Row, scale, event rotation, portrait frame fill, mobile carousel |
 | [`deckEditorCardImage.ts`](../../frontend/src/features/deck-editor/deckEditorCardImage.ts) | Shared `CardImage` loading props (grid + draw hand) |
@@ -116,6 +117,7 @@ Implemented in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts) (ports 
 **Draw algorithm**:
 1. Pick up to **8** unique random pile indices.
 2. If any drawn card is an **event** and the pile has **>8** cards and fewer than **9** drawn, attempt one more unique draw.
+3. **Display sort** (`sortDrawnHandCards`): reorder the drawn set by [`DECK_EDITOR_SECTION_ORDER`](../../frontend/src/lib/decks/deckEditorSectionOrder.ts), then within-type deck-editor sort (power value/type, special character+name, others by catalog name). Does not change which cards were drawn.
 
 ---
 
@@ -142,7 +144,7 @@ Deck rows from `GET /decks/:id/full` carry only `{ type, cardId, quantity }` —
 
 | File | Coverage |
 |------|----------|
-| `tests/unit/draw-hand-v2.test.ts` | Pile build, enable threshold, 8/9 draw logic |
+| `tests/unit/draw-hand-v2.test.ts` | Pile build, enable threshold, 8/9 draw logic, display sort |
 | `tests/unit/deck-card-catalog.test.ts` | Type normalization, index lookup, display names |
 | `tests/unit/simulate-ko.test.ts` | KO dimming rules (shared with draw hand via `shouldDimDeckCard`) |
 

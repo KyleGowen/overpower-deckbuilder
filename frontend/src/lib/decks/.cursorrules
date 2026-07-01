@@ -3,7 +3,8 @@
 Pure TypeScript modules for the v2 deck editor (no React, no `window` globals).
 
 ## Key modules
-- **drawHand.ts** — Draw Hand pile + random draw (8 cards, 9th on event). Spec: `docs/current/DRAW_HAND_FEATURE.md`.
+- **drawHand.ts** — Draw Hand pile + random draw (8 cards, 9th on event) + `sortDrawnHandCards` display order. Spec: `docs/current/DRAW_HAND_FEATURE.md`.
+- **deckEditorSectionOrder.ts** — Deck editor Card/List section order (`DECK_EDITOR_SECTION_ORDER`); DBV/Add Cards use `CATALOG_TYPES`.
 - **deckCardCatalog.ts** — Catalog index for deck rows (`buildDeckCardIndex`, `resolveDeckCatalogCard`, `deckCardDisplayName`). Normalizes underscore deck types; id-only fallback.
 - **simulateKo.ts** — Simulate KO dimming rules (`shouldDimDeckCard`, `buildKoDimmingContext`).
 - **deckInstances.ts**, **reserveCharacter.ts**, **iconTotals.ts**, **deckThreat.ts** — editor save model, reserve, stats.

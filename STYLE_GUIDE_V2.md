@@ -238,6 +238,21 @@ Each screen has a companion doc in its feature folder:
 - Deck Selection — [`frontend/src/features/deck-selection/DeckSelectionPage.md`](frontend/src/features/deck-selection/DeckSelectionPage.md)
 - Deck Editor (DEV) — [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md)
 
+### Deck Editor — Desktop header compaction
+DTV topbar (`.deck-editor__topbar`) uses a 3-column grid on wide viewports: leading (name + meta) | stats panel | actions. When the main column is narrow (`@container deck-editor-main (max-width: 1400px)`, desktop only), it switches to a **two-row** layout in [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css):
+
+| Row | Content |
+|---|---|
+| Row 1 | Leading (back + name + meta chips on one line) \| actions (right-aligned) |
+| Row 2 | Full-width stats panel (threat, character max, icon totals), centered, top border separator |
+
+Row 1 keeps back, deck name, and meta chips (card count, legality, visibility) on a single line. Stat block labels stay visible on row 2. Mobile `layout-mobile` unchanged.
+
+**Stat tooltips** (concise, on hover):
+- Threat: `Threat: {n}` (or `{n}/76` over cap) via `formatThreatTooltip`
+- Character max section: `Character max stats`; each icon: `Character max — {Stat}: {value}`
+- Icon totals section: `Deck icon totals`; each icon: `Icon total — {Stat}: {value}`
+
 ### Deck Editor — Simulate KO
 | Element | Tokens / values |
 |---|---|
@@ -257,7 +272,7 @@ Owner-only toggle (eligible cards) that marks a card as placed at game start (`e
 | Footer layout (`.deck-editor__card-footer`) | `display: grid; grid-template-columns: 1fr auto 1fr` — spacer / centered chip / right-aligned `.deck-editor__card-controls` |
 
 ### Deck Editor — Draw Hand
-Top slide-out overlay ([`DrawHandPanel.css`](frontend/src/features/deck-editor/DrawHandPanel.css)). Full spec: [`docs/current/DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md).
+Top slide-out overlay ([`DrawHandPanel.css`](frontend/src/features/deck-editor/DrawHandPanel.css)). Full spec: [`docs/current/DRAW_HAND_FEATURE.md`](docs/current/DRAW_HAND_FEATURE.md). After draw/redraw, cards sort by deck section order then within-type deck sort (manual drag reorder still allowed until next draw).
 
 | Element | Tokens / values |
 |---|---|

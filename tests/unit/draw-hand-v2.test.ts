@@ -1,10 +1,12 @@
-import type { DeckCardEntry } from '../../frontend/src/lib/api/types';
+import type { CatalogCard, DeckCardEntry } from '../../frontend/src/lib/api/types';
 import {
   buildDrawPile,
   canDrawHand,
   countPlayableCards,
   drawRandomHand,
+  sortDrawnHandCards,
 } from '../../frontend/src/lib/decks/drawHand';
+import { buildDeckCardIndex } from '../../frontend/src/lib/decks/deckCardCatalog';
 
 function entry(
   type: DeckCardEntry['type'],
@@ -116,6 +118,34 @@ describe('drawHand (v2)', () => {
       const cards = [power('only')];
       expect(() => drawRandomHand(cards)).not.toThrow();
       expect(drawRandomHand(cards)).toHaveLength(1);
+    });
+  });
+
+  describe('sortDrawnHandCards', () => {
+    const catalogByType: CatalogCard[][] = [
+      [{ id: 'sp1', name: 'Zap', character: 'Zatanna' } as CatalogCard],
+      [{ id: 'pw1', name: '3 - Energy', value: 3, power_type: 'Energy' } as CatalogCard],
+      [{ id: 'ev1', name: 'Big Event' } as CatalogCard],
+    ];
+    const index = buildDeckCardIndex(['special', 'power', 'event'], catalogByType);
+
+    it('orders by deck section index (special before power before event)', () => {
+      const drawn = [
+        entry('event', 'ev1', { instanceId: 'e1' }),
+        entry('power', 'pw1', { instanceId: 'p1' }),
+        entry('special', 'sp1', { instanceId: 's1' }),
+      ];
+      const sorted = sortDrawnHandCards(drawn, index);
+      expect(sorted.map((c) => c.type)).toEqual(['special', 'power', 'event']);
+    });
+
+    it('groups duplicate instances of the same card adjacent', () => {
+      const drawn = [
+        power('pw1', { instanceId: 'p2' }),
+        power('pw1', { instanceId: 'p1' }),
+      ];
+      const sorted = sortDrawnHandCards(drawn, index);
+      expect(sorted.map((c) => c.instanceId)).toEqual(['p1', 'p2']);
     });
   });
 });

@@ -40,7 +40,7 @@ describe('deckListView', () => {
   });
 
   describe('groupSpecialCardsByCharacter', () => {
-    it('places Any Character first then alphabetical', () => {
+    it('places Any Character last then alphabetical', () => {
       const index = buildDeckCardIndex(
         ['special'],
         [
@@ -61,9 +61,9 @@ describe('deckListView', () => {
       );
       const groups = groupSpecialCardsByCharacter(rows);
       expect(groups.map((g) => g.characterName)).toEqual([
-        'Any Character',
         'Aquaman',
         'Zatanna',
+        'Any Character',
       ]);
     });
   });

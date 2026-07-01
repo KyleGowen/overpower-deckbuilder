@@ -29,12 +29,12 @@ import {
 } from '../../lib/decks/deckInstances';
 import { collectPrintingsForCard } from '../../lib/catalog/cardPrintings';
 import {
-  CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
   cardDisplayName,
   cardStats,
   isLandscapeCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
+import { deckEditorCatalogTypes } from '../../lib/decks/deckEditorSectionOrder';
 import {
   buildFoilCardMapLookup,
   cardHasFoilVersion,
@@ -74,7 +74,7 @@ import {
   shouldDimDeckCard,
   toggleKoCharacterId,
 } from '../../lib/decks/simulateKo';
-import { canDrawHand, countPlayableCards, drawRandomHand } from '../../lib/decks/drawHand';
+import { canDrawHand, countPlayableCards, drawRandomHand, sortDrawnHandCards } from '../../lib/decks/drawHand';
 import {
   computePrePlacedFlags,
   isPrePlaced,
@@ -88,6 +88,7 @@ import {
   normalizeDeckCardType,
   resolveDeckCatalogCard,
   sortDeckPowerEntries,
+  sortDeckSpecialEntries,
 } from '../../lib/decks/deckCardCatalog';
 import { AddCardsPanel } from './AddCardsPanel';
 import { DrawHandPanel } from './DrawHandPanel';
@@ -132,18 +133,30 @@ const DECK_STAT_ROWS: Array<{
 function DeckStatRow({
   label,
   ariaLabel,
+  sectionTooltip,
+  iconTooltipPrefix,
   values,
 }: {
   label: string;
   ariaLabel: string;
+  sectionTooltip: string;
+  iconTooltipPrefix: string;
   values: Record<(typeof DECK_STAT_ROWS)[number]['key'], number>;
 }) {
   return (
-    <section className="deck-editor__stats-block" aria-label={ariaLabel}>
+    <section
+      className="deck-editor__stats-block"
+      aria-label={ariaLabel}
+      title={sectionTooltip}
+    >
       <span className="deck-editor__stats-block-label">{label}</span>
       <div className="deck-editor__stats-row">
         {DECK_STAT_ROWS.map(({ key, label: statLabel, iconKey }) => (
-          <span className="deck-editor__stat-group" key={key} title={`${statLabel}: ${values[key]}`}>
+          <span
+            className="deck-editor__stat-group"
+            key={key}
+            title={`${iconTooltipPrefix} — ${statLabel}: ${values[key]}`}
+          >
             <StatIconBadge type={iconKey} value={values[key]} size="lg" />
           </span>
         ))}
@@ -209,9 +222,17 @@ function DeckStatsPanel({
       <DeckStatRow
         label="Character max"
         ariaLabel="Character maximums"
+        sectionTooltip="Character max stats"
+        iconTooltipPrefix="Character max"
         values={maxStats}
       />
-      <DeckStatRow label="Icon totals" ariaLabel="Icon totals" values={iconTotals} />
+      <DeckStatRow
+        label="Icon totals"
+        ariaLabel="Icon totals"
+        sectionTooltip="Deck icon totals"
+        iconTooltipPrefix="Icon total"
+        values={iconTotals}
+      />
     </div>
   );
 }
@@ -476,10 +497,14 @@ export default function DeckEditorPage() {
       arr.push(c);
       map.set(c.type, arr);
     });
-    return CATALOG_TYPES.map((meta) => {
+    return deckEditorCatalogTypes().map((meta) => {
       const raw = map.get(meta.deckType) ?? [];
       const entries =
-        meta.deckType === 'power' ? sortDeckPowerEntries(raw, cardIndex) : raw;
+        meta.deckType === 'power'
+          ? sortDeckPowerEntries(raw, cardIndex)
+          : meta.deckType === 'special'
+            ? sortDeckSpecialEntries(raw, cardIndex)
+            : raw;
       return { meta, entries };
     }).filter((g) => g.entries.length > 0);
   }, [cards, cardIndex]);
@@ -607,7 +632,7 @@ export default function DeckEditorPage() {
       closeDrawHand();
       return;
     }
-    setDrawnCards(drawRandomHand(cards));
+    setDrawnCards(sortDrawnHandCards(drawRandomHand(cards), cardIndex));
     setDrawHandOpen(true);
   };
 
@@ -620,7 +645,7 @@ export default function DeckEditorPage() {
   };
 
   const handleDrawHandRedraw = () => {
-    setDrawnCards(drawRandomHand(cards));
+    setDrawnCards(sortDrawnHandCards(drawRandomHand(cards), cardIndex));
   };
 
   const handleDrawHandReorder = (fromIndex: number, toIndex: number) => {
