@@ -337,5 +337,22 @@ describe('defaultCatalogCards', () => {
 
       expect(id).toBeNull();
     });
+
+    it('skips deck entries without instanceId', () => {
+      const representative = card('base', { name: 'Dracula' });
+      const variantMap = new Map([['base', ['base']]]);
+
+      const id = findLastInstanceIdForRepresentative(
+        representative,
+        [
+          { type: 'character', cardId: 'base' },
+          { type: 'character', cardId: 'base', instanceId: 'inst-1' },
+        ],
+        'character',
+        variantMap,
+      );
+
+      expect(id).toBe('inst-1');
+    });
   });
 });
