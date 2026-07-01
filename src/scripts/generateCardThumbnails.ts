@@ -84,11 +84,15 @@ const THUMBNAIL_DIRS = [
   'basic-universe',
 ] as const;
 
-/** Skybound promo art uses set-scoped folders with mixed aspect ratios. */
-export const SKYP_SUBDIRS: { subdir: string; preset: ThumbResizeConfig }[] = [
+/** Promo set art uses set-scoped folders with mixed aspect ratios. */
+export const PROMO_ART_SUBDIRS: { subdir: string; preset: ThumbResizeConfig }[] = [
   { subdir: 'skyp/characters', preset: PRESET_CHARACTER },
   { subdir: 'skyp/power', preset: PRESET_PORTRAIT },
+  { subdir: 'tfacp/power', preset: PRESET_PORTRAIT },
 ];
+
+/** @deprecated Prefer PROMO_ART_SUBDIRS; kept for existing imports/tests. */
+export const SKYP_SUBDIRS = PROMO_ART_SUBDIRS.filter((entry) => entry.subdir.startsWith('skyp/'));
 
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
 
@@ -206,9 +210,10 @@ async function generateThumbnails(): Promise<void> {
     console.log(`   ${processed} generated, ${skipped} skipped, ${errors} error(s)\n`);
   }
 
-  for (const { subdir, preset } of SKYP_SUBDIRS) {
+  for (const { subdir, preset } of PROMO_ART_SUBDIRS) {
     const sourceDir = path.join(IMAGES_BASE, subdir);
-    const thumbDir = path.join(IMAGES_BASE, 'skyp/thumb', path.basename(subdir));
+    const promoRoot = subdir.split('/')[0];
+    const thumbDir = path.join(IMAGES_BASE, promoRoot, 'thumb', path.basename(subdir));
 
     if (!fs.existsSync(sourceDir)) {
       console.log(`⏭️  Skipping ${subdir}/ (directory not found)`);

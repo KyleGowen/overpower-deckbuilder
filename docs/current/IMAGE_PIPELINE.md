@@ -33,15 +33,19 @@ src/resources/cards/images/
 ├── specials/, power-cards/, events/, aspects/
 ├── advanced-universe/, teamwork-universe/, ally-universe/, training-universe/, basic-universe/
 │   └── thumb/                      ← same pattern under each (mirrors source subdirs)
-└── skyp/                           ← Skybound - Promos (set-scoped art paths)
-    ├── characters/                 ← landscape character promos (e.g. Rex Splode)
-    ├── power/                      ← portrait power promos (e.g. 7 - Any-Power)
-    └── thumb/                      ← generated; mirrors characters/ and power/ subdirs
-        ├── characters/
+├── skyp/                           ← Skybound - Promos (set-scoped art paths)
+│   ├── characters/                 ← landscape character promos (e.g. Rex Splode)
+│   ├── power/                      ← portrait power promos (e.g. 7 - Any-Power)
+│   └── thumb/                      ← generated; mirrors characters/ and power/ subdirs
+│       ├── characters/
+│       └── power/
+└── tfacp/                          ← The Few and the Cursed - Promos
+    ├── power/                      ← portrait power promos (e.g. 7 - Combat)
+    └── thumb/
         └── power/
 ```
 
-The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **`skyp/`** is handled separately: `skyp/characters/` uses the character preset and outputs to `skyp/thumb/characters/`; `skyp/power/` uses the portrait preset and outputs to `skyp/thumb/power/` (see `SKYP_SUBDIRS` in `generateCardThumbnails.ts`). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **Promo set folders** (`skyp/`, `tfacp/`) are handled via `PROMO_ART_SUBDIRS` in `generateCardThumbnails.ts`: e.g. `skyp/characters/` → character preset → `skyp/thumb/characters/`; `skyp/power/` and `tfacp/power/` → portrait preset → matching `thumb/power/` paths. The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
 
 ---
 
@@ -80,6 +84,7 @@ After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails 
    - `src/resources/cards/images/locations/` for locations
    - `src/resources/cards/images/missions/` for missions
    - `src/resources/cards/images/skyp/characters/` or `skyp/power/` for Skybound promo art (DB `image_path` uses the same `skyp/...` prefix)
+   - `src/resources/cards/images/tfacp/power/` for TFCP promo power art (DB `image_path` uses `tfacp/power/...`)
 2. Run `npm run generate:thumbnails`
 3. Confirm the new thumbnail appears in the corresponding `thumb/` subdirectory
 4. Commit both the source image and the generated thumbnail

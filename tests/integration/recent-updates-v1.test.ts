@@ -23,14 +23,20 @@ describe('GET /api/v1/recent-updates', () => {
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.data.length).toBeGreaterThanOrEqual(5);
 
-    const row = res.body.data[0];
-    expect(row.title).toBe('The Community Deck Section');
-    expect(typeof row.id).toBe('string');
-    expect(typeof row.title).toBe('string');
-    expect(typeof row.type).toBe('string');
-    expect(typeof row.description).toBe('string');
-    expect(row.cardImageUrl === null || typeof row.cardImageUrl === 'string').toBe(true);
-    expect(typeof row.createdAt).toBe('string');
-    expect(typeof row.updatedAt).toBe('string');
+    const titles = res.body.data.map((r: { title: string }) => r.title);
+    expect(titles).toContain('The Community Deck Section');
+    expect(titles).toContain('New Mobile Layout and Controls');
+
+    const row = res.body.data.find(
+      (r: { title: string }) => r.title === 'The Community Deck Section',
+    );
+    expect(row).toBeDefined();
+    expect(typeof row!.id).toBe('string');
+    expect(typeof row!.title).toBe('string');
+    expect(typeof row!.type).toBe('string');
+    expect(typeof row!.description).toBe('string');
+    expect(row!.cardImageUrl === null || typeof row!.cardImageUrl === 'string').toBe(true);
+    expect(typeof row!.createdAt).toBe('string');
+    expect(typeof row!.updatedAt).toBe('string');
   });
 });

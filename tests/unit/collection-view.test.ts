@@ -437,8 +437,8 @@ describe('displayCollectionCards()', () => {
                 inCollection: true,
                 quantity: 1,
                 set: 'TFCP',
-                image_path: 'power-cards/alternate/7_combat.png',
-                is_foil: false,
+                image_path: 'tfacp/power/7_combat.png',
+                is_foil: true,
                 card_data: { set_number: '301', value: 7, power_type: 'Combat' },
             },
             {

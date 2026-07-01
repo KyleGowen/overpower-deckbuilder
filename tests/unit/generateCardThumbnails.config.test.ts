@@ -2,6 +2,7 @@ import {
   PRESET_CHARACTER,
   PRESET_LOCATION,
   PRESET_PORTRAIT,
+  PROMO_ART_SUBDIRS,
   SKYP_SUBDIRS,
   THUMB_CONFIGS,
 } from '../../src/scripts/generateCardThumbnails';
@@ -45,5 +46,10 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     expect(SKYP_SUBDIRS).toHaveLength(2);
     expect(SKYP_SUBDIRS[0]).toEqual({ subdir: 'skyp/characters', preset: PRESET_CHARACTER });
     expect(SKYP_SUBDIRS[1]).toEqual({ subdir: 'skyp/power', preset: PRESET_PORTRAIT });
+  });
+
+  it('includes tfacp/power in promo art subdirs with portrait preset', () => {
+    const tfacp = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/power');
+    expect(tfacp).toEqual({ subdir: 'tfacp/power', preset: PRESET_PORTRAIT });
   });
 });

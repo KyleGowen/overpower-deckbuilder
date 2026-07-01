@@ -30,19 +30,73 @@ describe('Alternate Power Cards Integration Tests', () => {
       console.log('✅ 5 - Multi Power has alternate image:', alternateCard?.image_path);
     });
 
-    it('should have alternate image for 7 - Combat', async () => {
-      // After migration V181, alternate images are stored as separate card rows
-      const result = await pool.query(
-        "SELECT id, name, image_path FROM power_cards WHERE name = $1 OR (name LIKE '7 - Combat%' AND image_path LIKE '%/alternate/%')",
+    it('should have TFCP promo images for 7 - Combat', async () => {
+      const nonFoil = await pool.query(
+        "SELECT id, name, image_path, set FROM power_cards WHERE name = $1 AND set = 'TFCP' AND is_foil = FALSE",
         ['7 - Combat']
       );
-      
-      expect(result.rows.length).toBeGreaterThan(0);
-      const alternateCard = result.rows.find((c: any) => c.image_path && c.image_path.includes('/alternate/'));
-      expect(alternateCard).toBeTruthy();
-      expect(alternateCard.image_path).toContain('power-cards/alternate/7_combat.png');
-      
-      console.log('✅ 7 - Combat has alternate image:', alternateCard?.image_path);
+
+      expect(nonFoil.rows.length).toBe(1);
+      expect(nonFoil.rows[0].image_path).toBe('tfacp/power/7_combat_2.jpg');
+
+      const foil = await pool.query(
+        "SELECT id, name, image_path, set, is_foil FROM power_cards WHERE set = 'TFCP' AND image_path = 'tfacp/power/7_combat.png'",
+        []
+      );
+
+      expect(foil.rows.length).toBe(1);
+      expect(foil.rows[0].is_foil).toBe(true);
+
+      const map = await pool.query(
+        `SELECT fcm.foil_card_id, fcm.base_card_id, b.set AS base_set, b.image_path AS base_image_path
+         FROM foil_card_map fcm
+         JOIN power_cards b ON b.id::text = fcm.base_card_id
+         WHERE fcm.card_type = 'power'
+           AND fcm.foil_card_id = $1`,
+        [foil.rows[0].id]
+      );
+
+      expect(map.rows.length).toBe(1);
+      expect(map.rows[0].base_set).toBe('ERB');
+      expect(map.rows[0].base_image_path).toBe('power-cards/7_combat.webp');
+
+      console.log('✅ 7 - Combat TFCP: non-foil 7_combat_2.jpg, foil-only 7_combat.png → ERB base');
+    });
+
+    it('should have TFCP promo image for 7 - Energy', async () => {
+      const result = await pool.query(
+        "SELECT id, name, image_path, set FROM power_cards WHERE name = $1 AND set = 'TFCP'",
+        ['7 - Energy']
+      );
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_energy.jpg');
+
+      console.log('✅ 7 - Energy TFCP promo image:', result.rows[0]?.image_path);
+    });
+
+    it('should have TFCP promo image for 7 - Brute Force', async () => {
+      const result = await pool.query(
+        "SELECT id, name, image_path, set FROM power_cards WHERE name = $1 AND set = 'TFCP'",
+        ['7 - Brute Force']
+      );
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_brute_force.jpg');
+
+      console.log('✅ 7 - Brute Force TFCP promo image:', result.rows[0]?.image_path);
+    });
+
+    it('should have TFCP promo image for 7 - Intelligence', async () => {
+      const result = await pool.query(
+        "SELECT id, name, image_path, set FROM power_cards WHERE name = $1 AND set = 'TFCP'",
+        ['7 - Intelligence']
+      );
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_intelligence.jpg');
+
+      console.log('✅ 7 - Intelligence TFCP promo image:', result.rows[0]?.image_path);
     });
 
     it('should have SKYP promo image for 7 - Any-Power', async () => {
@@ -160,7 +214,7 @@ describe('Alternate Power Cards Integration Tests', () => {
         ORDER BY name
       `);
       
-      expect(result.rows.length).toBeGreaterThanOrEqual(7);
+      expect(result.rows.length).toBeGreaterThanOrEqual(6);
       
       // Verify each alternate card has the expected structure
       result.rows.forEach(card => {
@@ -202,7 +256,6 @@ describe('Alternate Power Cards Integration Tests', () => {
       
       const expectedImages = [
         'power-cards/alternate/5_multipower.webp',
-        'power-cards/alternate/7_combat.png',
         'power-cards/alternate/8_brute_force.webp',
         'power-cards/alternate/8_combat.webp',
         'power-cards/alternate/8_energy.webp',
