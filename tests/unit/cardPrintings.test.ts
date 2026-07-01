@@ -151,5 +151,89 @@ describe('cardPrintings', () => {
       expect(printings).toHaveLength(2);
       expect(printings.map((p) => p.id).sort()).toEqual(['erb-ally', 'tfcp-ally']);
     });
+
+    it('groups TFCP combat ally with ERB Little John stat slot', () => {
+      const erb = card('erb-lj', {
+        name: 'Little John',
+        set: 'ERB',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Combat',
+        attack_value: 3,
+        attack_type: 'Combat',
+        set_number: '328',
+        image_path: 'ally-universe/5_combat.webp',
+      });
+      const tfcp = card('tfcp-tsetseg', {
+        name: 'Tsetseg',
+        set: 'TFCP',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Combat',
+        attack_value: 3,
+        attack_type: 'Combat',
+        image_path: 'tfacp/ally/5_combat.png',
+      });
+      const catalog = [erb, tfcp];
+
+      const printings = collectPrintingsForCard(erb, 'ally-universe', catalog, foilLookup);
+
+      expect(printings).toHaveLength(2);
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-lj', 'tfcp-tsetseg']);
+    });
+
+    it('groups TFCP brute force ally with ERB Hucklebuck stat slot', () => {
+      const erb = card('erb-hb', {
+        name: 'Hucklebuck',
+        set: 'ERB',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Brute Force',
+        attack_value: 3,
+        attack_type: 'Brute Force',
+        set_number: '326',
+        image_path: 'ally-universe/5_brute_force.webp',
+      });
+      const tfcp = card('tfcp-annabelle', {
+        name: 'Annabelle',
+        set: 'TFCP',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Brute Force',
+        attack_value: 3,
+        attack_type: 'Brute Force',
+        image_path: 'tfacp/ally/5_brute_force.png',
+      });
+      const catalog = [erb, tfcp];
+
+      const printings = collectPrintingsForCard(erb, 'ally-universe', catalog, foilLookup);
+
+      expect(printings).toHaveLength(2);
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-hb', 'tfcp-annabelle']);
+    });
+
+    it('groups TFCP intelligence ally with ERB Professor Porter stat slot', () => {
+      const erb = card('erb-pp', {
+        name: 'Professor Porter',
+        set: 'ERB',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Intelligence',
+        attack_value: 3,
+        attack_type: 'Intelligence',
+        set_number: '330',
+        image_path: 'ally-universe/5_intelligence.webp',
+      });
+      const tfcp = card('tfcp-alistair', {
+        name: 'Alistair Fairweather',
+        set: 'TFCP',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Intelligence',
+        attack_value: 3,
+        attack_type: 'Intelligence',
+        image_path: 'tfacp/ally/5_intelligence.png',
+      });
+      const catalog = [erb, tfcp];
+
+      const printings = collectPrintingsForCard(erb, 'ally-universe', catalog, foilLookup);
+
+      expect(printings).toHaveLength(2);
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-pp', 'tfcp-alistair']);
+    });
   });
 });
