@@ -172,11 +172,22 @@ WHERE set = 'TFCP'
 INSERT INTO foil_card_map (foil_card_id, base_card_id, card_type)
 SELECT f.id::text, b.id::text, 'power'
 FROM power_cards f
-JOIN power_cards b
-  ON b.power_type = 'Combat'
- AND b.value = 7
- AND b.set = 'ERB'
- AND b.is_foil = FALSE
+JOIN LATERAL (
+  SELECT id
+  FROM power_cards
+  WHERE power_type = 'Combat'
+    AND value = 7
+    AND set = 'ERB'
+    AND is_foil = FALSE
+  ORDER BY
+    CASE
+      WHEN image_path = 'power-cards/301_7_combat.webp' THEN 0
+      WHEN image_path = 'power-cards/7_combat.webp' THEN 1
+      ELSE 2
+    END,
+    image_path
+  LIMIT 1
+) b ON TRUE
 WHERE f.set = 'TFCP'
   AND f.image_path = 'tfacp/power/7_combat.png'
   AND f.is_foil = TRUE
