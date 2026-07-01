@@ -80,6 +80,7 @@ Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card ca
 | FALSE | Character Card | Hades |  | NAOL Promo Exclusive theorangeking.com | TRUE |  | 2024 |  |
 | FALSE | Character Card | Zeus |  | NAOL Promo Exclusive theorangeking.com | TRUE |  | 2024 |  |
 | FALSE | Character Card | Leonidas |  | Con Exclusive - New York ComicCon (Play test incentive) | TRUE |  | 2024 |  |
+| FALSE | Character Card | Rex Splode |  | Con Exclusive - Comic Con (Skybound promo) | TRUE |  | 2026 | Skybound - Promos (SKYP); 7E/5C/3B/2I, threat 18 |
 | FALSE | Character Card | Witchblade |  | Con Exclusive - New York ComicCon (Proof of Kickstarter backer promo) | TRUE |  | 2024 |  |
 | FALSE | Business Card | Office | Three Musketeers | Business Card | TRUE |  | 2024 |  |
 | FALSE | Business Card | Ronald | Hercules | Business Card | TRUE |  | 2024 |  |

@@ -26,16 +26,22 @@ src/resources/cards/images/
 │   ├── <location-name>.webp
 │   └── thumb/
 │       └── <location-name>.webp
-└── missions/
-    ├── <mission-name>.webp
-    └── thumb/
-        └── <mission-name>.webp
+├── missions/
+│   ├── <mission-name>.webp
+│   └── thumb/
+│       └── <mission-name>.webp
 ├── specials/, power-cards/, events/, aspects/
 ├── advanced-universe/, teamwork-universe/, ally-universe/, training-universe/, basic-universe/
-    └── thumb/   ← same pattern under each (mirrors source subdirs)
+│   └── thumb/                      ← same pattern under each (mirrors source subdirs)
+└── skyp/                           ← Skybound - Promos (set-scoped art paths)
+    ├── characters/                 ← landscape character promos (e.g. Rex Splode)
+    ├── power/                      ← portrait power promos (e.g. 7 - Any-Power)
+    └── thumb/                      ← generated; mirrors characters/ and power/ subdirs
+        ├── characters/
+        └── power/
 ```
 
-The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **`skyp/`** is handled separately: `skyp/characters/` uses the character preset and outputs to `skyp/thumb/characters/`; `skyp/power/` uses the portrait preset and outputs to `skyp/thumb/power/` (see `SKYP_SUBDIRS` in `generateCardThumbnails.ts`). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
 
 ---
 
@@ -73,6 +79,7 @@ After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails 
    - `src/resources/cards/images/characters/` for characters
    - `src/resources/cards/images/locations/` for locations
    - `src/resources/cards/images/missions/` for missions
+   - `src/resources/cards/images/skyp/characters/` or `skyp/power/` for Skybound promo art (DB `image_path` uses the same `skyp/...` prefix)
 2. Run `npm run generate:thumbnails`
 3. Confirm the new thumbnail appears in the corresponding `thumb/` subdirectory
 4. Commit both the source image and the generated thumbnail

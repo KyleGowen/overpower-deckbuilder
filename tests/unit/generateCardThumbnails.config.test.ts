@@ -2,6 +2,7 @@ import {
   PRESET_CHARACTER,
   PRESET_LOCATION,
   PRESET_PORTRAIT,
+  SKYP_SUBDIRS,
   THUMB_CONFIGS,
 } from '../../src/scripts/generateCardThumbnails';
 
@@ -38,5 +39,11 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     expect(THUMB_CONFIGS.locations).toBe(PRESET_LOCATION);
     expect(PRESET_LOCATION.fit).toBe('contain');
     expect(PRESET_LOCATION.width / PRESET_LOCATION.height).toBeCloseTo(236 / 151, 2);
+  });
+
+  it('uses character preset for skyp/characters and portrait for skyp/power', () => {
+    expect(SKYP_SUBDIRS).toHaveLength(2);
+    expect(SKYP_SUBDIRS[0]).toEqual({ subdir: 'skyp/characters', preset: PRESET_CHARACTER });
+    expect(SKYP_SUBDIRS[1]).toEqual({ subdir: 'skyp/power', preset: PRESET_PORTRAIT });
   });
 });

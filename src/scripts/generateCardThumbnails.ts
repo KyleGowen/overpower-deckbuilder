@@ -84,6 +84,12 @@ const THUMBNAIL_DIRS = [
   'basic-universe',
 ] as const;
 
+/** Skybound promo art uses set-scoped folders with mixed aspect ratios. */
+export const SKYP_SUBDIRS: { subdir: string; preset: ThumbResizeConfig }[] = [
+  { subdir: 'skyp/characters', preset: PRESET_CHARACTER },
+  { subdir: 'skyp/power', preset: PRESET_PORTRAIT },
+];
+
 const IMAGES_BASE = path.join(process.cwd(), 'src/resources/cards/images');
 
 function getAllImageFiles(dir: string, basePath: string = dir): string[] {
@@ -194,6 +200,23 @@ async function generateThumbnails(): Promise<void> {
     const config = THUMB_CONFIGS[dirName];
     console.log(`📁 ${dirName}/  (${config.width}×${config.height}, ${config.fit})`);
     const { processed, skipped, errors } = await processDirectory(sourceDir, thumbDir, dirName, config);
+    totalProcessed += processed;
+    totalSkipped += skipped;
+    totalErrors += errors;
+    console.log(`   ${processed} generated, ${skipped} skipped, ${errors} error(s)\n`);
+  }
+
+  for (const { subdir, preset } of SKYP_SUBDIRS) {
+    const sourceDir = path.join(IMAGES_BASE, subdir);
+    const thumbDir = path.join(IMAGES_BASE, 'skyp/thumb', path.basename(subdir));
+
+    if (!fs.existsSync(sourceDir)) {
+      console.log(`⏭️  Skipping ${subdir}/ (directory not found)`);
+      continue;
+    }
+
+    console.log(`📁 ${subdir}/  (${preset.width}×${preset.height}, ${preset.fit})`);
+    const { processed, skipped, errors } = await processDirectory(sourceDir, thumbDir, subdir, preset);
     totalProcessed += processed;
     totalSkipped += skipped;
     totalErrors += errors;

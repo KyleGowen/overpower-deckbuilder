@@ -19,7 +19,9 @@ export function isAlternateArtCard(card: CatalogCard): boolean {
 
 function normalizeSet(set: string | undefined): string {
   const trimmed = (set ?? 'ERB').trim() || 'ERB';
-  return trimmed === 'ERBP' ? 'ERB' : trimmed;
+  if (trimmed === 'ERBP') return 'ERB';
+  if (trimmed === 'SKYP') return 'SKY';
+  return trimmed;
 }
 
 /** Sort key for checklist # (209, 519, 519F). Missing # sorts last. */

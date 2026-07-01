@@ -45,19 +45,18 @@ describe('Alternate Power Cards Integration Tests', () => {
       console.log('✅ 7 - Combat has alternate image:', alternateCard?.image_path);
     });
 
-    it('should have alternate image for 7 - Any-Power', async () => {
-      // After migration V181, alternate images are stored as separate card rows
+    it('should have SKYP promo image for 7 - Any-Power', async () => {
       const result = await pool.query(
-        "SELECT id, name, image_path FROM power_cards WHERE name = $1 OR (name LIKE '7 - Any-Power%' AND image_path LIKE '%/alternate/%')",
+        "SELECT id, name, image_path, set FROM power_cards WHERE name = $1",
         ['7 - Any-Power']
       );
-      
+
       expect(result.rows.length).toBeGreaterThan(0);
-      const alternateCard = result.rows.find((c: any) => c.image_path && c.image_path.includes('/alternate/'));
-      expect(alternateCard).toBeTruthy();
-      expect(alternateCard.image_path).toContain('power-cards/alternate/7_anypower.png');
-      
-      console.log('✅ 7 - Any-Power has alternate image:', alternateCard?.image_path);
+      const skypCard = result.rows.find((c: { set?: string }) => c.set === 'SKYP');
+      expect(skypCard).toBeTruthy();
+      expect(skypCard.image_path).toBe('skyp/power/7_anypower.png');
+
+      console.log('✅ 7 - Any-Power SKYP promo image:', skypCard?.image_path);
     });
 
     it('should verify 8 - Any-Power has no alternate images', async () => {
@@ -204,7 +203,6 @@ describe('Alternate Power Cards Integration Tests', () => {
       const expectedImages = [
         'power-cards/alternate/5_multipower.webp',
         'power-cards/alternate/7_combat.png',
-        'power-cards/alternate/7_anypower.png',
         'power-cards/alternate/8_brute_force.webp',
         'power-cards/alternate/8_combat.webp',
         'power-cards/alternate/8_energy.webp',
