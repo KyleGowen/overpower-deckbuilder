@@ -41,13 +41,15 @@ src/resources/cards/images/
 │       └── power/
 └── tfacp/                          ← The Few and the Cursed - Promos
     ├── ally/                       ← portrait ally promos (e.g. White Demon Of Mazandaran)
+    ├── missions/                   ← portrait mission promos (e.g. Chronicles of TFAC)
     ├── power/                      ← portrait power promos (e.g. 7 - Combat)
     └── thumb/
         ├── ally/
+        ├── missions/
         └── power/
 ```
 
-The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **Promo set folders** (`skyp/`, `tfacp/`) are handled via `PROMO_ART_SUBDIRS` in `generateCardThumbnails.ts`: e.g. `skyp/characters/` → character preset → `skyp/thumb/characters/`; `skyp/power/`, `tfacp/power/`, and `tfacp/ally/` → portrait preset → matching `thumb/power/` or `thumb/ally/` paths. The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **Promo set folders** (`skyp/`, `tfacp/`) are handled via `PROMO_ART_SUBDIRS` in `generateCardThumbnails.ts`: e.g. `skyp/characters/` → character preset → `skyp/thumb/characters/`; `skyp/power/`, `tfacp/power/`, `tfacp/ally/`, and `tfacp/missions/` → portrait preset → matching `thumb/` subdirs (nested folders like `missions/the_chronicles_of_tfac/` are preserved). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
 
 ---
 
@@ -88,6 +90,7 @@ After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails 
    - `src/resources/cards/images/skyp/characters/` or `skyp/power/` for Skybound promo art (DB `image_path` uses the same `skyp/...` prefix)
    - `src/resources/cards/images/tfacp/power/` for TFCP promo power art (DB `image_path` uses `tfacp/power/...`)
    - `src/resources/cards/images/tfacp/ally/` for TFCP promo ally art (DB `image_path` uses `tfacp/ally/...`)
+   - `src/resources/cards/images/tfacp/missions/` for TFCP promo mission art (DB `image_path` uses `tfacp/missions/...`)
 2. Run `npm run generate:thumbnails`
 3. Confirm the new thumbnail appears in the corresponding `thumb/` subdirectory
 4. Commit both the source image and the generated thumbnail

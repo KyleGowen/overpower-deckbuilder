@@ -74,6 +74,7 @@ export interface CatalogMissionItem {
   set: string;
   set_number: string | null;
   rarity: string | null;
+  is_foil: boolean;
 }
 
 export interface CatalogPowerCardItem {

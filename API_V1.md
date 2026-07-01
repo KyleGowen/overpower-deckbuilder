@@ -430,11 +430,12 @@ Fields: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, 
   "image_path": "missions/the-warlord-of-mars/a_fighting_man_of_mars.webp",
   "set": "ERB",
   "set_number": "376",
-  "rarity": "Common"
+  "rarity": "Common",
+  "is_foil": false
 }
 ```
 
-Fields: `id`, `mission_set`, `card_name` (primary display name), `name` (same as `card_name` on list), `image`, `image_path`, `set`, `set_number`, `rarity`.
+Fields: `id`, `mission_set`, `card_name` (primary display name), `name` (same as `card_name` on list), `image`, `image_path`, `set`, `set_number`, `rarity`, `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 

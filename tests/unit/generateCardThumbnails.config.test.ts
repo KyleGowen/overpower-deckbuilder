@@ -57,4 +57,9 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     const tfacpAlly = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/ally');
     expect(tfacpAlly).toEqual({ subdir: 'tfacp/ally', preset: PRESET_PORTRAIT });
   });
+
+  it('includes tfacp/missions in promo art subdirs with portrait preset', () => {
+    const tfacpMissions = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/missions');
+    expect(tfacpMissions).toEqual({ subdir: 'tfacp/missions', preset: PRESET_PORTRAIT });
+  });
 });

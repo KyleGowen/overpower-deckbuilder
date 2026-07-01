@@ -90,6 +90,7 @@ export const PROMO_ART_SUBDIRS: { subdir: string; preset: ThumbResizeConfig }[] 
   { subdir: 'skyp/power', preset: PRESET_PORTRAIT },
   { subdir: 'tfacp/power', preset: PRESET_PORTRAIT },
   { subdir: 'tfacp/ally', preset: PRESET_PORTRAIT },
+  { subdir: 'tfacp/missions', preset: PRESET_PORTRAIT },
 ];
 
 /** @deprecated Prefer PROMO_ART_SUBDIRS; kept for existing imports/tests. */

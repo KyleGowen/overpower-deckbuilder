@@ -111,6 +111,7 @@ export function mapMissionRow(row: DbRow): Mission {
     card_name: row.name as string,
     image: (row.image_path as string) ?? '',
     image_path: row.image_path as string,
+    is_foil: (row.is_foil as boolean) || false,
   };
 }
 

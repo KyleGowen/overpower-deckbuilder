@@ -20,7 +20,7 @@ disable-model-invocation: true
 
 - Path parsing: [PATH_RULES.md](PATH_RULES.md)
 - Per-type columns and SQL: [CARD_TYPES.md](CARD_TYPES.md)
-- Checklist: [`docs/checklist-source/checklist.md`](../../../docs/checklist-source/checklist.md) (main-line ERB), [`docs/checklist-source/checklist-promos.md`](../../../docs/checklist-source/checklist-promos.md) (promos)
+- Checklist: [`docs/checklist-source/checklist.md`](../../../docs/checklist-source/checklist.md) (main-line ERB, **read-only cross-check**), [`docs/checklist-source/checklist-promos.md`](../../../docs/checklist-source/checklist-promos.md) (promos, **read-only cross-check — do not edit**)
 - Image pipeline: [`docs/current/IMAGE_PIPELINE.md`](../../../docs/current/IMAGE_PIPELINE.md)
 - Promo metadata rule: `migrations/V257__Clear_set_numbers_and_rarity_for_all_promo_sets.sql`
 - Printings grouping: [`defaultCatalogCards.ts`](../../../frontend/src/lib/catalog/defaultCatalogCards.ts) (`variantGroupKey`), [`cardPrintings.ts`](../../../frontend/src/lib/catalog/cardPrintings.ts)
@@ -98,8 +98,8 @@ Read [PATH_RULES.md](PATH_RULES.md) for full mappings. Quick rules:
 
 ## Phase 4 — Cross-check sources
 
-1. **Main-line ERB** (`set = 'ERB'`): match `name`, `set_number`, `rarity` in [`checklist.md`](../../../docs/checklist-source/checklist.md).
-2. **Promos** (`TFCP`, `SKYP`, `ERBP`): check [`checklist-promos.md`](../../../docs/checklist-source/checklist-promos.md); **`set_number`**, **`set_number_foil`**, **`rarity`** must be **NULL** (V257).
+1. **Main-line ERB** (`set = 'ERB'`): match `name`, `set_number`, `rarity` in [`checklist.md`](../../../docs/checklist-source/checklist.md) (**read only**).
+2. **Promos** (`TFCP`, `SKYP`, `ERBP`): cross-check [`checklist-promos.md`](../../../docs/checklist-source/checklist-promos.md) when helpful (**read only — never edit this file**); **`set_number`**, **`set_number_foil`**, **`rarity`** must be **NULL** in the DB (V257).
 3. Flag conflicts between path inference, image read, and checklist in the summary.
 4. If main-line ERB with no checklist match → **hard stop**; ask user before proceeding.
 
@@ -131,7 +131,7 @@ Present this template filled in with all type-specific fields:
 | Thumbnail subdir | (e.g. tfacp/ally) |
 | PROMO_ART_SUBDIRS | new entry needed? preset? |
 | Migration | V{N}__{SET}_{description}.sql |
-| Docs to update | checklist-promos.md / IMAGE_PIPELINE.md / … |
+| Docs to update | `IMAGE_PIPELINE.md` only when new promo image subdirs; otherwise **none** |
 | Tests to update | (list or "none") |
 ```
 
@@ -204,11 +204,15 @@ Run `npm run test:unit` before reporting done.
 
 ### 6e. Docs
 
-When adding promo rows or new image subdirs, update as applicable:
+Update **[`docs/current/IMAGE_PIPELINE.md`](../../../docs/current/IMAGE_PIPELINE.md)** only when adding a **new** set-scoped promo image subdir (new `PROMO_ART_SUBDIRS` entry). Otherwise skip doc updates.
 
-- [`docs/current/COLLECTION_CHECKLIST_SOURCE.md`](../../../docs/current/COLLECTION_CHECKLIST_SOURCE.md)
-- [`docs/current/IMAGE_PIPELINE.md`](../../../docs/current/IMAGE_PIPELINE.md)
+**Do not edit** during add-card:
+
 - [`docs/checklist-source/checklist-promos.md`](../../../docs/checklist-source/checklist-promos.md)
+- [`docs/checklist-source/checklist.md`](../../../docs/checklist-source/checklist.md)
+- [`docs/current/COLLECTION_CHECKLIST_SOURCE.md`](../../../docs/current/COLLECTION_CHECKLIST_SOURCE.md)
+
+Checklist files are spreadsheet exports (read-only cross-check in Phase 4). `COLLECTION_CHECKLIST_SOURCE.md` is maintained separately — use for context only.
 
 ### 6f. Restart dev servers
 
@@ -289,6 +293,7 @@ After migration, a promo may be “missing” when the user expects it under an 
 | `foil_card_map` needed but base card unknown | Stop; ask which ERB/base row to link (power/training foil-only) |
 | Ally INSERT uses `first_attack_bonus` | **Hard stop** — columns removed in V264 |
 | Promo not visible under ERB printing | Verify stat slot matches ERB base; check set filter / Has Foil; see **Printings and DBV visibility** |
+| Editing `checklist-promos.md`, `checklist.md`, or `COLLECTION_CHECKLIST_SOURCE.md` | **Hard stop** — read-only / maintained separately; never modify during add-card |
 
 ## Out of scope
 
@@ -296,6 +301,7 @@ After migration, a promo may be “missing” when the user expects it under an 
 - Production S3 sync (CI `sync-images` after push)
 - Paid AWS / infra changes
 - Bulk set import without per-card approval
+- Editing `docs/checklist-source/checklist-promos.md`, `docs/checklist-source/checklist.md`, or `docs/current/COLLECTION_CHECKLIST_SOURCE.md` (read-only / maintained separately)
 
 ## Related
 
