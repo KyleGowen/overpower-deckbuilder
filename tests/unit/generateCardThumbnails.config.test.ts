@@ -52,4 +52,9 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     const tfacp = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/power');
     expect(tfacp).toEqual({ subdir: 'tfacp/power', preset: PRESET_PORTRAIT });
   });
+
+  it('includes tfacp/ally in promo art subdirs with portrait preset', () => {
+    const tfacpAlly = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/ally');
+    expect(tfacpAlly).toEqual({ subdir: 'tfacp/ally', preset: PRESET_PORTRAIT });
+  });
 });

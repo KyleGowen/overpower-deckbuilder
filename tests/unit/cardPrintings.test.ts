@@ -123,5 +123,33 @@ describe('cardPrintings', () => {
 
       expect(printings.map((p) => p.id).sort()).toEqual(['erb-7c', 'tfcp-7c-2', 'tfcp-7c-foil']);
     });
+
+    it('groups ally universe cards by stat slot across sets', () => {
+      const erb = card('erb-ally', {
+        name: 'Allan Quatermain',
+        set: 'ERB',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Energy',
+        attack_value: 3,
+        attack_type: 'Energy',
+        set_number: '324',
+        image_path: 'ally-universe/5_energy.webp',
+      });
+      const tfcp = card('tfcp-ally', {
+        name: 'White Demon Of Mazandaran',
+        set: 'TFCP',
+        stat_to_use: '5 or less',
+        stat_type_to_use: 'Energy',
+        attack_value: 3,
+        attack_type: 'Energy',
+        image_path: 'tfacp/ally/5_energy.png',
+      });
+      const catalog = [erb, tfcp];
+
+      const printings = collectPrintingsForCard(erb, 'ally-universe', catalog, foilLookup);
+
+      expect(printings).toHaveLength(2);
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-ally', 'tfcp-ally']);
+    });
   });
 });

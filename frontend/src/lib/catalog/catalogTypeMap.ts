@@ -282,6 +282,9 @@ const DBV_SEARCH_TEXT_FIELDS: (keyof CatalogCard)[] = [
   'card_description',
   'aspect_description',
   'game_effect',
+  'stat_to_use',
+  'stat_type_to_use',
+  'attack_type',
 ];
 
 function cardSearchTextFields(card: Partial<CatalogCard>): string[] {

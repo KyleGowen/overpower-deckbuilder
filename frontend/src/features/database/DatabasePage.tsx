@@ -21,6 +21,7 @@ import {
 } from '../../lib/catalog/catalogTypeMap';
 import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
 import { resolveDefaultCardForDeckAdd } from '../../lib/catalog/defaultCatalogCards';
+import { collectPrintingsForCard } from '../../lib/catalog/cardPrintings';
 import type { FoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
@@ -116,6 +117,32 @@ export default function DatabasePage() {
   });
 
   const detailTypeCatalogCards = detailTypeCatalogQuery.data ?? [];
+
+  const detailPrintingRows = useMemo(() => {
+    if (!selected) return undefined;
+    const printings = collectPrintingsForCard(
+      selected,
+      detailCatalogType,
+      detailTypeCatalogCards,
+      foilLookup,
+      (set) => resolveSetDisplayName(set, setNameLookup) ?? String(set ?? ''),
+    );
+    if (printings.length <= 1) return undefined;
+    return printings.map((printing) => ({
+      card: printing,
+      setDisplayName: resolveSetDisplayName(printing.set, setNameLookup) ?? String(printing.set ?? ''),
+      setNumber: printing.set_number ? String(printing.set_number) : null,
+      isCurrent: printing.id === selected.id,
+    }));
+  }, [selected, detailCatalogType, detailTypeCatalogCards, foilLookup, setNameLookup]);
+
+  const viewPrintingInDetail = useCallback(
+    (printingId: string) => {
+      const printing = detailTypeCatalogCards.find((c) => c.id === printingId);
+      if (printing) setSelected(printing);
+    },
+    [detailTypeCatalogCards],
+  );
 
   const perTypeCards = useMemo(
     () => dedupeFoilCatalogCards(catalogQuery.data ?? [], foilLookup.foilToBase),
@@ -319,6 +346,8 @@ export default function DatabasePage() {
         onClose={closeCardDetail}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
+        printings={detailPrintingRows}
+        onApplyPrinting={viewPrintingInDetail}
         actions={
           selected ? (
             <DbDetailActions

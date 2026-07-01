@@ -52,7 +52,7 @@ function compareDefaultRepresentative(a: CatalogCard, b: CatalogCard, catalogTyp
   const numCmp = rawA.localeCompare(rawB);
   if (numCmp !== 0) return numCmp;
 
-  if (catalogType === 'power-cards') {
+  if (catalogType === 'power-cards' || catalogType === 'ally-universe') {
     const aSet = normalizeSet(a.set as string | undefined);
     const bSet = normalizeSet(b.set as string | undefined);
     const aIsErb = aSet === 'ERB';
@@ -80,6 +80,12 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
       const value = String(card.value ?? '').trim();
       if (!powerType) return null;
       return `${powerType}|${value}`;
+    }
+    case 'ally-universe': {
+      const statToUse = String(card.stat_to_use ?? '').trim();
+      const statType = String(card.stat_type_to_use ?? '').trim();
+      if (!statType) return null;
+      return `${statToUse}|${statType}`;
     }
     case 'locations':
       return name;
@@ -215,7 +221,7 @@ export function qtyInDeckForRepresentative(
 /** Last-added deck instance id for any variant in the representative's group (LIFO). */
 export function findLastInstanceIdForRepresentative(
   representative: CatalogCard,
-  deckCards: { type: string; cardId: string; instanceId: string }[],
+  deckCards: { type: string; cardId: string; instanceId?: string }[],
   deckType: string,
   variantIdsByRepresentative: Map<string, string[]>,
 ): string | null {
@@ -223,7 +229,7 @@ export function findLastInstanceIdForRepresentative(
   const variantSet = new Set(variantIds);
   for (let i = deckCards.length - 1; i >= 0; i--) {
     const entry = deckCards[i];
-    if (entry.type === deckType && variantSet.has(entry.cardId)) {
+    if (entry.type === deckType && variantSet.has(entry.cardId) && entry.instanceId) {
       return entry.instanceId;
     }
   }

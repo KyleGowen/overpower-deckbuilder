@@ -112,6 +112,7 @@ Promos, con exclusives, NAOL / Kickstarter bonuses, and related entries (card ca
 | FALSE | Location | Event Horizon |  | Kickstarter bonus for pledging "The Dueler" tier or above (1 per pack) |  | TRUE | 2025 |  |
 | FALSE | Special | Any Character: Cataclysm | Loki | Kickstarter bonus for pledging "The Dueler" tier or above (1 per pack) |  | TRUE | 2025 |  |
 | FALSE | Aspect | Any Homebase | Isis | Kickstarter bonus for pledging "The Dueler" tier or above (1 per pack) |  | TRUE | 2025 |  |
+| FALSE | Universe Ally | 5E | White Demon Of Mazandaran (The Few and the Cursed Promo) | Kickstarter bonus for pledging "The Dueler" tier or above | TRUE |  | 2025 | Excelsior: `tfacp/ally/5_energy.png`, set **TFCP** |
 | FALSE | Power Card | 7C | The Red Head (The Few and the Cursed Promo) | Kickstarter bonus for pledging "The Dueler" tier or above (4 per pack) |  | TRUE | 2025 |  |
 | FALSE | Character Card | Hades |  | Kickstarter bonus for pledging "The Dueler" tier or above (1 per pack) |  | TRUE | 2025 |  |
 |  |  |  |  |  |  | FALSE |  |  |
