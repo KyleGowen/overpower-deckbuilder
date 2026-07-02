@@ -52,7 +52,7 @@ describe('defaultCatalogCards', () => {
       const tfcpAlt = card('tfcp-7c-2', {
         name: '7 - Combat',
         set: 'TFCP',
-        image_path: 'tfacp/power/7_combat_2.jpg',
+        image_path: 'tfacp/power/7_combat_2.png',
       });
       const foilToBase = new Map([['tfcp-7c-foil', 'erb-7c']]);
 

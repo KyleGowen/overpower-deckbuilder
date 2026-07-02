@@ -37,7 +37,7 @@ describe('Alternate Power Cards Integration Tests', () => {
       );
 
       expect(nonFoil.rows.length).toBe(1);
-      expect(nonFoil.rows[0].image_path).toBe('tfacp/power/7_combat_2.jpg');
+      expect(nonFoil.rows[0].image_path).toBe('tfacp/power/7_combat_2.png');
 
       const foil = await pool.query(
         "SELECT id, name, image_path, set, is_foil FROM power_cards WHERE set = 'TFCP' AND image_path = 'tfacp/power/7_combat.png'",
@@ -60,7 +60,7 @@ describe('Alternate Power Cards Integration Tests', () => {
       expect(map.rows[0].base_set).toBe('ERB');
       expect(map.rows[0].base_image_path).toBe('power-cards/7_combat.webp');
 
-      console.log('✅ 7 - Combat TFCP: non-foil 7_combat_2.jpg, foil-only 7_combat.png → ERB base');
+      console.log('✅ 7 - Combat TFCP: non-foil 7_combat_2.png, foil-only 7_combat.png → ERB base');
     });
 
     it('should have TFCP promo image for 7 - Energy', async () => {
@@ -70,7 +70,7 @@ describe('Alternate Power Cards Integration Tests', () => {
       );
 
       expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_energy.jpg');
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_energy.png');
 
       console.log('✅ 7 - Energy TFCP promo image:', result.rows[0]?.image_path);
     });
@@ -82,7 +82,7 @@ describe('Alternate Power Cards Integration Tests', () => {
       );
 
       expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_brute_force.jpg');
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_brute_force.png');
 
       console.log('✅ 7 - Brute Force TFCP promo image:', result.rows[0]?.image_path);
     });
@@ -94,7 +94,7 @@ describe('Alternate Power Cards Integration Tests', () => {
       );
 
       expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_intelligence.jpg');
+      expect(result.rows[0].image_path).toBe('tfacp/power/7_intelligence.png');
 
       console.log('✅ 7 - Intelligence TFCP promo image:', result.rows[0]?.image_path);
     });

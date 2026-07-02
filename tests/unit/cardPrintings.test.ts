@@ -112,7 +112,7 @@ describe('cardPrintings', () => {
         set: 'TFCP',
         power_type: 'Combat',
         value: 7,
-        image_path: 'tfacp/power/7_combat_2.jpg',
+        image_path: 'tfacp/power/7_combat_2.png',
       });
       const powerFoilLookup = buildFoilCardMapLookup([
         { foilCardId: 'tfcp-7c-foil', baseCardId: 'erb-7c', cardType: 'power' },

@@ -21,7 +21,7 @@ export interface ProgressiveImageTarget {
 interface SessionState {
   revealed: Map<string, number>;
   accessOrder: string[];
-  inFlight: Map<string, Promise<void>>;
+  inFlight: Map<string, Promise<boolean>>;
 }
 
 const sessions = new Map<ProgressiveImageSessionScope, SessionState>();
@@ -116,20 +116,20 @@ function revealOnTarget(
       onRevealed();
     })
     .catch(() => {
-      markFullResRevealed(fullUrl, scope);
-      onRevealed();
+      // Keep thumb visible when full-res fails (404, stale path, decode error).
+      targetImg.src = '';
     });
 }
 
-function runNetworkPreload(fullUrl: string, scope: ProgressiveImageSessionScope): Promise<void> {
+function runNetworkPreload(fullUrl: string, scope: ProgressiveImageSessionScope): Promise<boolean> {
   const session = getSession(scope);
   const existing = session.inFlight.get(fullUrl);
   if (existing) return existing;
 
-  const pending = new Promise<void>((resolve) => {
+  const pending = new Promise<boolean>((resolve) => {
     const preload = new Image();
-    preload.onload = () => resolve();
-    preload.onerror = () => resolve();
+    preload.onload = () => resolve(true);
+    preload.onerror = () => resolve(false);
     preload.src = fullUrl;
   }).finally(() => {
     session.inFlight.delete(fullUrl);
@@ -153,8 +153,8 @@ export function preloadAndRevealFullRes(
     return { cancel: () => {} };
   }
 
-  runNetworkPreload(fullUrl, scope).then(() => {
-    if (cancelled) return;
+  runNetworkPreload(fullUrl, scope).then((ok) => {
+    if (cancelled || !ok) return;
     revealOnTarget(fullUrl, targetImg, onRevealed, scope);
   });
 

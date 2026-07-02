@@ -66,6 +66,19 @@ describe('location progressive load paths', () => {
   });
 });
 
+describe('tfacp promo power progressive paths', () => {
+  it('resolves thumb and full URLs for tfacp/power promo art', () => {
+    const raw = 'tfacp/power/7_energy.png';
+    expect(canProgressiveLoad(raw, 'power-cards')).toBe(true);
+    expect(resolveImageUrl(raw, 'power-cards')).toBe(
+      '/src/resources/cards/images/tfacp/power/7_energy.png',
+    );
+    expect(resolveThumbUrl(raw, 'power-cards')).toBe(
+      '/src/resources/cards/images/tfacp/thumb/power/7_energy.webp',
+    );
+  });
+});
+
 describe('canProgressiveLoad', () => {
   it('returns true when thumb and full asset paths differ', () => {
     expect(canProgressiveLoad('characters/angry_mob.webp')).toBe(true);
@@ -160,6 +173,29 @@ describe('preloadAndRevealFullRes', () => {
     return decode().then(() => {
       expect(onRevealed).not.toHaveBeenCalled();
     });
+  });
+
+  it('does not reveal when preload fails (keeps thumb visible)', async () => {
+    let preloadInstance: { onload: (() => void) | null; onerror: (() => void) | null; src: string } | null =
+      null;
+
+    global.Image = jest.fn().mockImplementation(() => {
+      preloadInstance = { onload: null, onerror: null, src: '' };
+      return preloadInstance;
+    }) as unknown as typeof Image;
+
+    const decode = jest.fn().mockResolvedValue(undefined);
+    const target = { src: '', decode };
+    const onRevealed = jest.fn();
+
+    preloadAndRevealFullRes('/missing.png', target, onRevealed);
+    preloadInstance!.onerror?.();
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(onRevealed).not.toHaveBeenCalled();
+    expect(target.src).toBe('');
+    expect(decode).not.toHaveBeenCalled();
   });
 });
 

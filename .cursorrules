@@ -228,6 +228,11 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **CDN URL construction**: always strip trailing `/` from `cdnBase` and leading `/` from the path before joining to avoid double-slash URLs (`https://cdn.net//src/...`) that some origins reject. The `deckTileImages.js` helper uses `CDN_BASE + '/src/resources/...'` (no slash between base and path) — never `${cdnBase}/${path}` when `path` starts with `/`.
 - **`CDN_BASE` is a module-level constant** in `deckTileImages.js` (captured at IIFE init time from `window.APP_CDN_BASE`). `/js/app-config.js` must load synchronously via `<script>` before deck-selection scripts or `CDN_BASE` will be `''` for the whole page load.
 
+## Cursor skills — dual location sync
+- **When creating or updating any skill under `.cursor/skills/`**, mirror the same change to **`C:\Users\Kyle\.cursor\skills\{skill-name}/`** in the same session — do not wait for the user to ask.
+- Repo `SKILL.md` uses **repo-relative** script paths (e.g. `.cursor/skills/pdf-to-png/scripts/...`); the global copy uses **`C:\Users\Kyle\.cursor\skills\...`** absolute paths. All other content stays aligned.
+- Do **not** duplicate `C:\Users\Kyle\.cursor\skills-cursor\` (Cursor product skills). Full detail: [`.cursor/rules/cursor-skills-sync.mdc`](.cursor/rules/cursor-skills-sync.mdc).
+
 ## Infrastructure Spend Lock
 
 > ⛔ **NEVER implement any paid AWS infrastructure change without explicit instruction from Kyle.**

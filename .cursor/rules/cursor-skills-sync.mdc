@@ -1,0 +1,46 @@
+---
+description: >-
+  When creating or updating Cursor agent skills for this project, keep the repo
+  copy and Kyle's global skills folder in sync.
+alwaysApply: true
+---
+
+# Cursor skills — dual location sync
+
+When **creating**, **updating**, or **moving** an Excelsior agent skill, **always write both copies** in the same change — do not wait for the user to ask.
+
+## Locations (keep identical content, path-aware)
+
+| Copy | Root |
+|------|------|
+| **Repo** (versioned, shared) | `.cursor/skills/{skill-name}/` |
+| **Global** (user machine) | `C:\Users\Kyle\.cursor\skills\{skill-name}/` |
+
+Mirror the full skill folder: `SKILL.md`, companion docs (`PATH_RULES.md`, etc.), and `scripts/` when present.
+
+## Path conventions in SKILL.md
+
+Script and helper paths **differ by copy** — adjust when syncing:
+
+| Copy | Script invocation example |
+|------|---------------------------|
+| Repo | `& ".cursor/skills/pdf-to-png/scripts/Convert-PdfToPng.ps1"` |
+| Global | `& "C:\Users\Kyle\.cursor\skills\pdf-to-png\scripts\Convert-PdfToPng.ps1"` |
+
+Repo-relative links to project docs (`docs/`, `migrations/`, etc.) stay as-is in **both** copies.
+
+## Workflow
+
+1. Edit or create the skill in **both** locations before reporting done.
+2. If only one location exists, create the missing mirror immediately.
+3. On update, diff mentally: same behavior, only path roots differ where needed.
+4. Tell the user which files were updated in each location.
+
+## In scope
+
+Excelsior workflow skills under `.cursor/skills/` (e.g. `add-card`, `ship`, `pdf-to-png`, `start-aws-db-tunnel`).
+
+## Out of scope
+
+- `C:\Users\Kyle\.cursor\skills-cursor\` — Cursor product skills; do not duplicate into the repo.
+- Skills with no Excelsior tie-in unless the user explicitly asks to add them to the repo.
