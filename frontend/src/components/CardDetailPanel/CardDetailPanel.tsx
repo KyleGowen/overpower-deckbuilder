@@ -32,6 +32,8 @@ interface CardDetailPanelProps {
   hasFoil?: boolean;
   /** When set, renders "Is Foil" in Details (this catalog row is a foil printing). */
   isFoil?: boolean;
+  /** When false, suppresses the prismatic foil overlay on the hero image. Default true. */
+  showFoilEffect?: boolean;
   /** Friendly set name for Details (falls back to `card.set` code when omitted). */
   setDisplayName?: string;
   /** Deck editor: alternate printings with Apply actions (hidden when length <= 1). */
@@ -105,6 +107,7 @@ export function CardDetailPanel({
   actions,
   hasFoil,
   isFoil,
+  showFoilEffect = true,
   setDisplayName,
   printings,
   onApplyPrinting,
@@ -140,7 +143,7 @@ export function CardDetailPanel({
             alt={name}
             useThumbnail={false}
             className="card-image--contain"
-            isFoil={Boolean(isFoil ?? isFoilCard(card))}
+            isFoil={showFoilEffect && Boolean(isFoil ?? isFoilCard(card))}
             foilSeed={card.id}
             foilSize="hero"
             foilEagerIntro

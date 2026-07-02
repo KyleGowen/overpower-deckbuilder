@@ -14,6 +14,7 @@ overlay and footer slots. Used by the Database and Collection grids.
 | `showMeta` | `boolean` | `true` | Toggle the name/set line. |
 | `catalogType` | `CatalogType` | – | Database grid: landscape vs portrait art frame + `contain` fit. |
 | `hasFoilVersion` | `boolean` | `false` | Silver ✦ on tile (bottom-right of full tile, `title="has foil"`). |
+| `showFoilEffect` | `boolean` | `true` | When false, suppresses the prismatic foil overlay on foil printings. |
 
 ## Notes
 - Name comes from `cardDisplayName(card)`; art path from `card.image_path || card.image`.

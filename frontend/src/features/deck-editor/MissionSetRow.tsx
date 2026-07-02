@@ -54,6 +54,7 @@ export function MissionSetRow({
               card={card}
               catalogType="missions"
               showMeta={false}
+              showFoilEffect={false}
               onClick={() => onAddMission(card)}
               overlay={renderOverlay(card, inDeck)}
             />

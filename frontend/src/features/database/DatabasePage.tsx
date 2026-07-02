@@ -6,6 +6,7 @@ import {
   buildFoilCardMapLookup,
   cardHasFoilVersion,
   dedupeFoilCatalogCards,
+  isFoilCard,
   matchesHasFoilFilter,
 } from '../../lib/catalog/foilCatalog';
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
@@ -330,6 +331,7 @@ export default function DatabasePage() {
                   card={card}
                   catalogType={tab}
                   hasFoilVersion={cardHasFoilVersion(card, foilLookup.baseToFoil)}
+                  showFoilEffect={false}
                   onClick={() => selectCard(card, tab)}
                 />
               ))}
@@ -345,6 +347,8 @@ export default function DatabasePage() {
         open={Boolean(selected)}
         onClose={closeCardDetail}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
+        isFoil={selected ? isFoilCard(selected) : undefined}
+        showFoilEffect={false}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         printings={detailPrintingRows}
         onApplyPrinting={viewPrintingInDetail}

@@ -13,6 +13,9 @@ apply consistently (and keep working after the CDN cutover).
 | `useThumbnail` | `boolean` | `true` | Use the `/thumb/` variant (tiles, ribbons, lists). Set `false` for full art (detail panel). |
 | `loading` | `'lazy' \| 'eager'` | `'lazy'` | Native loading hint. |
 | `className`, `style` | – | – | Passthrough. |
+| `isFoil` | `boolean` | – | When true, wraps art in `FoilCard` prismatic laminate. |
+| `showFoilEffect` | `boolean` | `true` | When false, suppresses the foil overlay even if `isFoil` is true. |
+| `foilSeed`, `foilSize`, `foilEagerIntro` | – | – | Passed through to `FoilCard` when the overlay is shown. |
 
 ## Behavior
 - Shows a loading state until the image fires `onLoad`.

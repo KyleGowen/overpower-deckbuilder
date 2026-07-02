@@ -50,6 +50,7 @@ export function CharacterStackRow({
           card={stack.character}
           catalogType="characters"
           showMeta={false}
+          showFoilEffect={false}
         />
       </div>
       {portraitCards.length > 0 ? (
@@ -60,6 +61,7 @@ export function CharacterStackRow({
               card={card}
               catalogType={catalogType}
               showMeta={false}
+              showFoilEffect={false}
             />
           ))}
         </div>

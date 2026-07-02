@@ -19,6 +19,8 @@ interface CardTileProps {
   catalogType?: CatalogType;
   /** Silver starburst on tile when a foil variant exists (database grid). */
   hasFoilVersion?: boolean;
+  /** When false, suppresses the prismatic foil overlay on foil printings (DBV, Add Cards). Default true. */
+  showFoilEffect?: boolean;
 }
 
 function tileOrientationClass(catalogType?: CatalogType): string {
@@ -44,6 +46,7 @@ export function CardTile({
   showMeta = true,
   catalogType,
   hasFoilVersion = false,
+  showFoilEffect = true,
 }: CardTileProps) {
   const name = cardDisplayName(card);
   const imagePath = (card.image_path as string) || (card.image as string);
@@ -60,7 +63,7 @@ export function CardTile({
           progressive={Boolean(catalogType)}
           catalogType={catalogType}
           className={catalogType ? 'card-image--contain' : ''}
-          isFoil={isFoilCard(card)}
+          isFoil={showFoilEffect && isFoilCard(card)}
           foilSeed={card.id}
         />
         {overlay ? <span className="card-tile__overlay">{overlay}</span> : null}

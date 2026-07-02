@@ -43,6 +43,8 @@ interface CardImageProps {
   progressiveSessionScope?: ProgressiveImageSessionScope;
   /** When true, wraps the image in the v2 Prismatic Laminate foil overlay. */
   isFoil?: boolean;
+  /** When false, suppresses the foil overlay even if isFoil is true (browse-only screens). Default true. */
+  showFoilEffect?: boolean;
   /** Seed for per-card foil uniqueness; defaults to imagePath. */
   foilSeed?: string;
   foilSize?: FoilCardSize;
@@ -54,13 +56,14 @@ function wrapWithFoil(
   node: ReactNode,
   opts: {
     isFoil?: boolean;
+    showFoilEffect?: boolean;
     foilSeed?: string;
     imagePath?: string | null;
     foilSize?: FoilCardSize;
     foilEagerIntro?: boolean;
   },
 ): ReactNode {
-  if (!opts.isFoil) return node;
+  if (!opts.isFoil || opts.showFoilEffect === false) return node;
   const seed = opts.foilSeed ?? opts.imagePath ?? 'foil-default';
   return (
     <FoilCard seed={seed} size={opts.foilSize ?? 'thumb'} eagerIntro={opts.foilEagerIntro}>
@@ -115,6 +118,7 @@ export function CardImage({
   onImageFailed,
   progressiveSessionScope = 'database',
   isFoil,
+  showFoilEffect = true,
   foilSeed,
   foilSize,
   foilEagerIntro,
@@ -123,7 +127,7 @@ export function CardImage({
     progressive && canProgressiveLoad(imagePath, catalogType) && !shouldSkipFullResUpgrade();
   const progressiveThumb = catalogTypeSupportsProgressiveThumb(catalogType);
   const foilWrap = (node: ReactNode) =>
-    wrapWithFoil(node, { isFoil, foilSeed, imagePath, foilSize, foilEagerIntro });
+    wrapWithFoil(node, { isFoil, showFoilEffect, foilSeed, imagePath, foilSize, foilEagerIntro });
 
   if (useProgressive) {
     return foilWrap(

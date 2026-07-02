@@ -13,6 +13,7 @@ chips, an action slot, an Ability section, and an auto-generated Details key/val
 | `actions` | `ReactNode` | Action area under the header (e.g. Add to Deck button, or a collection `QuantityStepper`). |
 | `hasFoil` | `boolean` | When set, renders **Has Foil** Yes/No in Details (foil variant exists). |
 | `isFoil` | `boolean` | When set, renders **Is Foil** Yes/No in Details (this row is a foil printing). |
+| `showFoilEffect` | `boolean` | When false, suppresses the prismatic foil overlay on the hero image (default true). Metadata rows unchanged. |
 | `setDisplayName` | `string` | Friendly set name for the **Set** Details row (falls back to `card.set` code when omitted). |
 
 ## Details list

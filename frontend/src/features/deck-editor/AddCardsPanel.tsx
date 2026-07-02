@@ -605,6 +605,7 @@ export function AddCardsPanel({
                         card={card}
                         catalogType={catalogType}
                         showMeta={false}
+                        showFoilEffect={false}
                         onClick={() => handleAddCard(card, catalogType)}
                         overlay={renderQtyOverlay(card, catalogType)}
                       />
@@ -624,6 +625,7 @@ export function AddCardsPanel({
                   card={card}
                   catalogType={catalogType}
                   showMeta={false}
+                  showFoilEffect={false}
                   onClick={() => handleAddCard(card, catalogType)}
                   overlay={renderQtyOverlay(card, catalogType)}
                 />
