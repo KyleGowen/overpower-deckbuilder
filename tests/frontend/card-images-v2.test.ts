@@ -213,6 +213,37 @@ describe('CardTile database progressive wiring', () => {
     expect(source).toContain('catalogType={catalogType}');
     expect(source).not.toContain('catalogTypeUsesFullImageInDbGrid');
   });
+
+  it('gates foil laminate with showFoilEffect', () => {
+    const tileSource = fs.readFileSync(
+      path.join(__dirname, '../../frontend/src/components/CardTile/CardTile.tsx'),
+      'utf8',
+    );
+    expect(tileSource).toContain('showFoilEffect && isFoilCard(card)');
+
+    const imageSource = fs.readFileSync(
+      path.join(__dirname, '../../frontend/src/components/CardImage/CardImage.tsx'),
+      'utf8',
+    );
+    expect(imageSource).toContain('showFoilEffect === false');
+    expect(imageSource).toContain('showFoilEffect = true');
+  });
+});
+
+describe('per-screen foil effect wiring', () => {
+  it('disables laminate in DBV and Add Cards browse contexts', () => {
+    const dbvSource = fs.readFileSync(
+      path.join(__dirname, '../../frontend/src/features/database/DatabasePage.tsx'),
+      'utf8',
+    );
+    expect(dbvSource).toContain('showFoilEffect={false}');
+
+    const addCardsSource = fs.readFileSync(
+      path.join(__dirname, '../../frontend/src/features/deck-editor/AddCardsPanel.tsx'),
+      'utf8',
+    );
+    expect(addCardsSource).toContain('showFoilEffect={false}');
+  });
 });
 
 describe('CardImage single-layer cached sync', () => {

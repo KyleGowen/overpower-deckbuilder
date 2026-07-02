@@ -180,6 +180,17 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   catalog `mission_set`), and `threat.png` + threat on the right. Max-stat bar follows on `full` tiles. A **footer** row
   shows the updated date (left) and optional legality badge lower-right (**Limited** or **Not Legal**
   only; legal decks show date only).
+- **Foil laminate (per screen):** The prismatic `FoilCard` overlay is controlled by `showFoilEffect`
+  on `CardImage` / `CardTile` / `CardDetailPanel` (default `true`). Base cards that merely have a
+  foil variant show a silver ✦ badge (`.card-tile__foil-badge`) instead of the laminate.
+
+  | Screen | Laminate | Indicator |
+  |---|---|---|
+  | Database View (grid + detail) | Off | ✦ badge + **Has Foil** metadata |
+  | Deck editor — Add Cards slideout | Off | Plain catalog art |
+  | Deck editor — card grid, Draw Hand, detail | On when `is_foil` or foil printing selected | — |
+  | Collection (grid + detail) | On for foil printings | — |
+  | Deck tiles (selection / home / community) | On when deck entry `is_foil` on character slides | — |
 
 ## Stats, Badges & Status
 OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
