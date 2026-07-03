@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { CardImage } from '../CardImage';
 import { cardDisplayName } from '../../lib/catalog/catalogTypeMap';
 import { isFoilCard } from '../../lib/catalog/foilCatalog';
@@ -37,7 +37,7 @@ function formatSetLabel(card: CatalogCard): string | null {
   return setNumber ? `${card.set} ${setNumber}` : card.set;
 }
 
-export function CardTile({
+export const CardTile = memo(function CardTile({
   card,
   onClick,
   overlay,
@@ -86,4 +86,4 @@ export function CardTile({
       ) : null}
     </article>
   );
-}
+});
