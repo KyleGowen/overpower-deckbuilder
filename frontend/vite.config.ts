@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath, URL } from 'node:url';
 
 // Vite dev server proxies API + card image asset requests to the Express
@@ -7,8 +8,17 @@ import { fileURLToPath, URL } from 'node:url';
 // The backend default port is 8085 (process.env.PORT || 8085).
 const BACKEND = 'http://localhost:8085';
 
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    mode === 'analyze' &&
+      visualizer({
+        filename: 'dist/stats.html',
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+      }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -31,4 +41,4 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
   },
-});
+}));
