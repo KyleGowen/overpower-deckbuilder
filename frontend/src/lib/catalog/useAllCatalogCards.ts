@@ -31,6 +31,8 @@ export function useAllCatalogCards(options: UseAllCatalogCardsOptions = {}) {
   const isLoading = enabled && queries.some((q) => q.isLoading);
   const isError = enabled && queries.some((q) => q.isError);
 
+  const catalogDataSignature = queries.map((q) => q.dataUpdatedAt).join(',');
+
   const cards = useMemo(() => {
     if (!enabled) return [];
     const items: CatalogCardWithType[] = [];
@@ -40,7 +42,7 @@ export function useAllCatalogCards(options: UseAllCatalogCardsOptions = {}) {
       list.forEach((card) => items.push({ card, catalogType: meta.type }));
     });
     return items;
-  }, [enabled, queries, foilToBase]);
+  }, [enabled, catalogDataSignature, foilToBase]);
 
   return { cards, isLoading, isError };
 }

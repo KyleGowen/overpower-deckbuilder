@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CardTile } from '../../components/CardTile';
 import type { CatalogCard } from '../../lib/api/types';
 import type { MissionSet } from '../../lib/catalog/missionSets';
@@ -24,9 +24,16 @@ export function MissionSetRow({
   const [addedFlash, setAddedFlash] = useState(false);
 
   const entries = missionSetCardsInAddOrder(missionSet);
-  const inDeckCount = entries.filter(({ card }) => qtyInDeck(card) > 0).length;
+  const { inDeckCount, missingCount } = useMemo(() => {
+    let inDeck = 0;
+    let missing = 0;
+    for (const { card } of entries) {
+      if (qtyInDeck(card) > 0) inDeck += 1;
+      else missing += 1;
+    }
+    return { inDeckCount: inDeck, missingCount: missing };
+  }, [entries, qtyInDeck]);
   const isComplete = inDeckCount >= entries.length && entries.length > 0;
-  const missingCount = entries.filter(({ card }) => qtyInDeck(card) === 0).length;
   const addSetDisabled = isComplete || missionLimitReached || missingCount === 0;
 
   useEffect(() => {

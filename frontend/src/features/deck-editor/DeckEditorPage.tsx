@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
@@ -13,6 +13,7 @@ import {
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import { fetchFavoriteDecks } from '../../lib/api/favorites';
 import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
+import { favoritesQueryKey } from '../../lib/decks/favoritesQueryKey';
 import { clonePreloadedGuestDeck, guestNeedsCloneOnOpen } from '../../lib/decks/guestCloneOnOpen';
 import { calculateDeckTotalThreat, formatThreatTooltip } from '../../lib/decks/deckThreat';
 import { calculateDeckIconTotals } from '../../lib/decks/iconTotals';
@@ -90,8 +91,6 @@ import {
   sortDeckPowerEntries,
   sortDeckSpecialEntries,
 } from '../../lib/decks/deckCardCatalog';
-import { AddCardsPanel } from './AddCardsPanel';
-import { DrawHandPanel } from './DrawHandPanel';
 import { DeckListView, persistDeckViewMode, readDeckViewMode } from './DeckListView';
 import { KoToggleButton } from './KoToggleButton';
 import { ReserveCharacterButton } from './ReserveCharacterButton';
@@ -110,6 +109,13 @@ import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cy
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
 import './DeckEditorPage.css';
+
+const AddCardsPanel = lazy(() =>
+  import('./AddCardsPanel').then((m) => ({ default: m.AddCardsPanel })),
+);
+const DrawHandPanel = lazy(() =>
+  import('./DrawHandPanel').then((m) => ({ default: m.DrawHandPanel })),
+);
 
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   if (!catalogType) return 'deck-editor__card-img--portrait';
@@ -284,9 +290,9 @@ export default function DeckEditorPage() {
   // A real (non-guest) user can favorite any deck that isn't their own.
   const canFavorite =
     Boolean(user) && !isGuest && Boolean(deck) && deck?.metadata.userId !== user?.id;
-  const favoritesQueryKey = ['decks', 'favorites', user?.id] as const;
+  const favListKey = favoritesQueryKey(user?.id);
   const favoritesQuery = useQuery({
-    queryKey: favoritesQueryKey,
+    queryKey: favListKey,
     queryFn: fetchFavoriteDecks,
     enabled: canFavorite,
   });
@@ -364,7 +370,7 @@ export default function DeckEditorPage() {
           }),
         )
         .catch(() => setValidity(null));
-    }, 500);
+    }, 1000);
     return () => clearTimeout(t);
   }, [cards]);
 
@@ -410,9 +416,13 @@ export default function DeckEditorPage() {
     [setsQuery.data],
   );
 
+  const hasCharactersInDeckCatalog = deckCatalogTypes.some(
+    (t) => catalogSlugForDeckType(t) === 'characters',
+  );
   const charactersQuery = useQuery({
     queryKey: ['catalog', 'characters'],
     queryFn: () => fetchCatalog('characters'),
+    enabled: !hasCharactersInDeckCatalog,
     staleTime: 30 * 60 * 1000,
   });
 
@@ -450,12 +460,14 @@ export default function DeckEditorPage() {
     }
   }, [canDraw, drawHandOpen]);
 
+  const allCharactersCatalog = catalogBySlug.get('characters') ?? charactersQuery.data ?? [];
+
   const maxStats = useMemo(() => {
     if (koCtx) {
       return calculateActiveTeamStats(koCtx);
     }
     const statById = new Map<string, ReturnType<typeof cardStats>>();
-    (charactersQuery.data ?? []).forEach((c) => {
+    allCharactersCatalog.forEach((c) => {
       const s = cardStats(c);
       if (s) statById.set(c.id, s);
     });
@@ -471,7 +483,7 @@ export default function DeckEditorPage() {
       }
     });
     return acc;
-  }, [cards, charactersQuery.data, koCtx]);
+  }, [cards, allCharactersCatalog, koCtx]);
 
   const iconTotals = useMemo(
     () =>
@@ -836,7 +848,8 @@ export default function DeckEditorPage() {
       setTimeout(() => setSaveMsg(null), 2500);
       // Card changes recompute decks.is_valid server-side; refresh the deck lists
       // (My Decks, community feed, favorites, tournament) so tile legality matches.
-      void queryClient.invalidateQueries({ queryKey: ['decks'] });
+      void queryClient.invalidateQueries({ queryKey: ['decks', 'mine', user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ['deck', deckId] });
     } catch (err) {
       setSaveMsg((err as Error)?.message || 'Save failed');
     } finally {
@@ -878,7 +891,8 @@ export default function DeckEditorPage() {
         };
       });
       // Refresh deck lists so tile chips reflect Limited everywhere.
-      void queryClient.invalidateQueries({ queryKey: ['decks'] });
+      void queryClient.invalidateQueries({ queryKey: ['decks', 'mine', user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ['deck', deckId] });
     } catch {
       /* leave state unchanged on failure */
     } finally {
@@ -889,7 +903,7 @@ export default function DeckEditorPage() {
   const handleToggleFavorite = () => {
     if (!canFavorite || favoriteToggle.isPending || !deck) return;
     const next = !isFavorited;
-    queryClient.setQueryData<DeckDetail[]>(favoritesQueryKey, (prev) => {
+    queryClient.setQueryData<DeckDetail[]>(favListKey, (prev) => {
       const list = prev ?? [];
       if (next) {
         if (list.some((d) => d.metadata.id === deckId)) return list;
@@ -901,7 +915,7 @@ export default function DeckEditorPage() {
       { deckId, next },
       {
         onError: () => {
-          void queryClient.invalidateQueries({ queryKey: favoritesQueryKey });
+          void queryClient.invalidateQueries({ queryKey: favListKey });
         },
       },
     );
@@ -1311,8 +1325,9 @@ export default function DeckEditorPage() {
             ))
           )}
 
-          <DrawHandPanel
-            open={drawHandOpen}
+          <Suspense fallback={<LoadingState label="Loading..." />}>
+            <DrawHandPanel
+              open={drawHandOpen}
             drawnCards={drawnCards}
             cardIndex={cardIndex}
             koCtx={drawHandKoCtx}
@@ -1320,21 +1335,24 @@ export default function DeckEditorPage() {
             onClose={closeDrawHand}
             onReorder={handleDrawHandReorder}
             onCardClick={selectDeckCard}
-          />
+            />
+          </Suspense>
         </div>
       </div>
 
       {/* Add cards panel */}
-      {isOwner ? (
-        <AddCardsPanel
-          open={addOpen}
-          onClose={() => setAddOpen(false)}
-          onAdd={addCard}
-          onAddStack={addStack}
-          onRemoveInstance={removeDeckInstance}
-          cards={cards}
-          deckCatalogIndex={cardIndex}
-        />
+      {isOwner && addOpen ? (
+        <Suspense fallback={<LoadingState label="Loading..." />}>
+          <AddCardsPanel
+            open={addOpen}
+            onClose={() => setAddOpen(false)}
+            onAdd={addCard}
+            onAddStack={addStack}
+            onRemoveInstance={removeDeckInstance}
+            cards={cards}
+            deckCatalogIndex={cardIndex}
+          />
+        </Suspense>
       ) : null}
 
       <CardDetailPanel

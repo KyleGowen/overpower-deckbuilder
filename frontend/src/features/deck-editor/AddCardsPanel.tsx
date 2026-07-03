@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
   ADD_CARDS_TAB_ORDER,
@@ -105,6 +105,7 @@ export function AddCardsPanel({
   deckCatalogIndex,
 }: AddCardsPanelProps) {
   const { isMobile } = useLayoutMode();
+  const queryClient = useQueryClient();
   const addCardsRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<CatalogTabSelection>('all');
@@ -207,7 +208,12 @@ export function AddCardsPanel({
     queries: DECK_USABILITY_CONTEXT_TYPES.map((type) => ({
       queryKey: ['catalog', type] as const,
       queryFn: () => fetchCatalog(type),
-      enabled: open,
+      enabled:
+        open &&
+        queryClient.getQueryData(['catalog', type]) === undefined &&
+        !isAllTab &&
+        activeType !== type &&
+        !(isStacksTab && type === 'characters'),
       staleTime: 30 * 60 * 1000,
     })),
   });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { assetUrl } from '../../../lib/images/cardImages';
 import type { CompareOp, NumericFieldDef } from '../filters/dbvFilterTypes';
 import { OP_LABELS, STAT_ICON_PATHS } from '../filters/dbvFilterTypes';
@@ -26,6 +26,14 @@ function StatCell({
     setValue(c?.value?.toString() ?? '');
   }, [field.key, filters.state.numeric]);
 
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   const applyValue = (raw: string, nextOp: CompareOp = op) => {
     const trimmed = raw.trim();
     if (!trimmed) {
@@ -37,6 +45,11 @@ function StatCell({
     const clamped = Math.min(field.max, Math.max(field.min, n));
     filters.upsertNumericConstraint(field.key, nextOp, clamped);
     if (String(clamped) !== trimmed) setValue(String(clamped));
+  };
+
+  const scheduleApplyValue = (raw: string, nextOp: CompareOp = op) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => applyValue(raw, nextOp), 250);
   };
 
   const iconPath = STAT_ICON_PATHS[field.icon ?? field.key];
@@ -62,7 +75,7 @@ function StatCell({
         onChange={(e) => {
           const nextOp = e.target.value as CompareOp;
           setOp(nextOp);
-          if (value.trim()) applyValue(value, nextOp);
+          if (value.trim()) scheduleApplyValue(value, nextOp);
         }}
       >
         {(Object.keys(OP_LABELS) as CompareOp[]).map((k) => (
@@ -81,7 +94,7 @@ function StatCell({
         aria-label={`${field.label} value`}
         onChange={(e) => {
           setValue(e.target.value);
-          applyValue(e.target.value);
+          scheduleApplyValue(e.target.value);
         }}
       />
     </div>

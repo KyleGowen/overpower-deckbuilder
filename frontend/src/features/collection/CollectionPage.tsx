@@ -49,7 +49,7 @@ export default function CollectionPage() {
   const colRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
   const collection = useCollection();
-  const [tab, setTab] = useState<DbvTabSelection>('all');
+  const [tab, setTab] = useState<DbvTabSelection>('characters');
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
@@ -93,7 +93,7 @@ export default function CollectionPage() {
     });
     result.sort((a, b) => compareCollectionCatalogCards(a, b));
     return result;
-  }, [perTypeCards, debouncedSearch, setFilter, ownedOnly, collection, tab, isAllTab]);
+  }, [perTypeCards, debouncedSearch, setFilter, ownedOnly, collection.quantityFor, tab, isAllTab]);
 
   const allTabFiltered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
@@ -106,7 +106,7 @@ export default function CollectionPage() {
     });
     result.sort((a, b) => compareCollectionCatalogCards(a.card, b.card));
     return result;
-  }, [allCatalogQuery.cards, debouncedSearch, setFilter, ownedOnly, collection]);
+  }, [allCatalogQuery.cards, debouncedSearch, setFilter, ownedOnly, collection.quantityFor]);
 
   const filtered = isAllTab ? allTabFiltered : gridFiltered;
 

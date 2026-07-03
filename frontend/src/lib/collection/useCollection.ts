@@ -30,7 +30,13 @@ export interface UseCollectionResult {
   uniqueCards: number;
 }
 
-export function useCollection(): UseCollectionResult {
+export interface UseCollectionOptions {
+  /** When false, skips the server collection fetch (guest localStorage still works). */
+  enabled?: boolean;
+}
+
+export function useCollection(options: UseCollectionOptions = {}): UseCollectionResult {
+  const { enabled = true } = options;
   const { isGuest } = useAuth();
   const queryClient = useQueryClient();
   const [guestTick, setGuestTick] = useState(0);
@@ -38,7 +44,7 @@ export function useCollection(): UseCollectionResult {
   const serverQuery = useQuery({
     queryKey: ['collection', 'me'],
     queryFn: () => fetchCollectionCards(),
-    enabled: !isGuest,
+    enabled: enabled && !isGuest,
     staleTime: 60 * 1000,
   });
 
@@ -102,7 +108,29 @@ export function useCollection(): UseCollectionResult {
       } else {
         await setCollectionQuantity({ cardId: card.id, cardType: collectionType, quantity: next, imagePath });
       }
-      await queryClient.invalidateQueries({ queryKey: ['collection', 'me'] });
+      queryClient.setQueryData<Array<{ card_id: string; card_type: string; quantity: number; image_path: string }>>(
+        ['collection', 'me'],
+        (prev) => {
+          const list = prev ?? [];
+          const idx = list.findIndex((c) => c.card_id === card.id && c.card_type === collectionType);
+          if (next <= 0) {
+            if (idx < 0) return list;
+            return list.filter((_, i) => i !== idx);
+          }
+          if (idx < 0) {
+            return [
+              ...list,
+              {
+                card_id: card.id,
+                card_type: collectionType,
+                quantity: next,
+                image_path: imagePath,
+              },
+            ];
+          }
+          return list.map((c, i) => (i === idx ? { ...c, quantity: next } : c));
+        },
+      );
     },
     [isGuest, queryClient, map],
   );
@@ -110,12 +138,15 @@ export function useCollection(): UseCollectionResult {
   const totalOwned = useMemo(() => entries.reduce((s, e) => s + e.quantity, 0), [entries]);
   const uniqueCards = useMemo(() => entries.filter((e) => e.quantity > 0).length, [entries]);
 
-  return {
-    isGuest,
-    isLoading: !isGuest && serverQuery.isLoading,
-    quantityFor,
-    setQuantity,
-    totalOwned,
-    uniqueCards,
-  };
+  return useMemo(
+    () => ({
+      isGuest,
+      isLoading: !isGuest && serverQuery.isLoading,
+      quantityFor,
+      setQuantity,
+      totalOwned,
+      uniqueCards,
+    }),
+    [isGuest, serverQuery.isLoading, quantityFor, setQuantity, totalOwned, uniqueCards],
+  );
 }

@@ -26,7 +26,7 @@ import { collectPrintingsForCard } from '../../lib/catalog/cardPrintings';
 import type { FoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { buildSetNameLookup, resolveSetDisplayName } from '../../lib/catalog/setNames';
-import { useCollection, type UseCollectionResult } from '../../lib/collection/useCollection';
+import { useCollection } from '../../lib/collection/useCollection';
 import { CardTile } from '../../components/CardTile';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { CatalogAllList } from '../../components/CatalogAllList';
@@ -59,7 +59,7 @@ function useDebounced<T>(value: T, delay = 250): T {
 
 export default function DatabasePage() {
   const { isMobile } = useLayoutMode();
-  const collection = useCollection();
+  const queryClient = useQueryClient();
   const dbRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState<DbvTabSelection>('characters');
@@ -110,14 +110,16 @@ export default function DatabasePage() {
     foilToBase: foilLookup.foilToBase,
   });
 
+  const detailCatalogCached = queryClient.getQueryData<CatalogCard[]>(['catalog', detailCatalogType]);
+
   const detailTypeCatalogQuery = useQuery({
     queryKey: ['catalog', detailCatalogType],
     queryFn: () => fetchCatalog(detailCatalogType),
-    enabled: Boolean(selected),
+    enabled: Boolean(selected) && detailCatalogCached === undefined,
     staleTime: 30 * 60 * 1000,
   });
 
-  const detailTypeCatalogCards = detailTypeCatalogQuery.data ?? [];
+  const detailTypeCatalogCards = detailCatalogCached ?? detailTypeCatalogQuery.data ?? [];
 
   const detailPrintingRows = useMemo(() => {
     if (!selected) return undefined;
@@ -357,7 +359,6 @@ export default function DatabasePage() {
               card={selected}
               type={detailCatalogType}
               collectionType={detailCollectionType}
-              collection={collection}
               catalogCards={detailTypeCatalogCards}
               foilLookup={foilLookup}
             />
@@ -379,17 +380,16 @@ function DbDetailActions({
   card,
   type,
   collectionType,
-  collection,
   catalogCards,
   foilLookup,
 }: {
   card: CatalogCard;
   type: CatalogType;
   collectionType: CollectionCardType;
-  collection: UseCollectionResult;
   catalogCards: CatalogCard[];
   foilLookup: FoilCardMapLookup;
 }) {
+  const collection = useCollection();
   const { isGuest, user } = useAuth();
   const queryClient = useQueryClient();
   const [deckMenuOpen, setDeckMenuOpen] = useState(false);
@@ -419,7 +419,8 @@ function DbDetailActions({
       const resolved = resolveDefaultCardForDeckAdd(card, type, catalogCards, foilLookup);
       await addCardToDeck(deckId, { cardType: deckType, cardId: resolved.id, quantity: 1 });
       setStatus({ kind: 'success', message: `Added to ${deckName}` });
-      queryClient.invalidateQueries({ queryKey: ['decks'] });
+      queryClient.invalidateQueries({ queryKey: ['decks', 'mine', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['deck', deckId] });
     } catch (err) {
       setStatus({ kind: 'error', message: (err as Error)?.message || 'Could not add card' });
     }

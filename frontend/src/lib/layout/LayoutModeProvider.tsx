@@ -6,8 +6,10 @@
  */
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react';
@@ -58,7 +60,7 @@ export function LayoutModeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const setPreferDesktop = (on: boolean) => {
+  const setPreferDesktop = useCallback((on: boolean) => {
     if (typeof window.setPreferDesktopLayout === 'function') {
       window.setPreferDesktopLayout(on);
     } else {
@@ -70,14 +72,17 @@ export function LayoutModeProvider({ children }: { children: ReactNode }) {
       }
       window.dispatchEvent(new CustomEvent('layout-mode-change'));
     }
-  };
+  }, []);
 
-  const value: LayoutModeValue = {
-    isMobile,
-    isDesktop: !isMobile,
-    preferDesktop,
-    setPreferDesktop,
-  };
+  const value = useMemo<LayoutModeValue>(
+    () => ({
+      isMobile,
+      isDesktop: !isMobile,
+      preferDesktop,
+      setPreferDesktop,
+    }),
+    [isMobile, preferDesktop, setPreferDesktop],
+  );
 
   return <LayoutModeContext.Provider value={value}>{children}</LayoutModeContext.Provider>;
 }

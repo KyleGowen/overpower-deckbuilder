@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const userQuery = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: () => fetchCurrentUser(),
-    staleTime: 0,
+    staleTime: 2 * 60 * 1000,
   });
 
   const configQuery = useQuery({
