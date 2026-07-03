@@ -1,8 +1,6 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
-import { AppShell } from '../components/AppShell';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoadingState } from '../components/LoadingState';
-import { ProtectedRoute } from './ProtectedRoute';
 import { RootLayout } from './RootLayout';
 
 const LoginPage = lazy(() => import('../features/login/LoginPage'));
@@ -13,22 +11,10 @@ const CollectionPage = lazy(() => import('../features/collection/CollectionPage'
 const DeckSelectionPage = lazy(() => import('../features/deck-selection/DeckSelectionPage'));
 const CommunityPage = lazy(() => import('../features/community/CommunityPage'));
 const DeckEditorPage = lazy(() => import('../features/deck-editor/DeckEditorPage'));
+const ShelledLayout = lazy(() => import('./ShelledLayout'));
 
 function Lazy({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingState fullscreen label="Loading..." />}>{children}</Suspense>;
-}
-
-/** Layout for the primary navigable pages (top nav + mobile bottom nav). */
-function ShelledLayout() {
-  return (
-    <ProtectedRoute>
-      <AppShell>
-        <Lazy>
-          <Outlet />
-        </Lazy>
-      </AppShell>
-    </ProtectedRoute>
-  );
 }
 
 export const router = createBrowserRouter([
@@ -44,7 +30,11 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        element: <ShelledLayout />,
+        element: (
+          <Lazy>
+            <ShelledLayout />
+          </Lazy>
+        ),
         children: [
           { path: '/', element: <Navigate to="/home" replace /> },
           { path: '/home', element: <HomePage /> },

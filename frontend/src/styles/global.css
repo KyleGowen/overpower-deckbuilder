@@ -1,6 +1,4 @@
 @import './tokens.css';
-/* Stat-value numerals: heavy geometric sans matching the baked card-art digits */
-@import '@fontsource/poppins/800.css';
 
 /* ---- Reset ---- */
 *,
@@ -220,20 +218,6 @@ a:focus-visible,
   color: var(--color-text-muted);
   border-color: var(--color-border);
   background: var(--color-bg-elevated);
-}
-.deck-editor__visibility-toggle {
-  cursor: pointer;
-}
-.deck-editor__visibility-toggle:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.deck-editor__legality-toggle {
-  cursor: pointer;
-}
-.deck-editor__legality-toggle:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 /* ---- Accessibility ---- */

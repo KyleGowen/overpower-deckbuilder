@@ -1,3 +1,18 @@
+.deck-editor__visibility-toggle {
+  cursor: pointer;
+}
+.deck-editor__visibility-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.deck-editor__legality-toggle {
+  cursor: pointer;
+}
+.deck-editor__legality-toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .deck-editor {
   flex: 1;
   display: grid;
