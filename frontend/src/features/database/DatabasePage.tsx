@@ -348,7 +348,6 @@ export default function DatabasePage() {
         onClose={closeCardDetail}
         hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
         isFoil={selected ? isFoilCard(selected) : undefined}
-        showFoilEffect={false}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         printings={detailPrintingRows}
         onApplyPrinting={viewPrintingInDetail}

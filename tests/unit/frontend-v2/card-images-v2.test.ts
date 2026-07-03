@@ -267,12 +267,14 @@ describe('CardTile database progressive wiring', () => {
 });
 
 describe('per-screen foil effect wiring', () => {
-  it('disables laminate in DBV and Add Cards browse contexts', () => {
+  it('disables laminate in DBV grid and Add Cards browse contexts', () => {
     const dbvSource = fs.readFileSync(
       path.join(__dirname, '../../../frontend/src/features/database/DatabasePage.tsx'),
       'utf8',
     );
+    expect(dbvSource).toContain('<CardTile');
     expect(dbvSource).toContain('showFoilEffect={false}');
+    expect(dbvSource).not.toMatch(/<CardDetailPanel[\s\S]*?showFoilEffect=\{false\}/);
 
     const addCardsSource = fs.readFileSync(
       path.join(__dirname, '../../../frontend/src/features/deck-editor/AddCardsPanel.tsx'),

@@ -185,7 +185,8 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
 
   | Screen | Laminate | Indicator |
   |---|---|---|
-  | Database View (grid + detail) | Off | ✦ badge + **Has Foil** metadata |
+  | Database View — grid | Off | ✦ badge + **Has Foil** metadata |
+  | Database View — detail slide-out | On for foil printings | **Has Foil** / **Is Foil** metadata |
   | Deck editor — Add Cards slideout | Off | Plain catalog art |
   | Deck editor — card grid, Draw Hand, detail | On when `is_foil` or foil printing selected | — |
   | Collection (grid + detail) | On for foil printings | — |

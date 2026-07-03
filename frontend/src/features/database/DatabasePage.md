@@ -52,8 +52,8 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   Set line shows code + number when available.
 - **Foil dedup:** `fetchFoilCardMap` hides foil rows when the base card is in the same tab;
   foil-only rows remain. Base (or foil-only) tiles show a silver ✦ (`has foil` tooltip) when a
-  foil variant exists per the map.
-- Clicking a tile opens `CardDetailPanel`.
+  foil variant exists per the map. Grid tiles suppress the prismatic laminate (`showFoilEffect={false}` on `CardTile`).
+- Clicking a tile opens `CardDetailPanel`. The detail slide-out shows the foil laminate for foil printings (default `showFoilEffect` on `CardDetailPanel`).
 
 ## Add to Deck
 - The detail panel exposes an **Add to Deck** action for logged-in users (`addCardToDeck`).
