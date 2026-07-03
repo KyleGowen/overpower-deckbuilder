@@ -873,8 +873,20 @@
   padding-right: 11px;
 }
 
+/* Desktop stats header — StatIconBadge lg at 90% (40px → 36px) */
+.layout-desktop .deck-editor__header .stat-icon-badge--lg {
+  width: calc(40px * 0.9);
+  height: calc(40px * 0.9);
+}
+.layout-desktop .deck-editor__header .stat-icon-badge--lg .stat-icon-badge__value {
+  font-size: calc(16px * 0.9);
+}
+.layout-desktop .deck-editor__header .stat-icon-badge--lg .stat-icon-badge__value--wide {
+  transform: translateY(2px) scaleX(0.7) scaleY(0.9);
+}
+
 /* ---- Desktop header responsive — two-row layout when cramped ---- */
-@container deck-editor-main (max-width: 1400px) {
+@container deck-editor-main (max-width: 1700px) {
   .layout-desktop .deck-editor__topbar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

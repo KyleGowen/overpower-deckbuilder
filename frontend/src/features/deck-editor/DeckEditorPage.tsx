@@ -220,14 +220,14 @@ function DeckStatsPanel({
     <div className="deck-editor__stats-panel">
       {showThreatInPanel ? <DeckThreatStat totalThreat={totalThreat} /> : null}
       <DeckStatRow
-        label="Character max"
+        label="Max"
         ariaLabel="Character maximums"
         sectionTooltip="Character max stats"
         iconTooltipPrefix="Character max"
         values={maxStats}
       />
       <DeckStatRow
-        label="Icon totals"
+        label="Total"
         ariaLabel="Icon totals"
         sectionTooltip="Deck icon totals"
         iconTooltipPrefix="Icon total"

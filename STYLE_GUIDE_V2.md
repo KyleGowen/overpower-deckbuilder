@@ -250,19 +250,21 @@ Each screen has a companion doc in its feature folder:
 - Deck Editor (DEV) — [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md)
 
 ### Deck Editor — Desktop header compaction
-DTV topbar (`.deck-editor__topbar`) uses a 3-column grid on wide viewports: leading (name + meta) | stats panel | actions. When the main column is narrow (`@container deck-editor-main (max-width: 1400px)`, desktop only), it switches to a **two-row** layout in [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css):
+DTV topbar (`.deck-editor__topbar`) uses a 3-column grid on wide viewports: leading (name + meta) | stats panel | actions. When the main column is narrow (`@container deck-editor-main (max-width: 1700px)`, desktop only), it switches to a **two-row** layout in [`DeckEditorPage.css`](frontend/src/features/deck-editor/DeckEditorPage.css):
 
 | Row | Content |
 |---|---|
 | Row 1 | Leading (back + name + meta chips on one line) \| actions (right-aligned) |
 | Row 2 | Full-width stats panel (threat, character max, icon totals), centered, top border separator |
 
-Row 1 keeps back, deck name, and meta chips (card count, legality, visibility) on a single line. Stat block labels stay visible on row 2. Mobile `layout-mobile` unchanged.
+Row 1 keeps back, deck name, and meta chips (card count, legality, visibility) on a single line. Stat block labels stay visible on row 2 (short labels **Max** / **Total**, uppercase via CSS). Mobile `layout-mobile` unchanged.
+
+**Header stat icons** (`.layout-desktop .deck-editor__header .stat-icon-badge--lg`): `StatIconBadge` `lg` scaled to **90%** (40px → 36px, value font 16px → 14.4px). Card-tile stat icons in the deck body remain full `lg` (40px).
 
 **Stat tooltips** (concise, on hover):
 - Threat: `Threat: {n}` (or `{n}/76` over cap) via `formatThreatTooltip`
-- Character max section: `Character max stats`; each icon: `Character max — {Stat}: {value}`
-- Icon totals section: `Deck icon totals`; each icon: `Icon total — {Stat}: {value}`
+- Max section: `Character max stats`; each icon: `Character max — {Stat}: {value}`
+- Total section: `Deck icon totals`; each icon: `Icon total — {Stat}: {value}`
 
 ### Deck Editor — Simulate KO
 | Element | Tokens / values |
