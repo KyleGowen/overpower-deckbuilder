@@ -284,15 +284,16 @@ export default function DeckEditorPage() {
   // A real (non-guest) user can favorite any deck that isn't their own.
   const canFavorite =
     Boolean(user) && !isGuest && Boolean(deck) && deck?.metadata.userId !== user?.id;
+  const favoritesQueryKey = ['decks', 'favorites', user?.id] as const;
   const favoritesQuery = useQuery({
-    queryKey: ['decks', 'favorites', user?.id],
+    queryKey: favoritesQueryKey,
     queryFn: fetchFavoriteDecks,
     enabled: canFavorite,
   });
   const favoriteToggle = useFavoriteToggle();
-  const [favOverride, setFavOverride] = useState<boolean | null>(null);
-  const isFavorited =
-    favOverride ?? Boolean(favoritesQuery.data?.some((d) => d.metadata.id === deckId));
+  const isFavorited = Boolean(
+    favoritesQuery.data?.some((d) => d.metadata.id === deckId),
+  );
 
   const [cards, setCards] = useState<DeckCardEntry[]>([]);
   const [name, setName] = useState('');
@@ -886,14 +887,22 @@ export default function DeckEditorPage() {
   };
 
   const handleToggleFavorite = () => {
-    if (!canFavorite || favoriteToggle.isPending) return;
+    if (!canFavorite || favoriteToggle.isPending || !deck) return;
     const next = !isFavorited;
-    setFavOverride(next);
+    queryClient.setQueryData<DeckDetail[]>(favoritesQueryKey, (prev) => {
+      const list = prev ?? [];
+      if (next) {
+        if (list.some((d) => d.metadata.id === deckId)) return list;
+        return [...list, deck];
+      }
+      return list.filter((d) => d.metadata.id !== deckId);
+    });
     favoriteToggle.mutate(
       { deckId, next },
       {
-        onError: () => setFavOverride(null),
-        onSettled: () => setFavOverride(null),
+        onError: () => {
+          void queryClient.invalidateQueries({ queryKey: favoritesQueryKey });
+        },
       },
     );
   };
