@@ -149,6 +149,19 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   `.deck-editor__content` bottom padding clears the fixed bar (`--bottom-nav-height` + safe area).
 - Nav, dropdowns, and tooltips sit at `--z-nav: 9999` so they always clear page content.
 
+### Branding & favicon
+- **In-app logo:** [`Logo`](frontend/src/components/Logo/Logo.tsx) `variant="emblem"` uses
+  `/src/resources/images/logo/logo6.png` (textless triangle mark) in desktop top nav and deck
+  editor rail; login uses `wordmark` (`logo5.png`).
+- **Browser tab favicon:** [`frontend/index.html`](frontend/index.html) links
+  `/src/resources/images/favicon.png` (32×32 PNG) and
+  `/src/resources/images/apple-touch-icon.png` (180×180). Both are generated from `logo6.png`
+  via `npm run generate:favicon` ([`src/scripts/generateFavicon.ts`](src/scripts/generateFavicon.ts)).
+  Output PNGs use a **transparent** background (near-black keyed out from `logo6.png`). Generation
+  trims padding and applies a slight zoom so the emblem fills more of the favicon canvas (browser
+  tabs still render favicons at a fixed ~16px; this maximizes visual weight within that slot).
+- **Regenerate** after changing `logo6.png`: `npm run generate:favicon` (or `--force`).
+
 ## Cards & Card Art
 - Card art is rendered exclusively through the `CardImage` component, which resolves
   paths via [`frontend/src/lib/images/cardImages.ts`](frontend/src/lib/images/cardImages.ts)
