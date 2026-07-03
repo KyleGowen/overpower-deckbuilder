@@ -8,6 +8,10 @@ import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
 import { buildCharStatsById, deckMaxStats as computeDeckMaxStats } from '../../lib/decks/deckMaxStats';
+import {
+  buildDeckPreviewCatalogImages,
+  enrichDeckListPreviewImages,
+} from '../../lib/decks/deckPreviewImages';
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { DECK_SELECTION_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
@@ -107,6 +111,11 @@ export default function DeckSelectionPage() {
     queryFn: () => fetchCatalog('characters'),
     staleTime: 30 * 60 * 1000,
   });
+  const locationsQuery = useQuery({
+    queryKey: ['catalog', 'locations'],
+    queryFn: () => fetchCatalog('locations'),
+    staleTime: 30 * 60 * 1000,
+  });
   const missionsQuery = useQuery({
     queryKey: ['catalog', 'missions'],
     queryFn: () => fetchCatalog('missions'),
@@ -190,6 +199,11 @@ export default function DeckSelectionPage() {
     [charactersQuery.data],
   );
 
+  const previewCatalogImages = useMemo(
+    () => buildDeckPreviewCatalogImages(charactersQuery.data, locationsQuery.data),
+    [charactersQuery.data, locationsQuery.data],
+  );
+
   const missionSetByCardId = useMemo(
     () => buildMissionSetByCardId(missionsQuery.data ?? []),
     [missionsQuery.data],
@@ -205,8 +219,9 @@ export default function DeckSelectionPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = q ? decks.filter((d) => d.metadata.name.toLowerCase().includes(q)) : decks;
-    return [...list].sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
-  }, [decks, search]);
+    const sorted = [...list].sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+    return enrichDeckListPreviewImages(sorted, previewCatalogImages);
+  }, [decks, search, previewCatalogImages]);
 
   const openDeck = (deck: DeckListItem) => {
     const suffix = isReadOnlyProfile ? '?readonly=true' : '';
@@ -463,6 +478,7 @@ export default function DeckSelectionPage() {
               className="dsel__grid"
               decks={favoriteDecks}
               characters={charactersQuery.data}
+              locations={locationsQuery.data}
               missions={missionsQuery.data}
               viewerId={viewerId}
               canFavorite={canFavorite}
@@ -489,6 +505,7 @@ export default function DeckSelectionPage() {
               className="dsel__grid"
               decks={communityDecks}
               characters={charactersQuery.data}
+              locations={locationsQuery.data}
               missions={missionsQuery.data}
               viewerId={viewerId}
               canFavorite={canFavorite}
@@ -509,6 +526,7 @@ export default function DeckSelectionPage() {
             className="dsel__grid"
             decks={tournamentDecks}
             characters={charactersQuery.data}
+            locations={locationsQuery.data}
             missions={missionsQuery.data}
             viewerId={viewerId}
             canFavorite={canFavorite}

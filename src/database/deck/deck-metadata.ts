@@ -1,5 +1,115 @@
+import type { PoolClient } from 'pg';
 import { UIPreferences } from '../../types';
 import type { DeckRepositoryContext } from './context';
+
+const UUID_CARD_ID_PATTERN =
+  '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
+
+/**
+ * Recompute decks.character_1_id–character_4_id and location_id from deck_cards.
+ * Called after bulk card replace so list API preview joins stay in sync with deck_cards.
+ */
+export async function refreshDeckPreviewMetadata(
+  ctx: DeckRepositoryContext,
+  deckId: string,
+  existingClient?: PoolClient,
+): Promise<void> {
+  const run = async (client: PoolClient) => {
+    await client.query(
+      `
+        UPDATE decks d
+        SET
+          character_1_id = refs.char1_id::UUID,
+          character_2_id = refs.char2_id::UUID,
+          character_3_id = refs.char3_id::UUID,
+          character_4_id = refs.char4_id::UUID
+        FROM (
+          SELECT
+            MAX(CASE WHEN row_num = 1 THEN card_id END) AS char1_id,
+            MAX(CASE WHEN row_num = 2 THEN card_id END) AS char2_id,
+            MAX(CASE WHEN row_num = 3 THEN card_id END) AS char3_id,
+            MAX(CASE WHEN row_num = 4 THEN card_id END) AS char4_id
+          FROM (
+            SELECT
+              card_id,
+              ROW_NUMBER() OVER (ORDER BY created_at, card_id) AS row_num
+            FROM deck_cards
+            WHERE deck_id = $1
+              AND card_type = 'character'
+              AND card_id ~* $2
+          ) ranked_chars
+          WHERE row_num <= 4
+        ) refs
+        WHERE d.id = $1
+      `,
+      [deckId, UUID_CARD_ID_PATTERN],
+    );
+
+    await client.query(
+      `
+        UPDATE decks
+        SET
+          character_1_id = NULL,
+          character_2_id = NULL,
+          character_3_id = NULL,
+          character_4_id = NULL
+        WHERE id = $1
+          AND NOT EXISTS (
+            SELECT 1 FROM deck_cards dc
+            WHERE dc.deck_id = $1
+              AND dc.card_type = 'character'
+              AND dc.card_id ~* $2
+          )
+      `,
+      [deckId, UUID_CARD_ID_PATTERN],
+    );
+
+    await client.query(
+      `
+        UPDATE decks d
+        SET location_id = loc_refs.location_id::UUID
+        FROM (
+          SELECT card_id AS location_id
+          FROM deck_cards
+          WHERE deck_id = $1
+            AND card_type = 'location'
+            AND card_id ~* $2
+          ORDER BY created_at, card_id
+          LIMIT 1
+        ) loc_refs
+        WHERE d.id = $1
+      `,
+      [deckId, UUID_CARD_ID_PATTERN],
+    );
+
+    await client.query(
+      `
+        UPDATE decks
+        SET location_id = NULL
+        WHERE id = $1
+          AND NOT EXISTS (
+            SELECT 1 FROM deck_cards dc
+            WHERE dc.deck_id = $1
+              AND dc.card_type = 'location'
+              AND dc.card_id ~* $2
+          )
+      `,
+      [deckId, UUID_CARD_ID_PATTERN],
+    );
+  };
+
+  if (existingClient) {
+    await run(existingClient);
+    return;
+  }
+
+  const client = await ctx.pool.connect();
+  try {
+    await run(client);
+  } finally {
+    client.release();
+  }
+}
 
 export async function updateUIPreferences(
   ctx: DeckRepositoryContext,

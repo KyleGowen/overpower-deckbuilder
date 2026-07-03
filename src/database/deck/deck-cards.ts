@@ -2,6 +2,7 @@ import { PoolClient } from 'pg';
 import { catalogCardExistsInTable } from '../collection/card-lookup';
 import { DeckCard } from '../../types';
 import type { DeckRepositoryContext } from './context';
+import { refreshDeckPreviewMetadata } from './deck-metadata';
 
 async function touchDeckUpdatedAt(client: PoolClient, deckId: string): Promise<void> {
   await client.query('UPDATE decks SET updated_at = NOW() WHERE id = $1', [deckId]);
@@ -282,6 +283,7 @@ export async function replaceAllCardsInDeck(
       }
     }
 
+    await refreshDeckPreviewMetadata(ctx, deckId, client);
     await touchDeckUpdatedAt(client, deckId);
     await client.query('COMMIT');
     await ctx.invalidateDeck(deckId);

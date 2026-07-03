@@ -1,12 +1,17 @@
 import { useMemo } from 'react';
 import { DeckTile } from '../../components/DeckTile';
 import { buildCharStatsById, deckMaxStats } from '../../lib/decks/deckMaxStats';
+import {
+  buildDeckPreviewCatalogImages,
+  enrichDeckListPreviewImages,
+} from '../../lib/decks/deckPreviewImages';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
 import type { CatalogCard, DeckListItem } from '../../lib/api/types';
 
 export interface CommunityDeckGridProps {
   decks: DeckListItem[];
   characters: Array<Partial<CatalogCard> & { id: string }> | undefined;
+  locations?: Array<Partial<CatalogCard> & { id: string }> | undefined;
   missions: Array<Partial<CatalogCard> & { id: string }> | undefined;
   /** Current viewer id (decks owned by the viewer never show a favorite heart). */
   viewerId: string | null;
@@ -26,6 +31,7 @@ export interface CommunityDeckGridProps {
 export function CommunityDeckGrid({
   decks,
   characters,
+  locations,
   missions,
   viewerId,
   canFavorite,
@@ -38,10 +44,18 @@ export function CommunityDeckGrid({
 }: CommunityDeckGridProps) {
   const charStatsById = useMemo(() => buildCharStatsById(characters), [characters]);
   const missionSetByCardId = useMemo(() => buildMissionSetByCardId(missions ?? []), [missions]);
+  const previewCatalogImages = useMemo(
+    () => buildDeckPreviewCatalogImages(characters, locations),
+    [characters, locations],
+  );
+  const enrichedDecks = useMemo(
+    () => enrichDeckListPreviewImages(decks, previewCatalogImages),
+    [decks, previewCatalogImages],
+  );
 
   return (
     <div className={className}>
-      {decks.map((deck) => {
+      {enrichedDecks.map((deck) => {
         const isOwn = deck.metadata.userId === viewerId;
         const showFavorite = canFavorite && !isOwn && Boolean(onToggleFavorite);
         return (

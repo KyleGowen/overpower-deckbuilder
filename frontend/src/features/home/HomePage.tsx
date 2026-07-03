@@ -6,6 +6,10 @@ import { fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchCommunityFeed } from '../../lib/api/favorites';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
+import {
+  buildDeckPreviewCatalogImages,
+  enrichDeckListPreviewImages,
+} from '../../lib/decks/deckPreviewImages';
 import { assetUrl } from '../../lib/images/cardImages';
 import { DeckTile } from '../../components/DeckTile';
 import { LoadingState } from '../../components/LoadingState';
@@ -59,6 +63,33 @@ export default function HomePage() {
     staleTime: 30 * 60 * 1000,
   });
 
+  const charactersQuery = useQuery({
+    queryKey: ['catalog', 'characters'],
+    queryFn: () => fetchCatalog('characters'),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const locationsQuery = useQuery({
+    queryKey: ['catalog', 'locations'],
+    queryFn: () => fetchCatalog('locations'),
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const previewCatalogImages = useMemo(
+    () => buildDeckPreviewCatalogImages(charactersQuery.data, locationsQuery.data),
+    [charactersQuery.data, locationsQuery.data],
+  );
+
+  const enrichedCommunityDecks = useMemo(
+    () => enrichDeckListPreviewImages(communityDecks, previewCatalogImages),
+    [communityDecks, previewCatalogImages],
+  );
+
+  const enrichedTournamentDecks = useMemo(
+    () => enrichDeckListPreviewImages(tournamentDecks, previewCatalogImages),
+    [tournamentDecks, previewCatalogImages],
+  );
+
   const missionSetByCardId = useMemo(
     () => buildMissionSetByCardId(missionsQuery.data ?? []),
     [missionsQuery.data],
@@ -110,7 +141,7 @@ export default function HomePage() {
           viewAllTo="/community#community"
           loading={communityQuery.isLoading}
           error={communityQuery.isError}
-          decks={communityDecks}
+          decks={enrichedCommunityDecks}
           emptyMessage="Community decks will appear here as they are shared."
           missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}
@@ -123,7 +154,7 @@ export default function HomePage() {
           viewAllTo="/community#tournament"
           loading={tournamentQuery.isLoading}
           error={tournamentQuery.isError}
-          decks={tournamentDecks}
+          decks={enrichedTournamentDecks}
           emptyMessage="Tournament-winning decks will appear here as they are added."
           missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}

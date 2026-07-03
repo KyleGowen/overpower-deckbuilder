@@ -23,6 +23,7 @@ interface DeckListRow extends DeckRow {
   character_4_default_image?: string;
   character_4_is_foil?: boolean;
   location_id?: string;
+  preview_location_id?: string;
   location_name?: string;
   location_default_image?: string;
   mission_1_id?: string;
@@ -84,19 +85,60 @@ const CHARACTER_LIST_SLOTS = [
 ] as const;
 
 function buildCharacterListSqlFragments(): { selectFragment: string; joinFragment: string } {
-  const selectParts = CHARACTER_LIST_SLOTS.map(
-    (s) =>
-      `${s.sqlAlias}.name as ${s.nameField},
-          ${s.sqlAlias}.image_path as ${s.imageField},
-          ${s.sqlAlias}.is_foil as ${s.foilField}`,
-  );
+  const fallbackJoin = `
+        LEFT JOIN LATERAL (
+          SELECT
+            MAX(CASE WHEN sub.rn = 1 THEN sub.char_id END) AS fb_char1_id,
+            MAX(CASE WHEN sub.rn = 1 THEN sub.char_name END) AS fb_char1_name,
+            MAX(CASE WHEN sub.rn = 1 THEN sub.char_image END) AS fb_char1_image,
+            COALESCE(BOOL_OR(sub.rn = 1 AND sub.char_foil), false) AS fb_char1_foil,
+            MAX(CASE WHEN sub.rn = 2 THEN sub.char_id END) AS fb_char2_id,
+            MAX(CASE WHEN sub.rn = 2 THEN sub.char_name END) AS fb_char2_name,
+            MAX(CASE WHEN sub.rn = 2 THEN sub.char_image END) AS fb_char2_image,
+            COALESCE(BOOL_OR(sub.rn = 2 AND sub.char_foil), false) AS fb_char2_foil,
+            MAX(CASE WHEN sub.rn = 3 THEN sub.char_id END) AS fb_char3_id,
+            MAX(CASE WHEN sub.rn = 3 THEN sub.char_name END) AS fb_char3_name,
+            MAX(CASE WHEN sub.rn = 3 THEN sub.char_image END) AS fb_char3_image,
+            COALESCE(BOOL_OR(sub.rn = 3 AND sub.char_foil), false) AS fb_char3_foil,
+            MAX(CASE WHEN sub.rn = 4 THEN sub.char_id END) AS fb_char4_id,
+            MAX(CASE WHEN sub.rn = 4 THEN sub.char_name END) AS fb_char4_name,
+            MAX(CASE WHEN sub.rn = 4 THEN sub.char_image END) AS fb_char4_image,
+            COALESCE(BOOL_OR(sub.rn = 4 AND sub.char_foil), false) AS fb_char4_foil
+          FROM (
+            SELECT
+              c.id::text AS char_id,
+              c.name AS char_name,
+              c.image_path AS char_image,
+              c.is_foil AS char_foil,
+              ROW_NUMBER() OVER (ORDER BY dc.created_at, dc.card_id) AS rn
+            FROM deck_cards dc
+            JOIN characters c ON c.id = dc.card_id::uuid
+            WHERE dc.deck_id = d.id
+              AND dc.card_type = 'character'
+              AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          ) sub
+          WHERE sub.rn <= 4
+        ) dc_chars ON TRUE`;
+  const selectParts = CHARACTER_LIST_SLOTS.map((s, index) => {
+    const slot = index + 1;
+    return `COALESCE(d.${s.idField}, dc_chars.fb_char${slot}_id::uuid) AS ${s.idField},
+          COALESCE(${s.sqlAlias}.name, dc_chars.fb_char${slot}_name) AS ${s.nameField},
+          COALESCE(${s.sqlAlias}.image_path, dc_chars.fb_char${slot}_image) AS ${s.imageField},
+          COALESCE(${s.sqlAlias}.is_foil, dc_chars.fb_char${slot}_foil, false) AS ${s.foilField}`;
+  });
   const joinParts = CHARACTER_LIST_SLOTS.map(
     (s) => `LEFT JOIN characters ${s.sqlAlias} ON d.${s.idField} = ${s.sqlAlias}.id`,
   );
   return {
     selectFragment: selectParts.join(',\n          '),
-    joinFragment: joinParts.map((j) => `        ${j}`).join('\n'),
+    joinFragment: [...joinParts.map((j) => `        ${j}`), fallbackJoin].join('\n'),
   };
+}
+
+function previewImagePath(raw: unknown): string | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
 }
 
 function pushCharacterPreviewCards(cards: DeckCard[], deckRow: DeckListRow): void {
@@ -106,14 +148,13 @@ function pushCharacterPreviewCards(cards: DeckCard[], deckRow: DeckListRow): voi
     if (!cardId) {
       continue;
     }
+    const defaultImage = previewImagePath(deckRow[slot.imageField]);
     cards.push({
       id: `char${slot.syntheticSuffix}_${deckId}`,
       type: 'character',
       cardId,
       quantity: 1,
-      ...(deckRow[slot.imageField] !== undefined && {
-        defaultImage: deckRow[slot.imageField],
-      }),
+      ...(defaultImage !== undefined && { defaultImage }),
       ...(deckRow[slot.nameField] !== undefined && { name: deckRow[slot.nameField] }),
       is_foil: deckRow[slot.foilField] ?? false,
     });
@@ -176,15 +217,15 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
 
   pushCharacterPreviewCards(cards, deckRow);
 
-  if (deckRow.location_id) {
+  if (deckRow.location_id || deckRow.preview_location_id) {
+    const locationId = (deckRow.preview_location_id as string | undefined) ?? deckRow.location_id;
+    const locationImage = previewImagePath(deckRow.location_default_image);
     cards.push({
       id: `loc_${deckRow.id}`,
       type: 'location',
-      cardId: deckRow.location_id,
+      cardId: locationId as string,
       quantity: 1,
-      ...(deckRow.location_default_image !== undefined && {
-        defaultImage: deckRow.location_default_image,
-      }),
+      ...(locationImage !== undefined && { defaultImage: locationImage }),
       ...(deckRow.location_name !== undefined && { name: deckRow.location_name }),
     });
   }
@@ -253,6 +294,26 @@ export function mapDeckRowBasic(deckRow: DeckRow): Deck {
     ...(updatedAt !== undefined && { updated_at: updatedAt }),
   };
 }
+
+const LOCATION_FALLBACK_JOIN = `
+        LEFT JOIN LATERAL (
+          SELECT
+            l.id::text AS loc_id,
+            l.name AS loc_name,
+            l.image_path AS loc_image
+          FROM deck_cards dc
+          JOIN locations l ON l.id = dc.card_id::uuid
+          WHERE dc.deck_id = d.id
+            AND dc.card_type = 'location'
+            AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          ORDER BY dc.created_at, dc.card_id
+          LIMIT 1
+        ) dc_loc ON TRUE`;
+
+const LOCATION_LIST_SELECT = `
+          COALESCE(d.location_id, dc_loc.loc_id::uuid) AS preview_location_id,
+          COALESCE(l.name, dc_loc.loc_name) AS location_name,
+          COALESCE(l.image_path, dc_loc.loc_image) AS location_default_image`;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -384,14 +445,14 @@ export async function getDecksByUserId(
         SELECT 
           d.*,
           ${characterSelectSql},
-          l.name as location_name,
-          l.image_path as location_default_image,
+          ${LOCATION_LIST_SELECT},
           dm1.mission_id as mission_1_id,
           dm1.mission_name as mission_1_name,
           dm1.mission_image_path as mission_1_default_image
         FROM decks d
 ${characterJoinSql}
         LEFT JOIN locations l ON d.location_id = l.id
+${LOCATION_FALLBACK_JOIN}
         LEFT JOIN LATERAL (
           SELECT 
             dc.card_id as mission_id,
@@ -447,14 +508,14 @@ function buildDeckListSelectSql(opts: {
         SELECT 
           d.*,
           ${selectFragment},
-          l.name as location_name,
-          l.image_path as location_default_image,
+          ${LOCATION_LIST_SELECT},
           dm1.mission_id as mission_1_id,
           dm1.mission_name as mission_1_name,
           dm1.mission_image_path as mission_1_default_image
         FROM decks d
 ${joinFragment}
         LEFT JOIN locations l ON d.location_id = l.id
+${LOCATION_FALLBACK_JOIN}
         LEFT JOIN LATERAL (
           SELECT 
             dc.card_id as mission_id,

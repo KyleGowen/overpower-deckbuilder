@@ -250,6 +250,16 @@ export default function CommunityPage() {
 
   });
 
+  const locationsQuery = useQuery({
+
+    queryKey: ['catalog', 'locations'],
+
+    queryFn: () => fetchCatalog('locations'),
+
+    staleTime: 30 * 60 * 1000,
+
+  });
+
 
 
   const favoriteToggle = useFavoriteToggle();
@@ -352,6 +362,8 @@ export default function CommunityPage() {
 
   const missions = missionsQuery.data;
 
+  const locations = locationsQuery.data;
+
   const tournamentDecksWithFav = tournamentDecks.map((d) =>
 
     favoriteIds.has(d.metadata.id)
@@ -367,6 +379,8 @@ export default function CommunityPage() {
   const gridProps = {
 
     characters,
+
+    locations,
 
     missions,
 
