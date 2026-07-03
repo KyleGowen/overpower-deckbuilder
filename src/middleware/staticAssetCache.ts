@@ -4,10 +4,6 @@ import path from 'path';
 export const APP_SHELL_CACHE_CONTROL = 'no-cache, no-store, must-revalidate';
 export const SHORT_STATIC_CACHE_CONTROL = 'public, max-age=300';
 
-// Directories whose .html files are treated as partial fragments (short-cached)
-// rather than app-shell entries (no-store). Update this list when the new
-// frontend introduces a different component directory structure.
-export const PUBLIC_FRAGMENT_DIRS = ['/public/components/', '/public/templates/'];
 const SHORT_CACHE_EXTENSIONS = new Set([
   '.css',
   '.js',
@@ -27,10 +23,6 @@ function normalizeFilePath(filePath: string): string {
   return filePath.replace(/\\/g, '/');
 }
 
-function isHtmlFragment(normalizedPath: string): boolean {
-  return PUBLIC_FRAGMENT_DIRS.some((dir) => normalizedPath.includes(dir));
-}
-
 export function setNoStoreHeaders(res: Response): void {
   res.setHeader('Cache-Control', APP_SHELL_CACHE_CONTROL);
   res.setHeader('Pragma', 'no-cache');
@@ -41,12 +33,12 @@ export function setStaticAssetCacheHeaders(res: Response, filePath: string): voi
   const normalizedPath = normalizeFilePath(filePath);
   const ext = path.extname(normalizedPath).toLowerCase();
 
-  if (ext === '.html' && !isHtmlFragment(normalizedPath)) {
+  if (ext === '.html') {
     setNoStoreHeaders(res);
     return;
   }
 
-  if (SHORT_CACHE_EXTENSIONS.has(ext) || isHtmlFragment(normalizedPath)) {
+  if (SHORT_CACHE_EXTENSIONS.has(ext)) {
     res.setHeader('Cache-Control', SHORT_STATIC_CACHE_CONTROL);
   }
 }

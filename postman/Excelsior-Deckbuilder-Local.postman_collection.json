@@ -744,7 +744,7 @@
             "header": [],
             "url": "{{baseUrl}}/"
           },
-          "description": "Serves public/index.html"
+          "description": "Serves v2 SPA shell (frontend/dist/index.html)"
         },
         {
           "name": "GET /logout",

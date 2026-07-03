@@ -22,10 +22,7 @@ function pushObjectArrayCards(
 const STAT_TYPES = ['Brute Force', 'Energy', 'Combat', 'Intelligence'];
 const BASIC_STAT_TYPES = ['Brute Force', 'Any-Power', 'Energy', 'Combat', 'Intelligence'];
 
-/**
- * Flatten v2.0 deck export JSON `cards` object into typed card entries.
- * Ported from public/js/components/deck-import.js extractCardsFromImportData.
- */
+/** Flatten v2.0 deck export JSON `cards` object into typed card entries. */
 export function extractCardsFromExportJson(cardsData: ExportDeckCardsJson): ExportCardEntry[] {
   const result: ExportCardEntry[] = [];
 

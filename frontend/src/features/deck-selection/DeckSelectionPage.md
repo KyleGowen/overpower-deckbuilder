@@ -43,10 +43,10 @@ read-only with favorite hearts; the Community tab keeps the character/location s
 - **Mobile layout** (`.layout-mobile`): `.dsel__grid` uses `repeat(2, minmax(0, 1fr))` with
   `gap: var(--space-3)` — two `DeckTile` cards per row. Tile density is scaled via
   `.layout-mobile` rules in `DeckTile.css` (mission chip and updated date hidden; stats
-  shrunk; 1-line name). See `DeckSelectionPage.css` and `STYLE_GUIDE.md` § Mobile deck grid.
+  shrunk; 1-line name). See `DeckSelectionPage.css` and `STYLE_GUIDE_V2.md` § Mobile deck grid.
 - Import logic lives in `frontend/src/lib/decks/` (`extractCardsFromImportJson`,
   `resolveImportCardIds`, `importDeckFromJson`, `importCatalogLoader`). Contract matches
-  [`public/js/components/deck-import.md`](public/js/components/deck-import.md) for parsing and
+  [`docs/current/DECK_IMPORT.md`](../../../docs/current/DECK_IMPORT.md) for parsing and
   name resolution; persistence uses existing deck HTTP APIs (no import endpoint).
 - The page renders the bare component — `ShelledLayout`/`ProtectedRoute` are applied by the
   router, not here.

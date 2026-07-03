@@ -3,10 +3,7 @@ import { cardDisplayName } from './catalogTypeMap';
 import { parseSetNumber, setCodeForCard } from './catalogSetSort';
 import { isFoilCard } from './foilCatalog';
 
-/**
- * Checklist sort for All-tab lists: set code, non-foil before foil, set_number, then name.
- * Mirrors legacy `sortAllCardsData` in public/js/all-cards-display.js.
- */
+/** Checklist sort for All-tab lists: set code, non-foil before foil, set_number, then name. */
 export function compareAllCatalogCards(a: CatalogCard, b: CatalogCard): number {
   const setCmp = setCodeForCard(a).localeCompare(setCodeForCard(b), undefined, { sensitivity: 'base' });
   if (setCmp !== 0) return setCmp;

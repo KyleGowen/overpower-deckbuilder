@@ -1,8 +1,6 @@
 # Agent orientation — `frontend/` (Excelsior v2 React SPA)
 
-This is the **production frontend**: a React 19 + Vite 6 + TypeScript single-page app that
-replaces the legacy vanilla-JS UI in `../public/` (now deprecated, kept only for rollback via
-`EXCELSIOR_DISABLE_SPA=1`). New UI work goes here.
+This is the **production frontend**: a React 19 + Vite 6 + TypeScript single-page app.
 
 Read first: [`.cursorrules`](.cursorrules) (this dir), repo-root
 [`STYLE_GUIDE_V2.md`](../STYLE_GUIDE_V2.md) (visual source of truth), and
@@ -12,7 +10,7 @@ Read first: [`.cursorrules`](.cursorrules) (this dir), repo-root
 
 - Open the app at **`http://localhost:5173`** (Vite). Requires the root `npm run dev`
   (Express API on `:8085`) running in parallel; Vite proxies `/api`, `/health`,
-  `/src/resources`, `/js` to it.
+  `/src/resources` to it.
 - `npm run build` → `dist/`, served in prod by Express ([`src/routes/spaIndexPath.ts`](../src/routes/spaIndexPath.ts)).
 - `tsc -b` / `vite build` must pass before shipping (strict TS, `exactOptionalPropertyTypes`).
 
@@ -49,7 +47,7 @@ Read first: [`.cursorrules`](.cursorrules) (this dir), repo-root
 
 ## Tests
 
-- Frontend-touching unit tests live in the repo-root suite (e.g.
-  `tests/unit/use-horizontal-swipe.test.ts`). Run `npm run test:unit` from the repo root.
+- Frontend-touching unit tests live in the repo-root suite under `tests/unit/` (including
+  `tests/unit/frontend-v2/`). Run `npm run test:unit` from the repo root.
 - Browser-verify UI changes at `:5173` per `.cursor/rules/browser-verification.mdc`
   (login as `kyle` / `test`).

@@ -3,16 +3,15 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [V1 vs V2 Parity](#v1-vs-v2-parity)
-3. [User Experience](#user-experience)
-4. [Code Organization](#code-organization)
-5. [Draw Rules](#draw-rules)
-6. [Catalog Resolution](#catalog-resolution)
-7. [Tests](#tests)
-8. [Visual Design](#visual-design)
-9. [Simulate KO Integration](#simulate-ko-integration)
-10. [Troubleshooting](#troubleshooting)
-11. [Related Documentation](#related-documentation)
+2. [User Experience](#user-experience)
+3. [Code Organization](#code-organization)
+4. [Draw Rules](#draw-rules)
+5. [Catalog Resolution](#catalog-resolution)
+6. [Tests](#tests)
+7. [Visual Design](#visual-design)
+8. [Simulate KO Integration](#simulate-ko-integration)
+9. [Troubleshooting](#troubleshooting)
+10. [Related Documentation](#related-documentation)
 
 ---
 
@@ -32,29 +31,7 @@
 
 ---
 
-## V1 vs V2 Parity
-
-| Concern | V1 legacy | V2 React | Note |
-|---------|-----------|----------|------|
-| Draw rules | `draw-hand.js` | `drawHand.ts` | **Parity** — 8 cards, 9th on event, pile exclusions |
-| Enable threshold | ≥8 playable | `canDrawHand()` | **Parity** |
-| `exclude_from_draw` | Supported | Supported | **Parity** |
-| Entry control | `#drawHandBtn` in utility row | **Draw Hand** in `.deck-editor__actions` | Playtest placeholder removed in v2 |
-| Panel UX | Replaces deck contents / mobile vertical fan | **Desktop:** top slide-out over deck grid. **Mobile:** full-viewport overlay (`position: fixed`, `100dvh`) | **V2 UX** |
-| Desktop layout | Grid or horizontal row by viewport | **2-column grid**, **210px** portrait slots per column, scale-to-fit when narrow | **V2 UX** |
-| Mobile layout | Vertical accordion fan + thumb-drag | **Full-screen 2-column grid** — equal half-width slots, scroll in panel body | **V2 UX** |
-| Event rotation | 90° CCW in portrait slot | Same — `.draw-hand__event-rotate` | **Parity** |
-| Drag reorder | Desktop fine pointer | Desktop fine pointer only | **Parity** |
-| KO dimming | `ko-dimmed` on whole card | Art-only `.deck-editor__card--ko-dimmed` | Matches v2 KO presentation |
-| KO refresh | `DrawHand.refresh()` re-renders | React re-render on `koCharacterIds` change | **Parity** intent |
-| Card names / art | `availableCardsMap` + `getCardImagePath` | `deckCardCatalog.ts` + `CardImage` | v2 normalizes underscore deck types |
-| Card detail | Legacy hover / modal patterns | `CardDetailPanel` on tile click | **V2** |
-
----
-
 ## User Experience
-
-### v2 React deck editor (production SPA)
 
 Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx).
 
@@ -70,17 +47,9 @@ Route: `/users/:userId/decks/:deckId` — [`DeckEditorPage.tsx`](../../frontend/
 
 Full feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md).
 
-### Legacy v1 deck editor
-
-- **Desktop**: `#drawHandSection` replaces deck contents; horizontal card row.
-- **Mobile** (`layout-mobile`): vertical fan accordion — see [STYLE_GUIDE.md § Draw Hand mobile (legacy v1)](STYLE_GUIDE.md#draw-hand-mobile-legacy-v1-layout-mobile) and [`public/js/components/DRAW_HAND.md`](../../public/js/components/DRAW_HAND.md).
-- **Entry**: `#drawHandBtn` in deck editor utility actions (or hamburger menu on mobile DEV).
-
 ---
 
 ## Code Organization
-
-### v2 React SPA
 
 | File | Role |
 |------|------|
@@ -94,19 +63,11 @@ Full feature notes: [`DeckEditorPage.md`](../../frontend/src/features/deck-edito
 | [`CardImage`](../../frontend/src/components/CardImage/CardImage.tsx) | Thumb → full-res fallback; `onImageFailed` for missing-art label |
 | [`SlideOutPanel`](../../frontend/src/components/SlideOutPanel/SlideOutPanel.tsx) | `side="top"`, `position="absolute"` overlay |
 
-### v1 legacy
-
-| File | Role |
-|------|------|
-| [`public/js/components/draw-hand.js`](../../public/js/components/draw-hand.js) | Module + `window.DrawHand` API |
-| [`public/css/draw-hand.css`](../../public/css/draw-hand.css) | Desktop row + shared card chrome |
-| [`public/css/deck-editor-mobile.css`](../../public/css/deck-editor-mobile.css) | Mobile vertical fan |
-
 ---
 
 ## Draw Rules
 
-Implemented in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts) (ports legacy `draw-hand.js`).
+Implemented in [`drawHand.ts`](../../frontend/src/lib/decks/drawHand.ts).
 
 **Non-playable types** (never in pile): `character`, `location`, `mission`.
 
@@ -140,8 +101,6 @@ Deck rows from `GET /decks/:id/full` carry only `{ type, cardId, quantity }` —
 
 ## Tests
 
-### v2 unit tests
-
 | File | Coverage |
 |------|----------|
 | `tests/unit/draw-hand-v2.test.ts` | Pile build, enable threshold, 8/9 draw logic, display sort |
@@ -152,22 +111,11 @@ Deck rows from `GET /decks/:id/full` carry only `{ type, cardId, quantity }` —
 npm run test:unit -- draw-hand-v2.test.ts deck-card-catalog.test.ts simulate-ko.test.ts
 ```
 
-### Legacy unit tests
-
-| Files | Coverage |
-|-------|----------|
-| `tests/unit/draw-hand-module.test.ts` | Legacy module API |
-| `tests/unit/draw-hand-ui-wrappers.test.ts` | UI wrappers |
-| `tests/unit/draw-hand-ko-integration.test.ts` | Legacy KO hook |
-| `tests/unit/draw-hand-ko-dimming-*.test.ts` (5 files) | Legacy dimming per card type — helpers in `tests/helpers/drawHandKoDimmingTestHelpers.ts` |
-
 ---
 
 ## Visual Design
 
-### v2 tokens
-
-See [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md) — **Deck Editor — Draw Hand** and [`STYLE_GUIDE.md`](STYLE_GUIDE.md) — **Deck Editor Draw Hand (v2 SPA)**.
+See [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md) — **Deck Editor — Draw Hand**.
 
 Summary:
 
@@ -180,10 +128,6 @@ Summary:
 | Event rotate | `.draw-hand__event-rotate` — `rotate(-90deg)` inside portrait slot |
 | Missing art | `.draw-hand__missing-art` — `font-size-xs`, muted, ellipsis |
 | Redraw | `.draw-hand__redraw` — centered footer, `min-width: 140px` |
-
-### Legacy mobile fan
-
-v1 only — [`STYLE_GUIDE.md` § Draw Hand mobile (legacy v1)](STYLE_GUIDE.md#draw-hand-mobile-layout-mobile).
 
 ---
 
@@ -201,7 +145,7 @@ Full KO spec: [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md).
 
 ## Troubleshooting
 
-### v2 — tooltip or label says "Unknown … card"
+### Tooltip or label says "Unknown … card"
 
 Catalog lookup failed for that `type` + `cardId`. Check:
 
@@ -209,31 +153,25 @@ Catalog lookup failed for that `type` + `cardId`. Check:
 2. `cardId` matches catalog `id` (stale/orphan deck row).
 3. Catalog query for that type still loading (rare race on first paint).
 
-### v2 — grey placeholder image
+### Grey placeholder image
 
 1. Confirm the same card in the **deck grid** — if grid art loads, draw hand should too (shared `CardImage` + catalog).
 2. Check network for thumbnail vs full-res 404.
 3. Read `.draw-hand__missing-art` under the tile for the card name.
 
-### v2 — Draw Hand button disabled
+### Draw Hand button disabled
 
 Deck has fewer than **8 playable** cards (characters/locations/missions do not count; `exclude_from_draw` rows **do** count toward the threshold).
-
-### Legacy v1 — Draw Hand not dimming with KO
-
-See [`SIMULATE_KO_FEATURE.md` § Troubleshooting](SIMULATE_KO_FEATURE.md#troubleshooting) (legacy `displayDrawnCards` / `DrawHand.refresh()`).
 
 ---
 
 ## Related Documentation
 
-- **v2 deck editor**: [`frontend/src/features/deck-editor/DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md)
-- **v2 KO**: [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md)
-- **v2 architecture**: [`FRONTEND_V2.md`](FRONTEND_V2.md)
-- **v2 visual tokens**: [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md)
-- **Legacy module**: [`public/js/components/DRAW_HAND.md`](../../public/js/components/DRAW_HAND.md)
-- **Legacy mobile DEV**: [`DECK_EDITOR_MOBILE_VIEW.md`](DECK_EDITOR_MOBILE_VIEW.md)
+- **Deck editor**: [`frontend/src/features/deck-editor/DeckEditorPage.md`](../../frontend/src/features/deck-editor/DeckEditorPage.md)
+- **Simulate KO**: [`SIMULATE_KO_FEATURE.md`](SIMULATE_KO_FEATURE.md)
+- **Architecture**: [`FRONTEND_V2.md`](FRONTEND_V2.md)
+- **Visual tokens**: [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md)
 
 ---
 
-*Last updated: 2026-06-17*
+*Last updated: 2026-07-02*

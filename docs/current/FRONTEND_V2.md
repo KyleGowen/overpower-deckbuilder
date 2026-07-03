@@ -1,8 +1,7 @@
 # Frontend v2 — Architecture Reference
 
 The **v2 frontend** is a React 19 + Vite 6 + TypeScript single-page app in
-[`frontend/`](../../frontend/). It replaces the legacy vanilla-JS site under `public/`
-and is the production frontend going forward. Visual rules live in
+[`frontend/`](../../frontend/). It is the **only** production UI. Visual rules live in
 [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md); this doc covers architecture, data flow,
 and serving.
 
@@ -140,18 +139,21 @@ additional decks via `npm run import:tournament-deck` or the
 and `src/constants/tournamentDecksUser.ts`.
 
 ## Build & serving
-- **Dev:** `npm run dev` in `frontend/` runs Vite on **:5173** and proxies `/api`,
-  `/health`, `/src/resources`, `/js` to the Express backend on **:8085**.
-- **Build:** `npm run build` type-checks then emits hashed assets to `frontend/dist/`.
-- **Prod serving (Express):**
-  [`src/routes/spaIndexPath.ts`](../../src/routes/spaIndexPath.ts) resolves the app shell
-  (`frontend/dist/index.html` when built, else the legacy `public/index.html` fallback).
-  - `src/index.ts` mounts `express.static(spaDistDir())` **after** all API routes (so it
-    can't shadow them) and adds a history-fallback `GET *` that returns the app shell for
-    non-API/non-asset paths.
+- **Dev:** Run **both** processes — repo root `npm run dev` (Express API on **:8085**) and
+  `frontend/npm run dev` (Vite on **:5173**). Browse **`http://localhost:5173`**; Vite
+  proxies `/api`, `/health`, and `/src/resources` to the backend.
+- **Build:** `npm run build` in `frontend/` type-checks then emits hashed assets to
+  `frontend/dist/`.
+- **Prod / single-port (Express):** Express serves the SPA only from **`frontend/dist/`**.
+  [`src/routes/spaIndexPath.ts`](../../src/routes/spaIndexPath.ts) requires
+  `frontend/dist/index.html` — if missing, app routes throw at startup (run
+  `npm --prefix frontend run build` first).
+  - `src/routes/static-health.routes.ts` mounts `express.static(spaDistDir())` when the
+    build exists (hashed `/assets/*` before the shell).
   - `src/routes/pages.routes.ts` serves the shell via `sendAppShell()` for `/`, `/home`,
     `/login`, `/data`, `/users/:userId/decks`, `/users/:userId/collection`, and the deck
     editor route, with `no-store` HTML cache headers.
+  - History-fallback `GET *` returns the same shell for non-API paths.
 
 ## QA notes
 Verified end-to-end against the local backend + DB (browser automation): login (admin

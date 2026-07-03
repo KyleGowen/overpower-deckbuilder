@@ -9,8 +9,6 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "scripts/**",
-    "public/**",
-    "src/public/**",
     "tests/setup-deckbuilding.ts"
   ],
   "ignoreBinaries": ["wait"]

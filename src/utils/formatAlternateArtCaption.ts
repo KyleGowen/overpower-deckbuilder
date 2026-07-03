@@ -1,6 +1,5 @@
 /**
  * Select Art modal caption: friendly set name, optional checklist #, optional rarity.
- * Mirrors public/js/alternate-art-modal.js — keep behavior in sync.
  * Rarity is usually Common / Uncommon / Rare / Ultra Rare from the DB; empty string is treated like missing.
  */
 export function formatAlternateArtCaption(

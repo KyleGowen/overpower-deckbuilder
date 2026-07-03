@@ -4,25 +4,18 @@ This document defines conventions for identifying, handling, and removing unused
 
 ## Canonical UI surface
 
-**The production frontend is the v2 React SPA in `frontend/`.** New code belongs there. The legacy v1 vanilla-JS UI in `public/` is **deprecated** (served only as a rollback via `EXCELSIOR_DISABLE_SPA=1`) — see the dedicated section below before touching or removing it.
-
-## v1 `public/` deprecation and removal
-
-- **Do not build new features in `public/`.** It is the deprecated v1 UI. All UI work goes in `frontend/` (see [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md)).
-- **Do NOT bulk-delete `public/` yet.** Until the v2 cutover has been validated in production for a stable period, `public/` is the **instant rollback path**: Express serves it when `EXCELSIOR_DISABLE_SPA=1` (or when `frontend/dist/` is absent). It is intentionally still copied into the Docker image and committed to git for this reason.
-- **Knip / unused-code scans** continue to exclude `public/` (`knip.json`), so they will not flag legacy v1 files. Do not "clean up" `public/` based on Knip output.
-- **Planned removal (future, separate change):** once v2 is confirmed stable and the rollback is no longer needed, removing `public/` should be done as one deliberate change that also: drops the `public/` `COPY` from the [`Dockerfile`](Dockerfile), removes the v1 fallback branches in [`src/routes/spaIndexPath.ts`](src/routes/spaIndexPath.ts) / [`src/routes/static-health.routes.ts`](src/routes/static-health.routes.ts) / [`src/routes/pages.routes.ts`](src/routes/pages.routes.ts) and the `EXCELSIOR_DISABLE_SPA` escape hatch, deletes the `public/`-only docs, and updates the image-verification steps in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). Until then, treat `public/` as frozen legacy, not dead code to delete.
+**The production frontend is the v2 React SPA in `frontend/`.** All UI work belongs there. See [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md). Historical v1 UI docs are archived in [`docs/archive/FRONTEND_V1_TO_V2_MIGRATION.md`](docs/archive/FRONTEND_V1_TO_V2_MIGRATION.md).
 
 ## When to Remove vs. Archive
 
 ### Remove (Delete)
 - Orphaned files never imported or loaded (e.g. refactored modules that were never integrated)
 - Backup files (`.backup`, `.bak`) after confirming they are obsolete
-- Duplicate directories (e.g. `src/public/` when `public/` is the canonical location)
+- Duplicate directories (e.g. `src/public/` when no longer used)
 - Code that has been commented out indefinitely with no plan to re-enable
 - Unit tests for code that has been removed
 
-### Archive (Move to scripts/archive/)
+### Archive (Move to scripts/archive/ or docs/archive/)
 - One-off fix scripts that may have historical value
 - Scripts that were used for production debugging or migrations
 - Prefer archive over delete when there is uncertainty about future need
@@ -43,10 +36,9 @@ The `--production` flag focuses on production code and fails on critical unused 
 
 ## Conventions
 
-1. **Before removing**: Verify the file is truly unused (grep for imports, check HTML script tags for frontend JS)
-2. **Frontend JS**: Files in `public/js/` are loaded via `<script src="">` in HTML. See [docs/FRONTEND_SCRIPT_MANIFEST.md](docs/FRONTEND_SCRIPT_MANIFEST.md) for which files are active
-3. **After removal**: Run `npm run test:unit` and fix or remove any broken tests
-4. **Knip config**: `knip.json` excludes `public/`, `scripts/`, and test files from "unused files" reporting (vanilla JS and scripts have different entry points)
+1. **Before removing**: Verify the file is truly unused (grep for imports)
+2. **After removal**: Run `npm run test:unit` and fix or remove any broken tests
+3. **Knip config**: `knip.json` excludes `scripts/` and test files from "unused files" reporting where appropriate
 
 ## CI Integration
 

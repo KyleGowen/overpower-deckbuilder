@@ -110,11 +110,10 @@ Users have a `role` of `GUEST`, `USER`, or `ADMIN` (see `src/types/index.ts`).
 
 | Method | Path | Source file | Description |
 |--------|------|-------------|-------------|
-| * | `/public/*` | `src/routes/static-health.routes.ts` | Static files under `public/` with `/public` prefix |
-| * | `/*` (root static) | `src/routes/static-health.routes.ts` | Static files from `public/` at site root; **`.js` files** get no-cache headers |
-| * | `/src/resources/*` | `src/routes/static-health.routes.ts` | Static files from repo `src/resources` |
+| * | `/src/resources/*` | `src/routes/static-health.routes.ts` | Static files from repo `src/resources` (card images, UI icons, backgrounds) |
 | * | `/src/resources/cards/images/*` | `src/middleware/setup.ts` | Narrower mount for card images (registered before full tree) |
 | * | `/src/resources/images/*` | `src/middleware/setup.ts` | Narrower mount for general images |
+| * | `/assets/*` (when built) | `src/routes/static-health.routes.ts` | Hashed Vite build output from `frontend/dist/` (only when `frontend/dist/index.html` exists) |
 
 ### `GET /health/ready`
 
@@ -303,15 +302,9 @@ Public. **Response 200:**
 
 Values come from environment variables (`FIREBASE_*`).
 
-### `GET /js/app-config.js`
+### `GET /api/v1/config/app`
 
-Returns **JavaScript** (not JSON), `Content-Type: application/javascript`, short cache. Body shape:
-
-```javascript
-window.APP_CDN_BASE = "https://cdn.example.com";
-```
-
-(`CDN_BASE_URL` env; empty string if unset.)
+JSON CDN and app config for the v2 SPA. **Prefer this** over any legacy config endpoints. See [API_V1.md](API_V1.md).
 
 ---
 
@@ -464,7 +457,7 @@ Use **`GET /api/v1/collections/me`**, **`/api/v1/collections/me/cards`**, **`/ap
 
 **File:** `src/routes/pages.routes.ts`
 
-These return **`public/index.html`** (single-page app) with no-cache headers except where noted.
+These return **`frontend/dist/index.html`** (v2 React SPA shell) with no-cache headers except where noted.
 
 | Method | Path | Auth | Notes |
 |--------|------|------|--------|
@@ -499,10 +492,10 @@ Quick lookup: **method**, **path**, **source file**.
 
 | Method | Path | File |
 |--------|------|------|
-| * | `/public`, `/`, `/src/resources` (+ setup mounts) | `static-health.routes.ts`, `middleware/setup.ts` |
+| * | `/src/resources` (+ setup mounts), `/assets/*` when SPA built | `static-health.routes.ts`, `middleware/setup.ts` |
 | GET | `/health`, `/health/deep` (deep health), `/health/live` (liveness, no DB), `/health/ready` (readiness, SELECT 1) | `static-health.routes.ts` |
 | POST | `/api/auth/login`, `/signup`, `/google`, `/logout` | `auth.routes.ts` |
-| GET | `/api/auth/me`, `/api/config/firebase`, `/js/app-config.js`, `/api/v1/config/app` (JSON CDN config) | `auth.routes.ts` |
+| GET | `/api/auth/me`, `/api/config/firebase`, `/api/v1/config/app` (JSON CDN config) | `auth.routes.ts` |
 | POST | `/api/users/change-password` | `users-debug.routes.ts` |
 | GET | ~~`/api/decks`~~ (removed) | *use* **`GET /api/v1/decks`** · [`decks.http.ts`](src/api/http/decks.http.ts) |
 | POST/GET/PUT/DELETE | ~~`/api/guest/decks`~~ (removed) | *use* **`/api/v1/guest/decks...`** · [`guest-decks.http.ts`](src/api/http/guest-decks.http.ts) |

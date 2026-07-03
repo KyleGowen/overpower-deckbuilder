@@ -13,6 +13,5 @@ UI usage:
 - These assets are rendered in the Database View Special Cards `Function` column.
 - Header icon toggles in that table use the same files for filtering controls.
 - If icon files are added/renamed, update:
-  - `public/index.html` toggle markup
-  - `public/js/card-display.js` field-to-icon mapping
+  - `frontend/src/features/database/filters/dbvFilterTypes.ts` (`FUNCTION_ICON_DEFS`)
   - `docs/special-card-icons.md` mapping table

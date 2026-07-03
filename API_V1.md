@@ -1290,10 +1290,9 @@ These endpoints are **intentionally not** under `**/api/v1`**:
 | `GET /health/ready` | Readiness for deploy gates — live payload + `SELECT 1` DB ping. |
 | `GET /health/live` | Lightweight liveness probe (no DB). Returns `{ "status": "OK" }`. |
 | `GET /health/deep` | Same as `GET /health` — alias for deep health check. |
-| `GET /js/app-config.js` | Injects `window.APP_CDN_BASE` as a JS snippet for the legacy frontend. **Prefer** `GET /api/v1/config/app` in new code. |
-| `GET /api/v1/config/app` | JSON: `{ "cdnBase": "<string>", "communityDecksUserId": "<uuid>", "tournamentDecksUserId": "<uuid>" }`. No auth required. New frontend should use this. `communityDecksUserId` backs the Home "Community Decks" pool; `tournamentDecksUserId` backs the "Tournament Winning Decks" pool. |
-| **Static assets** | `public/`, `src/resources/` served by `express.static` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
-| **HTML shell routes** | `/`, `/users/:userId/decks`, `/users/:userId/collection`, `/data` — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
+| `GET /api/v1/config/app` | JSON: `{ "cdnBase": "<string>", "communityDecksUserId": "<uuid>", "tournamentDecksUserId": "<uuid>" }`. No auth required. v2 SPA loads this at boot. `communityDecksUserId` backs the Home "Community Decks" pool; `tournamentDecksUserId` backs the "Tournament Winning Decks" pool. |
+| **Static assets** | `src/resources/` (card images, UI assets) and `frontend/dist/assets/*` when built — see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
+| **HTML shell routes** | `/`, `/home`, `/login`, `/users/:userId/decks`, `/users/:userId/collection`, `/data` — serve `frontend/dist/index.html`; see [API_DOCUMENTATION.md](API_DOCUMENTATION.md). |
 
 **Legacy** JSON that remains outside v1 (e.g. `**POST /api/users/change-password`**) is documented only in [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
 

@@ -24,5 +24,5 @@ read-only public profile, and the mobile Decks tabs.
 - Hearts/owner names hidden for the deck owner and for guests (guests see no heart).
 - Tournament decks lack server-side `isFavorited`; `CommunityPage` derives their heart state
   from the favorites cache and toggles that cache so hearts stay correct on reload.
-- Visual spec: `docs/current/STYLE_GUIDE.md` § "Community page (v2 SPA)" and
+- Visual spec: `STYLE_GUIDE_V2.md` § "Community page (v2 SPA)" and
   § "Public/private visibility chip & favorite heart (v2 SPA)".

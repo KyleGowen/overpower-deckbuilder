@@ -12,8 +12,6 @@ import { Pool } from 'pg';
 import { app, initializeTestServer } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
-import { itV1Frontend } from './helpers/v1FrontendSkip';
-
 describe('Foil Collection View Integration Tests', () => {
   let pool: Pool;
   let testUser: any;
@@ -92,13 +90,4 @@ describe('Foil Collection View Integration Tests', () => {
     expect(foilCard.card_data?.is_foil || foilCard.is_foil).toBe(true);
   });
 
-  itV1Frontend('should load collection view page with foil-related scripts', async () => {
-    const htmlResponse = await request(app)
-      .get('/')
-      .expect(200);
-
-    const html = htmlResponse.text;
-    expect(html).toContain('collection-view.js');
-    expect(html).toContain('foil-effect.css');
-  });
 });

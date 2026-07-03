@@ -11,7 +11,7 @@ description: >-
 
 ## When to use
 
-- User pastes deck export JSON (v2.0 format from `public/js/components/deck-export.md`)
+- User pastes deck export JSON (v2.0 format from `docs/current/DECK_EXPORT.md`)
 - User asks to add/import a deck to community decks
 - User wants to populate the Home "Community Decks" rail
 

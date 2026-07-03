@@ -12,8 +12,6 @@ import { Pool } from 'pg';
 import { app, initializeTestServer } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
-import { itV1Frontend } from './helpers/v1FrontendSkip';
-
 describe('Foil Deck Selection Integration Tests', () => {
   let pool: Pool;
   let testUser: any;
@@ -96,13 +94,4 @@ describe('Foil Deck Selection Integration Tests', () => {
     expect(foilCharCard.is_foil).toBe(true);
   });
 
-  itV1Frontend('should load deck selection page with foil-related scripts', async () => {
-    const htmlResponse = await request(app)
-      .get('/')
-      .expect(200);
-
-    const html = htmlResponse.text;
-    expect(html).toContain('deckTilesRenderer.js');
-    expect(html).toContain('foil-effect.css');
-  });
 });

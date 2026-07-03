@@ -2,6 +2,8 @@
 
 This document captures what we tried for GUEST users and deck editing, why it didn’t work out, and what we decided. Use it to avoid repeating the same approaches and to keep cursor/AI context accurate.
 
+> **Note:** The legacy v1 vanilla-JS UI (`public/`) has been removed. The lessons below describe historical v1 behavior and policy; the **v2 React SPA** in `frontend/` implements the same GUEST policy (+Deck disabled on Card Database, session guest decks, clone-on-open).
+
 ---
 
 ## Current behavior (as of this doc)
@@ -77,7 +79,6 @@ This document captures what we tried for GUEST users and deck editing, why it di
 
 ## References
 
-- Guest deck API: `docs/current/API_DOCUMENTATION.md` — “Guest Deck Endpoints”
-- Backend guest block: `src/index.ts` — `blockGuestMutation(req, res, 'modify decks')` on deck/card mutation routes
-- Clone-on-open: `public/js/deck-editor-core.js` — `loadDeckForEditing` (guest + DB deck → clone then redirect)
-- +Deck disabled for guest: `public/index.html`, `public/js/deck-editor-simple.js`, `public/js/card-display.js`, `public/js/card-display-functions.js`, `public/js/all-cards-display.js`
+- Guest deck API: [API_V1.md](../../API_V1.md) — Guest decks section; legacy session routes in [API_DOCUMENTATION.md](../../API_DOCUMENTATION.md)
+- Backend guest block: `src/api/http/` guest deck handlers + `blockGuestMutation` on legacy deck mutation routes
+- Clone-on-open and +Deck policy: v2 [`DeckEditorPage.tsx`](../../frontend/src/features/deck-editor/DeckEditorPage.tsx) and Card Database components under `frontend/src/features/database/`

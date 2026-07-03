@@ -30,26 +30,9 @@ function buildStaticApp(): express.Application {
 }
 
 describe('static asset cache headers', () => {
-  it('serves JavaScript with a short public cache instead of no-store', async () => {
-    const response = await request(buildStaticApp()).get('/js/card-image-utils.js');
-
-    expect(response.status).toBe(200);
-    expect(response.headers['cache-control']).toBe(SHORT_STATIC_CACHE_CONTROL);
-    expect(response.headers.pragma).toBeUndefined();
-    expect(response.headers.expires).toBeUndefined();
-  });
-
-  it('serves CSS, templates, and resource images with a short public cache', async () => {
+  it('serves resource images with a short public cache', async () => {
     const app = buildStaticApp();
 
-    await expect(request(app).get('/css/index.css')).resolves.toMatchObject({
-      status: 200,
-      headers: expect.objectContaining({ 'cache-control': SHORT_STATIC_CACHE_CONTROL }),
-    });
-    await expect(request(app).get('/templates/deck-editor-template.html')).resolves.toMatchObject({
-      status: 200,
-      headers: expect.objectContaining({ 'cache-control': SHORT_STATIC_CACHE_CONTROL }),
-    });
     await expect(request(app).get('/src/resources/images/icons/energy.png')).resolves.toMatchObject({
       status: 200,
       headers: expect.objectContaining({ 'cache-control': SHORT_STATIC_CACHE_CONTROL }),
@@ -62,7 +45,7 @@ describe('static asset cache headers', () => {
       setHeader: (name: string, value: string) => headers.set(name, value),
     } as unknown as express.Response;
 
-    setStaticAssetCacheHeaders(res, '/repo/public/index.html');
+    setStaticAssetCacheHeaders(res, '/repo/frontend/dist/index.html');
 
     expect(headers.get('Cache-Control')).toBe(APP_SHELL_CACHE_CONTROL);
     expect(headers.get('Pragma')).toBe('no-cache');

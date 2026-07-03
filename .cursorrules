@@ -96,11 +96,11 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **When creating a new directory, ALWAYS add a `.cursorrules` file in that directory** to give Cursor context for that area of the codebase.
 - The file should briefly describe the directory’s purpose, main entry points, and any conventions or patterns used there (see existing `src/.cursorrules`, `src/middleware/.cursorrules`, `src/routes/.cursorrules` for examples).
 - **Keep each directory’s `.cursorrules` up to date** when you add, remove, or refactor files in that directory—update the description so it stays accurate.
-- **DBV/mobile context:** See [`MOBILE_DESIGN.md`](MOBILE_DESIGN.md) for the mobile docs index (one-hop navigation to all per-tab specs); see [`public/.cursorrules`](public/.cursorrules) and sub-directory rules for DBV/layout-mobile code patterns.
+- **DBV/mobile context:** See [`frontend/src/features/database/DatabasePage.md`](frontend/src/features/database/DatabasePage.md) and [`MOBILE_DESIGN.md`](docs/archive/MOBILE_DESIGN.md) (archived v1 index) for historical mobile notes; implement mobile work in `frontend/` using `LayoutModeProvider`.
 
 ## Project-Specific Guidelines
 - This is a TypeScript/Node.js project with Jest testing
-- **Production frontend is the v2 React SPA in `frontend/`** (React 19 + Vite + TypeScript), served from `frontend/dist/` via `isSpaBuilt()`. The legacy vanilla-JS UI in `public/` is **deprecated** (rollback only via `EXCELSIOR_DISABLE_SPA=1`) — build new UI in `frontend/`, not `public/`. See [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
+- **Production frontend is the v2 React SPA in `frontend/`** (React 19 + Vite + TypeScript), served from `frontend/dist/`. See [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
 - Backend uses Express.js with PostgreSQL
 - All changes should maintain backward compatibility
 - Follow the existing component structure (globalNav, etc.)
@@ -114,9 +114,9 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - Test that popups are visible and not hidden behind other page elements
 
 ## Style Guide Maintenance
-- **For the v2 React SPA (`frontend/`), the visual source of truth is [`STYLE_GUIDE_V2.md`](STYLE_GUIDE_V2.md). ALWAYS update `STYLE_GUIDE_V2.md` when making visual changes to v2.** The legacy [docs/current/STYLE_GUIDE.md](docs/current/STYLE_GUIDE.md) documents the deprecated v1 `public/` UI; only touch it for v1 maintenance.
-- **NEVER make UI/UX changes without documenting them in the appropriate style guide**
-- **Deck editor Card View (v1, legacy):** Before changing the v1 Card View layout or landscape/portrait styling, read [docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md](docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md). Do not add border/background to landscape card item or wrap; keep image fill and bevelled corners (border-radius: 8px). Update that doc and STYLE_GUIDE.md if you change the pattern. (The v2 deck editor Card View lives in [`frontend/src/features/deck-editor/`](frontend/src/features/deck-editor/).)
+- **For the v2 React SPA (`frontend/`), the visual source of truth is [`STYLE_GUIDE_V2.md`](STYLE_GUIDE_V2.md). ALWAYS update `STYLE_GUIDE_V2.md` when making visual changes to v2.**
+- **NEVER make UI/UX changes without documenting them in STYLE_GUIDE_V2.md**
+- **Deck editor Card View (v2):** lives in [`frontend/src/features/deck-editor/`](frontend/src/features/deck-editor/). See [`frontend/src/features/deck-editor/DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md).
 - When updating visual elements, include:
   1. **CSS class names and selectors used**
   2. **Exact color values, spacing, and positioning**
@@ -133,9 +133,9 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **LAN access:** Vite is configured with `host: true` in `frontend/vite.config.ts` so other devices on the home network can use `http://<LAN-IP>:5173`. When starting/restarting dev servers, always use the normal `npm run dev` commands (do not bind localhost-only). Express stays on `127.0.0.1:8085` in dev; API calls from LAN clients go through Vite’s proxy.
 - **Two processes are required for v2 frontend work:**
   1. **Repo root:** `npm run dev` → Express API on **:8085**
-  2. **`frontend/`:** `npm run dev` → React SPA on **:5173** (proxies `/api`, `/health`, `/src/resources`, `/js` to 8085)
+  2. **`frontend/`:** `npm run dev` → React SPA on **:5173** (proxies `/api`, `/health`, `/src/resources` to 8085)
 - **When relaunching the server** (migrations, backend changes, frontend work): start **both** unless the task is API-only. Then confirm the user should open **5173**, not 8085. Mention the Vite **Network** URL for LAN devices when restarting.
-- **Do not use `http://localhost:8085` as the main dev URL.** Port 8085 serves the API and, if browsed directly, a stale `frontend/dist/` build or legacy `public/` UI — not live Vite HMR.
+- **Do not use `http://localhost:8085` as the main dev URL.** Port 8085 serves the API and, if browsed directly, a stale `frontend/dist/` build — not live Vite HMR.
 - **8085 remains correct for** health checks (`/health`), direct API verification, and production-like single-port testing after `npm run build` in `frontend/`.
 - Full workflow: [`docs/current/FRONTEND_V2.md`](docs/current/FRONTEND_V2.md).
 
@@ -199,9 +199,9 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 
 ## Acronyms and Terminology
 - **DBV** = **Database View** — when the user says "DBV", they mean the Card Database view (the database browsing UI), not a generic "database."
-- **MV** = **mobile view** / **mobile display layout** — narrow viewport and `layout-mobile` (or equivalent mobile presentation), not "model view" or other meanings of MV.
+- **MV** = **mobile view** / **mobile display layout** — narrow viewport and `.layout-mobile` (via `LayoutModeProvider` at 900px), not "model view" or other meanings of MV.
 - **DTV** = **desktop view** / **desktop layout** — wide viewport and default desktop presentation of the same screens.
-- **DEV** = **Deck Editor View** — the deck editing UI. **In the v2 SPA this is the route-based deck editor in [`frontend/src/features/deck-editor/`](frontend/src/features/deck-editor/)** ([`DeckEditorPage.tsx`](frontend/src/features/deck-editor/DeckEditorPage.tsx) + [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md)), with responsive desktop/mobile layouts driven by `LayoutModeProvider`. The legacy v1 deck-editor modal (mobile list/search chrome in [`public/css/deck-editor-mobile.css`](public/css/deck-editor-mobile.css) and [`public/js/deck-editor-mobile-view.js`](public/js/deck-editor-mobile-view.js); spec [`docs/current/DECK_EDITOR_MOBILE_VIEW.md`](docs/current/DECK_EDITOR_MOBILE_VIEW.md)) is deprecated.
+- **DEV** = **Deck Editor View** — the deck editing UI in [`frontend/src/features/deck-editor/`](frontend/src/features/deck-editor/) ([`DeckEditorPage.tsx`](frontend/src/features/deck-editor/DeckEditorPage.tsx) + [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md)), with responsive desktop/mobile layouts driven by `LayoutModeProvider`.
 - **OPD** = "One Per Deck" - Cards that can only appear once in a deck (marked with `one_per_deck=TRUE` in database)
 - **UA** = "Universe: Advanced" - Advanced Universe card category
 - **UB** = "Universe: Basic" - Basic Universe card category  
@@ -215,7 +215,7 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **When adding new card images, ALWAYS run `npm run generate:thumbnails` before committing**
 - **NEVER commit a source image without its corresponding `/thumb/` thumbnail**
 - Thumbnails live in `src/resources/cards/images/<type>/thumb/` — never edit these files directly
-- To change thumbnail dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` AND the matching CSS for the v2 deck tiles in [`frontend/src/components/DeckTile/DeckTile.css`](frontend/src/components/DeckTile/DeckTile.css) (legacy v1 equivalent: `public/css/deck-selection.css`)
+- To change thumbnail dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbnails.ts` AND the matching CSS for the v2 deck tiles in [`frontend/src/components/DeckTile/DeckTile.css`](frontend/src/components/DeckTile/DeckTile.css)
 - Thumbnail generation runs automatically via `npm run dev` and `npm run build` — no manual step needed in CI
 - Full workflow documented in [`docs/current/IMAGE_PIPELINE.md`](docs/current/IMAGE_PIPELINE.md)
 
@@ -224,9 +224,8 @@ See [`tests/integration/.cursorrules`](tests/integration/.cursorrules) for the f
 - **`src/resources/cards/images/` is excluded from the Docker image** (`.dockerignore`). In production, ALL card images (characters, missions, locations, thumbnails, specials, etc.) must come from S3/CloudFront. The Express static middleware is only a local-dev fallback.
 - **Thumbnails (`thumb/` directories) are gitignored** — they are never in the git repo. The `sync-images` CI job runs `npm run generate:thumbnails` first so thumbnails are generated before `aws s3 sync` pushes them to S3.
 - **UI images are NOT gitignored** — `src/resources/images/**/*.png` (deck backgrounds + stat/function icons) are committed to git, synced to S3 by the deploy workflow (`aws s3 sync src/resources/images/`), and can load from CloudFront/S3 even if thumbnail generation breaks.
-- **Deck selection blank card slots** (teal outlines, no image, clean console) almost always means thumbnails are missing from S3. Check: (1) sync-images job ran successfully, (2) `AWS_S3_ASSETS_BUCKET` secret matches `terraform output -raw assets_bucket_name`, (3) `/js/app-config.js` returns a non-empty `APP_CDN_BASE`.
-- **CDN URL construction**: always strip trailing `/` from `cdnBase` and leading `/` from the path before joining to avoid double-slash URLs (`https://cdn.net//src/...`) that some origins reject. The `deckTileImages.js` helper uses `CDN_BASE + '/src/resources/...'` (no slash between base and path) — never `${cdnBase}/${path}` when `path` starts with `/`.
-- **`CDN_BASE` is a module-level constant** in `deckTileImages.js` (captured at IIFE init time from `window.APP_CDN_BASE`). `/js/app-config.js` must load synchronously via `<script>` before deck-selection scripts or `CDN_BASE` will be `''` for the whole page load.
+- **Deck selection blank card slots** (teal outlines, no image, clean console) almost always means thumbnails are missing from S3. Check: (1) sync-images job ran successfully, (2) `AWS_S3_ASSETS_BUCKET` secret matches `terraform output -raw assets_bucket_name`, (3) `GET /api/v1/config/app` returns a non-empty `cdnBase`.
+- **CDN URL construction**: always strip trailing `/` from `cdnBase` and leading `/` from the path before joining to avoid double-slash URLs (`https://cdn.net//src/...`) that some origins reject. Use the v2 `cardImages` helpers in `frontend/src/lib/images/` — never `${cdnBase}/${path}` when `path` starts with `/`.
 
 ## Cursor skills — dual location sync
 - **When creating or updating any skill under `.cursor/skills/`**, mirror the same change to **`C:\Users\Kyle\.cursor\skills\{skill-name}/`** in the same session — do not wait for the user to ask.

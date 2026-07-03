@@ -2,12 +2,9 @@ import request from 'supertest';
 import { app, integrationTestUtils } from '../setup-integration';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { UserRepository } from '../../src/repository/UserRepository';
-import { DeckRepository } from '../../src/repository/DeckRepository';
-import { describeV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Deck Editor Role-Based Access Integration Tests', () => {
   let userRepository: UserRepository;
-  let deckRepository: DeckRepository;
   let guestUser: any;
   let userRoleUser: any;
   let adminUser: any;
@@ -18,7 +15,6 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
   beforeAll(async () => {
     const dataSourceConfig = DataSourceConfig.getInstance();
     userRepository = dataSourceConfig.getUserRepository();
-    deckRepository = dataSourceConfig.getDeckRepository();
 
     // Create test users for each role
     guestUser = await userRepository.createUser(
@@ -82,115 +78,6 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
     } catch (error) {
       // Users might already be deleted, ignore error
     }
-  });
-
-  describeV1Frontend('Create Deck Button Access', () => {
-    it('should allow GUEST users to access the Create Deck button and open deck editor', async () => {
-      // Test that guest users can access the main page with Create Deck button
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify the page loads deck-selection scripts (logic lives in external files)
-      expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('src="/js/app-initialization.js"');
-      expect(response.text).toContain('src="/components/globalNav.js"');
-
-      // Verify the deck editor modal is present
-      expect(response.text).toContain('id="deckEditorModal"');
-      expect(response.text).toContain('deckEditorTitle');
-      expect(response.text).toContain('deckEditorDescription');
-    });
-
-    it('should allow USER role users to access the Create Deck button and open deck editor', async () => {
-      // Test that user role users can access the main page with Create Deck button
-      const response = await request(app)
-        .get('/users/test-user-editor/decks')
-        .set('Cookie', userSessionCookie)
-        .expect(200);
-
-      // Verify the page loads deck-selection scripts (logic lives in external files)
-      expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('src="/js/app-initialization.js"');
-      expect(response.text).toContain('src="/components/globalNav.js"');
-
-      // Verify the deck editor modal is present
-      expect(response.text).toContain('id="deckEditorModal"');
-      expect(response.text).toContain('deckEditorTitle');
-      expect(response.text).toContain('deckEditorDescription');
-    });
-
-    it('should allow ADMIN users to access the Create Deck button and open deck editor', async () => {
-      // Test that admin users can access the main page with Create Deck button
-      const response = await request(app)
-        .get('/users/test-admin-editor/decks')
-        .set('Cookie', adminSessionCookie)
-        .expect(200);
-
-      // Verify the page loads deck-selection scripts (logic lives in external files)
-      expect(response.text).toContain('id="globalNav"');
-      expect(response.text).toContain('src="/js/app-initialization.js"');
-      expect(response.text).toContain('src="/components/globalNav.js"');
-
-      // Verify the deck editor modal is present
-      expect(response.text).toContain('id="deckEditorModal"');
-      expect(response.text).toContain('deckEditorTitle');
-      expect(response.text).toContain('deckEditorDescription');
-    });
-  });
-
-  describeV1Frontend('Deck Editor Initialization', () => {
-    it('should initialize blank deck editor with "New Deck" title for all user roles', async () => {
-      // Test that the initializeBlankDeck function is present and sets up correctly
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Blank deck setup lives in index-page.js (loaded by index.html)
-      expect(response.text).toContain('src="/js/index-page.js"');
-      expect(response.text).toContain('Create New Deck');
-    });
-
-    it('should have createNewDeck function that opens blank editor', async () => {
-      // Test that the createNewDeck function is present in globalNav.js
-      const response = await request(app)
-        .get('/components/globalNav.js')
-        .expect(200);
-
-      // Verify the createNewDeck function is present
-      expect(response.text).toContain('function createNewDeck()');
-      expect(response.text).toContain('createNewDeckForUser');
-    });
-  });
-
-  describeV1Frontend('Deck Editor UI Elements', () => {
-    it('should have editable title and description fields for all user roles', async () => {
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify deck editor elements are present
-      expect(response.text).toContain('id="deckEditorTitle"');
-      expect(response.text).toContain('id="deckEditorDescription"');
-      expect(response.text).toMatch(/editable-title/);
-      expect(response.text).toContain('data-edit-handler="startEditingTitle"');
-      expect(response.text).toContain('data-edit-handler="startEditingDescription"');
-    });
-
-    it('should have save button present for all user roles', async () => {
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify save button is present
-      expect(response.text).toContain('id="saveDeckButton"');
-      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
-      expect(response.text).toContain('Save');
-    });
   });
 
   describe('Deck Creation API Restrictions', () => {
@@ -406,116 +293,6 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
 
       // Untrack since it's deleted
       integrationTestUtils.untrackTestDeck(testDeckId);
-    });
-  });
-
-  describeV1Frontend('Frontend Save Button Behavior', () => {
-    it('should have save button disabled for GUEST users in frontend', async () => {
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify save wiring and guest detection scripts are present
-      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
-      expect(response.text).toContain('src="/js/filter-functions.js"');
-    });
-
-    it('should have save button enabled for USER role users in frontend', async () => {
-      const response = await request(app)
-        .get('/users/test-user-editor/decks')
-        .set('Cookie', userSessionCookie)
-        .expect(200);
-
-      // Verify save wiring and guest detection scripts are present
-      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
-      expect(response.text).toContain('src="/js/filter-functions.js"');
-    });
-
-    it('should have save button enabled for ADMIN users in frontend', async () => {
-      const response = await request(app)
-        .get('/users/test-admin-editor/decks')
-        .set('Cookie', adminSessionCookie)
-        .expect(200);
-
-      // Verify save wiring and guest detection scripts are present
-      expect(response.text).toContain('data-click-handler="saveDeckChanges"');
-      expect(response.text).toContain('src="/js/filter-functions.js"');
-    });
-  });
-
-  describeV1Frontend('Deck Editor JavaScript Functions', () => {
-    it('should have all required JavaScript functions for deck editing', async () => {
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify external script references are present
-      expect(response.text).toContain('src="/js/deck-editor-core.js"');
-    });
-
-    it('should have proper error handling for guest user restrictions', async () => {
-      const response = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      // Verify guest user restriction checks load from external scripts
-      expect(response.text).toContain('src="/js/filter-functions.js"');
-      expect(response.text).toContain('src="/js/deck-editor-core.js"');
-    });
-  });
-
-  describeV1Frontend('Cross-Role Consistency', () => {
-    it('should provide same deck editor UI for all user roles', async () => {
-      const guestResponse = await request(app)
-        .get('/users/test-guest-editor/decks')
-        .set('Cookie', guestSessionCookie)
-        .expect(200);
-
-      const userResponse = await request(app)
-        .get('/users/test-user-editor/decks')
-        .set('Cookie', userSessionCookie)
-        .expect(200);
-
-      const adminResponse = await request(app)
-        .get('/users/test-admin-editor/decks')
-        .set('Cookie', adminSessionCookie)
-        .expect(200);
-
-      // All responses should have the same deck editor elements
-      const commonElements = [
-        'id="deckEditorModal"',
-        'id="deckEditorTitle"',
-        'id="deckEditorDescription"',
-        'id="saveDeckButton"',
-        'src="/js/index-page.js"'
-      ];
-
-      commonElements.forEach(element => {
-        expect(guestResponse.text).toContain(element);
-        expect(userResponse.text).toContain(element);
-        expect(adminResponse.text).toContain(element);
-      });
-    });
-
-    it('should only differ in save permissions, not UI access', async () => {
-      // Test that all users get the same UI but different save permissions
-      const responses = await Promise.all([
-        request(app).get('/users/test-guest-editor/decks').set('Cookie', guestSessionCookie),
-        request(app).get('/users/test-user-editor/decks').set('Cookie', userSessionCookie),
-        request(app).get('/users/test-admin-editor/decks').set('Cookie', adminSessionCookie)
-      ]);
-
-      responses.forEach(response => {
-        expect(response.status).toBe(200);
-        // All should have the same deck editor UI
-        expect(response.text).toContain('deckEditorModal');
-        expect(response.text).toContain('deckEditorTitle');
-        expect(response.text).toContain('deckEditorDescription');
-        expect(response.text).toContain('saveDeckButton');
-      });
     });
   });
 });

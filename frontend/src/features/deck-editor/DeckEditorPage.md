@@ -38,7 +38,7 @@ Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). F
 
 ## Draw Hand
 
-Client-only random hand simulation. Full cross-stack spec: [`docs/current/DRAW_HAND_FEATURE.md`](../../../docs/current/DRAW_HAND_FEATURE.md). Behavior mirrors legacy v1 [`draw-hand.js`](../../../public/js/components/draw-hand.js).
+Client-only random hand simulation. Full spec: [`docs/current/DRAW_HAND_FEATURE.md`](../../../docs/current/DRAW_HAND_FEATURE.md). Implementation: `DrawHandPanel.tsx` + `drawHand.ts`.
 
 - **Entry**: **Draw Hand** button in the header actions (replaces the former Playtest placeholder). Enabled when the deck has **≥8 playable** cards (non character/location/mission); `exclude_from_draw` rows count toward the threshold but are omitted from the draw pile.
 - **State**: `drawHandOpen` + `drawnCards` in `DeckEditorPage` — not persisted.
@@ -53,7 +53,7 @@ Client-only random hand simulation. Full cross-stack spec: [`docs/current/DRAW_H
 
 ## Pre-Placed
 
-Lets an owner mark a playable card as **Pre-Placed** — it starts the game already placed (under a location or with a character) instead of in the random draw pile. Stored as `exclude_from_draw` on the deck card (re-implements the legacy v1 control from [`public/js/game-logic.js`](../../../public/js/game-logic.js)); Draw Hand omits these rows while they still count toward deck size and the ≥8 playable threshold.
+Lets an owner mark a playable card as **Pre-Placed** — it starts the game already placed (under a location or with a character) instead of in the random draw pile. Stored as `exclude_from_draw` on the deck card; Draw Hand omits these rows while they still count toward deck size and the ≥8 playable threshold. Logic: `frontend/src/lib/decks/prePlaced.ts`.
 
 - **Toggle UI**: a small **Pre-Placed** pill button in the [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) slide-out (`.card-detail__preplaced-btn`), shown only to owners and only for **eligible** cards. Active state fills the pill; a hint line explains the effect. Props: `prePlacedEligible`, `prePlaced`, `onTogglePrePlaced`.
 - **Indicator**: when active, a centered **"Pre-Placed"** chip appears on the card tile footer (see Per-card controls above).

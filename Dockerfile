@@ -15,10 +15,8 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY dist ./dist
-COPY public ./public
 # v2 React SPA build output (produced by `npm --prefix frontend run build` in CI
-# before `docker build`). Express auto-selects v2 when frontend/dist/index.html
-# exists (see src/routes/spaIndexPath.ts isSpaBuilt()).
+# before `docker build`).
 COPY frontend/dist ./frontend/dist
 COPY src/resources ./src/resources
 COPY migrations ./migrations
@@ -72,10 +70,6 @@ RUN curl -fsSL https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/public ./public
-# v2 React SPA. Served automatically via isSpaBuilt(). public/ is retained as the
-# legacy v1 fallback: set EXCELSIOR_DISABLE_SPA=1 in the container env to roll
-# back to the v1 UI instantly without rebuilding/redeploying the image.
 COPY --from=build /app/frontend/dist ./frontend/dist
 COPY --from=build /app/src/resources ./src/resources
 COPY --from=build /app/migrations ./migrations

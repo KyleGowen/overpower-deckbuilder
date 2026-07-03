@@ -15,8 +15,6 @@ import { Pool } from 'pg';
 import { app, initializeTestServer } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
-import { itV1Frontend } from './helpers/v1FrontendSkip';
-
 describe('Foil Deck Editor Tile View Integration Tests', () => {
   let pool: Pool;
   let testUser: any;
@@ -109,15 +107,4 @@ describe('Foil Deck Editor Tile View Integration Tests', () => {
     expect(powerMapping.cardType).toBe('power');
   });
 
-  itV1Frontend('should load deck editor page with foil-related scripts', async () => {
-    const htmlResponse = await request(app)
-      .get(`/users/${testUser.id}/decks/${testDeckId}`)
-      .expect(200);
-
-    const html = htmlResponse.text;
-    expect(html).toContain('foil-effect.css');
-    expect(html).toContain('foil-animation.js');
-    expect(html).toContain('deck-editor-rendering.js');
-    expect(html).toContain('data-loading.js');
-  });
 });

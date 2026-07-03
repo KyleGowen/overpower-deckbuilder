@@ -1,6 +1,6 @@
 Server-side import of v2.0 deck export JSON into internal pool user accounts.
 
-- `extractCardsFromExportJson.ts` — flatten export `cards` object (ported from `public/js/components/deck-import.js`)
+- `extractCardsFromExportJson.ts` — flatten export `cards` object into typed card entries
 - `resolveExportCardIds.ts` — name→id resolution via `buildAvailableCardsMap`
 - `importDeckFromExport.ts` — orchestrates create + `replaceAllCardsInDeck` (default user: `community_decks`)
 - `importCommunityDeckFromExport.ts` — thin re-export alias for community callers

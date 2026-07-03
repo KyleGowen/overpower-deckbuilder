@@ -3,32 +3,37 @@
  * When registered before registerRoutes, lenient /users/:userId/decks take precedence (no auth, serve HTML).
  */
 import express, { Request } from 'express';
-import path from 'path';
-import { pathToDeckEditorHtml } from '../routes/deckEditorPagePath';
+import { resolveSpaIndexPath, isSpaBuilt } from '../routes/spaIndexPath';
 
 export interface TestOnlyRoutesDeps {
   deckRepository: { getDeckById: (id: string) => Promise<unknown> };
   authenticateUser: express.RequestHandler;
 }
 
+const noCache = {
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0'
+};
+
+function sendSpaShell(res: express.Response): void {
+  res.set(noCache);
+  if (isSpaBuilt()) {
+    res.sendFile(resolveSpaIndexPath());
+  } else {
+    res.status(503).send('SPA not built');
+  }
+}
+
 export function registerTestOnlyRoutes(app: express.Application, deps: TestOnlyRoutesDeps): void {
-  // Lenient page routes (no auth) so integration tests can load /users/:userId/decks by role name
-  const noCache = {
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0'
-  };
   app.get('/users/:userId/decks', (_req, res) => {
-    res.set(noCache);
-    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+    sendSpaShell(res);
   });
-  app.get('/users/:userId/decks/:deckId/edit', (req, res) => {
-    res.set({ ...noCache, 'Last-Modified': new Date().toUTCString(), 'ETag': `"${Date.now()}"` });
-    res.sendFile(pathToDeckEditorHtml());
+  app.get('/users/:userId/decks/:deckId/edit', (_req, res) => {
+    sendSpaShell(res);
   });
   app.get('/users/:userId/decks/:deckId', (_req, res) => {
-    res.set({ ...noCache, 'Last-Modified': new Date().toUTCString(), 'ETag': `"${Date.now()}"` });
-    res.sendFile(pathToDeckEditorHtml());
+    sendSpaShell(res);
   });
 
   app.get('/deck-editor/:deckId', deps.authenticateUser, async (req: Request, res) => {

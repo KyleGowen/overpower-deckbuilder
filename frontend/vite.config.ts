@@ -25,7 +25,6 @@ export default defineConfig({
       // Card art + UI image assets are served by Express static middleware
       // in local dev (production uses S3/CloudFront via cdnBase).
       '/src/resources': { target: BACKEND, changeOrigin: true },
-      '/js': { target: BACKEND, changeOrigin: true },
     },
   },
   build: {

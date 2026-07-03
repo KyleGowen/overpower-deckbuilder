@@ -1,6 +1,6 @@
 ---
 description: OverPower power type sort order for cards, stats, and UI lists.
-globs: "**/*sort*,**/*deck*,**/*power*,public/js/**"
+globs: "**/*sort*,**/*deck*,**/*power*,frontend/**"
 alwaysApply: false
 ---
 

@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import type { StaticHealthRoutesDeps } from './types';
 import { setStaticAssetCacheHeaders } from '../middleware/staticAssetCache';
 import { resolveSpaIndexPath, isSpaBuilt, spaDistDir } from './spaIndexPath';
@@ -217,12 +216,6 @@ async function buildDeepPayload(deps: StaticHealthRoutesDeps, startTime: number)
 }
 
 export function registerStaticAndHealthRoutes(app: express.Application, deps: StaticHealthRoutesDeps): void {
-  app.use('/public', express.static('public', {
-    setHeaders: setStaticAssetCacheHeaders,
-  }));
-  app.use(express.static('public', {
-    setHeaders: setStaticAssetCacheHeaders,
-  }));
   app.use('/src/resources', express.static('src/resources', {
     setHeaders: setStaticAssetCacheHeaders,
   }));
@@ -290,21 +283,15 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
     res.status(httpStatus).json(data);
   });
 
-  // SPA catch-all — must be registered LAST, after all API routes, page routes,
-  // and static mounts. Serves the app shell for any unmatched path so that
-  // client-side routing works for deep links / refreshes. Serves the v2 SPA
-  // shell when built (frontend/dist), else the legacy public/index.html.
+  // SPA catch-all — must be registered LAST. Serves the v2 app shell for
+  // client-side routing on deep links / refreshes.
   app.get('*', (req, res, next) => {
     const p = req.path;
-    // Let API/health and real asset namespaces fall through (assets are handled
-    // by the static mounts above; if missing they should 404, not return HTML).
     if (
       p.startsWith('/api/') ||
       p.startsWith('/health') ||
       p.startsWith('/assets/') ||
-      p.startsWith('/js/') ||
       p.startsWith('/src/') ||
-      p.startsWith('/public/') ||
       p.includes('.')
     ) {
       return next();
@@ -314,6 +301,9 @@ export function registerStaticAndHealthRoutes(app: express.Application, deps: St
       'Pragma': 'no-cache',
       'Expires': '0',
     });
-    res.sendFile(isSpaBuilt() ? resolveSpaIndexPath() : path.join(process.cwd(), 'public/index.html'));
+    if (!isSpaBuilt()) {
+      return next();
+    }
+    res.sendFile(resolveSpaIndexPath());
   });
 }

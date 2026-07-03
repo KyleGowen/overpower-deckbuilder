@@ -7,18 +7,15 @@ import request from 'supertest';
 import { app, initializeTestServer } from '../../src/test-server';
 import { DataSourceConfig } from '../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../setup-integration';
-import { describeV1Frontend, itV1Frontend } from './helpers/v1FrontendSkip';
 
 describe('Deck Navigation Flow Integration Tests', () => {
-  let server: any;
   let testUser: any;
   let testDeck: any;
   let authCookie: string;
 
   beforeAll(async () => {
     // Initialize test server
-    const { server: initializedServer } = await initializeTestServer();
-    server = initializedServer;
+    await initializeTestServer();
     
     // Ensure guest user exists
     await integrationTestUtils.ensureGuestUser();
@@ -82,24 +79,6 @@ describe('Deck Navigation Flow Integration Tests', () => {
   });
 
   describe('Deck Editor Navigation Flow', () => {
-    itV1Frontend('should successfully navigate to deck editor without database view flash', async () => {
-      // Test the deck editor page load
-      const deckEditorResponse = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(deckEditorResponse.status).toBe(200);
-      expect(deckEditorResponse.text).toContain('deckEditorModal');
-      
-      // The deck name is loaded asynchronously via JavaScript, so we don't check for it in the initial HTML
-      // Instead, we verify the page structure is correct for the deck editor to load
-      
-      // Verify the page contains the deck editor elements
-      expect(deckEditorResponse.text).toContain('deck-editor-layout');
-      expect(deckEditorResponse.text).toContain('card-selector-pane');
-      expect(deckEditorResponse.text).toContain('deck-pane');
-    });
-
     it('should load deck data correctly in editor', async () => {
       // Get deck data via API
       const deckDataResponse = await request(app)
@@ -111,22 +90,6 @@ describe('Deck Navigation Flow Integration Tests', () => {
       expect(deckDataResponse.body.errors ?? []).toEqual([]);
       expect(deckDataResponse.body.data.metadata.name).toBe('Test Navigation Deck');
       expect(deckDataResponse.body.data.metadata.isOwner).toBe(true);
-    });
-
-    itV1Frontend('should handle deck editor modal opening and closing', async () => {
-      // Test opening deck editor
-      const openResponse = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(openResponse.status).toBe(200);
-      
-      // Verify the page structure for deck editor
-      expect(openResponse.text).toContain('deckEditorModal');
-      expect(openResponse.text).toContain('modal-content');
-      
-      // Test that the deck editor has the correct layout functions available
-      expect(openResponse.text).toContain('<script src="/js/filter-functions.js" defer></script>');
     });
 
     it('should load available cards for deck editor', async () => {
@@ -198,134 +161,7 @@ describe('Deck Navigation Flow Integration Tests', () => {
     });
   });
 
-  describeV1Frontend('Deck Editor UI Elements', () => {
-    it('should render deck editor with proper layout structure', async () => {
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(response.status).toBe(200);
-      
-      // Check for essential deck editor elements
-      expect(response.text).toContain('deck-editor-layout');
-      expect(response.text).toContain('deck-pane');
-      expect(response.text).toContain('card-selector-pane');
-      expect(response.text).toContain('resizable-divider');
-      
-      // Check for card categories
-      expect(response.text).toContain('card-categories');
-      expect(response.text).toContain('Available Cards');
-    });
-
-    it('should include search functionality in deck editor', async () => {
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(response.status).toBe(200);
-      
-      // Check for search elements
-      expect(response.text).toContain('deckEditorSearch');
-      expect(response.text).toContain('deckEditorSearchResults');
-    });
-
-    it('should include deck management controls', async () => {
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(response.status).toBe(200);
-      
-      // Check for deck management elements (these are in the modal)
-      expect(response.text).toContain('deckEditorModal');
-      expect(response.text).toContain('modal-content');
-    });
-  });
-
-  describe('Navigation Between Views', () => {
-    itV1Frontend('should handle navigation from main app to deck editor', async () => {
-      // First, access the main app
-      const mainAppResponse = await request(app)
-        .get('/')
-        .set('Cookie', authCookie);
-
-      expect(mainAppResponse.status).toBe(200);
-      expect(mainAppResponse.text).toContain('database-view');
-
-      // Then navigate to deck editor
-      const deckEditorResponse = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(deckEditorResponse.status).toBe(200);
-      expect(deckEditorResponse.text).toContain('deckEditorModal');
-    });
-
-    itV1Frontend('should maintain session across navigation', async () => {
-      // Test session validation
-      const sessionResponse = await request(app)
-        .get('/api/auth/me')
-        .set('Cookie', authCookie);
-
-      expect(sessionResponse.status).toBe(200);
-      expect(sessionResponse.body.success).toBe(true);
-      expect(sessionResponse.body.data.id).toBe(testUser.id);
-
-      // Navigate to deck editor and verify session is maintained
-      const deckEditorResponse = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      expect(deckEditorResponse.status).toBe(200);
-    });
-  });
-
-  describeV1Frontend('Error Handling in Deck Navigation', () => {
-    it('should handle non-existent deck gracefully', async () => {
-      const fakeDeckId = '00000000-0000-0000-0000-000000000000';
-      
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${fakeDeckId}`)
-        .set('Cookie', authCookie);
-
-      // The app might return 200 with an error page or 404
-      expect([200, 404]).toContain(response.status);
-    });
-
-    it('should handle invalid user ID in deck URL', async () => {
-      const fakeUserId = '00000000-0000-0000-0000-000000000000';
-      
-      const response = await request(app)
-        .get(`/users/${fakeUserId}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      // The app might return 200 with an error page or 404
-      expect([200, 404]).toContain(response.status);
-    });
-
-    it('should require authentication for deck access', async () => {
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`);
-
-      // Should redirect to login or return 401/403
-      expect([200, 302, 401, 403]).toContain(response.status);
-    });
-  });
-
   describe('Deck Editor Performance', () => {
-    itV1Frontend('should load deck editor within reasonable time', async () => {
-      const startTime = Date.now();
-      
-      const response = await request(app)
-        .get(`/users/${testUser.id}/decks/${testDeck.id}`)
-        .set('Cookie', authCookie);
-
-      const loadTime = Date.now() - startTime;
-      
-      expect(response.status).toBe(200);
-      expect(loadTime).toBeLessThan(5000); // Should load within 5 seconds
-    });
-
     it('should load available cards efficiently', async () => {
       const startTime = Date.now();
       

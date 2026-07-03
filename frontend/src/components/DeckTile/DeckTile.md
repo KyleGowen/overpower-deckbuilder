@@ -51,7 +51,7 @@ In community/profile/favorites contexts the tile gains:
   (`deckTileVisibilityBadge`) sits beside the legality badge.
 - **Owner name** — `ownerName` renders as a clickable username link via `onOwnerClick` (footer lower-left; no "by" prefix).
 
-See `STYLE_GUIDE.md` § "Public/private visibility chip & favorite heart (v2 SPA)".
+See `STYLE_GUIDE_V2.md` § "Public/private visibility chip & favorite heart (v2 SPA)".
 
 ## Meta bar
 

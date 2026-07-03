@@ -1,8 +1,6 @@
 # frontend/ - Excelsior React SPA (v2)
 
-Greenfield React 19 + Vite 6 + TypeScript single-page app that replaces the
-legacy vanilla-JS site under `public/`. This is the production frontend going
-forward.
+Greenfield React 19 + Vite 6 + TypeScript single-page app — the production frontend.
 
 ## Visual source of truth
 - Design decisions live in repo-root `STYLE_GUIDE_V2.md`. Update it whenever you
@@ -35,7 +33,7 @@ forward.
 ## Dev
 - **Open the app at `http://localhost:5173`** (not :8085). Requires root
   `npm run dev` running in parallel for the API backend on :8085.
-- `npm run dev` (Vite :5173) proxies `/api`, `/health`, `/src/resources`, `/js`
+- `npm run dev` (Vite :5173) proxies `/api`, `/health`, `/src/resources`
   to the Express backend on :8085.
 - `npm run build` outputs to `dist/`, served in prod by Express
   `src/routes/spaIndexPath.ts`.

@@ -1,0 +1,16 @@
+---
+description: The Excelsior frontend is v2 React SPA only — no legacy UI exists.
+alwaysApply: true
+---
+
+# v2 frontend only
+
+There is **no v1 UI**. The deprecated vanilla-JS `public/` tree has been removed.
+
+- All frontend work goes in **`frontend/`** (React 19 + Vite + TypeScript).
+- Visual source of truth: **`STYLE_GUIDE_V2.md`**.
+- Architecture and dev workflow: **`docs/current/FRONTEND_V2.md`**.
+- Local dev URL: **`http://localhost:5173`** (Vite); API on `:8085`.
+- Mobile/desktop layout: **`LayoutModeProvider`** / `useLayoutMode()` at 900px — not v1 `layout-mobile` classes.
+
+Do not reference `public/`, `EXCELSIOR_DISABLE_SPA`, legacy script manifests, or v1 style/mobile docs as active code. Historical v1 docs are in **`docs/archive/`**.

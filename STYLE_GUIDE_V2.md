@@ -2,8 +2,7 @@
 
 Visual source of truth for the **v2 React SPA** under [`frontend/`](frontend/). This
 guide describes the dark, neon, card-game-companion theme derived from the mocks in
-`docs/mocks`. The legacy vanilla-JS site under `public/` is documented separately in
-`STYLE_GUIDE.md`; **do not** mix the two.
+`docs/mocks`.
 
 > **Rule:** Whenever you change a visual pattern, token, or add a screen in `frontend/`,
 > update this file. Tokens are defined in

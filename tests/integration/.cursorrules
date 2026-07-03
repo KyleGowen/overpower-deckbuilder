@@ -1,13 +1,5 @@
 # Integration Test Data Cleanup
 
-## Legacy v1 UI tests (disabled)
-
-After the v2 SPA cutover, integration tests that asserted on served `public/` HTML are
-**disabled** — see [`V1_FRONTEND_TESTS_DISABLED.md`](V1_FRONTEND_TESTS_DISABLED.md).
-Do **not** add new ITs that check `response.text` for v1 markup (`deckEditorModal`,
-`/js/deck-editor-*.js`, `/components/globalNav.html`). Use `/api/v1/*` and `/api/auth/*`
-for new coverage; v2 UI is verified in the browser at `:5173`.
-
 ## Mandatory Cleanup Rules
 
 - **ALL integration tests that create users or decks MUST clean up what they create**
@@ -18,6 +10,10 @@ for new coverage; v2 UI is verified in the browser at `:5173`.
 - Use integrationTestUtils.trackTestUser(userId) when using userRepository.createUser directly
 - Use integrationTestUtils.trackTestDeck(deckId) for decks created via API
 - **NEVER leave orphaned test data in the database**
+
+## v2 frontend coverage
+
+The production UI is the React SPA in `frontend/`. Integration tests should exercise **`/api/v1/*`** and **`/api/auth/*`** (and legacy compat routes documented in API docs). v2 UI behavior is verified in the browser at **`http://localhost:5173`** — do not assert on removed v1 HTML or `public/js` markup.
 
 ## Test Categorization (CI Workflow Buckets)
 

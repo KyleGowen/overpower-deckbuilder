@@ -553,11 +553,6 @@ jobs:
         else
           echo "❌ Card duplication bug fix NOT found in current commit"
         fi
-        if test -f public/index.html; then
-          echo "✅ Main index.html file found in current commit"
-        else
-          echo "❌ Main index.html file NOT found in current commit"
-        fi
         echo "=== END GIT VERIFICATION ==="
       
     - name: Configure AWS credentials
@@ -592,12 +587,6 @@ jobs:
           echo "❌ Card duplication bug fix NOT found in source files"
           exit 1
         fi
-        if test -f public/index.html; then
-          echo "✅ Main index.html file found in source files"
-        else
-          echo "❌ Main index.html file NOT found in source files"
-          exit 1
-        fi
         if test -f frontend/dist/index.html; then
           echo "✅ v2 SPA build (frontend/dist/index.html) found in source files"
         else
@@ -625,8 +614,7 @@ jobs:
         echo "✅ Image tagged"
         
         echo "📋 Verifying build contents..."
-        docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/public/index.html
-        echo "📋 Verifying v2 SPA is baked into the image (this is what cuts over to v2)..."
+        echo "📋 Verifying v2 SPA is baked into the image..."
         docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/frontend/dist/index.html
         docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG grep -c "replaceAllCardsInDeck" /app/src/database/PostgreSQLDeckRepository.ts || echo "0"
         
@@ -646,33 +634,12 @@ jobs:
       run: |
         echo "🔍 Verifying critical files in Docker image..."
         echo "Image built: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        
-        echo "Testing js directory..."
-        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/public/js/; then
-          echo "✅ js directory found"
-        else
-          echo "❌ js directory missing"
-        fi
-        
-        echo "Testing auth-service.js file..."
-        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG test -f /app/public/js/auth-service.js; then
-          echo "✅ auth-service.js found"
-        else
-          echo "❌ auth-service.js missing"
-        fi
-        
-        echo "Testing index.html file..."
-        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG test -f /app/public/index.html; then
-          echo "✅ index.html found"
-        else
-          echo "❌ index.html missing"
-        fi
 
-        echo "Testing v2 SPA build (frontend/dist/index.html) — required for v2 cutover..."
+        echo "Testing v2 SPA build (frontend/dist/index.html)..."
         if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG test -f /app/frontend/dist/index.html; then
-          echo "✅ v2 SPA index.html found — production will serve v2"
+          echo "✅ v2 SPA index.html found"
         else
-          echo "❌ v2 SPA index.html MISSING — production would fall back to legacy v1"
+          echo "❌ v2 SPA index.html MISSING"
           exit 1
         fi
         
@@ -681,20 +648,6 @@ jobs:
           echo "✅ Card duplication bug fix found in deployment"
         else
           echo "❌ Card duplication bug fix NOT found in deployment - deployment may be using old code"
-        fi
-        
-        echo "Checking for refactored JavaScript files..."
-        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG test -d /app/public/js; then
-          echo "✅ Refactored JavaScript directory found"
-        else
-          echo "❌ Refactored JavaScript directory NOT found"
-        fi
-        
-        echo "Listing public directory..."
-        if docker run --rm $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ls -la /app/public/; then
-          echo "✅ public directory listing successful"
-        else
-          echo "❌ public directory listing failed"
         fi
 
     - name: Push Docker Image to ECR

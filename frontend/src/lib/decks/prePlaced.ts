@@ -10,8 +10,7 @@ import { resolveDeckCatalogCard, type DeckCardIndex } from './deckCardCatalog';
  * while they still count toward deck size and the ≥8 playable threshold.
  *
  * Eligibility is client-only (the backend stores the flag without validating
- * which card types may set it) and mirrors the legacy v1 rules in
- * `public/js/game-logic.js`:
+ * which card types may set it):
  *   - Training card        → deck contains the "Spartan Training Ground" location
  *   - Basic Universe card  → deck contains the "Dracula's Armory" location
  *   - "Sword and Shield"   → deck contains the character "Lancelot"

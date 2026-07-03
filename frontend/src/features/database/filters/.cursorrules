@@ -3,7 +3,7 @@
 Config-driven per-tab filters for `DatabasePage` (`/data`).
 
 - `dbvFilterConfig.ts` — which filter groups each `CatalogType` exposes.
-- `dbvFilterPredicates.ts` — pure `cardMatchesDbvFilters` and helpers (port of legacy `public/js` filter math).
+- `dbvFilterPredicates.ts` — pure `cardMatchesDbvFilters` and filter predicate helpers.
 - `useDbvFilters.ts` — React state, chips, reset on tab change.
 - UI: `../components/DbvFilterRail.tsx` and strip/numeric subcomponents.
 

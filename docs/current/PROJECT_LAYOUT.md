@@ -7,38 +7,27 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ```
 /Users/kyle/cursored/
 ├── 📄 README.md                    # Main project documentation
+├── 📄 STYLE_GUIDE_V2.md            # v2 React SPA visual source of truth
+├── 📁 frontend/                    # v2 React SPA (production UI)
 ├── 📄 docs/current/PROJECT_LAYOUT.md  # Project structure documentation
-├── 📄 docs/current/API_DOCUMENTATION.md  # API endpoints and usage documentation
-├── 📄 docs/current/DEPLOYMENT.md   # Deployment instructions and strategies
-├── 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy
-├── 📄 docs/current/SERVER_STARTUP.md       # Server startup and configuration guide
-├── 📄 docs/current/STYLE_GUIDE.md          # Code style and formatting guidelines
-├── 📄 docs/current/DECK_EDITOR_CARD_VIEW_LAYOUT.md  # Deck editor Card View layout pattern (landscape/portrait, do not regress)
-├── 📄 docs/current/DECK_EDITOR_MOBILE_VIEW.md  # Deck editor mobile list (DEV in MV): rows, ⋯ menu, integration, file map
+├── 📄 docs/current/FRONTEND_V2.md  # v2 architecture and dev workflow
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
-├── 📄 docs/current/ENDPOINT_HIT_METRICS.md # DB endpoint_hit_counts: seed + prune stale keys on boot, adding routes (no per-route SQL)
-├── 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck attempts, lessons, current policy
-├── 📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV row art + image modal sizing attempts; troubleshooting
-├── 📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
-├── 📄 docs/current/DBV_ASPECTS_MOBILE.md  # Aspects DBV mobile: filter shell, caption, actions, files, unit tests
-├── 📄 docs/current/DBV_MISSIONS_MOBILE.md  # Missions DBV mobile: select filter, card rows, caption, files, unit tests
-├── 📄 public/js/DBV_POWER_TYPE_FILTER_STRIP.md  # DBV reusable power-type icon strip (`data-dbv-power-strip`, presets, tests)
-├── 📄 public/js/DBV_CARD_NAME_FILTER.md  # DBV reusable card/name text filters (`data-dbv-name-filter`, presets, tests)
-├── 📄 docs/current/COLLECTION_CHECKLIST_SOURCE.md # Source of truth for collection card names and numbers (OverPower Check List)
-├── 📄 docs/current/COLLECTION_VIEW_MOBILE.md  # Collection tab mobile: list, detail sheet, fixed sort, layout-mode-change, unit tests
-├── 📁 docs/checklist-source/       # Markdown exports of each OverPower Check List tab (regenerate via scripts/export-overpower-checklist-markdown.py)
-├── 📄 docs/current/CLOUDFRONT_CDN.md              # CDN infrastructure: S3 bucket, CloudFront distribution, CI sync job, frontend integration
+├── 📄 docs/current/API_DOCUMENTATION.md  # Legacy HTTP API
+├── 📄 API_V1.md                    # /api/v1 contract
 ├── 📄 package.json                 # Node.js dependencies and scripts
 ├── 📄 tsconfig.json                # TypeScript configuration
-├── 📄 jest.config.js               # Jest testing configuration
-└── 📄 jest.*.config.js             # Specific Jest configurations for different test types
+├── 📁 tests/                       # Unit and integration tests
+└── 📁 src/                         # Express backend
 ```
 
 ## 🎨 **Frontend Structure**
 
-> **The production frontend is the v2 React SPA in `/frontend/` (below).** The legacy `/public/` vanilla-JS UI is **deprecated** and served only as a rollback (`EXCELSIOR_DISABLE_SPA=1`). Express chooses between them at runtime via `isSpaBuilt()` ([`src/routes/spaIndexPath.ts`](../../src/routes/spaIndexPath.ts)).
+> **The production frontend is the v2 React SPA in `/frontend/`.** Express serves
+> `frontend/dist/index.html` for app routes after `npm run build` in `frontend/`.
+> Local development uses the Vite dev server on **:5173** — see
+> [`docs/current/FRONTEND_V2.md`](FRONTEND_V2.md).
 
-### **v2 React SPA (`/frontend/`) — primary**
+### **v2 React SPA (`/frontend/`)**
 ```
 /frontend/
 ├── 📄 index.html                   # Vite entry HTML (built to frontend/dist/index.html)
@@ -55,66 +44,6 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 └── 📁 dist/                        # Production build output (gitignored; built in CI, copied into Docker image)
 ```
 Full v2 reference: [`docs/current/FRONTEND_V2.md`](FRONTEND_V2.md). Visual source of truth: [`STYLE_GUIDE_V2.md`](../../STYLE_GUIDE_V2.md).
-
-### **Legacy v1 UI (`/public/`) — deprecated**
-
-### **Main Application Files**
-```
-/public/
-├── 📄 index.html                   # Main application entry point (9,255 lines after refactoring)
-├── 📄 deck-builder.html            # Deck builder interface
-├── 📄 database.html                # Database view interface
-├── 📄 database-view.html           # Database view page
-└── 📄 test-payload.json            # Test data payload
-```
-
-### **CSS Styles (`/public/css/`)**
-```
-/public/css/
-└── 📄 index.css                    # All application styles (extracted from index.html in Phase 1)
-```
-
-### **JavaScript Modules (`/public/js/`)**
-```
-/public/js/
-├── 📄 utilities.js                 # Phase 2: Core utility functions and app initialization
-├── 📄 card-display.js              # Phase 3: All card rendering and display functions
-├── 📄 deck-editor-simple.js        # Phase 4: Basic deck editor functionality
-├── 📄 auth-service.js              # Phase 5: User authentication and session management
-├── 📄 data-loading.js              # Phase 6: API data loading and management
-├── 📄 search-filter.js             # Phase 7: Search and filtering functionality
-├── 📄 layout-manager.js            # Phase 7: Centralized layout management
-├── 📄 deck-management.js           # Phase 8: Deck creation, editing, and management
-├── 📄 ui-utility-functions.js      # Phase 9: UI interactions and utility functions
-├── 📄 layout-drag-drop-functions.js # Phase 10A: Drag-and-drop functionality
-├── 📄 validation-calculation-functions.js # Phase 10B: Deck validation and calculations
-├── 📄 remaining-utility-functions.js # Phase 10C: Remaining utility functions
-├── 📄 template-loader.js           # Phase 11B: HTML template loading and injection
-├── 📄 event-binder.js              # Phase 11B: Centralized event binding for data attributes
-└── 📄 filter-functions.js          # Phase 11C & 12: Filter-related functions and utilities
-```
-
-### **HTML Templates (`/public/templates/`)**
-```
-/public/templates/
-├── 📄 deck-editor-template.html    # Phase 11A: Deck editor modal HTML structure
-├── 📄 modal-templates.html         # Phase 11A: Various modal HTML structures
-└── 📄 database-view-template.html  # Phase 11A: Database view HTML structure
-```
-
-### **Components (`/public/components/`)**
-```
-/public/components/
-├── 📄 globalNav.html               # Global navigation component
-├── 📄 globalNav.js                 # Global navigation JavaScript
-└── 📄 globalNav.css                # Global navigation styles
-```
-
-### **Resources (`/public/resources/`)**
-```
-/public/resources/
-└── 📄 logo.png                     # Application logo
-```
 
 ## 🔧 **Backend Structure (`/src/`)**
 
@@ -162,7 +91,6 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 ├── 📄 databaseInitialization.ts    # Database initialization service
 ├── 📄 deckPersistence.ts           # Deck persistence service
 ├── 📄 deckService.ts               # Deck business logic service
-├── 📄 FrontendAuthService.ts       # Frontend authentication service
 ├── 📄 guestDeckPersistence.ts      # Guest deck persistence service
 └── 📄 userPersistence.ts           # User persistence service
 ```
@@ -199,18 +127,6 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 └── 📁 rules/                       # Game rules and documentation
 ```
 
-### **Public Assets (`/src/public/`)**
-```
-/src/public/
-├── 📄 components/                  # Frontend components
-├── 📄 database-view.html           # Database view page
-├── 📄 deck-builder.html            # Deck builder page
-├── 📄 index.html                   # Main index page
-├── 📄 js/                          # JavaScript files
-├── 📄 resources/                   # Static resources
-└── 📄 styles/                      # CSS stylesheets
-```
-
 ## 🧪 **Testing Structure (`/tests/`)**
 
 ### **Test Configuration**
@@ -238,14 +154,8 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 ### **Unit Tests (`/tests/unit/`)**
 ```
 /tests/unit/
-├── 📄 *.test.ts                    # 68 unit test files covering:
-│   ├── Authentication functionality
-│   ├── Deck management
-│   ├── Card display and validation
-│   ├── UI components
-│   ├── Database operations
-│   ├── Utility functions
-│   └── Business logic
+├── 📁 frontend-v2/                 # v2 SPA unit tests (import from frontend/src/)
+├── 📄 *.test.ts                    # Backend and shared unit tests
 ```
 
 ### **Integration Tests (`/tests/integration/`)**
@@ -399,59 +309,30 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 📄 docs/current/DEPLOYMENT.md       # Deployment instructions
 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy
 📄 docs/current/SERVER_STARTUP.md       # Server startup guide
-📄 docs/current/STYLE_GUIDE.md          # Code style guidelines
+📄 docs/current/STYLE_GUIDE_V2.md       # v2 React SPA visual source of truth
 📄 docs/current/GUEST_DECK_LESSONS_LEARNED.md  # Guest +Deck / session deck attempts and why we disabled +Deck for GUEST
-📄 docs/current/MOBILE_DBV_CARD_IMAGE_TRIES.md  # Mobile DBV card row + #imageModal sizing attempts; troubleshooting
-📄 docs/current/MOBILE_DBV_TD_IMG_MAX_HEIGHT_FIX.md  # Repeatable fix: max-height override for mobile DBV tab images
 ```
 
 ### Documentation map and context files
 
-**Existing context files** (`.context.md` — feature overview and code locations for AI/contributors):
-
-- `public/css/foil-effect.context.md` — foil card styling and CSS
-- `src/services/deck-background.context.md` — deck editor backgrounds; see also `src/resources/images/backgrounds/landscape/.cursorrules`
-
-**Areas that would benefit from a future `.context.md`** (high complexity or many touchpoints):
-
-- Deck editor flow: `public/js/deck-editor-*.js`, `deck-card-operations.js`, `deck-validation.js`, and related components
-- Collection service and UI: `src/services/collectionService.ts`, `src/database/collectionsRepository.ts`, `public/js/collection-view.js` — mobile UX map: [`docs/current/COLLECTION_VIEW_MOBILE.md`](COLLECTION_VIEW_MOBILE.md)
-- Auth flow: `src/services/AuthenticationService.ts`, `src/middleware/authorizationHelpers.ts`, `public/js/auth-service.js`, Firebase config
-
-## 🔄 **12-Phase Refactoring History**
-
-This project underwent a comprehensive 12-phase refactoring to transform a monolithic `index.html` file into a well-organized, modular codebase:
-
-- **Phase 1**: CSS Extraction → `public/css/index.css`
-- **Phase 2**: JavaScript Extraction → `public/js/utilities.js`
-- **Phase 3**: Card Display Functions → `public/js/card-display.js`
-- **Phase 4**: Deck Editor Functions → `public/js/deck-editor-simple.js`
-- **Phase 5**: Authentication Functions → `public/js/auth-service.js`
-- **Phase 6**: Data Loading Functions → `public/js/data-loading.js`
-- **Phase 7**: Search and Filter Functions → `public/js/search-filter.js` + `public/js/layout-manager.js`
-- **Phase 8**: Deck Management Functions → `public/js/deck-management.js`
-- **Phase 9**: UI Utility Functions → `public/js/ui-utility-functions.js`
-- **Phase 10**: Layout and Drag-Drop Functions → Multiple specialized files
-- **Phase 11**: HTML Structure Optimization → Template system
-- **Phase 12**: Final Cleanup and Optimization → Complete refactoring
+**Feature `.md` files** under `frontend/src/features/` and component folders document v2 screens (e.g. `DeckEditorPage.md`, `DatabasePage.md`). Backend context: `.cursorrules` per directory under `src/`.
 
 ## 🎯 **Key Architectural Decisions**
 
-1. **Modular Frontend**: Separated concerns into focused JavaScript modules
-2. **Template System**: Extracted HTML templates for better maintainability
-3. **Service-Based Architecture**: Clean separation between frontend and backend services
-4. **Comprehensive Testing**: Unit and integration tests for all major functionality
-5. **Infrastructure as Code**: Terraform-managed AWS infrastructure
-6. **Database Migrations**: Flyway-managed schema evolution
-7. **Containerization**: Docker support for consistent deployments
+1. **v2 React SPA**: Production UI in `frontend/` (React 19 + Vite + TypeScript)
+2. **Service-Based Architecture**: Clean separation between frontend and backend services
+3. **Comprehensive Testing**: Unit and integration tests for all major functionality
+4. **Infrastructure as Code**: Terraform-managed AWS infrastructure
+5. **Database Migrations**: Flyway-managed schema evolution
+6. **Containerization**: Docker support for consistent deployments
 
 ## 🚀 **Getting Started**
 
-1. **Development**: Run `npm run dev` to start the development server
-2. **Testing**: Run `npm run test:unit` for unit tests or `npm run test:integration` for integration tests
-3. **Building**: Run `npm run build` to compile TypeScript
-4. **Deployment**: Follow instructions in `docs/current/DEPLOYMENT.md`
+1. **Development:** Run repo root `npm run dev` (API :8085) and `frontend/npm run dev` (SPA :5173)
+2. **Testing:** Run `npm run test:unit` for unit tests or `npm run test:integration` for integration tests
+3. **Building:** Run `npm run build` in `frontend/` for the SPA; repo root `npm run build` for backend
+4. **Deployment:** Follow instructions in `docs/current/DEPLOYMENT.md`
 
 ---
 
-*This documentation reflects the current state of the project after the 12-phase refactoring. For specific implementation details, refer to the individual file documentation and inline comments.*
+*This documentation reflects the current project structure. For v2 frontend details, see [`FRONTEND_V2.md`](FRONTEND_V2.md).*

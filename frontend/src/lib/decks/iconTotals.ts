@@ -71,10 +71,7 @@ function iconsForCard(
   );
 }
 
-/**
- * Sum Energy / Combat / Brute Force / Intelligence icons from playable deck cards.
- * Matches legacy `calculateIconTotals` in `public/js/deck-validation.js`.
- */
+/** Sum Energy / Combat / Brute Force / Intelligence icons from playable deck cards. */
 export function calculateDeckIconTotals(
   cards: DeckIconCardInput[],
   lookup: (deckType: string, cardId: string) => IconCatalogSource | null | undefined,

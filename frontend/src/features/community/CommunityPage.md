@@ -72,5 +72,5 @@ deck owner and for guests.
 
 See also: `API_V1.md` (§ Community, favorites, and public profiles),
 
-`docs/current/STYLE_GUIDE.md` (§ Community page).
+`STYLE_GUIDE_V2.md` (§ Community page).
 
