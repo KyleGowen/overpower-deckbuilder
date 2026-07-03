@@ -25,6 +25,7 @@ const mockDeckRepository: jest.Mocked<DeckRepository> = {
   getCommunityFeedDecks: jest.fn(),
   searchCommunityDecks: jest.fn(),
   getPublicDecksByUserId: jest.fn(),
+  getPublicLegalDecksByUserId: jest.fn(),
   getFavoriteDecksForUser: jest.fn(),
   addDeckFavorite: jest.fn(),
   removeDeckFavorite: jest.fn(),

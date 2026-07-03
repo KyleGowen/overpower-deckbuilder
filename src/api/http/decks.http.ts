@@ -120,7 +120,7 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
   });
 
   /**
-   * Community deck pool. Returns the community_decks account's saved decks,
+   * Community deck pool. Returns the community_decks account's public, legal decks,
    * sorted by updated_at descending. Registered before `/decks/:id` so the
    * literal `community` segment is not captured as an id. Requires an authenticated
    * session (the Home screen is behind auth).
@@ -139,7 +139,7 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
   });
 
   /**
-   * Tournament deck pool. Returns the tournament_decks account's saved decks,
+   * Tournament deck pool. Returns the tournament_decks account's public, legal decks,
    * sorted by updated_at descending. Registered before `/decks/:id` so the
    * literal `tournament` segment is not captured as an id.
    */

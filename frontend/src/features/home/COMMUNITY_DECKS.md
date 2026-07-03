@@ -15,7 +15,7 @@ The Home **"Community Decks"** rail shows the latest **user-shared public decks*
 Editorial decks for the internal **`community_decks`** service account are **not** what powers the Home rail anymore. That account is still used for manual curation:
 
 - User id: `COMMUNITY_DECKS_USER_ID` (`00000000-0000-0000-0000-000000000002`) via `GET /api/v1/config/app` → `communityDecksUserId`.
-- API: `GET /api/v1/decks/community` — [`fetchCommunityDecks()`](../../lib/api/decks.ts).
+- API: `GET /api/v1/decks/community` — [`fetchCommunityDecks()`](../../lib/api/decks.ts). Returns only **public + legal** decks (`is_private = false`, `is_valid = true`; Limited allowed when legal).
 - **Import via Cursor skill:** `.cursor/skills/add-community-deck/SKILL.md`
 - **CLI:** `npm run import:community-deck -- path/to/export.json`
 - **Manual edit:** log in as `community_decks` (password in migration `V279`) and use the deck editor.

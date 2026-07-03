@@ -559,6 +559,26 @@ export async function getPublicDecksByUserId(
   }
 }
 
+/** Public + legal decks owned by a curated account (tournament/community rails). */
+export async function getPublicLegalDecksByUserId(
+  ctx: DeckRepositoryContext,
+  userId: string,
+  orderBy: DeckListOrderBy = 'updated_at'
+): Promise<Deck[]> {
+  const client = await ctx.pool.connect();
+  try {
+    const sql = buildDeckListSelectSql({
+      where: 'd.user_id = $1 AND d.is_private = false AND d.is_valid = true',
+      orderBy: `d.${orderBy === 'updated_at' ? 'updated_at' : 'created_at'} DESC`,
+    });
+    // SQL fragments are fixed; $1 is the only user input.
+    const result = await client.query(sql, [userId]); // nosemgrep: pg-sql-template-interpolation
+    return (result.rows as DeckListRow[]).map(mapDeckRowToListDeck);
+  } finally {
+    client.release();
+  }
+}
+
 /**
  * Community feed: public + legal (is_valid) + non-limited decks across all users,
  * most-recently-updated first. `excludeUserIds` removes internal/curated accounts.

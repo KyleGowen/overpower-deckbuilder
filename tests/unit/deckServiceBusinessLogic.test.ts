@@ -109,6 +109,10 @@ class MockDeckRepository {
     return [];
   }
 
+  async getPublicLegalDecksByUserId(): Promise<any[]> {
+    return [];
+  }
+
   async getFavoriteDecksForUser(): Promise<any[]> {
     return [];
   }

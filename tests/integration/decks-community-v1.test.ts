@@ -5,7 +5,7 @@ import { integrationTestUtils } from '../setup-integration';
 
 describe('GET /api/v1/decks/community', () => {
   let authCookie: string;
-  let createdDeckId: string | null = null;
+  const createdDeckIds: string[] = [];
 
   beforeAll(async () => {
     await initializeTestServer();
@@ -18,13 +18,24 @@ describe('GET /api/v1/decks/community', () => {
   });
 
   afterAll(async () => {
-    if (createdDeckId) {
+    if (createdDeckIds.length > 0) {
       const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
       const pool = DataSourceConfig.getInstance().getPool();
-      await pool.query('DELETE FROM deck_cards WHERE deck_id = $1', [createdDeckId]);
-      await pool.query('DELETE FROM decks WHERE id = $1', [createdDeckId]);
+      for (const deckId of createdDeckIds) {
+        await pool.query('DELETE FROM deck_cards WHERE deck_id = $1', [deckId]);
+        await pool.query('DELETE FROM decks WHERE id = $1', [deckId]);
+      }
     }
   });
+
+  async function markPublicLegal(deckId: string): Promise<void> {
+    const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
+    const pool = DataSourceConfig.getInstance().getPool();
+    await pool.query(
+      `UPDATE decks SET is_private = false, is_valid = true WHERE id = $1`,
+      [deckId]
+    );
+  }
 
   it('returns only community_decks user decks sorted by lastModified descending', async () => {
     const configRes = await request(app).get('/api/v1/config/app').expect(200);
@@ -38,7 +49,7 @@ describe('GET /api/v1/decks/community', () => {
       `IT Community Older ${Date.now()}`,
       'older'
     );
-    createdDeckId = older.id;
+    createdDeckIds.push(older.id);
     integrationTestUtils.trackTestDeck(older.id);
 
     const pool = DataSourceConfig.getInstance().getPool();
@@ -46,13 +57,16 @@ describe('GET /api/v1/decks/community', () => {
       `UPDATE decks SET updated_at = NOW() - INTERVAL '1 hour' WHERE id = $1`,
       [older.id]
     );
+    await markPublicLegal(older.id);
 
     const newer = await deckRepository.createDeck(
       COMMUNITY_DECKS_USER_ID,
       `IT Community Newer ${Date.now()}`,
       'newer'
     );
+    createdDeckIds.push(newer.id);
     integrationTestUtils.trackTestDeck(newer.id);
+    await markPublicLegal(newer.id);
 
     const res = await request(app)
       .get('/api/v1/decks/community')
@@ -68,6 +82,8 @@ describe('GET /api/v1/decks/community', () => {
     expect(communityDecks.length).toBeGreaterThan(0);
     for (const deck of communityDecks) {
       expect(deck.metadata.userId).toBe(COMMUNITY_DECKS_USER_ID);
+      expect(deck.metadata.is_private).toBe(false);
+      expect(deck.metadata.is_valid).toBe(true);
     }
 
     const ids = communityDecks.map((d: { metadata: { id: string } }) => d.metadata.id);
@@ -79,7 +95,61 @@ describe('GET /api/v1/decks/community', () => {
 
     await deckRepository.deleteDeck(newer.id);
     await deckRepository.deleteDeck(older.id);
-    createdDeckId = null;
+    createdDeckIds.length = 0;
+  });
+
+  it('excludes private and not-legal community_decks decks from the rail', async () => {
+    const { DataSourceConfig } = await import('../../src/config/DataSourceConfig');
+    const deckRepository = DataSourceConfig.getInstance().getDeckRepository();
+    const pool = DataSourceConfig.getInstance().getPool();
+
+    const publicLegal = await deckRepository.createDeck(
+      COMMUNITY_DECKS_USER_ID,
+      `IT Community Public Legal ${Date.now()}`,
+      'visible'
+    );
+    createdDeckIds.push(publicLegal.id);
+    integrationTestUtils.trackTestDeck(publicLegal.id);
+    await markPublicLegal(publicLegal.id);
+
+    const privateDeck = await deckRepository.createDeck(
+      COMMUNITY_DECKS_USER_ID,
+      `IT Community Private ${Date.now()}`,
+      'hidden private'
+    );
+    createdDeckIds.push(privateDeck.id);
+    integrationTestUtils.trackTestDeck(privateDeck.id);
+    await pool.query(
+      `UPDATE decks SET is_private = true, is_valid = true WHERE id = $1`,
+      [privateDeck.id]
+    );
+
+    const notLegal = await deckRepository.createDeck(
+      COMMUNITY_DECKS_USER_ID,
+      `IT Community Not Legal ${Date.now()}`,
+      'hidden not legal'
+    );
+    createdDeckIds.push(notLegal.id);
+    integrationTestUtils.trackTestDeck(notLegal.id);
+    await pool.query(
+      `UPDATE decks SET is_private = false, is_valid = false WHERE id = $1`,
+      [notLegal.id]
+    );
+
+    const res = await request(app)
+      .get('/api/v1/decks/community')
+      .set('Cookie', authCookie)
+      .expect(200);
+
+    const ids = res.body.data.map((d: { metadata: { id: string } }) => d.metadata.id);
+    expect(ids).toContain(publicLegal.id);
+    expect(ids).not.toContain(privateDeck.id);
+    expect(ids).not.toContain(notLegal.id);
+
+    await deckRepository.deleteDeck(publicLegal.id);
+    await deckRepository.deleteDeck(privateDeck.id);
+    await deckRepository.deleteDeck(notLegal.id);
+    createdDeckIds.length = 0;
   });
 
   it('returns cardCount matching playable deck_cards quantity sum for each community deck', async () => {
@@ -92,7 +162,9 @@ describe('GET /api/v1/decks/community', () => {
       `IT Community cardCount ${Date.now()}`,
       'cardCount fixture'
     );
+    createdDeckIds.push(seedDeck.id);
     integrationTestUtils.trackTestDeck(seedDeck.id);
+    await markPublicLegal(seedDeck.id);
 
     const powerRow = await pool.query<{ id: string }>(
       `SELECT id FROM power_cards WHERE one_per_deck = false ORDER BY value ASC LIMIT 1`
@@ -127,5 +199,6 @@ describe('GET /api/v1/decks/community', () => {
     }
 
     await deckRepository.deleteDeck(seedDeck.id);
+    createdDeckIds.length = 0;
   });
 });

@@ -671,7 +671,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is backed by the internal **`community_decks`** user account (`communityDecksUserId` = `00000000-0000-0000-0000-000000000002`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-community-deck/SKILL.md` for importing decks.
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is backed by the internal **`community_decks`** user account (`communityDecksUserId` = `00000000-0000-0000-0000-000000000002`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Private or not-legal WIP decks remain visible to the owner via `GET /api/v1/decks`. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-community-deck/SKILL.md` for importing decks.
 
 **Response 500:** v1 envelope — `errors` with code `**COMMUNITY_DECKS_ERROR**`.
 
@@ -683,7 +683,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **tournament pool**. The pool is backed by the internal **`tournament_decks`** user account (`tournamentDecksUserId` = `00000000-0000-0000-0000-000000000003`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-tournament-deck/SKILL.md` for importing decks.
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **tournament pool**. The pool is backed by the internal **`tournament_decks`** user account (`tournamentDecksUserId` = `00000000-0000-0000-0000-000000000003`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Private or not-legal WIP decks remain visible to the owner via `GET /api/v1/decks`. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-tournament-deck/SKILL.md` for importing decks.
 
 **Response 500:** v1 envelope — `errors` with code `**TOURNAMENT_DECKS_ERROR**`.
 
@@ -954,7 +954,7 @@ Read-only community feed, deck favorites, and public user profiles. These power 
 - `ownerDisplayName` (string or `null`) — the resolved public name of the deck owner (`resolveUserDisplayName`).
 - `isFavorited` (boolean) — whether the **current viewer** has favorited this deck (always `false` for guests).
 
-**Visibility rule:** only decks with `is_private = false` are ever returned by the community feed, search, public profiles, and favorites. Curated internal accounts (`community_decks` `…0002`, `tournament_decks` `…0003`) are **excluded** from the community feed/search (they have their own `GET /api/v1/decks/community` and `GET /api/v1/decks/tournament` rails).
+**Visibility rule:** only decks with `is_private = false` are ever returned by the community feed, search, public profiles, and favorites. Curated internal accounts (`community_decks` `…0002`, `tournament_decks` `…0003`) are **excluded** from the community feed/search (they have their own `GET /api/v1/decks/community` and `GET /api/v1/decks/tournament` rails). Those curated rails return only **`is_private = false` AND `is_valid = true`** decks (Limited allowed when legal).
 
 > **Naming:** `GET /api/v1/community/decks` (this section, user-submitted public feed) is distinct from `GET /api/v1/decks/community` (the curated `community_decks` account rail used by Home).
 

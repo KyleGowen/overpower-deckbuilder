@@ -65,6 +65,13 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     return deckCrud.getPublicDecksByUserId(this.getContext(), userId);
   }
 
+  async getPublicLegalDecksByUserId(
+    userId: string,
+    orderBy?: deckCrud.DeckListOrderBy
+  ): Promise<Deck[]> {
+    return deckCrud.getPublicLegalDecksByUserId(this.getContext(), userId, orderBy);
+  }
+
   async getCommunityFeedDecks(opts?: {
     limit?: number;
     excludeUserIds?: string[];

@@ -22,10 +22,11 @@ The Home "Tournament Winning Decks" rail shows decks owned by the internal **`to
 
 ### Visibility (public vs private)
 
-Curated tournament decks must be **public** so users can open them from the Home rail (`GET /api/v1/decks/:id/full`). The tournament list endpoint returns all `tournament_decks` decks regardless of privacy, but the detail endpoint blocks private decks for non-owners.
+Curated tournament decks shown on Home, Community, and Deck Selection tournament tabs must be **public** and **legal** (`is_private = false`, `is_valid = true`). The tournament list endpoint filters to that subset; private or not-legal WIP decks are managed in the owner's **My Decks** list (`GET /api/v1/decks`).
 
 - **Flyway seeds** (`V288`, etc.) insert with `is_private = FALSE`.
 - **CLI/skill imports** (`import:tournament-deck`, `seed:tournament-decks`) set `is_private=false` via `importDeckFromExport`.
 - **Repair:** `migrations/V289__Fix_tournament_deck_visibility.sql` flips any still-private `tournament_decks` decks public (fixes decks imported before the auto-public behavior).
+- **Publishing:** toggle **Public** in the deck editor and ensure the deck validates **Legal** before it appears on public rails.
 
 For production, prefer regenerating `V288` via `npm run generate:tournament-deck-migration` after local edits so new environments get stable deck IDs and card rows.

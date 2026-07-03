@@ -38,6 +38,7 @@ export interface DeckRepository {
   getCommunityFeedDecks(opts?: { limit?: number; excludeUserIds?: string[] }): Promise<Deck[]>;
   searchCommunityDecks(opts: { search: string; limit?: number; excludeUserIds?: string[] }): Promise<Deck[]>;
   getPublicDecksByUserId(userId: string): Promise<Deck[]>;
+  getPublicLegalDecksByUserId(userId: string, orderBy?: 'created_at' | 'updated_at'): Promise<Deck[]>;
   getFavoriteDecksForUser(userId: string): Promise<Deck[]>;
   addDeckFavorite(userId: string, deckId: string): Promise<boolean>;
   removeDeckFavorite(userId: string, deckId: string): Promise<boolean>;

@@ -5,6 +5,7 @@ export type DeckListOrderBy = 'created_at' | 'updated_at';
 
 export interface DeckListRepository {
   getDecksByUserId: (userId: string, orderBy?: DeckListOrderBy) => Promise<Deck[]>;
+  getPublicLegalDecksByUserId: (userId: string, orderBy?: DeckListOrderBy) => Promise<Deck[]>;
 }
 
 /**
@@ -22,14 +23,14 @@ export class DeckListService {
   async getTransformedCommunityListForUser(
     userId: string
   ): Promise<ReturnType<typeof transformDeckList>> {
-    const decks = await this.deckRepository.getDecksByUserId(userId, 'updated_at');
+    const decks = await this.deckRepository.getPublicLegalDecksByUserId(userId, 'updated_at');
     return transformDeckList(decks);
   }
 
   async getTransformedTournamentListForUser(
     userId: string
   ): Promise<ReturnType<typeof transformDeckList>> {
-    const decks = await this.deckRepository.getDecksByUserId(userId, 'updated_at');
+    const decks = await this.deckRepository.getPublicLegalDecksByUserId(userId, 'updated_at');
     return transformDeckList(decks);
   }
 }
