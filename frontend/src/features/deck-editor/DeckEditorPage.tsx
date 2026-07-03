@@ -397,7 +397,7 @@ export default function DeckEditorPage() {
     staleTime: 60 * 60 * 1000,
   });
   const setsQuery = useQuery({
-    queryKey: ['dbv-sets'],
+    queryKey: ['sets'],
     queryFn: () => fetchSets(),
     staleTime: 60 * 60 * 1000,
   });

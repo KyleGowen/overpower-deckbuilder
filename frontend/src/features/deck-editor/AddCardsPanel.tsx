@@ -174,7 +174,7 @@ export function AddCardsPanel({
   });
 
   const setsQuery = useQuery({
-    queryKey: ['dbv-sets'],
+    queryKey: ['sets'],
     queryFn: () => fetchSets(),
     enabled: open,
     staleTime: 60 * 60 * 1000,
