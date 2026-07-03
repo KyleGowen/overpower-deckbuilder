@@ -5,6 +5,7 @@ import { useAuth } from '../../app/AuthProvider';
 import { fetchDecksForUser, createDeck, deleteDeck, fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchPublicDecksForUser, fetchFavoriteDecks, fetchCommunityFeed } from '../../lib/api/favorites';
 import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
+import { favoritesQueryKey } from '../../lib/decks/favoritesQueryKey';
 import { fetchCatalog } from '../../lib/api/catalog';
 import { buildMissionSetByCardId, deckMissionSetName } from '../../lib/decks/missionSetLabel';
 import { buildCharStatsById, deckMaxStats as computeDeckMaxStats } from '../../lib/decks/deckMaxStats';
@@ -48,7 +49,6 @@ const DECK_TAB_LABELS: Record<DeckTab, string> = {
   tournament: 'Tournament',
 };
 const COMMUNITY_FEED_KEY = (search: string) => ['decks', 'community-feed', search] as const;
-const FAVORITES_KEY = ['decks', 'favorites'] as const;
 const TOURNAMENT_KEY = ['decks', 'tournament'] as const;
 
 export default function DeckSelectionPage() {
@@ -160,7 +160,7 @@ export default function DeckSelectionPage() {
   }, [communitySearchInput]);
 
   const favoritesQuery = useQuery({
-    queryKey: FAVORITES_KEY,
+    queryKey: favoritesQueryKey(viewerId),
     queryFn: () => fetchFavoriteDecks(),
     enabled: showTabs && tab === 'favorites',
     staleTime: 60 * 1000,
@@ -250,7 +250,7 @@ export default function DeckSelectionPage() {
   };
   // Mobile favorites tab: unfavorite removes the tile.
   const removeListFavorite = (deck: DeckListItem) => {
-    queryClient.setQueryData<DeckListItem[]>(FAVORITES_KEY, (prev) =>
+    queryClient.setQueryData<DeckListItem[]>(favoritesQueryKey(viewerId), (prev) =>
       (prev ?? []).filter((d) => d.metadata.id !== deck.metadata.id),
     );
     favoriteToggle.mutate({ deckId: deck.metadata.id, next: false });
@@ -263,7 +263,7 @@ export default function DeckSelectionPage() {
     setCreateError(null);
     try {
       const created = await createDeck({ name: newName.trim(), description: newDesc.trim() || undefined }, isGuest);
-      await queryClient.invalidateQueries({ queryKey: ['decks'] });
+      await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
       const targetUser = created.userId || user?.id || ownerId;
       navigate(`/users/${targetUser}/decks/${created.id}`);
     } catch (err) {
@@ -278,7 +278,7 @@ export default function DeckSelectionPage() {
     try {
       await deleteDeck(deck.metadata.id, isGuest);
       setMenuDeck(null);
-      await queryClient.invalidateQueries({ queryKey: ['decks'] });
+      await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
     } catch (err) {
       window.alert((err as Error)?.message || 'Could not delete deck');
     }
@@ -286,7 +286,7 @@ export default function DeckSelectionPage() {
 
   const handleImportSuccess = async (deckId: string, userId: string) => {
     setImportOpen(false);
-    await queryClient.invalidateQueries({ queryKey: ['decks'] });
+    await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
     navigate(`/users/${userId}/decks/${deckId}`);
   };
 

@@ -11,6 +11,7 @@ import { fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchCommunityFeed, fetchFavoriteDecks } from '../../lib/api/favorites';
 
 import { useFavoriteToggle } from '../../lib/decks/useFavoriteToggle';
+import { favoritesQueryKey } from '../../lib/decks/favoritesQueryKey';
 
 import { fetchCatalog } from '../../lib/api/catalog';
 
@@ -33,8 +34,6 @@ import './CommunityPage.css';
 
 
 const COMMUNITY_FEED_KEY = (search: string) => ['decks', 'community-feed', search] as const;
-
-const FAVORITES_KEY = ['decks', 'favorites'] as const;
 
 
 
@@ -192,6 +191,8 @@ export default function CommunityPage() {
 
     queryFn: () => fetchTournamentDecks(),
 
+    enabled: activeTab === 'tournament',
+
     staleTime: 10 * 60 * 1000,
 
   });
@@ -210,6 +211,8 @@ export default function CommunityPage() {
 
     queryFn: () => fetchCommunityFeed(search),
 
+    enabled: activeTab === 'community',
+
     staleTime: 60 * 1000,
 
   });
@@ -218,11 +221,11 @@ export default function CommunityPage() {
 
   const favoritesQuery = useQuery({
 
-    queryKey: FAVORITES_KEY,
+    queryKey: favoritesQueryKey(viewerId),
 
     queryFn: () => fetchFavoriteDecks(),
 
-    enabled: canFavorite,
+    enabled: canFavorite && activeTab === 'favorites',
 
     staleTime: 60 * 1000,
 
@@ -312,7 +315,7 @@ export default function CommunityPage() {
 
   const removeFromFavorites = (deck: DeckListItem) => {
 
-    queryClient.setQueryData<DeckListItem[]>(FAVORITES_KEY, (prev) =>
+    queryClient.setQueryData<DeckListItem[]>(favoritesQueryKey(viewerId), (prev) =>
 
       (prev ?? []).filter((d) => d.metadata.id !== deck.metadata.id),
 
@@ -334,7 +337,7 @@ export default function CommunityPage() {
 
     const next = !favoriteIds.has(deck.metadata.id);
 
-    queryClient.setQueryData<DeckListItem[]>(FAVORITES_KEY, (prev) => {
+    queryClient.setQueryData<DeckListItem[]>(favoritesQueryKey(viewerId), (prev) => {
 
       const list = prev ?? [];
 

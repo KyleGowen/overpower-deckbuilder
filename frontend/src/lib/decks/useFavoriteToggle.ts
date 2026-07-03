@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { useAuth } from '../../app/AuthProvider';
 import { addFavorite, removeFavorite } from '../api/favorites';
+import { favoritesQueryKey } from './favoritesQueryKey';
 
 export interface FavoriteToggleVars {
   deckId: string;
@@ -15,11 +17,12 @@ export interface FavoriteToggleVars {
  */
 export function useFavoriteToggle(invalidateKeys: QueryKey[] = []) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   return useMutation({
     mutationFn: ({ deckId, next }: FavoriteToggleVars) =>
       next ? addFavorite(deckId) : removeFavorite(deckId),
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ['decks', 'favorites'] });
+      void queryClient.invalidateQueries({ queryKey: favoritesQueryKey(user?.id) });
       for (const key of invalidateKeys) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
