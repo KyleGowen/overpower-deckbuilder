@@ -124,6 +124,51 @@ describe('cardPrintings', () => {
       expect(printings.map((p) => p.id).sort()).toEqual(['erb-7c', 'tfcp-7c-2', 'tfcp-7c-foil']);
     });
 
+    it('groups TFCP NAOL 8 Energy promo with ERB 8 Energy printing slot', () => {
+      const erbBase = card('erb-8e', {
+        name: '8 - Energy',
+        set: 'ERB',
+        power_type: 'Energy',
+        value: 8,
+        image_path: 'power-cards/8_energy.webp',
+      });
+      const tfcpNaol = card('tfcp-8e-naol', {
+        name: '8 - Energy',
+        set: 'TFCP',
+        power_type: 'Energy',
+        value: 8,
+        image_path: 'tfacp/power/8_energy_naol.png',
+      });
+      const catalog = [erbBase, tfcpNaol];
+
+      const printings = collectPrintingsForCard(erbBase, 'power-cards', catalog, foilLookup);
+
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-8e', 'tfcp-8e-naol']);
+    });
+
+    it('groups TFCP 5 Multi-Power NAOL promo with ERB 5 Multi-Power slot', () => {
+      const erbBase = card('erb-5mp', {
+        name: '5 - Multi Power',
+        set: 'ERB',
+        power_type: 'Multi Power',
+        value: 5,
+        image_path: 'power-cards/5_multipower.webp',
+      });
+      const tfcpNaol = card('tfcp-5mp-naol', {
+        name: '5 - Multi Power',
+        set: 'TFCP',
+        power_type: 'Multi-Power',
+        value: 5,
+        one_per_deck: true,
+        image_path: 'tfacp/power/5_multipower_naol.png',
+      });
+      const catalog = [erbBase, tfcpNaol];
+
+      const printings = collectPrintingsForCard(erbBase, 'power-cards', catalog, foilLookup);
+
+      expect(printings.map((p) => p.id).sort()).toEqual(['erb-5mp', 'tfcp-5mp-naol']);
+    });
+
     it('groups ally universe cards by stat slot across sets', () => {
       const erb = card('erb-ally', {
         name: 'Allan Quatermain',

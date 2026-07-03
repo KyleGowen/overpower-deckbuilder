@@ -76,7 +76,8 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
       return `${character}|${name}`;
     }
     case 'power-cards': {
-      const powerType = String(card.power_type ?? '').trim();
+      let powerType = String(card.power_type ?? '').trim();
+      if (powerType === 'Multi-Power') powerType = 'Multi Power';
       const value = String(card.value ?? '').trim();
       if (!powerType) return null;
       return `${powerType}|${value}`;
