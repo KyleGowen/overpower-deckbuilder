@@ -11,6 +11,7 @@ Before making changes:
 Key docs:
 
 - [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) — **the v2 React SPA** (`frontend/`): architecture, routing, dev workflow, and how the production build is served. **Start here for frontend work.**
+- [docs/current/SHADCN_UI.md](docs/current/SHADCN_UI.md) — Tailwind + shadcn/ui setup, theme bridge, dashboard tiles.
 - [STYLE_GUIDE_V2.md](STYLE_GUIDE_V2.md) — visual source of truth for the v2 React SPA. Update it for any v2 UI change.
 - [frontend/.cursorrules](frontend/.cursorrules) — conventions for the v2 SPA (component structure, lib map, API client, layout/query patterns).
 - [docs/archive/FRONTEND_V1_TO_V2_MIGRATION.md](docs/archive/FRONTEND_V1_TO_V2_MIGRATION.md) — historical v1 → v2 migration story and archived doc index.

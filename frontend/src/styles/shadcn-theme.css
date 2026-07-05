@@ -1,0 +1,26 @@
+/*
+ * shadcn/ui theme bridge — maps to Excelsior tokens in tokens.css.
+ * HSL components only (no hsl() wrapper); consumed by tailwind.css @theme.
+ */
+:root {
+  --background: 228 52% 6%;
+  --foreground: 220 33% 94%;
+  --card: 218 45% 11%;
+  --card-foreground: 220 33% 94%;
+  --popover: 218 45% 11%;
+  --popover-foreground: 220 33% 94%;
+  --primary: 189 100% 45%;
+  --primary-foreground: 200 90% 4%;
+  --secondary: 220 40% 16%;
+  --secondary-foreground: 220 33% 94%;
+  --muted: 220 40% 16%;
+  --muted-foreground: 220 28% 65%;
+  --accent: 189 100% 45%;
+  --accent-foreground: 200 90% 4%;
+  --destructive: 0 84% 62%;
+  --destructive-foreground: 220 33% 94%;
+  --border: 220 40% 20%;
+  --input: 220 45% 8%;
+  --ring: 189 80% 45%;
+  --radius: 0.875rem;
+}

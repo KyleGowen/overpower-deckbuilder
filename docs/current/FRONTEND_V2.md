@@ -9,6 +9,8 @@ and serving.
 - **React 19** + **React Router** (`createBrowserRouter`, lazy routes).
 - **Vite 6** dev server / bundler (TypeScript, hashed asset output to `dist/`).
 - **TanStack Query** for all server state (caching, invalidation).
+- **Tailwind CSS v4** + **shadcn/ui** (dashboard tiles, `src/components/ui/`). See [`SHADCN_UI.md`](SHADCN_UI.md).
+- **Recharts** for tournament stat charts inside dashboard tiles.
 - Session-cookie auth (no tokens in JS); **Firebase** only for Google sign-in popups.
 
 ## Directory map

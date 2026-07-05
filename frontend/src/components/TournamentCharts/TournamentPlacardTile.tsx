@@ -1,5 +1,6 @@
 import type { TournamentEventMeta } from '../../lib/tournaments/types';
 import { formatEventLocation } from '../../lib/tournaments/formatEventLocation';
+import type { DashboardTileVariant } from '../dashboard';
 import { PreviewTextTile } from './PreviewTextTile';
 import './TournamentCharts.css';
 
@@ -10,12 +11,14 @@ function formatEventDate(iso: string): string {
 
 interface TournamentPlacardTileProps {
   meta: TournamentEventMeta;
+  variant?: DashboardTileVariant;
 }
 
-export function TournamentPlacardTile({ meta }: TournamentPlacardTileProps) {
+export function TournamentPlacardTile({ meta, variant = 'rail' }: TournamentPlacardTileProps) {
   return (
     <PreviewTextTile
       className="tournament-placard-tile"
+      variant={variant}
       title={meta.title}
       subtitle={meta.seasonLabel}
       sections={[

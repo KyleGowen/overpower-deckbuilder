@@ -1,0 +1,20 @@
+# dashboard/ — Datadog-style data dashboards
+
+12-column grid + horizontal rail layouts for tournament stat pages. Uses **shadcn Card**
+via `DashboardTile` with CVA size variants.
+
+## Key files
+
+- `DashboardTile.tsx` — tile shell (art + caption footer)
+- `DashboardGrid.tsx` — `lg:grid-cols-12` placement
+- `DashboardRail.tsx` — Home horizontal scroll (fixed deck-tile columns)
+- `dashboardTileVariants.ts` — size tokens + chart sizing helpers
+
+## Conventions
+
+- **Tailwind** utilities allowed here (not BEM).
+- Theme via `shadcn-theme.css` / Excelsior tokens — no hardcoded zinc palette.
+- Layout configs live in `src/lib/tournaments/*DashboardLayout.ts`.
+- Tile content builders: `buildColumbusStatsTiles.tsx` pattern.
+
+See [`DashboardGrid.md`](DashboardGrid.md) and [`docs/current/SHADCN_UI.md`](../../../docs/current/SHADCN_UI.md).

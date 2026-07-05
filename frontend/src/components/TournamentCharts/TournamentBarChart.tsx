@@ -9,6 +9,8 @@ import {
 } from 'recharts';
 import type { CatalogType } from '../../lib/api/types';
 import type { CountEntry } from '../../lib/tournaments/types';
+import type { DashboardTileVariant } from '../dashboard';
+import { barMaxRowsForVariant, isDashboardRailVariant } from '../dashboard/dashboardTileVariants';
 import { barColorAt, CHART_THEME } from './chartTheme';
 import './TournamentCharts.css';
 
@@ -30,6 +32,7 @@ interface TournamentBarChartProps {
   isClickable?: (entry: CountEntry) => boolean;
   /** Optional extra tooltip lines (e.g. homebase top8). */
   tooltipExtra?: (entry: CountEntry) => string[] | undefined;
+  tileVariant?: DashboardTileVariant;
 }
 
 function truncateLabel(name: string, max = 16): string {
@@ -40,15 +43,18 @@ function truncateLabel(name: string, max = 16): string {
 export function TournamentBarChart({
   data,
   limit,
-  compact = false,
+  compact: _compactOverride = false,
   fillContainer = false,
-  maxRows = 5,
+  maxRows,
   onSegmentClick,
   isClickable,
   tooltipExtra,
+  tileVariant = 'rail',
 }: TournamentBarChartProps) {
+  const compact = _compactOverride || isDashboardRailVariant(tileVariant);
+  const effectiveMaxRows = maxRows ?? barMaxRowsForVariant(tileVariant, !isDashboardRailVariant(tileVariant));
   const capped = limit ? data.slice(0, limit) : data;
-  const slice = fillContainer ? capped.slice(0, maxRows) : capped;
+  const slice = fillContainer ? capped.slice(0, effectiveMaxRows) : capped;
   const chartData: BarChartDatum[] = slice.map((entry) => ({
     name: entry.name,
     count: entry.count,
@@ -116,7 +122,6 @@ export function TournamentBarChart({
             radius={[0, 4, 4, 0]}
             minPointSize={3}
             maxBarSize={fillContainer ? 18 : undefined}
-            barCategoryGap={fillContainer ? '12%' : undefined}
             onClick={(barData) => {
               const payload = barData as { payload?: BarChartDatum };
               const row = payload.payload;

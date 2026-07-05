@@ -406,19 +406,24 @@ News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Share
 
 ## Home — Columbus Regional stats rail (Preview Data Tiles)
 
-Tournament metagame **preview** tiles on `/home` (horizontal rail) and `/home/columbus-regional` (grid).
-Full-size charts are out of scope; these tiles are deck-tile-sized summaries. See
-[`TournamentCharts.md`](frontend/src/components/TournamentCharts/TournamentCharts.md) for reuse on future tournaments.
+Tournament metagame tiles on `/home` (horizontal **rail**) and `/home/columbus-regional` (**12-column dashboard**).
+Shell uses **shadcn/ui `Card`** via [`DashboardTile`](frontend/src/components/dashboard/DashboardTile.tsx) with **`.deck-tile` outer parity** (`--color-bg-panel`, `1px solid var(--color-border)`, `--radius-lg`, no default shadow). See
+[`SHADCN_UI.md`](docs/current/SHADCN_UI.md), [`DashboardGrid.md`](frontend/src/components/dashboard/DashboardGrid.md),
+and [`TournamentCharts.md`](frontend/src/components/TournamentCharts/TournamentCharts.md).
 
 Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentStatsRail.tsx),
-[`TournamentCharts/`](frontend/src/components/TournamentCharts/).
+[`TournamentCharts/`](frontend/src/components/TournamentCharts/), [`dashboard/`](frontend/src/components/dashboard/).
 
-### Sizing contract (non-negotiable)
+### Sizing contract
 
-| Element | Tokens / values |
-|---|---|
-| Stats rail (`.home__rail--stats`) | Same column widths as deck rail (`clamp(230px, 25%, 280px)` desktop; mobile `clamp(210px, 78vw, 280px)`) |
-| Shell (`.stats-chart-tile`) | `container-type: inline-size`; art `aspect-ratio: 380/280`; body `min-height: 4.875rem` (deck-tile parity) |
+| Surface | Layout | Tile shell |
+|---|---|---|
+| Home rail | `DashboardRail` — `clamp(230px, 25%, 280px)` columns (deck-tile parity) | `DashboardTile` variant **`rail`**: art `aspect-ratio: 380/280`; body `min-height: 4.875rem` |
+| View All dashboard | `DashboardGrid` — **12 columns** desktop, `col-span-12` mobile; per-tile `colSpan` / `rowSpan` in [`columbusDashboardLayout.ts`](frontend/src/lib/tournaments/columbusDashboardLayout.ts) | Variants `sm`–`wide`: fluid art `min-height` (280–480px); charts scale `maxRows` / pie radius |
+
+**Tile chrome (match `DeckTile`):** `.dashboard-tile` — `background: var(--color-bg-panel)`; `border: 1px solid var(--color-border)`; `border-radius: var(--radius-lg)`; `box-shadow: none`. Art zone `.stats-chart-tile__art` uses `--color-bg-elevated` with **no** art/body divider. Body inherits panel background (same as `.deck-tile__body`).
+
+**Home rail height:** `.home__rail--stats` uses `align-items: stretch`; `.home__rail-item--stats` is a flex column; child tiles `height: 100%` with chart body `flex: 1` and `stats-chart-tile__body--center` (`justify-content: flex-end`) so captions stay bottom-aligned when a row stretches to the tallest tile.
 
 ### Preview tile types
 
@@ -457,7 +462,6 @@ Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentSta
 | Bar colors | `#00e5ff`, `#3aa0ff`, `#4bd07b`, `#f6a623`, `#b06bff`, `#ef4d5a`, `#1c7d92` |
 | Axis tick labels | `#a8b8d8`; truncated single-line (no wrap) |
 | Chart tooltip | `--color-bg-elevated`, `--color-border-strong`, `--shadow-panel` |
-| View All grid | Desktop `repeat(2, 1fr)`; mobile single column |
-| Section icon | `IconTrophy` in `.home__section-icon` |
+| View All dashboard | `DashboardGrid` 12-col; layout in `columbusDashboardLayout.ts` | Section icon `IconTrophy` in `.home__section-icon` |
 
 **Interaction:** Bar/pie segment or card click opens `CardDetailPanel`. Home rail bar charts show top 5 rows with `+N more` footnote when truncated.

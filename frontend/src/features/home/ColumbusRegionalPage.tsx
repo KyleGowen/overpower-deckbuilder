@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
 import { IconTrophy } from '../../components/icons';
 import { TournamentStatsRail } from './TournamentStatsRail';
 import './TournamentStatsRail.css';
@@ -18,6 +19,7 @@ export default function ColumbusRegionalPage() {
             Columbus Regional — Full Meta
           </h1>
         </header>
+        <Separator className="bg-border" />
         <TournamentStatsRail expanded />
       </div>
     </div>

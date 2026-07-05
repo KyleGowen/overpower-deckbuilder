@@ -11,6 +11,13 @@
   container-type: inline-size;
 }
 
+/* shadcn Card (.dashboard-tile) owns border, background, and shadow — do not strip them */
+
+/* Dashboard art: rail keeps fixed aspect; larger variants grow via min-height */
+.dashboard-tile__art--fluid {
+  aspect-ratio: auto;
+}
+
 /* ---- Art zone (same proportions as .deck-tile__art) ---- */
 .stats-chart-tile__art {
   position: relative;
@@ -319,6 +326,7 @@
 }
 
 .preview-text-tile__content {
+  flex: 1 1 auto;
   min-height: calc(100cqw * 280 / 380 + 4.875rem);
   padding: var(--space-3) var(--space-4);
   box-sizing: border-box;
@@ -326,7 +334,23 @@
   flex-direction: column;
   justify-content: flex-start;
   gap: 2px;
-  background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-surface));
+  background: var(--color-bg-panel);
+}
+
+.preview-text-tile__divider {
+  flex-shrink: 0;
+  height: 1px;
+  margin: var(--space-3) 0 var(--space-2);
+  background: var(--color-border);
+  opacity: 0.55;
+}
+
+.preview-text-tile__section-divider {
+  flex-shrink: 0;
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: var(--color-border);
+  opacity: 0.35;
 }
 
 .preview-text-tile__h1 {

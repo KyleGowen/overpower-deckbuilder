@@ -1,19 +1,21 @@
 # TournamentCharts — Preview Data Tiles
 
-Reusable **preview** tiles for tournament metagame stats on Home rails and similar surfaces.
-Each tile matches **deck-tile dimensions** (380×280 art zone + compact body). Full-size
-charts on View All pages are separate; these components are the rail-sized summaries.
+Reusable tiles for tournament metagame stats. **Home rail** uses `DashboardTile` variant `rail`
+(deck-tile dimensions: 380×280 art + compact body). **View All** (`/home/columbus-regional`) uses
+larger dashboard variants on a 12-column grid — see [`DashboardGrid.md`](../dashboard/DashboardGrid.md).
+
+Shell: shadcn **Card** via [`DashboardTile`](../dashboard/DashboardTile.tsx). Setup: [`SHADCN_UI.md`](../../../../docs/current/SHADCN_UI.md).
 
 Visual spec: [`STYLE_GUIDE_V2.md`](../../../../STYLE_GUIDE_V2.md) § Home — Columbus Regional stats rail.
 
-## Shell: `StatsChartTile`
+## Shell: `StatsChartTile` → `DashboardTile`
 
-All chart-based previews use this wrapper:
+Chart-based tiles compose `DashboardTile` (`layout="chart"`):
 
-- `__art` — chart or card visual (`aspect-ratio: 380/280`, full tile width)
-- `__body` — caption (title, optional detail/subtitle/footnote)
+- `dashboard-tile__art` — chart or card visual; `rail` = `aspect-ratio: 380/280`; dashboard variants use fluid `min-height`
+- `dashboard-tile__body` — shadcn `CardFooter` caption (title, detail, subtitle, footnote badge)
 
-Props: `title`, `subtitle?`, `footnote?`, `detail?`, `captionAlign?` (`center` | `start`).
+Props: `title`, `subtitle?`, `footnote?`, `detail?`, `captionAlign?`, `variant?` (`rail` | `sm` | `md` | `lg` | `wide` | `tall`).
 
 ## Text tile: `PreviewTextTile`
 

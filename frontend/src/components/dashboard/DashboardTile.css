@@ -1,0 +1,8 @@
+/* Outer shell parity with .deck-tile — Excelsior tokens, not shadcn HSL border/shadow defaults */
+.dashboard-tile {
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  color: var(--color-text);
+}

@@ -2,6 +2,8 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
 import type { CatalogType } from '../../lib/api/types';
 import type { CountEntry } from '../../lib/tournaments/types';
+import type { DashboardTileVariant } from '../dashboard';
+import { isDashboardRailVariant, pieSizingForVariant } from '../dashboard/dashboardTileVariants';
 import { barColorAt, CHART_THEME } from './chartTheme';
 import './TournamentCharts.css';
 
@@ -21,6 +23,7 @@ interface TournamentPieChartProps {
   showPortionLabels?: boolean;
   onSegmentClick?: (entry: CountEntry) => void;
   isClickable?: (entry: CountEntry) => boolean;
+  tileVariant?: DashboardTileVariant;
 }
 
 function truncateLabel(name: string, max: number): string {
@@ -117,13 +120,15 @@ function renderPortionLabel(
 
 export function TournamentPieChart({
   data,
-  compact = false,
+  compact: _compactOverride = false,
   fillContainer = false,
   showLegend = true,
   showPortionLabels,
   onSegmentClick,
   isClickable,
+  tileVariant = 'rail',
 }: TournamentPieChartProps) {
+  const compact = _compactOverride || isDashboardRailVariant(tileVariant);
   const portionLabels = showPortionLabels ?? !showLegend;
 
   const chartData: PieDatum[] = data.map((entry) => ({
@@ -134,13 +139,17 @@ export function TournamentPieChart({
   }));
 
   const outerRadius = portionLabels && fillContainer
-    ? '42%'
+    ? pieSizingForVariant(tileVariant, true, true).outer
     : fillContainer
-      ? '72%'
+      ? pieSizingForVariant(tileVariant, false, true).outer
       : compact
         ? 58
         : 88;
-  const innerRadius = fillContainer ? '28%' : compact ? 28 : 44;
+  const innerRadius = fillContainer
+    ? pieSizingForVariant(tileVariant, portionLabels, true).inner
+    : compact
+      ? 28
+      : 44;
   const chartHeight = fillContainer ? '100%' : compact ? 150 : 220;
   const labelMaxChars = fillContainer ? 9 : compact ? 11 : 14;
   const minLabelPercent = chartData.length > 4 ? 0.06 : 0.04;

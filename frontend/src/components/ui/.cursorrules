@@ -1,0 +1,22 @@
+# shadcn/ui components (`frontend/src/components/ui/`)
+
+Generated and hand-maintained [shadcn/ui](https://ui.shadcn.com/) primitives for the v2 SPA.
+
+## Conventions
+
+- **Tailwind utilities** are allowed here (and in `components/dashboard/`).
+- Theme colors come from **Excelsior tokens** via `shadcn-theme.css` — do not hardcode zinc/slate hex values.
+- Radix portal z-index is capped below global nav (`--z-nav: 9999`) in `tailwind.css`.
+- Prefer **Lucide** icons in new shadcn components; existing screens may keep `icons.tsx`.
+
+## Adding components
+
+From `frontend/`:
+
+```bash
+npx shadcn@latest add button
+```
+
+If the CLI fails validation, copy the component from [ui.shadcn.com](https://ui.shadcn.com/docs/components) and align imports with `@/lib/utils`.
+
+Full setup: [`docs/current/SHADCN_UI.md`](../../../../docs/current/SHADCN_UI.md).

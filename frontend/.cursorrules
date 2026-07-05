@@ -18,10 +18,14 @@ Greenfield React 19 + Vite 6 + TypeScript single-page app — the production fro
   `catalog/`, `collection/`, `layout/`, `decks/` (draw hand, KO, catalog index).
 - `src/styles/` - `tokens.css` (design tokens) + `global.css` (reset + base).
 - Home "Recent Updates" cards load from `GET /api/v1/recent-updates` (`lib/api/recent-updates.ts`).
-- Tournament stats preview tiles: `src/components/TournamentCharts/` — see
-  `TournamentCharts/TournamentCharts.md` (deck-tile-sized rail summaries).
+- Tournament stats preview tiles: `src/components/TournamentCharts/` + `src/components/dashboard/`
+  — see `TournamentCharts/TournamentCharts.md` and `dashboard/DashboardGrid.md`.
+- **shadcn/ui** primitives: `src/components/ui/` (Tailwind allowed). Theme bridge:
+  `src/styles/shadcn-theme.css`. Full guide: `docs/current/SHADCN_UI.md`.
 
 ## Conventions
+- **BEM + `Component.css`** for most of the app. **Tailwind utilities** allowed in
+  `src/components/ui/` and `src/components/dashboard/` only (shadcn tiles).
 - Server state via TanStack Query; cross-cutting state via `useAuth()` /
   `useLayoutMode()` hooks.
 - All data calls go to `/api/v1/*`; session auth uses legacy `/api/auth/*`.
