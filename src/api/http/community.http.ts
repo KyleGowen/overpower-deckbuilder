@@ -1,5 +1,6 @@
 import type { Request, RequestHandler, Response, Router } from 'express';
 import type { CommunityService } from '../services/communityService';
+import { setPrivateUserCacheHeaders } from './privateUserCache';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 
 export interface CommunityV1HttpDeps {
@@ -36,6 +37,7 @@ export function registerCommunityV1HttpRoutes(router: Router, deps: CommunityV1H
     if (!requireRealUser(req, res)) return;
     try {
       const data = await deps.communityService.getFavorites(req.user!.id);
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, data);
     } catch (error) {
       console.error('v1 GET /decks/favorites error:', error);
@@ -80,6 +82,7 @@ export function registerCommunityV1HttpRoutes(router: Router, deps: CommunityV1H
       const searchRaw = req.query.search;
       const search = typeof searchRaw === 'string' ? searchRaw : undefined;
       const data = await deps.communityService.getCommunityDecks(viewerId, search);
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, data);
     } catch (error) {
       console.error('v1 GET /community/decks error:', error);
@@ -92,6 +95,7 @@ export function registerCommunityV1HttpRoutes(router: Router, deps: CommunityV1H
     try {
       const viewerId = req.user?.id ?? null;
       const data = await deps.communityService.getPublicDecksForUser(req.params.userId, viewerId);
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, data);
     } catch (error) {
       console.error('v1 GET /users/:userId/public-decks error:', error);

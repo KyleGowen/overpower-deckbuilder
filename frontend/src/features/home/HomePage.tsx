@@ -16,6 +16,7 @@ import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { RecentUpdatesList } from './RecentUpdatesList';
 import { useRecentUpdates } from './useRecentUpdates';
+import { TournamentStatsRail } from './TournamentStatsRail';
 import {
   IconUsers,
   IconTrophy,
@@ -159,6 +160,8 @@ export default function HomePage() {
           missionSetByCardId={missionSetByCardId}
           onOpen={openDeck}
         />
+
+        <TournamentStatsRail />
       </div>
     </div>
   );

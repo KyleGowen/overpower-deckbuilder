@@ -337,6 +337,15 @@ export const IconBook = (p: IconProps) => (
   </Svg>
 );
 
+export const IconChartBar = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 20V10" />
+    <path d="M10 20V4" />
+    <path d="M16 20v-6" />
+    <path d="M22 20v-9" />
+  </Svg>
+);
+
 export function IconGoogle(p: IconProps) {
   return (
     <svg width="1em" height="1em" viewBox="0 0 48 48" aria-hidden="true" focusable="false" {...p}>

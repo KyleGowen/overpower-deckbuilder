@@ -954,6 +954,8 @@ Read-only community feed, deck favorites, and public user profiles. These power 
 - `ownerDisplayName` (string or `null`) — the resolved public name of the deck owner (`resolveUserDisplayName`).
 - `isFavorited` (boolean) — whether the **current viewer** has favorited this deck (always `false` for guests).
 
+**Caching:** `GET /api/v1/community/decks`, `GET /api/v1/users/:userId/public-decks`, and `GET /api/v1/decks/favorites` emit `Cache-Control: private, max-age=0, must-revalidate` and `Vary: Cookie` so CloudFront does not serve stale per-viewer favorite state after toggles. See [`docs/current/CLOUDFRONT_CDN.md`](docs/current/CLOUDFRONT_CDN.md).
+
 **Visibility rule:** only decks with `is_private = false` are ever returned by the community feed, search, public profiles, and favorites. Curated internal accounts (`community_decks` `…0002`, `tournament_decks` `…0003`) are **excluded** from the community feed/search (they have their own `GET /api/v1/decks/community` and `GET /api/v1/decks/tournament` rails). Those curated rails return only **`is_private = false` AND `is_valid = true`** decks (Limited allowed when legal).
 
 > **Naming:** `GET /api/v1/community/decks` (this section, user-submitted public feed) is distinct from `GET /api/v1/decks/community` (the curated `community_decks` account rail used by Home).

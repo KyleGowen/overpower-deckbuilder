@@ -461,6 +461,20 @@ ETag is computed with Node `crypto` (no extra dependency). The full response is 
 
 This is **per-user** (the `private` directive) and complements the server-side in-memory cache in `PostgreSQLDeckRepository` (2-minute TTL); both layers work independently.
 
+### Community, favorites, and public profiles — no edge cache
+
+Viewer-specific reads include `metadata.isFavorited` (or the favorites list itself), so they must not be cached at CloudFront without revalidation. Without origin `Cache-Control`, the default CloudFront behavior can cache GETs for up to one day per session cookie — favorite toggles would appear to succeed (`POST`/`DELETE` bypass the cache) but refetches would return stale lists/hearts.
+
+**File:** `src/api/http/community.http.ts` (via `setPrivateUserCacheHeaders` in `privateUserCache.ts`)
+
+| Route | Headers |
+|-------|---------|
+| `GET /api/v1/decks/favorites` | `Cache-Control: private, max-age=0, must-revalidate`, `Vary: Cookie` |
+| `GET /api/v1/community/decks` | same |
+| `GET /api/v1/users/:userId/public-decks` | same |
+
+Guests may call the community and public-profile routes; `Vary: Cookie` still applies because authenticated viewers receive different `isFavorited` values on the same URLs.
+
 ### Catalog caching (`/api/v1/catalog/*`)
 
 See [`API_V1_CATALOG_CACHING.md`](API_V1_CATALOG_CACHING.md) for `Cache-Control` + strong `ETag` + `catalogDataVersion` on catalog routes and the CloudFront ordered cache behaviors in `infra/cloudfront.tf`.

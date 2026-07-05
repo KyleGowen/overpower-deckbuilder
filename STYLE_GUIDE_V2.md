@@ -23,6 +23,7 @@ guide describes the dark, neon, card-game-companion theme derived from the mocks
 11. [Per-Screen Notes](#per-screen-notes)
 12. [Database Filter Rail](#database-filter-rail)
 13. [Home Recent Updates](#home-recent-updates)
+14. [Home — Columbus Regional stats rail](#home--columbus-regional-stats-rail)
 
 ---
 
@@ -402,3 +403,61 @@ News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Share
 
 **Home rail:** shows 3 newest tiles; View All appears when total count exceeds 3.
 **Updates page:** 10 tiles per page via shared `Pagination`; no global nav entry.
+
+## Home — Columbus Regional stats rail (Preview Data Tiles)
+
+Tournament metagame **preview** tiles on `/home` (horizontal rail) and `/home/columbus-regional` (grid).
+Full-size charts are out of scope; these tiles are deck-tile-sized summaries. See
+[`TournamentCharts.md`](frontend/src/components/TournamentCharts/TournamentCharts.md) for reuse on future tournaments.
+
+Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentStatsRail.tsx),
+[`TournamentCharts/`](frontend/src/components/TournamentCharts/).
+
+### Sizing contract (non-negotiable)
+
+| Element | Tokens / values |
+|---|---|
+| Stats rail (`.home__rail--stats`) | Same column widths as deck rail (`clamp(230px, 25%, 280px)` desktop; mobile `clamp(210px, 78vw, 280px)`) |
+| Shell (`.stats-chart-tile`) | `container-type: inline-size`; art `aspect-ratio: 380/280`; body `min-height: 4.875rem` (deck-tile parity) |
+
+### Preview tile types
+
+| Type | Component | Art zone | Body caption |
+|---|---|---|---|
+| Event metadata | `TournamentPlacardTile` / `PreviewTextTile` | Title hierarchy: H1 name, H2 season, then Location / Date / Players / Winner Name; fluid `clamp()` type; unified content (no art/body split) |
+| Bar chart | `StatsChartTile` + `TournamentBarChart` | Horizontal bars, `fillContainer`, max 5 rows on rail | Title + subtitle + footnote, **bottom-center** |
+| Pie chart | `StatsChartTile` + `TournamentPieChart` | Donut fills art (42% outer when labeled); preview portion labels use **straight radial** leader lines to tile edge (~2.12× slice radius), `clamp()`/radius-scaled font; **2-slice pies** stagger labels top-right / bottom-left (~22° off vertical) | Title + subtitle, **bottom-center** |
+| Card spotlight | `TournamentHighlightTile` | Card full-bleed (no text overlay) | Label (caps) + detail + name, **bottom-center** |
+| Character list | `TournamentCharacterListTile` | 0: empty; 1: spotlight; 2–4: pie; 5+: bar | Title **bottom-center** |
+
+### Shared caption typography
+
+| Class | Use |
+|---|---|
+| `.preview-tile__title` | `clamp(1rem, 9cqw, 1.35rem)`, bold |
+| `.preview-tile__subtitle` | `clamp(0.75rem, 6.5cqw, 1rem)`, `--color-accent-bright` |
+| `.preview-tile__detail` | Stat values, `clamp(0.875rem, 7cqw, 1.125rem)` |
+| `.preview-tile__footnote` | `+N more…`, `--font-size-xs` dim |
+| `.preview-tile__caption` | Body wrapper; `--center` or `--start` via `stats-chart-tile__body--*` |
+
+### Text placard typography (`PreviewTextTile`)
+
+| Class | Use |
+|---|---|
+| `.preview-text-tile__h1` | Tournament name — `clamp(1.125rem, 10cqw, 1.5rem)` |
+| `.preview-text-tile__h2` | Season subtitle — `clamp(0.8125rem, 7cqw, 1.0625rem)` accent |
+| `.preview-text-tile__section-label` | Field label (Location, Date, …) — uppercase dim |
+| `.preview-text-tile__section-value` | Field value — `clamp(0.8125rem, 7.5cqw, 1rem)`; `--accent` for winner; `--wrap` for multi-line location |
+| Section spacing | `0.5em` margin between each labeled section block |
+
+### Chart styling
+
+| Element | Tokens / values |
+|---|---|
+| Bar colors | `#00e5ff`, `#3aa0ff`, `#4bd07b`, `#f6a623`, `#b06bff`, `#ef4d5a`, `#1c7d92` |
+| Axis tick labels | `#a8b8d8`; truncated single-line (no wrap) |
+| Chart tooltip | `--color-bg-elevated`, `--color-border-strong`, `--shadow-panel` |
+| View All grid | Desktop `repeat(2, 1fr)`; mobile single column |
+| Section icon | `IconTrophy` in `.home__section-icon` |
+
+**Interaction:** Bar/pie segment or card click opens `CardDetailPanel`. Home rail bar charts show top 5 rows with `+N more` footnote when truncated.

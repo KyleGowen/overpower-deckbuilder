@@ -1,0 +1,475 @@
+{
+  "meta": {
+    "id": "s1-columbus",
+    "title": "Columbus Regional",
+    "subtitle": "Season One Regional",
+    "date": "2026-06-27",
+    "playerCount": 53,
+    "winnerName": "Justin Sadaie",
+    "seasonLabel": "1st Season One Regional",
+    "location": {
+      "venueName": "Heroes and Games",
+      "city": "Columbus",
+      "region": "OH"
+    }
+  },
+  "characterAppearances": [
+    {
+      "name": "Wicked Witch",
+      "count": 22,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 17,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Jane Porter",
+      "count": 15,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 15,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Joan of Arc",
+      "count": 14,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sherlock Holmes",
+      "count": 10,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Leonidas",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Billy the Kid",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Carson of Venus",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Mummy",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Count of Monte Cristo",
+      "count": 6,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sun Wukong",
+      "count": 6,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zeus",
+      "count": 6,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zorro",
+      "count": 6,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Robin Hood",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Hercules",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Merlin",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Angry Mob (Middle Ages)",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dejah Thoris",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Korak",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Van Helsing",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Victory Harben",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Angry Mob (Modern Age)",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Anubis",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Captain Nemo",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "King Arthur",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dracula",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Headless Horseman",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Invisible Man",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "John Carter of Mars",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mr. Hyde",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Professor Moriarty",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tarzan",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Three Musketeers",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Time Traveler",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "top8CharacterAppearances": [
+    {
+      "name": "Wicked Witch",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Jane Porter",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Joan of Arc",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sun Wukong",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Angry Mob (Middle Ages)",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Billy the Kid",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dejah Thoris",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "John Carter of Mars",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "King Arthur",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Korak",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Leonidas",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Merlin",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Robin Hood",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Mummy",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zeus",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zorro",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "mostPlaysWithoutTop8": {
+    "name": "Sherlock Holmes",
+    "catalogType": "characters",
+    "totalPlays": 10,
+    "top8Plays": 0,
+    "label": "Most plays w/o Top 8",
+    "detail": "10"
+  },
+  "highestTop8Rate": {
+    "name": "Sun Wukong",
+    "catalogType": "characters",
+    "totalPlays": 6,
+    "top8Plays": 2,
+    "label": "Highest Top 8 %",
+    "detail": "2 of 6 (33.3%)"
+  },
+  "newWinningCharacters": [
+    {
+      "name": "Angry Mob (Middle Ages)",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "newTop8Characters": [
+    {
+      "name": "John Carter of Mars",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "topReserves": [
+    {
+      "name": "Jane Porter",
+      "count": 14,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 10,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Billy the Kid",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Carson of Venus",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Anubis",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mr. Hyde",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Victory Harben",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "topHomebases": [
+    {
+      "name": "Asclepieion",
+      "count": 17,
+      "catalogType": "locations",
+      "top8": 4,
+      "top3": 1,
+      "wins": 0
+    },
+    {
+      "name": "221-B Baker St.",
+      "count": 16,
+      "catalogType": "locations",
+      "top8": 1,
+      "top3": 0,
+      "wins": 0
+    },
+    {
+      "name": "The Round Table",
+      "count": 9,
+      "catalogType": "locations",
+      "top8": 2,
+      "top3": 2,
+      "wins": 1
+    },
+    {
+      "name": "Spartan Training Ground",
+      "count": 8,
+      "catalogType": "locations",
+      "top8": 1,
+      "top3": 0,
+      "wins": 0
+    },
+    {
+      "name": "Dracula's Armory",
+      "count": 2,
+      "catalogType": "locations",
+      "top8": 0,
+      "top3": 0,
+      "wins": 0
+    },
+    {
+      "name": "The Land That Time Forgot",
+      "count": 1,
+      "catalogType": "locations",
+      "top8": 0,
+      "top3": 0,
+      "wins": 0
+    }
+  ],
+  "topCataclysms": [
+    {
+      "name": "Fairy Protection",
+      "count": 37,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Heimdall",
+      "count": 2,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Loki",
+      "count": 2,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Lady of the Lake",
+      "count": 1,
+      "catalogType": "special-cards"
+    }
+  ],
+  "cataclysmReportedCount": 42
+}

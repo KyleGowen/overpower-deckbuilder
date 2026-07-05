@@ -1,0 +1,409 @@
+/* Preview data tiles mirror .deck-tile: art zone (380×280) + compact body */
+
+.stats-chart-tile {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+/* ---- Art zone (same proportions as .deck-tile__art) ---- */
+.stats-chart-tile__art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 380 / 280;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg-elevated);
+  container-type: inline-size;
+}
+
+/* ---- Shared preview typography (scales with tile width via cqw) ---- */
+.preview-tile__title {
+  margin: 0;
+  font-size: clamp(1rem, 9cqw, 1.35rem);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-tight);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.preview-tile__title--caps {
+  font-size: clamp(0.625rem, 5.5cqw, 0.75rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.preview-tile__subtitle {
+  margin: 0;
+  font-size: clamp(0.75rem, 6.5cqw, 1rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-bright);
+  line-height: var(--line-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.preview-tile__detail {
+  margin: 0;
+  font-size: clamp(0.875rem, 7cqw, 1.125rem);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-stat-value);
+  color: var(--color-text);
+  line-height: var(--line-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.preview-tile__footnote {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  line-height: var(--line-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.preview-tile__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ---- Body (same padding rhythm as .deck-tile--compact .deck-tile__body) ---- */
+.stats-chart-tile__body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  flex-shrink: 0;
+  min-height: 4.875rem;
+  box-sizing: border-box;
+}
+
+.stats-chart-tile__body--center {
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+}
+
+.stats-chart-tile__body--start {
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+}
+
+.stats-chart-tile__title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.stats-chart-tile__subtitle {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.tournament-tile-empty {
+  margin: auto;
+  padding: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-dim);
+  text-align: center;
+}
+
+/* ---- Tooltips ---- */
+.tournament-chart-tooltip {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: var(--shadow-panel);
+}
+
+.tournament-chart-tooltip strong {
+  color: var(--color-accent-bright);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tournament-chart-tooltip__extra {
+  color: var(--color-text-muted);
+}
+
+/* ---- Bar chart ---- */
+.tournament-bar-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.tournament-bar-chart--fill {
+  padding: var(--space-1) var(--space-1) var(--space-1) 0;
+  box-sizing: border-box;
+}
+
+.tournament-bar-chart--fill .recharts-yAxis .recharts-cartesian-axis-tick-value {
+  fill: var(--color-text-muted);
+}
+
+.tournament-bar-chart--compact .recharts-cartesian-grid-horizontal line,
+.tournament-bar-chart--compact .recharts-cartesian-grid-vertical line {
+  stroke: var(--color-border);
+}
+
+.tournament-bar-chart__cell--clickable {
+  cursor: pointer;
+}
+
+.tournament-bar-chart__cell--muted {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---- Pie chart ---- */
+.tournament-pie-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.tournament-pie-chart--fill {
+  padding: var(--space-2);
+  box-sizing: border-box;
+}
+
+.tournament-pie-chart--fill .recharts-responsive-container {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+}
+
+.tournament-pie-chart--labeled.tournament-pie-chart--fill {
+  padding: var(--space-1);
+}
+
+.tournament-pie-chart__portion-line {
+  opacity: 0.85;
+}
+
+.tournament-pie-chart__portion-label {
+  font-size: clamp(0.625rem, 4.8cqw, 0.8125rem);
+  font-weight: var(--font-weight-semibold);
+  fill: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.layout-mobile .tournament-pie-chart__portion-label {
+  font-size: clamp(0.5625rem, 4.2cqw, 0.75rem);
+}
+
+.tournament-pie-chart__cell--clickable {
+  cursor: pointer;
+}
+
+.tournament-pie-chart__cell--muted {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.tournament-pie-chart__legend {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+}
+
+.tournament-pie-chart__legend li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.tournament-pie-chart__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.tournament-pie-chart__legend-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-pie-chart__legend-count {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* ---- Card spotlight tile ---- */
+.tournament-highlight-tile {
+  padding: 0;
+}
+
+.tournament-highlight-tile__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 1px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.tournament-highlight-tile__art .card-image,
+.tournament-highlight-tile__art .card-image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tournament-highlight-tile__art:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.tournament-highlight-tile__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-3);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.tournament-highlight-tile__name {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ---- Preview text tile (event placard, etc.) ---- */
+.preview-text-tile {
+  padding: 0;
+  container-type: inline-size;
+}
+
+.preview-text-tile__content {
+  min-height: calc(100cqw * 280 / 380 + 4.875rem);
+  padding: var(--space-3) var(--space-4);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  background: linear-gradient(135deg, var(--color-bg-elevated), var(--color-bg-surface));
+}
+
+.preview-text-tile__h1 {
+  margin: 0;
+  font-size: clamp(1.125rem, 10cqw, 1.5rem);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-tight);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-text-tile__h2 {
+  margin: 0;
+  font-size: clamp(0.8125rem, 7cqw, 1.0625rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-tight);
+  color: var(--color-accent-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-text-tile__spacer {
+  flex-shrink: 0;
+  height: var(--space-2);
+}
+
+.preview-text-tile__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.preview-text-tile__section + .preview-text-tile__section {
+  margin-top: 0.5em;
+}
+
+.preview-text-tile__section-label {
+  margin: 0;
+  font-size: clamp(0.625rem, 5cqw, 0.75rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-tight);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.preview-text-tile__section-value {
+  margin: 0;
+  font-size: clamp(0.8125rem, 7.5cqw, 1rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-tight);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-text-tile__section-value--accent {
+  color: var(--color-accent-bright);
+}
+
+.preview-text-tile__section-value--wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.layout-mobile .preview-text-tile__content {
+  padding: var(--space-2);
+}
+
+.layout-mobile .stats-chart-tile__body {
+  padding: var(--space-2);
+}
