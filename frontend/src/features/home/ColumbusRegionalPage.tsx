@@ -16,7 +16,7 @@ export default function ColumbusRegionalPage() {
             <span className="columbus-regional__title-icon" aria-hidden="true">
               <IconTrophy />
             </span>
-            Columbus Regional — Full Meta
+            Columbus Regional - June 2026
           </h1>
         </header>
         <Separator className="bg-border" />

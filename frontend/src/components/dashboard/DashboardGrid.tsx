@@ -6,6 +6,8 @@ export interface DashboardGridItem {
   id: string;
   colSpan: number;
   rowSpan: number;
+  colStart?: number;
+  rowStart?: number;
   node: ReactNode;
 }
 
@@ -25,7 +27,13 @@ export function DashboardGrid({ items, className }: DashboardGridProps) {
       {items.map((item) => (
         <div
           key={item.id}
-          className={cn('dashboard-grid__item min-h-0', dashboardPlacementClass(item.colSpan, item.rowSpan))}
+          className={cn(
+            'dashboard-grid__item min-h-0',
+            dashboardPlacementClass(item.colSpan, item.rowSpan, {
+              colStart: item.colStart,
+              rowStart: item.rowStart,
+            }),
+          )}
         >
           {item.node}
         </div>

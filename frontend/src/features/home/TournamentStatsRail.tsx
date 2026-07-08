@@ -13,7 +13,9 @@ import { resolveTournamentCard, isTournamentCardClickable } from '../../lib/tour
 import {
   COLUMBUS_DASHBOARD_LAYOUT,
   COLUMBUS_TILE_ORDER,
+  getColumbusDashboardGridPlacements,
   getPlacementForTile,
+  getStackedPlacements,
 } from '../../lib/tournaments/columbusDashboardLayout';
 import { buildColumbusTileById, HOME_CHART_LIMIT } from '../../lib/tournaments/buildColumbusStatsTiles';
 import { TournamentHighlightTile } from '../../components/TournamentCharts';
@@ -124,15 +126,52 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
   );
 
   if (expanded) {
-    const gridItems = COLUMBUS_DASHBOARD_LAYOUT.map((placement) => ({
-      id: placement.id,
-      colSpan: placement.colSpan,
-      rowSpan: placement.rowSpan,
-      node: buildColumbusTileById(placement.id, {
+    const buildPlacementTile = (placement: (typeof COLUMBUS_DASHBOARD_LAYOUT)[number]) =>
+      buildColumbusTileById(placement.id, {
         ...tileBuildOptions,
         tileVariant: placement.tileVariant,
-      }),
-    }));
+      });
+
+    const gridItems = getColumbusDashboardGridPlacements().map((placement) => {
+      const stacked = getStackedPlacements(placement.id);
+      const topRowStacked = stacked.filter((child) => child.stackRole === 'topRow');
+      const belowStacked = stacked.filter((child) => child.stackRole !== 'topRow');
+
+      let node = buildPlacementTile(placement);
+      if (topRowStacked.length > 0) {
+        node = (
+          <div className="dashboard-grid__stack flex flex-col gap-4">
+            <div className="dashboard-grid__stack-row grid grid-cols-2 gap-4">
+              {node}
+              {topRowStacked.map((child) => (
+                <div key={child.id}>{buildPlacementTile(child)}</div>
+              ))}
+            </div>
+            {belowStacked.map((child) => (
+              <div key={child.id}>{buildPlacementTile(child)}</div>
+            ))}
+          </div>
+        );
+      } else if (belowStacked.length > 0) {
+        node = (
+          <div className="dashboard-grid__stack flex flex-col gap-4">
+            {node}
+            {belowStacked.map((child) => (
+              <div key={child.id}>{buildPlacementTile(child)}</div>
+            ))}
+          </div>
+        );
+      }
+
+      return {
+        id: placement.id,
+        colSpan: placement.colSpan,
+        rowSpan: placement.rowSpan,
+        colStart: placement.colStart,
+        rowStart: placement.rowStart,
+        node,
+      };
+    });
 
     return (
       <>
