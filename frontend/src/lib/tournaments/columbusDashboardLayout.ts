@@ -28,17 +28,52 @@ export interface DashboardLayoutPlacement {
   stackRole?: 'topRow' | 'below';
 }
 
+export interface ColumbusDashboardBandColumn {
+  colSpan: number;
+  tileIds: ColumbusDashboardTileId[];
+  /** Render the first two tile IDs side-by-side on desktop. */
+  pairFirstRow?: boolean;
+}
+
+export interface ColumbusDashboardBand {
+  columns: ColumbusDashboardBandColumn[];
+}
+
+/**
+ * Desktop dashboard bands — column stacks that pack tiles vertically without
+ * shared CSS grid row tracks (avoids dead space from row-span sizing).
+ */
+export const COLUMBUS_DASHBOARD_BANDS: ColumbusDashboardBand[] = [
+  {
+    columns: [
+      { colSpan: 3, tileIds: ['meta', 'highestTop8Rate', 'topHomebases', 'newTop8Characters'] },
+      { colSpan: 5, tileIds: ['characterAppearances', 'topReservists'] },
+      {
+        colSpan: 4,
+        tileIds: [
+          'mostPlaysWithoutTop8',
+          'newWinningCharacters',
+          'top8Characters',
+          'topCataclysms',
+        ],
+        pairFirstRow: true,
+      },
+    ],
+  },
+];
+
+/** Wireframe reference placements (col/row spans for docs and tile variants). */
 export const COLUMBUS_DASHBOARD_LAYOUT: DashboardLayoutPlacement[] = [
-  { id: 'meta', colSpan: 2, rowSpan: 1, tileVariant: 'sm' },
-  { id: 'highestTop8Rate', colSpan: 2, rowSpan: 1, tileVariant: 'sm', stackIn: 'meta' },
-  { id: 'characterAppearances', colSpan: 6, rowSpan: 6, tileVariant: 'wide' },
-  { id: 'mostPlaysWithoutTop8', colSpan: 4, rowSpan: 1, tileVariant: 'sm', colStart: 9, rowStart: 1 },
-  { id: 'newWinningCharacters', colSpan: 2, rowSpan: 1, tileVariant: 'sm', stackIn: 'mostPlaysWithoutTop8', stackRole: 'topRow' },
-  { id: 'top8Characters', colSpan: 4, rowSpan: 1, tileVariant: 'sm', stackIn: 'mostPlaysWithoutTop8' },
-  { id: 'newTop8Characters', colSpan: 3, rowSpan: 1, tileVariant: 'sm' },
-  { id: 'topReservists', colSpan: 6, rowSpan: 2, tileVariant: 'md' },
-  { id: 'topHomebases', colSpan: 6, rowSpan: 2, tileVariant: 'md' },
-  { id: 'topCataclysms', colSpan: 4, rowSpan: 2, tileVariant: 'md' },
+  { id: 'meta', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 1, rowStart: 1 },
+  { id: 'highestTop8Rate', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 1, rowStart: 4 },
+  { id: 'characterAppearances', colSpan: 6, rowSpan: 6, tileVariant: 'wide', colStart: 3, rowStart: 1 },
+  { id: 'mostPlaysWithoutTop8', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 9, rowStart: 1 },
+  { id: 'newWinningCharacters', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 11, rowStart: 1 },
+  { id: 'top8Characters', colSpan: 4, rowSpan: 5, tileVariant: 'tall', colStart: 9, rowStart: 4 },
+  { id: 'topHomebases', colSpan: 3, rowSpan: 4, tileVariant: 'md', colStart: 1, rowStart: 7 },
+  { id: 'topReservists', colSpan: 5, rowSpan: 4, tileVariant: 'md', colStart: 4, rowStart: 7 },
+  { id: 'topCataclysms', colSpan: 4, rowSpan: 4, tileVariant: 'md', colStart: 9, rowStart: 9 },
+  { id: 'newTop8Characters', colSpan: 3, rowSpan: 2, tileVariant: 'sm', colStart: 1, rowStart: 11 },
 ];
 
 const COL_SPAN_CLASS: Record<number, string> = {
@@ -100,6 +135,14 @@ const COL_START_CLASS: Record<number, string> = {
   11: 'lg:col-start-11',
   12: 'lg:col-start-12',
 };
+
+export function columbusColumnSpanClass(colSpan: number): string {
+  return cn('col-span-12', COL_SPAN_CLASS[colSpan] ?? 'lg:col-span-12');
+}
+
+export function getColumbusDashboardBandTileIds(): ColumbusDashboardTileId[] {
+  return COLUMBUS_DASHBOARD_BANDS.flatMap((band) => band.columns.flatMap((column) => column.tileIds));
+}
 
 export function dashboardPlacementClass(
   colSpan: number,

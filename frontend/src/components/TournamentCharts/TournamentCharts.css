@@ -70,8 +70,8 @@
 .preview-tile__detail {
   margin: 0;
   font-size: clamp(0.875rem, 7cqw, 1.125rem);
-  font-weight: var(--font-weight-bold);
-  font-family: var(--font-stat-value);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-sans);
   color: var(--color-text);
   line-height: var(--line-tight);
   overflow: hidden;
@@ -276,6 +276,26 @@
 /* ---- Card spotlight tile ---- */
 .tournament-highlight-tile {
   padding: 0;
+}
+
+/* Captions below card art — site sans-serif (not stat display face) */
+.tournament-highlight-tile .preview-tile__title,
+.tournament-highlight-tile .preview-tile__title--caps,
+.tournament-highlight-tile .preview-tile__subtitle,
+.tournament-highlight-tile .preview-tile__detail {
+  font-family: var(--font-sans);
+}
+
+.layout-desktop .tournament-highlight-tile .preview-tile__title--caps {
+  font-size: clamp(0.6875rem, 6cqw, 0.8125rem);
+}
+
+.layout-desktop .tournament-highlight-tile .preview-tile__detail {
+  font-size: clamp(0.9375rem, 8cqw, 1.125rem);
+}
+
+.layout-desktop .tournament-highlight-tile .preview-tile__subtitle {
+  font-size: clamp(0.8125rem, 7cqw, 1rem);
 }
 
 .tournament-highlight-tile__art {

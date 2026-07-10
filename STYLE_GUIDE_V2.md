@@ -419,7 +419,26 @@ Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentSta
 | Surface | Layout | Tile shell |
 |---|---|---|
 | Home rail | `DashboardRail` — `clamp(230px, 25%, 280px)` columns (deck-tile parity) | `DashboardTile` variant **`rail`**: art `aspect-ratio: 380/280`; body `min-height: 4.875rem` |
-| View All dashboard | `DashboardGrid` — **12 columns** desktop, `col-span-12` mobile; per-tile `colSpan` / `rowSpan` in [`columbusDashboardLayout.ts`](frontend/src/lib/tournaments/columbusDashboardLayout.ts) | Variants `sm`–`wide`: fluid art `min-height` (280–480px); charts scale `maxRows` / pie radius |
+| View All dashboard | `ColumbusDashboardGrid` — **12 columns** desktop in two horizontal bands; each band uses **column stacks** (`flex-col`) so tiles pack vertically without shared row-track dead space; wireframe col spans in [`columbusDashboardLayout.ts`](frontend/src/lib/tournaments/columbusDashboardLayout.ts) | Variants `sm`–`wide`: fluid art `min-height` (280–480px); charts scale `maxRows` / pie radius |
+
+### Desktop grid map (View All — 12×12 wireframe reference)
+
+Rendered via **three column stacks** in one band (left 2-col, center 6-col, right 4-col). Tiles pack vertically within each column without shared row-track dead space. Logical wireframe positions:
+
+| Tile ID | Label | Cols | Rows | Variant |
+|---|---|---|---|---|
+| `meta` | Event metadata | 1–2 | 1–3 | `sm` |
+| `highestTop8Rate` | Highest Top 8 spotlight | 1–2 | 4–6 | `sm` |
+| `characterAppearances` | Character Appearances | 3–8 | 1–6 | `wide` |
+| `mostPlaysWithoutTop8` | Most Plays w/o Top 8 | 9–10 | 1–3 | `sm` |
+| `newWinningCharacters` | New Winning Characters | 11–12 | 1–3 | `sm` |
+| `top8Characters` | Top 8 Characters | 9–12 | 4–8 | `tall` |
+| `topHomebases` | Top Homebases | 1–3 | 7–10 | `md` |
+| `topReservists` | Top Reservists | 4–8 | 7–10 | `md` |
+| `topCataclysms` | Top Cataclysms | 9–12 | 9–12 | `md` |
+| `newTop8Characters` | New Top 8 Characters | 1–3 | 11–12 | `sm` |
+
+Rows 11–12 cols 4–8 remain empty (no deck-size tile). Vertical gap between stacked tiles: **0** within columns on desktop (tiles touch); `gap-x-4` preserved between horizontal columns.
 
 **Tile chrome (match `DeckTile`):** `.dashboard-tile` — `background: var(--color-bg-panel)`; `border: 1px solid var(--color-border)`; `border-radius: var(--radius-lg)`; `box-shadow: none`. Art zone `.stats-chart-tile__art` uses `--color-bg-elevated` with **no** art/body divider. Body inherits panel background (same as `.deck-tile__body`).
 
@@ -441,7 +460,7 @@ Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentSta
 |---|---|
 | `.preview-tile__title` | `clamp(1rem, 9cqw, 1.35rem)`, bold |
 | `.preview-tile__subtitle` | `clamp(0.75rem, 6.5cqw, 1rem)`, `--color-accent-bright` |
-| `.preview-tile__detail` | Stat values, `clamp(0.875rem, 7cqw, 1.125rem)` |
+| `.preview-tile__detail` | Stat values, `clamp(0.875rem, 7cqw, 1.125rem)`, `--font-sans`, semibold |
 | `.preview-tile__footnote` | `+N more…`, `--font-size-xs` dim |
 | `.preview-tile__caption` | Body wrapper; `--center` or `--start` via `stats-chart-tile__body--*` |
 

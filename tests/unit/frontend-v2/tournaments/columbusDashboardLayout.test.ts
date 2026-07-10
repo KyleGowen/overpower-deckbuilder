@@ -1,7 +1,9 @@
 import {
+  COLUMBUS_DASHBOARD_BANDS,
   COLUMBUS_DASHBOARD_LAYOUT,
   COLUMBUS_TILE_ORDER,
   dashboardPlacementClass,
+  getColumbusDashboardBandTileIds,
   getColumbusDashboardGridPlacements,
   getPlacementForTile,
   getStackedPlacements,
@@ -13,78 +15,100 @@ describe('columbusDashboardLayout', () => {
     expect(COLUMBUS_DASHBOARD_LAYOUT).toHaveLength(10);
   });
 
-  it('event metadata spans 2 columns on desktop', () => {
-    const placement = getPlacementForTile('meta');
-    expect(placement.colSpan).toBe(2);
-    expect(placement.rowSpan).toBe(1);
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan)).toContain('lg:col-span-2');
+  it('uses explicit grid coordinates with no stacking', () => {
+    for (const placement of COLUMBUS_DASHBOARD_LAYOUT) {
+      expect(placement.stackIn).toBeUndefined();
+      expect(placement.stackRole).toBeUndefined();
+      expect(placement.colStart).toBeDefined();
+      expect(placement.rowStart).toBeDefined();
+    }
+    expect(getColumbusDashboardGridPlacements()).toHaveLength(10);
+    expect(getStackedPlacements('meta')).toHaveLength(0);
+    expect(getStackedPlacements('mostPlaysWithoutTop8')).toHaveLength(0);
   });
 
-  it('character appearances spans 6 columns and 6 rows on desktop', () => {
+  it('bands stack all 10 tiles in column groups without shared row tracks', () => {
+    const bandTileIds = getColumbusDashboardBandTileIds();
+    expect(bandTileIds).toHaveLength(10);
+    expect(new Set(bandTileIds).size).toBe(10);
+    expect(COLUMBUS_DASHBOARD_BANDS).toHaveLength(1);
+    expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns).toHaveLength(3);
+    expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns[0]?.colSpan).toBe(3);
+    expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns[1]?.colSpan).toBe(5);
+    expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns[0]?.tileIds).toEqual([
+      'meta',
+      'highestTop8Rate',
+      'topHomebases',
+      'newTop8Characters',
+    ]);
+    expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns[2]?.pairFirstRow).toBe(true);
+  });
+
+  it('event metadata spans cols 1-2, rows 1-3 on desktop', () => {
+    const placement = getPlacementForTile('meta');
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 1, rowStart: 1 });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-span-2');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-span-3');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-1');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-1');
+  });
+
+  it('highest top 8 rate spans cols 1-2, rows 4-6 on desktop', () => {
+    const placement = getPlacementForTile('highestTop8Rate');
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 1, rowStart: 4 });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-4');
+  });
+
+  it('character appearances spans cols 3-8, rows 1-6 on desktop', () => {
     const placement = getPlacementForTile('characterAppearances');
-    expect(placement.colSpan).toBe(6);
-    expect(placement.rowSpan).toBe(6);
-    expect(placement.tileVariant).toBe('wide');
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan)).toContain('lg:col-span-6');
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan)).toContain('lg:row-span-6');
+    expect(placement).toMatchObject({ colSpan: 6, rowSpan: 6, colStart: 3, rowStart: 1, tileVariant: 'wide' });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-span-6');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-span-6');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-3');
+  });
+
+  it('most plays without top 8 spans cols 9-10, rows 1-3 on desktop', () => {
+    const placement = getPlacementForTile('mostPlaysWithoutTop8');
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 9, rowStart: 1, tileVariant: 'sm' });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-span-2');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-9');
+  });
+
+  it('new winning characters spans cols 11-12, rows 1-3 on desktop', () => {
+    const placement = getPlacementForTile('newWinningCharacters');
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 11, rowStart: 1, tileVariant: 'sm' });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-11');
+  });
+
+  it('top 8 characters spans cols 9-12, rows 4-8 on desktop', () => {
+    const placement = getPlacementForTile('top8Characters');
+    expect(placement).toMatchObject({ colSpan: 4, rowSpan: 5, colStart: 9, rowStart: 4, tileVariant: 'tall' });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-span-5');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-4');
+  });
+
+  it('top homebases spans cols 1-3, rows 7-10 on desktop', () => {
+    const placement = getPlacementForTile('topHomebases');
+    expect(placement).toMatchObject({ colSpan: 3, rowSpan: 4, colStart: 1, rowStart: 7, tileVariant: 'md' });
+  });
+
+  it('top reservists spans cols 4-8, rows 7-10 on desktop', () => {
+    const placement = getPlacementForTile('topReservists');
+    expect(placement).toMatchObject({ colSpan: 5, rowSpan: 4, colStart: 4, rowStart: 7, tileVariant: 'md' });
+  });
+
+  it('top cataclysms spans cols 9-12, rows 9-12 on desktop', () => {
+    const placement = getPlacementForTile('topCataclysms');
+    expect(placement).toMatchObject({ colSpan: 4, rowSpan: 4, colStart: 9, rowStart: 9, tileVariant: 'md' });
+  });
+
+  it('new top 8 characters spans cols 1-3, rows 11-12 on desktop', () => {
+    const placement = getPlacementForTile('newTop8Characters');
+    expect(placement).toMatchObject({ colSpan: 3, rowSpan: 2, colStart: 1, rowStart: 11, tileVariant: 'sm' });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-11');
   });
 
   it('mobile placement is full width', () => {
     expect(dashboardPlacementClass(3, 1)).toContain('col-span-12');
-  });
-
-  it('most plays anchors a 4-column top-right stack on the top row', () => {
-    const placement = getPlacementForTile('mostPlaysWithoutTop8');
-    expect(placement.colSpan).toBe(4);
-    expect(placement.rowSpan).toBe(1);
-    expect(placement.colStart).toBe(9);
-    expect(placement.rowStart).toBe(1);
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-span-4');
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-9');
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-1');
-    expect(getStackedPlacements('mostPlaysWithoutTop8').map((child) => child.id)).toEqual([
-      'newWinningCharacters',
-      'top8Characters',
-    ]);
-  });
-
-  it('highest top 8 rate stacks under tournament metadata on the dashboard', () => {
-    const highestRate = getPlacementForTile('highestTop8Rate');
-    expect(highestRate.colSpan).toBe(2);
-    expect(highestRate.rowSpan).toBe(1);
-    expect(highestRate.stackIn).toBe('meta');
-    expect(highestRate.colStart).toBeUndefined();
-    expect(highestRate.rowStart).toBeUndefined();
-    expect(getStackedPlacements('meta')).toEqual([highestRate]);
-    expect(getColumbusDashboardGridPlacements().map((placement) => placement.id)).not.toContain('highestTop8Rate');
-  });
-
-  it('new winning characters sits beside most plays in the top-right stack', () => {
-    const mostPlays = getPlacementForTile('mostPlaysWithoutTop8');
-    const newWinning = getPlacementForTile('newWinningCharacters');
-    expect(newWinning.colSpan).toBe(2);
-    expect(newWinning.rowSpan).toBe(1);
-    expect(newWinning.tileVariant).toBe('sm');
-    expect(newWinning.stackIn).toBe('mostPlaysWithoutTop8');
-    expect(newWinning.stackRole).toBe('topRow');
-    expect(newWinning.colStart).toBeUndefined();
-    expect(getColumbusDashboardGridPlacements().map((placement) => placement.id)).not.toContain('newWinningCharacters');
-  });
-
-  it('top 8 characters fills the width below the top-right row', () => {
-    const placement = getPlacementForTile('top8Characters');
-    expect(placement.colSpan).toBe(4);
-    expect(placement.rowSpan).toBe(1);
-    expect(placement.tileVariant).toBe('sm');
-    expect(placement.stackIn).toBe('mostPlaysWithoutTop8');
-    expect(placement.stackRole).toBeUndefined();
-    expect(placement.colStart).toBeUndefined();
-    expect(placement.rowStart).toBeUndefined();
-    expect(getColumbusDashboardGridPlacements().map((placement) => placement.id)).not.toContain('top8Characters');
-  });
-
-  it('spotlight tiles use sm variant', () => {
-    expect(getPlacementForTile('mostPlaysWithoutTop8').tileVariant).toBe('sm');
-    expect(getPlacementForTile('highestTop8Rate').tileVariant).toBe('sm');
   });
 });

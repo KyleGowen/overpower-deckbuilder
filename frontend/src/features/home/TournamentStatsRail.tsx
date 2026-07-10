@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
-import { DashboardGrid, DashboardRail, DashboardRailItem } from '../../components/dashboard';
+import { ColumbusDashboardGrid, DashboardRail, DashboardRailItem } from '../../components/dashboard';
 import { IconChevronRight, IconTrophy } from '../../components/icons';
 import { fetchFoilCardMap } from '../../lib/api/catalog';
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
@@ -11,11 +11,9 @@ import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
 import { getColumbusRegionalStats } from '../../lib/tournaments/columbusStats';
 import { resolveTournamentCard, isTournamentCardClickable } from '../../lib/tournaments/resolveTournamentCard';
 import {
-  COLUMBUS_DASHBOARD_LAYOUT,
   COLUMBUS_TILE_ORDER,
-  getColumbusDashboardGridPlacements,
   getPlacementForTile,
-  getStackedPlacements,
+  type ColumbusDashboardTileId,
 } from '../../lib/tournaments/columbusDashboardLayout';
 import { buildColumbusTileById, HOME_CHART_LIMIT } from '../../lib/tournaments/buildColumbusStatsTiles';
 import { TournamentHighlightTile } from '../../components/TournamentCharts';
@@ -126,56 +124,17 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
   );
 
   if (expanded) {
-    const buildPlacementTile = (placement: (typeof COLUMBUS_DASHBOARD_LAYOUT)[number]) =>
-      buildColumbusTileById(placement.id, {
+    const renderDashboardTile = (id: ColumbusDashboardTileId) => {
+      const placement = getPlacementForTile(id);
+      return buildColumbusTileById(id, {
         ...tileBuildOptions,
         tileVariant: placement.tileVariant,
       });
-
-    const gridItems = getColumbusDashboardGridPlacements().map((placement) => {
-      const stacked = getStackedPlacements(placement.id);
-      const topRowStacked = stacked.filter((child) => child.stackRole === 'topRow');
-      const belowStacked = stacked.filter((child) => child.stackRole !== 'topRow');
-
-      let node = buildPlacementTile(placement);
-      if (topRowStacked.length > 0) {
-        node = (
-          <div className="dashboard-grid__stack flex flex-col gap-4">
-            <div className="dashboard-grid__stack-row grid grid-cols-2 gap-4">
-              {node}
-              {topRowStacked.map((child) => (
-                <div key={child.id}>{buildPlacementTile(child)}</div>
-              ))}
-            </div>
-            {belowStacked.map((child) => (
-              <div key={child.id}>{buildPlacementTile(child)}</div>
-            ))}
-          </div>
-        );
-      } else if (belowStacked.length > 0) {
-        node = (
-          <div className="dashboard-grid__stack flex flex-col gap-4">
-            {node}
-            {belowStacked.map((child) => (
-              <div key={child.id}>{buildPlacementTile(child)}</div>
-            ))}
-          </div>
-        );
-      }
-
-      return {
-        id: placement.id,
-        colSpan: placement.colSpan,
-        rowSpan: placement.rowSpan,
-        colStart: placement.colStart,
-        rowStart: placement.rowStart,
-        node,
-      };
-    });
+    };
 
     return (
       <>
-        <DashboardGrid items={gridItems} />
+        <ColumbusDashboardGrid renderTile={renderDashboardTile} />
         {cardPanel}
       </>
     );
