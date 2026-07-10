@@ -136,6 +136,8 @@ export default function HomePage() {
 
         <NewsSection />
 
+        <TournamentStatsRail />
+
         <DeckRail
           icon={<IconUsers />}
           title="Community Decks"
@@ -161,7 +163,6 @@ export default function HomePage() {
           onOpen={openDeck}
         />
 
-        <TournamentStatsRail />
       </div>
     </div>
   );
