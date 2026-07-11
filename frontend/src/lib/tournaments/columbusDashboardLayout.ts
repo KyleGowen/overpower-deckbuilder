@@ -1,5 +1,8 @@
-import { cn } from '../../lib/utils';
-import type { DashboardTileVariant } from '../../components/dashboard/dashboardTileVariants';
+import type { DashboardTileVariant } from '../../components/dashboard/dashboardTileSizing';
+
+function joinLayoutClasses(...parts: Array<string | undefined>): string {
+  return parts.filter((part): part is string => Boolean(part)).join(' ');
+}
 
 export type ColumbusDashboardTileId =
   | 'meta'
@@ -137,7 +140,7 @@ const COL_START_CLASS: Record<number, string> = {
 };
 
 export function columbusColumnSpanClass(colSpan: number): string {
-  return cn('col-span-12', COL_SPAN_CLASS[colSpan] ?? 'lg:col-span-12');
+  return joinLayoutClasses('col-span-12', COL_SPAN_CLASS[colSpan] ?? 'lg:col-span-12');
 }
 
 export function getColumbusDashboardBandTileIds(): ColumbusDashboardTileId[] {
@@ -149,7 +152,7 @@ export function dashboardPlacementClass(
   rowSpan: number,
   placement?: Pick<DashboardLayoutPlacement, 'colStart' | 'rowStart'>,
 ): string {
-  return cn(
+  return joinLayoutClasses(
     'col-span-12',
     COL_SPAN_CLASS[colSpan] ?? 'lg:col-span-12',
     ROW_SPAN_CLASS[rowSpan] ?? '',

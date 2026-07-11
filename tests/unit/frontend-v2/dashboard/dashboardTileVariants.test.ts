@@ -1,7 +1,7 @@
 import {
   barMaxRowsForVariant,
   pieSizingForVariant,
-} from '../../../../frontend/src/components/dashboard/dashboardTileVariants';
+} from '../../../../frontend/src/components/dashboard/dashboardTileSizing';
 
 describe('dashboardTileVariants', () => {
   it('rail bar charts cap at 5 rows on home', () => {
