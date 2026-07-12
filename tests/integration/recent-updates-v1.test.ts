@@ -26,6 +26,7 @@ describe('GET /api/v1/recent-updates', () => {
     const titles = res.body.data.map((r: { title: string }) => r.title);
     expect(titles).toContain('The Community Deck Section');
     expect(titles).toContain('New Mobile Layout and Controls');
+    expect(titles).toContain('The Columbus Regional Breakdown');
 
     const row = res.body.data.find(
       (r: { title: string }) => r.title === 'The Community Deck Section',
