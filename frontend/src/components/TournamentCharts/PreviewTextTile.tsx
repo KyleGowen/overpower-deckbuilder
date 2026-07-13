@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { DashboardTile, type DashboardTileVariant } from '../dashboard';
 import './TournamentCharts.css';
 
@@ -13,6 +14,7 @@ export interface PreviewTextTileProps {
   title: string;
   subtitle?: string;
   sections: PreviewTextTileSection[];
+  footer?: ReactNode;
   className?: string;
   variant?: DashboardTileVariant;
 }
@@ -21,6 +23,7 @@ export function PreviewTextTile({
   title,
   subtitle,
   sections,
+  footer,
   className = '',
   variant = 'rail',
 }: PreviewTextTileProps) {
@@ -53,6 +56,12 @@ export function PreviewTextTile({
             </div>
           </div>
         ))}
+        {footer ? (
+          <>
+            <div className="preview-text-tile__section-divider" aria-hidden="true" />
+            <div className="preview-text-tile__footer">{footer}</div>
+          </>
+        ) : null}
       </div>
     </DashboardTile>
   );

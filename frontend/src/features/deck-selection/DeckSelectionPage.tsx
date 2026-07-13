@@ -16,6 +16,10 @@ import {
 import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { DECK_SELECTION_SWIPE_BLOCK_SELECTOR, useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import {
+  buildDeckEditorNavigateState,
+  buildDeckSelectionReturnPath,
+} from '../../lib/navigation/deckEditorReturn';
 import { DeckTile, type DeckStatLine } from '../../components/DeckTile';
 import { CommunityDeckGrid } from '../community/CommunityDeckGrid';
 import { LoadingState } from '../../components/LoadingState';
@@ -63,6 +67,7 @@ export default function DeckSelectionPage() {
   // Read-only public profile: viewing another user's decks (not your own, not guest's own).
   const isReadOnlyProfile = Boolean(profileUserId) && profileUserId !== viewerId;
   const ownerId = viewerId ?? profileUserId ?? '';
+  const deckSelectionReturnPath = buildDeckSelectionReturnPath(profileUserId ?? ownerId);
 
   const publicDecksKey = ['decks', 'public', profileUserId ?? ''] as const;
 
@@ -225,13 +230,17 @@ export default function DeckSelectionPage() {
 
   const openDeck = (deck: DeckListItem) => {
     const suffix = isReadOnlyProfile ? '?readonly=true' : '';
-    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}${suffix}`);
+    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}${suffix}`, {
+      state: buildDeckEditorNavigateState(deckSelectionReturnPath),
+    });
   };
 
   const canFavorite = Boolean(viewerId) && !isGuest;
 
   const openReadonly = (deck: DeckListItem) =>
-    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}?readonly=true`);
+    navigate(`/users/${deck.metadata.userId}/decks/${deck.metadata.id}?readonly=true`, {
+      state: buildDeckEditorNavigateState(deckSelectionReturnPath),
+    });
   const openProfile = (deck: DeckListItem) =>
     navigate(`/users/${deck.metadata.userId}/decks`);
 
@@ -265,7 +274,9 @@ export default function DeckSelectionPage() {
       const created = await createDeck({ name: newName.trim(), description: newDesc.trim() || undefined }, isGuest);
       await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
       const targetUser = created.userId || user?.id || ownerId;
-      navigate(`/users/${targetUser}/decks/${created.id}`);
+      navigate(`/users/${targetUser}/decks/${created.id}`, {
+        state: buildDeckEditorNavigateState(deckSelectionReturnPath),
+      });
     } catch (err) {
       setCreateError((err as Error)?.message || 'Could not create deck');
     } finally {
@@ -287,7 +298,9 @@ export default function DeckSelectionPage() {
   const handleImportSuccess = async (deckId: string, userId: string) => {
     setImportOpen(false);
     await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
-    navigate(`/users/${userId}/decks/${deckId}`);
+    navigate(`/users/${userId}/decks/${deckId}`, {
+      state: buildDeckEditorNavigateState(deckSelectionReturnPath),
+    });
   };
 
   if (isReadOnlyProfile) {
@@ -582,7 +595,7 @@ export default function DeckSelectionPage() {
             <button type="button" className="dsel__menu-item" onClick={() => openDeck(menuDeck)}>
               <IconEdit /> Open / Edit
             </button>
-            <button type="button" className="dsel__menu-item" onClick={() => navigate(`/users/${menuDeck.metadata.userId}/decks/${menuDeck.metadata.id}?readonly=true`)}>
+            <button type="button" className="dsel__menu-item" onClick={() => openReadonly(menuDeck)}>
               <IconPlay /> View (read-only)
             </button>
             <button

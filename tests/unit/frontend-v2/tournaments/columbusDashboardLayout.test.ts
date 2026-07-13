@@ -4,13 +4,15 @@ import {
   COLUMBUS_TILE_ORDER,
   dashboardPlacementClass,
   getColumbusDashboardBandTileIds,
+  getColumbusDashboardBands,
   getColumbusDashboardGridPlacements,
+  getColumbusMobileTileOrder,
   getPlacementForTile,
   getStackedPlacements,
 } from '../../../../frontend/src/lib/tournaments/columbusDashboardLayout';
 
 describe('columbusDashboardLayout', () => {
-  it('defines 10 tiles in display order', () => {
+  it('defines 10 layout placements and 10 home-rail tiles', () => {
     expect(COLUMBUS_TILE_ORDER).toHaveLength(10);
     expect(COLUMBUS_DASHBOARD_LAYOUT).toHaveLength(10);
   });
@@ -27,7 +29,30 @@ describe('columbusDashboardLayout', () => {
     expect(getStackedPlacements('mostPlaysWithoutTop8')).toHaveLength(0);
   });
 
-  it('bands stack all 10 tiles in column groups without shared row tracks', () => {
+  it('mobile bands prioritize high-impact stats with podium links inside meta', () => {
+    const mobileOrder = getColumbusMobileTileOrder();
+    expect(mobileOrder).toHaveLength(10);
+    expect(mobileOrder[0]).toBe('meta');
+    expect(mobileOrder[1]).toBe('top8Characters');
+    expect(mobileOrder[2]).toBe('topHomebases');
+    expect(mobileOrder[3]).toBe('characterAppearances');
+    expect(mobileOrder.slice(-4)).toEqual([
+      'highestTop8Rate',
+      'mostPlaysWithoutTop8',
+      'newWinningCharacters',
+      'newTop8Characters',
+    ]);
+    expect(getColumbusDashboardBands(true)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          columns: [expect.objectContaining({ colSpan: 12, tileIds: mobileOrder })],
+        }),
+      ]),
+    );
+    expect(getColumbusDashboardBands(false)).toBe(COLUMBUS_DASHBOARD_BANDS);
+  });
+
+  it('bands stack all 10 desktop stats tiles in column groups without shared row tracks', () => {
     const bandTileIds = getColumbusDashboardBandTileIds();
     expect(bandTileIds).toHaveLength(10);
     expect(new Set(bandTileIds).size).toBe(10);
@@ -44,19 +69,19 @@ describe('columbusDashboardLayout', () => {
     expect(COLUMBUS_DASHBOARD_BANDS[0]?.columns[2]?.pairFirstRow).toBe(true);
   });
 
-  it('event metadata spans cols 1-2, rows 1-3 on desktop', () => {
+  it('event metadata spans cols 1-2, rows 1-4 on desktop (includes podium footer)', () => {
     const placement = getPlacementForTile('meta');
-    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 1, rowStart: 1 });
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 4, colStart: 1, rowStart: 1 });
     expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-span-2');
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-span-3');
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-span-4');
     expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:col-start-1');
     expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-1');
   });
 
-  it('highest top 8 rate spans cols 1-2, rows 4-6 on desktop', () => {
+  it('highest top 8 rate spans cols 1-2, rows 5-7 on desktop', () => {
     const placement = getPlacementForTile('highestTop8Rate');
-    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 1, rowStart: 4 });
-    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-4');
+    expect(placement).toMatchObject({ colSpan: 2, rowSpan: 3, colStart: 1, rowStart: 5 });
+    expect(dashboardPlacementClass(placement.colSpan, placement.rowSpan, placement)).toContain('lg:row-start-5');
   });
 
   it('character appearances spans cols 3-8, rows 1-6 on desktop', () => {

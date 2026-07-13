@@ -6,5 +6,6 @@ export { TournamentPlacardTile } from './TournamentPlacardTile';
 export { TournamentBarChart } from './TournamentBarChart';
 export { TournamentPieChart } from './TournamentPieChart';
 export { TournamentHighlightTile } from './TournamentHighlightTile';
+export { TournamentPodiumDecksTile } from './TournamentPodiumDecksTile';
 export { TournamentSummaryTile } from './TournamentSummaryTile';
 export { barColorAt, CHART_THEME } from './chartTheme';

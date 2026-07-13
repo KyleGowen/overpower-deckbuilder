@@ -427,8 +427,8 @@ Rendered via **three column stacks** in one band (left 2-col, center 6-col, righ
 
 | Tile ID | Label | Cols | Rows | Variant |
 |---|---|---|---|---|
-| `meta` | Event metadata | 1–2 | 1–3 | `sm` |
-| `highestTop8Rate` | Highest Top 8 spotlight | 1–2 | 4–6 | `sm` |
+| `meta` | Event metadata (includes podium deck links on View All) | 1–2 | 1–4 | `sm` |
+| `highestTop8Rate` | Highest Top 8 spotlight | 1–2 | 5–7 | `sm` |
 | `characterAppearances` | Character Appearances | 3–8 | 1–6 | `wide` |
 | `mostPlaysWithoutTop8` | Most Plays w/o Top 8 | 9–10 | 1–3 | `sm` |
 | `newWinningCharacters` | New Winning Characters | 11–12 | 1–3 | `sm` |
@@ -438,7 +438,28 @@ Rendered via **three column stacks** in one band (left 2-col, center 6-col, righ
 | `topCataclysms` | Top Cataclysms | 9–12 | 9–12 | `md` |
 | `newTop8Characters` | New Top 8 Characters | 1–3 | 11–12 | `sm` |
 
-Rows 11–12 cols 4–8 remain empty (no deck-size tile). Vertical gap between stacked tiles: **0** within columns on desktop (tiles touch); `gap-x-4` preserved between horizontal columns.
+Rows 11–12 cols 4–8 remain empty (no deck-size tile). Vertical gap between stacked tiles: **`gap-y-3`** (`12px` / `var(--space-3)`) on `.columbus-dashboard__column` (desktop and mobile); `gap-x-4` preserved between horizontal columns.
+
+### Mobile View All tile order (`layout-mobile`, `/home/columbus-regional`)
+
+On mobile, `ColumbusDashboardGrid` uses `COLUMBUS_MOBILE_BANDS` — a single full-width column (no `pairFirstRow` side-by-side spotlights). Stacked tiles use **`gap-y-3`** (`12px` / `var(--space-3)`) on `.columbus-dashboard__column` so each tile is separated by a small buffer (same as desktop column stacks). Order:
+
+1. `meta` — event placard with **podium deck link rows** in the placard footer (1st / 2nd / 3rd); badges `.tournament-podium-tile__badge`; 44px+ tap targets; navigates to `/users/{tournamentDecksUserId}/decks/{id}?readonly=true`. **Winner Name** section is omitted on View All (1st row replaces it).
+2. `top8Characters`
+3. `topHomebases`
+4. `characterAppearances` (wide splash)
+5. `topReservists`
+6. `topCataclysms`
+7. `highestTop8Rate`
+8. `mostPlaysWithoutTop8`
+9. `newWinningCharacters`
+10. `newTop8Characters`
+
+Desktop band layout is unchanged. Home horizontal stats rail still shows **Winner Name** in the meta placard (no deck links, no tournament deck fetch).
+
+**Placard footer classes:** `.preview-text-tile__footer` wraps `.tournament-podium-tile__list` inside `.tournament-placard-tile` on View All (desktop + mobile). Podium rows use a **stair-step width** (left-aligned): `.tournament-podium-tile__item--1st` **100%**, `--3rd` **72%** (`--podium-row-width-3rd`), `--2nd` **calc((100% + 72%) / 2)** ≈ **86%**; row buttons fill each item (`width: 100%`).
+
+**Podium deck IDs (prod-stable):** `81d73769-e987-4c85-a9f8-6629980a1807` (1st), `a6df76ba-c073-4e65-bc68-2046ee3919b1` (2nd), `bb9a2144-9c15-4cb3-9c38-851e66972c74` (3rd). Seeded via [`V309__Seed_columbus_podium_decks.sql`](migrations/V309__Seed_columbus_podium_decks.sql).
 
 **Tile chrome (match `DeckTile`):** `.dashboard-tile` — `background: var(--color-bg-panel)`; `border: 1px solid var(--color-border)`; `border-radius: var(--radius-lg)`; `box-shadow: none`. Art zone `.stats-chart-tile__art` uses `--color-bg-elevated` with **no** art/body divider. Body inherits panel background (same as `.deck-tile__body`).
 
@@ -448,7 +469,7 @@ Rows 11–12 cols 4–8 remain empty (no deck-size tile). Vertical gap between s
 
 | Type | Component | Art zone | Body caption |
 |---|---|---|---|
-| Event metadata | `TournamentPlacardTile` / `PreviewTextTile` | Title hierarchy: H1 name, H2 season, then Location / Date / Players / Winner Name; fluid `clamp()` type; unified content (no art/body split) |
+| Event metadata | `TournamentPlacardTile` / `PreviewTextTile` | Title hierarchy: H1 name, H2 season, then Location / Date / Players; **Winner Name** on Home rail only; View All adds podium link rows in `.preview-text-tile__footer` | Fluid `clamp()` type; unified content (no art/body split) |
 | Bar chart | `StatsChartTile` + `TournamentBarChart` | Horizontal bars, `fillContainer`, max 5 rows on rail | Title + subtitle + footnote, **bottom-center** |
 | Pie chart | `StatsChartTile` + `TournamentPieChart` | Donut fills art (42% outer when labeled); preview portion labels use **straight radial** leader lines to tile edge (~2.12× slice radius), `clamp()`/radius-scaled font; **2-slice pies** stagger labels top-right / bottom-left (~22° off vertical) | Title + subtitle, **bottom-center** |
 | Card spotlight | `TournamentHighlightTile` | Card full-bleed (no text overlay) | Label (caps) + detail + name, **bottom-center** |

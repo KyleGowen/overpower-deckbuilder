@@ -1,14 +1,16 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CardDetailPanel } from '../../components/CardDetailPanel';
 import { ColumbusDashboardGrid, DashboardRail, DashboardRailItem } from '../../components/dashboard';
 import { IconChevronRight, IconTrophy } from '../../components/icons';
+import { fetchTournamentDecks } from '../../lib/api/decks';
 import { fetchFoilCardMap } from '../../lib/api/catalog';
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
 import { getColumbusRegionalStats } from '../../lib/tournaments/columbusStats';
+import { resolveColumbusPodiumDecks } from '../../lib/tournaments/columbusPodiumDecks';
 import { resolveTournamentCard, isTournamentCardClickable } from '../../lib/tournaments/resolveTournamentCard';
 import {
   COLUMBUS_TILE_ORDER,
@@ -16,6 +18,7 @@ import {
   type ColumbusDashboardTileId,
 } from '../../lib/tournaments/columbusDashboardLayout';
 import { buildColumbusTileById, HOME_CHART_LIMIT } from '../../lib/tournaments/buildColumbusStatsTiles';
+import { buildDeckEditorNavigateState, DECK_EDITOR_RETURN_COLUMBUS } from '../../lib/navigation/deckEditorReturn';
 import { TournamentHighlightTile } from '../../components/TournamentCharts';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import type { CountEntry, HomebaseCountEntry, SpotlightEntry } from '../../lib/tournaments/types';
@@ -30,7 +33,18 @@ interface TournamentStatsRailProps {
 
 export function TournamentStatsRail({ expanded = false }: TournamentStatsRailProps) {
   const stats = getColumbusRegionalStats();
+  const navigate = useNavigate();
   const { cards: allCards } = useAllCatalogCards();
+  const tournamentQuery = useQuery({
+    queryKey: ['decks', 'tournament'],
+    queryFn: () => fetchTournamentDecks(),
+    staleTime: 10 * 60 * 1000,
+    enabled: expanded,
+  });
+  const podiumEntries = useMemo(
+    () => resolveColumbusPodiumDecks(tournamentQuery.data ?? []),
+    [tournamentQuery.data],
+  );
   const foilMapQuery = useQuery({
     queryKey: ['foil-card-map'],
     queryFn: () => fetchFoilCardMap(),
@@ -100,6 +114,15 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
     [allCards, expanded, foilLookup, openEntry],
   );
 
+  const openPodiumDeck = useCallback(
+    (deckId: string, userId: string) => {
+      navigate(`/users/${userId}/decks/${deckId}?readonly=true`, {
+        state: buildDeckEditorNavigateState(DECK_EDITOR_RETURN_COLUMBUS),
+      });
+    },
+    [navigate],
+  );
+
   const tileBuildOptions = useMemo(
     () => ({
       stats,
@@ -110,8 +133,21 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
       isClickable,
       resolveCard,
       renderSpotlight,
+      podiumEntries: expanded ? podiumEntries : undefined,
+      onOpenPodiumDeck: expanded ? openPodiumDeck : undefined,
     }),
-    [stats, expanded, charFootnote, homebaseTooltip, openEntry, isClickable, resolveCard, renderSpotlight],
+    [
+      stats,
+      expanded,
+      charFootnote,
+      homebaseTooltip,
+      openEntry,
+      isClickable,
+      resolveCard,
+      renderSpotlight,
+      podiumEntries,
+      openPodiumDeck,
+    ],
   );
 
   const cardPanel = (

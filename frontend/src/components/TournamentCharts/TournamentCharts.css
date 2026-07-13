@@ -451,3 +451,105 @@
 .layout-mobile .stats-chart-tile__body {
   padding: var(--space-2);
 }
+
+/* ---- Podium deck links (placard footer on View All) ---- */
+.tournament-placard-tile .preview-text-tile__footer {
+  margin-top: 0;
+}
+
+.tournament-placard-tile .tournament-podium-tile__list {
+  margin-top: var(--space-1);
+}
+
+.tournament-podium-tile__list {
+  --podium-row-width-3rd: 72%;
+  --podium-row-width-2nd: calc((100% + var(--podium-row-width-3rd)) / 2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tournament-podium-tile__item {
+  margin: 0;
+  max-width: 100%;
+}
+
+.tournament-podium-tile__item--1st {
+  width: 100%;
+}
+
+.tournament-podium-tile__item--2nd {
+  width: var(--podium-row-width-2nd);
+}
+
+.tournament-podium-tile__item--3rd {
+  width: var(--podium-row-width-3rd);
+}
+
+.tournament-podium-tile__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tournament-podium-tile__row:hover:not(:disabled),
+.tournament-podium-tile__row:focus-visible {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-accent);
+  outline: none;
+}
+
+.tournament-podium-tile__row--disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.tournament-podium-tile__badge {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-bright);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tournament-podium-tile__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-podium-tile__name--muted {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.tournament-podium-tile__chevron {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-text-muted);
+}

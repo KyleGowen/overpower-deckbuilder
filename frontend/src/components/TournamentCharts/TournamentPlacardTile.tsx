@@ -1,46 +1,39 @@
 import type { TournamentEventMeta } from '../../lib/tournaments/types';
-import { formatEventLocation } from '../../lib/tournaments/formatEventLocation';
+import type { ColumbusPodiumDeckEntry } from '../../lib/tournaments/columbusPodiumDecks';
+import { getTournamentPlacardSections } from '../../lib/tournaments/tournamentPlacardSections';
 import type { DashboardTileVariant } from '../dashboard';
 import { PreviewTextTile } from './PreviewTextTile';
+import { TournamentPodiumDeckRows } from './TournamentPodiumDeckRows';
 import './TournamentCharts.css';
-
-function formatEventDate(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
 
 interface TournamentPlacardTileProps {
   meta: TournamentEventMeta;
   variant?: DashboardTileVariant;
+  podiumEntries?: ColumbusPodiumDeckEntry[];
+  onOpenPodiumDeck?: (deckId: string, userId: string) => void;
 }
 
-export function TournamentPlacardTile({ meta, variant = 'rail' }: TournamentPlacardTileProps) {
+export function TournamentPlacardTile({
+  meta,
+  variant = 'rail',
+  podiumEntries,
+  onOpenPodiumDeck,
+}: TournamentPlacardTileProps) {
+  const showPodium = Boolean(podiumEntries?.length && onOpenPodiumDeck);
+  const sections = getTournamentPlacardSections(meta, showPodium);
+
   return (
     <PreviewTextTile
       className="tournament-placard-tile"
       variant={variant}
       title={meta.title}
       subtitle={meta.seasonLabel}
-      sections={[
-        {
-          label: 'Location',
-          value: formatEventLocation(meta.location),
-          wrap: true,
-        },
-        {
-          label: 'Date',
-          value: formatEventDate(meta.date),
-        },
-        {
-          label: 'Players',
-          value: String(meta.playerCount),
-        },
-        {
-          label: 'Winner Name',
-          value: meta.winnerName,
-          variant: 'accent',
-        },
-      ]}
+      sections={sections}
+      footer={
+        showPodium && podiumEntries && onOpenPodiumDeck ? (
+          <TournamentPodiumDeckRows entries={podiumEntries} onOpenDeck={onOpenPodiumDeck} />
+        ) : undefined
+      }
     />
   );
 }

@@ -18,6 +18,10 @@ import { RecentUpdatesList } from './RecentUpdatesList';
 import { useRecentUpdates } from './useRecentUpdates';
 import { TournamentStatsRail } from './TournamentStatsRail';
 import {
+  buildDeckEditorNavigateState,
+  DECK_EDITOR_RETURN_HOME,
+} from '../../lib/navigation/deckEditorReturn';
+import {
   IconUsers,
   IconTrophy,
   IconSparkles,
@@ -98,7 +102,9 @@ export default function HomePage() {
 
   const openDeck = (deck: DeckListItem) => {
     const m = deck.metadata;
-    navigate(`/users/${m.userId}/decks/${m.id}?readonly=true`);
+    navigate(`/users/${m.userId}/decks/${m.id}?readonly=true`, {
+      state: buildDeckEditorNavigateState(DECK_EDITOR_RETURN_HOME),
+    });
   };
 
   const openProfile = (deck: DeckListItem) => {

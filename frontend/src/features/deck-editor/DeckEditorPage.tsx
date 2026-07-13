@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
 import {
@@ -107,6 +107,7 @@ import { useDeckCardDetailHistory } from '../../lib/layout/useDeckCardDetailHist
 import { clearProgressiveImageSession } from '../../lib/images/progressiveImageLoad';
 import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import { getDeckEditorReturnTo, getDeckEditorBackAriaLabel } from '../../lib/navigation/deckEditorReturn';
 import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
 import './DeckEditorPage.css';
 
@@ -247,8 +248,11 @@ export default function DeckEditorPage() {
   const { deckId = '', userId = '' } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isGuest } = useAuth();
   const { isMobile } = useLayoutMode();
+  const returnTo = getDeckEditorReturnTo(location.state);
+  const backAriaLabel = getDeckEditorBackAriaLabel(returnTo);
 
   const forceReadonly = searchParams.get('readonly') === 'true';
   const needsGuestClone = guestNeedsCloneOnOpen(deckId, isGuest, forceReadonly);
@@ -637,6 +641,10 @@ export default function DeckEditorPage() {
       setAddOpen(false);
       return;
     }
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     navigate(`/users/${user?.id ?? userId}/decks`);
   };
 
@@ -980,7 +988,12 @@ export default function DeckEditorPage() {
           <div className="deck-editor__topbar">
             <div className="deck-editor__topbar-leading">
               <div className="deck-editor__topbar-name-row">
-                <button type="button" className="deck-editor__back" onClick={handleBackToDecks} aria-label="Back to decks">
+                <button
+                  type="button"
+                  className="deck-editor__back"
+                  onClick={handleBackToDecks}
+                  aria-label={backAriaLabel}
+                >
                   <IconChevronLeft />
                 </button>
 

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import {
-  COLUMBUS_DASHBOARD_BANDS,
+  getColumbusDashboardBands,
   columbusColumnSpanClass,
   type ColumbusDashboardTileId,
 } from '@/lib/tournaments/columbusDashboardLayout';
@@ -12,18 +13,22 @@ interface ColumbusDashboardGridProps {
 }
 
 export function ColumbusDashboardGrid({ renderTile, className }: ColumbusDashboardGridProps) {
+  const { isMobile } = useLayoutMode();
+  const bands = getColumbusDashboardBands(isMobile);
+
   return (
     <div className={cn('columbus-dashboard flex flex-col', className)}>
-      {COLUMBUS_DASHBOARD_BANDS.map((band, bandIndex) => (
+      {bands.map((band, bandIndex) => (
         <div
           key={`band-${bandIndex}`}
           className="columbus-dashboard__band grid grid-cols-1 gap-x-4 lg:grid-cols-12 lg:items-start"
         >
           {band.columns.map((column) => {
             const columnKey = column.tileIds.join('-');
-            const columnStackClass = 'flex flex-col gap-y-0 lg:gap-y-0';
+            const columnStackClass = 'flex flex-col gap-y-3';
+            const usePairFirstRow = !isMobile && column.pairFirstRow;
 
-            if (column.pairFirstRow && column.tileIds.length >= 2) {
+            if (usePairFirstRow && column.tileIds.length >= 2) {
               const [first, second, ...rest] = column.tileIds;
               return (
                 <div

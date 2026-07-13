@@ -65,10 +65,44 @@ export const COLUMBUS_DASHBOARD_BANDS: ColumbusDashboardBand[] = [
   },
 ];
 
+/**
+ * Mobile View All — single-column stack prioritizing high-impact stats.
+ * Podium deck links render inside the meta placard. Trivia spotlights appear last.
+ */
+export const COLUMBUS_MOBILE_BANDS: ColumbusDashboardBand[] = [
+  {
+    columns: [
+      {
+        colSpan: 12,
+        tileIds: [
+          'meta',
+          'top8Characters',
+          'topHomebases',
+          'characterAppearances',
+          'topReservists',
+          'topCataclysms',
+          'highestTop8Rate',
+          'mostPlaysWithoutTop8',
+          'newWinningCharacters',
+          'newTop8Characters',
+        ],
+      },
+    ],
+  },
+];
+
+export function getColumbusDashboardBands(isMobile: boolean): ColumbusDashboardBand[] {
+  return isMobile ? COLUMBUS_MOBILE_BANDS : COLUMBUS_DASHBOARD_BANDS;
+}
+
+export function getColumbusMobileTileOrder(): ColumbusDashboardTileId[] {
+  return COLUMBUS_MOBILE_BANDS.flatMap((band) => band.columns.flatMap((column) => column.tileIds));
+}
+
 /** Wireframe reference placements (col/row spans for docs and tile variants). */
 export const COLUMBUS_DASHBOARD_LAYOUT: DashboardLayoutPlacement[] = [
-  { id: 'meta', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 1, rowStart: 1 },
-  { id: 'highestTop8Rate', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 1, rowStart: 4 },
+  { id: 'meta', colSpan: 2, rowSpan: 4, tileVariant: 'sm', colStart: 1, rowStart: 1 },
+  { id: 'highestTop8Rate', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 1, rowStart: 5 },
   { id: 'characterAppearances', colSpan: 6, rowSpan: 6, tileVariant: 'wide', colStart: 3, rowStart: 1 },
   { id: 'mostPlaysWithoutTop8', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 9, rowStart: 1 },
   { id: 'newWinningCharacters', colSpan: 2, rowSpan: 3, tileVariant: 'sm', colStart: 11, rowStart: 1 },
@@ -169,9 +203,7 @@ export function getPlacementForTile(id: ColumbusDashboardTileId): DashboardLayou
   return placement;
 }
 
-export const COLUMBUS_TILE_ORDER: ColumbusDashboardTileId[] = COLUMBUS_DASHBOARD_LAYOUT.map(
-  (p) => p.id,
-);
+export const COLUMBUS_TILE_ORDER: ColumbusDashboardTileId[] = COLUMBUS_DASHBOARD_LAYOUT.map((p) => p.id);
 
 export function getColumbusDashboardGridPlacements(): DashboardLayoutPlacement[] {
   return COLUMBUS_DASHBOARD_LAYOUT.filter((placement) => !placement.stackIn);

@@ -1,0 +1,416 @@
+{
+  "prod_deck_id": "bb9a2144-9c15-4cb3-9c38-851e66972c74",
+  "name": "S1 Regionals (Columbus 3rd, Charlie Hanford)",
+  "description": "",
+  "reserve_character": "4027c873-0aab-4d0f-a1e1-daff5d405114",
+  "is_valid": true,
+  "is_limited": false,
+  "cards": [
+    {
+      "id": "a63ca4fe-b61c-412d-a82b-a6c06f14e5ce",
+      "type": "character",
+      "cardId": "5f6d0c4d-ab59-4704-b5ed-1e7a7b5e093b",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "07ef306e-4fa0-4a98-af99-87d71eac8773",
+      "type": "special",
+      "cardId": "5579bf9c-5a1a-4f38-8158-c913b640f233",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "d3c7fdd2-d0da-418d-9714-f12319797e01",
+      "type": "special",
+      "cardId": "dd397347-08b6-4953-9a89-df53ebeec89f",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "8178673e-e264-4cf7-907e-b8659b61bf21",
+      "type": "special",
+      "cardId": "f488e123-6bda-4278-8882-a036618f7822",
+      "quantity": 2,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "f7103388-9e9c-455c-83bc-48a8e9ebf4a0",
+      "type": "advanced-universe",
+      "cardId": "bb1992c5-6a2a-4ed3-8cf6-3ab9a9476813",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "19026a18-5d84-44ea-a2a7-d887ffd09fc0",
+      "type": "advanced-universe",
+      "cardId": "0938766e-9411-4184-b52f-fcef3cda890e",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "eb923738-f0df-495c-ae11-2865b6ff5106",
+      "type": "special",
+      "cardId": "9e9d3630-8565-4aad-979b-c4cd7cdcf7b4",
+      "quantity": 6,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "bdaed1c0-1135-4eec-aeb7-5628f2ad6bba",
+      "type": "special",
+      "cardId": "f63ceae4-79ba-4ad7-85b2-4913eac3b0f5",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "e7ad42c3-0853-488b-b50a-89236860162c",
+      "type": "special",
+      "cardId": "024dfd93-41b9-47a4-ad63-ea9724c6ef27",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "64579267-86e6-40ea-9469-20b049f7a260",
+      "type": "special",
+      "cardId": "e5b40c1f-bf02-44cf-a75b-4034f0ed060d",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "19ce4a44-04e5-409d-aa0f-63befb22a99c",
+      "type": "character",
+      "cardId": "127f077e-209b-4aeb-a6cd-6bac029ae662",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "c531921d-ee8f-4faa-9244-5698af6016b2",
+      "type": "special",
+      "cardId": "f7c53009-2743-4dda-a62f-d1e2200bb6f9",
+      "quantity": 3,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "52e9af83-6394-45ff-807b-3308c22317b5",
+      "type": "special",
+      "cardId": "1f39c927-5520-4079-bbc3-974261faacca",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "18c8471e-45f7-4462-982b-041390bb8a76",
+      "type": "special",
+      "cardId": "fce17890-4c62-4fc8-97a6-cfedf511c9e0",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "1c16f49e-3b84-4fd9-9b3c-dfd594200939",
+      "type": "character",
+      "cardId": "20a41323-fd16-411e-bf4b-bb4a4bfbbefd",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "7d810015-cb7e-41b8-a2b4-88ac03b4d31d",
+      "type": "character",
+      "cardId": "4027c873-0aab-4d0f-a1e1-daff5d405114",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "eb9301ad-7f33-42bc-8635-816b880ad227",
+      "type": "special",
+      "cardId": "d6cd56d6-cc3c-4b17-b3a6-3717c8aee0c0",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "69173724-3b9a-477d-9ca4-34bc25d514ed",
+      "type": "special",
+      "cardId": "f17dded9-04fc-4918-846c-1211cb84008c",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "15a4e57a-45d0-447e-bb85-ca1e1bbf6595",
+      "type": "special",
+      "cardId": "f5e2f5f5-4fc0-4933-b2c9-53eda7af4da6",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "b586eaef-016b-4a12-b89f-257cea4bcace",
+      "type": "special",
+      "cardId": "9978ca40-def4-4945-9a25-535b84adec4a",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "2bb0ba4c-b83a-409e-9978-84dd4c854029",
+      "type": "special",
+      "cardId": "5d4698a8-8d10-455c-8255-5a38d015924f",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "9804aa89-d302-4142-b7a2-23c8e23c2943",
+      "type": "special",
+      "cardId": "7d5e5de5-652a-4212-9f8e-15e70a29dc46",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "a9ad6e21-50d9-4ab5-b43d-ae91a7a54bfa",
+      "type": "special",
+      "cardId": "04c0379f-de0d-409d-b20f-adfd2c56f930",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "b2aae3cd-98d5-43de-a825-dfc824e3bf60",
+      "type": "special",
+      "cardId": "1d9912a2-e52c-43f4-a0a7-47b820f77789",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "e8b990a1-08f6-410d-b593-a74d36daee03",
+      "type": "special",
+      "cardId": "7bb3d401-8934-468f-b0aa-ca0bcd0b93c3",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "915e2375-26e4-42a8-980a-b4e014ca5ebb",
+      "type": "special",
+      "cardId": "d5f29709-d5e0-4441-a055-6d8e7e619f4e",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "9fe01114-f377-4182-a9ad-365fa16e5cc4",
+      "type": "special",
+      "cardId": "6fd9496a-0ae1-4802-8bbd-e241d76fcdda",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "db710b14-379c-401b-bd1d-d472119cdf96",
+      "type": "special",
+      "cardId": "2be10511-76fd-4133-917e-cd781beeef4e",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "643c5552-7488-460c-8338-538c9014a225",
+      "type": "special",
+      "cardId": "2aae579d-9c6f-49f7-8c4f-62b158e99796",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "d04a6e7b-dca5-44b1-95fb-4999b84753ea",
+      "type": "aspect",
+      "cardId": "01e7d8a7-2f8f-4969-9658-b1f47d5af327",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "785c69ee-e66d-4e9e-9008-af9b47a2cb10",
+      "type": "teamwork",
+      "cardId": "d06e8e10-ddb0-4cc9-9af0-eff8f2535e1a",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "22e9edd2-4801-4266-bb81-2d26eb7ff285",
+      "type": "ally-universe",
+      "cardId": "81f8c49c-e973-416e-8eeb-2968168bc9ec",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "88c5e85e-a19d-41b6-acd3-8912dcbfc3da",
+      "type": "ally-universe",
+      "cardId": "96e0f267-17a7-4314-be80-9531117875fd",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "540f26bf-3be0-4327-8909-f91e63ef98a9",
+      "type": "ally-universe",
+      "cardId": "070bc97f-2787-4a29-9b59-d297552dff15",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "98762839-ba25-41f1-9e1c-45e3308a2029",
+      "type": "ally-universe",
+      "cardId": "6aa78a57-b085-45b1-8f10-dcae39402a93",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "aef13c4d-f1a1-491a-ae37-fc68b5e1af4c",
+      "type": "event",
+      "cardId": "8b6d6708-f5ac-481c-a183-ef80e2a1115c",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "ac971136-a461-4967-9bc9-e849b2fc1526",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440018",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "67da0bf1-a86e-4a1e-ae14-c9a81720e713",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440017",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "512e2c21-a4a7-4ad0-b0c7-c549ec12ea67",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440015",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "a1055ab7-c48d-49af-906f-05cfe4cca7f6",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440016",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "be182b83-c72e-44f8-bee0-7f46cf34a67c",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440019",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "6adcc409-eb5b-4016-980d-9ae3e9e9ff7d",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440020",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "db0a27ed-0690-4e0b-998e-830e284f0168",
+      "type": "mission",
+      "cardId": "550e8400-e29b-41d4-a716-446655440021",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "0c1e0fd3-6d77-4747-8c2e-1e4ac201116d",
+      "type": "location",
+      "cardId": "a1091dcf-cf99-4ea0-9c32-3aa84b67ec5d",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "3e8d2e1c-2a44-4bf4-b985-05bad099f448",
+      "type": "power",
+      "cardId": "0166ac19-9025-4a1f-a059-f5c2d7564d7c",
+      "quantity": 3,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "db4bed9e-ef75-44e7-97b4-407d368c236e",
+      "type": "power",
+      "cardId": "4fb39a77-3151-4e3e-a2fd-100d77dcf5fd",
+      "quantity": 3,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "7285457f-7e0e-41b5-989d-1ff33efb6f27",
+      "type": "power",
+      "cardId": "af804c8f-0ccc-4a60-9717-e2635610287d",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "5319e508-b038-4306-91a3-92111bff8997",
+      "type": "power",
+      "cardId": "67d5e6a6-56ae-4cc1-b51b-addd0cc05fff",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "35d36105-35db-4e11-8b8d-1e29908c9481",
+      "type": "power",
+      "cardId": "5cab8be6-4a1b-48db-9f6a-e84dbe84ee38",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "2baa0a5d-0952-4fb5-bae0-ac8005213ffa",
+      "type": "power",
+      "cardId": "34c2cca7-c7c5-4f07-aacd-57c47c6b2c2f",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "8a010cb5-c180-4541-9014-838fc1bdcd0d",
+      "type": "power",
+      "cardId": "cbe1fcdd-08be-4529-8d75-ca7cc115def1",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "3844c0c4-99eb-4224-998c-f7d0a121e0c9",
+      "type": "power",
+      "cardId": "f195141f-d788-45cd-9440-26a3fbda2cae",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "cc720100-cdbb-4d55-ac9d-f4903cd4c38d",
+      "type": "power",
+      "cardId": "8fbafacf-6b7f-43f9-a4c8-9fbe824501e3",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "8e2e3191-a62c-4df2-9fbf-adb0190246cb",
+      "type": "power",
+      "cardId": "063cdb2c-2432-456b-9914-ce054107c9ac",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "b8121239-e690-4e62-bbe3-9a2fb48af466",
+      "type": "power",
+      "cardId": "8e5f3b08-018a-402c-9a90-b8b498bd4c31",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "a3e542d6-533d-4b83-b188-5e935279b131",
+      "type": "power",
+      "cardId": "0faff911-34cc-4136-ba80-eb41d87e591c",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "0d058d5d-3300-4544-944b-b543d96d021f",
+      "type": "power",
+      "cardId": "4fad5da0-a726-4306-99c2-9f934787929b",
+      "quantity": 1,
+      "exclude_from_draw": false
+    },
+    {
+      "id": "4ea48cde-58b9-4ba6-b845-cb2edcdcf6be",
+      "type": "power",
+      "cardId": "38e0c862-ce8c-404a-94ff-5aa5ab228fa6",
+      "quantity": 1,
+      "exclude_from_draw": false
+    }
+  ]
+}

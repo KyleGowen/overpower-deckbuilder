@@ -28,7 +28,7 @@ Generic text-only preview tile (no chart art zone). Single content column with t
 
 | Type | Component | When to use |
 |------|-----------|-------------|
-| Event placard | `TournamentPlacardTile` (`TournamentSummaryTile` alias) | Tournament meta: name, season, location, date, players, winner |
+| Event placard | `TournamentPlacardTile` (`TournamentSummaryTile` alias) | Tournament meta: name, season, location, date, players; winner on Home rail; View All adds podium deck links in placard footer |
 | Bar chart | `StatsChartTile` + `TournamentBarChart` | Ranked counts (characters, homebases, reserves, …) |
 | Pie chart | `StatsChartTile` + `TournamentPieChart` | Small categorical sets (cataclysms, ≤4 character groups) |
 | Card spotlight | `TournamentHighlightTile` | Single highlighted card + stat label |
@@ -84,10 +84,12 @@ Columbus Regional uses static JSON from `npm run build:regional-stats` →
 | File | Role |
 |------|------|
 | `PreviewTextTile.tsx` | Generic text-only preview tile |
-| `TournamentPlacardTile.tsx` | Tournament event placard |
+| `TournamentPlacardTile.tsx` | Tournament event placard (optional podium link footer on View All) |
 | `StatsChartTile.tsx` | Chart shell + caption |
 | `TournamentSummaryTile.tsx` | Re-export alias of `TournamentPlacardTile` |
 | `TournamentHighlightTile.tsx` | Single-card spotlight |
+| `TournamentPodiumDeckRows.tsx` | 1st/2nd/3rd deck link rows (placard footer) |
+| `TournamentPodiumDecksTile.tsx` | Standalone podium tile (legacy export; View All uses placard footer) |
 | `TournamentCharacterListTile.tsx` | List auto-routing |
 | `TournamentBarChart.tsx` / `TournamentPieChart.tsx` | Recharts previews |
 | `TournamentCharts.css` | Layout + `.preview-tile__*` tokens |
