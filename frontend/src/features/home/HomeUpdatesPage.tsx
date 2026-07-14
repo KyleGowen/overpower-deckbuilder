@@ -4,12 +4,15 @@ import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { Pagination } from '../../components/Pagination';
 import { RecentUpdatesList } from './RecentUpdatesList';
+import { useScrollToTopOnMount } from '../../lib/layout/useScrollToTopOnMount';
 import { useRecentUpdates } from './useRecentUpdates';
 import './HomeUpdatesPage.css';
 
 const UPDATES_PAGE_SIZE = 10;
 
 export default function HomeUpdatesPage() {
+  useScrollToTopOnMount();
+
   const [page, setPage] = useState(1);
   const updatesQuery = useRecentUpdates();
   const updates = updatesQuery.data ?? [];

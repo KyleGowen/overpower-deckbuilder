@@ -18,6 +18,7 @@ import { fetchCatalog } from '../../lib/api/catalog';
 import { stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
+import { useScrollToTopOnMount } from '../../lib/layout/useScrollToTopOnMount';
 
 import { CommunityDeckGrid } from './CommunityDeckGrid';
 
@@ -76,6 +77,7 @@ const COMMUNITY_SWIPE_BLOCK_SELECTOR =
 
 
 export default function CommunityPage() {
+  useScrollToTopOnMount();
 
   const { user, isGuest, tournamentDecksUserId } = useAuth();
 

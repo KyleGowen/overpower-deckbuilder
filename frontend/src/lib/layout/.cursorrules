@@ -34,3 +34,10 @@ user-agent** anywhere in the SPA — use these.
   Do **not** call `navigate(-1)` in effect cleanup (Strict Mode + router race) — use the
   controller's `attach`/`detach`/`close`/`reset`.
 - `cyclicalIndex.ts` — wrap-around index helper for prev/next card navigation.
+
+## `useScrollToTopOnMount.ts`
+
+- Call at the top of route-level pages reached via Home **View All** links so document
+  scroll resets on entry (`ColumbusRegionalPage`, `HomeUpdatesPage`, `CommunityPage`).
+- Uses `window.scrollTo({ top: 0, left: 0 })` once on mount — does not affect in-page tab
+  swipes on an already-mounted page.
