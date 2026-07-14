@@ -457,7 +457,7 @@ On mobile, `ColumbusDashboardGrid` uses `COLUMBUS_MOBILE_BANDS` — a single ful
 
 Desktop band layout is unchanged. Home horizontal stats rail still shows **Winner Name** in the meta placard (no deck links, no tournament deck fetch).
 
-**Placard footer classes:** `.preview-text-tile__footer` wraps `.tournament-podium-tile__list` inside `.tournament-placard-tile` on View All (desktop + mobile). Podium rows use a **stair-step width** (left-aligned): `.tournament-podium-tile__item--1st` **100%**, `--3rd` **72%** (`--podium-row-width-3rd`), `--2nd` **calc((100% + 72%) / 2)** ≈ **86%**; row buttons fill each item (`width: 100%`).
+**Placard footer classes:** `.preview-text-tile__footer` wraps `.tournament-podium-tile__list` inside `.tournament-placard-tile` on View All (desktop + mobile). `.preview-text-tile__content`, footer, and list all use **`width: 100%`** so percentage row widths resolve against the full placard (DashboardTile text layout uses `items-start`, which otherwise shrink-wraps the list). Podium rows use a **stair-step width** (left-aligned via `align-items: flex-start`): `--podium-row-width-1st` **calc(100% - var(--space-1))**, `--podium-row-width-2nd` **75%**, `--podium-row-width-3rd` **60%**; row buttons fill each item (`width: 100%`).
 
 **Podium deck IDs (prod-stable):** `81d73769-e987-4c85-a9f8-6629980a1807` (1st), `a6df76ba-c073-4e65-bc68-2046ee3919b1` (2nd), `bb9a2144-9c15-4cb3-9c38-851e66972c74` (3rd). Seeded via [`V309__Seed_columbus_podium_decks.sql`](migrations/V309__Seed_columbus_podium_decks.sql).
 

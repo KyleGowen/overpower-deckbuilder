@@ -347,6 +347,7 @@
 
 .preview-text-tile__content {
   flex: 1 1 auto;
+  width: 100%;
   min-height: calc(100cqw * 280 / 380 + 4.875rem);
   padding: var(--space-3) var(--space-4);
   box-sizing: border-box;
@@ -455,6 +456,7 @@
 /* ---- Podium deck links (placard footer on View All) ---- */
 .tournament-placard-tile .preview-text-tile__footer {
   margin-top: 0;
+  width: 100%;
 }
 
 .tournament-placard-tile .tournament-podium-tile__list {
@@ -462,8 +464,10 @@
 }
 
 .tournament-podium-tile__list {
-  --podium-row-width-3rd: 72%;
-  --podium-row-width-2nd: calc((100% + var(--podium-row-width-3rd)) / 2);
+  --podium-row-width-1st: calc(100% - var(--space-1));
+  --podium-row-width-2nd: 75%;
+  --podium-row-width-3rd: 60%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -479,7 +483,7 @@
 }
 
 .tournament-podium-tile__item--1st {
-  width: 100%;
+  width: var(--podium-row-width-1st);
 }
 
 .tournament-podium-tile__item--2nd {
