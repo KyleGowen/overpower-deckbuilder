@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { assetUrl } from '../../../lib/images/cardImages';
 import type { CompareOp, NumericFieldDef } from '../filters/dbvFilterTypes';
 import { OP_LABELS, STAT_ICON_PATHS } from '../filters/dbvFilterTypes';
@@ -7,6 +7,7 @@ import type { UseDbvFiltersReturn } from '../filters/useDbvFilters';
 interface DbvNumericStatInlineProps {
   fields: NumericFieldDef[];
   filters: UseDbvFiltersReturn;
+  trailingAction?: ReactNode;
 }
 
 function StatCell({
@@ -101,12 +102,13 @@ function StatCell({
   );
 }
 
-export function DbvNumericStatInline({ fields, filters }: DbvNumericStatInlineProps) {
+export function DbvNumericStatInline({ fields, filters, trailingAction }: DbvNumericStatInlineProps) {
   return (
     <div className="dbv-stat-inline" role="group" aria-label="Stat filters">
       {fields.map((field) => (
         <StatCell key={field.key} field={field} filters={filters} />
       ))}
+      {trailingAction}
     </div>
   );
 }

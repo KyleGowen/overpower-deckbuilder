@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CardTile } from '../../components/CardTile';
+import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import type { CharacterStack } from '../../lib/catalog/characterStacks';
 import { stackCardsInAddOrder } from '../../lib/catalog/characterStacks';
 
@@ -8,6 +9,8 @@ export interface CharacterStackRowProps {
   inDeckCount: number;
   totalCount: number;
   onAddStack: () => void;
+  onCardHover?: (card: CatalogCard, catalogType: CatalogType) => void;
+  onCardHoverEnd?: () => void;
 }
 
 export function CharacterStackRow({
@@ -15,6 +18,8 @@ export function CharacterStackRow({
   inDeckCount,
   totalCount,
   onAddStack,
+  onCardHover,
+  onCardHoverEnd,
 }: CharacterStackRowProps) {
   const [addedFlash, setAddedFlash] = useState(false);
   const isComplete = inDeckCount >= totalCount && totalCount > 0;
@@ -51,6 +56,8 @@ export function CharacterStackRow({
           catalogType="characters"
           showMeta={false}
           showFoilEffect={false}
+          onHoverStart={() => onCardHover?.(stack.character, 'characters')}
+          onHoverEnd={onCardHoverEnd}
         />
       </div>
       {portraitCards.length > 0 ? (
@@ -62,6 +69,8 @@ export function CharacterStackRow({
               catalogType={catalogType}
               showMeta={false}
               showFoilEffect={false}
+              onHoverStart={() => onCardHover?.(card, catalogType)}
+              onHoverEnd={onCardHoverEnd}
             />
           ))}
         </div>

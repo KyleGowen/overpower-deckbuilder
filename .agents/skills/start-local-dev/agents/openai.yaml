@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start Local Dev"
+  short_description: "Start Excelsior dev servers and verify health"
+  default_prompt: "Use $start-local-dev to start the Excelsior local API and frontend, then verify /health."

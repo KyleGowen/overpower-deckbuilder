@@ -1,0 +1,5 @@
+# docs/future
+
+Holds proposed, unshipped feature documents. Keep `README.md` as the directory index and link each specific proposal from it.
+
+Do not describe future proposals here as current shipped behavior. When a proposal ships, update or move the relevant content into `docs/current/` and the feature-local docs.

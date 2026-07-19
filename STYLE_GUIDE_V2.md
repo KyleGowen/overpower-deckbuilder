@@ -336,6 +336,23 @@ Top-right overlay on Add Cards catalog tiles ([`AddCardsQtyOverlay.css`](fronten
 
 Mobile swipe: `.add-cards__qty` and `.add-cards__add` are in `ADD_CARDS_SWIPE_BLOCK_SELECTOR` so tab swipes do not fire when adjusting quantity.
 
+### Deck Editor — Add Cards wide desktop context pane
+
+On desktop viewports **above 1200px**, Add Cards expands the right `SlideOutPanel` from the normal **575px** drawer to `.add-cards-slideout { width: min(1060px, calc(100vw - 72px)) }`. Below 1200px, the drawer uses the existing single-pane layout and inline filters.
+
+| Element | Tokens / values |
+|---|---|
+| Shell (`.add-cards-shell`) | Wide desktop `display: grid`; columns `minmax(360px, 1fr) 575px`; `gap: var(--space-4)` |
+| Context pane (`.add-cards__context-pane`) | Wide desktop only; `grid-template-rows: minmax(0, 20%) minmax(0, 15%) minmax(0, 65%)`; right separator `1px solid var(--color-border)`; no self scrolling |
+| Team heading (`.add-cards__pane-heading`) | `--font-size-xs`, uppercase, `--color-text-muted`, `letter-spacing: 0.05em`, `4px` bottom margin |
+| Team rows (`.add-cards__team-row`) | `grid-template-columns: minmax(185px, 1fr) minmax(220px, auto)`; `min-height: 35px`; every slot row, including the fourth, keeps the same bottom rule; team section has `10px` bottom padding before filters |
+| Team stat icons (`.add-cards__team-stat-list .stat-icon-badge--md`) | Large readable generated `StatIconBadge` values; 38×38px in the context pane for Energy, Combat, Brute Force, Intelligence, and Threat Value |
+| Compact filters (`.add-cards__filters`, `.add-cards__dynamic-filters`) | Set + Hide Unusables plus type-specific DBV-style controls; no top rule in the wide context pane; `20px` top buffer above the Set row; filter text/icons/controls are scaled about 10% larger than the compact baseline; controls wrap inside the 15% filter region without horizontal scrolling; numeric stat filters use a compact 3-column grid so character stats fit in 2 rows, with `Clear` occupying the empty sixth cell when active; Location Threat Value uses a subtly larger single-filter treatment; Type and Function icon groups stack as rows with a fixed 76px label column so first icons align vertically; no active-filter summary chips in this compact pane |
+| Hover preview (`.add-cards__hover-preview`) | Bottom 65%; image-only `CardImage` preview; hidden overflow so the full-card image scales to fit the pane without detail text or buttons |
+| Placeholder (`.add-cards__hover-placeholder`) | Centered muted text, `--font-size-sm`, top border separator |
+
+**Behavior:** Hovering a result-pane card or filled team row populates the preview with the selected full-card image. Clicking a result card still adds it; the preview remains until the pointer leaves the hovered card/team row. Search, type tab, Set, Hide Unusables, current page, and dynamic filters persist while closing/reopening Add Cards in the same deck-editor session. Dynamic filters are cached per card type so tabbing away and back restores that type's selections; the cache resets when the deck editor unloads.
+
 ### Deck Editor — Instance tiles
 Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash on every type; **Save** aggregates instances by `(type, cardId)` for the API.
 

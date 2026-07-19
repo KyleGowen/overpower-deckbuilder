@@ -21,6 +21,8 @@ interface CardTileProps {
   hasFoilVersion?: boolean;
   /** When false, suppresses the prismatic foil overlay on foil printings (DBV, Add Cards). Default true. */
   showFoilEffect?: boolean;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
 }
 
 function tileOrientationClass(catalogType?: CatalogType): string {
@@ -47,6 +49,8 @@ export const CardTile = memo(function CardTile({
   catalogType,
   hasFoilVersion = false,
   showFoilEffect = true,
+  onHoverStart,
+  onHoverEnd,
 }: CardTileProps) {
   const name = cardDisplayName(card);
   const imagePath = (card.image_path as string) || (card.image as string);
@@ -54,7 +58,11 @@ export const CardTile = memo(function CardTile({
   const orientationClass = tileOrientationClass(catalogType);
 
   return (
-    <article className={`card-tile ${dimmed ? 'card-tile--dimmed' : ''} ${orientationClass}`.trim()}>
+    <article
+      className={`card-tile ${dimmed ? 'card-tile--dimmed' : ''} ${orientationClass}`.trim()}
+      onPointerEnter={onHoverStart}
+      onPointerLeave={onHoverEnd}
+    >
       <button type="button" className="card-tile__art" onClick={onClick} aria-label={`View ${name}`}>
         <CardImage
           imagePath={imagePath}

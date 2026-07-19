@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CardTile } from '../../components/CardTile';
-import type { CatalogCard } from '../../lib/api/types';
+import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import type { MissionSet } from '../../lib/catalog/missionSets';
 import { missionSetCardsInAddOrder } from '../../lib/catalog/missionSets';
 
@@ -11,6 +11,8 @@ export interface MissionSetRowProps {
   renderOverlay: (card: CatalogCard, inDeck: number) => ReactNode;
   onAddMission: (card: CatalogCard) => void;
   onAddSet: () => void;
+  onCardHover?: (card: CatalogCard, catalogType: CatalogType) => void;
+  onCardHoverEnd?: () => void;
 }
 
 export function MissionSetRow({
@@ -20,6 +22,8 @@ export function MissionSetRow({
   renderOverlay,
   onAddMission,
   onAddSet,
+  onCardHover,
+  onCardHoverEnd,
 }: MissionSetRowProps) {
   const [addedFlash, setAddedFlash] = useState(false);
 
@@ -64,6 +68,8 @@ export function MissionSetRow({
               showFoilEffect={false}
               onClick={() => onAddMission(card)}
               overlay={renderOverlay(card, inDeck)}
+              onHoverStart={() => onCardHover?.(card, 'missions')}
+              onHoverEnd={onCardHoverEnd}
             />
           );
         })}

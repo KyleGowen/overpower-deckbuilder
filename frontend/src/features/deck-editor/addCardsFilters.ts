@@ -8,6 +8,8 @@ import {
 import type { CharacterStack } from '../../lib/catalog/characterStacks';
 import { stackCardsInAddOrder } from '../../lib/catalog/characterStacks';
 import type { MissionSet } from '../../lib/catalog/missionSets';
+import type { DbvFilterState } from '../database/filters/dbvFilterTypes';
+import { cardMatchesDbvFilters } from '../database/filters/dbvFilterPredicates';
 import {
   catalogTypeSupportsHideUnusables,
   isCatalogCardUsable,
@@ -20,6 +22,7 @@ export interface AddCardsFilterOptions {
   setFilter: string;
   hideUnusables: boolean;
   usabilityCtx: DeckUsabilityContext;
+  dynamicFilters?: DbvFilterState;
 }
 
 export function matchesSetFilter(card: CatalogCard, setFilter: string): boolean {
@@ -35,6 +38,9 @@ export function cardPassesAddCardsFilters(
   const q = options.searchQuery.trim();
   if (q && !cardMatchesSearchQuery(card, q)) return false;
   if (!matchesSetFilter(card, options.setFilter)) return false;
+  if (options.dynamicFilters && !cardMatchesDbvFilters(card, catalogType, options.dynamicFilters)) {
+    return false;
+  }
 
   if (
     options.hideUnusables &&

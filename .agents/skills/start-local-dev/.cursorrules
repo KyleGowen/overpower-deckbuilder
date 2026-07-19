@@ -1,0 +1,5 @@
+# start-local-dev skill
+
+Repo-local Codex skill for starting the Excelsior development servers and verifying `/health`.
+
+Keep `SKILL.md` concise. Put deterministic startup and health-check behavior in `scripts/start_local_dev.py`.

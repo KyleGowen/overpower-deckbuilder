@@ -5,6 +5,7 @@ import {
   ADD_CARDS_TAB_ORDER,
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
+  cardDisplayName,
   type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import {
@@ -15,9 +16,11 @@ import {
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { isOnePerDeckCatalogCard } from '../../lib/decks/deckCardControls';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
+import { CardImage } from '../../components/CardImage';
 import { CardTile } from '../../components/CardTile';
 import { Pagination } from '../../components/Pagination';
 import { SlideOutPanel } from '../../components/SlideOutPanel';
+import { StatIconBadge } from '../../components/StatIconBadge';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { IconSearch, IconClose } from '../../components/icons';
@@ -64,6 +67,7 @@ import {
 } from './addCardsFilters';
 import { AddCardsFilterBar } from './AddCardsFilterBar';
 import { buildDeckUsabilityContext, effectiveHideUnusablesForTab, tabSupportsHideUnusables } from '../../lib/deck-usability';
+import { useDbvFilters } from '../database/filters/useDbvFilters';
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
@@ -74,6 +78,7 @@ const ADD_CARDS_SEARCH_PLACEHOLDER = 'Search name, character, or card text...';
 const STACKS_SEARCH_PLACEHOLDER = 'Search character names...';
 const ADD_CARDS_SEARCH_ARIA_LABEL = 'Search cards to add';
 const STACKS_SEARCH_ARIA_LABEL = 'Search character names';
+const EMPTY_CHARACTER_SLOT_COUNT = 4;
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [v, setV] = useState(value);
@@ -95,6 +100,90 @@ export interface AddCardsPanelProps {
   deckCatalogIndex?: Map<string, CatalogCard>;
 }
 
+interface HoveredAddCard {
+  card: CatalogCard;
+  catalogType: CatalogType;
+}
+
+const CHARACTER_STAT_ROWS: Array<{
+  key: 'energy' | 'combat' | 'brute_force' | 'intelligence' | 'threat_level';
+  icon: 'energy' | 'combat' | 'brute_force' | 'intelligence' | 'threat_level';
+  label: string;
+}> = [
+  { key: 'energy', icon: 'energy', label: 'Energy' },
+  { key: 'combat', icon: 'combat', label: 'Combat' },
+  { key: 'brute_force', icon: 'brute_force', label: 'Brute Force' },
+  { key: 'intelligence', icon: 'intelligence', label: 'Intelligence' },
+  { key: 'threat_level', icon: 'threat_level', label: 'Threat Value' },
+];
+
+function numericStat(card: CatalogCard, key: (typeof CHARACTER_STAT_ROWS)[number]['key']): number {
+  const value = Number(card[key] ?? 0);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function AddCardsTeamStats({
+  cards,
+  deckCatalogIndex,
+  onCardHover,
+  onCardHoverEnd,
+}: {
+  cards: DeckCardEntry[];
+  deckCatalogIndex?: Map<string, CatalogCard>;
+  onCardHover: (card: CatalogCard, catalogType: CatalogType) => void;
+  onCardHoverEnd: () => void;
+}) {
+  const characterCards = cards
+    .filter((entry) => entry.type === 'character')
+    .slice(0, EMPTY_CHARACTER_SLOT_COUNT)
+    .map((entry) => deckCatalogIndex?.get(`${entry.type}:${entry.cardId}`) ?? null);
+  const rows = [
+    ...characterCards,
+    ...Array.from({ length: Math.max(0, EMPTY_CHARACTER_SLOT_COUNT - characterCards.length) }, () => null),
+  ];
+
+  return (
+    <section className="add-cards__team-stats" aria-label="Team character stats">
+      <div className="add-cards__pane-heading">
+        <span>Team</span>
+        <span>{characterCards.filter(Boolean).length}/4</span>
+      </div>
+      <div className="add-cards__team-rows">
+        {rows.map((card, index) => (
+          <div
+            key={card?.id ?? `empty-${index}`}
+            className={`add-cards__team-row${card ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'}`}
+            tabIndex={card ? 0 : undefined}
+            onPointerEnter={() => {
+              if (card) onCardHover(card, 'characters');
+            }}
+            onPointerLeave={card ? onCardHoverEnd : undefined}
+            onFocus={() => {
+              if (card) onCardHover(card, 'characters');
+            }}
+            onBlur={card ? onCardHoverEnd : undefined}
+          >
+            <span className="add-cards__team-name">
+              {card ? cardDisplayName(card) : `Character ${index + 1}`}
+            </span>
+            <span className="add-cards__team-stat-list">
+              {CHARACTER_STAT_ROWS.map(({ key, icon, label }) => (
+                <StatIconBadge
+                  key={key}
+                  type={icon}
+                  value={card ? numericStat(card, key) : 0}
+                  size="md"
+                  title={card ? `${cardDisplayName(card)} ${label}` : `Empty slot ${label}`}
+                />
+              ))}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function AddCardsPanel({
   open,
   onClose,
@@ -113,26 +202,19 @@ export function AddCardsPanel({
   const [setFilter, setSetFilter] = useState('');
   const [hideUnusables, setHideUnusables] = useState(false);
   const [page, setPage] = useState(1);
+  const [hoveredCard, setHoveredCard] = useState<HoveredAddCard | null>(null);
   const debouncedSearch = useDebounced(search);
 
   const isAllTab = tab === 'all';
   const isStacksTab = tab === 'stacks';
   const isMissionsTab = tab === 'missions';
   const activeType = isAllTab || isStacksTab ? null : tab;
-
-  useEffect(() => {
-    if (open) {
-      setTab('all');
-      setSearch('');
-      setSetFilter('');
-      setHideUnusables(false);
-      setPage(1);
-    }
-  }, [open]);
+  const dynamicFilterType = activeType ?? 'characters';
+  const dynamicFilters = useDbvFilters(dynamicFilterType, { persistByCatalogType: true });
 
   useEffect(() => {
     setPage(1);
-  }, [tab, debouncedSearch, setFilter, hideUnusables]);
+  }, [tab, debouncedSearch, setFilter, hideUnusables, dynamicFilters.state]);
 
   const goToRelativeTab = useCallback(
     (delta: 1 | -1) => {
@@ -320,8 +402,9 @@ export function AddCardsPanel({
       setFilter,
       hideUnusables: effectiveHideUnusables,
       usabilityCtx,
+      dynamicFilters: activeType ? dynamicFilters.state : undefined,
     }),
-    [debouncedSearch, setFilter, effectiveHideUnusables, usabilityCtx],
+    [debouncedSearch, setFilter, effectiveHideUnusables, usabilityCtx, activeType, dynamicFilters.state],
   );
 
   const hideUnusablesDisabled = !tabSupportsHideUnusables(tab);
@@ -440,6 +523,14 @@ export function AddCardsPanel({
     onAdd(card, catalogType);
   };
 
+  const showHoverCard = useCallback((card: CatalogCard, catalogType: CatalogType) => {
+    setHoveredCard({ card, catalogType });
+  }, []);
+
+  const clearHoverCard = useCallback(() => {
+    setHoveredCard(null);
+  }, []);
+
   const handleRemoveCard = (card: CatalogCard, catalogType: CatalogType) => {
     const deckType = CATALOG_TYPE_BY_SLUG[catalogType].deckType;
     const variantMap = variantLookupByType.get(catalogType) ?? new Map<string, string[]>();
@@ -489,6 +580,7 @@ export function AddCardsPanel({
       ? allCatalogQuery.isError
       : catalogQuery.isError;
   const hasResults = totalItems > 0;
+  const dynamicFilterCards = activeType ? cardsByType[activeType] ?? [] : [];
 
   return (
     <SlideOutPanel
@@ -497,6 +589,7 @@ export function AddCardsPanel({
       title="Add Cards"
       ariaLabel="Add cards"
       width={575}
+      className="add-cards-slideout"
       footer={
         <div className="add-cards__footer">
           <button type="button" className="btn btn-primary add-cards__done" onClick={onClose}>
@@ -505,64 +598,113 @@ export function AddCardsPanel({
         </div>
       }
     >
-      <div className="add-cards" ref={addCardsRef}>
-        <div className="add-cards__search">
-          <IconSearch className="add-cards__search-icon" />
-          <input
-            type="search"
-            placeholder={isStacksTab ? STACKS_SEARCH_PLACEHOLDER : ADD_CARDS_SEARCH_PLACEHOLDER}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label={isStacksTab ? STACKS_SEARCH_ARIA_LABEL : ADD_CARDS_SEARCH_ARIA_LABEL}
+      <div className="add-cards-shell">
+        <aside className="add-cards__context-pane" aria-label="Add cards context">
+          <AddCardsTeamStats
+            cards={cards}
+            deckCatalogIndex={deckCatalogIndex}
+            onCardHover={showHoverCard}
+            onCardHoverEnd={clearHoverCard}
           />
-        </div>
-        <div className="add-cards__types" ref={typeTabsRef} role="tablist" aria-label="Card types">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isAllTab}
-            data-add-cards-tab="all"
-            className={`add-cards__type ${isAllTab ? 'is-active' : ''}`}
-            onClick={() => setTab('all')}
-          >
-            All
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isStacksTab}
-            data-add-cards-tab="stacks"
-            className={`add-cards__type ${isStacksTab ? 'is-active' : ''}`}
-            onClick={() => setTab('stacks')}
-          >
-            Stacks
-          </button>
-          {CATALOG_TYPES.map((meta) => (
+
+          <AddCardsFilterBar
+            sets={setsQuery.data ?? []}
+            setFilter={setFilter}
+            onSetFilterChange={setSetFilter}
+            hideUnusables={effectiveHideUnusables}
+            onHideUnusablesChange={setHideUnusables}
+            hideUnusablesDisabled={hideUnusablesDisabled}
+            hideUnusablesDisabledReason={hideUnusablesDisabledReason}
+            activeType={activeType}
+            dynamicFilters={activeType ? dynamicFilters : null}
+            dynamicFilterCards={dynamicFilterCards}
+          />
+
+          <section className="add-cards__hover-preview" aria-label="Hovered card preview">
+            {hoveredCard ? (
+              <div className="add-cards__hover-art">
+                <CardImage
+                  imagePath={hoveredCard.card.image_path ?? hoveredCard.card.image}
+                  alt={cardDisplayName(hoveredCard.card)}
+                  catalogType={hoveredCard.catalogType}
+                  useThumbnail={false}
+                  loading="eager"
+                  className="card-image--contain add-cards__hover-art-image"
+                  isFoil={hoveredCard.card.is_foil}
+                  showFoilEffect={false}
+                />
+              </div>
+            ) : (
+              <div className="add-cards__hover-placeholder">
+                <span>Hover for full image.</span>
+              </div>
+            )}
+          </section>
+        </aside>
+
+        <div className="add-cards" ref={addCardsRef} onPointerLeave={clearHoverCard}>
+          <div className="add-cards__search">
+            <IconSearch className="add-cards__search-icon" />
+            <input
+              type="search"
+              placeholder={isStacksTab ? STACKS_SEARCH_PLACEHOLDER : ADD_CARDS_SEARCH_PLACEHOLDER}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label={isStacksTab ? STACKS_SEARCH_ARIA_LABEL : ADD_CARDS_SEARCH_ARIA_LABEL}
+            />
+          </div>
+          <div className="add-cards__types" ref={typeTabsRef} role="tablist" aria-label="Card types">
             <button
-              key={meta.type}
               type="button"
               role="tab"
-              aria-selected={tab === meta.type}
-              data-add-cards-tab={meta.type}
-              className={`add-cards__type ${tab === meta.type ? 'is-active' : ''}`}
-              onClick={() => setTab(meta.type)}
+              aria-selected={isAllTab}
+              data-add-cards-tab="all"
+              className={`add-cards__type ${isAllTab ? 'is-active' : ''}`}
+              onClick={() => setTab('all')}
             >
-              {meta.shortLabel}
+              All
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isStacksTab}
+              data-add-cards-tab="stacks"
+              className={`add-cards__type ${isStacksTab ? 'is-active' : ''}`}
+              onClick={() => setTab('stacks')}
+            >
+              Stacks
+            </button>
+            {CATALOG_TYPES.map((meta) => (
+              <button
+                key={meta.type}
+                type="button"
+                role="tab"
+                aria-selected={tab === meta.type}
+                data-add-cards-tab={meta.type}
+                className={`add-cards__type ${tab === meta.type ? 'is-active' : ''}`}
+                onClick={() => setTab(meta.type)}
+              >
+                {meta.shortLabel}
+              </button>
+            ))}
+          </div>
 
-        <AddCardsFilterBar
-          sets={setsQuery.data ?? []}
-          setFilter={setFilter}
-          onSetFilterChange={setSetFilter}
-          hideUnusables={effectiveHideUnusables}
-          onHideUnusablesChange={setHideUnusables}
-          hideUnusablesDisabled={hideUnusablesDisabled}
-          hideUnusablesDisabledReason={hideUnusablesDisabledReason}
-        />
+          <div className="add-cards__inline-filters">
+            <AddCardsFilterBar
+              sets={setsQuery.data ?? []}
+              setFilter={setFilter}
+              onSetFilterChange={setSetFilter}
+              hideUnusables={effectiveHideUnusables}
+              onHideUnusablesChange={setHideUnusables}
+              hideUnusablesDisabled={hideUnusablesDisabled}
+              hideUnusablesDisabledReason={hideUnusablesDisabledReason}
+              activeType={activeType}
+              dynamicFilters={activeType ? dynamicFilters : null}
+              dynamicFilterCards={dynamicFilterCards}
+            />
+          </div>
 
-        {isLoading ? (
+          {isLoading ? (
           <LoadingState label="Loading..." />
         ) : isError ? (
           <EmptyState title="Could not load cards" message="Try again in a moment." icon={<IconSearch />} />
@@ -577,6 +719,8 @@ export function AddCardsPanel({
                 inDeckCount={stackInDeckCount(stack)}
                 totalCount={stackTotalCardCount(stack)}
                 onAddStack={() => handleAddStack(stack)}
+                onCardHover={showHoverCard}
+                onCardHoverEnd={clearHoverCard}
               />
             ))}
           </div>
@@ -591,6 +735,8 @@ export function AddCardsPanel({
                 renderOverlay={(card, _inDeck) => renderQtyOverlay(card, 'missions')}
                 onAddMission={(card) => handleAddCard(card, 'missions')}
                 onAddSet={() => handleAddMissionSet(set)}
+                onCardHover={showHoverCard}
+                onCardHoverEnd={clearHoverCard}
               />
             ))}
           </div>
@@ -614,6 +760,8 @@ export function AddCardsPanel({
                         showFoilEffect={false}
                         onClick={() => handleAddCard(card, catalogType)}
                         overlay={renderQtyOverlay(card, catalogType)}
+                        onHoverStart={() => showHoverCard(card, catalogType)}
+                        onHoverEnd={clearHoverCard}
                       />
                     );
                   })}
@@ -634,6 +782,8 @@ export function AddCardsPanel({
                   showFoilEffect={false}
                   onClick={() => handleAddCard(card, catalogType)}
                   overlay={renderQtyOverlay(card, catalogType)}
+                  onHoverStart={() => showHoverCard(card, catalogType)}
+                  onHoverEnd={clearHoverCard}
                 />
               );
             })}
@@ -649,6 +799,7 @@ export function AddCardsPanel({
             onPageChange={setPage}
           />
         ) : null}
+        </div>
       </div>
     </SlideOutPanel>
   );

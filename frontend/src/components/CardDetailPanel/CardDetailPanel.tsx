@@ -48,7 +48,11 @@ interface CardDetailPanelProps {
   prePlaced?: boolean;
   /** Deck editor: toggle Pre-Placed for the selected deck card. */
   onTogglePrePlaced?: () => void;
+  /** Embedded previews can suppress text that duplicates readable card art. */
+  hideTextSections?: boolean;
 }
+
+export type CardDetailContentProps = Omit<CardDetailPanelProps, 'open' | 'onClose'>;
 
 /** Internal / non-display fields hidden from the auto-generated field list. */
 const HIDDEN_FIELDS = new Set([
@@ -99,11 +103,9 @@ function detailImageClass(type: CatalogType | null): string {
   return '';
 }
 
-export function CardDetailPanel({
+export function CardDetailContent({
   card,
   type,
-  open,
-  onClose,
   actions,
   hasFoil,
   isFoil,
@@ -114,7 +116,8 @@ export function CardDetailPanel({
   prePlacedEligible,
   prePlaced,
   onTogglePrePlaced,
-}: CardDetailPanelProps) {
+  hideTextSections,
+}: CardDetailContentProps) {
   if (!card) return null;
 
   const name = cardDisplayName(card);
@@ -133,121 +136,131 @@ export function CardDetailPanel({
   const showPrintings = Boolean(printings && printings.length > 1);
 
   return (
-    <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
-      <div className="card-detail">
-        <div className={`card-detail__image${detailImageClass(type)}`}>
-          <CardImage
-            key={card.id}
-            imagePath={(card.image_path as string) || (card.image as string)}
-            catalogType={type ?? undefined}
-            alt={name}
-            useThumbnail={false}
-            className="card-image--contain"
-            isFoil={showFoilEffect && Boolean(isFoil ?? isFoilCard(card))}
-            foilSeed={card.id}
-            foilSize="hero"
-            foilEagerIntro
-          />
-        </div>
-
-        <div className="card-detail__tags">
-          {typeLabel ? <span className="badge">{typeLabel}</span> : null}
-          {card.set ? <span className="badge">{card.set}</span> : null}
-          {card.rarity ? <span className="badge">{card.rarity}</span> : null}
-          {card.set_number ? <span className="badge">#{card.set_number}</span> : null}
-        </div>
-
-        {actions ? <div className="card-detail__actions">{actions}</div> : null}
-
-        {prePlacedEligible && onTogglePrePlaced ? (
-          <div className="card-detail__preplaced">
-            <button
-              type="button"
-              className={`card-detail__preplaced-btn${prePlaced ? ' is-active' : ''}`}
-              onClick={onTogglePrePlaced}
-              aria-pressed={Boolean(prePlaced)}
-              title={
-                prePlaced
-                  ? 'Unmark as Pre-Placed (include in Draw Hand)'
-                  : 'Mark as Pre-Placed (exclude from Draw Hand)'
-              }
-            >
-              Pre-Placed
-            </button>
-            <p className="card-detail__preplaced-hint">
-              {prePlaced
-                ? 'Placed at game start — excluded from Draw Hand.'
-                : 'Place at game start to exclude this card from Draw Hand.'}
-            </p>
-          </div>
-        ) : null}
-
-        {ability ? (
-          <section className="card-detail__section">
-            <h4 className="card-detail__section-title">Ability</h4>
-            <p className="card-detail__text">{ability}</p>
-          </section>
-        ) : null}
-
-        {showPrintings ? (
-          <section className="card-detail__section">
-            <h4 className="card-detail__section-title">Printings</h4>
-            <ul className="card-detail__printings">
-              {printings!.map((row) => {
-                const labelParts = [row.setDisplayName];
-                if (row.setNumber) labelParts.push(`#${row.setNumber}`);
-                const label = labelParts.join(' · ');
-                return (
-                  <li className="card-detail__printing-row" key={row.card.id}>
-                    <span className="card-detail__printing-meta">{label}</span>
-                    <button
-                      type="button"
-                      className={`card-detail__printing-apply${row.isCurrent ? ' card-detail__printing-apply--current' : ''}`}
-                      disabled={row.isCurrent}
-                      aria-disabled={row.isCurrent}
-                      onClick={() => onApplyPrinting?.(row.card.id)}
-                    >
-                      {row.isCurrent ? 'Applied' : 'Apply'}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
-
-        {showDetails ? (
-          <section className="card-detail__section">
-            <h4 className="card-detail__section-title">Details</h4>
-            <dl className="card-detail__fields">
-              {setLabel ? (
-                <div className="card-detail__field">
-                  <dt>Set</dt>
-                  <dd>{setLabel}</dd>
-                </div>
-              ) : null}
-              {isFoil !== undefined ? (
-                <div className="card-detail__field">
-                  <dt>Is Foil</dt>
-                  <dd>{isFoil ? 'Yes' : 'No'}</dd>
-                </div>
-              ) : null}
-              {hasFoil !== undefined ? (
-                <div className="card-detail__field">
-                  <dt>Has Foil</dt>
-                  <dd>{hasFoil ? 'Yes' : 'No'}</dd>
-                </div>
-              ) : null}
-              {extraFields.map(([key, value]) => (
-                <div className="card-detail__field" key={key}>
-                  <dt>{humanizeKey(key)}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ) : null}
+    <div className="card-detail">
+      <div className={`card-detail__image${detailImageClass(type)}`}>
+        <CardImage
+          key={card.id}
+          imagePath={(card.image_path as string) || (card.image as string)}
+          catalogType={type ?? undefined}
+          alt={name}
+          useThumbnail={false}
+          className="card-image--contain"
+          isFoil={showFoilEffect && Boolean(isFoil ?? isFoilCard(card))}
+          foilSeed={card.id}
+          foilSize="hero"
+          foilEagerIntro
+        />
       </div>
+
+      <div className="card-detail__tags">
+        {typeLabel ? <span className="badge">{typeLabel}</span> : null}
+        {card.set ? <span className="badge">{card.set}</span> : null}
+        {card.rarity ? <span className="badge">{card.rarity}</span> : null}
+        {card.set_number ? <span className="badge">#{card.set_number}</span> : null}
+      </div>
+
+      {actions ? <div className="card-detail__actions">{actions}</div> : null}
+
+      {prePlacedEligible && onTogglePrePlaced ? (
+        <div className="card-detail__preplaced">
+          <button
+            type="button"
+            className={`card-detail__preplaced-btn${prePlaced ? ' is-active' : ''}`}
+            onClick={onTogglePrePlaced}
+            aria-pressed={Boolean(prePlaced)}
+            title={
+              prePlaced
+                ? 'Unmark as Pre-Placed (include in Draw Hand)'
+                : 'Mark as Pre-Placed (exclude from Draw Hand)'
+            }
+          >
+            Pre-Placed
+          </button>
+          <p className="card-detail__preplaced-hint">
+            {prePlaced
+              ? 'Placed at game start — excluded from Draw Hand.'
+              : 'Place at game start to exclude this card from Draw Hand.'}
+          </p>
+        </div>
+      ) : null}
+
+      {ability && !hideTextSections ? (
+        <section className="card-detail__section">
+          <h4 className="card-detail__section-title">Ability</h4>
+          <p className="card-detail__text">{ability}</p>
+        </section>
+      ) : null}
+
+      {showPrintings ? (
+        <section className="card-detail__section">
+          <h4 className="card-detail__section-title">Printings</h4>
+          <ul className="card-detail__printings">
+            {printings!.map((row) => {
+              const labelParts = [row.setDisplayName];
+              if (row.setNumber) labelParts.push(`#${row.setNumber}`);
+              const label = labelParts.join(' · ');
+              return (
+                <li className="card-detail__printing-row" key={row.card.id}>
+                  <span className="card-detail__printing-meta">{label}</span>
+                  <button
+                    type="button"
+                    className={`card-detail__printing-apply${row.isCurrent ? ' card-detail__printing-apply--current' : ''}`}
+                    disabled={row.isCurrent}
+                    aria-disabled={row.isCurrent}
+                    onClick={() => onApplyPrinting?.(row.card.id)}
+                  >
+                    {row.isCurrent ? 'Applied' : 'Apply'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {showDetails && !hideTextSections ? (
+        <section className="card-detail__section">
+          <h4 className="card-detail__section-title">Details</h4>
+          <dl className="card-detail__fields">
+            {setLabel ? (
+              <div className="card-detail__field">
+                <dt>Set</dt>
+                <dd>{setLabel}</dd>
+              </div>
+            ) : null}
+            {isFoil !== undefined ? (
+              <div className="card-detail__field">
+                <dt>Is Foil</dt>
+                <dd>{isFoil ? 'Yes' : 'No'}</dd>
+              </div>
+            ) : null}
+            {hasFoil !== undefined ? (
+              <div className="card-detail__field">
+                <dt>Has Foil</dt>
+                <dd>{hasFoil ? 'Yes' : 'No'}</dd>
+              </div>
+            ) : null}
+            {extraFields.map(([key, value]) => (
+              <div className="card-detail__field" key={key}>
+                <dt>{humanizeKey(key)}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+export function CardDetailPanel({ card, type, open, onClose, ...contentProps }: CardDetailPanelProps) {
+  if (!card) return null;
+
+  const name = cardDisplayName(card);
+
+  return (
+    <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
+      <CardDetailContent card={card} type={type} {...contentProps} />
     </SlideOutPanel>
   );
 }

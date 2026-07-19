@@ -27,6 +27,7 @@ const POWER_FOUR = [
 ];
 
 const POWER_FIVE_WITH_MP = [...POWER_FOUR, POWER_TYPE_LABELS.MultiPower];
+const POWER_FIVE_WITH_AP = [...POWER_FOUR, POWER_TYPE_LABELS.AnyPower];
 const POWER_SIX_WITH_AP = [...POWER_FIVE_WITH_MP, POWER_TYPE_LABELS.AnyPower];
 
 export const DBV_FILTER_CONFIG: Record<CatalogType, DbvTypeFilterConfig> = {
@@ -43,7 +44,7 @@ export const DBV_FILTER_CONFIG: Record<CatalogType, DbvTypeFilterConfig> = {
   'advanced-universe': { groups: ['functionIcons'] },
   teamwork: { groups: ['powerTypes'], powerTypeKeys: [...POWER_FOUR, POWER_TYPE_LABELS.AnyPower] },
   'ally-universe': { groups: ['powerTypes'], powerTypeKeys: POWER_FOUR },
-  training: { groups: ['powerTypes'], powerTypeKeys: POWER_SIX_WITH_AP },
+  training: { groups: ['powerTypes'], powerTypeKeys: POWER_FIVE_WITH_AP },
   'basic-universe': { groups: ['powerTypes'], powerTypeKeys: POWER_FOUR },
 };
 

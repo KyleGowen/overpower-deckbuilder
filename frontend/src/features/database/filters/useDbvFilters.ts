@@ -12,6 +12,12 @@ import {
   type NumericConstraint,
 } from './dbvFilterTypes';
 
+type DbvFilterStateUpdater = DbvFilterState | ((prev: DbvFilterState) => DbvFilterState);
+
+interface UseDbvFiltersOptions {
+  persistByCatalogType?: boolean;
+}
+
 function numericChipId(c: NumericConstraint): string {
   return `numeric:${c.field}:${c.op}:${c.value}`;
 }
@@ -62,20 +68,42 @@ function buildChips(state: DbvFilterState, type: CatalogType): FilterChip[] {
   return chips;
 }
 
-export function useDbvFilters(catalogType: CatalogType) {
-  const [state, setState] = useState<DbvFilterState>(EMPTY_DBV_FILTER_STATE);
+export function useDbvFilters(catalogType: CatalogType, options: UseDbvFiltersOptions = {}) {
+  const persistByCatalogType = options.persistByCatalogType === true;
+  const [singleState, setSingleState] = useState<DbvFilterState>(EMPTY_DBV_FILTER_STATE);
+  const [stateByType, setStateByType] = useState<Partial<Record<CatalogType, DbvFilterState>>>({});
+  const state = persistByCatalogType
+    ? stateByType[catalogType] ?? EMPTY_DBV_FILTER_STATE
+    : singleState;
+
+  const setCurrentState = useCallback(
+    (updater: DbvFilterStateUpdater) => {
+      if (!persistByCatalogType) {
+        setSingleState(updater);
+        return;
+      }
+
+      setStateByType((prev) => {
+        const previousForType = prev[catalogType] ?? EMPTY_DBV_FILTER_STATE;
+        const nextForType =
+          typeof updater === 'function' ? updater(previousForType) : updater;
+        return { ...prev, [catalogType]: nextForType };
+      });
+    },
+    [catalogType, persistByCatalogType],
+  );
 
   useEffect(() => {
-    setState(EMPTY_DBV_FILTER_STATE);
-  }, [catalogType]);
+    if (!persistByCatalogType) setSingleState(EMPTY_DBV_FILTER_STATE);
+  }, [catalogType, persistByCatalogType]);
 
   const activeCount = useMemo(() => countActiveFilters(state), [state]);
   const chips = useMemo(() => buildChips(state, catalogType), [state, catalogType]);
 
-  const clearAll = useCallback(() => setState(EMPTY_DBV_FILTER_STATE), []);
+  const clearAll = useCallback(() => setCurrentState(EMPTY_DBV_FILTER_STATE), [setCurrentState]);
 
   const removeChip = useCallback((chip: FilterChip) => {
-    setState((prev) => {
+    setCurrentState((prev) => {
       switch (chip.kind) {
         case 'numeric':
           return { ...prev, numeric: prev.numeric.filter((c) => numericChipId(c) !== chip.removeKey) };
@@ -92,10 +120,10 @@ export function useDbvFilters(catalogType: CatalogType) {
           return prev;
       }
     });
-  }, []);
+  }, [setCurrentState]);
 
   const togglePowerType = useCallback((powerType: string) => {
-    setState((prev) => {
+    setCurrentState((prev) => {
       const has = prev.powerTypes.includes(powerType);
       return {
         ...prev,
@@ -104,10 +132,10 @@ export function useDbvFilters(catalogType: CatalogType) {
           : [...prev.powerTypes, powerType],
       };
     });
-  }, []);
+  }, [setCurrentState]);
 
   const toggleFunctionIcon = useCallback((field: FunctionIconField) => {
-    setState((prev) => {
+    setCurrentState((prev) => {
       const has = prev.functionIcons.includes(field);
       return {
         ...prev,
@@ -116,25 +144,25 @@ export function useDbvFilters(catalogType: CatalogType) {
           : [...prev.functionIcons, field],
       };
     });
-  }, []);
+  }, [setCurrentState]);
 
   const setMissionSet = useCallback((missionSet: string) => {
-    setState((prev) => ({ ...prev, missionSet }));
-  }, []);
+    setCurrentState((prev) => ({ ...prev, missionSet }));
+  }, [setCurrentState]);
 
   const upsertNumericConstraint = useCallback((field: string, op: CompareOp, value: number) => {
-    setState((prev) => ({
+    setCurrentState((prev) => ({
       ...prev,
       numeric: [...prev.numeric.filter((c) => c.field !== field), { field, op, value }],
     }));
-  }, []);
+  }, [setCurrentState]);
 
   const removeNumericConstraint = useCallback((field: string) => {
-    setState((prev) => ({
+    setCurrentState((prev) => ({
       ...prev,
       numeric: prev.numeric.filter((c) => c.field !== field),
     }));
-  }, []);
+  }, [setCurrentState]);
 
   const getNumericConstraint = useCallback(
     (field: string): NumericConstraint | undefined =>

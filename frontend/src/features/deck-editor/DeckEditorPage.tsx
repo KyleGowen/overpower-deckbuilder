@@ -313,6 +313,7 @@ export default function DeckEditorPage() {
   const [privacyBusy, setPrivacyBusy] = useState(false);
   const [limitedBusy, setLimitedBusy] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [addCardsMounted, setAddCardsMounted] = useState(false);
   const [selected, setSelected] = useState<{
     card: CatalogCard;
     type: CatalogType;
@@ -343,7 +344,13 @@ export default function DeckEditorPage() {
     setKoCharacterIds(new Set());
     setDrawHandOpen(false);
     setDrawnCards([]);
+    setAddOpen(false);
+    setAddCardsMounted(false);
   }, [deckId]);
+
+  useEffect(() => {
+    if (addOpen) setAddCardsMounted(true);
+  }, [addOpen]);
 
   useEffect(() => () => clearProgressiveImageSession('deck-editor'), []);
 
@@ -1354,9 +1361,10 @@ export default function DeckEditorPage() {
       </div>
 
       {/* Add cards panel */}
-      {isOwner && addOpen ? (
+      {isOwner && (addOpen || addCardsMounted) ? (
         <Suspense fallback={<LoadingState label="Loading..." />}>
           <AddCardsPanel
+            key={deckId}
             open={addOpen}
             onClose={() => setAddOpen(false)}
             onAdd={addCard}
