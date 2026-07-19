@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix Trivy"
+  short_description: "Debug and fix Excelsior Trivy CI failures"
+  default_prompt: "Use $fix-trivy to inspect a failing Excelsior Trivy Actions job, reproduce it locally, fix it, verify Trivy and app health, then ship the fix."

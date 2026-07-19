@@ -68,6 +68,8 @@ Lets an owner mark a playable card as **Pre-Placed** — it starts the game alre
 - **Persistence**: toggling sets local state + `dirty`; persisted on **Save** through the existing `replaceDeckCards` path (`exclude_from_draw` is already in the save payload). No dedicated toggle endpoint.
 
 ## Add Cards panel
+Feature-specific UX context lives in [`AddCardsPanel.md`](AddCardsPanel.md).
+
 A `SlideOutPanel` with search + type chips + card image grids. Panel width **575px** on normal desktop (`width={575}`). On desktop viewports wider than **1200px**, the drawer expands to a two-pane layout: a contextual middle pane plus the existing right-side Add Cards results pane. Below 1200px (including mobile), Add Cards keeps the previous single-pane flow.
 
 - **Wide desktop context pane (`>1200px`)**: left side of the expanded drawer, split into fixed-height working regions:

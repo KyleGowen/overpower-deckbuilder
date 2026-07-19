@@ -1,0 +1,11 @@
+# Fix Trivy Skill
+
+This directory contains the local Codex skill for debugging and fixing Excelsior GitHub Actions Trivy failures.
+
+Entry points:
+- `SKILL.md` defines the workflow and required verification gates.
+- `scripts/run_trivy_ci_scan.py` reproduces the repository Trivy CI scan locally with a fresh DB and a temporary empty Docker config.
+
+Conventions:
+- Keep this skill narrow to Trivy CI failures in `/Users/kyle/cursored`.
+- Verification must include both Trivy health and application health/functionality checks before completion.

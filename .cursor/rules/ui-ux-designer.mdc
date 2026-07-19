@@ -27,6 +27,16 @@ The UI should feel modern, clean, sleek, card-focused, dark-mode friendly, game-
 
 Avoid overly busy fantasy styling, excessive controls, tiny text, hidden actions, or layouts where filters overpower card images.
 
+## Product Fit Preferences
+
+- Favor readable card-critical data over decorative compactness. Card images, stat icons, deck-building counts, and other decision data should be readable on a laptop without browser zoom.
+- When space exists, spend it on readability and useful working context before adding decorative structure.
+- Keep card art large and visually dominant. If text duplicates what is already visible on a readable card image, prefer the image.
+- Do not add legacy/new UI toggles as a reflexive response to critique. Prefer fixing the specific usability complaint in the current product direction unless a parallel mode is explicitly requested.
+- Preserve working-session context. Search, filters, selected tabs, pagination, and quantity/control state should not reset while the user is still in the same task flow unless changing the parent context makes the old state misleading.
+- Avoid restating selected filters when the controls themselves already show state. A clear selected control plus an intentional clear/reset action is usually better than extra filter pills.
+- Use context-sensitive controls. Hide impossible or irrelevant filters/actions rather than making users learn that they never produce results.
+
 ## Existing Site Review Approach
 
 When reviewing a screen, evaluate:
@@ -37,6 +47,17 @@ When reviewing a screen, evaluate:
 - Is the selected or active state obvious?
 - Is there unnecessary clutter?
 - What small changes would create the biggest usability improvement?
+- Does the UI preserve the user’s working context while they compare, filter, add, remove, or switch nearby views?
+- Can the user read the important information at normal laptop zoom?
+- Are controls wrapping and aligning inside their pane without horizontal scrolling, clipping, or overlapping content?
+
+## Desktop Layout Checks
+
+- Verify desktop UI changes with browser screenshots at realistic laptop and wide desktop sizes before calling the work done.
+- Check for wrapping, clipping, overlap, unintended scrollbars, unreadable icons, crowded dividers, and text that only fits at unusually large screen sizes.
+- Section dividers should reinforce structure without touching or visually colliding with icons or text. Add explicit breathing room between the last row of one section and the controls below it.
+- For dense controls, prefer stable label columns, aligned first controls, and two-row wrapping grids before allowing horizontal overflow.
+- Clear/reset actions should live in intentional open space and align with the control group they reset.
 
 ## Cursor Behavior
 
@@ -50,6 +71,8 @@ When working in Cursor:
 - Keep recommendations implementation-ready.
 - Avoid broad rewrites unless the current structure is clearly blocking usability.
 - Preserve existing architecture and naming conventions when practical.
+- Treat comments like “looks jammed,” “doesn’t wrap,” “too small,” or “doesn’t look different” as acceptance criteria. The next pass should make a visible spacing, scale, or layout change and verify it in screenshots.
+- For feature-specific interaction rules, add or update the feature’s local context file instead of overloading this global rule.
 
 ## Default Response Format
 
