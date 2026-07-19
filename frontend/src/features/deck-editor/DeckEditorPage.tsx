@@ -1372,6 +1372,7 @@ export default function DeckEditorPage() {
             onRemoveInstance={removeDeckInstance}
             cards={cards}
             deckCatalogIndex={cardIndex}
+            reserveCharacterId={reserveCharacterId}
           />
         </Suspense>
       ) : null}

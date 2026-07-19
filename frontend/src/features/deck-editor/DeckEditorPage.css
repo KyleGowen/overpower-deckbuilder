@@ -257,7 +257,7 @@
   gap: var(--space-6);
 }
 
-/* Empty deck CTA — primary pill at 1.2× chip size (matches .add-cards__done) */
+/* Empty deck CTA — primary pill at 1.2× chip size */
 .deck-editor__empty-add {
   width: auto;
   padding: 5px 12px;
@@ -567,6 +567,12 @@
   height: 100%;
   min-height: 0;
 }
+.add-cards-slideout .slideout__header {
+  padding: var(--space-2) var(--space-5);
+}
+.add-cards-slideout .slideout__footer {
+  padding: var(--space-3) var(--space-5);
+}
 .add-cards__context-pane {
   display: none;
 }
@@ -779,18 +785,18 @@
   width: 100%;
 }
 
-/* Footer Done — chip pill at 1.2× toolbar chip size, centered in slide-out footer */
+/* Footer Done — compact chip pill, centered in slide-out footer */
 .add-cards__done {
   width: auto;
-  padding: 5px 12px;
-  font-size: calc(var(--font-size-xs) * 1.2);
+  padding: 4px 9px;
+  font-size: calc(var(--font-size-xs) * 0.9);
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-full);
-  gap: calc(var(--space-2) * 0.8);
+  gap: calc(var(--space-2) * 0.6);
 }
 .add-cards__done svg {
-  width: 17px;
-  height: 17px;
+  width: 13px;
+  height: 13px;
 }
 
 /* Stacks tab — character + linked specials/UA */
@@ -921,8 +927,8 @@
 
   .add-cards__context-pane {
     display: grid;
-    grid-template-rows: minmax(0, 20%) minmax(0, 15%) minmax(0, 65%);
-    gap: var(--space-3);
+    grid-template-rows: max-content max-content minmax(0, 1fr);
+    gap: var(--space-2);
     min-height: 0;
     overflow: hidden;
     border-right: 1px solid var(--color-border);
@@ -944,7 +950,7 @@
   }
 
   .add-cards__team-stats {
-    padding-bottom: 10px;
+    padding-bottom: 4px;
   }
 
   .add-cards__pane-heading {
@@ -958,6 +964,14 @@
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  .add-cards__team-threat {
+    white-space: nowrap;
+  }
+
+  .add-cards__team-threat-value--over {
+    color: var(--color-danger);
   }
 
   .add-cards__team-rows {
@@ -992,6 +1006,10 @@
     opacity: 0.48;
   }
 
+  .add-cards__team-row--location {
+    margin-top: 1px;
+  }
+
   .add-cards__team-name {
     min-width: 0;
     overflow: hidden;
@@ -1018,10 +1036,16 @@
     font-size: 16px;
   }
 
+  .add-cards__team-stat-spacer {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+
   .add-cards__context-pane > .add-cards__filters {
     border-top: none;
     overflow: visible;
-    padding-top: 20px;
+    padding-top: 4px;
     gap: 6px;
     font-size: 110%;
   }

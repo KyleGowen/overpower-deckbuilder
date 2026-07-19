@@ -1,4 +1,5 @@
 /** Central user-facing strings for deck validation (keep in sync with client messaging where applicable). */
+import { TOURNAMENT_LEGAL_THREAT_LIMIT } from '../../constants/deckRules';
 
 export const deckValidationMessages = {
     characterCount(found: number): string {
@@ -17,7 +18,7 @@ export const deckValidationMessages = {
         return `Deck may have at most 1 location (found ${found})`;
     },
     threatLevel(found: number): string {
-        return `Deck threat level must be 76 or less (found ${found})`;
+        return `Deck threat level must be ${TOURNAMENT_LEGAL_THREAT_LIMIT} or less (found ${found})`;
     },
     deckSize(required: number, found: number): string {
         return `Deck must have at least ${required} cards in draw pile (${found}/${required})`;

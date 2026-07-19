@@ -25,7 +25,9 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   mission-set select) are config-driven via `filters/dbvFilterConfig.ts`. Advanced filters
   reset on tab change; search, set, **Has Foil**, and collapse persist. Active constraints
   show as removable chips at the rail end with a **Clear** action (Clear does not reset Has
-  Foil). Optional **collapse** via left chevron (default expanded; collapsed state is a thin
+  Foil). Numeric inputs preserve the user's typed value instead of snapping to the configured
+  min/max range while editing; the range remains available to native number controls. Optional
+  **collapse** via left chevron (default expanded; collapsed state is a thin
   rule with left-aligned chevron-down; collapse preference persists across tab switches).
 - **Has Foil** toggle (`.dbv-filter-rail__foil-toggle`, trailing end of filter rail): when
   checked, only cards with a foil variant per `foil_card_map` remain (base rows with a foil

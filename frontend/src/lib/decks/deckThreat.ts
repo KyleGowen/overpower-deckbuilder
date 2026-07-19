@@ -1,6 +1,7 @@
 import type { CatalogCard, DeckCardEntry } from '../api/types';
+import { TOURNAMENT_LEGAL_THREAT_LIMIT } from '../../../../src/constants/deckRules';
 
-export const MAX_TOTAL_THREAT = 76;
+export const MAX_TOTAL_THREAT = TOURNAMENT_LEGAL_THREAT_LIMIT;
 
 const RESERVE_THREAT_OVERRIDES: Record<string, number> = {
   'Victory Harben': 20,

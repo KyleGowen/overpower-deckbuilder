@@ -43,9 +43,7 @@ function StatCell({
     }
     const n = parseInt(trimmed, 10);
     if (Number.isNaN(n)) return;
-    const clamped = Math.min(field.max, Math.max(field.min, n));
-    filters.upsertNumericConstraint(field.key, nextOp, clamped);
-    if (String(clamped) !== trimmed) setValue(String(clamped));
+    filters.upsertNumericConstraint(field.key, nextOp, n);
   };
 
   const scheduleApplyValue = (raw: string, nextOp: CompareOp = op) => {

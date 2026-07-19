@@ -68,6 +68,7 @@ import {
 import { AddCardsFilterBar } from './AddCardsFilterBar';
 import { buildDeckUsabilityContext, effectiveHideUnusablesForTab, tabSupportsHideUnusables } from '../../lib/deck-usability';
 import { useDbvFilters } from '../database/filters/useDbvFilters';
+import { calculateDeckTotalThreat, MAX_TOTAL_THREAT } from '../../lib/decks/deckThreat';
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
@@ -98,6 +99,7 @@ export interface AddCardsPanelProps {
   cards: DeckCardEntry[];
   /** Resolved catalog rows for deck cards (`${deckType}:${cardId}`), from DeckEditorPage. */
   deckCatalogIndex?: Map<string, CatalogCard>;
+  reserveCharacterId?: string | null;
 }
 
 interface HoveredAddCard {
@@ -125,11 +127,13 @@ function numericStat(card: CatalogCard, key: (typeof CHARACTER_STAT_ROWS)[number
 function AddCardsTeamStats({
   cards,
   deckCatalogIndex,
+  reserveCharacterId,
   onCardHover,
   onCardHoverEnd,
 }: {
   cards: DeckCardEntry[];
   deckCatalogIndex?: Map<string, CatalogCard>;
+  reserveCharacterId?: string | null;
   onCardHover: (card: CatalogCard, catalogType: CatalogType) => void;
   onCardHoverEnd: () => void;
 }) {
@@ -141,12 +145,34 @@ function AddCardsTeamStats({
     ...characterCards,
     ...Array.from({ length: Math.max(0, EMPTY_CHARACTER_SLOT_COUNT - characterCards.length) }, () => null),
   ];
+  const locationCard =
+    cards
+      .filter((entry) => entry.type === 'location')
+      .map((entry) => deckCatalogIndex?.get(`${entry.type}:${entry.cardId}`) ?? null)
+      .find(Boolean) ?? null;
+  const totalThreat = calculateDeckTotalThreat(
+    cards,
+    reserveCharacterId,
+    (deckType, cardId) => deckCatalogIndex?.get(`${deckType}:${cardId}`),
+  );
+  const isOverThreat = totalThreat > MAX_TOTAL_THREAT;
 
   return (
     <section className="add-cards__team-stats" aria-label="Team character stats">
       <div className="add-cards__pane-heading">
         <span>Team</span>
-        <span>{characterCards.filter(Boolean).length}/4</span>
+        <span className="add-cards__team-threat">
+          Threat:{' '}
+          {isOverThreat ? (
+            <>
+              <span className="add-cards__team-threat-value--over">{totalThreat}</span>
+              {' / '}
+              {MAX_TOTAL_THREAT}
+            </>
+          ) : (
+            totalThreat
+          )}
+        </span>
       </div>
       <div className="add-cards__team-rows">
         {rows.map((card, index) => (
@@ -179,6 +205,37 @@ function AddCardsTeamStats({
             </span>
           </div>
         ))}
+        <div
+          className={`add-cards__team-row add-cards__team-row--location${
+            locationCard ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'
+          }`}
+          tabIndex={locationCard ? 0 : undefined}
+          onPointerEnter={() => {
+            if (locationCard) onCardHover(locationCard, 'locations');
+          }}
+          onPointerLeave={locationCard ? onCardHoverEnd : undefined}
+          onFocus={() => {
+            if (locationCard) onCardHover(locationCard, 'locations');
+          }}
+          onBlur={locationCard ? onCardHoverEnd : undefined}
+        >
+          <span className="add-cards__team-name">
+            {locationCard ? cardDisplayName(locationCard) : 'No Location Set'}
+          </span>
+          {locationCard ? (
+            <span className="add-cards__team-stat-list" aria-label="Location threat value">
+              {CHARACTER_STAT_ROWS.slice(0, 4).map(({ key }) => (
+                <span key={key} className="add-cards__team-stat-spacer" aria-hidden="true" />
+              ))}
+              <StatIconBadge
+                type="threat_level"
+                value={numericStat(locationCard, 'threat_level')}
+                size="md"
+                title={`${cardDisplayName(locationCard)} Threat Value`}
+              />
+            </span>
+          ) : null}
+        </div>
       </div>
     </section>
   );
@@ -192,6 +249,7 @@ export function AddCardsPanel({
   onRemoveInstance,
   cards,
   deckCatalogIndex,
+  reserveCharacterId,
 }: AddCardsPanelProps) {
   const { isMobile } = useLayoutMode();
   const queryClient = useQueryClient();
@@ -603,6 +661,7 @@ export function AddCardsPanel({
           <AddCardsTeamStats
             cards={cards}
             deckCatalogIndex={deckCatalogIndex}
+            reserveCharacterId={reserveCharacterId}
             onCardHover={showHoverCard}
             onCardHoverEnd={clearHoverCard}
           />
