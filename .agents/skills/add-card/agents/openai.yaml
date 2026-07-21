@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Card"
+  short_description: "Add an Excelsior card from image to catalog"
+  default_prompt: "Use $add-card to add src/resources/cards/images/tfacp/ally/5_energy.png to Excelsior."

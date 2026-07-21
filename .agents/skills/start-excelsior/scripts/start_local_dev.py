@@ -26,13 +26,13 @@ def port_open(port: int) -> bool:
 
 
 def fetch(url: str, timeout: float = 2.0) -> tuple[int, str]:
-    req = urllib.request.Request(url, headers={"User-Agent": "codex-start-local-dev"})
+    req = urllib.request.Request(url, headers={"User-Agent": "codex-start-excelsior"})
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return response.status, response.read().decode("utf-8", errors="replace")
 
 
 def start_process(name: str, cwd: Path) -> subprocess.Popen[str]:
-    log_dir = Path("/tmp") / "excelsior-start-local-dev"
+    log_dir = Path("/tmp") / "excelsior-start-excelsior"
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / f"{name}.log"
     log = log_path.open("a", encoding="utf-8")

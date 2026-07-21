@@ -1,4 +1,6 @@
-# Cursor AI Assistant Rules for Overpower Deckbuilder
+# Historical Cursor AI Assistant Rules for Overpower Deckbuilder
+
+> Codex migration note (2026-07-21): this file is retained as historical Cursor compatibility material. Active Codex instructions live in `AGENTS.md`, and repo-local Codex skills live in `.agents/skills/`. Archived Cursor rule and skill sources are under `docs/archive/cursor/`.
 
 ## Codebase Search and Find — Use a Subagent
 - **Whenever the agent needs to find something in the codebase**, the agent MUST spawn a subagent that performs the search and returns the final results.
@@ -249,4 +251,3 @@ The following actions are **permanently locked** unless Kyle explicitly says to 
 All upgrade options with costs are documented in [`docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md`](docs/current/INFRASTRUCTURE_UPGRADE_OPTIONS.md). Read that file for context — do NOT implement anything from it unless explicitly directed.
 
 If you are ever unsure whether an infrastructure action costs money, **ask first**.
-

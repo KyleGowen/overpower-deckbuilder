@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF to PNG"
+  short_description: "Convert card artwork PDFs to native-resolution PNGs"
+  default_prompt: "Use $pdf-to-png to convert a card artwork PDF into PNG output without upscaling."

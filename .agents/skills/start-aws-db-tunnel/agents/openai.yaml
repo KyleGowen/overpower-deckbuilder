@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start AWS DB Tunnel"
+  short_description: "Open a guarded SSM tunnel to Excelsior production PostgreSQL"
+  default_prompt: "Use $start-aws-db-tunnel to prepare or start the Excelsior production database SSM tunnel."

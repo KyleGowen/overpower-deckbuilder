@@ -31,7 +31,7 @@ Use this skill in the Excelsior repo for Trivy CI failures.
    - Run `bash scripts/ship-conditional-test.sh unit`.
    - Run `npm run build`.
    - Run `npm --prefix frontend run build`.
-   - Start or reuse local dev with `$start-local-dev` if available, or manually start root API and Vite, then verify `http://localhost:8085/health`.
+   - Start or reuse local dev with `$start-excelsior` if available, or manually start root API and Vite, then verify `http://localhost:8085/health`.
    - If the fix touched frontend behavior or UI files, do a browser smoke check at `http://localhost:5173`.
 8. Commit and push when the user asked to fix the pipeline or ship the fix.
 9. After pushing, poll the new Actions run until the Trivy job reaches `success` or a new actionable failure appears.
