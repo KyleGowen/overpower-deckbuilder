@@ -1,0 +1,9 @@
+interface:
+  display_name: "Orange King Price"
+  short_description: "Look up The Orange King card prices"
+  default_prompt: "Use $orange-king-price to find the current The Orange King USD price for Spider-Man - Web."
+policy:
+  allow_implicit_invocation: true
+model:
+  preference: "lowest-tool-capable-tier"
+  rationale: "Deterministic Shopify JSON scraping; higher reasoning models are unnecessary unless matching becomes ambiguous."

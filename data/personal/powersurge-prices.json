@@ -1,0 +1,1086 @@
+{
+  "fetchedAt": "2026-07-22",
+  "prices": {
+    "Character|Banshee": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/banshee-ps-character-vr"
+    },
+    "Character|Black Cat": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/black-cat-ps-character-r"
+    },
+    "Character|Blob": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/blob-ps-character-vr"
+    },
+    "Character|Daredevil": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/daredevil-ps-hero-vr"
+    },
+    "Character|Domino": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/domino-ps-hero-vr"
+    },
+    "Character|Dr. Strange": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/tw-7e-fs-2-2-ps-u-dr-strange-ghost-rider-daredevil"
+    },
+    "Character|Ghost Rider": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/ghost-rider-ps-hero-r"
+    },
+    "Character|Iceman": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/iceman-ps-hero-vr"
+    },
+    "Character|Juggernaut": {
+      "price": "$10.50",
+      "url": "https://theorangeking.com/products/juggernaut-ps-hero-vr"
+    },
+    "Character|Longshot": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/longshot-ps-hero-vr"
+    },
+    "Character|Mandarin": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/mandarin-ps-hero-vr"
+    },
+    "Character|Mojo": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/mojo-ps-hero-vr"
+    },
+    "Character|Mr. Sinister": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/mr-sinister-ps-hero-vr"
+    },
+    "Character|Mysterio": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/mysterio-ps-hero-vr"
+    },
+    "Character|Namor": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/namor-ps-hero-r"
+    },
+    "Character|Scarlet Spider": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/scarlet-spider-ps-hero-vr"
+    },
+    "Character|Scarlet Witch": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-ps-hero-vr"
+    },
+    "Character|She Hulk (sic)": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/she-hulk-ps-hero-r"
+    },
+    "Character|Silver Sable": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/silver-sable-ps-hero-vr"
+    },
+    "Character|Strong Guy": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/strong-guy-ps-hero-vr"
+    },
+    "Character|Super Skrull (sic)": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/super-skrull-ps-hero-vr"
+    },
+    "Mission|Separation Anxiety 1 of 7 - \"Seeds of Destruction\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-1-seeds-of-destruction-ps-c-venom"
+    },
+    "Mission|Separation Anxiety 2 of 7 - \"A Bridge to Bedlam\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-2-a-bridge-to-bedlam-ps-c-spider-man"
+    },
+    "Mission|Separation Anxiety 3 of 7 - \"A Hot Welcome\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-3-a-hot-welcome-ps-c-the-jury"
+    },
+    "Mission|Separation Anxiety 4 of 7 - \"City Beneath the Soil\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-4-city-beneath-the-soil-ps-c-symbiote"
+    },
+    "Mission|Separation Anxiety 5 of 7 - \"Ventilator Blues\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-5-ventilator-blues-ps-c-venom-symbiote"
+    },
+    "Mission|Separation Anxiety 6 of 7 - \"Check-Point Charley\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-6-check-point-charley-ps-c-spider-man-symbiote"
+    },
+    "Mission|Separation Anxiety 7 of 7 - \"Carnage Uncaged!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/separation-anxiety-7-carnage-uncaged-ps-c-carnage"
+    },
+    "Mission|Sins of the Future 1 of 7 - \"The New Order\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-1-the-new-order-ps-c-sentinels"
+    },
+    "Mission|Sins of the Future 2 of 7 - \"Fractured Logic\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-2-fractured-logic-ps-c-graydon-creed"
+    },
+    "Mission|Sins of the Future 3 of 7 - \"The Face of Death\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-3-the-face-of-death-ps-c-master-mold"
+    },
+    "Mission|Sins of the Future 4 of 7 - \"The Fight for Freedom\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-4-the-fight-for-freedom-ps-c-magneto"
+    },
+    "Mission|Sins of the Future 5 of 7 - \"Search and Destroy\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-5-search-and-destroy-ps-c-wolverine"
+    },
+    "Mission|Sins of the Future 6 of 7 - \"Traitors and Turncoats\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-6-traitors-and-turncoats-ps-c-phoenix"
+    },
+    "Mission|Sins of the Future 7 of 7 - \"The Ultimate Evil\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/sins-of-the-future-7-the-ultimate-evil-ps-c-nimrod"
+    },
+    "Power|1 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1e-ps-c-nebula"
+    },
+    "Power|1 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1f-ps-c-bloody-mary"
+    },
+    "Power|1 MultiPower": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1m-ps-c-century"
+    },
+    "Power|1 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1s-ps-c-archangel"
+    },
+    "Power|2 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2e-ps-c-black-cat"
+    },
+    "Power|2 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2f-ps-c-black-widow"
+    },
+    "Power|2 MultiPower": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2m-ps-u-iron-man"
+    },
+    "Power|2 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2s-ps-c-spider-man"
+    },
+    "Power|3 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3e-ps-c-sauron"
+    },
+    "Power|3 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3f-ps-c-longshot"
+    },
+    "Power|3 MultiPower": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/power-3m-ps-r-nightcrawler"
+    },
+    "Power|3 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3s-ps-c-war-machine"
+    },
+    "Power|4 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4e-ps-c-electro"
+    },
+    "Power|4 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4f-ps-c-nightcrawler"
+    },
+    "Power|4 MultiPower": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/power-4m-ps-r-super-skrull"
+    },
+    "Power|4 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4s-ps-c-loki"
+    },
+    "Power|5 Energy": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/power-5e-ps-c-century"
+    },
+    "Power|5 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5f-ps-c-venom"
+    },
+    "Power|5 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5s-ps-c-cyber"
+    },
+    "Power|6 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-6e-ps-c-storm"
+    },
+    "Power|6 Fighting": {
+      "price": "$10.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-sorceress-slam-ps-r-error-6-fighting"
+    },
+    "Power|6 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-6s-ps-c-super-skrull"
+    },
+    "Power|7 Energy": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/power-7e-ps-u-cyclops"
+    },
+    "Power|7 Fighting": {
+      "price": "$1.75",
+      "url": "https://theorangeking.com/products/power-7f-ps-u-domino"
+    },
+    "Power|7 Strength": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/power-7s-ps-u-thing"
+    },
+    "Power|8 Energy": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/power-8e-ps-u-professor-x"
+    },
+    "Power|8 Fighting": {
+      "price": "$2.25",
+      "url": "https://theorangeking.com/products/power-8f-ps-u-cyber"
+    },
+    "Special|Any Hero - Confusion": {
+      "price": "$5.00",
+      "url": "https://theorangeking.com/products/ah-confusion-opd-mc-r-rogue"
+    },
+    "Special|Any Hero - Savage Land": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/ah-savage-land-df-bl-ps-promo-opd-r-sauron"
+    },
+    "Special|Apocalypse - Instant Evolution": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/apocalypse-instant-evolution-ps-u"
+    },
+    "Special|Banshee - Interpol Training": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/banshee-interpol-training-ps-u"
+    },
+    "Special|Banshee - Luck o' the Irish": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/banshee-luck-o-the-irish-ps-vr"
+    },
+    "Special|Banshee - Shatter Shriek": {
+      "price": "$5.00",
+      "url": "https://theorangeking.com/products/banshee-shatter-shriek-ps-opd-vr"
+    },
+    "Special|Banshee - Sonic Glide": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/banshee-sonic-glide-ps-vr"
+    },
+    "Special|Banshee - Super Scream": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/banshee-super-scream-ps-opd-vr"
+    },
+    "Special|Banshee - Vocal Hypnosis": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/banshee-vocal-hypnosis-ps-vr"
+    },
+    "Special|Beast - Acrobatics": {
+      "price": "$10.50",
+      "url": "https://theorangeking.com/products/beast-acrobatics-ps-u"
+    },
+    "Special|Bishop - Body Armor": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/bishop-body-armor-ps-u"
+    },
+    "Special|Blac Cat - Cat Fight": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/black-cat-cat-fight-ps-u"
+    },
+    "Special|Black Cat - Bad Luck": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/black-cat-bad-luck-ps-vr"
+    },
+    "Special|Black Cat - Cat Burglar": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/black-cat-cat-burglar-ps-vr"
+    },
+    "Special|Black Cat - Femme Fatale": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/black-cat-femme-fatale-ps-opd-vr"
+    },
+    "Special|Black Cat - Kiss of Death": {
+      "price": "$3.50",
+      "url": "https://theorangeking.com/products/black-cat-kiss-of-death-ps-opd-vr"
+    },
+    "Special|Black Cat - Nine Lives": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/black-cat-nine-lives-ps-u"
+    },
+    "Special|Blob - Absorp Impact": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/blob-absorb-impact-ps-opd-u"
+    },
+    "Special|Blob - Blubber Block": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/blob-blubber-block-ps-vr"
+    },
+    "Special|Blob - Bottomless Belly": {
+      "price": "$10.00",
+      "url": "https://theorangeking.com/products/blob-bottomless-belly-ps-vr"
+    },
+    "Special|Blob - Heavy Hitter": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/blob-heavy-hitter-ps-r"
+    },
+    "Special|Blob - Immovable Object": {
+      "price": "$3.50",
+      "url": "https://theorangeking.com/products/blob-immovable-object-ps-u"
+    },
+    "Special|Blob - Sumo Slam": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/blob-sumo-slam-ps-opd-vr"
+    },
+    "Special|Cable - Really Big Gun": {
+      "price": "$8.00",
+      "url": "https://theorangeking.com/products/cable-really-big-gun-ps-opd-r"
+    },
+    "Special|Captain America - Inspiration": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/captain-america-inspiration-ps-u"
+    },
+    "Special|Carnage - Alien Healing": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/carnage-alien-healing-ps-r"
+    },
+    "Special|Colossus - Iron Curtain": {
+      "price": "$4.00",
+      "url": "https://theorangeking.com/products/colossus-iron-curtain-ps-r"
+    },
+    "Special|Cyclops - Remove Visor": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/cyclops-remove-visor-ps-opd-vr"
+    },
+    "Special|Daredevil - Agility": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/daredevil-agility-ps-vr"
+    },
+    "Special|Daredevil - Alertness": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/daredevil-alertness-ps-u"
+    },
+    "Special|Daredevil - Billy Club": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/daredevil-billy-club-ps-opd-vr"
+    },
+    "Special|Daredevil - Blind Man's Bluff": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/daredevil-blind-mans-bluff-ps-opd-u"
+    },
+    "Special|Daredevil - Hypersenses": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/daredevil-hypersenses-ps-vr"
+    },
+    "Special|Daredevil - Man Without Fear": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/daredevil-man-without-fear-ps-vr"
+    },
+    "Special|Deadpool - Bushwack": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/deadpool-bushwack-ps-u"
+    },
+    "Special|Doctor Doom - Expandable Ally": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/doctor-doom-expendable-ally-ps-u"
+    },
+    "Special|Doctor Octopus - Master Inventor": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/dr-octopus-master-inventor-ps-opd-vr"
+    },
+    "Special|Domino - Double Down": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/domino-double-down-ps-u"
+    },
+    "Special|Domino - Fall Into Place": {
+      "price": "$3.50",
+      "url": "https://theorangeking.com/products/domino-fall-into-place-ps-r"
+    },
+    "Special|Domino - Lady Luck": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/domino-lady-luck-ps-vr"
+    },
+    "Special|Domino - Shrapnel Bomb": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/domino-shrapnel-bomb-ps-opd-vr"
+    },
+    "Special|Domino - Six Pack Attack": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/domino-six-pack-attack-ps-u"
+    },
+    "Special|Domino - Trip Wire": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/domino-tripwire-ps-opd-vr"
+    },
+    "Special|Dr. Strange - Crimson Band of Cytorak": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/dr-strange-crimson-bands-of-cytorak-ps-opd-u"
+    },
+    "Special|Dr. Strange - Eldritch Blasts": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/dr-strange-eldritch-blasts-ps-u"
+    },
+    "Special|Dr. Strange - Eye of Agamotto": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/dr-strange-eye-of-agamotto-aa-aj-ps-vr"
+    },
+    "Special|Dr. Strange - Mists of Morpheus": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/dr-strange-mists-of-morpheus-ps-r"
+    },
+    "Special|Dr. Strange - Necromancy": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/dr-strange-necromancy-ps-opd-vr"
+    },
+    "Special|Dr. Strange - Sorcerer Supreme": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/dr-strange-sorcerer-supreme-ps-vr"
+    },
+    "Special|Elektra - Shuriken": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/elektra-shuriken-ps-u"
+    },
+    "Special|Gambit - Ace in the Hole": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/gambit-ace-in-the-hole-ps-opd-r"
+    },
+    "Special|Ghost Rider - Bat Out of Hell": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/ghost-rider-bat-out-of-hell-ps-vr"
+    },
+    "Special|Ghost Rider - Demon Chain": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ghost-rider-demon-chain-ps-u"
+    },
+    "Special|Ghost Rider - Fire and Brimstone": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ghost-rider-fire-and-brimstone-ps-u"
+    },
+    "Special|Ghost Rider - Hell on Wheels": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/ghost-rider-hell-on-wheels-ps-opd-vr"
+    },
+    "Special|Ghost Rider - Penance Stare": {
+      "price": "$13.50",
+      "url": "https://theorangeking.com/products/ghost-rider-penance-stare-ps-opd-vr"
+    },
+    "Special|Ghost Rider - Spirit of Vengeance": {
+      "price": "$4.00",
+      "url": "https://theorangeking.com/products/ghost-rider-spirit-of-vengeance-ps-vr"
+    },
+    "Special|Hobgoblin - Secret Pouches": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/hobgoblin-secret-pouches-ps-opd-vr"
+    },
+    "Special|Hulk - Power Leap": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/hulk-power-leap-ps-opd-r"
+    },
+    "Special|Human Torch - Flame On": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/human-torch-flame-on-ps-r"
+    },
+    "Special|Iceman - Blood Chill": {
+      "price": "$17.50",
+      "url": "https://theorangeking.com/products/iceman-blood-chill-ps-opd-vr"
+    },
+    "Special|Iceman - Frostbite": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/iceman-frostbite-ps-r"
+    },
+    "Special|Iceman - Hail Storm": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/iceman-hail-storm-ps-u"
+    },
+    "Special|Iceman - Ice Armor": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/iceman-ice-armor-ps-vr"
+    },
+    "Special|Iceman - Snow Blind": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/iceman-snow-blind-ps-r"
+    },
+    "Special|Iceman - Sub Zero": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/iceman-sub-zero-ps-vr"
+    },
+    "Special|Inivisible Woman - Invisible Saboteur": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/invisible-woman-invisible-saboteur-ps-u"
+    },
+    "Special|Iron Man - Industrial Waste": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/iron-man-industrial-waste-ps-opd-r"
+    },
+    "Special|Jean Grey - Mutant Motivation": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/jean-grey-mutant-motivation-ps-u"
+    },
+    "Special|Jubilee - Prismatic Flare": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/jubilee-prismatic-flare-ps-opd-vr"
+    },
+    "Special|Juggernaut - Battering Ram": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/juggernaut-battering-ram-ps-opd-vr"
+    },
+    "Special|Juggernaut - Head Butt": {
+      "price": "$17.50",
+      "url": "https://theorangeking.com/products/juggernaut-head-butt-ps-u"
+    },
+    "Special|Juggernaut - Ignore Blow": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/juggernaut-ignore-blow-ps-r"
+    },
+    "Special|Juggernaut - Raze": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/juggernaut-raze-ps-opd-u"
+    },
+    "Special|Juggernaut - Smash Incoming Object": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/juggernaut-smash-incoming-object-ps-vr"
+    },
+    "Special|Juggernaut - Unstoppable Force": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/juggernaut-unstoppable-force-ps-vr"
+    },
+    "Special|Longshot - Four-Fingered Fury": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/longshot-four-fingered-fury-ps-vr"
+    },
+    "Special|Longshot - Freedom Fighter": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/longshot-freedom-fighter-ps-u"
+    },
+    "Special|Longshot - Hollow Bones": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/longshot-hollow-bones-ps-vr"
+    },
+    "Special|Longshot - Lucky Bounce": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/longshot-lucky-bounce-ps-opd-vr"
+    },
+    "Special|Longshot - One in a Million": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/longshot-one-in-a-million-av-cv-ps-opd-vr"
+    },
+    "Special|Longshot - Roll with the Punches": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/longshot-roll-with-the-punches-ps-r-ver-1-1-at-end-of-1st-line"
+    },
+    "Special|Magneto - Power Flux": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/magneto-power-flux-ps-r"
+    },
+    "Special|Mandarin - Arch Villain": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/mandarin-arch-villain-ps-vr"
+    },
+    "Special|Mandarin - Disintegrate": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/mandarin-disintegrate-ps-vr"
+    },
+    "Special|Mandarin - Electromagnetic Shield": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/mandarin-electromagnetic-shield-ps-u"
+    },
+    "Special|Mandarin - Mastermind": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/mandarin-mastermind-ps-opd-vr"
+    },
+    "Special|Mandarin - Mind Control": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/mandarin-mind-control-ps-opd-vr"
+    },
+    "Special|Mandarin - Vortex Beam": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/mandarin-vortex-beam-ps-r"
+    },
+    "Special|Mojo - Bodyguard": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/mojo-bodyguard-ps-vr"
+    },
+    "Special|Mojo - It's a Rap": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/mojo-its-a-rap-ps-u"
+    },
+    "Special|Mojo - Prime Time": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/mojo-prime-time-ps-opd-vr"
+    },
+    "Special|Mojo - Rewrite Script": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/mojo-rewrite-script-ps-opd-vr"
+    },
+    "Special|Mojo - Spineless Plot": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/mojo-spineless-plot-ps-vr"
+    },
+    "Special|Mojo - Supreme Edits": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/mojo-supreme-edits-ps-r"
+    },
+    "Special|Mr. Fantastic - Object Bounce": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/mr-fantastic-object-bounce-ps-u"
+    },
+    "Special|Mr. Sinister - Backstab": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/mr-sinister-backstab-ps-r"
+    },
+    "Special|Mr. Sinister - Hidden Agenda": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/mr-sinister-hidden-agenda-ps-vr"
+    },
+    "Special|Mr. Sinister - Inside Information": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/mr-sinister-inside-information-ps-opd-r"
+    },
+    "Special|Mr. Sinister - Maleable Maneuver": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/mr-sinister-maleable-maneuver-ps-vr"
+    },
+    "Special|Mr. Sinister - Merciless Mutant": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/mr-sinister-merciless-mutant-ps-u"
+    },
+    "Special|Mr. Sinister - Power Scheme": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/mr-sinister-power-scheme-ps-r"
+    },
+    "Special|Mysterio - Alter Perception": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/mysterio-alter-perception-ps-opd-vr"
+    },
+    "Special|Mysterio - Hollywood Horror": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/mysterio-hollywood-horror-ps-opd-vr"
+    },
+    "Special|Mysterio - Mist and Mirrors": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/mysterio-mist-and-mirrors-ps-u"
+    },
+    "Special|Mysterio - Now You See It...": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/mysterio-now-you-see-it-ps-opd-vr"
+    },
+    "Special|Mysterio - Poison Props": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/mysterio-poison-props-ps-vr"
+    },
+    "Special|Mysterio - Stuntman": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/mysterio-stuntman-ps-vr"
+    },
+    "Special|Mystique - Mistaken Identity": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/mystique-mistaken-identity-ps-r"
+    },
+    "Special|Namor - Atlantis Attacks": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/namor-atlantis-attacks-ps-u"
+    },
+    "Special|Namor - Bounty of the Sea": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/namor-bounty-of-the-sea-br-ps-vr"
+    },
+    "Special|Namor - Imperious Rex": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/namor-imperious-rex-ps-opd-vr"
+    },
+    "Special|Namor - Land, Sea, and Air": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/namor-land-sea-and-air-ps-vr"
+    },
+    "Special|Namor - Watery Grave": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/namor-watery-grave-ps-opd-vr"
+    },
+    "Special|Namor - Winged Feet": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/namor-winged-feet-ps-u"
+    },
+    "Special|Omega Red - Secret Pheromones": {
+      "price": "$3.50",
+      "url": "https://theorangeking.com/products/omega-red-secrete-pheromones-ps-opd-vr"
+    },
+    "Special|Professor X - Read Mind": {
+      "price": "$4.00",
+      "url": "https://theorangeking.com/products/professor-x-read-mind-ps-r"
+    },
+    "Special|Psylocke - Illusion": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/psylocke-illusion-ps-u"
+    },
+    "Special|Punisher - Flame Thrower": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/punisher-flame-thrower-ps-r"
+    },
+    "Special|Rhino - Scare Tactics": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/rhino-scare-tactics-ps-opd-r"
+    },
+    "Special|Rogue - Mutant Missile": {
+      "price": "$11.00",
+      "url": "https://theorangeking.com/products/rogue-mutant-missile-ps-opd-r"
+    },
+    "Special|Sabretooth - Rabid Beast": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/sabretooth-rabid-beast-ps-u"
+    },
+    "Special|Scarlet Spider - Arachnid Gizmos": {
+      "price": "$3.50",
+      "url": "https://theorangeking.com/products/scarlet-spider-arachnid-gizmos-ps-opd-r"
+    },
+    "Special|Scarlet Spider - Hidden Pouches": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/scarlet-spider-hidden-pouches-ps-vr"
+    },
+    "Special|Scarlet Spider - Impact Webbing": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/scarlet-spider-impact-webbing-ps-opd-vr"
+    },
+    "Special|Scarlet Spider - New Warrior": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/scarlet-spider-new-warrior-ps-u"
+    },
+    "Special|Scarlet Spider - Spider Web": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/scarlet-spider-spider-web-ps-opd-vr"
+    },
+    "Special|Scarlet Spider - Sticky Fingers": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/scarlet-spider-sticky-fingers-ps-vr"
+    },
+    "Special|Scarlet Witch - Change Outcome": {
+      "price": "$16.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-change-outcome-ps-vr"
+    },
+    "Special|Scarlet Witch - Hex Power": {
+      "price": "$15.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-hex-power-opd-ps-vr"
+    },
+    "Special|Scarlet Witch - Mutant Magic": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/scarlet-witch-mutant-magic-ps-r"
+    },
+    "Special|Scarlet Witch - Sorceress Slam": {
+      "price": "$14.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-sorceress-slam-ps-r-6-strength"
+    },
+    "Special|Scarlet Witch - Spell of Destruction": {
+      "price": "$0.35",
+      "url": "https://theorangeking.com/products/scarlet-witch-spell-of-destruction-ps-u"
+    },
+    "Special|Scarlet Witch - Spontaneous Combustion": {
+      "price": "$16.50",
+      "url": "https://theorangeking.com/products/scarlet-witch-spontaneous-combustion-ps-vr"
+    },
+    "Special|She Hulk (sic) - Elbow Grease": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/she-hulk-elbow-grease-ps-vr"
+    },
+    "Special|She Hulk (sic) - Emerald Allure": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/she-hulk-emerald-allure-ps-u"
+    },
+    "Special|She Hulk (sic) - Gamma Girl": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/she-hulk-gamma-girl-ps-opd-r"
+    },
+    "Special|She Hulk (sic) - Power Proxy": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/she-hulk-power-proxy-ps-u"
+    },
+    "Special|She Hulk (sic) - She-Hulk Smash": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/she-hulk-she-hulk-smash-ps-vr"
+    },
+    "Special|She Hulk (sic) - Vitamin \"G\"": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/she-hulk-vitamin-g-ps-r"
+    },
+    "Special|Silver Sable - Chia": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/silver-sable-chia-ps-u"
+    },
+    "Special|Silver Sable - Hidden Weapon": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/silver-sable-hidden-weapon-ps-opd-vr"
+    },
+    "Special|Silver Sable - Katana": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/silver-sable-katana-ps-r"
+    },
+    "Special|Silver Sable - Kevlar": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/silver-sable-kevlar-ps-vr"
+    },
+    "Special|Silver Sable - Leadership": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/silver-sable-leadership-ps-u"
+    },
+    "Special|Silver Sable - One with the Sword": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/silver-sable-one-with-the-sword-ps-r"
+    },
+    "Special|Silver Surfer - Double Power Blast": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/silver-surfer-double-power-blast-ps-r"
+    },
+    "Special|Spider-Man - Taunt": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/spider-man-taunt-ps-opd-r"
+    },
+    "Special|Spider-Woman - Psionic Attack": {
+      "price": "$17.50",
+      "url": "https://theorangeking.com/products/spider-woman-psionic-attack-ps-opd-r"
+    },
+    "Special|Storm - Weather Manipulation": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/storm-weather-manipulation-ps-r"
+    },
+    "Special|Strong Guy - Fit of Laughter": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/strong-guy-fit-of-laughter-ps-opd-r"
+    },
+    "Special|Strong Guy - Kinetic Absorption": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/strong-guy-kinetic-absorption-ps-u"
+    },
+    "Special|Strong Guy - Knuckle Sandwich": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/strong-guy-knuckle-sandwich-ps-u"
+    },
+    "Special|Strong Guy - Mighty Mutant": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/strong-guy-mighty-mutant-ps-vr"
+    },
+    "Special|Strong Guy - Pile It On": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/strong-guy-pile-it-on-ps-opd-vr"
+    },
+    "Special|Strong Guy - Rock & Roll": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/strong-guy-rock-roll-ps-opd-vr"
+    },
+    "Special|Super Skrull (sic) - Alien Fire": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/super-skrull-alien-fire-ps-opd-r"
+    },
+    "Special|Super Skrull (sic) - Fists of Strength": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/super-skrull-fists-of-stone-ps-vr"
+    },
+    "Special|Super Skrull (sic) - Flexible Form": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/super-skrull-flexible-form-ps-vr"
+    },
+    "Special|Super Skrull (sic) - Imitation": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/super-skrull-immitation-ps-vr"
+    },
+    "Special|Super Skrull (sic) - Invisible Invasion": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/super-skrull-invisible-invasion-ps-opd-r"
+    },
+    "Special|Super Skrull (sic) - Skrull and Crossbones": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/super-skrull-skrull-and-crossbones-ps-opd-vr"
+    },
+    "Special|Thing - Brute Force": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/thing-brute-force-ps-u"
+    },
+    "Special|Thor - Airborne Avenger": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/thor-airborne-avenger-ps-u"
+    },
+    "Special|Venom - Alien Symbiote": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/venom-alien-symbiote-ps-r"
+    },
+    "Special|War Machine - Shield Teammate": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/war-machine-shield-teammate-ps-u"
+    },
+    "Special|Wolverine - Rage": {
+      "price": "$4.00",
+      "url": "https://theorangeking.com/products/wolverine-rage-ps-u"
+    },
+    "Universe - Basic|Alien Technology": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8e-2-ps-u-alien-technology-prof-x"
+    },
+    "Universe - Basic|Booster Shot": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8f-1-ps-c-booster-shot-cyber"
+    },
+    "Universe - Basic|Chain": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8f-2-ps-u-chain-sabretooth"
+    },
+    "Universe - Basic|City Bus": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-8s-3-ps-r-city-bus-hulk"
+    },
+    "Universe - Basic|Divine Intervention": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8e-1-ps-c-divine-intervention-loki"
+    },
+    "Universe - Basic|Dumpster": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6s-3-ps-c-dumpster-iron-man"
+    },
+    "Universe - Basic|EM Force Lines": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-8e-3-ps-r-em-force-lines-magneto"
+    },
+    "Universe - Basic|Energy Booster": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-7e-1-ps-c-energy-booster-storm"
+    },
+    "Universe - Basic|Energy Enhancer": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/universe-6e-3-ps-r-energy-enhancer-gambit"
+    },
+    "Universe - Basic|Energy Maximizer": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7e-2-ps-u-energy-maximizer-cyclops"
+    },
+    "Universe - Basic|Generator": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6e-1-ps-c-generator-electro"
+    },
+    "Universe - Basic|Girder": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8s-1-ps-c-girder-abomination"
+    },
+    "Universe - Basic|Hand Grenade": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6f-2-ps-u-hand-grenade-black-widow"
+    },
+    "Universe - Basic|Hot Dog Cart": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6s-1-ps-c-hot-dog-cart-venom"
+    },
+    "Universe - Basic|Hunk of Asphalt": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7s-1-ps-c-hunk-of-asphalt-rhino"
+    },
+    "Universe - Basic|Lamp Post": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8s-2-ps-u-lamp-post-thing"
+    },
+    "Universe - Basic|Laser Pistol": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/universe-6f-3-ps-r-laser-pistol-nebula"
+    },
+    "Universe - Basic|Machine Gun": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/universe-7f-3-ps-r-machine-gun-domino"
+    },
+    "Universe - Basic|Manhole Cover": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6s-2-ps-u-manhole-cover-spider-woman"
+    },
+    "Universe - Basic|Power Cosmic": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/universe-7e-3-ps-r-power-cosmic-silver-surfer"
+    },
+    "Universe - Basic|Power Lines": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6e-2-ps-u-power-lines-bishop"
+    },
+    "Universe - Basic|Rocket Launcher": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7f-1-ps-c-rocket-launcher-punisher"
+    },
+    "Universe - Basic|Sword": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/silver-sable-one-with-the-sword-ps-r"
+    },
+    "Universe - Basic|Taxi Cab": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-7s-3-ps-r-taxi-cab-colossus"
+    },
+    "Universe - Basic|Throwing Blades": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6f-1-ps-c-throwing-blades-longshot"
+    },
+    "Universe - Basic|Tree": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7s-2-ps-u-tree-rogue"
+    },
+    "Universe - Teamwork|6 Energy Fighting/Strength +1 +2": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-6e-fs-1-2-ps-r-iceman-colossus-and-bishop"
+    },
+    "Universe - Teamwork|6 Fighting Energy/Strength +1 +2": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-6f-es-1-2-ps-r-psylocke-rogue-and-storm"
+    },
+    "Universe - Teamwork|6 Strength Energy/Fighting +1 +2": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-6s-ef-1-2-ps-vr-rhino-doctor-octopus-and-mysterio"
+    },
+    "Universe - Teamwork|7 Energy Fighting/Strength +2 +2": {
+      "price": "$12.50",
+      "url": "https://theorangeking.com/products/tw-7e-fs-2-2-ps-u-dr-strange-ghost-rider-daredevil"
+    },
+    "Universe - Teamwork|7 Fighting Energy/Strength +2 +2": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/tw-7f-es-2-2-ps-r-black-cat-spider-man-and-scarlet-spider"
+    },
+    "Universe - Teamwork|7 Strength Energy/Fighting +2 +2": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/tw-7s-ef-2-2-ps-u-namor-capt-america-and-human-torch"
+    },
+    "Universe - Teamwork|8 Energy Fighting/Strength +1 +3": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-8e-fs-1-3-ps-c-magneto-sabretooth-and-juggernaut"
+    },
+    "Universe - Teamwork|8 Fighting Energy/Strength +1 +3": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-8f-es-1-3-ps-c-wolverine-cyclops-and-beast-green"
+    },
+    "Universe - Teamwork|8 Strength Energy/Fighting +1 +3": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-8s-ef-1-3-ps-c-thing-mr-fantastic-and-human-torch"
+    },
+    "Universe - Training|5 Energy Strength +3": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/training-5es-3-ps-u-century"
+    },
+    "Universe - Training|5 Energy Strength +4": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/training-5es-4-ps-u-archange"
+    },
+    "Universe - Training|5 Fighting Energy +3": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/training-5ef-3-ps-u-black-cat"
+    },
+    "Universe - Training|5 Fighting Energy +4": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/training-5ef-4-ps-r-sauron"
+    },
+    "Universe - Training|5 Fighting Strength +3": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/training-5fs-3-ps-u-human-torch"
+    },
+    "Universe - Training|5 Fighting Strength +4": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/training-5fs-4-ps-r-jubilee"
+    }
+  },
+  "source": "The Orange King"
+}

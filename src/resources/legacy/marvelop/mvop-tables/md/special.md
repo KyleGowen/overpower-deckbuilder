@@ -42,7 +42,7 @@ _201 cards_
 | Colossus™ - Fastball Special | Colossus | BI | Teammate may make 1 Strength or Fighting attack at +4 | Cost/Effect: - | Normal | Uncommon | Special | ColossusFastballSpecial-MVOP_cb20191213125552.jpg |
 | Colossus™ - Haymaker | Colossus | AR | Acts as a level 7 Fighting attack | Cost/Effect: Fighting 7 | Normal | Common | Special | ColossusHaymaker-MVOP_cb20191213125731.jpg |
 | Colossus™ - Metal Barrier | Colossus | AC | Attack made on Teammate is now made on Colossus, who may defend it | - | Normal | Common | Special | ColossusMetalBarrier-MVOP_cb20191213125922.jpg |
-| Colossus™ - Ruthless | Carnage | BE | Carnage may make 1 attack after opponent has conceded the battle, opponent may defend One Per Deck | Cost/Effect: - | Normal | Rare | Special | CarnageRuthless-MVOP_cb20191213124605.jpg |
+| Carnage™ - Ruthless | Carnage | BE | Carnage may make 1 attack after opponent has conceded the battle, opponent may defend One Per Deck | Cost/Effect: - | Normal | Rare | Special | CarnageRuthless-MVOP_cb20191213124605.jpg |
 | Colossus™ - Skin of Steel | Colossus | AG | Avoid 1 attack | - | Normal | Uncommon | Special | ColossusSkinOfSteel-MVOP_cb20191213130358.jpg |
 | Colossus™ - Smash Object | Colossus | AI | Opponent must immediately discard 1 place Universe card of Colossu's choice | - | Normal | Common | Special | ColossusSmashObject-MVOP_cb20191213131000.jpg |
 | Cyclops™ - Fearless Leader | Cyclops | AF | Adds 3 to venture total for this battle | Cost/Effect: - | Normal | Common | Special | CyclopsFearlessLeader-MVOP_cb20191213142417.jpg |

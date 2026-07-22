@@ -1,0 +1,7 @@
+interface:
+  display_name: "Generate Card Checklist"
+  short_description: "Generate priced standalone card checklists"
+  default_prompt: "Use $generate-card-checklist to build a priced standalone checklist for Original OverPower 1995."
+model:
+  preference: "lowest-tool-capable-tier"
+  rationale: "Checklist generation is deterministic file parsing, HTML rendering, and Shopify JSON scraping through the orange-king-price skill."

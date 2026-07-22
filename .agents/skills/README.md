@@ -11,6 +11,8 @@ Repo-local Codex skills live here. They are the project source of truth for recu
 | `start-aws-db-tunnel` | SSM DB tunnel, production RDS, TablePlus/psql to prod | Active guarded runbook | Migrated from `.cursor/skills/start-aws-db-tunnel` |
 | `pdf-to-png` | `/pdf-to-png`, convert PDF artwork to PNG | Active | Migrated from `.cursor/skills/pdf-to-png` |
 | `fix-trivy` | Trivy CI failure, dependency scanner failure | Active | Existing Codex skill |
+| `orange-king-price` | The Orange King, theOrangeKing, Orange King, OverPower retail price | Active | Repo-local Shopify price scraper |
+| `generate-card-checklist` | set checklist, collection checklist, priced personal checklist | Active | Repo-local standalone checklist generator |
 
 Skipped by choice:
 
