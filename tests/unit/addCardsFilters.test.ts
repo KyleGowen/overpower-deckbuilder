@@ -8,6 +8,7 @@ import {
 import {
   filterAndSortTypeCardsWithOptions,
   filterCharacterStacksWithOptions,
+  isAnyCharacterSpecialCard,
   type AddCardsFilterOptions,
 } from '../../frontend/src/features/deck-editor/addCardsFilters';
 
@@ -93,5 +94,132 @@ describe('addCardsFilters hide unusables', () => {
 
     expect(filtered).toHaveLength(1);
     expect(filtered[0].specials.map((c) => c.id)).toEqual(['s1']);
+  });
+});
+
+describe('addCardsFilters special scopes', () => {
+  const baseOptions: AddCardsFilterOptions = {
+    searchQuery: '',
+    setFilter: '',
+    hideUnusables: false,
+    usabilityCtx: buildDeckUsabilityContext([], {}),
+  };
+
+  it('detects true Any Character specials from linked character fields only', () => {
+    expect(
+      isAnyCharacterSpecialCard({ id: 's1', name: 'Merlin', character: 'Any Character' }),
+    ).toBe(true);
+    expect(
+      isAnyCharacterSpecialCard({
+        id: 's2',
+        name: 'The Gemini',
+        character_name: 'any character',
+      }),
+    ).toBe(true);
+    expect(
+      isAnyCharacterSpecialCard({
+        id: 's3',
+        name: 'Set Loose',
+        character: 'Mr. Hyde',
+        card_text: 'Opponent may not use Any Character Special cards.',
+      }),
+    ).toBe(false);
+  });
+
+  it('keeps text-only Any Character matches out of the Any-Char tab', () => {
+    const cards: CatalogCard[] = [
+      {
+        id: 'hyde',
+        name: 'Set Loose',
+        character: 'Mr. Hyde',
+        card_text: 'Opponent may not use Any Character Special cards.',
+      },
+      { id: 'any', name: 'Merlin Magic', character: 'Any Character' },
+      { id: 'char', name: 'Web Swing', character: 'Spider-Man' },
+    ];
+
+    const anyCharacter = filterAndSortTypeCardsWithOptions(cards, 'special-cards', {
+      ...baseOptions,
+      searchQuery: 'Any Character',
+      specialScope: 'any-character',
+    });
+    const characterSpecific = filterAndSortTypeCardsWithOptions(cards, 'special-cards', {
+      ...baseOptions,
+      searchQuery: 'Any Character',
+      specialScope: 'character-specific',
+    });
+
+    expect(anyCharacter.map((c) => c.id)).toEqual(['any']);
+    expect(characterSpecific.map((c) => c.id)).toEqual(['hyde']);
+  });
+
+  it('sorts Any-Char specials by set number before function fallback', () => {
+    const cards: CatalogCard[] = [
+      {
+        id: 'assist',
+        name: 'Assist',
+        character: 'Any Character',
+        set: 'ERB',
+        set_number: '003',
+        is_assist: true,
+      },
+      {
+        id: 'cataclysm',
+        name: 'Cataclysm',
+        character: 'Any Character',
+        set: 'ERB',
+        set_number: '001',
+        is_cataclysm: true,
+      },
+      {
+        id: 'ambush',
+        name: 'Ambush',
+        character: 'Any Character',
+        set: 'ERB',
+        set_number: '002',
+        is_ambush: true,
+      },
+    ];
+
+    const result = filterAndSortTypeCardsWithOptions(cards, 'special-cards', {
+      ...baseOptions,
+      specialScope: 'any-character',
+    });
+
+    expect(result.map((c) => c.id)).toEqual(['cataclysm', 'ambush', 'assist']);
+  });
+
+  it('groups Any-Char specials by function when set numbers tie', () => {
+    const cards: CatalogCard[] = [
+      { id: 'normal', name: 'Normal', character: 'Any Character', set: 'ERB' },
+      {
+        id: 'assist',
+        name: 'Assist',
+        character: 'Any Character',
+        set: 'ERB',
+        is_assist: true,
+      },
+      {
+        id: 'ambush',
+        name: 'Ambush',
+        character: 'Any Character',
+        set: 'ERB',
+        is_ambush: true,
+      },
+      {
+        id: 'cataclysm',
+        name: 'Cataclysm',
+        character: 'Any Character',
+        set: 'ERB',
+        is_cataclysm: true,
+      },
+    ];
+
+    const result = filterAndSortTypeCardsWithOptions(cards, 'special-cards', {
+      ...baseOptions,
+      specialScope: 'any-character',
+    });
+
+    expect(result.map((c) => c.id)).toEqual(['cataclysm', 'ambush', 'assist', 'normal']);
   });
 });

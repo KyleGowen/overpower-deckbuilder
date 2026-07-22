@@ -22,10 +22,11 @@ On desktop viewports wider than 1200px, the Add Cards drawer uses a contextual p
 ## Filters
 
 - Filters are dynamic to the active Add Cards tab and should hide impossible options.
+- The Add Cards tab row includes an Add Cards-only `Any-Char` tab immediately after `Special`. It reuses the `special-cards` catalog/deck type, but filters results to specials whose linked character is exactly `Any Character`. The `Special` tab excludes those true Any Character specials and shows character-specific specials.
 - Do not show MP for Training cards when no MP Training cards exist.
 - Location filters should include Threat Value and may give that control slightly more room since it is often the only location-specific numeric filter.
 - Character numeric filters should fit in two rows in the context pane. Do not allow them to overlap the preview image or require horizontal scrolling.
-- Special card filters should place Type on row 1 and Function on row 2, left-aligned with stable label/control columns.
+- Special card filters should place Type on row 1 and Function on row 2, left-aligned with stable label/control columns. The same filters apply on `Special` and `Any-Char`.
 - Use selected control states plus a nearby Clear action. Do not add active filter pills that restate the visible selections.
 - Filter state should persist while the user remains in the same deck-editor session: closing/reopening Add Cards and switching tabs should restore search, active tab, set, hide-unusable, page/quantity state, and type-specific dynamic filters. Resetting on deck-editor exit or deck change is acceptable.
 

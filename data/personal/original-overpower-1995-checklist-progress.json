@@ -1,0 +1,22 @@
+{
+  "schema": "original-overpower-1995-checklist-progress/v1",
+  "updatedAt": "2026-07-22T19:04:41Z",
+  "cardCount": 354,
+  "checkedCount": 14,
+  "checked": {
+    "missions.md:0:AgeOfApocalypse1-MVOP_cb20191211222438.jpg": true,
+    "missions.md:1:AnnihilationAffair2-MVOP_cb20191222144306.jpg": true,
+    "missions.md:2:AgeOfApocalypse2-MVOP_cb20191211225236.jpg": true,
+    "missions.md:3:AgeOfApocalypse3-MVOP_cb20191212140200.jpg": true,
+    "missions.md:4:AgeOfApocalypse4-MVOP_cb20191212141046.jpg": true,
+    "missions.md:5:AgeOfApocalypse5-MVOP_cb20191212141545.jpg": true,
+    "missions.md:6:AgeOfApocalypse6-MVOP_cb20191222143947.jpg": true,
+    "missions.md:7:AgeOfApocalypse7-MVOP_cb20191212142141.jpg": true,
+    "missions.md:8:AnnihilationAffair1-MVOP_cb20191212143323.jpg": true,
+    "missions.md:9:AnnihilationAffair3-MVOP_cb20191212143742.jpg": true,
+    "missions.md:10:AnnihilationAffair4-MVOP_cb20191212144156.jpg": true,
+    "missions.md:11:AnnihilationAffair5-MVOP_cb20191212144545.jpg": true,
+    "missions.md:12:AnnihilationAffair6-MVOP_cb20191212161433.jpg": true,
+    "missions.md:13:AnnihilationAffair7-MVOP_cb20191212162616.jpg": true
+  }
+}

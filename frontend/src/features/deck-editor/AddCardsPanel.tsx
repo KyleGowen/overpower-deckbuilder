@@ -2,9 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
+  ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB,
   ADD_CARDS_TAB_ORDER,
+  ADD_CARDS_TYPE_TABS,
   CATALOG_TYPES,
   CATALOG_TYPE_BY_SLUG,
+  addCardsCatalogTypeForTab,
   cardDisplayName,
   type CatalogTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
@@ -266,7 +269,8 @@ export function AddCardsPanel({
   const isAllTab = tab === 'all';
   const isStacksTab = tab === 'stacks';
   const isMissionsTab = tab === 'missions';
-  const activeType = isAllTab || isStacksTab ? null : tab;
+  const isAnyCharacterSpecialsTab = tab === ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB;
+  const activeType = addCardsCatalogTypeForTab(tab);
   const dynamicFilterType = activeType ?? 'characters';
   const dynamicFilters = useDbvFilters(dynamicFilterType, { persistByCatalogType: true });
 
@@ -460,9 +464,23 @@ export function AddCardsPanel({
       setFilter,
       hideUnusables: effectiveHideUnusables,
       usabilityCtx,
+      specialScope: isAnyCharacterSpecialsTab
+        ? 'any-character'
+        : tab === 'special-cards'
+          ? 'character-specific'
+          : undefined,
       dynamicFilters: activeType ? dynamicFilters.state : undefined,
     }),
-    [debouncedSearch, setFilter, effectiveHideUnusables, usabilityCtx, activeType, dynamicFilters.state],
+    [
+      debouncedSearch,
+      setFilter,
+      effectiveHideUnusables,
+      usabilityCtx,
+      isAnyCharacterSpecialsTab,
+      tab,
+      activeType,
+      dynamicFilters.state,
+    ],
   );
 
   const hideUnusablesDisabled = !tabSupportsHideUnusables(tab);
@@ -713,35 +731,15 @@ export function AddCardsPanel({
             />
           </div>
           <div className="add-cards__types" ref={typeTabsRef} role="tablist" aria-label="Card types">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={isAllTab}
-              data-add-cards-tab="all"
-              className={`add-cards__type ${isAllTab ? 'is-active' : ''}`}
-              onClick={() => setTab('all')}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={isStacksTab}
-              data-add-cards-tab="stacks"
-              className={`add-cards__type ${isStacksTab ? 'is-active' : ''}`}
-              onClick={() => setTab('stacks')}
-            >
-              Stacks
-            </button>
-            {CATALOG_TYPES.map((meta) => (
+            {ADD_CARDS_TYPE_TABS.map((meta) => (
               <button
-                key={meta.type}
+                key={meta.tab}
                 type="button"
                 role="tab"
-                aria-selected={tab === meta.type}
-                data-add-cards-tab={meta.type}
-                className={`add-cards__type ${tab === meta.type ? 'is-active' : ''}`}
-                onClick={() => setTab(meta.type)}
+                aria-selected={tab === meta.tab}
+                data-add-cards-tab={meta.tab}
+                className={`add-cards__type ${tab === meta.tab ? 'is-active' : ''}`}
+                onClick={() => setTab(meta.tab)}
               >
                 {meta.shortLabel}
               </button>

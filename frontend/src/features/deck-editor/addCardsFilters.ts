@@ -1,10 +1,13 @@
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import {
+  cardCharacterName,
   cardMatchesSearchQuery,
   compareCatalogCards,
   CATALOG_TYPES,
+  isAnyCharacterName,
   type CatalogTypeMeta,
 } from '../../lib/catalog/catalogTypeMap';
+import { compareSetThenSetNumber } from '../../lib/catalog/catalogSetSort';
 import type { CharacterStack } from '../../lib/catalog/characterStacks';
 import { stackCardsInAddOrder } from '../../lib/catalog/characterStacks';
 import type { MissionSet } from '../../lib/catalog/missionSets';
@@ -23,6 +26,7 @@ export interface AddCardsFilterOptions {
   hideUnusables: boolean;
   usabilityCtx: DeckUsabilityContext;
   dynamicFilters?: DbvFilterState;
+  specialScope?: 'character-specific' | 'any-character';
 }
 
 export function matchesSetFilter(card: CatalogCard, setFilter: string): boolean {
@@ -30,11 +34,56 @@ export function matchesSetFilter(card: CatalogCard, setFilter: string): boolean 
   return String(card.set ?? '') === setFilter;
 }
 
+export function isAnyCharacterSpecialCard(card: CatalogCard): boolean {
+  return isAnyCharacterName(cardCharacterName(card));
+}
+
+export function isCharacterSpecificSpecialCard(card: CatalogCard): boolean {
+  return !isAnyCharacterSpecialCard(card);
+}
+
+function cardPassesSpecialScope(
+  card: CatalogCard,
+  catalogType: CatalogType,
+  options: AddCardsFilterOptions,
+): boolean {
+  if (catalogType !== 'special-cards' || !options.specialScope) return true;
+  return options.specialScope === 'any-character'
+    ? isAnyCharacterSpecialCard(card)
+    : isCharacterSpecificSpecialCard(card);
+}
+
+function truthyFlag(card: CatalogCard, ...keys: string[]): boolean {
+  return keys.some((key) => {
+    const value = card[key];
+    return value === true || value === 'true' || value === 1 || value === '1';
+  });
+}
+
+function specialFunctionSortIndex(card: CatalogCard): number {
+  if (truthyFlag(card, 'is_cataclysm', 'cataclysm')) return 0;
+  if (truthyFlag(card, 'is_ambush', 'ambush')) return 1;
+  if (truthyFlag(card, 'is_assist', 'assist')) return 2;
+  return 3;
+}
+
+function compareAnyCharacterSpecialCards(a: CatalogCard, b: CatalogCard): number {
+  const setNumberCmp = compareSetThenSetNumber(a, b);
+  if (setNumberCmp !== 0) return setNumberCmp;
+
+  const functionCmp = specialFunctionSortIndex(a) - specialFunctionSortIndex(b);
+  if (functionCmp !== 0) return functionCmp;
+
+  return compareCatalogCards(a, b, 'special-cards');
+}
+
 export function cardPassesAddCardsFilters(
   card: CatalogCard,
   catalogType: CatalogType,
   options: AddCardsFilterOptions,
 ): boolean {
+  if (!cardPassesSpecialScope(card, catalogType, options)) return false;
+
   const q = options.searchQuery.trim();
   if (q && !cardMatchesSearchQuery(card, q)) return false;
   if (!matchesSetFilter(card, options.setFilter)) return false;
@@ -60,7 +109,11 @@ export function filterAndSortTypeCardsWithOptions(
   options: AddCardsFilterOptions,
 ): CatalogCard[] {
   const result = cards.filter((c) => cardPassesAddCardsFilters(c, catalogType, options));
-  result.sort((a, b) => compareCatalogCards(a, b, catalogType));
+  result.sort((a, b) =>
+    catalogType === 'special-cards' && options.specialScope === 'any-character'
+      ? compareAnyCharacterSpecialCards(a, b)
+      : compareCatalogCards(a, b, catalogType),
+  );
   return result;
 }
 

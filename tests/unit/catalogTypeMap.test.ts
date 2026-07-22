@@ -1,5 +1,9 @@
 import type { CatalogCard } from '../../frontend/src/lib/api/types';
 import {
+  ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB,
+  ADD_CARDS_TAB_ORDER,
+  ADD_CARDS_TYPE_TABS,
+  addCardsCatalogTypeForTab,
   cardMatchesSearchQuery,
   compareCatalogCards,
   parseSearchTokens,
@@ -80,5 +84,24 @@ describe('compareCatalogCards power-cards', () => {
     const b = card('mp2', 'Multi-Power', 4);
     expect(compareCatalogCards(a, b, 'power-cards')).toBeLessThan(0);
     expect(compareCatalogCards(b, a, 'power-cards')).toBeGreaterThan(0);
+  });
+});
+
+describe('Add Cards tab metadata', () => {
+  it('places Any-Char immediately after Special', () => {
+    const specialIndex = ADD_CARDS_TAB_ORDER.indexOf('special-cards');
+
+    expect(ADD_CARDS_TAB_ORDER[specialIndex + 1]).toBe(ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB);
+    expect(ADD_CARDS_TYPE_TABS[specialIndex + 1]).toMatchObject({
+      tab: ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB,
+      shortLabel: 'Any-Char',
+    });
+  });
+
+  it('resolves the Any-Char virtual tab to the special catalog type', () => {
+    expect(addCardsCatalogTypeForTab(ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB)).toBe('special-cards');
+    expect(addCardsCatalogTypeForTab('special-cards')).toBe('special-cards');
+    expect(addCardsCatalogTypeForTab('all')).toBeNull();
+    expect(addCardsCatalogTypeForTab('stacks')).toBeNull();
   });
 });

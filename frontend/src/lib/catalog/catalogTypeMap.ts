@@ -14,8 +14,12 @@ import type {
 import { compareSetThenSetNumber } from './catalogSetSort';
 import { isFoilCard } from './foilCatalog';
 
-/** Per-type catalog tab, All list, or character Stacks tab in Add Cards. */
-export type CatalogTabSelection = CatalogType | 'all' | 'stacks';
+export const ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB = 'any-character-specials' as const;
+
+export type AddCardsVirtualTab = typeof ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB;
+
+/** Per-type catalog tab, All list, character Stacks tab, or Add Cards-only virtual tab. */
+export type CatalogTabSelection = CatalogType | 'all' | 'stacks' | AddCardsVirtualTab;
 
 /**
  * Card Database / Collection tab selection: per-type tab or the All list.
@@ -55,12 +59,30 @@ export const DBV_TAB_ORDER: readonly DbvTabSelection[] = [
   ...CATALOG_TYPES.map((m) => m.type),
 ];
 
-/** Add Cards panel tab order (All, Stacks, then CATALOG_TYPES) for mobile swipe cycling. */
-export const ADD_CARDS_TAB_ORDER: readonly CatalogTabSelection[] = [
-  'all',
-  'stacks',
-  ...CATALOG_TYPES.map((m) => m.type),
+export interface AddCardsTabMeta {
+  tab: CatalogTabSelection;
+  shortLabel: string;
+}
+
+export const ADD_CARDS_TYPE_TABS: readonly AddCardsTabMeta[] = [
+  { tab: 'all', shortLabel: 'All' },
+  { tab: 'stacks', shortLabel: 'Stacks' },
+  { tab: 'characters', shortLabel: 'Characters' },
+  { tab: 'special-cards', shortLabel: 'Special' },
+  { tab: ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB, shortLabel: 'Any-Char' },
+  ...CATALOG_TYPES.slice(2).map((meta) => ({ tab: meta.type, shortLabel: meta.shortLabel })),
 ];
+
+/** Add Cards panel tab order (All, Stacks, then type/virtual tabs) for mobile swipe cycling. */
+export const ADD_CARDS_TAB_ORDER: readonly CatalogTabSelection[] = ADD_CARDS_TYPE_TABS.map(
+  (meta) => meta.tab,
+);
+
+export function addCardsCatalogTypeForTab(tab: CatalogTabSelection): CatalogType | null {
+  if (tab === 'all' || tab === 'stacks') return null;
+  if (tab === ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB) return 'special-cards';
+  return tab;
+}
 
 export const CATALOG_TYPE_BY_SLUG: Record<CatalogType, CatalogTypeMeta> = CATALOG_TYPES.reduce(
   (acc, meta) => {
