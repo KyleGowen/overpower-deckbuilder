@@ -322,16 +322,22 @@ export async function createDeck(
   userId: string,
   name: string,
   description?: string,
-  characterIds?: string[]
+  characterIds?: string[],
+  isPrivate?: boolean
 ): Promise<Deck> {
   const client = await ctx.pool.connect();
   try {
     await client.query('BEGIN');
 
-    const result = await client.query(
-      'INSERT INTO decks (user_id, name, description) VALUES ($1, $2, $3) RETURNING *',
-      [userId, name, description ?? null]
-    );
+    const result = isPrivate === undefined
+      ? await client.query(
+        'INSERT INTO decks (user_id, name, description) VALUES ($1, $2, $3) RETURNING *',
+        [userId, name, description ?? null]
+      )
+      : await client.query(
+        'INSERT INTO decks (user_id, name, description, is_private) VALUES ($1, $2, $3, $4) RETURNING *',
+        [userId, name, description ?? null, isPrivate]
+      );
 
     const deck = result.rows[0] as DeckRow;
     const deckId = deck.id as string;

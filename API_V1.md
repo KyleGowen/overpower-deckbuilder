@@ -711,6 +711,8 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Response 400:** v1 envelope — validation (`VALIDATION_ERROR` / field hints) or `**Maximum 4 characters allowed per deck`** in `errors`.
 
+The create request also accepts `is_private` (boolean): `true` keeps the deck owner-only, while `false` makes it public. When omitted, the database default remains private.
+
 **Response 500:** v1 envelope — `errors` with code `**DECK_CREATE_ERROR`**.
 
 **Implementation:** `[src/api/services/deckWriteService.ts](src/api/services/deckWriteService.ts)` · HTTP `[src/api/http/decks.http.ts](src/api/http/decks.http.ts)` · response `[src/api/dto/v1/DeckCreateV1DataDto.ts](src/api/dto/v1/DeckCreateV1DataDto.ts)`
@@ -1367,4 +1369,3 @@ introduced side-by-side rather than as a mutation of v1.
 - The OpenAPI spec (`[docs/openapi.yaml](docs/openapi.yaml)`) is the
 machine-readable contract. Any breaking change must be reflected there
 before the deprecation window starts.
-

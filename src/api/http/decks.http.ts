@@ -208,10 +208,12 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
         return;
       }
 
-      const { name, description, characters } = parsed.value;
+      const { name, description, characters, is_private } = parsed.value;
 
       try {
-        const deck = await deps.deckWriteService.createDeck(req.user!.id, name, description, characters);
+        const deck = is_private === undefined
+          ? await deps.deckWriteService.createDeck(req.user!.id, name, description, characters)
+          : await deps.deckWriteService.createDeck(req.user!.id, name, description, characters, is_private);
         const data = deck as DeckCreateV1DataDto;
         sendV1Success(res, data, 201);
       } catch (error) {

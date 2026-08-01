@@ -394,6 +394,68 @@ describe('decks.http', () => {
     expect(deckWriteService.createDeck).toHaveBeenCalledWith('user-1', 'N', 'd', undefined);
   });
 
+  it('POST /decks forwards an explicit public visibility choice', async () => {
+    const created = {
+      id: 'deck-public',
+      user_id: 'user-1',
+      name: 'Public deck',
+      is_private: false,
+    };
+    const deckWriteService = {
+      createDeck: jest.fn().mockResolvedValue(created),
+      validateDeckCards: jest.fn(),
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService: { getTransformedListForUser: jest.fn() } as unknown as DeckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth,
+    };
+
+    const res = await request(buildApp(deps))
+      .post('/decks')
+      .send({ name: 'Public deck', is_private: false })
+      .expect(201);
+
+    expect(res.body.data.is_private).toBe(false);
+    expect(deckWriteService.createDeck).toHaveBeenCalledWith(
+      'user-1',
+      'Public deck',
+      undefined,
+      undefined,
+      false,
+    );
+  });
+
+  it('POST /decks rejects a non-boolean visibility value', async () => {
+    const deckWriteService = {
+      createDeck: jest.fn(),
+      validateDeckCards: jest.fn(),
+    } as unknown as DeckWriteService;
+    const deps: DecksV1HttpDeps = {
+      deckStatsService: stubDeckStats(),
+      deckListService: { getTransformedListForUser: jest.fn() } as unknown as DeckListService,
+      deckWriteService,
+      deckDetailService: stubDetail(),
+      deckBackgroundService: noopDeckBackground,
+      deckCardsService: stubDeckCards(),
+      deckUIPreferencesService: stubDeckUIPreferences(),
+      authenticateUser: passAuth,
+    };
+
+    const res = await request(buildApp(deps))
+      .post('/decks')
+      .send({ name: 'Bad visibility', is_private: 'no' })
+      .expect(400);
+
+    expect(res.body.errors[0]).toEqual(expect.objectContaining({ field: 'is_private' }));
+    expect(deckWriteService.createDeck).not.toHaveBeenCalled();
+  });
+
   it('POST /decks returns 400 v1 envelope for invalid name', async () => {
     const deckListService = { getTransformedListForUser: jest.fn() } as unknown as DeckListService;
     const deckWriteService = {

@@ -175,6 +175,63 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-muted);
 }
+.dsel__visibility-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.dsel__visibility-field legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+}
+.dsel__visibility-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.dsel__visibility-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.dsel__visibility-option input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--color-accent-bright);
+}
+.dsel__visibility-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dsel__visibility-option strong {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+.dsel__visibility-option:hover strong,
+.dsel__visibility-option.is-selected strong {
+  color: var(--color-accent-bright);
+}
+.dsel__visibility-option small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+}
 .dsel__error {
   background: rgba(239, 77, 90, 0.12);
   border: 1px solid rgba(239, 77, 90, 0.4);

@@ -7,14 +7,16 @@ export class DeckService {
   /**
    * Create a new deck with business logic validation
    */
-  async createDeck(userId: string, name: string, description?: string, characterIds?: string[]): Promise<Deck> {
+  async createDeck(userId: string, name: string, description?: string, characterIds?: string[], isPrivate?: boolean): Promise<Deck> {
     // Business logic validation: Character limit (0-4 characters allowed)
     if (characterIds && characterIds.length > 4) {
       throw new Error('Maximum 4 characters allowed per deck');
     }
 
     // Delegate to repository for data persistence
-    return await this.deckRepository.createDeck(userId, name, description, characterIds);
+    return isPrivate === undefined
+      ? await this.deckRepository.createDeck(userId, name, description, characterIds)
+      : await this.deckRepository.createDeck(userId, name, description, characterIds, isPrivate);
   }
 
   /**

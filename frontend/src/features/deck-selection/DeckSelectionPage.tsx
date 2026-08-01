@@ -188,10 +188,17 @@ export default function DeckSelectionPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newDeckPrivate, setNewDeckPrivate] = useState(true);
   const [busy, setBusy] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [menuDeck, setMenuDeck] = useState<DeckListItem | null>(null);
   const [exportDeckId, setExportDeckId] = useState<string | null>(null);
+
+  const openCreatePanel = () => {
+    setNewDeckPrivate(true);
+    setCreateError(null);
+    setCreateOpen(true);
+  };
 
   const { input: exportDeckInput, loading: exportLoading } = useDeckExportInput(
     exportDeckId,
@@ -271,7 +278,14 @@ export default function DeckSelectionPage() {
     setBusy(true);
     setCreateError(null);
     try {
-      const created = await createDeck({ name: newName.trim(), description: newDesc.trim() || undefined }, isGuest);
+      const created = await createDeck(
+        {
+          name: newName.trim(),
+          description: newDesc.trim() || undefined,
+          ...(isGuest ? {} : { is_private: newDeckPrivate }),
+        },
+        isGuest,
+      );
       await queryClient.invalidateQueries({ queryKey: ['decks', 'mine', ownerId] });
       const targetUser = created.userId || user?.id || ownerId;
       navigate(`/users/${targetUser}/decks/${created.id}`, {
@@ -397,7 +411,7 @@ export default function DeckSelectionPage() {
                 >
                   <IconImport /> Import Deck
                 </button>
-                <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                <button type="button" className="btn btn-primary" onClick={openCreatePanel}>
                   <IconPlus /> New Deck
                 </button>
               </div>
@@ -454,7 +468,7 @@ export default function DeckSelectionPage() {
                     <button type="button" className="btn btn-ghost" onClick={() => setImportOpen(true)}>
                       <IconImport /> Import Deck
                     </button>
-                    <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+                    <button type="button" className="btn btn-primary" onClick={openCreatePanel}>
                       <IconPlus /> New Deck
                     </button>
                   </div>
@@ -562,6 +576,39 @@ export default function DeckSelectionPage() {
             <span>Description (optional)</span>
             <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="What's the game plan?" maxLength={500} rows={4} />
           </label>
+          {!isGuest ? (
+            <fieldset className="dsel__visibility-field">
+              <legend>Visibility</legend>
+              <div className="dsel__visibility-options">
+                <label className={`dsel__visibility-option${newDeckPrivate ? ' is-selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="new-deck-visibility"
+                    value="private"
+                    checked={newDeckPrivate}
+                    onChange={() => setNewDeckPrivate(true)}
+                  />
+                  <span>
+                    <strong>Private</strong>
+                    <small>Only you can view this deck.</small>
+                  </span>
+                </label>
+                <label className={`dsel__visibility-option${!newDeckPrivate ? ' is-selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="new-deck-visibility"
+                    value="public"
+                    checked={!newDeckPrivate}
+                    onChange={() => setNewDeckPrivate(false)}
+                  />
+                  <span>
+                    <strong>Public</strong>
+                    <small>Visible in Community when legal.</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+          ) : null}
           {createError ? <div className="dsel__error" role="alert">{createError}</div> : null}
           <div className="dsel__form-footer">
             <button

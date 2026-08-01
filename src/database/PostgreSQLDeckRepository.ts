@@ -39,14 +39,16 @@ export class PostgreSQLDeckRepository implements DeckRepository {
     userId: string,
     name: string,
     description?: string,
-    characterIds?: string[]
+    characterIds?: string[],
+    isPrivate?: boolean
   ): Promise<Deck> {
     return deckCrud.createDeck(
       this.getContext(),
       userId,
       name,
       description,
-      characterIds
+      characterIds,
+      isPrivate
     );
   }
 

@@ -44,6 +44,8 @@ export function fetchDeckFull(deckId: string, isGuest: boolean): Promise<DeckDet
 export interface CreateDeckInput {
   name: string;
   description?: string;
+  /** Deck visibility. true = private (owner only), false = public. */
+  is_private?: boolean;
 }
 
 /** Minimal reference needed to navigate to a freshly-created deck. */

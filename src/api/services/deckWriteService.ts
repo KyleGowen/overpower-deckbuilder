@@ -6,7 +6,8 @@ export interface DeckBusinessCreatePort {
     userId: string,
     name: string,
     description?: string,
-    characterIds?: string[]
+    characterIds?: string[],
+    isPrivate?: boolean
   ) => Promise<Deck>;
   updateDeck: (deckId: string, updates: Partial<Deck>) => Promise<Deck | undefined>;
 }
@@ -28,9 +29,12 @@ export class DeckWriteService {
     userId: string,
     name: string,
     description: string | undefined,
-    characters: string[] | undefined
+    characters: string[] | undefined,
+    isPrivate?: boolean
   ): Promise<Deck> {
-    const deck = await this.deckBusiness.createDeck(userId, name, description, characters);
+    const deck = isPrivate === undefined
+      ? await this.deckBusiness.createDeck(userId, name, description, characters)
+      : await this.deckBusiness.createDeck(userId, name, description, characters, isPrivate);
     await this.syncCreatedDeckValidity(deck, characters);
     return deck;
   }

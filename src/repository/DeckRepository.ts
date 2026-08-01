@@ -5,7 +5,7 @@ export interface DeckRepository {
   initialize(): Promise<void>;
 
   // Deck management
-  createDeck(userId: string, name: string, description?: string, characterIds?: string[]): Promise<Deck>;
+  createDeck(userId: string, name: string, description?: string, characterIds?: string[], isPrivate?: boolean): Promise<Deck>;
   getDeckById(id: string): Promise<Deck | undefined>;
   getDecksByUserId(userId: string, orderBy?: 'created_at' | 'updated_at'): Promise<Deck[]>;
   getDeckSummaryWithAllCards(deckId: string): Promise<Deck | undefined>;

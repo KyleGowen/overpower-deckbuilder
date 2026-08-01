@@ -13,6 +13,26 @@ function makeDeck(overrides: Partial<Deck> = {}): Deck {
 }
 
 describe('DeckWriteService.createDeck — server-owned is_valid', () => {
+  it('passes an explicit visibility choice to deck creation', async () => {
+    const created = makeDeck({ is_private: false });
+    const deckBusiness = {
+      createDeck: jest.fn().mockResolvedValue(created),
+      updateDeck: jest.fn().mockResolvedValue(created),
+    };
+    const deckValidation = { validateDeck: jest.fn().mockResolvedValue([{ rule: 'empty', message: 'not legal' }]) };
+
+    const service = new DeckWriteService(deckBusiness, deckValidation);
+    await service.createDeck('user-1', 'Public deck', undefined, undefined, false);
+
+    expect(deckBusiness.createDeck).toHaveBeenCalledWith(
+      'user-1',
+      'Public deck',
+      undefined,
+      undefined,
+      false,
+    );
+  });
+
   it('recomputes and persists is_valid for a freshly created deck', async () => {
     const created = makeDeck({ is_valid: false });
     const deckBusiness = {

@@ -4,6 +4,7 @@ export interface CreateDeckParsedBody {
   name: string;
   description?: string;
   characters?: string[];
+  is_private?: boolean;
 }
 
 /**
@@ -13,11 +14,18 @@ export class CreateDeckRequestBody {
   readonly name: string;
   readonly description?: string;
   readonly characters?: string[];
+  readonly is_private?: boolean;
 
-  private constructor(name: string, description?: string, characters?: string[]) {
+  private constructor(
+    name: string,
+    description?: string,
+    characters?: string[],
+    isPrivate?: boolean
+  ) {
     this.name = name;
     if (description !== undefined) this.description = description;
     if (characters !== undefined) this.characters = characters;
+    if (isPrivate !== undefined) this.is_private = isPrivate;
   }
 
   static parse(body: unknown): { ok: true; value: CreateDeckRequestBody } | { ok: false; errors: V1ErrorBody[] } {
@@ -75,6 +83,15 @@ export class CreateDeckRequestBody {
       }
     }
 
+    const isPrivate = o.is_private;
+    if (isPrivate !== undefined && typeof isPrivate !== 'boolean') {
+      errors.push({
+        code: 'VALIDATION_ERROR',
+        message: 'is_private must be a boolean value',
+        field: 'is_private'
+      });
+    }
+
     if (errors.length) return { ok: false, errors };
 
     const desc =
@@ -84,7 +101,7 @@ export class CreateDeckRequestBody {
 
     return {
       ok: true,
-      value: new CreateDeckRequestBody((name as string).trim(), desc, chars)
+      value: new CreateDeckRequestBody((name as string).trim(), desc, chars, isPrivate as boolean | undefined)
     };
   }
 }

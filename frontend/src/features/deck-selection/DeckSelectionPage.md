@@ -20,7 +20,7 @@ buttons). Per-tab rules match desktop: My Decks editable; Favorites/Community/To
 read-only with favorite hearts; the Community tab keeps the character/location search bar.
 
 ## Capabilities
-- **New Deck**: opens a `SlideOutPanel` form (name + optional description) → `createDeck` →
+- **New Deck**: opens a `SlideOutPanel` form (name + optional description + private/public visibility) → `createDeck` →
   navigates to the editor. `createDeck` returns a normalized `{ id, userId }` (the create
   API returns a flat deck row, not the `{ metadata }` list shape).
 - **Import Deck**: ghost button between search and **New Deck** opens `ImportDeckPanel`

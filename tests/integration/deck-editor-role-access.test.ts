@@ -133,6 +133,29 @@ describe('Deck Editor Role-Based Access Integration Tests', () => {
       integrationTestUtils.trackTestDeck(deckId);
     });
 
+    it('should persist the requested public visibility through deck creation and full-deck reads', async () => {
+      const createDeckResponse = await request(app)
+        .post('/api/v1/decks')
+        .set('Cookie', userSessionCookie)
+        .send({
+          name: 'Public deck from creation',
+          description: 'Visibility persistence test',
+          is_private: false,
+        });
+
+      expect(createDeckResponse.status).toBe(201);
+      expect(createDeckResponse.body.data.is_private).toBe(false);
+      const deckId = createDeckResponse.body.data.id;
+      integrationTestUtils.trackTestDeck(deckId);
+
+      const fullDeckResponse = await request(app)
+        .get(`/api/v1/decks/${deckId}/full`)
+        .set('Cookie', userSessionCookie);
+
+      expect(fullDeckResponse.status).toBe(200);
+      expect(fullDeckResponse.body.data.metadata.is_private).toBe(false);
+    });
+
     it('should allow ADMIN users to create decks via API', async () => {
       const createDeckResponse = await request(app)
         .post('/api/v1/decks')

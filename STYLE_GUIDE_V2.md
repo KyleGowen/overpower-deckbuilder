@@ -233,6 +233,8 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
 - `SlideOutPanel` is the standard right-hand drawer for details and forms (card detail,
   create deck, deck actions, add cards). It uses `--color-bg-panel`, `--shadow-pop`, a
   scrim at `--z-drawer`, focus trapping, `Esc` to close, and slides in with `--ease-out`.
+- The New Deck form presents private/public visibility as a compact stacked radio group with
+  readable labels and supporting text; private is selected by default and persisted with the deck.
 - The card **detail panel** shows the full art, type/set chips, an action slot (e.g. Add to
   Deck / + Collection), the color-coded stat row, and a Details key/value list
   (Set, **Is Foil** on Collection, **Has Foil** on Database, Set Number, abilities when present). Default width **504px** (20% wider
