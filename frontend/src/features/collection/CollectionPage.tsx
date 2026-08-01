@@ -30,6 +30,7 @@ import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
 import { Checkbox } from '../../components/Checkbox';
 import { IconSearch, IconCollection } from '../../components/icons';
 import type { CatalogCard, CatalogType, CollectionCardType } from '../../lib/api/types';
+import { COLLECTION_DEFAULT_TAB } from './collectionDefaults';
 import './CollectionPage.css';
 
 const PAGE_SIZE_GRID = 24;
@@ -49,7 +50,7 @@ export default function CollectionPage() {
   const colRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
   const collection = useCollection();
-  const [tab, setTab] = useState<DbvTabSelection>('characters');
+  const [tab, setTab] = useState<DbvTabSelection>(COLLECTION_DEFAULT_TAB);
   const [search, setSearch] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
