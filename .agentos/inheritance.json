@@ -9,7 +9,7 @@
   },
   "cache": {
     "rulesFile": ".agentos/global-rules.md",
-    "upstreamCommit": "1296730302f2b5465dd947b05d777492d7ea4662",
+    "upstreamCommit": "b85ae39a4b7dd488c31ea446cd577ba144921d02",
     "sourceCategories": {
       "identityAndWorkingStyle": [
         "os/context/identity.md"

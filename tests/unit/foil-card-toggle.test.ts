@@ -10,6 +10,8 @@
  *  - edge cases: missing map, missing card, no counterpart
  */
 
+export {};
+
 const mockRenderDeckCardsCardView = jest.fn();
 const mockRenderDeckCardsListView = jest.fn();
 const mockDisplayDeckCardsForEditing = jest.fn();

@@ -1,7 +1,7 @@
 # AgentOS Global Rules Cache
 
 Upstream: `KyleGowen/AgentOS` committed `main` at
-`1296730302f2b5465dd947b05d777492d7ea4662`.
+`b85ae39a4b7dd488c31ea446cd577ba144921d02`.
 
 Manifest and category provenance: [`inheritance.json`](inheritance.json).
 Refresh contract: [`../docs/current/AGENTOS_INHERITANCE.md`](../docs/current/AGENTOS_INHERITANCE.md).
