@@ -6,11 +6,13 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 
 ```
 /Users/kyle/cursored/
+├── 📁 .agentos/                    # Compact global AgentOS inheritance cache + provenance
 ├── 📄 README.md                    # Main project documentation
 ├── 📄 STYLE_GUIDE_V2.md            # v2 React SPA visual source of truth
 ├── 📁 frontend/                    # v2 React SPA (production UI)
 ├── 📄 docs/current/PROJECT_LAYOUT.md  # Project structure documentation
 ├── 📄 docs/current/FRONTEND_V2.md  # v2 architecture and dev workflow
+├── 📄 docs/current/AGENTOS_INHERITANCE.md  # Cross-project rule inheritance contract
 ├── 📄 docs/current/TESTING_GUIDE.md        # How to run unit/integration tests
 ├── 📄 docs/current/API_DOCUMENTATION.md  # Legacy HTTP API
 ├── 📄 API_V1.md                    # /api/v1 contract
@@ -252,6 +254,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 
 ```
 /scripts/
+├── 📄 agentos-inheritance-status.mjs  # Read-only AgentOS freshness/provenance check
 ├── 📄 check-production-status.js   # Production status checker
 ├── 📄 cleanup-test-data.js         # Test data cleanup script
 ├── 📄 connect-to-production-db.sh  # Production database connection
@@ -305,6 +308,7 @@ Integration-test Express app; reuses `registerRoutes` from `src/routes/` with te
 ```
 📄 README.md                        # Main project documentation
 📄 docs/current/PROJECT_LAYOUT.md   # Project structure guide
+📄 docs/current/AGENTOS_INHERITANCE.md  # AgentOS cache, precedence, and recovery contract
 📄 docs/current/API_DOCUMENTATION.md  # API endpoints and usage
 📄 docs/current/DEPLOYMENT.md       # Deployment instructions
 📄 docs/current/DEPLOYMENT_STRATEGY.md  # Detailed deployment strategy

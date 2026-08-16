@@ -79,6 +79,8 @@
     "backfill:deck-validity": "ts-node src/scripts/backfillDeckValidity.ts",
     "generate:sql-migrations": "ts-node src/scripts/generateSqlDataMigrations.ts",
     "start:full": "./scripts/start-server.sh",
+    "agentos:status": "node scripts/agentos-inheritance-status.mjs",
+    "test:agentos-inheritance": "node --test tests/unit/agentos-inheritance-status.test.mjs",
     "lint": "eslint src tests --ext .ts",
     "find:unused": "knip",
     "find:unused:ci": "knip --production --include dependencies,duplicates"

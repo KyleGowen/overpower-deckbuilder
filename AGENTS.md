@@ -7,6 +7,14 @@ Before making changes:
 1. **Use this file as the active Codex source of truth.** `.cursorrules` and archived `.cursor/` files are historical Cursor material unless a task explicitly asks about Cursor.
 2. **Local dev URL is `http://localhost:5173`** (Vite in `frontend/`). Run root `npm run dev` (API :8085) **and** `frontend/npm run dev` (UI :5173).
 3. **Read [DEAD_CODE_POLICY.md](DEAD_CODE_POLICY.md)** — how to identify and remove unused code (Knip).
+4. **Load [`.agentos/global-rules.md`](.agentos/global-rules.md) for every substantive task.** It is the compact, checked-in cache of Kyle's global AgentOS rules. At the first substantive task in a session, run `npm run agentos:status`; reuse the cache when it is current, and do not open large AgentOS source files unless the status output identifies relevant changed files.
+
+## AgentOS inheritance
+
+- Excelsior is authoritative for this product, repository, architecture, users, data, operations, releases, and repo-local workflows. This file and nested path-specific instructions override inherited AgentOS rules when they conflict.
+- AgentOS is authoritative for Kyle's global identity, communication preferences, privacy, verification, approval, memory, GitHub synchronization, and skill-learning practices.
+- Follow [`docs/current/AGENTOS_INHERITANCE.md`](docs/current/AGENTOS_INHERITANCE.md) for source resolution, cache refresh, conflict reporting, exclusions, and the narrow AgentOS write allowlist.
+- Report material conflicts. Never import context from AgentOS's other projects, and never treat uncommitted AgentOS changes as shared inherited state.
 
 Key docs:
 

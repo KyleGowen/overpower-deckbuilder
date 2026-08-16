@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "repository": "KyleGowen/AgentOS",
+    "remoteUrl": "https://github.com/KyleGowen/AgentOS.git",
+    "branch": "main",
+    "configuredLocalPath": "C:\\Users\\Player.NUCBOXG3_PLUS\\Documents\\ChatGPT\\AgentOS",
+    "pathEnvironmentVariable": "EXCELSIOR_AGENTOS_PATH"
+  },
+  "cache": {
+    "rulesFile": ".agentos/global-rules.md",
+    "upstreamCommit": "1296730302f2b5465dd947b05d777492d7ea4662",
+    "sourceCategories": {
+      "identityAndWorkingStyle": [
+        "os/context/identity.md"
+      ],
+      "communication": [
+        "os/context/identity.md",
+        "os/context/communication-style.md"
+      ],
+      "privacyAndSecrets": [
+        "AGENTS.md",
+        "os/memory/README.md",
+        "os/agents/os-thought-partner.md",
+        "os/skills/README.md"
+      ],
+      "verificationAndSourceGrounding": [
+        "os/context/identity.md",
+        "os/context/engineering-review.md",
+        "PLAYBOOK.md"
+      ],
+      "approvalBoundaries": [
+        "os/agents/os-thought-partner.md"
+      ],
+      "memoryAndCompaction": [
+        "AGENTS.md",
+        "os/memory/README.md",
+        "os/agents/os-thought-partner.md"
+      ],
+      "githubSynchronization": [
+        "os/memory/README.md",
+        "os/agents/os-thought-partner.md"
+      ],
+      "skillLearningAndDocumentation": [
+        "os/agents/os-thought-partner.md",
+        "os/skills/README.md"
+      ]
+    }
+  }
+}
