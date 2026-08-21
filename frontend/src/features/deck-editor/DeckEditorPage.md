@@ -22,7 +22,7 @@ are read-only automatically).
   - **Characters (authenticated visitors)**: **KO** toggle only in the footer (no trash/reserve edits).
   - **Characters (read-only)**: disabled **Reserve** on the reserved character only when applicable; **KO** still available for all signed-in users (GUEST, USER, ADMIN).
   - **All types (owners)**: trash only — removes that single instance. Logic: [`deckInstances.ts`](../../lib/decks/deckInstances.ts), [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts), reserve: [`reserveCharacter.ts`](../../lib/decks/reserveCharacter.ts).
-  - **Pre-Placed chip**: a card marked Pre-Placed shows a small cyan **"Pre-Placed"** chip (`.deck-editor__preplaced-chip`) **center-aligned** in the footer row (same row as trash). The footer is a 3-column grid (`1fr auto 1fr` — empty spacer / centered chip / right-aligned controls) so the chip stays centered regardless of how many controls sit on the right.
+  - **Pre-Placed chip**: a card marked Pre-Placed shows a small cyan **"Pre-Placed"** chip (`.deck-editor__preplaced-chip`) **center-aligned** in the footer row (same row as trash). It is also shown on read-only/public deck views so viewers can see the persisted setup; only the owner can change it. The footer is a 3-column grid (`1fr auto 1fr` — empty spacer / centered chip / right-aligned controls) so the chip stays centered regardless of how many controls sit on the right.
 - **Threat stat**: client-calculated live via `calculateDeckTotalThreat` (characters + locations, reserve bumps for Victory Harben, Carson of Venus, Morgan le Fay). Rendered as `.deck-editor__threat-stat` (icon + value) in the stats panel — not a meta chip. Shows `total/76` when over cap.
 
 ## Simulate KO
@@ -55,7 +55,7 @@ Client-only random hand simulation. Full spec: [`docs/current/DRAW_HAND_FEATURE.
 
 Lets an owner mark a playable card as **Pre-Placed** — it starts the game already placed (under a location or with a character) instead of in the random draw pile. Stored as `exclude_from_draw` on the deck card; Draw Hand omits these rows while they still count toward deck size and the ≥8 playable threshold. Logic: `frontend/src/lib/decks/prePlaced.ts`.
 
-- **Toggle UI**: a small **Pre-Placed** pill button in the [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) slide-out (`.card-detail__preplaced-btn`), shown only to owners and only for **eligible** cards. Active state fills the pill; a hint line explains the effect. Props: `prePlacedEligible`, `prePlaced`, `onTogglePrePlaced`.
+- **Toggle UI**: an owner sees a small **Pre-Placed** pill button in the [`CardDetailPanel`](../../components/CardDetailPanel/CardDetailPanel.tsx) slide-out (`.card-detail__preplaced-btn`) for **eligible** cards. A card already marked Pre-Placed shows the active pill and explanation to every viewer, including read-only/public views; only owners receive the interactive control. Props: `prePlacedEligible`, `prePlaced`, `onTogglePrePlaced`.
 - **Indicator**: when active, a centered **"Pre-Placed"** chip appears on the card tile footer (see Per-card controls above).
 - **Eligibility** (client-only — backend stores the flag without validating type): [`prePlaced.ts`](../../lib/decks/prePlaced.ts)
   - **Training** card → deck contains the **"Spartan Training Ground"** location **and** the card is **not** one-per-deck.

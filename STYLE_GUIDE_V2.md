@@ -290,7 +290,7 @@ Row 1 keeps back, deck name, and meta chips (card count, legality, visibility) o
 | KO-dimmed card (`.deck-editor__card--ko-dimmed .deck-editor__card-media`) | `filter: grayscale(0.7) brightness(0.55)` on art only — matches `CardTile` dimming; footer controls stay full contrast |
 
 ### Deck Editor — Pre-Placed
-Owner-only toggle (eligible cards) that marks a card as placed at game start (`exclude_from_draw`). Full spec: [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md#pre-placed). Eligibility: [`prePlaced.ts`](frontend/src/lib/decks/prePlaced.ts).
+Owner-only toggle (eligible cards) that marks a card as placed at game start (`exclude_from_draw`). The active status is visible on public/read-only deck tiles and inspectors; only the owner can change it. Full spec: [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md#pre-placed). Eligibility: [`prePlaced.ts`](frontend/src/lib/decks/prePlaced.ts).
 
 | Element | Tokens / values |
 |---|---|

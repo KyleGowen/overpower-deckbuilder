@@ -15,6 +15,8 @@ chips, an action slot, an Ability section, and an auto-generated Details key/val
 | `isFoil` | `boolean` | When set, renders **Is Foil** Yes/No in Details (this row is a foil printing). |
 | `showFoilEffect` | `boolean` | When false, suppresses the prismatic foil overlay on the hero image (default true). Metadata rows unchanged. |
 | `setDisplayName` | `string` | Friendly set name for the **Set** Details row (falls back to `card.set` code when omitted). |
+| `prePlaced` | `boolean` | Shows the active **Pre-Placed** status and Draw Hand explanation for every viewer when true. |
+| `prePlacedEligible` + `onTogglePrePlaced` | `boolean` + callback | Makes that status pill editable for an eligible deck owner; read-only viewers see the status but no control. |
 
 ## Details list
 Auto-built from the card's own fields, minus a `HIDDEN_FIELDS` set (ids, image paths,
@@ -37,3 +39,4 @@ Character-linked specials omit these rows. Logic lives in `cardDetailFields.ts`
 ## Notes
 - Uses `cardAbilityText` from `catalogTypeMap` so ability extraction is consistent across card types.
 - Primary stats (Energy, Combat, Brute Force, Intelligence, Threat) are shown on character card art — no duplicate stat row in the slide-out.
+- A pre-placed card's status is part of the deck instance, not the catalog card: public/read-only deck detail must expose it even though only the owner can toggle it.

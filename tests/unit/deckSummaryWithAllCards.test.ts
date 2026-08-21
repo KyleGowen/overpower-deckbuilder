@@ -7,7 +7,7 @@ describe('getDeckSummaryWithAllCards', () => {
       query: jest
         .fn()
         .mockResolvedValueOnce({
-          rows: [{ id: 'deck-1', user_id: 'user-1', name: 'Saved deck' }],
+          rows: [{ id: 'deck-1', user_id: 'user-1', name: 'Saved deck', card_count: 52 }],
         })
         .mockResolvedValueOnce({
           rows: [
@@ -38,5 +38,6 @@ describe('getDeckSummaryWithAllCards', () => {
         exclude_from_draw: true,
       }),
     ]);
+    expect(deck?.card_count).toBe(52);
   });
 });

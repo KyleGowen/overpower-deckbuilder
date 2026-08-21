@@ -187,6 +187,7 @@ export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
   const isLimited = deckRow.is_limited as boolean | undefined;
   const isValid = deckRow.is_valid as boolean | undefined;
   const isPrivate = deckRow.is_private as boolean | undefined;
+  const cardCount = deckRow.card_count as number | undefined;
   const reserveChar = deckRow.reserve_character as string | undefined;
   const displayMission = (deckRow.display_mission_card_id as string | null) ?? null;
   const bgPath = deckRow.background_image_path as string | undefined;
@@ -202,6 +203,7 @@ export function mapDeckRowWithCards(deckRow: DeckRow, cards: DeckCard[]): Deck {
     ...(isLimited !== undefined && { is_limited: isLimited }),
     ...(isValid !== undefined && { is_valid: isValid }),
     ...(isPrivate !== undefined && { is_private: isPrivate }),
+    ...(cardCount !== undefined && { card_count: cardCount }),
     ...(reserveChar !== undefined && { reserve_character: reserveChar }),
     ...(displayMission !== null && { display_mission_card_id: displayMission }),
     ...(bgPath !== undefined && { background_image_path: bgPath }),

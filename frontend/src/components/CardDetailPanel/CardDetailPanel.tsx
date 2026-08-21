@@ -39,10 +39,7 @@ interface CardDetailPanelProps {
   /** Deck editor: alternate printings with Apply actions (hidden when length <= 1). */
   printings?: CardDetailPrintingRow[];
   onApplyPrinting?: (printingId: string) => void;
-  /**
-   * Deck editor: show the Pre-Placed toggle (card is eligible per character /
-   * location rules and the viewer owns the deck). Renders nothing when false.
-   */
+  /** Deck editor: whether the owner may toggle Pre-Placed for this card. */
   prePlacedEligible?: boolean;
   /** Deck editor: current Pre-Placed state (excluded from Draw Hand). */
   prePlaced?: boolean;
@@ -161,21 +158,27 @@ export function CardDetailContent({
 
       {actions ? <div className="card-detail__actions">{actions}</div> : null}
 
-      {prePlacedEligible && onTogglePrePlaced ? (
+      {prePlaced === true || (prePlacedEligible && onTogglePrePlaced) ? (
         <div className="card-detail__preplaced">
-          <button
-            type="button"
-            className={`card-detail__preplaced-btn${prePlaced ? ' is-active' : ''}`}
-            onClick={onTogglePrePlaced}
-            aria-pressed={Boolean(prePlaced)}
-            title={
-              prePlaced
-                ? 'Unmark as Pre-Placed (include in Draw Hand)'
-                : 'Mark as Pre-Placed (exclude from Draw Hand)'
-            }
-          >
-            Pre-Placed
-          </button>
+          {prePlacedEligible && onTogglePrePlaced ? (
+            <button
+              type="button"
+              className={`card-detail__preplaced-btn${prePlaced ? ' is-active' : ''}`}
+              onClick={onTogglePrePlaced}
+              aria-pressed={Boolean(prePlaced)}
+              title={
+                prePlaced
+                  ? 'Unmark as Pre-Placed (include in Draw Hand)'
+                  : 'Mark as Pre-Placed (exclude from Draw Hand)'
+              }
+            >
+              Pre-Placed
+            </button>
+          ) : (
+            <span className="card-detail__preplaced-btn is-active" aria-label="Pre-Placed">
+              Pre-Placed
+            </span>
+          )}
           <p className="card-detail__preplaced-hint">
             {prePlaced
               ? 'Placed at game start — excluded from Draw Hand.'

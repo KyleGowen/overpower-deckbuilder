@@ -1245,15 +1245,16 @@ export default function DeckEditorPage() {
                           )
                         : null;
                     const showKoOnCharacter = entry.type === 'character' && canSimulateKo;
+                    const entryPrePlaced = isPrePlaced(entry);
                     const showCardFooter =
                       isOwner ||
+                      entryPrePlaced ||
                       (entry.type === 'character' &&
                         reserveRowState !== null &&
                         reserveSlotVisible(reserveRowState)) ||
                       showKoOnCharacter;
                     const koDimmed =
                       koCtx !== null && shouldDimDeckCard(entry, catalogCard, koCtx);
-                    const entryPrePlaced = isPrePlaced(entry);
                     const entryIsFoil = Boolean(entry.is_foil || (catalogCard && isFoilCard(catalogCard)));
                     const foilSeed = buildFoilSeed(entry.cardId, entry.instanceId);
                     return (
