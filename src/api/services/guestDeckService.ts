@@ -2,6 +2,24 @@ import type { Deck, DeckCard, DeckData } from '../../types';
 import { transformDeckList, transformGuestDeckToListItem } from '../deckTransform';
 
 const MAX_CARD_QUANTITY_PER_ENTRY = 100;
+const NON_DECK_CARD_TYPES = new Set(['character', 'location', 'mission']);
+
+type CardCountInput = {
+  cardType?: string;
+  type?: string;
+  quantity?: number;
+  exclude_from_draw?: boolean;
+};
+
+/** Keep session-deck metadata aligned with the persisted deck-count rule. */
+function countCardsInDeck(cards: readonly CardCountInput[]): number {
+  return cards
+    .filter((card) => {
+      const type = card.type ?? card.cardType;
+      return !NON_DECK_CARD_TYPES.has(type ?? '') && card.exclude_from_draw !== true;
+    })
+    .reduce((sum, card) => sum + (card.quantity ?? 1), 0);
+}
 
 export type GuestDeckPersistencePort = {
   createDeck: (sessionId: string, deckData: DeckData) => string;
@@ -202,7 +220,7 @@ export class GuestDeckService {
         );
       }
     }
-    const cardCount = cards.reduce((sum, c) => sum + (c.quantity ?? 1), 0);
+    const cardCount = countCardsInDeck(cards);
     const mappedCards: DeckCard[] = cards.map((c, i) => ({
       id: `guest-${deckId}-${i}`,
       type: c.cardType as DeckCard['type'],
@@ -269,7 +287,7 @@ export class GuestDeckService {
       quantity: qty
     };
     const updatedCards = [...currentCards, newCard];
-    const cardCount = updatedCards.reduce((sum, c) => sum + (c.quantity ?? 1), 0);
+    const cardCount = countCardsInDeck(updatedCards);
     const updated: DeckData = {
       metadata: {
         ...existing.metadata,

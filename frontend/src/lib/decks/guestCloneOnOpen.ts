@@ -30,10 +30,11 @@ export function guestNeedsCloneOnOpen(
 /** Clone a DB deck into a new guest session deck; returns the new `guest_*` id. */
 export async function clonePreloadedGuestDeck(sourceDeckId: string): Promise<string> {
   const source = await api.get<DeckDetail>(`/api/v1/decks/${sourceDeckId}/full`);
+  const description = source.metadata.description;
   const created = await createDeck(
     {
       name: source.metadata.name,
-      description: source.metadata.description ?? undefined,
+      ...(description !== undefined && description !== null ? { description } : {}),
     },
     true,
   );
