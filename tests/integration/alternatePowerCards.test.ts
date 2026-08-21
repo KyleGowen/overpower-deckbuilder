@@ -36,8 +36,10 @@ describe('Alternate Power Cards Integration Tests', () => {
         ['7 - Combat']
       );
 
-      expect(nonFoil.rows.length).toBe(1);
-      expect(nonFoil.rows[0].image_path).toBe('tfacp/power/7_combat_2.png');
+      expect(nonFoil.rows.map((card: { image_path: string }) => card.image_path).sort()).toEqual([
+        'tfacp/power/7_combat_2.png',
+        'tfacp/power/7_combat_naol.png',
+      ]);
 
       const foil = await pool.query(
         "SELECT id, name, image_path, set, is_foil FROM power_cards WHERE set = 'TFCP' AND image_path = 'tfacp/power/7_combat.png'",
@@ -69,8 +71,10 @@ describe('Alternate Power Cards Integration Tests', () => {
         ['7 - Energy']
       );
 
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_energy.png');
+      expect(result.rows.map((card: { image_path: string }) => card.image_path).sort()).toEqual([
+        'tfacp/power/7_energy.png',
+        'tfacp/power/7_energy_naol.png',
+      ]);
 
       console.log('✅ 7 - Energy TFCP promo image:', result.rows[0]?.image_path);
     });
@@ -81,8 +85,10 @@ describe('Alternate Power Cards Integration Tests', () => {
         ['7 - Brute Force']
       );
 
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_brute_force.png');
+      expect(result.rows.map((card: { image_path: string }) => card.image_path).sort()).toEqual([
+        'tfacp/power/7_brute_force.png',
+        'tfacp/power/7_brute_force_naol.png',
+      ]);
 
       console.log('✅ 7 - Brute Force TFCP promo image:', result.rows[0]?.image_path);
     });
@@ -93,8 +99,10 @@ describe('Alternate Power Cards Integration Tests', () => {
         ['7 - Intelligence']
       );
 
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].image_path).toBe('tfacp/power/7_intelligence.png');
+      expect(result.rows.map((card: { image_path: string }) => card.image_path).sort()).toEqual([
+        'tfacp/power/7_intelligence.png',
+        'tfacp/power/7_intelligence_naol.png',
+      ]);
 
       console.log('✅ 7 - Intelligence TFCP promo image:', result.rows[0]?.image_path);
     });

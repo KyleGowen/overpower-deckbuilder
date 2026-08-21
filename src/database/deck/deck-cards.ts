@@ -240,7 +240,7 @@ export async function replaceAllCardsInDeck(
       if (existing) {
         existing.quantity += card.quantity;
         if (card.exclude_from_draw !== undefined) {
-          existing.exclude_from_draw = card.exclude_from_draw;
+          existing.exclude_from_draw = existing.exclude_from_draw || card.exclude_from_draw;
         }
       } else {
         cardMap.set(key, { ...card });
@@ -282,6 +282,22 @@ export async function replaceAllCardsInDeck(
         );
       }
     }
+
+    const cardCountResult = await client.query<{ card_count: number }>(
+      `
+        SELECT COALESCE(SUM(quantity), 0)::int AS card_count
+        FROM deck_cards
+        WHERE deck_id = $1
+          AND card_type NOT IN ('character', 'location', 'mission')
+          AND exclude_from_draw IS DISTINCT FROM TRUE
+      `,
+      [deckId]
+    );
+    const cardCount = cardCountResult.rows[0]?.card_count ?? 0;
+    await client.query('UPDATE decks SET card_count = $1, updated_at = NOW() WHERE id = $2', [
+      cardCount,
+      deckId,
+    ]);
 
     await refreshDeckPreviewMetadata(ctx, deckId, client);
     await touchDeckUpdatedAt(client, deckId);

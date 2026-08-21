@@ -2,6 +2,7 @@ import type { CatalogCard, DeckCardEntry } from '../../frontend/src/lib/api/type
 import {
   buildDrawPile,
   canDrawHand,
+  countCardsInDeck,
   countPlayableCards,
   drawRandomHand,
   sortDrawnHandCards,
@@ -45,6 +46,16 @@ describe('drawHand (v2)', () => {
       cards.push(power('excluded', { exclude_from_draw: true }));
       expect(countPlayableCards(cards)).toBe(8);
       expect(canDrawHand(cards)).toBe(true);
+    });
+
+    it('excludes pre-placed cards from the deck-size count', () => {
+      const cards = [
+        power('p1', { quantity: 2 }),
+        power('pre-placed', { quantity: 3, exclude_from_draw: true }),
+        entry('location', 'l1'),
+      ];
+
+      expect(countCardsInDeck(cards)).toBe(2);
     });
   });
 

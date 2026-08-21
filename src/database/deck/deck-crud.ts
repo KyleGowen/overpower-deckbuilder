@@ -738,6 +738,7 @@ export async function getDeckSummaryWithAllCards(
       type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
+      exclude_from_draw: card.exclude_from_draw ?? false,
     }));
 
     const fullDeck = mapDeckRowWithCards(deck, cards);

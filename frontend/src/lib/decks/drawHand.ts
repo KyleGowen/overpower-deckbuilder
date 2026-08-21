@@ -24,6 +24,17 @@ export function countPlayableCards(cards: DeckCardEntry[]): number {
     .reduce((sum, card) => sum + cardQuantity(card), 0);
 }
 
+/**
+ * Count cards that belong in the deck-size metric. Pre-placed cards are
+ * intentionally excluded here, while countPlayableCards still includes them
+ * for the Draw Hand eligibility threshold.
+ */
+export function countCardsInDeck(cards: DeckCardEntry[]): number {
+  return cards
+    .filter((card) => isPlayableType(card.type) && card.exclude_from_draw !== true)
+    .reduce((sum, card) => sum + cardQuantity(card), 0);
+}
+
 export function canDrawHand(cards: DeckCardEntry[]): boolean {
   return countPlayableCards(cards) >= 8;
 }

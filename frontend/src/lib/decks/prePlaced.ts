@@ -6,8 +6,9 @@ import { resolveDeckCatalogCard, type DeckCardIndex } from './deckCardCatalog';
 /**
  * "Pre-Placed" lets a playable card start the game already placed (under a
  * location or with a character) instead of in the random draw pile. It is
- * stored as `exclude_from_draw` on the deck card; Draw Hand skips those rows
- * while they still count toward deck size and the ≥8 playable threshold.
+ * stored as `exclude_from_draw` on the deck card; Draw Hand skips those rows.
+ * They do not count toward the Cards in Deck metric, but still count toward
+ * the ≥8-card Draw Hand eligibility threshold.
  *
  * Eligibility is client-only (the backend stores the flag without validating
  * which card types may set it):

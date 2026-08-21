@@ -32,6 +32,7 @@ export function aggregateInstancesForSave(cards: DeckCardEntry[]): DeckCardEntry
     const existing = map.get(key);
     if (existing) {
       existing.quantity += card.quantity;
+      existing.exclude_from_draw = (existing.exclude_from_draw === true) || (card.exclude_from_draw === true);
     } else {
       const { instanceId: _instanceId, ...rest } = card;
       map.set(key, { ...rest, quantity: card.quantity });

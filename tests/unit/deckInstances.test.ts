@@ -40,6 +40,16 @@ describe('deckInstances', () => {
       expect(power?.quantity).toBe(2);
       expect(power?.instanceId).toBeUndefined();
     });
+
+    it('preserves exclude_from_draw when any instance is marked pre-placed', () => {
+      const input: DeckCardEntry[] = [
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'a', exclude_from_draw: false },
+        { type: 'power', cardId: 'p1', quantity: 1, instanceId: 'b', exclude_from_draw: true },
+      ];
+      const result = aggregateInstancesForSave(input);
+      expect(result).toHaveLength(1);
+      expect(result[0].exclude_from_draw).toBe(true);
+    });
   });
 
   describe('removeInstance', () => {
