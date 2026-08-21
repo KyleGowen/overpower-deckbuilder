@@ -109,6 +109,18 @@ nohup ./scripts/ssm-prod-db-tunnel.sh i-INSTANCE_ID >>"${HOME}/.ssm-op-deckbuild
 echo $!
 ```
 
+3. **macOS detached `screen` + keepalive:** if `nohup` exits, the session times out quickly, or prior runs showed `broken pipe`, use a named detached `screen` session and a tiny local keepalive. This keeps the SSM process attached to a real session and periodically touches the local listener:
+
+```bash
+/usr/bin/screen -dmS op-db-tunnel /bin/bash -lc 'cd /Users/kyle/cursored; ./scripts/ssm-prod-db-tunnel.sh i-INSTANCE_ID >/private/tmp/op-deckbuilder-ssm-db-tunnel.log 2>&1 & tunnel_pid=$!; trap "kill ${tunnel_pid} >/dev/null 2>&1 || true" INT TERM EXIT; while kill -0 ${tunnel_pid} >/dev/null 2>&1; do sleep 120; /usr/bin/nc -z -w 5 127.0.0.1 15432 >/dev/null 2>&1 || true; done; wait ${tunnel_pid}'
+```
+
+For the `screen` pattern, report the `screen -ls` entry and log path (`/private/tmp/op-deckbuilder-ssm-db-tunnel.log`). Stop it later with:
+
+```bash
+screen -S op-db-tunnel -X quit
+```
+
 If `./scripts/ssm-prod-db-tunnel.sh` is not executable, `chmod +x scripts/ssm-prod-db-tunnel.sh` once (per DEPLOYMENT).
 
 **Environment overrides (see script):** `AWS_REGION` (default `us-west-2`), `LOCAL_PORT`, `RDS_PORT`, `RDS_HOST`.
@@ -123,11 +135,39 @@ lsof -nP -iTCP:15432 -sTCP:LISTEN
 
 (Use the actual `LOCAL_PORT` if overridden.)
 
+If using the detached `screen` pattern, also confirm `screen -ls` shows `op-db-tunnel` and the log says `Port 15432 opened`. The log may show `Starting session` a few seconds before the local listener appears; do not call the tunnel healthy until `lsof` shows `session-manager-plugin`/`session-m` on `127.0.0.1:15432`.
+
+For a stronger proof, run an authenticated `psql` query through the tunnel without printing the password:
+
+```bash
+PGPASSWORD="$(aws ssm get-parameter --region us-west-2 --name /op-deckbuilder/dev/database/password --with-decryption --query Parameter.Value --output text)" \
+  psql "host=127.0.0.1 port=15432 dbname=overpower user=postgres sslmode=require connect_timeout=10" \
+  -c 'select current_database(), current_user;'
+```
+
+`pg_isready` can return `no response` even when the tunnel is bound; prefer the authenticated `psql` check before changing AWS or TablePlus settings.
+
 ## Connect
 
 Point the client at **`127.0.0.1`** and **`LOCAL_PORT`** (default **15432**) — **not** the RDS hostname from the laptop.
 
 Database name, user, password, and SSM parameter paths are in DEPLOYMENT (**SSM parameter names**). Use **`sslmode=require`** for `psql` as documented there.
+
+### TablePlus quick check
+
+If TablePlus fails, inspect the connection fields before restarting AWS. The most common mistake is entering the RDS endpoint and RDS port directly, which bypasses the SSM tunnel:
+
+| Field      | Correct value while tunnel is running                                      |
+| ---------- | -------------------------------------------------------------------------- |
+| Host       | `127.0.0.1`                                                                |
+| Port       | `15432` (or the chosen `LOCAL_PORT`)                                       |
+| Database   | `overpower`                                                               |
+| User       | `postgres`                                                                |
+| SSL mode   | `Require` / `Required`                                                     |
+| Over SSH   | Off — SSM is already the forwarding layer                                  |
+| Password   | Raw SSM password; URL-encode only when using an import URL                 |
+
+Do **not** use `op-deckbuilder-postgres...amazonaws.com:5432` in TablePlus from the laptop; that is the remote target the SSM session reaches from EC2. `127.0.0.1:15432` is the laptop-side endpoint of the production tunnel, not a local Postgres database.
 
 ## Stop
 
