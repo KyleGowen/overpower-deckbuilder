@@ -404,7 +404,7 @@ Unless noted, **auth required**. Guest users receive **403** on mutations that c
 
 #### `GET /api/decks/:id`, `GET /api/decks/:id/full` (compatibility)
 
-**Compatibility only:** **`GET /api/decks/:id`** and **`GET /api/decks/:id/full`** are registered for cached clients; responses use the **same v1 JSON envelope** as **`GET /api/v1/decks/:id`** / **`/full`** ([API_V1.md](API_V1.md)). Implementation: **[`legacyDeckReadCompat.http.ts`](src/api/http/legacyDeckReadCompat.http.ts)**.
+**Compatibility only:** **`GET /api/decks/:id`** and **`GET /api/decks/:id/full`** are registered for cached clients; responses use the **same v1 JSON envelope** as **`GET /api/v1/decks/:id`** / **`/full`** ([API_V1.md](API_V1.md)) and send **`Cache-Control: no-store`** so public deck state is never served from a stale edge snapshot. Implementation: **[`legacyDeckReadCompat.http.ts`](src/api/http/legacyDeckReadCompat.http.ts)**.
 
 **Still removed (404):** **`PUT /api/decks/:id`**, **`DELETE /api/decks/:id`** — use **`PUT` / `DELETE`** **`/api/v1/decks/:id`**.
 

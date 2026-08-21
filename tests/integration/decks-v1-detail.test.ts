@@ -56,6 +56,7 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
     expect(res.body.errors).toEqual([]);
     expect(res.body.data.metadata.id).toBe(id);
     expect(res.body.data.metadata.isOwner).toBe(false);
+    expect(res.headers['cache-control']).toBe('no-store');
 
     await request(app).delete(`/api/v1/decks/${id}`).set('Cookie', cookie).expect(200);
     integrationTestUtils.untrackTestDeck(id);
@@ -83,6 +84,7 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
     const full = await request(app).get(`/api/v1/decks/${id}/full`).set('Cookie', cookie).expect(200);
     expect(full.body.errors).toEqual([]);
     expect(full.body.data.metadata.id).toBe(id);
+    expect(full.headers['cache-control']).toBe('no-store');
 
     const put = await request(app)
       .put(`/api/v1/decks/${id}`)

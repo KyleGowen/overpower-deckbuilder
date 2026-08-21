@@ -798,6 +798,8 @@ Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModif
 
 Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, `exclude_from_draw`.
 
+**Caching:** `Cache-Control: no-store`. Deck contents and calculated counts are mutable and publicly readable, so clients and edge caches must fetch the persisted state for every read.
+
 **Response 404:** v1 envelope — `errors` with code `**DECK_NOT_FOUND`**.
 
 **Response 500:** v1 envelope — `errors` with code `**DECK_FETCH_ERROR`**.
@@ -811,6 +813,8 @@ Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (ca
 **Request model:** none.
 
 **Response 200:** Same `**data`** shape as `**GET /api/v1/decks/:id`**, using `**getDeckSummaryWithAllCards**` (heavier card hydration).
+
+**Caching:** Same `Cache-Control: no-store` behavior as `GET /api/v1/decks/:id`.
 
 **Response 404 / 500:** Same codes as `**GET /api/v1/decks/:id`** (`DECK_NOT_FOUND` / `DECK_FETCH_ERROR`; full route uses “full deck data” in the 500 message).
 

@@ -388,6 +388,9 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
 
   router.get('/decks/:id/full', deckViewAuth, async (req: Request, res: Response) => {
     try {
+      // Deck contents and calculated count can change on save. These reads are
+      // also public, so an edge cache must never serve a prior owner's snapshot.
+      res.set('Cache-Control', 'no-store');
       const viewerId = req.user?.id ?? '';
       const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, viewerId);
       if (!detail) {
@@ -403,6 +406,9 @@ export function registerDecksV1HttpRoutes(router: Router, deps: DecksV1HttpDeps)
 
   router.get('/decks/:id', deckViewAuth, async (req: Request, res: Response) => {
     try {
+      // See `/decks/:id/full`: both the compact and fully hydrated views must
+      // reflect the current persisted deck for owners and public viewers.
+      res.set('Cache-Control', 'no-store');
       const viewerId = req.user?.id ?? '';
       const detail = await deps.deckDetailService.getDeckDetail(req.params.id, viewerId);
       if (!detail) {

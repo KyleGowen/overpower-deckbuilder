@@ -19,6 +19,7 @@ export function registerLegacyDeckReadCompatRoutes(
 
   app.get('/api/decks/:id/full', deckViewAuth, async (req: Request, res: Response) => {
     try {
+      res.set('Cache-Control', 'no-store');
       const viewerId = req.user?.id ?? '';
       const detail = await deps.deckDetailService.getDeckFullDetail(req.params.id, viewerId);
       if (!detail) {
@@ -34,6 +35,7 @@ export function registerLegacyDeckReadCompatRoutes(
 
   app.get('/api/decks/:id', deckViewAuth, async (req: Request, res: Response) => {
     try {
+      res.set('Cache-Control', 'no-store');
       const viewerId = req.user?.id ?? '';
       const detail = await deps.deckDetailService.getDeckDetail(req.params.id, viewerId);
       if (!detail) {

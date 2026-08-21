@@ -633,6 +633,7 @@ describe('decks.http', () => {
     const res = await request(buildApp(deps)).get('/decks/d1').expect(200);
     expect(res.body.errors).toEqual([]);
     expect(res.body.data).toEqual(sampleDetail);
+    expect(res.headers['cache-control']).toBe('no-store');
     expect(deckDetailService.getDeckDetail).toHaveBeenCalledWith('d1', 'user-1');
   });
 
@@ -657,6 +658,7 @@ describe('decks.http', () => {
     };
     const res = await request(buildApp(deps)).get('/decks/d1/full').expect(200);
     expect(res.body.data).toEqual(sampleDetail);
+    expect(res.headers['cache-control']).toBe('no-store');
     expect(deckDetailService.getDeckFullDetail).toHaveBeenCalledWith('d1', 'user-1');
   });
 
