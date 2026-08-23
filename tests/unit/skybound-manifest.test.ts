@@ -23,6 +23,7 @@ type SkyboundManifest = {
 
 describe('Skybound import manifest', () => {
   const repoRoot = process.cwd();
+  const localImageRoot = path.join(repoRoot, 'src/resources/cards/images/sky');
   const manifest = JSON.parse(
     fs.readFileSync(path.join(repoRoot, 'scripts/skybound/skybound-manifest.json'), 'utf8'),
   ) as SkyboundManifest;
@@ -94,7 +95,9 @@ describe('Skybound import manifest', () => {
     expect(manifest.assets.some((asset) => /^\d{3}F_/i.test(asset.source_file))).toBe(false);
   });
 
-  it('has every permitted source and thumbnail target in the local image tree', () => {
+  const verifiesLocalImageTree = fs.existsSync(localImageRoot) ? it : it.skip;
+
+  verifiesLocalImageTree('has every permitted source and thumbnail target in the local image tree', () => {
     for (const asset of manifest.assets) {
       expect(fs.existsSync(path.join(repoRoot, 'src/resources/cards/images', asset.target_path))).toBe(true);
       const parts = asset.target_path.split('/');

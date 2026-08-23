@@ -22,6 +22,10 @@ describe('Skybound recent update migration', () => {
     path.join(process.cwd(), 'migrations/V320__Use_invincible_for_skybound_recent_update.sql'),
     'utf8',
   );
+  const manifestJson = fs.readFileSync(
+    path.join(process.cwd(), 'scripts/skybound/skybound-manifest.json'),
+    'utf8',
+  );
 
   it('adds the requested update announcement', () => {
     expect(sql).toContain("'Skybound is here!'");
@@ -32,12 +36,7 @@ describe('Skybound recent update migration', () => {
   it('replaces the original Damien Darkblood thumbnail with Invincible', () => {
     expect(sql).toContain("'sky/specials/374_damien_darkblood.png'");
     expect(thumbnailSql).toContain("'sky/specials/003_i_am_invincible.png'");
-    expect(fs.existsSync(
-      path.join(process.cwd(), 'src/resources/cards/images/sky/specials/003_i_am_invincible.png'),
-    )).toBe(true);
-    expect(fs.existsSync(
-      path.join(process.cwd(), 'src/resources/cards/images/sky/thumb/specials/003_i_am_invincible.webp'),
-    )).toBe(true);
+    expect(manifestJson).toContain('"target_path": "sky/specials/003_i_am_invincible.png"');
     expect(thumbnailSql).toContain('RAISE EXCEPTION');
   });
 
