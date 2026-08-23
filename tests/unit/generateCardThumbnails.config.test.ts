@@ -112,4 +112,29 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     const tfacpMissions = PROMO_ART_SUBDIRS.find((entry) => entry.subdir === 'tfacp/missions');
     expect(tfacpMissions).toEqual({ subdir: 'tfacp/missions', preset: PRESET_PORTRAIT });
   });
+
+  it('covers every Skybound set-scoped image directory with the correct orientation', () => {
+    const sky = new Map(
+      PROMO_ART_SUBDIRS.filter((entry) => entry.subdir.startsWith('sky/'))
+        .map((entry) => [entry.subdir, entry.preset]),
+    );
+
+    expect(sky.get('sky/characters')).toBe(PRESET_CHARACTER);
+    expect(sky.get('sky/locations')).toBe(PRESET_LOCATION);
+    expect(sky.get('sky/events')).toBe(PRESET_LOCATION);
+    for (const subdir of [
+      'sky/specials',
+      'sky/power',
+      'sky/missions',
+      'sky/aspects',
+      'sky/advanced-universe',
+      'sky/teamwork',
+      'sky/ally',
+      'sky/training',
+      'sky/basic-universe',
+      'sky/card-back',
+    ]) {
+      expect(sky.get(subdir)).toBe(PRESET_PORTRAIT);
+    }
+  });
 });

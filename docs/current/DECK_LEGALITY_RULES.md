@@ -54,6 +54,7 @@ Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** ([`deckValidat
 | Threat | **≤ 76** characters + homebase (~L53, ~L59) | `threat_level` — sums character + location `threat` / `threat_level` values against shared `TOURNAMENT_LEGAL_THREAT_LIMIT` (`76`) | Not checked | Rule 5 — characters + locations use **`threat_level`** per row (no `quantity` multiply); reserve display tweaks live in `calculateTotalThreat` only |
 | Draw pile / deck size | Min **51**, or **56** if using events (~L39, ~L135) | `deck_size` — **draw pile** count (excludes character, mission, location rows) ≥ 51 or ≥ 56 if **any event row** exists | Not checked | Rule 6 — count **excludes** mission, character, location rows (draw pile only) |
 | Specials usable | Specials only for characters on team; Angry Mob rules (~L102–L111, ~L139) | `unusable_special` (+ Angry Mob variant logic); uses `character` or `character_name` from catalog | Not checked | **Aligned:** client mirrors server (incl. `characters[]` extras) |
+| G.D.A. Any Character specials | Global Defense Agency Battleground text permits its G.D.A. Any Character subset | `gda_any_character_requires_battleground` — Skybound collectors **363–374** require a location named **Global Defense Agency** | Not checked | Add Cards Hide Unusables mirrors the dependency; live/full legality comes from `POST /api/v1/decks/validate` |
 | Events vs mission set | Events align with mission set | `unusable_event` | Not checked | **Aligned:** client checks when mission rows supply sets (same gate as server: no error if no missions in deck) |
 | One per deck | Single copy (~L138) | `one_per_deck_violation` | Rule 4 block + row checks | `one_per_deck` flag (does not check `is_one_per_deck` alias) |
 | Pre-placed Basic Universe (Dracula's Armory) | Up to **3 unique** Basic Universe cards may be pre-placed under Dracula's Armory | `pre_placed_basic_universe_limit` — total pre-placed (`exclude_from_draw`) `basic-universe` quantity ≤ 3; `pre_placed_basic_universe_unique` — each pre-placed `cardId` at most once. **Only enforced when a Dracula's Armory location is in the deck** | Not checked | Not in client mirror (v2 sends `exclude_from_draw`; enforced server-side) |
@@ -69,6 +70,10 @@ Columns: **Rule** | **Rulebook (Learn-to-Play txt)** | **Server** ([`deckValidat
 **Multi Power (deck vs play):** Learn-to-Play text ([`overpower-learn-to-play-rules.txt`](../../src/resources/rules/overpower-learn-to-play-rules.txt) ~L67–70) ties **in-game** use of MultiPower to declaring one of the four types and having grid in that type. Excelsior **deck construction** does not run that play-time check: **Multi Power** / **Multi-Power** rows in the deck are allowed regardless of team character grids (see `unusable_power` + client mirror).
 
 **Deck card `type` strings:** API/editor rows use hyphens (e.g. `basic-universe`). Server validation normalizes to underscore map keys via `deckCardTypeKeyPrefix` in [`deckValidationService.ts`](../../src/services/deckValidationService.ts) so lookups match catalog rows.
+
+**Skybound G.D.A. identity:** Production UUIDs are environment-specific, so the legality rule identifies
+the G.D.A.-branded Any Character Special subset by stable set code + collector numbers (`SKY` 363–374)
+and identifies the required Battleground by the catalog name `Global Defense Agency`.
 
 **Persistence snapshot:** Server **`is_valid`** is recomputed on every deck mutation. The v2 SPA uses `POST /api/v1/decks/validate` for live feedback and shared `deckLegalityBadge` on tiles; client mirror in [`validateDeckClient.ts`](../../frontend/src/lib/decks/validateDeckClient.ts) is kept aligned with `DeckValidationService` where editor-side checks run.
 

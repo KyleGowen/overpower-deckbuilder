@@ -1,6 +1,8 @@
 import type { CatalogCard, CatalogType } from '../api/types';
 import { catalogTypeSupportsHideUnusables } from './catalogTypesWithUsability';
 import {
+  GLOBAL_DEFENSE_AGENCY_BATTLEGROUND_NAME,
+  isGdaAnyCharacterSpecial,
   isMultiPowerPowerCardType,
   normalizeAngryMobVariant,
   specialLinkedCharacterName,
@@ -18,6 +20,9 @@ function isSpecialCardUsable(card: CatalogCard, ctx: DeckUsabilityContext): bool
     : [];
 
   if (!characterName || characterName === 'Any Character') {
+    if (isGdaAnyCharacterSpecial(card)) {
+      return ctx.homebaseName === GLOBAL_DEFENSE_AGENCY_BATTLEGROUND_NAME;
+    }
     return true;
   }
 

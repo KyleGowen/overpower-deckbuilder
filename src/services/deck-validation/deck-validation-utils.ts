@@ -88,6 +88,27 @@ export function specialLinkedCharacterName(special: {
     return '';
 }
 
+export const GLOBAL_DEFENSE_AGENCY_BATTLEGROUND_NAME = 'Global Defense Agency';
+
+/**
+ * Skybound collectors 363–374 are the G.D.A.-branded Any Character subset.
+ * Collector identity is stable across environments while database UUIDs are not.
+ */
+export function isGdaAnyCharacterSpecial(special: {
+    set?: unknown;
+    set_number?: unknown;
+    character?: string;
+    character_name?: string;
+    characters?: string[];
+}): boolean {
+    if (String(special.set ?? '').trim().toUpperCase() !== 'SKY') return false;
+    if (specialLinkedCharacterName(special) !== 'Any Character') return false;
+    const collectorMatch = String(special.set_number ?? '').trim().match(/^(\d+)/);
+    if (!collectorMatch) return false;
+    const collectorNumber = Number.parseInt(collectorMatch[1], 10);
+    return collectorNumber >= 363 && collectorNumber <= 374;
+}
+
 export function teamHasSpecialCharacter(characterNames: string[], linkedName: string, extras: string[]): boolean {
     if (characterNames.includes(linkedName)) return true;
     return extras.some((e) => characterNames.includes(e));

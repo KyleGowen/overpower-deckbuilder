@@ -13,6 +13,7 @@ interface RecentUpdateTileProps {
 export function RecentUpdateTile({ item, isOpen, onToggle }: RecentUpdateTileProps) {
   const typeLabel = formatUpdateTypeLabel(item.type);
   const typeClass = item.type.replace(/_/g, '-');
+  const isSkyboundLaunch = item.id === 'a1000001-0000-4000-8000-000000000007';
 
   return (
     <button
@@ -23,7 +24,13 @@ export function RecentUpdateTile({ item, isOpen, onToggle }: RecentUpdateTilePro
     >
       <div className="home__news-thumb">
         {item.cardImageUrl ? (
-          <img src={resolveThumbUrl(item.cardImageUrl)} alt="" loading="lazy" draggable={false} />
+          <img
+            className={isSkyboundLaunch ? 'home__news-thumb-image--skybound-launch' : undefined}
+            src={resolveThumbUrl(item.cardImageUrl)}
+            alt=""
+            loading="lazy"
+            draggable={false}
+          />
         ) : (
           <span className="home__news-thumb-icon"><IconSparkles /></span>
         )}

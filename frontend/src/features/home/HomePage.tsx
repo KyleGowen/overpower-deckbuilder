@@ -32,8 +32,21 @@ import type { DeckListItem } from '../../lib/api/types';
 import './HomePage.css';
 import './recentUpdates.css';
 
-const HERO_BANNER = '/src/resources/images/home/home-hero.png';
-const HERO_BANNER_2X = '/src/resources/images/home/home-hero-2x.png';
+const HOME_BANNERS = {
+  victoryHarben: {
+    src: '/src/resources/images/home/banners/victory-harben.png',
+    src2x: '/src/resources/images/home/banners/victory-harben-2x.png',
+    mirrored: false,
+  },
+  skyboundImmortal: {
+    src: '/src/resources/images/home/banners/skybound-immortal.png',
+    src2x: '/src/resources/images/home/banners/skybound-immortal-2x.png',
+    mirrored: true,
+  },
+} as const;
+
+// Keep selection explicit until banner rotation is intentionally designed and enabled.
+const ACTIVE_HOME_BANNER = HOME_BANNERS.skyboundImmortal;
 /** Max tiles in the Home community rail (feed returns up to 20). */
 const HOME_COMMUNITY_RAIL_LIMIT = 12;
 /** Max update tiles on the Home Recent Updates rail. */
@@ -131,9 +144,9 @@ export default function HomePage() {
           </div>
           <div className="home__hero-art" aria-hidden="true">
             <img
-              className="home__hero-art-image"
-              src={assetUrl(HERO_BANNER)}
-              srcSet={`${assetUrl(HERO_BANNER)} 1x, ${assetUrl(HERO_BANNER_2X)} 2x`}
+              className={`home__hero-art-image${ACTIVE_HOME_BANNER.mirrored ? ' home__hero-art-image--mirrored' : ''}`}
+              src={assetUrl(ACTIVE_HOME_BANNER.src)}
+              srcSet={`${assetUrl(ACTIVE_HOME_BANNER.src)} 1x, ${assetUrl(ACTIVE_HOME_BANNER.src2x)} 2x`}
               sizes="(min-width: 2000px) 1333px, 66vw"
               alt=""
             />

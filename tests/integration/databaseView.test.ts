@@ -179,8 +179,10 @@ describe('Database View Integration Tests', () => {
       const count = parseInt(result.rows[0].count);
       expect(count).toBeGreaterThan(0);
       
-      // Based on current database content
-      expect(count).toBe(12);
+      // Includes the eight Skybound locations (the G.D.A. Battleground is
+      // intentionally stored as a location until Battleground becomes a
+      // standalone catalog type).
+      expect(count).toBe(20);
       
       console.log('✅ Location count verified:', count);
     });

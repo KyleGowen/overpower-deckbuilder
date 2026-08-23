@@ -24,6 +24,19 @@ function normalizeSet(set: string | undefined): string {
   return trimmed;
 }
 
+function normalizeTeamworkMechanic(value: unknown): string {
+  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function normalizeTeamworkFollowups(value: unknown): string {
+  return String(value ?? '')
+    .split(/\s*(?:\+|\/|,|&)\s*/)
+    .map(normalizeTeamworkMechanic)
+    .filter(Boolean)
+    .sort()
+    .join('+');
+}
+
 /** Sort key for checklist # (209, 519, 519F). Missing # sorts last. */
 function setNumberSortTuple(setNumRaw: string | null | undefined): [number, number, string] {
   const s = setNumRaw != null ? String(setNumRaw).trim().toUpperCase() : '';
@@ -92,19 +105,58 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
       return name;
     case 'teamwork': {
       const toUse = String(card.to_use ?? name).trim();
-      const followup = String(
+      const followup = normalizeTeamworkFollowups(
         card.followup_attack_types ?? card.follow_up_attack_types ?? '',
-      ).trim();
+      );
       if (!toUse) return null;
-      return `${toUse}|${followup}`;
+      return [
+        normalizeTeamworkMechanic(toUse),
+        normalizeTeamworkMechanic(card.acts_as),
+        followup,
+        normalizeTeamworkMechanic(card.first_attack_bonus),
+        normalizeTeamworkMechanic(card.second_attack_bonus),
+      ].join('|');
+    }
+    case 'training': {
+      const types = [card.type_1, card.type_2]
+        .map(normalizeTeamworkMechanic)
+        .filter(Boolean)
+        .sort()
+        .join('+');
+      if (!types) return null;
+      return [
+        types,
+        normalizeTeamworkMechanic(card.value_to_use),
+        normalizeTeamworkMechanic(card.bonus),
+        card.one_per_deck ?? card.is_one_per_deck ? 'opd' : 'standard',
+      ].join('|');
+    }
+    case 'basic-universe': {
+      const powerType = normalizeTeamworkMechanic(card.type);
+      if (!powerType) return null;
+      return [
+        powerType,
+        normalizeTeamworkMechanic(card.value_to_use),
+        normalizeTeamworkMechanic(card.bonus),
+        card.one_per_deck ?? card.is_one_per_deck ? 'opd' : 'standard',
+      ].join('|');
     }
     default:
       return `${name}|${normalizeSet(card.set as string | undefined)}`;
   }
 }
 
-function pickDefaultRepresentative(group: CatalogCard[], catalogType: CatalogType): CatalogCard {
-  return group.slice().sort((a, b) => compareDefaultRepresentative(a, b, catalogType))[0];
+function pickDefaultRepresentative(
+  group: CatalogCard[],
+  catalogType: CatalogType,
+  preferredSet?: string,
+): CatalogCard {
+  const normalizedPreferredSet = preferredSet ? normalizeSet(preferredSet) : '';
+  const preferredRows = normalizedPreferredSet
+    ? group.filter((card) => normalizeSet(card.set as string | undefined) === normalizedPreferredSet)
+    : [];
+  const candidates = preferredRows.length > 0 ? preferredRows : group;
+  return candidates.slice().sort((a, b) => compareDefaultRepresentative(a, b, catalogType))[0];
 }
 
 /**
@@ -165,6 +217,7 @@ export function resolveDefaultCardForDeckAdd(
 export function dedupeToDefaultCatalogCards(
   cards: CatalogCard[],
   catalogType: CatalogType,
+  preferredSet?: string,
 ): DefaultCatalogCardsResult {
   const groups = new Map<string, CatalogCard[]>();
 
@@ -183,7 +236,7 @@ export function dedupeToDefaultCatalogCards(
   const variantIdsByRepresentative = new Map<string, string[]>();
 
   for (const group of groups.values()) {
-    const representative = pickDefaultRepresentative(group, catalogType);
+    const representative = pickDefaultRepresentative(group, catalogType, preferredSet);
     const variantIds = group.map((c) => c.id);
     result.push(representative);
     variantIdsByRepresentative.set(representative.id, variantIds);
@@ -199,9 +252,10 @@ export function prepareAddCardsCatalogList(
   cards: CatalogCard[],
   catalogType: CatalogType,
   foilToBase: Map<string, string>,
+  preferredSet?: string,
 ): DefaultCatalogCardsResult {
   const foilDeduped = dedupeFoilCatalogCards(cards, foilToBase);
-  return dedupeToDefaultCatalogCards(foilDeduped, catalogType);
+  return dedupeToDefaultCatalogCards(foilDeduped, catalogType, preferredSet);
 }
 
 /** Sum deck quantities for any variant id in the representative's group. */

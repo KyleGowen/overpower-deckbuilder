@@ -39,6 +39,12 @@ src/resources/cards/images/
 │   └── thumb/                      ← generated; mirrors characters/ and power/ subdirs
 │       ├── characters/
 │       └── power/
+├── sky/                            ← Skybound full set (additive set-scoped layout)
+│   ├── characters/, locations/, events/
+│   ├── specials/, power/, missions/, aspects/
+│   ├── advanced-universe/, teamwork/, ally/, training/, basic-universe/
+│   ├── card-back/                  ← public back used for unreleased alternate art
+│   └── thumb/                      ← generated; mirrors all folders above
 └── tfacp/                          ← The Few and the Cursed - Promos
     ├── ally/                       ← portrait ally promos (e.g. White Demon Of Mazandaran)
     ├── missions/                   ← portrait mission promos (e.g. Chronicles of TFAC)
@@ -49,7 +55,7 @@ src/resources/cards/images/
         └── power/
 ```
 
-The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **Promo set folders** (`skyp/`, `tfacp/`) are handled via `PROMO_ART_SUBDIRS` in `generateCardThumbnails.ts`: e.g. `skyp/characters/` → character preset → `skyp/thumb/characters/`; `skyp/power/`, `tfacp/power/`, `tfacp/ally/`, and `tfacp/missions/` → portrait preset → matching `thumb/` subdirs (nested folders like `missions/the_chronicles_of_tfac/` are preserved). The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
+The same generator also fills `thumb/` under every **card-art** top-level folder (excluding `backgrounds/`). **Set-scoped folders** (`sky/`, `skyp/`, `tfacp/`) are handled via `PROMO_ART_SUBDIRS` in `generateCardThumbnails.ts`: e.g. `sky/characters/` and `skyp/characters/` → character preset; `sky/locations/` → location preset; other Skybound types and the existing promo portrait folders → portrait preset; `sky/events/` → event preset. Generated paths insert `thumb/` after the set folder, such as `sky/thumb/characters/001_invincible.webp`. Nested source folders are preserved. The `thumb/` directories are auto-generated. Never edit files inside `thumb/` directly — they will be overwritten on the next run.
 
 ---
 
@@ -87,6 +93,7 @@ After changing fit or padding behavior without changing dimensions, regenerate t
    - `src/resources/cards/images/locations/` for locations
    - `src/resources/cards/images/missions/` for missions
    - `src/resources/cards/images/skyp/characters/` or `skyp/power/` for Skybound promo art (DB `image_path` uses the same `skyp/...` prefix)
+   - `src/resources/cards/images/sky/<type>/` for the full Skybound set (DB `image_path` uses the same `sky/...` prefix)
    - `src/resources/cards/images/tfacp/power/` for TFCP promo power art (DB `image_path` uses `tfacp/power/...`)
    - `src/resources/cards/images/tfacp/ally/` for TFCP promo ally art (DB `image_path` uses `tfacp/ally/...`)
    - `src/resources/cards/images/tfacp/missions/` for TFCP promo mission art (DB `image_path` uses `tfacp/missions/...`)
@@ -95,6 +102,12 @@ After changing fit or padding behavior without changing dimensions, regenerate t
 4. Commit both the source image and the generated thumbnail
 
 **Never commit a source image without its corresponding thumbnail.**
+
+Skybound `F`-suffixed workbook images are printing-production files and remain outside the
+public image tree. Foil database rows reuse the matching non-foil `image_path`; the established
+frontend sheen supplies the visual treatment. For protected collectors 419–472, both base and
+foil rows therefore point to `sky/card-back/overpowerback.png`; only that back and its generated
+thumbnail may be hosted until the art is explicitly released.
 
 ---
 

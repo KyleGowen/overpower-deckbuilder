@@ -11,6 +11,8 @@ import {
   resolveImageUrl,
   resolveThumbUrl,
   placeholderImageUrl,
+  reverseImagePathForImagePath,
+  shouldRotateSkyboundCardBack,
 } from '../../lib/images/cardImages';
 import {
   isFullResRevealed,
@@ -23,6 +25,8 @@ import './CardImage.css';
 interface CardImageProps {
   /** Raw card path (card.image_path / card.image). */
   imagePath?: string | null;
+  /** Optional second face. When present, an in-art control swaps the displayed image. */
+  reverseImagePath?: string | null;
   alt: string;
   /** Use the thumbnail variant (lists, tiles, ribbons). Default true. */
   useThumbnail?: boolean;
@@ -108,6 +112,7 @@ function syncImageLoaded(img: HTMLImageElement | null): boolean {
 
 export function CardImage({
   imagePath,
+  reverseImagePath,
   alt,
   useThumbnail = true,
   progressive = false,
@@ -123,39 +128,79 @@ export function CardImage({
   foilSize,
   foilEagerIntro,
 }: CardImageProps) {
+  const [showReverse, setShowReverse] = useState(false);
+  const effectiveReverseImagePath = reverseImagePath ?? reverseImagePathForImagePath(imagePath);
+  const activeImagePath = showReverse && effectiveReverseImagePath
+    ? effectiveReverseImagePath
+    : imagePath;
+  const rotatedBackClass = shouldRotateSkyboundCardBack(activeImagePath, catalogType)
+    ? ` card-image--rotated-back card-image--rotated-back--${catalogType}`
+    : '';
+  const resolvedClassName = `${className}${rotatedBackClass}`.trim();
+
+  useEffect(() => {
+    setShowReverse(false);
+  }, [imagePath, effectiveReverseImagePath]);
+
+  const flipControl = effectiveReverseImagePath ? (
+    <button
+      type="button"
+      className="card-image__flip"
+      aria-label={showReverse ? `Show front of ${alt}` : `Show reverse of ${alt}`}
+      aria-pressed={showReverse}
+      title={showReverse ? 'Show front' : 'Show reverse'}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setShowReverse((current) => !current);
+      }}
+    >
+      <span aria-hidden="true">↻</span>
+    </button>
+  ) : null;
+
   const useProgressive =
-    progressive && canProgressiveLoad(imagePath, catalogType) && !shouldSkipFullResUpgrade();
+    progressive && canProgressiveLoad(activeImagePath, catalogType) && !shouldSkipFullResUpgrade();
   const progressiveThumb = catalogTypeSupportsProgressiveThumb(catalogType);
   const foilWrap = (node: ReactNode) =>
-    wrapWithFoil(node, { isFoil, showFoilEffect, foilSeed, imagePath, foilSize, foilEagerIntro });
+    wrapWithFoil(node, {
+      isFoil,
+      showFoilEffect,
+      foilSeed,
+      imagePath: activeImagePath,
+      foilSize,
+      foilEagerIntro,
+    });
 
   if (useProgressive) {
     return foilWrap(
       <ProgressiveCardImage
-        key={`${imagePath ?? ''}|${catalogType ?? ''}`}
-        imagePath={imagePath}
+        key={`${activeImagePath ?? ''}|${catalogType ?? ''}`}
+        imagePath={activeImagePath}
         catalogType={catalogType}
         alt={alt}
-        className={className}
+        className={resolvedClassName}
         style={style}
         loading={loading}
         progressiveThumb={progressiveThumb}
         progressiveSessionScope={progressiveSessionScope}
+        flipControl={flipControl}
       />,
     );
   }
 
   return foilWrap(
     <SingleLayerCardImage
-      key={`${imagePath ?? ''}|${catalogType ?? ''}`}
-      imagePath={imagePath}
+      key={`${activeImagePath ?? ''}|${catalogType ?? ''}`}
+      imagePath={activeImagePath}
       catalogType={catalogType}
       alt={alt}
       useThumbnail={useThumbnail}
-      className={className}
+      className={resolvedClassName}
       style={style}
       loading={loading}
       onImageFailed={onImageFailed}
+      flipControl={flipControl}
     />,
   );
 }
@@ -169,6 +214,7 @@ function SingleLayerCardImage({
   style,
   loading,
   onImageFailed,
+  flipControl,
 }: {
   imagePath?: string | null;
   catalogType?: CatalogType;
@@ -178,6 +224,7 @@ function SingleLayerCardImage({
   style?: CSSProperties;
   loading: 'lazy' | 'eager';
   onImageFailed?: () => void;
+  flipControl?: ReactNode;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -206,28 +253,31 @@ function SingleLayerCardImage({
 
   return (
     <span className={`card-image ${loaded ? 'card-image--loaded' : 'card-image--loading'} ${className}`} style={style}>
-      <img
-        ref={imgRef}
-        className="card-image__img"
-        src={src}
-        alt={alt}
-        loading={loading}
-        decoding="async"
-        onLoad={() => setLoaded(true)}
-        onError={() => {
-          if (useThumbnail && !thumbFailed) {
-            setThumbFailed(true);
-            setLoaded(false);
-            return;
-          }
-          if (!failed) {
-            setFailed(true);
-            setLoaded(true);
-            onImageFailed?.();
-          }
-        }}
-        draggable={false}
-      />
+      <span className="card-image__media">
+        <img
+          ref={imgRef}
+          className="card-image__img"
+          src={src}
+          alt={alt}
+          loading={loading}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            if (useThumbnail && !thumbFailed) {
+              setThumbFailed(true);
+              setLoaded(false);
+              return;
+            }
+            if (!failed) {
+              setFailed(true);
+              setLoaded(true);
+              onImageFailed?.();
+            }
+          }}
+          draggable={false}
+        />
+      </span>
+      {flipControl}
     </span>
   );
 }
@@ -241,6 +291,7 @@ function ProgressiveCardImage({
   loading,
   progressiveThumb,
   progressiveSessionScope,
+  flipControl,
 }: {
   imagePath?: string | null;
   catalogType?: CatalogType;
@@ -250,6 +301,7 @@ function ProgressiveCardImage({
   loading: 'lazy' | 'eager';
   progressiveThumb: boolean;
   progressiveSessionScope: ProgressiveImageSessionScope;
+  flipControl?: ReactNode;
 }) {
   const [wrapperRef, inView] = useInView('200px', loading === 'eager');
   const thumbRef = useRef<HTMLImageElement>(null);
@@ -326,31 +378,34 @@ function ProgressiveCardImage({
       className={`card-image card-image--progressive ${showLoadedState ? 'card-image--loaded' : 'card-image--loading'} ${className}`}
       style={style}
     >
-      {progressiveThumb ? (
+      <span className="card-image__media">
+        {progressiveThumb ? (
+          <img
+            ref={thumbRef}
+            className="card-image__img card-image__img--thumb"
+            src={thumbSrc}
+            alt={alt}
+            loading={loading}
+            decoding="async"
+            onLoad={markThumbLoaded}
+            onError={() => {
+              if (!thumbFailed) {
+                setThumbFailed(true);
+                markThumbLoaded();
+              }
+            }}
+            draggable={false}
+          />
+        ) : null}
         <img
-          ref={thumbRef}
-          className="card-image__img card-image__img--thumb"
-          src={thumbSrc}
-          alt={alt}
-          loading={loading}
-          decoding="async"
-          onLoad={markThumbLoaded}
-          onError={() => {
-            if (!thumbFailed) {
-              setThumbFailed(true);
-              markThumbLoaded();
-            }
-          }}
+          ref={fullImgRef}
+          className={`card-image__img card-image__img--full ${fullLoaded ? 'card-image__full--loaded' : ''}`}
+          alt={progressiveThumb ? '' : alt}
+          aria-hidden={progressiveThumb || undefined}
           draggable={false}
         />
-      ) : null}
-      <img
-        ref={fullImgRef}
-        className={`card-image__img card-image__img--full ${fullLoaded ? 'card-image__full--loaded' : ''}`}
-        alt={progressiveThumb ? '' : alt}
-        aria-hidden={progressiveThumb || undefined}
-        draggable={false}
-      />
+      </span>
+      {flipControl}
     </span>
   );
 }

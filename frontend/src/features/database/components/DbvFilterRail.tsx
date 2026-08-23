@@ -22,6 +22,8 @@ interface DbvFilterRailProps {
   onCollapsedChange: (collapsed: boolean) => void;
   hasFoilFilter: boolean;
   onHasFoilFilterChange: (checked: boolean) => void;
+  hideAltsFilter: boolean;
+  onHideAltsFilterChange: (checked: boolean) => void;
 }
 
 function FilterChips({
@@ -66,6 +68,8 @@ export function DbvFilterRail({
   onCollapsedChange,
   hasFoilFilter,
   onHasFoilFilterChange,
+  hideAltsFilter,
+  onHideAltsFilterChange,
 }: DbvFilterRailProps) {
   const config = getDbvFilterConfig(catalogType);
   const hasFilterGroups = config.groups.length > 0;
@@ -137,6 +141,12 @@ export function DbvFilterRail({
               label="Has Foil"
               checked={hasFoilFilter}
               onChange={onHasFoilFilterChange}
+            />
+            <Checkbox
+              className="dbv-filter-rail__hide-alts-toggle"
+              label="Hide Alts"
+              checked={hideAltsFilter}
+              onChange={onHideAltsFilterChange}
             />
           </div>
           </div>

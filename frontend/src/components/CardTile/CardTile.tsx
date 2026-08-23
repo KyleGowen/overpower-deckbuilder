@@ -2,6 +2,7 @@ import { memo, type ReactNode } from 'react';
 import { CardImage } from '../CardImage';
 import { cardDisplayName } from '../../lib/catalog/catalogTypeMap';
 import { isFoilCard } from '../../lib/catalog/foilCatalog';
+import { imagePathFromCard } from '../../lib/images/cardImages';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import './CardTile.css';
 
@@ -53,7 +54,7 @@ export const CardTile = memo(function CardTile({
   onHoverEnd,
 }: CardTileProps) {
   const name = cardDisplayName(card);
-  const imagePath = (card.image_path as string) || (card.image as string);
+  const imagePath = imagePathFromCard(card);
   const setLabel = formatSetLabel(card);
   const orientationClass = tileOrientationClass(catalogType);
 
@@ -63,7 +64,20 @@ export const CardTile = memo(function CardTile({
       onPointerEnter={onHoverStart}
       onPointerLeave={onHoverEnd}
     >
-      <button type="button" className="card-tile__art" onClick={onClick} aria-label={`View ${name}`}>
+      <div
+        className={`card-tile__art${onClick ? ' card-tile__art--clickable' : ''}`}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        onClick={onClick}
+        onKeyDown={(event) => {
+          if (!onClick || event.target !== event.currentTarget) return;
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        }}
+        aria-label={onClick ? `View ${name}` : undefined}
+      >
         <CardImage
           imagePath={imagePath}
           alt={name}
@@ -75,7 +89,7 @@ export const CardTile = memo(function CardTile({
           foilSeed={card.id}
         />
         {overlay ? <span className="card-tile__overlay">{overlay}</span> : null}
-      </button>
+      </div>
       {showMeta ? (
         <div className="card-tile__meta">
           <span className="card-tile__name" title={name}>{name}</span>

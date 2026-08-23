@@ -52,7 +52,10 @@ describe('deck usability', () => {
       { id: 'mission-1', name: 'M1', mission_set: 'The Call of Cthulhu' },
       { id: 'mission-2', name: 'M2', mission_set: 'King of the Jungle' },
     ],
-    locations: [{ id: 'loc-1', name: 'Avengers Mansion' }],
+    locations: [
+      { id: 'loc-1', name: 'Avengers Mansion' },
+      { id: 'gda', name: 'Global Defense Agency' },
+    ],
   };
 
   describe('buildDeckUsabilityContext', () => {
@@ -189,6 +192,22 @@ describe('deck usability', () => {
       const ctx = buildDeckUsabilityContext([], catalogByType);
       const card: CatalogCard = { id: 's1', name: 'Wild', character: 'Any Character' };
       expect(isCatalogCardUsable(card, 'special-cards', ctx)).toBe(true);
+    });
+
+    it('requires Global Defense Agency for Skybound G.D.A. Any Character specials', () => {
+      const shapesmith: CatalogCard = {
+        id: 'shapesmith',
+        name: 'Shapesmith',
+        character: 'Any Character',
+        set: 'SKY',
+        set_number: '370',
+      };
+
+      const withoutGda = buildDeckUsabilityContext([], catalogByType);
+      expect(isCatalogCardUsable(shapesmith, 'special-cards', withoutGda)).toBe(false);
+
+      const withGda = buildDeckUsabilityContext([deckLocation('gda')], catalogByType);
+      expect(isCatalogCardUsable(shapesmith, 'special-cards', withGda)).toBe(true);
     });
 
     it('requires linked character in deck', () => {

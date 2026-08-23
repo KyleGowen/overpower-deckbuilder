@@ -86,6 +86,7 @@ export interface CatalogCard {
   rarity?: CardRarity | null;
   image?: string;
   image_path?: string;
+  reverse_image_path?: string | null;
   is_foil?: boolean;
 
   /* Character / stat fields */

@@ -191,7 +191,8 @@
   text-decoration: underline;
 }
 
-.dbv-filter-rail__foil-toggle {
+.dbv-filter-rail__foil-toggle,
+.dbv-filter-rail__hide-alts-toggle {
   color: var(--color-text);
 }
 

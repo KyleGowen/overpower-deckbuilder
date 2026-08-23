@@ -9,6 +9,7 @@ import {
 } from '../../lib/catalog/catalogTypeMap';
 import { shouldShowCardDetailField } from './cardDetailFields';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
+import { imagePathFromCard } from '../../lib/images/cardImages';
 import './CardDetailPanel.css';
 
 /** Default slide-out width for catalog card detail (20% wider than the original 420px). */
@@ -56,6 +57,7 @@ const HIDDEN_FIELDS = new Set([
   'id',
   'image',
   'image_path',
+  'reverse_image_path',
   'thumb',
   'name',
   'card_name',
@@ -137,7 +139,8 @@ export function CardDetailContent({
       <div className={`card-detail__image${detailImageClass(type)}`}>
         <CardImage
           key={card.id}
-          imagePath={(card.image_path as string) || (card.image as string)}
+          imagePath={imagePathFromCard(card)}
+          reverseImagePath={card.reverse_image_path as string | null | undefined}
           catalogType={type ?? undefined}
           alt={name}
           useThumbnail={false}

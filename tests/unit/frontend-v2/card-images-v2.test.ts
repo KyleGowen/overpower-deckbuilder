@@ -5,7 +5,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   canProgressiveLoad,
+  imagePathFromCard,
   imageElementMatchesUrl,
+  isSkyboundHiddenArtCard,
+  reverseImagePathForImagePath,
+  shouldRotateSkyboundCardBack,
   normalizeRawImagePath,
   resolveImageUrl,
   resolveThumbUrl,
@@ -40,6 +44,9 @@ describe('normalizeRawImagePath for locations', () => {
 
   it('leaves already-prefixed location paths unchanged', () => {
     expect(normalizeRawImagePath('locations/barsoom.webp', 'locations')).toBe('locations/barsoom.webp');
+    expect(normalizeRawImagePath('sky/locations/348_global_defense_agency.png', 'locations')).toBe(
+      'sky/locations/348_global_defense_agency.png',
+    );
   });
 
   it('does not rewrite non-location catalog types', () => {
@@ -63,6 +70,49 @@ describe('location progressive load paths', () => {
     expect(resolveThumbUrl('danger_room.webp', 'locations')).toBe(
       '/src/resources/cards/images/locations/thumb/danger_room.webp',
     );
+  });
+
+  it('resolves set-scoped Skybound location thumbnails', () => {
+    const raw = 'sky/locations/348_global_defense_agency.png';
+    expect(resolveImageUrl(raw, 'locations')).toBe(
+      '/src/resources/cards/images/sky/locations/348_global_defense_agency.png',
+    );
+    expect(resolveThumbUrl(raw, 'locations')).toBe(
+      '/src/resources/cards/images/sky/thumb/locations/348_global_defense_agency.webp',
+    );
+  });
+});
+
+describe('Skybound alternate-art redaction', () => {
+  it('uses the card back for collector numbers 419 through 472, including suffixes', () => {
+    for (const setNumber of ['419', '450', '472', '472F']) {
+      const card = { id: setNumber, set: 'SKY', set_number: setNumber, image_path: 'secret.png' };
+      expect(isSkyboundHiddenArtCard(card)).toBe(true);
+      expect(imagePathFromCard(card)).toBe('sky/card-back/overpowerback.png');
+    }
+  });
+
+  it('does not redact adjacent or non-Skybound cards', () => {
+    expect(isSkyboundHiddenArtCard({ id: '418', set: 'SKY', set_number: '418' })).toBe(false);
+    expect(isSkyboundHiddenArtCard({ id: '419', set: 'ERB', set_number: '419' })).toBe(false);
+  });
+
+  it('rotates the protected back only for landscape card frames', () => {
+    const back = 'sky/card-back/overpowerback.png';
+    expect(shouldRotateSkyboundCardBack(back, 'characters')).toBe(true);
+    expect(shouldRotateSkyboundCardBack(back, 'locations')).toBe(true);
+    expect(shouldRotateSkyboundCardBack(back, 'events')).toBe(true);
+    expect(shouldRotateSkyboundCardBack(back, 'special-cards')).toBe(false);
+    expect(shouldRotateSkyboundCardBack('sky/characters/001_invincible.png', 'characters')).toBe(false);
+  });
+});
+
+describe('Skybound two-faced character art', () => {
+  it('derives the Walkers reverse face when a surface only has the front image path', () => {
+    expect(reverseImagePathForImagePath('sky/characters/226_walkers_herd.png')).toBe(
+      'sky/characters/226_walkers.png',
+    );
+    expect(reverseImagePathForImagePath('sky/characters/001_invincible.png')).toBeNull();
   });
 });
 
@@ -211,6 +261,34 @@ describe('CardImage progressive CSS', () => {
     expect(css).toContain('visibility: hidden');
     expect(css).toContain('.card-image--progressive.card-image--loading .card-image__img--thumb');
     expect(css).toContain('.card-image--contain.card-image--progressive .card-image__img--full');
+  });
+
+  it('defines the accessible in-image flip control used by two-faced cards', () => {
+    const imageSource = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardImage/CardImage.tsx'),
+      'utf8',
+    );
+    const detailSource = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardDetailPanel/CardDetailPanel.tsx'),
+      'utf8',
+    );
+    expect(imageSource).toContain('className="card-image__flip"');
+    expect(imageSource).toContain('Show reverse of');
+    expect(detailSource).toContain('reverseImagePath={card.reverse_image_path');
+  });
+
+  it('wires the landscape protected-back class to a counter-clockwise rotation', () => {
+    const imageSource = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardImage/CardImage.tsx'),
+      'utf8',
+    );
+    const css = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardImage/CardImage.css'),
+      'utf8',
+    );
+    expect(imageSource).toContain('card-image--rotated-back');
+    expect(css).toContain('.card-image--rotated-back .card-image__img');
+    expect(css).toContain('transform: rotate(-90deg)');
   });
 });
 

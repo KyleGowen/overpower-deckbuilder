@@ -29,4 +29,14 @@ describe('matchesHasFoilFilter', () => {
     const foilOnly = card({ id: 'foil-only', is_foil: true });
     expect(matchesHasFoilFilter(foilOnly, baseToFoil, true)).toBe(true);
   });
+
+  it('passes a main printing when a hidden alternate printing has the foil counterpart', () => {
+    const main = card({ id: 'main-1', is_foil: false });
+    expect(matchesHasFoilFilter(main, baseToFoil, true, ['main-1', 'base-1'])).toBe(true);
+  });
+
+  it('rejects a variant group when none of its printings has a foil counterpart', () => {
+    const main = card({ id: 'main-1', is_foil: false });
+    expect(matchesHasFoilFilter(main, baseToFoil, true, ['main-1', 'alt-1'])).toBe(false);
+  });
 });

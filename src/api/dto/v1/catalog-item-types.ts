@@ -21,6 +21,7 @@ export interface CatalogCharacterItem {
   special_abilities: string;
   image: string;
   image_path: string;
+  reverse_image_path: string | null;
   is_foil: boolean;
 }
 

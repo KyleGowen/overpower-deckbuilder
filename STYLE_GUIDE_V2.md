@@ -105,6 +105,15 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 | `.btn .btn-danger` | Red (`--color-danger`) | Destructive (Delete) |
 
 - **Home hero CTA** (`.home__hero-cta`): accent-outline pill (`btn-ghost` + local overrides), not `btn-primary` gradient — compact chip sizing aligned with deck-editor header actions.
+- **Home hero art** (`.home__hero-art-image`): explicit responsive 1×/2× pairs live in
+  `src/resources/images/home/banners/`. The active Skybound Immortal banner is mirrored to keep
+  the character on the visual right and copy readable on the left; the original Victory Harben
+  pair remains available. Desktop and mobile both use a broad left-to-right panel fade plus soft
+  bottom/radial shading so copy transitions into art without a hard edge. On desktop, hero art
+  grows fluidly from `100%` to a hard `140%` height cap as the hero widens; it remains top- and
+  right-anchored at its native aspect ratio so Immortal fills an ultrawide banner without clipping
+  his head. Mobile stays at `100%` height. Do not restore a width-driven `cover` scale. Banner
+  rotation/randomization is not enabled.
 - **DBV detail slide-out actions** (`.db__detail-actions .btn`): same accent-outline pill family for Add to Deck / Collection under `CardDetailPanel` on `/data`.
 - Disabled buttons drop to ~50% opacity and `cursor: not-allowed`; loading buttons show
   text like `Saving...` / `Creating...` and are disabled.
@@ -169,6 +178,14 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   (CDN base + thumbnail rules). Never hardcode image URLs.
 - Progressive thumbnail → full-resolution reveals must preserve the same painted framing;
   loading may improve sharpness but must not visibly scale, crop, or shift the card art.
+- Two-faced cards expose a compact circular flip control at the lower-right of the
+  detail image. The control uses the elevated/input surface, strong border, standard
+  pop shadow, and accent focus ring; flipping changes art only and never mutates deck state.
+- Unreleased Skybound alternate art (collectors 419–472) always renders the standard
+  card back. When that back represents a landscape card (Character, Location, or Event),
+  it is rotated 90° counter-clockwise inside the landscape frame; portrait types remain upright.
+  The protected source images are not public UI assets. All Skybound printing-production foil
+  images are also excluded; foil rows reuse their non-foil image and receive the existing sheen.
 - Card tiles (`CardTile`) use a type-aware aspect frame (`catalogType` prop): portrait
   `5:7` by default; characters `380:280`; locations and events `236:151`. Tiles use
   `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
@@ -184,6 +201,10 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   row: accent left border + `--color-accent-soft` background. DBV All opens detail slideout on
   row click only (deck/collection actions in panel). Pagination uses 48 rows per page on All
   (24 on image grids). Search + set filter apply; DBV hides `DbvFilterRail` on All.
+- **Database per-type grids with All Sets selected** ignore set/collector number: linked
+  character/location or mission-set alphabetic order applies to named categories, while Power
+  and Universe value cards use OverPower type order then ascending value. Selecting a specific
+  set restores collector-number order. Database All and every Collection view retain checklist order.
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
   (`aspect-ratio: 380 / 280`): characters (and the location card when set) cycle on hover after a
@@ -399,6 +420,7 @@ Always-visible per-type filter rail on DBV (`/data`), inserted between `.db__typ
 | Chips (`.dbv-filter-rail__chip`) | `--color-accent-soft`, `--color-border-accent`, `--font-size-xs` |
 | Clear (`.dbv-filter-rail__clear`) | `--color-accent-bright` |
 | Has Foil (`.dbv-filter-rail__foil-toggle`) | Shared `Checkbox` component; label `--color-text`; persists across tab switches; hidden when rail collapsed |
+| Hide Alts (`.dbv-filter-rail__hide-alts-toggle`) | Shared `Checkbox` component beside Has Foil; checked by default; keeps the canonical main printing for each logical card and restores all printings when unchecked |
 | Stat op/value (`.dbv-stat-cell__op`, `.dbv-stat-cell__value`) | `width: calc(2.75rem * 1.15)`, `min-height: calc(1.5rem * 1.15)`, `font-size: calc(var(--font-size-xs) * 1.15)`; mobile `min-height: calc(36px * 1.15)`; numeric values do not auto-snap to configured min/max while the user types |
 | Collapse toggle (`.dbv-filter-rail__toggle`) | Left-edge chevron; `28×28px` desktop, `44×44px` mobile; `--color-text-muted`, hover `--color-bg-hover` |
 | Collapsed rail (`.dbv-filter-rail.is-collapsed`) | Transparent, no border; keeps `--space-3` horizontal padding so the chevron stays aligned with expanded; chevron locked left in `.dbv-filter-rail__toggle-icon-wrap` (28px); `1px` rule (`.dbv-filter-rail__toggle-line`) extends right |
@@ -419,6 +441,7 @@ News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Share
 | Tile (`.home__news-item`) | `--color-bg-panel` fill, `--color-border` border, `--radius-lg`, `134px` height on desktop rail |
 | Open tile (`.home__news-item--open`) | `flex-grow: 2.4` (horizontal expand on desktop rail) |
 | Thumbnail (`.home__news-thumb`) | `72×72px`, `--radius-md`, `object-position: center 22%` |
+| Skybound launch thumbnail (`.home__news-thumb-image--skybound-launch`) | Invincible #003 art centered near the upper action pose with a `1.78×` crop, keeping the printed yellow name rail, card frame, and rules text outside the thumbnail |
 | Type badge (`.home__news-tag`) | `10px` bold caps; default accent soft; `.home__news-tag--feature` uses `--color-info` |
 | Summary clamped (`.home__news-summary--clamped`) | `-webkit-line-clamp: 2` |
 | Summary expanded (`.home__news-summary--expanded`) | `-webkit-line-clamp: 6` |

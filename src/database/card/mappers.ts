@@ -31,6 +31,7 @@ export function mapCharacterRow(row: DbRow): Character {
     special_abilities: row.special_abilities as string,
     image: (row.image_path as string) ?? '',
     image_path: row.image_path as string,
+    reverse_image_path: (row.reverse_image_path as string | null) ?? null,
     is_foil: (row.is_foil as boolean) || false,
   };
 }
@@ -194,6 +195,7 @@ export function mapAdvancedUniverseRow(row: DbRow): AdvancedUniverse {
     icon_remainder_of_battle: (row.icon_remainder_of_battle as boolean) || false,
     icon_remainder_of_game: (row.icon_remainder_of_game as boolean) || false,
     icon_astral_plane: (row.icon_astral_plane as boolean) || false,
+    icon_first_action_only: (row.icon_first_action_only as boolean) || false,
   };
 }
 

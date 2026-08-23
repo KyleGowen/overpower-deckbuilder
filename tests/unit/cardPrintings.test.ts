@@ -169,6 +169,90 @@ describe('cardPrintings', () => {
       expect(printings.map((p) => p.id).sort()).toEqual(['erb-5mp', 'tfcp-5mp-naol']);
     });
 
+    it('groups ERB 399 and SKY 312 as printings of the same teamwork card', () => {
+      const erb = card('erb-399', {
+        name: '6 Energy',
+        set: 'ERB',
+        set_number: '399',
+        to_use: '6 Energy',
+        acts_as: '4 Attack',
+        followup_attack_types: 'Brute Force + Combat',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+      const sky = card('sky-312', {
+        name: '6 Energy',
+        set: 'SKY',
+        set_number: '312',
+        to_use: '6 Energy',
+        acts_as: '4 Attack',
+        followup_attack_types: 'Combat + Brute Force',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+
+      const printings = collectPrintingsForCard(erb, 'teamwork', [erb, sky], foilLookup);
+
+      expect(printings.map((p) => p.id)).toEqual(['erb-399', 'sky-312']);
+      expect(hasMultiplePrintings(sky, 'teamwork', [erb, sky], foilLookup)).toBe(true);
+    });
+
+    it('groups ERB 344 and SKY 306 as printings of the same training card', () => {
+      const erb = card('erb-344', {
+        name: 'Training (Merlin)',
+        set: 'ERB',
+        set_number: '344',
+        type_1: 'Energy',
+        type_2: 'Combat',
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+      const sky = card('sky-306', {
+        name: 'Training (Energy / Combat)',
+        set: 'SKY',
+        set_number: '306',
+        type_1: 'Combat',
+        type_2: 'Energy',
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+
+      const printings = collectPrintingsForCard(sky, 'training', [erb, sky], foilLookup);
+
+      expect(printings.map((p) => p.id)).toEqual(['erb-344', 'sky-306']);
+      expect(hasMultiplePrintings(erb, 'training', [erb, sky], foilLookup)).toBe(true);
+    });
+
+    it("groups Merlin's Wand and Power Amplifier as printings of the same Basic Universe card", () => {
+      const erb = card('erb-333', {
+        name: "Merlin's Wand",
+        card_name: "Merlin's Wand",
+        set: 'ERB',
+        set_number: '333',
+        type: 'Energy',
+        value_to_use: '6 or greater',
+        bonus: '+3',
+        one_per_deck: false,
+      });
+      const sky = card('sky-295', {
+        name: 'Power Amplifier',
+        card_name: 'Power Amplifier',
+        set: 'SKY',
+        set_number: '295',
+        type: 'Energy',
+        value_to_use: '6 or greater',
+        bonus: '+3',
+        one_per_deck: false,
+      });
+
+      const printings = collectPrintingsForCard(sky, 'basic-universe', [erb, sky], foilLookup);
+
+      expect(printings.map((p) => p.id)).toEqual(['erb-333', 'sky-295']);
+      expect(hasMultiplePrintings(erb, 'basic-universe', [erb, sky], foilLookup)).toBe(true);
+    });
+
     it('groups ally universe cards by stat slot across sets', () => {
       const erb = card('erb-ally', {
         name: 'Allan Quatermain',
@@ -279,6 +363,32 @@ describe('cardPrintings', () => {
 
       expect(printings).toHaveLength(2);
       expect(printings.map((p) => p.id).sort()).toEqual(['erb-pp', 'tfcp-alistair']);
+    });
+  });
+
+  it('includes a newly mapped Skybound foil when the type catalog cache predates the foil row', () => {
+    const base = card('sky-437', {
+      name: 'Andrea',
+      set: 'SKY',
+      set_number: '437',
+      set_number_foil: '437F',
+      image_path: 'sky/card-back/overpowerback.png',
+      is_foil: false,
+    });
+    const foilLookup = {
+      baseToFoil: new Map([['sky-437', 'sky-437f']]),
+      foilToBase: new Map([['sky-437f', 'sky-437']]),
+    };
+
+    const printings = collectPrintingsForCard(base, 'characters', [base], foilLookup);
+
+    expect(printings).toHaveLength(2);
+    expect(printings[1]).toMatchObject({
+      id: 'sky-437f',
+      set_number: '437F',
+      set_number_foil: null,
+      image_path: 'sky/card-back/overpowerback.png',
+      is_foil: true,
     });
   });
 });

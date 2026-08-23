@@ -200,6 +200,106 @@ function comparePowerCatalogCardTiebreakers(a: CatalogCard, b: CatalogCard): num
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
+function compareAlphabetic(a: unknown, b: unknown): number {
+  const aText = String(a ?? '').trim();
+  const bText = String(b ?? '').trim();
+  if (!aText && bText) return 1;
+  if (aText && !bText) return -1;
+  return aText.localeCompare(bText, undefined, { sensitivity: 'base' });
+}
+
+function firstNumericValue(value: unknown): number {
+  const match = String(value ?? '').match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
+}
+
+function comparePowerTypes(a: unknown, b: unknown): number {
+  const aText = String(a ?? '').trim();
+  const bText = String(b ?? '').trim();
+  const indexCmp = powerTypeSortIndex(aText) - powerTypeSortIndex(bText);
+  if (indexCmp !== 0) return indexCmp;
+  return compareAlphabetic(aText, bText);
+}
+
+function compareTypeSequence(aTypes: unknown[], bTypes: unknown[]): number {
+  const length = Math.max(aTypes.length, bTypes.length);
+  for (let i = 0; i < length; i += 1) {
+    const cmp = comparePowerTypes(aTypes[i], bTypes[i]);
+    if (cmp !== 0) return cmp;
+  }
+  return 0;
+}
+
+function universeSortParts(card: CatalogCard, type: CatalogType): { types: unknown[]; value: number } {
+  switch (type) {
+    case 'power-cards':
+      return { types: [card.power_type], value: firstNumericValue(card.value) };
+    case 'ally-universe':
+      return { types: [card.stat_type_to_use], value: firstNumericValue(card.stat_to_use) };
+    case 'basic-universe':
+      return { types: [card.type], value: firstNumericValue(card.value_to_use) };
+    case 'training':
+      return { types: [card.type_1, card.type_2], value: firstNumericValue(card.value_to_use) };
+    case 'teamwork': {
+      const match = String(card.to_use ?? '').trim().match(/(\d+)\s+(.+)/);
+      return {
+        types: [match?.[2] ?? card.power_type],
+        value: match ? Number(match[1]) : firstNumericValue(card.value),
+      };
+    }
+    default:
+      return { types: [], value: Number.POSITIVE_INFINITY };
+  }
+}
+
+const DBV_UNIVERSE_VALUE_TYPES = new Set<CatalogType>([
+  'power-cards',
+  'ally-universe',
+  'basic-universe',
+  'training',
+  'teamwork',
+]);
+
+/**
+ * Database type-grid sort when the set filter is "All Sets". Set and collector
+ * number are deliberately ignored; the Database All tab and Collection use
+ * separate checklist comparators.
+ */
+export function compareDbvAllSetsCatalogCards(
+  a: CatalogCard,
+  b: CatalogCard,
+  type: CatalogType,
+): number {
+  if (DBV_UNIVERSE_VALUE_TYPES.has(type)) {
+    const aParts = universeSortParts(a, type);
+    const bParts = universeSortParts(b, type);
+    const typeCmp = compareTypeSequence(aParts.types, bParts.types);
+    if (typeCmp !== 0) return typeCmp;
+    if (aParts.value !== bParts.value) return aParts.value - bParts.value;
+  } else if (type === 'missions' || type === 'events') {
+    const missionSetCmp = compareAlphabetic(a.mission_set, b.mission_set);
+    if (missionSetCmp !== 0) return missionSetCmp;
+  } else {
+    let subjectA: unknown = cardDisplayName(a);
+    let subjectB: unknown = cardDisplayName(b);
+
+    if (type === 'special-cards' || type === 'advanced-universe') {
+      subjectA = cardCharacterName(a);
+      subjectB = cardCharacterName(b);
+    } else if (type === 'aspects') {
+      subjectA = a.location;
+      subjectB = b.location;
+    }
+
+    const subjectCmp = compareAlphabetic(subjectA, subjectB);
+    if (subjectCmp !== 0) return subjectCmp;
+  }
+
+  const nameCmp = compareAlphabetic(cardDisplayName(a), cardDisplayName(b));
+  if (nameCmp !== 0) return nameCmp;
+  return compareAlphabetic(a.id, b.id);
+}
+
 /** Add-cards / DBV tiebreakers: Energy → Combat → BF → Int → Multi → Any, then value ascending. */
 export function comparePowerCatalogCards(a: CatalogCard, b: CatalogCard): number {
   return comparePowerCatalogCardTiebreakers(a, b);
@@ -218,17 +318,18 @@ export function compareDeckPowerCatalogCards(a: CatalogCard, b: CatalogCard): nu
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
-/** Card Database grid sort: set → set_number, then tab-specific tiebreakers. */
+/** Card Database grid sort for a selected set; Power Cards always use type/value order. */
 export function compareDbvCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
+  if (type === 'power-cards') {
+    return comparePowerCatalogCardTiebreakers(a, b);
+  }
+
   const setNumCmp = compareSetThenSetNumber(a, b);
   if (setNumCmp !== 0) return setNumCmp;
 
   if (type === 'special-cards') {
     const charCmp = compareCharacterNames(cardCharacterName(a), cardCharacterName(b));
     if (charCmp !== 0) return charCmp;
-  } else if (type === 'power-cards') {
-    const powerCmp = comparePowerCatalogCardTiebreakers(a, b);
-    if (powerCmp !== 0) return powerCmp;
   }
 
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });

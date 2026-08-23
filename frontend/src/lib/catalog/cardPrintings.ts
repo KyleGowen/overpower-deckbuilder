@@ -47,6 +47,23 @@ function comparePrintings(
   return rawA.localeCompare(rawB);
 }
 
+function missingSkyboundFoilPrinting(
+  base: CatalogCard,
+  foilId: string,
+  catalogById: Map<string, CatalogCard>,
+): CatalogCard | undefined {
+  if (catalogById.has(foilId) || String(base.set ?? '') !== 'SKY') return undefined;
+  const foilNumber = String(base.set_number_foil ?? '').trim();
+  if (!/^\d+F$/i.test(foilNumber)) return undefined;
+  return {
+    ...base,
+    id: foilId,
+    set_number: foilNumber,
+    set_number_foil: null,
+    is_foil: true,
+  };
+}
+
 /**
  * All catalog printings for a card (alternate art + foil rows), sorted by set name then checklist #.
  */
@@ -79,7 +96,10 @@ export function collectPrintingsForCard(
     addPrinting(base);
     const foilId = foilLookup.baseToFoil.get(base.id);
     if (foilId) {
-      addPrinting(catalogById.get(foilId));
+      addPrinting(
+        catalogById.get(foilId)
+          ?? missingSkyboundFoilPrinting(base, foilId, catalogById),
+      );
     }
   }
 

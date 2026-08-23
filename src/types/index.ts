@@ -57,6 +57,7 @@ export interface Character {
   special_abilities: string; // Can be empty string for no special ability
   image: string;
   image_path?: string; // Optional for backward compatibility, same as image
+  reverse_image_path?: string | null; // Optional second face (Skybound Walkers)
   set_number?: string; // e.g. "035" or "035F" for foil rows
   rarity?: CardRarity | null; // null if unknown / promo not in source
   is_foil?: boolean;   // TRUE for foil card rows; foil effect applied via CSS only
@@ -171,6 +172,7 @@ export interface AdvancedUniverse {
   icon_remainder_of_battle?: boolean;
   icon_remainder_of_game?: boolean;
   icon_astral_plane?: boolean;
+  icon_first_action_only?: boolean;
   set?: string;
   set_number?: string | null;
   rarity?: CardRarity | null;
@@ -317,4 +319,3 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
 }
-

@@ -1,4 +1,30 @@
-import { mapAdvancedUniverseRow, mapSpecialCardRow } from '../../src/database/card/mappers';
+import {
+  mapAdvancedUniverseRow,
+  mapCharacterRow,
+  mapSpecialCardRow,
+} from '../../src/database/card/mappers';
+
+describe('mapCharacterRow', () => {
+  it('exposes an optional reverse image path for two-faced characters', () => {
+    const mapped = mapCharacterRow({
+      id: 'walkers',
+      name: 'Walkers: Herd',
+      set: 'SKY',
+      set_number: '226',
+      energy: 1,
+      combat: 3,
+      brute_force: 8,
+      intelligence: 1,
+      threat_level: 19,
+      special_abilities: 'Flip when KO’d.',
+      image_path: 'sky/characters/226_walkers_herd.png',
+      reverse_image_path: 'sky/characters/226_walkers.png',
+      is_foil: false,
+    });
+
+    expect(mapped.reverse_image_path).toBe('sky/characters/226_walkers.png');
+  });
+});
 
 describe('mapSpecialCardRow', () => {
   it('maps function icon booleans with defaults', () => {
@@ -42,6 +68,7 @@ describe('mapAdvancedUniverseRow', () => {
       icon_offensive_swords: true,
       icon_defensive_shield: true,
       icon_remainder_of_game: true,
+      icon_first_action_only: true,
     });
 
     expect(mapped.icon_offensive_swords).toBe(true);
@@ -49,5 +76,6 @@ describe('mapAdvancedUniverseRow', () => {
     expect(mapped.icon_remainder_of_game).toBe(true);
     expect(mapped.icon_remainder_of_battle).toBe(false);
     expect(mapped.icon_astral_plane).toBe(false);
+    expect(mapped.icon_first_action_only).toBe(true);
   });
 });

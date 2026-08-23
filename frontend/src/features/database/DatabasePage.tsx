@@ -4,16 +4,17 @@ import { useAuth } from '../../app/AuthProvider';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
   buildFoilCardMapLookup,
-  cardHasFoilVersion,
   dedupeFoilCatalogCards,
   isFoilCard,
   matchesHasFoilFilter,
+  variantGroupHasFoilVersion,
 } from '../../lib/catalog/foilCatalog';
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
   CATALOG_TYPES,
   DBV_TAB_ORDER,
   cardMatchesSearchQuery,
+  compareDbvAllSetsCatalogCards,
   compareDbvCatalogCards,
   isLandscapeCatalogType,
   metaForDeckType,
@@ -21,7 +22,10 @@ import {
   type DbvTabSelection,
 } from '../../lib/catalog/catalogTypeMap';
 import { compareAllCatalogCards } from '../../lib/catalog/allCatalogSort';
-import { resolveDefaultCardForDeckAdd } from '../../lib/catalog/defaultCatalogCards';
+import {
+  dedupeToDefaultCatalogCards,
+  resolveDefaultCardForDeckAdd,
+} from '../../lib/catalog/defaultCatalogCards';
 import { collectPrintingsForCard } from '../../lib/catalog/cardPrintings';
 import type { FoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
@@ -70,6 +74,7 @@ export default function DatabasePage() {
   const [selectedCatalogType, setSelectedCatalogType] = useState<CatalogType>('characters');
   const [filterRailCollapsed, setFilterRailCollapsed] = useState(false);
   const [hasFoilFilter, setHasFoilFilter] = useState(false);
+  const [hideAltsFilter, setHideAltsFilter] = useState(true);
 
   const { close: closeCardDetail } = useCardDetailHistory(Boolean(selected), () => setSelected(null));
 
@@ -121,7 +126,7 @@ export default function DatabasePage() {
 
   const detailTypeCatalogCards = detailCatalogCached ?? detailTypeCatalogQuery.data ?? [];
 
-  const detailPrintingRows = useMemo(() => {
+  const detailPrintingCards = useMemo(() => {
     if (!selected) return undefined;
     const printings = collectPrintingsForCard(
       selected,
@@ -131,20 +136,26 @@ export default function DatabasePage() {
       (set) => resolveSetDisplayName(set, setNameLookup) ?? String(set ?? ''),
     );
     if (printings.length <= 1) return undefined;
-    return printings.map((printing) => ({
+    return printings;
+  }, [selected, detailCatalogType, detailTypeCatalogCards, foilLookup, setNameLookup]);
+
+  const detailPrintingRows = useMemo(() => {
+    if (!selected || !detailPrintingCards) return undefined;
+    return detailPrintingCards.map((printing) => ({
       card: printing,
       setDisplayName: resolveSetDisplayName(printing.set, setNameLookup) ?? String(printing.set ?? ''),
       setNumber: printing.set_number ? String(printing.set_number) : null,
       isCurrent: printing.id === selected.id,
     }));
-  }, [selected, detailCatalogType, detailTypeCatalogCards, foilLookup, setNameLookup]);
+  }, [selected, detailPrintingCards, setNameLookup]);
 
   const viewPrintingInDetail = useCallback(
     (printingId: string) => {
-      const printing = detailTypeCatalogCards.find((c) => c.id === printingId);
+      const printing = detailPrintingCards?.find((c) => c.id === printingId)
+        ?? detailTypeCatalogCards.find((c) => c.id === printingId);
       if (printing) setSelected(printing);
     },
-    [detailTypeCatalogCards],
+    [detailPrintingCards, detailTypeCatalogCards],
   );
 
   const perTypeCards = useMemo(
@@ -152,20 +163,40 @@ export default function DatabasePage() {
     [catalogQuery.data, foilLookup.foilToBase],
   );
 
-  const gridFiltered = useMemo(() => {
+  const gridPrintingSelection = useMemo(() => {
     if (isAllTab) return [];
     const q = debouncedSearch.trim().toLowerCase();
     const catalogType = tab;
-    const result = perTypeCards.filter((c) => {
+    const searchAndSetMatches = perTypeCards.filter((c) => {
       if (q && !cardMatchesSearchQuery(c, q)) return false;
       if (setFilter && String(c.set ?? '') !== setFilter) return false;
-      if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
-      if (!matchesHasFoilFilter(c, foilLookup.baseToFoil, hasFoilFilter)) return false;
       return true;
     });
-    result.sort((a, b) => compareDbvCatalogCards(a, b, catalogType));
+    if (hideAltsFilter) {
+      return dedupeToDefaultCatalogCards(searchAndSetMatches, catalogType, setFilter || undefined);
+    }
+    return {
+      cards: searchAndSetMatches,
+      variantIdsByRepresentative: new Map(searchAndSetMatches.map((card) => [card.id, [card.id]])),
+    };
+  }, [perTypeCards, debouncedSearch, setFilter, tab, hideAltsFilter, isAllTab]);
+
+  const gridFiltered = useMemo(() => {
+    if (isAllTab || Array.isArray(gridPrintingSelection)) return [];
+    const catalogType = tab;
+    const result = gridPrintingSelection.cards.filter((c) => {
+      if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
+      const variantIds = gridPrintingSelection.variantIdsByRepresentative.get(c.id);
+      if (!matchesHasFoilFilter(c, foilLookup.baseToFoil, hasFoilFilter, variantIds)) return false;
+      return true;
+    });
+    result.sort((a, b) =>
+      setFilter
+        ? compareDbvCatalogCards(a, b, catalogType)
+        : compareDbvAllSetsCatalogCards(a, b, catalogType),
+    );
     return result;
-  }, [perTypeCards, debouncedSearch, setFilter, tab, dbvFilters.state, hasFoilFilter, foilLookup.baseToFoil, isAllTab]);
+  }, [gridPrintingSelection, setFilter, tab, dbvFilters.state, hasFoilFilter, foilLookup.baseToFoil, isAllTab]);
 
   const allTabFiltered = useMemo(() => {
     const q = debouncedSearch.trim().toLowerCase();
@@ -182,7 +213,7 @@ export default function DatabasePage() {
 
   useEffect(() => {
     setPage(1);
-  }, [tab, debouncedSearch, setFilter, dbvFilters.state, hasFoilFilter]);
+  }, [tab, debouncedSearch, setFilter, dbvFilters.state, hasFoilFilter, hideAltsFilter]);
 
   useEffect(() => () => clearProgressiveImageSession('database'), []);
 
@@ -305,6 +336,8 @@ export default function DatabasePage() {
             onCollapsedChange={setFilterRailCollapsed}
             hasFoilFilter={hasFoilFilter}
             onHasFoilFilterChange={setHasFoilFilter}
+            hideAltsFilter={hideAltsFilter}
+            onHideAltsFilterChange={setHideAltsFilter}
           />
         ) : null}
 
@@ -332,7 +365,13 @@ export default function DatabasePage() {
                   key={card.id}
                   card={card}
                   catalogType={tab}
-                  hasFoilVersion={cardHasFoilVersion(card, foilLookup.baseToFoil)}
+                  hasFoilVersion={variantGroupHasFoilVersion(
+                    card,
+                    foilLookup.baseToFoil,
+                    Array.isArray(gridPrintingSelection)
+                      ? undefined
+                      : gridPrintingSelection.variantIdsByRepresentative.get(card.id),
+                  )}
                   showFoilEffect={false}
                   onClick={() => selectCard(card, tab)}
                 />
@@ -348,7 +387,13 @@ export default function DatabasePage() {
         type={detailCatalogType}
         open={Boolean(selected)}
         onClose={closeCardDetail}
-        hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
+        hasFoil={selected ? variantGroupHasFoilVersion(
+          selected,
+          foilLookup.baseToFoil,
+          Array.isArray(gridPrintingSelection)
+            ? undefined
+            : gridPrintingSelection.variantIdsByRepresentative.get(selected.id),
+        ) : undefined}
         isFoil={selected ? isFoilCard(selected) : undefined}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         printings={detailPrintingRows}

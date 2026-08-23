@@ -86,7 +86,7 @@ describe('compareDbvCatalogCards', () => {
         value,
       });
 
-    it('sorts by set and set_number before power type and value', () => {
+    it('sorts by power type and value regardless of set and set_number', () => {
       const unsorted: CatalogCard[] = [
         powerCard('p2', 'SKY', '1', 'Energy', 1),
         powerCard('p1', 'ERB', '5', 'Combat', 9),
@@ -95,7 +95,7 @@ describe('compareDbvCatalogCards', () => {
 
       const sorted = [...unsorted].sort((a, b) => compareDbvCatalogCards(a, b, 'power-cards'));
 
-      expect(sorted.map((c) => c.id)).toEqual(['p3', 'p1', 'p2']);
+      expect(sorted.map((c) => c.id)).toEqual(['p2', 'p1', 'p3']);
     });
 
     it('preserves power type order within the same set and set_number', () => {

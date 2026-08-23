@@ -35,6 +35,9 @@ export const deckValidationMessages = {
     unusableSpecialNeedsCharacter(cardName: string, characterName: string): string {
         return `"${cardName}" requires character "${characterName}" in your team`;
     },
+    gdaAnyCharacterNeedsBattleground(): string {
+        return 'G.D.A. Any Character Special cards require the "Global Defense Agency" Battleground in your deck';
+    },
     unusableEventMissionSet(cardName: string, missionSet: string): string {
         return `"${cardName}" requires mission set "${missionSet}" in your deck`;
     },

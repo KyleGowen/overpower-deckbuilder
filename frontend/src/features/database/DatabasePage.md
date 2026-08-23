@@ -23,7 +23,7 @@ Browse, search, filter, and sort the full modern OverPower catalog.
 - **Filter rail** (`DbvFilterRail`) visible on per-type tabs only (hidden on **All**).
   Per-tab controls (numeric stat op/value rows, power-type icon strips, function icons,
   mission-set select) are config-driven via `filters/dbvFilterConfig.ts`. Advanced filters
-  reset on tab change; search, set, **Has Foil**, and collapse persist. Active constraints
+  reset on tab change; search, set, **Has Foil**, **Hide Alts**, and collapse persist. Active constraints
   show as removable chips at the rail end with a **Clear** action (Clear does not reset Has
   Foil). Numeric inputs preserve the user's typed value instead of snapping to the configured
   min/max range while editing; the range remains available to native number controls. Optional
@@ -31,11 +31,26 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   rule with left-aligned chevron-down; collapse preference persists across tab switches).
 - **Has Foil** toggle (`.dbv-filter-rail__foil-toggle`, trailing end of filter rail): when
   checked, only cards with a foil variant per `foil_card_map` remain (base rows with a foil
-  counterpart or foil-only promos). Uses `matchesHasFoilFilter` / `cardHasFoilVersion` after
-  foil dedup. Persists across type tab switches; off restores the full deduped catalog.
-- Sort is fixed per tab: all per-type tabs sort by **set** → **set_number**, then tab tiebreakers
-  (Special Cards: character with `Any Character` last; Power Cards: power type → value; others: name).
-  **All** tab: set → foil tier → set_number → name (`compareAllCatalogCards`).
+  counterpart or foil-only promos). Uses `matchesHasFoilFilter` with the complete logical-card
+  variant group after foil dedup. Persists across type tab switches; off restores the full
+  deduped catalog.
+- **Hide Alts** toggle (`.dbv-filter-rail__hide-alts-toggle`, beside Has Foil): on by
+  default. When checked, each logical card is represented by its canonical main printing using
+  `dedupeToDefaultCatalogCards`; turning it off restores alternate-art and cross-set printing
+  rows. Search and Set filtering happen before canonical-printing selection so a selected set
+  keeps that set's main printing. Stat filters apply to that representative; Has Foil evaluates
+  every printing in the representative's hidden variant group, so enabling both toggles shows the
+  main printing for each foil-capable logical card without restoring alternate rows. The toggle
+  persists across type tab switches and does not affect **All**.
+- Per-type grid sorting depends on the Set dropdown:
+  - **All Sets:** ignores set and collector number. Characters and Locations sort by card name;
+    Specials and Advanced Universe by linked character; Aspects by linked location; Missions and
+    Events by mission-set name; Power/Ally/Basic/Training/Teamwork by OverPower type order then
+    ascending requirement/value. Alphabetical card name is the stable tiebreaker.
+  - **Specific set:** retains checklist order by **set_number**, then the existing tab tiebreakers,
+    except Power Cards, which always use OverPower type order then ascending value.
+  - **All** tab is intentionally unchanged: set → foil tier → set_number → name
+    (`compareAllCatalogCards`). Collection sorting is also unaffected.
 
 ## All tab
 - Merges all 12 catalog slugs (`useAllCatalogCards`); foil dedup per slug like per-type tabs.
@@ -52,10 +67,26 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   one card per row for all types. Images use `contain` (no crop).
   Tile art uses **progressive** thumb → full-res loading (`CardImage` `progressive` prop).
   Set line shows code + number when available.
+- A protected Skybound card back in a landscape frame is rotated 90° counter-clockwise while
+  portrait hidden cards retain the normal upright back.
 - **Foil dedup:** `fetchFoilCardMap` hides foil rows when the base card is in the same tab;
   foil-only rows remain. Base (or foil-only) tiles show a silver ✦ (`has foil` tooltip) when a
   foil variant exists per the map. Grid tiles suppress the prismatic laminate (`showFoilEffect={false}` on `CardTile`).
-- Clicking a tile opens `CardDetailPanel`. The detail slide-out shows the foil laminate for foil printings (default `showFoilEffect` on `CardDetailPanel`).
+- Clicking a tile opens `CardDetailPanel`. The detail slide-out shows the foil laminate for foil
+  printings (default `showFoilEffect` on `CardDetailPanel`). If a newly mapped Skybound foil ID is
+  present in `foil_card_map` while the browser still holds a pre-migration type-catalog payload,
+  the printing list temporarily derives that foil row from the mapped base and its
+  `set_number_foil`; selecting it behaves identically to a freshly fetched catalog row.
+- Teamwork printing identity uses normalized `to_use`, `acts_as`, both attack bonuses, and an
+  order-insensitive set of follow-up attack types. Thus `Combat + Brute Force` and
+  `Brute Force + Combat` group together only when the rest of the card mechanics also match.
+- Training printing identity uses an order-insensitive pair of power types plus `value_to_use`,
+  bonus, and one-per-deck status, allowing differently named ERB and SKY art to share one slot.
+- Basic Universe printing identity uses power type, `value_to_use`, bonus, and one-per-deck
+  status, allowing differently named ERB and SKY art with identical mechanics to share one slot.
+- Skybound `#112`, `#126`, `#131`, and `#242` are corrected by Flyway V314 from character
+  Specials to Universe: Advanced cards while retaining their UUIDs and shared action-icon data.
+  V315 extends the Advanced Universe model so `#112` also retains its first-action-only icon.
 
 ## Add to Deck
 - The detail panel exposes an **Add to Deck** action for logged-in users (`addCardToDeck`).

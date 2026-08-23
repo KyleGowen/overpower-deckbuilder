@@ -2,19 +2,20 @@
 
 ## Purpose
 
-This directory holds **static image assets used by the v2 home screen** (`frontend/src/features/home/HomePage.tsx`). Currently:
+This directory holds **static image assets used by the v2 home screen** (`frontend/src/features/home/HomePage.tsx`). Home hero art lives in the dedicated `banners/` directory. Currently:
 
-- **`home-hero.png`** — 1× master landscape Victory Harben art for the "Welcome to Excelsior" hero banner.
-- **`home-hero-2x.png`** — 2× retina PNG generated from the master (`npm run generate:home-hero`). Committed alongside the master; referenced via `srcSet` on the hero `<img>`. Use `-2x` (not `@2x`) in the filename so URLs stay safe on all hosts.
+- **`banners/victory-harben.png`** — retained 1× master for the original banner.
+- **`banners/skybound-immortal.png`** — active 1× Skybound launch banner master.
+- **`banners/*-2x.png`** — generated 2× retina PNGs (`npm run generate:home-hero`). Committed alongside each master and referenced via `srcSet`. Use `-2x` (not `@2x`) in filenames so URLs stay safe on all hosts.
 
 Rendered as `<img className="home__hero-art-image">` inside `.home__hero-art`, right-aligned and height-scaled to the welcome tile.
 
 ## Rules
 
-- **Edit only `home-hero.png`**, then run **`npm run generate:home-hero`** (or `--force`) to regenerate `home-hero-2x.png`.
+- **Edit only the non-`-2x` master files in `banners/`**, then run **`npm run generate:home-hero`** (or `--force`) to regenerate every changed retina asset.
 
 - **These images are committed to git** (UI images under `src/resources/images/**` are not gitignored) and are synced to S3/CloudFront by the deploy workflow, so they load from the CDN in production.
-- **Reference via `assetUrl('/src/resources/images/home/<file>')`** in the frontend (CDN-safe). Do NOT hardcode CDN URLs or use CSS `url()` with an absolute `/src/...` path (it would resolve against the SPA origin, not the CDN).
+- **Reference via `assetUrl('/src/resources/images/home/banners/<file>')`** in the frontend (CDN-safe). Do NOT hardcode CDN URLs or use CSS `url()` with an absolute `/src/...` path (it would resolve against the SPA origin, not the CDN).
 - **Not auto-discovered.** Unlike `backgrounds/landscape` (deck-editor picker), files here are referenced explicitly. Adding a file requires a code reference; it will not appear anywhere automatically.
 - **No thumbnails** — the card thumbnail pipeline does not process this directory; do not add a `thumb/` subfolder.
 

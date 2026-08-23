@@ -331,11 +331,12 @@ The resolved public name everywhere in the app comes from `resolveUserDisplayNam
   "special_abilities": "Must have 25 hits to be Cumulative KO'd.",
   "image": "characters/angry_mob_industrial_age.webp",
   "image_path": "characters/angry_mob_industrial_age.webp",
+  "reverse_image_path": null,
   "is_foil": false
 }
 ```
 
-Fields: `id`, `name`, `set`, `set_number` (string|null), `rarity` (`"Common"|"Uncommon"|"Rare"|"Ultra Rare"|null`), `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` (all numbers), `special_abilities` (string), `image`, `image_path`, `is_foil`.
+Fields: `id`, `name`, `set`, `set_number` (string|null), `rarity` (`"Common"|"Uncommon"|"Rare"|"Ultra Rare"|null`), `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` (all numbers), `special_abilities` (string), `image`, `image_path`, `reverse_image_path` (string|null; second face for two-faced characters), `is_foil`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 

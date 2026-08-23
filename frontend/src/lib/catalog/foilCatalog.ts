@@ -49,11 +49,21 @@ export function cardHasFoilVersion(card: CatalogCard, baseToFoil: Map<string, st
   return baseToFoil.has(card.id);
 }
 
+/** True when the displayed row or any hidden printing in its variant group has a foil. */
+export function variantGroupHasFoilVersion(
+  card: CatalogCard,
+  baseToFoil: Map<string, string>,
+  variantIds: readonly string[] = [card.id],
+): boolean {
+  return cardHasFoilVersion(card, baseToFoil) || variantIds.some((id) => baseToFoil.has(id));
+}
+
 /** DBV "Has Foil" filter: pass all cards when disabled; foil-capable only when enabled. */
 export function matchesHasFoilFilter(
   card: CatalogCard,
   baseToFoil: Map<string, string>,
   enabled: boolean,
+  variantIds?: readonly string[],
 ): boolean {
-  return !enabled || cardHasFoilVersion(card, baseToFoil);
+  return !enabled || variantGroupHasFoilVersion(card, baseToFoil, variantIds);
 }

@@ -2,7 +2,7 @@
 
 Landing page after login. Sections, top to bottom:
 
-1. **Hero** — "Welcome to Excelsior" over dedicated landscape character art (`src/resources/images/home/home-hero.png` + generated `home-hero-2x.png` via `assetUrl()` / `srcSet`), right-aligned in the welcome tile. Art scales fluidly in the right two-thirds until the hero tile reaches ~2000px wide (≈ 2048px viewport); wider viewports freeze art width and grow the left panel behind copy. Regenerate `home-hero-2x.png` with `npm run generate:home-hero` after editing the master PNG. CTA is a compact accent-outline pill (`btn btn-ghost home__hero-cta`), not a filled primary button.
+1. **Hero** — "Welcome to Excelsior" over dedicated landscape character art from `src/resources/images/home/banners/`, loaded via `assetUrl()` / `srcSet`. The active Skybound Immortal banner is mirrored so the character sits on the right, away from the copy; the retained Victory Harben pair remains available for an explicit future switch. Art scales fluidly in the right two-thirds until the hero tile reaches ~2000px wide (≈ 2048px viewport); wider viewports freeze art width and grow the left panel behind copy. Run `npm run generate:home-hero` after editing or adding a non-`-2x` banner master. Banner selection remains explicit—there is no randomization or cycling yet. CTA is a compact accent-outline pill (`btn btn-ghost home__hero-cta`), not a filled primary button.
 2. **Recent Updates** — news cards from
    `GET /api/v1/recent-updates` (`useRecentUpdates`; rows in `recent_updates` table).
    Shows the **3 newest** tiles (`HOME_RECENT_UPDATES_LIMIT`). When more than 3 exist,

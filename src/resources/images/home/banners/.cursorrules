@@ -1,0 +1,9 @@
+# Home Hero Banners
+
+This directory stores explicitly selected 1x home-hero masters and their generated `-2x` retina
+counterparts. `HomePage.tsx` chooses the active banner; rotation is intentionally disabled.
+
+- Edit the non-`-2x` master, then run `npm run generate:home-hero` to refresh its retina pair.
+- Keep prior masters available for future selection.
+- Reference assets through `assetUrl`; do not hardcode a CDN hostname.
+- Banner CSS must preserve the subject across mobile, desktop, and ultrawide layouts.

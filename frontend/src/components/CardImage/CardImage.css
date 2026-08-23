@@ -15,6 +15,12 @@
   transition: opacity var(--dur-med) var(--ease-out);
 }
 
+.card-image__media {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
 .card-image--progressive .card-image__img--thumb {
   position: absolute;
   inset: 0;
@@ -85,6 +91,58 @@
 /* Once full-res paints, hide thumb so contain letterbox / edge bleed never double-frames the swap. */
 .card-image--progressive:has(.card-image__full--loaded) .card-image__img--thumb {
   visibility: hidden;
+}
+
+/* Protected portrait back shown for landscape cards: swap the image box dimensions,
+   then rotate counter-clockwise so the back remains undistorted and centered. */
+.card-image--rotated-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.card-image--rotated-back .card-image__media {
+  position: relative;
+  inset: auto;
+  flex: 0 0 auto;
+  width: 100cqh;
+  height: 100cqw;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.card-image--rotated-back .card-image__img {
+  object-fit: contain;
+}
+
+.card-image__flip {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  z-index: 5;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-bg-input) 86%, transparent);
+  box-shadow: var(--shadow-pop);
+  font: 700 1.15rem/1 system-ui, sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+
+.card-image__flip:hover {
+  background: var(--color-bg-hover);
+}
+
+.card-image__flip:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* Full layer stacks above thumb; thumb remains visible as letterbox backing until full loads. */

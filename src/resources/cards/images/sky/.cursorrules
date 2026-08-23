@@ -1,0 +1,11 @@
+# Skybound Card Images
+
+Public Skybound card assets are organized by catalog type under this set-scoped directory.
+Generated progressive thumbnails mirror those paths beneath `thumb/`.
+
+- Keep this additive; do not relocate cards from earlier sets.
+- Collectors 419–472 must not contain public alternate-art source images. They render through
+  `card-back/overpowerback.png` instead.
+- Do not commit printing-production foil images. Foil database rows reuse non-foil art.
+- Run the repository thumbnail generator after adding or changing a public source image.
+- Preserve collector-number filename prefixes so migrations and audit manifests stay traceable.

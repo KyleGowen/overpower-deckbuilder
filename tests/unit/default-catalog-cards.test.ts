@@ -60,6 +60,29 @@ describe('defaultCatalogCards', () => {
 
       expect(deduped.map((c) => c.id).sort()).toEqual(['erb-7c', 'tfcp-7c-2', 'tfcp-7c-foil']);
     });
+
+    it('uses the filtered set as representative for cross-set card groups', () => {
+      const erb = card('erb', {
+        name: '7 - Energy',
+        set: 'ERB',
+        power_type: 'Energy',
+        value: 7,
+        set_number: '100',
+      });
+      const sky = card('sky', {
+        name: '7 - Energy',
+        set: 'SKY',
+        power_type: 'Energy',
+        value: 7,
+        set_number: '270',
+      });
+
+      const result = prepareAddCardsCatalogList([erb, sky], 'power-cards', new Map(), 'SKY');
+
+      expect(result.cards).toHaveLength(1);
+      expect(result.cards[0].id).toBe('sky');
+      expect(result.variantIdsByRepresentative.get('sky')?.sort()).toEqual(['erb', 'sky']);
+    });
   });
 
   describe('dedupeToDefaultCatalogCards', () => {
@@ -83,6 +106,30 @@ describe('defaultCatalogCards', () => {
       expect(cards).toHaveLength(1);
       expect(cards[0].id).toBe('base');
       expect(variantIdsByRepresentative.get('base')?.sort()).toEqual(['alt', 'base']);
+    });
+
+    it('keeps the main Skybound printing over a protected back-only alternate row', () => {
+      const base = card('base', {
+        name: 'Rick Grimes',
+        set: 'SKY',
+        set_number: '128',
+        image_path: 'sky/characters/128_rick_grimes.png',
+      });
+      const hiddenAlternate = card('hidden-alt', {
+        name: 'Rick Grimes',
+        set: 'SKY',
+        set_number: '452',
+        image_path: 'sky/card-back/overpowerback.png',
+      });
+
+      const { cards, variantIdsByRepresentative } = dedupeToDefaultCatalogCards(
+        [hiddenAlternate, base],
+        'characters',
+      );
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('base');
+      expect(variantIdsByRepresentative.get('base')?.sort()).toEqual(['base', 'hidden-alt']);
     });
 
     it('merges ERBP alternate with ERB base for characters', () => {
@@ -228,6 +275,193 @@ describe('defaultCatalogCards', () => {
       expect(cards).toHaveLength(1);
       expect(cards[0].id).toBe('tw-base');
       expect(variantIdsByRepresentative.get('tw-base')?.sort()).toEqual(['tw-alt', 'tw-base']);
+    });
+
+    it('groups mechanically identical teamwork printings with reversed followup order', () => {
+      const erb = card('erb-399', {
+        name: '6 Energy',
+        set: 'ERB',
+        set_number: '399',
+        to_use: '6 Energy',
+        acts_as: '4 Attack',
+        followup_attack_types: 'Brute Force + Combat',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+      const sky = card('sky-312', {
+        name: '6 Energy',
+        set: 'SKY',
+        set_number: '312',
+        to_use: '6 Energy',
+        acts_as: '4 Attack',
+        followup_attack_types: 'Combat + Brute Force',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+
+      const { cards, variantIdsByRepresentative } = dedupeToDefaultCatalogCards(
+        [sky, erb],
+        'teamwork',
+      );
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('sky-312');
+      expect(variantIdsByRepresentative.get('sky-312')?.sort()).toEqual(['erb-399', 'sky-312']);
+    });
+
+    it('keeps teamwork cards distinct when acts-as value or bonuses differ', () => {
+      const baseFields = {
+        name: '6 Energy',
+        to_use: '6 Energy',
+        followup_attack_types: 'Combat + Brute Force',
+      };
+      const standard = card('standard', {
+        ...baseFields,
+        acts_as: '4 Attack',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+      const differentAttack = card('different-attack', {
+        ...baseFields,
+        acts_as: '5 Attack',
+        first_attack_bonus: '0',
+        second_attack_bonus: '1',
+      });
+      const differentBonus = card('different-bonus', {
+        ...baseFields,
+        acts_as: '4 Attack',
+        first_attack_bonus: '1',
+        second_attack_bonus: '1',
+      });
+
+      expect(dedupeToDefaultCatalogCards(
+        [standard, differentAttack, differentBonus],
+        'teamwork',
+      ).cards).toHaveLength(3);
+    });
+
+    it('groups equivalent training printings with reversed type order and different names', () => {
+      const erb = card('erb-344', {
+        name: 'Training (Merlin)',
+        set: 'ERB',
+        set_number: '344',
+        type_1: 'Energy',
+        type_2: 'Combat',
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+      const sky = card('sky-306', {
+        name: 'Training (Energy / Combat)',
+        set: 'SKY',
+        set_number: '306',
+        type_1: 'Combat',
+        type_2: 'Energy',
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+
+      const { cards, variantIdsByRepresentative } = dedupeToDefaultCatalogCards(
+        [erb, sky],
+        'training',
+      );
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('sky-306');
+      expect(variantIdsByRepresentative.get('sky-306')?.sort()).toEqual(['erb-344', 'sky-306']);
+    });
+
+    it('keeps training cards distinct when requirement, bonus, or one-per-deck differs', () => {
+      const baseFields = {
+        name: 'Training',
+        type_1: 'Energy',
+        type_2: 'Combat',
+      };
+      const standard = card('standard-training', {
+        ...baseFields,
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+      const differentRequirement = card('different-requirement', {
+        ...baseFields,
+        value_to_use: '6 or less',
+        bonus: '+4',
+        one_per_deck: false,
+      });
+      const differentBonus = card('different-training-bonus', {
+        ...baseFields,
+        value_to_use: '5 or less',
+        bonus: '+5',
+        one_per_deck: false,
+      });
+      const onePerDeck = card('one-per-deck-training', {
+        ...baseFields,
+        value_to_use: '5 or less',
+        bonus: '+4',
+        one_per_deck: true,
+      });
+
+      expect(dedupeToDefaultCatalogCards(
+        [standard, differentRequirement, differentBonus, onePerDeck],
+        'training',
+      ).cards).toHaveLength(4);
+    });
+
+    it('groups mechanically identical Basic Universe printings with different names', () => {
+      const erb = card('erb-333', {
+        name: "Merlin's Wand",
+        card_name: "Merlin's Wand",
+        set: 'ERB',
+        set_number: '333',
+        type: 'Energy',
+        value_to_use: '6 or greater',
+        bonus: '+3',
+        one_per_deck: false,
+      });
+      const sky = card('sky-295', {
+        name: 'Power Amplifier',
+        card_name: 'Power Amplifier',
+        set: 'SKY',
+        set_number: '295',
+        type: 'Energy',
+        value_to_use: '6 or greater',
+        bonus: '+3',
+        one_per_deck: false,
+      });
+
+      const { cards, variantIdsByRepresentative } = dedupeToDefaultCatalogCards(
+        [erb, sky],
+        'basic-universe',
+      );
+
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('sky-295');
+      expect(variantIdsByRepresentative.get('sky-295')?.sort()).toEqual(['erb-333', 'sky-295']);
+    });
+
+    it('keeps Basic Universe cards distinct when type, requirement, bonus, or one-per-deck differs', () => {
+      const baseFields = {
+        name: 'Basic Universe',
+        type: 'Energy',
+        value_to_use: '6 or greater',
+        bonus: '+3',
+        one_per_deck: false,
+      };
+      const standard = card('standard-basic', baseFields);
+      const differentType = card('different-type-basic', { ...baseFields, type: 'Combat' });
+      const differentRequirement = card('different-requirement-basic', {
+        ...baseFields,
+        value_to_use: '7 or greater',
+      });
+      const differentBonus = card('different-bonus-basic', { ...baseFields, bonus: '+2' });
+      const onePerDeck = card('one-per-deck-basic', { ...baseFields, one_per_deck: true });
+
+      expect(dedupeToDefaultCatalogCards(
+        [standard, differentType, differentRequirement, differentBonus, onePerDeck],
+        'basic-universe',
+      ).cards).toHaveLength(5);
     });
 
     it('prefers non-foil over foil and lowest checklist number', () => {

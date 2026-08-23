@@ -27,6 +27,7 @@ import { StatIconBadge } from '../../components/StatIconBadge';
 import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { IconSearch, IconClose } from '../../components/icons';
+import { imagePathFromCard } from '../../lib/images/cardImages';
 import { AddCardsQtyOverlay } from './AddCardsQtyOverlay';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../../lib/api/types';
 import {
@@ -385,16 +386,19 @@ export function AddCardsPanel({
         charactersRaw,
         'characters',
         foilLookup.foilToBase,
+        setFilter || undefined,
       );
       const specials = prepareAddCardsCatalogList(
         specialsRaw,
         'special-cards',
         foilLookup.foilToBase,
+        setFilter || undefined,
       );
       const advancedUniverse = prepareAddCardsCatalogList(
         uaRaw,
         'advanced-universe',
         foilLookup.foilToBase,
+        setFilter || undefined,
       );
 
       variantLookupByType.set('characters', characters.variantIdsByRepresentative);
@@ -417,7 +421,12 @@ export function AddCardsPanel({
       for (const meta of CATALOG_TYPES) {
         const raw = rawByType[meta.type] ?? [];
         if (raw.length === 0) continue;
-        const prepared = prepareAddCardsCatalogList(raw, meta.type, foilLookup.foilToBase);
+        const prepared = prepareAddCardsCatalogList(
+          raw,
+          meta.type,
+          foilLookup.foilToBase,
+          setFilter || undefined,
+        );
         dedupedByType[meta.type] = prepared.cards;
         variantLookupByType.set(meta.type, prepared.variantIdsByRepresentative);
       }
@@ -429,6 +438,7 @@ export function AddCardsPanel({
         catalogQuery.data ?? [],
         activeType,
         foilLookup.foilToBase,
+        setFilter || undefined,
       );
       variantLookupByType.set(activeType, prepared.variantIdsByRepresentative);
       return {
@@ -446,6 +456,7 @@ export function AddCardsPanel({
     catalogQuery.data,
     stackCatalogQueries,
     foilLookup.foilToBase,
+    setFilter,
   ]);
 
   const usabilityCtx = useMemo(
@@ -701,7 +712,7 @@ export function AddCardsPanel({
             {hoveredCard ? (
               <div className="add-cards__hover-art">
                 <CardImage
-                  imagePath={hoveredCard.card.image_path ?? hoveredCard.card.image}
+                  imagePath={imagePathFromCard(hoveredCard.card)}
                   alt={cardDisplayName(hoveredCard.card)}
                   catalogType={hoveredCard.catalogType}
                   useThumbnail={false}
