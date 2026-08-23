@@ -167,6 +167,8 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
 - Card art is rendered exclusively through the `CardImage` component, which resolves
   paths via [`frontend/src/lib/images/cardImages.ts`](frontend/src/lib/images/cardImages.ts)
   (CDN base + thumbnail rules). Never hardcode image URLs.
+- Progressive thumbnail → full-resolution reveals must preserve the same painted framing;
+  loading may improve sharpness but must not visibly scale, crop, or shift the card art.
 - Card tiles (`CardTile`) use a type-aware aspect frame (`catalogType` prop): portrait
   `5:7` by default; characters `380:280`; locations and events `236:151`. Tiles use
   `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles

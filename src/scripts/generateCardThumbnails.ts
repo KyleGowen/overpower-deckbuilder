@@ -44,7 +44,6 @@ export const PRESET_PORTRAIT: ThumbResizeConfig = {
   background: THUMB_LETTERBOX_BG,
 };
 
-const PRESET_MISSION: ThumbResizeConfig = { width: 264, height: 378, fit: 'cover' };
 /** Landscape DB/deck location slot 236×151 (2×); `contain` matches full-res progressive framing. */
 export const PRESET_LOCATION: ThumbResizeConfig = {
   width: 472,
@@ -60,7 +59,7 @@ export const THUMB_CONFIGS: Record<string, ThumbResizeConfig> = {
   locations: PRESET_LOCATION,
   specials: PRESET_PORTRAIT,
   'power-cards': PRESET_PORTRAIT,
-  events: PRESET_MISSION,
+  events: PRESET_LOCATION,
   aspects: PRESET_PORTRAIT,
   'advanced-universe': PRESET_PORTRAIT,
   'teamwork-universe': PRESET_PORTRAIT,
@@ -127,12 +126,25 @@ function getThumbnailPath(sourcePath: string, sourceDir: string, thumbDir: strin
   return path.join(thumbDir, thumbRelative);
 }
 
-function shouldSkip(sourcePath: string, thumbPath: string): boolean {
+async function shouldSkip(
+  sourcePath: string,
+  thumbPath: string,
+  thumbConfig: ThumbResizeConfig,
+): Promise<boolean> {
   if (FORCE_REGENERATE) return false;
   if (!fs.existsSync(thumbPath)) return false;
   const sourceStat = fs.statSync(sourcePath);
   const thumbStat = fs.statSync(thumbPath);
-  return thumbStat.mtimeMs >= sourceStat.mtimeMs;
+  if (thumbStat.mtimeMs < sourceStat.mtimeMs) return false;
+
+  // A source-mtime check alone misses generator preset changes. Validate the
+  // generated canvas so stale thumbnails are rebuilt on the next dev/build run.
+  try {
+    const metadata = await sharp(thumbPath).metadata();
+    return metadata.width === thumbConfig.width && metadata.height === thumbConfig.height;
+  } catch {
+    return false;
+  }
 }
 
 async function processDirectory(
@@ -149,7 +161,7 @@ async function processDirectory(
   for (const sourcePath of imageFiles) {
     const thumbPath = getThumbnailPath(sourcePath, sourceDir, thumbDir);
 
-    if (shouldSkip(sourcePath, thumbPath)) {
+    if (await shouldSkip(sourcePath, thumbPath, thumbConfig)) {
       skipped++;
       continue;
     }
@@ -185,7 +197,7 @@ async function generateThumbnails(): Promise<void> {
     console.log('   --force: regenerating all thumbnails (ignoring skip cache)');
   }
   console.log(
-    '   Presets: characters 380×280 contain; portrait 350×490 contain; events 264×378 cover; locations 472×302 contain (2× retina) | WebP quality:',
+    '   Presets: characters 380×280 contain; portrait 350×490 contain; locations/events 472×302 contain (2× retina) | WebP quality:',
     WEBP_QUALITY
   );
   console.log('');

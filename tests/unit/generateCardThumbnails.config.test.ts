@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
 import {
   PRESET_CHARACTER,
   PRESET_LOCATION,
@@ -40,6 +43,53 @@ describe('generateCardThumbnails THUMB_CONFIGS', () => {
     expect(THUMB_CONFIGS.locations).toBe(PRESET_LOCATION);
     expect(PRESET_LOCATION.fit).toBe('contain');
     expect(PRESET_LOCATION.width / PRESET_LOCATION.height).toBeCloseTo(236 / 151, 2);
+  });
+
+  it('keeps generated thumbnails aligned with their configured canvas dimensions', async () => {
+    const expectTreeToMatchPreset = async (
+      thumbRoot: string,
+      preset: { width: number; height: number },
+    ) => {
+      if (!fs.existsSync(thumbRoot)) return;
+
+      const pending = [thumbRoot];
+      while (pending.length > 0) {
+        const current = pending.pop()!;
+        for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+          const entryPath = path.join(current, entry.name);
+          if (entry.isDirectory()) {
+            pending.push(entryPath);
+            continue;
+          }
+          if (!entry.name.endsWith('.webp')) continue;
+
+          const metadata = await sharp(entryPath).metadata();
+          expect({ file: path.relative(process.cwd(), entryPath), width: metadata.width, height: metadata.height })
+            .toEqual({
+              file: path.relative(process.cwd(), entryPath),
+              width: preset.width,
+              height: preset.height,
+            });
+        }
+      }
+    };
+
+    for (const [folder, preset] of Object.entries(THUMB_CONFIGS)) {
+      const thumbRoot = path.join(process.cwd(), 'src/resources/cards/images', folder, 'thumb');
+      await expectTreeToMatchPreset(thumbRoot, preset);
+    }
+
+    for (const { subdir, preset } of PROMO_ART_SUBDIRS) {
+      const [setFolder, typeFolder] = subdir.split('/');
+      const thumbRoot = path.join(
+        process.cwd(),
+        'src/resources/cards/images',
+        setFolder,
+        'thumb',
+        typeFolder,
+      );
+      await expectTreeToMatchPreset(thumbRoot, preset);
+    }
   });
 
   it('uses character preset for skyp/characters and portrait for skyp/power', () => {

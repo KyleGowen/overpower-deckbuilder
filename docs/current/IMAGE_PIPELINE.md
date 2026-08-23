@@ -61,8 +61,7 @@ Dimensions match the exact CSS pixel sizes used on deck tiles. Changing either r
 |----------------------------|-------------------|-----|-------------|
 | Character (`contain`)      | 380×280           | `contain` | characters (landscape DB/deck tiles) |
 | Portrait (`contain`)       | 350×490 (5:7)     | `contain` | specials, power-cards, aspects, missions, universe folders |
-| Event-like (`cover`)       | 264×378           | `cover` | events (landscape DB tile) |
-| Location-like (`cover`)    | 472×302           | `cover` | locations |
+| Landscape location/event (`contain`) | 472×302 | `contain` | locations, events |
 
 Portrait and character presets letterbox with `#0a1220` pad so progressive DB tiles match full-res `object-fit: contain` framing.
 
@@ -74,10 +73,10 @@ To change dimensions, update `THUMB_CONFIGS` in `src/scripts/generateCardThumbna
 
 - **Characters**: thumbnails use Sharp **`contain`** on 380×280 (matches DB grid full-res framing).
 - **Portrait card types** (specials, power, aspects, missions, universe): **`contain`** on 350×490 (5:7).
-- **Events**: thumbnails use Sharp **`cover`** at 264×378.
-- **Locations**: thumbnails use Sharp **`contain`** at 472×302 (2× the deck-tile location slot `236×151`) so progressive DB tiles match full-res framing.
+- **Locations and events**: thumbnails use Sharp **`contain`** at 472×302 (2× the database tile slot `236×151`) so progressive tiles match full-res framing.
 
-After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails -- --force` (otherwise mtime skip leaves old files).
+After changing fit or padding behavior without changing dimensions, regenerate thumbs with
+`npm run generate:thumbnails -- --force`. Dimension changes are detected automatically.
 
 ---
 
@@ -101,22 +100,27 @@ After changing resize behavior, regenerate thumbs: `npm run generate:thumbnails 
 
 ## shouldSkip Logic
 
-The script uses file modification times to avoid regenerating up-to-date thumbnails:
+The script uses file modification times plus the configured output canvas to avoid
+regenerating up-to-date thumbnails:
 
 ```typescript
-function shouldSkip(sourcePath: string, thumbPath: string): boolean {
+async function shouldSkip(sourcePath: string, thumbPath: string, preset: ThumbResizeConfig): Promise<boolean> {
   if (!fs.existsSync(thumbPath)) return false;       // no thumb yet → generate
   const sourceStat = fs.statSync(sourcePath);
   const thumbStat  = fs.statSync(thumbPath);
-  return thumbStat.mtimeMs >= sourceStat.mtimeMs;    // thumb is newer → skip
+  if (thumbStat.mtimeMs < sourceStat.mtimeMs) return false;
+  const metadata = await sharp(thumbPath).metadata();
+  return metadata.width === preset.width && metadata.height === preset.height;
 }
 ```
 
 - If the thumbnail does not exist → generate it
 - If the source image is newer than the thumbnail → regenerate it
+- If the generated canvas no longer matches the configured preset → regenerate it
 - Otherwise → skip (already up to date)
 
-This makes the script fast on subsequent runs (all existing thumbnails are skipped in milliseconds).
+This makes dimension changes self-healing on the next dev/build run while keeping subsequent
+runs fast. A fit-only change that retains the same canvas dimensions still requires `--force`.
 
 ---
 
@@ -147,7 +151,7 @@ npm run generate:thumbnails
 Output example:
 ```
 🖼️  Generating card thumbnails (all card-art directories; backgrounds excluded)...
-   Presets: character-like 380×280 cover; mission/event-like 264×378 cover; locations 472×302 cover (2× retina) | WebP quality: 80
+   Presets: characters 380×280 contain; portrait 350×490 contain; locations/events 472×302 contain (2× retina) | WebP quality: 80
 
 📁 characters/  (380×280, cover)
    ✓ spider-man.webp → thumb/spider-man.webp
