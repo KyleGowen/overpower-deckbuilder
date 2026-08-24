@@ -103,6 +103,10 @@ export function variantGroupKey(card: CatalogCard, catalogType: CatalogType): st
     }
     case 'locations':
       return name;
+    case 'missions': {
+      const missionSet = String(card.mission_set ?? '').trim();
+      return `${missionSet}|${name}|${normalizeSet(card.set as string | undefined)}`;
+    }
     case 'teamwork': {
       const toUse = String(card.to_use ?? name).trim();
       const followup = normalizeTeamworkFollowups(

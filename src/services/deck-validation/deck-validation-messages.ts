@@ -71,16 +71,16 @@ export const deckValidationMessages = {
     unusableAspectNeedsHomebaseNamed(cardName: string, locField: string): string {
         return `"${cardName}" (Aspect) requires Homebase "${locField}"`;
     },
-    prePlacedBasicUniverseLimit(found: number): string {
-        return `"Dracula's Armory" allows at most 3 pre-placed Basic Universe cards (found ${found})`;
+    prePlacedBasicUniverseLimit(found: number, locationName = "Dracula's Armory"): string {
+        return `"${locationName}" allows at most 3 pre-placed Basic Universe cards (found ${found})`;
     },
-    prePlacedBasicUniverseUnique(): string {
-        return 'Pre-placed Basic Universe cards under "Dracula\'s Armory" must be unique';
+    prePlacedBasicUniverseUnique(locationName = "Dracula's Armory"): string {
+        return `Pre-placed Basic Universe cards under "${locationName}" must be unique`;
     },
-    prePlacedTrainingLimit(found: number): string {
-        return `"Spartan Training Ground" allows at most 3 pre-placed Training cards (found ${found})`;
+    prePlacedTrainingLimit(found: number, locationName = 'Spartan Training Ground'): string {
+        return `"${locationName}" allows at most 3 pre-placed Training cards (found ${found})`;
     },
-    prePlacedTrainingUnique(): string {
-        return 'Pre-placed Training cards under "Spartan Training Ground" must be unique';
+    prePlacedTrainingUnique(locationName = 'Spartan Training Ground'): string {
+        return `Pre-placed Training cards under "${locationName}" must be unique`;
     }
 } as const;

@@ -12,6 +12,12 @@ function makeCtx(cards: DeckCard[], withGround = true) {
     return buildDeckValidationContext(cards, availableCardsMap);
 }
 
+function makeTeenTeamCtx(cards: DeckCard[]) {
+    return buildDeckValidationContext(cards, new Map([
+        ['location_teen_team_headquarters', { name: 'Teen Team Headquarters' }]
+    ]));
+}
+
 function ground(): DeckCard {
     return { id: 'loc', type: 'location', cardId: 'spartan_training_ground', quantity: 1 };
 }
@@ -72,5 +78,20 @@ describe('PrePlacedTrainingRule', () => {
             { id: 'tr_a', type: 'training', cardId: 'tr1', quantity: 5 }
         ];
         expect(rule.validate(makeCtx(cards))).toEqual([]);
+    });
+
+    it('applies the same cap and uniqueness rules with Teen Team Headquarters', () => {
+        const cards: DeckCard[] = [
+            { id: 'loc', type: 'location', cardId: 'teen_team_headquarters', quantity: 1 },
+            prePlacedTraining('tr1', 2),
+            prePlacedTraining('tr2'),
+            prePlacedTraining('tr3')
+        ];
+        const errors = rule.validate(makeTeenTeamCtx(cards));
+        expect(errors.map(e => e.rule)).toEqual(expect.arrayContaining([
+            'pre_placed_training_limit',
+            'pre_placed_training_unique'
+        ]));
+        expect(errors.every(e => e.message.includes('Teen Team Headquarters'))).toBe(true);
     });
 });

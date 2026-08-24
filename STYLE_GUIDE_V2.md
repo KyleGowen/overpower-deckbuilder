@@ -315,6 +315,8 @@ Row 1 keeps back, deck name, and meta chips (card count, legality, visibility) o
 ### Deck Editor — Pre-Placed
 Owner-only toggle (eligible cards) that marks a card as placed at game start (`exclude_from_draw`). The active status is visible on public/read-only deck tiles and inspectors; only the owner can change it. Full spec: [`DeckEditorPage.md`](frontend/src/features/deck-editor/DeckEditorPage.md#pre-placed). Eligibility: [`prePlaced.ts`](frontend/src/lib/decks/prePlaced.ts).
 
+Equivalent location effects share eligibility: Spartan Training Ground / Teen Team Headquarters enable non-OPD Training cards, and Dracula's Armory / The Sanctuary enable non-OPD Basic Universe cards. Character start-in-play specials use the same toggle for Lancelot / Sword and Shield, Immortal / I am Immortal, Mauler Twins / My Brother, and Ezekiel / Shiva.
+
 | Element | Tokens / values |
 |---|---|
 | Toggle button (`.card-detail__preplaced-btn`) | Pill (`--radius-pill`); `--color-accent-bright` border/text, transparent fill; hover `--color-accent-soft`; `font-size-xs`, semibold. In `CardDetailPanel` slide-out |

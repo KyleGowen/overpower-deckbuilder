@@ -7,6 +7,9 @@ type SkyboundCard = {
   image_path: string;
   reverse_image_path?: string;
   is_foil: boolean;
+  name?: string;
+  character_name?: string;
+  mission_set?: string;
 };
 
 type SkyboundManifest = {
@@ -58,6 +61,21 @@ describe('Skybound import manifest', () => {
       table: 'characters',
       is_foil: true,
       image_path: byNumber.get('227')?.image_path,
+    });
+  });
+
+  it('keeps Walking Dead ownership and mission-set identity source-correct', () => {
+    const byNumber = new Map(manifest.cards.map((card) => [card.collector_number, card]));
+    for (const number of ['228', '229', '230', '231', '232', '233']) {
+      expect(byNumber.get(number)?.character_name).toBe('Walkers: Herd');
+    }
+    for (const number of ['407', '408', '409', '410', '411', '412', '413', '414', '415', '416', '417', '418']) {
+      expect(byNumber.get(number)?.mission_set).toBe('The Walking Dead: All Out War');
+    }
+    expect(byNumber.get('082')).toMatchObject({
+      name: 'Bite',
+      character_name: 'Battle Beast',
+      image_path: 'sky/specials/082_bite.png',
     });
   });
 

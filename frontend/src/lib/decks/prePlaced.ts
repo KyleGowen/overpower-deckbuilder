@@ -12,23 +12,41 @@ import { resolveDeckCatalogCard, type DeckCardIndex } from './deckCardCatalog';
  *
  * Eligibility is client-only (the backend stores the flag without validating
  * which card types may set it):
- *   - Training card        → deck contains the "Spartan Training Ground" location
- *   - Basic Universe card  → deck contains the "Dracula's Armory" location
- *   - "Sword and Shield"   → deck contains the character "Lancelot"
+ *   - Training card        → deck contains Spartan Training Ground or Teen Team Headquarters
+ *   - Basic Universe card  → deck contains Dracula's Armory or The Sanctuary
+ *   - Named start-in-play Special → deck contains its enabling character
  */
 
 const SPARTAN_TRAINING_GROUND = 'Spartan Training Ground';
+const TEEN_TEAM_HEADQUARTERS = 'Teen Team Headquarters';
 const DRACULAS_ARMORY = "Dracula's Armory";
+const THE_SANCTUARY = 'The Sanctuary';
 const LANCELOT = 'Lancelot';
+const IMMORTAL_NAMES = ['Immortal', 'The Immortal'];
+const MAULER_TWINS_NAMES = ['Mauler Twins', 'The Mauler Twins'];
+const EZEKIEL = 'Ezekiel';
 const SWORD_AND_SHIELD = 'Sword and Shield';
+const I_AM_IMMORTAL = 'I am Immortal';
+const MY_BROTHER = 'My Brother';
+const SHIVA = 'Shiva';
 
 export interface PrePlacedFlags {
   /** Deck contains the Spartan Training Ground location (enables Training pre-place). */
   spartanTrainingGround: boolean;
+  /** Deck contains Teen Team Headquarters (also enables Training pre-place). */
+  teenTeamHeadquarters: boolean;
   /** Deck contains Dracula's Armory location (enables Basic Universe pre-place). */
   draculasArmory: boolean;
+  /** Deck contains The Sanctuary (also enables Basic Universe pre-place). */
+  sanctuary: boolean;
   /** Deck contains the character Lancelot (enables Sword and Shield pre-place). */
   lancelot: boolean;
+  /** Deck contains Immortal / The Immortal (enables I am Immortal pre-place). */
+  immortal: boolean;
+  /** Deck contains Mauler Twins / The Mauler Twins (enables My Brother pre-place). */
+  maulerTwins: boolean;
+  /** Deck contains Ezekiel (enables Shiva pre-place). */
+  ezekiel: boolean;
 }
 
 function entryCatalogName(entry: DeckCardEntry, cardIndex: DeckCardIndex): string {
@@ -55,16 +73,53 @@ export function hasSpartanTrainingGround(
   return deckHasNamedCard(cards, cardIndex, 'location', SPARTAN_TRAINING_GROUND);
 }
 
+export function hasTeenTeamHeadquarters(
+  cards: DeckCardEntry[],
+  cardIndex: DeckCardIndex,
+): boolean {
+  return deckHasNamedCard(cards, cardIndex, 'location', TEEN_TEAM_HEADQUARTERS);
+}
+
 export function hasDraculasArmory(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
   return deckHasNamedCard(cards, cardIndex, 'location', DRACULAS_ARMORY);
 }
 
-export function hasLancelot(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+export function hasSanctuary(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+  return deckHasNamedCard(cards, cardIndex, 'location', THE_SANCTUARY);
+}
+
+function normalizedCardName(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function hasNamedCharacter(
+  cards: DeckCardEntry[],
+  cardIndex: DeckCardIndex,
+  names: string[],
+): boolean {
+  const normalizedNames = new Set(names.map(normalizedCardName));
   return cards.some((entry) => {
     if (entry.type !== 'character') return false;
-    if (entryCatalogName(entry, cardIndex) === LANCELOT) return true;
-    return entry.cardId.toLowerCase().includes('lancelot');
+    if (normalizedNames.has(normalizedCardName(entryCatalogName(entry, cardIndex)))) return true;
+    const normalizedId = normalizedCardName(entry.cardId);
+    return [...normalizedNames].some((name) => normalizedId.includes(name));
   });
+}
+
+export function hasLancelot(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+  return hasNamedCharacter(cards, cardIndex, [LANCELOT]);
+}
+
+export function hasImmortal(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+  return hasNamedCharacter(cards, cardIndex, IMMORTAL_NAMES);
+}
+
+export function hasMaulerTwins(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+  return hasNamedCharacter(cards, cardIndex, MAULER_TWINS_NAMES);
+}
+
+export function hasEzekiel(cards: DeckCardEntry[], cardIndex: DeckCardIndex): boolean {
+  return hasNamedCharacter(cards, cardIndex, [EZEKIEL]);
 }
 
 /** True when the special card entry is "Sword and Shield" (name or legacy id). */
@@ -74,6 +129,16 @@ export function isSwordAndShield(entry: DeckCardEntry, cardIndex: DeckCardIndex)
   return id.includes('sword_and_shield') || id.includes('sword-and-shield');
 }
 
+function isNamedSpecial(
+  entry: DeckCardEntry,
+  cardIndex: DeckCardIndex,
+  name: string,
+): boolean {
+  const normalizedName = normalizedCardName(name);
+  if (normalizedCardName(entryCatalogName(entry, cardIndex)) === normalizedName) return true;
+  return normalizedCardName(entry.cardId).includes(normalizedName);
+}
+
 /** Compute deck-level pre-placed enablers once per render (avoids O(n²) scans). */
 export function computePrePlacedFlags(
   cards: DeckCardEntry[],
@@ -81,8 +146,13 @@ export function computePrePlacedFlags(
 ): PrePlacedFlags {
   return {
     spartanTrainingGround: hasSpartanTrainingGround(cards, cardIndex),
+    teenTeamHeadquarters: hasTeenTeamHeadquarters(cards, cardIndex),
     draculasArmory: hasDraculasArmory(cards, cardIndex),
+    sanctuary: hasSanctuary(cards, cardIndex),
     lancelot: hasLancelot(cards, cardIndex),
+    immortal: hasImmortal(cards, cardIndex),
+    maulerTwins: hasMaulerTwins(cards, cardIndex),
+    ezekiel: hasEzekiel(cards, cardIndex),
   };
 }
 
@@ -98,13 +168,21 @@ export function isPrePlacedEligible(
   cardIndex: DeckCardIndex,
 ): boolean {
   if (entry.type === 'training') {
-    return flags.spartanTrainingGround && !isOnePerDeckEntry(entry, cardIndex);
+    return (
+      (flags.spartanTrainingGround || flags.teenTeamHeadquarters)
+      && !isOnePerDeckEntry(entry, cardIndex)
+    );
   }
   if (entry.type === 'basic-universe') {
-    return flags.draculasArmory && !isOnePerDeckEntry(entry, cardIndex);
+    return (flags.draculasArmory || flags.sanctuary) && !isOnePerDeckEntry(entry, cardIndex);
   }
   if (entry.type === 'special') {
-    return flags.lancelot && isSwordAndShield(entry, cardIndex);
+    return (
+      (flags.lancelot && isSwordAndShield(entry, cardIndex))
+      || (flags.immortal && isNamedSpecial(entry, cardIndex, I_AM_IMMORTAL))
+      || (flags.maulerTwins && isNamedSpecial(entry, cardIndex, MY_BROTHER))
+      || (flags.ezekiel && isNamedSpecial(entry, cardIndex, SHIVA))
+    );
   }
   return false;
 }

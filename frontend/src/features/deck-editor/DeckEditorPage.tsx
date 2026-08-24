@@ -758,8 +758,8 @@ export default function DeckEditorPage() {
     setDirty(true);
   };
 
-  // Deck-level enablers for Pre-Placed (Spartan Training Ground / Dracula's
-  // Armory / Lancelot). Computed once so per-card eligibility is O(1).
+  // Deck-level location and character enablers for Pre-Placed eligibility.
+  // Computed once so per-card eligibility is O(1).
   const prePlacedFlags = useMemo(
     () => computePrePlacedFlags(cards, cardIndex),
     [cards, cardIndex],

@@ -86,6 +86,28 @@ describe('defaultCatalogCards', () => {
   });
 
   describe('dedupeToDefaultCatalogCards', () => {
+    it('keeps same-name missions from different mission sets as distinct cards', () => {
+      const invincibleMission = card('sky-399', {
+        name: 'A Desperate Gamble',
+        set: 'SKY',
+        set_number: '399',
+        mission_set: 'Who Killed the Guardians of the Globe?',
+      });
+      const walkingDeadMission = card('sky-412', {
+        name: 'A Desperate Gamble',
+        set: 'SKY',
+        set_number: '412',
+        mission_set: 'The Walking Dead: All Out War',
+      });
+
+      const { cards } = dedupeToDefaultCatalogCards(
+        [invincibleMission, walkingDeadMission],
+        'missions',
+      );
+
+      expect(cards.map((mission) => mission.id).sort()).toEqual(['sky-399', 'sky-412']);
+    });
+
     it('keeps default character art over alternate in the same set', () => {
       const base = card('base', {
         name: 'Dracula',

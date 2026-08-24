@@ -5,10 +5,11 @@ import { deckCardTypeKeyPrefix, deckHasLocationNamed } from '../deck-validation-
 import { deckValidationMessages } from '../deck-validation-messages';
 
 const DRACULAS_ARMORY = "Dracula's Armory";
+const THE_SANCTUARY = 'The Sanctuary';
 const MAX_PRE_PLACED = 3;
 
 /**
- * When the deck contains the "Dracula's Armory" location, pre-placed Basic
+ * When the deck contains Dracula's Armory or The Sanctuary, pre-placed Basic
  * Universe cards (`exclude_from_draw === true`) are capped at 3 total and must
  * be unique by cardId. Only enforced while the location is present.
  */
@@ -16,7 +17,9 @@ export class PrePlacedBasicUniverseRule implements DeckValidationRule {
     readonly id = 'pre_placed_basic_universe';
 
     validate(ctx: DeckValidationContext): ValidationError[] {
-        if (!deckHasLocationNamed(ctx, DRACULAS_ARMORY)) return [];
+        const enablingLocation = [DRACULAS_ARMORY, THE_SANCTUARY]
+            .find((name) => deckHasLocationNamed(ctx, name));
+        if (!enablingLocation) return [];
 
         const prePlaced = ctx.cards.filter(
             (c) => deckCardTypeKeyPrefix(c.type) === 'basic_universe' && c.exclude_from_draw === true
@@ -28,7 +31,7 @@ export class PrePlacedBasicUniverseRule implements DeckValidationRule {
         if (total > MAX_PRE_PLACED) {
             errors.push({
                 rule: 'pre_placed_basic_universe_limit',
-                message: deckValidationMessages.prePlacedBasicUniverseLimit(total)
+                message: deckValidationMessages.prePlacedBasicUniverseLimit(total, enablingLocation)
             });
         }
 
@@ -40,7 +43,7 @@ export class PrePlacedBasicUniverseRule implements DeckValidationRule {
         if (hasDuplicate) {
             errors.push({
                 rule: 'pre_placed_basic_universe_unique',
-                message: deckValidationMessages.prePlacedBasicUniverseUnique()
+                message: deckValidationMessages.prePlacedBasicUniverseUnique(enablingLocation)
             });
         }
 

@@ -12,6 +12,12 @@ function makeCtx(cards: DeckCard[], withArmory = true) {
     return buildDeckValidationContext(cards, availableCardsMap);
 }
 
+function makeSanctuaryCtx(cards: DeckCard[]) {
+    return buildDeckValidationContext(cards, new Map([
+        ['location_the_sanctuary', { name: 'The Sanctuary' }]
+    ]));
+}
+
 function armory(): DeckCard {
     return { id: 'loc', type: 'location', cardId: 'draculas_armory', quantity: 1 };
 }
@@ -72,5 +78,20 @@ describe('PrePlacedBasicUniverseRule', () => {
             { id: 'bu_a', type: 'basic-universe', cardId: 'bu1', quantity: 5 }
         ];
         expect(rule.validate(makeCtx(cards))).toEqual([]);
+    });
+
+    it('applies the same cap and uniqueness rules with The Sanctuary', () => {
+        const cards: DeckCard[] = [
+            { id: 'loc', type: 'location', cardId: 'the_sanctuary', quantity: 1 },
+            prePlacedBU('bu1', 2),
+            prePlacedBU('bu2'),
+            prePlacedBU('bu3')
+        ];
+        const errors = rule.validate(makeSanctuaryCtx(cards));
+        expect(errors.map(e => e.rule)).toEqual(expect.arrayContaining([
+            'pre_placed_basic_universe_limit',
+            'pre_placed_basic_universe_unique'
+        ]));
+        expect(errors.every(e => e.message.includes('The Sanctuary'))).toBe(true);
     });
 });

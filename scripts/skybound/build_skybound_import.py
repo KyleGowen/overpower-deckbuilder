@@ -22,6 +22,7 @@ NS = {"a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 SET_CODE = "SKY"
 SET_NAME = "Skybound"
 CARD_BACK_PATH = "sky/card-back/overpowerback.png"
+WALKING_DEAD_MISSION_SET = "The Walking Dead: All Out War"
 
 TABLE_TO_CARD_TYPE = {
     "characters": "character",
@@ -387,7 +388,10 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
                 card["reverse_source_file"] = clean(reverse_226["file"])
                 assets.append({"source_file": clean(reverse_226["file"]), "target_path": reverse_path})
         elif table == "special_cards":
-            owner = "Any Character" if 349 <= number <= 374 else latest_character
+            if 228 <= number <= 233:
+                owner = "Walkers: Herd"
+            else:
+                owner = "Any Character" if 349 <= number <= 374 else latest_character
             title = choose_special_title(row, owner)
             icons, value = numeric_icons(row)
             effect = clean(row.get("card_text"))
@@ -433,7 +437,11 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
             )
         elif table == "missions":
             name = MISSION_NAMES[number]
-            mission_set = "Who Killed the Guardians of the Globe?" if number <= 401 else "We Are Negan"
+            mission_set = (
+                "Who Killed the Guardians of the Globe?"
+                if number <= 401
+                else WALKING_DEAD_MISSION_SET
+            )
             card.update(name=name, mission_set=mission_set, mission_description=f"{name} mission card")
         elif table == "events":
             name = smart_title(row.get("name"))
@@ -443,7 +451,11 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
             if not name or "guardians of the globe" in name.lower():
                 name = filename_label(clean(row["file"]), "_EVENT_")
             name = name.replace("Revieled", "Revealed")
-            mission_set = "Who Killed the Guardians of the Globe?" if number <= 406 else "We Are Negan"
+            mission_set = (
+                "Who Killed the Guardians of the Globe?"
+                if number <= 406
+                else WALKING_DEAD_MISSION_SET
+            )
             effect = clean(row.get("card_text"))
             card.update(
                 name=name,
