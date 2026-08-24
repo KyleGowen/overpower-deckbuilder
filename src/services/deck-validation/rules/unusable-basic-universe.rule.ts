@@ -8,6 +8,8 @@ export class UnusableBasicUniverseRule implements DeckValidationRule {
     readonly id = 'unusable_universe_basic';
 
     validate(ctx: DeckValidationContext): ValidationError[] {
+        if (ctx.characterNames.includes('Glenn')) return [];
+
         const errors: ValidationError[] = [];
         const basicDeck = ctx.cards.filter(c => deckCardTypeKeyPrefix(c.type) === 'basic_universe');
         for (const card of basicDeck) {

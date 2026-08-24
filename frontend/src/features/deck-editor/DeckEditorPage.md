@@ -23,7 +23,8 @@ are read-only automatically).
   - **Characters (read-only)**: disabled **Reserve** on the reserved character only when applicable; **KO** still available for all signed-in users (GUEST, USER, ADMIN).
   - **All types (owners)**: trash only — removes that single instance. Logic: [`deckInstances.ts`](../../lib/decks/deckInstances.ts), [`deckCardControls.ts`](../../lib/decks/deckCardControls.ts), reserve: [`reserveCharacter.ts`](../../lib/decks/reserveCharacter.ts).
   - **Pre-Placed chip**: a card marked Pre-Placed shows a small cyan **"Pre-Placed"** chip (`.deck-editor__preplaced-chip`) **center-aligned** in the footer row (same row as trash). It is also shown on read-only/public deck views so viewers can see the persisted setup; only the owner can change it. The footer is a 3-column grid (`1fr auto 1fr` — empty spacer / centered chip / right-aligned controls) so the chip stays centered regardless of how many controls sit on the right.
-- **Threat stat**: client-calculated live via `calculateDeckTotalThreat` (characters + locations, reserve bumps for Victory Harben, Carson of Venus, Morgan le Fay). Rendered as `.deck-editor__threat-stat` (icon + value) in the stats panel — not a meta chip. Shows `total/76` when over cap.
+- **Threat stat**: client-calculated live via `calculateDeckTotalThreat` (characters + locations, reserve overrides for Victory Harben, Carson of Venus, Morgan le Fay, and Glenn). Rendered as `.deck-editor__threat-stat` (icon + value) in the stats panel — not a meta chip. Shows `total/76` when over cap.
+- **Glenn**: when he is on the team, Basic Universe cards ignore their printed grid requirements in both the add-card usability filter and server-side deck validation.
 
 ## Simulate KO
 Client-only knock-out simulation for all signed-in users (GUEST, USER, ADMIN). Full behavior spec:

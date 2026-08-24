@@ -1,7 +1,7 @@
 /**
  * Integration tests for special character threat calculation display
  * Tests threat values shown in deck editor and deck summary card
- * for Carson of Venus, Morgan le Fay, and Victory Harben
+ * for Carson of Venus, Glenn, Morgan le Fay, and Victory Harben
  * in both reserve and non-reserve scenarios
  */
 
@@ -28,11 +28,11 @@ describe('Special Character Threat Display Integration Tests', () => {
         const characterResult = await pool.query(`
             SELECT DISTINCT ON (name) id, name, threat_level
             FROM characters
-            WHERE name IN ('Carson of Venus', 'Morgan le Fay', 'Victory Harben')
+            WHERE name IN ('Carson of Venus', 'Glenn', 'Morgan le Fay', 'Victory Harben')
             ORDER BY name, id
         `);
 
-        expect(characterResult.rows).toHaveLength(3);
+        expect(characterResult.rows).toHaveLength(4);
 
         specialCharacterIds = {};
         characterResult.rows.forEach((row) => {
@@ -376,10 +376,12 @@ describe('Special Character Threat Display Integration Tests', () => {
 
     describe('Threat display consistency verification', () => {
         it('should show consistent threat values between deck editor and deck summary for all scenarios', async () => {
-            // Test all three characters in both reserve and non-reserve scenarios
+            // Test all reserve-threat characters in both reserve and non-reserve scenarios
             const testScenarios = [
                 { character: 'Carson of Venus', reserve: true, expectedThreat: 19 },
                 { character: 'Carson of Venus', reserve: false, expectedThreat: 18 },
+                { character: 'Glenn', reserve: true, expectedThreat: 16 },
+                { character: 'Glenn', reserve: false, expectedThreat: 15 },
                 { character: 'Morgan le Fay', reserve: true, expectedThreat: 20 },
                 { character: 'Morgan le Fay', reserve: false, expectedThreat: 19 },
                 { character: 'Victory Harben', reserve: true, expectedThreat: 20 },

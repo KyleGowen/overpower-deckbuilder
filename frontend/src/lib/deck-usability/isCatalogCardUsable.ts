@@ -77,6 +77,8 @@ function isTeamworkUsable(card: CatalogCard, ctx: DeckUsabilityContext): boolean
 }
 
 function isBasicUniverseUsable(card: CatalogCard, ctx: DeckUsabilityContext): boolean {
+  if (ctx.characterNames.includes('Glenn')) return true;
+
   const buType = String(card.type ?? card.basic_skill_type ?? '');
   const buMatch = String(card.value_to_use ?? '').match(/(\d+)\s*or\s*greater/i);
   const requiredValue = buMatch ? parseInt(buMatch[1], 10) : 0;

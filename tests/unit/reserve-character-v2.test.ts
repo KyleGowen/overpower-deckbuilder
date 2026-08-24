@@ -64,6 +64,11 @@ describe('calculateDeckTotalThreat', () => {
     name: 'Carson of Venus',
     threat_level: 18,
   };
+  const glenn: CatalogCard = {
+    id: 'glenn-1',
+    name: 'Glenn',
+    threat_level: 15,
+  };
   const generic: CatalogCard = {
     id: 'gen-1',
     name: 'Generic Hero',
@@ -79,6 +84,7 @@ describe('calculateDeckTotalThreat', () => {
     const map: Record<string, CatalogCard> = {
       'character:vh-1': victoryHarben,
       'character:cv-1': carson,
+      'character:glenn-1': glenn,
       'character:gen-1': generic,
       'location:loc-1': location,
     };
@@ -104,6 +110,13 @@ describe('calculateDeckTotalThreat', () => {
       { type: 'character', cardId: 'cv-1', quantity: 1 },
     ];
     expect(calculateDeckTotalThreat(carsonCards, 'cv-1', lookup)).toBe(19);
+  });
+
+  it('applies Glenn reserve bump to 16', () => {
+    const glennCards: DeckCardEntry[] = [
+      { type: 'character', cardId: 'glenn-1', quantity: 1 },
+    ];
+    expect(calculateDeckTotalThreat(glennCards, 'glenn-1', lookup)).toBe(16);
   });
 });
 

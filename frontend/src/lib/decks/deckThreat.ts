@@ -7,6 +7,7 @@ const RESERVE_THREAT_OVERRIDES: Record<string, number> = {
   'Victory Harben': 20,
   'Carson of Venus': 19,
   'Morgan le Fay': 20,
+  Glenn: 16,
 };
 
 export type ThreatCatalogLookup = (

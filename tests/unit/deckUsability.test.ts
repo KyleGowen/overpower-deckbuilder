@@ -45,9 +45,15 @@ describe('deck usability', () => {
     brute_force: 4,
     intelligence: 5,
   });
+  const glenn = charCard('char-glenn', 'Glenn', {
+    energy: 2,
+    combat: 3,
+    brute_force: 3,
+    intelligence: 5,
+  });
 
   const catalogByType: Partial<Record<CatalogType, CatalogCard[]>> = {
-    characters: [spiderMan, johnCarter, timeTraveler],
+    characters: [spiderMan, johnCarter, timeTraveler, glenn],
     missions: [
       { id: 'mission-1', name: 'M1', mission_set: 'The Call of Cthulhu' },
       { id: 'mission-2', name: 'M2', mission_set: 'King of the Jungle' },
@@ -184,6 +190,25 @@ describe('deck usability', () => {
         mission_set: 'King of the Jungle',
       };
       expect(isCatalogCardUsable(card, 'events', ctx)).toBe(false);
+    });
+  });
+
+  describe('isCatalogCardUsable — Basic Universe cards', () => {
+    const highGridCard: CatalogCard = {
+      id: 'bu-1',
+      card_name: 'Energy 8 or greater',
+      type: 'Energy',
+      value_to_use: '8 or greater',
+    };
+
+    it('rejects a Basic Universe card when the team does not meet its grid', () => {
+      const ctx = buildDeckUsabilityContext([deckCharacter('char-1')], catalogByType);
+      expect(isCatalogCardUsable(highGridCard, 'basic-universe', ctx)).toBe(false);
+    });
+
+    it('allows Glenn to ignore all Basic Universe grid requirements', () => {
+      const ctx = buildDeckUsabilityContext([deckCharacter('char-glenn')], catalogByType);
+      expect(isCatalogCardUsable(highGridCard, 'basic-universe', ctx)).toBe(true);
     });
   });
 
