@@ -1,6 +1,10 @@
 import { Pool } from 'pg';
 import { User, UserRole } from '../types';
-import { UserRepository } from '../repository/UserRepository';
+import {
+  UserRepository,
+  type UserAnalyticsCounts,
+  type UserAnalyticsQuery
+} from '../repository/UserRepository';
 import { PasswordUtils } from '../utils/passwordUtils';
 
 export class PostgreSQLUserRepository implements UserRepository {
@@ -323,6 +327,84 @@ export class PostgreSQLUserRepository implements UserRepository {
       const result = await client.query('SELECT COUNT(*) as count FROM users');
       return {
         users: parseInt(result.rows[0].count)
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserAnalytics(query: UserAnalyticsQuery): Promise<UserAnalyticsCounts> {
+    const client = await this.pool.connect();
+    const excludedUsernames = [...query.excludedUsernames];
+    try {
+      const [summaryResult, monthlyResult, recencyResult] = await Promise.all([
+        client.query(
+          `SELECT
+             COUNT(*)::int AS standard_user_accounts,
+             COUNT(*) FILTER (WHERE created_at >= $2::timestamp AND created_at < $1::timestamp)::int AS new_standard_accounts,
+             COUNT(*) FILTER (WHERE last_login_at >= $1::timestamp - INTERVAL '30 days' AND last_login_at <= $1::timestamp)::int AS logged_in_last_30_days,
+             COUNT(*) FILTER (WHERE LOWER(COALESCE(auth_provider, 'password')) = 'google')::int AS google_auth_users,
+             COUNT(*) FILTER (WHERE last_login_at IS NOT NULL)::int AS recorded_login_users
+           FROM users
+           WHERE role = 'USER'
+             AND NOT (LOWER(username) = ANY($3::text[]))`,
+          [query.asOf, query.acquisitionStart, excludedUsernames]
+        ),
+        client.query(
+          `WITH months AS (
+             SELECT generate_series($2::timestamptz, $3::timestamptz - INTERVAL '1 month', INTERVAL '1 month') AS month_start
+           ), eligible_users AS (
+             SELECT created_at
+             FROM users
+             WHERE role = 'USER'
+               AND NOT (LOWER(username) = ANY($4::text[]))
+               AND created_at >= $2
+               AND created_at < $3
+               AND created_at <= $1::timestamp
+           )
+           SELECT TO_CHAR(months.month_start AT TIME ZONE 'UTC', 'YYYY-MM') AS month,
+                  COUNT(eligible_users.created_at)::int AS count
+           FROM months
+           LEFT JOIN eligible_users
+             ON eligible_users.created_at >= months.month_start
+            AND eligible_users.created_at < months.month_start + INTERVAL '1 month'
+           GROUP BY months.month_start
+           ORDER BY months.month_start`,
+          [query.asOf, query.signupChartStart, query.signupChartEnd, excludedUsernames]
+        ),
+        client.query(
+          `SELECT
+             COUNT(*) FILTER (WHERE last_login_at >= $1::timestamp - INTERVAL '7 days' AND last_login_at <= $1::timestamp)::int AS days_0_to_7,
+             COUNT(*) FILTER (WHERE last_login_at < $1::timestamp - INTERVAL '7 days' AND last_login_at >= $1::timestamp - INTERVAL '30 days')::int AS days_8_to_30,
+             COUNT(*) FILTER (WHERE last_login_at < $1::timestamp - INTERVAL '30 days' AND last_login_at >= $1::timestamp - INTERVAL '60 days')::int AS days_31_to_60,
+             COUNT(*) FILTER (WHERE last_login_at < $1::timestamp - INTERVAL '60 days' AND last_login_at >= $1::timestamp - INTERVAL '90 days')::int AS days_61_to_90,
+             COUNT(*) FILTER (WHERE last_login_at < $1::timestamp - INTERVAL '90 days')::int AS days_90_plus
+           FROM users
+           WHERE role = 'USER'
+             AND NOT (LOWER(username) = ANY($2::text[]))`,
+          [query.asOf, excludedUsernames]
+        )
+      ]);
+
+      const summary = summaryResult.rows[0] as Record<string, number>;
+      const recency = recencyResult.rows[0] as Record<string, number>;
+      return {
+        standardUserAccounts: summary.standard_user_accounts ?? 0,
+        newStandardAccounts: summary.new_standard_accounts ?? 0,
+        loggedInLast30Days: summary.logged_in_last_30_days ?? 0,
+        googleAuthUsers: summary.google_auth_users ?? 0,
+        recordedLoginUsers: summary.recorded_login_users ?? 0,
+        signupMonths: monthlyResult.rows.map((row: { month: string; count: number }) => ({
+          month: row.month,
+          count: row.count
+        })),
+        loginRecency: {
+          days0To7: recency.days_0_to_7 ?? 0,
+          days8To30: recency.days_8_to_30 ?? 0,
+          days31To60: recency.days_31_to_60 ?? 0,
+          days61To90: recency.days_61_to_90 ?? 0,
+          days90Plus: recency.days_90_plus ?? 0
+        }
       };
     } finally {
       client.release();

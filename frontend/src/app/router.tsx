@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoadingState } from '../components/LoadingState';
 import { RootLayout } from './RootLayout';
+import { AdminRoute } from './AdminRoute';
 
 const LoginPage = lazy(() => import('../features/login/LoginPage'));
 const HomePage = lazy(() => import('../features/home/HomePage'));
@@ -12,6 +13,7 @@ const CollectionPage = lazy(() => import('../features/collection/CollectionPage'
 const DeckSelectionPage = lazy(() => import('../features/deck-selection/DeckSelectionPage'));
 const CommunityPage = lazy(() => import('../features/community/CommunityPage'));
 const DeckEditorPage = lazy(() => import('../features/deck-editor/DeckEditorPage'));
+const UserAnalyticsPage = lazy(() => import('../features/admin-user-analytics/UserAnalyticsPage'));
 const ShelledLayout = lazy(() => import('./ShelledLayout'));
 
 function Lazy({ children }: { children: ReactNode }) {
@@ -43,6 +45,14 @@ export const router = createBrowserRouter([
           { path: '/home/columbus-regional', element: <ColumbusRegionalPage /> },
           { path: '/data', element: <DatabasePage /> },
           { path: '/community', element: <CommunityPage /> },
+          {
+            path: '/admin/user-analytics',
+            element: (
+              <AdminRoute>
+                <UserAnalyticsPage />
+              </AdminRoute>
+            ),
+          },
           { path: '/users/:userId/decks', element: <DeckSelectionPage /> },
           { path: '/users/:userId/collection', element: <CollectionPage /> },
         ],

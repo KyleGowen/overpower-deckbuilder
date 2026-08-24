@@ -524,7 +524,7 @@ paths:
   /api/v1/catalog/advanced-universe:
     get:
       tags: [Catalog]
-      summary: Universe: Advanced cards.
+      summary: 'Universe: Advanced cards.'
       responses:
         '200':
           description: OK
@@ -542,7 +542,7 @@ paths:
   /api/v1/catalog/teamwork:
     get:
       tags: [Catalog]
-      summary: Universe: Teamwork cards.
+      summary: 'Universe: Teamwork cards.'
       responses:
         '200':
           description: OK
@@ -560,7 +560,7 @@ paths:
   /api/v1/catalog/ally-universe:
     get:
       tags: [Catalog]
-      summary: Universe: Ally cards.
+      summary: 'Universe: Ally cards.'
       responses:
         '200':
           description: OK
@@ -578,7 +578,7 @@ paths:
   /api/v1/catalog/training:
     get:
       tags: [Catalog]
-      summary: Universe: Training cards.
+      summary: 'Universe: Training cards.'
       responses:
         '200':
           description: OK
@@ -596,7 +596,7 @@ paths:
   /api/v1/catalog/basic-universe:
     get:
       tags: [Catalog]
-      summary: Universe: Basic cards.
+      summary: 'Universe: Basic cards.'
       responses:
         '200':
           description: OK
@@ -863,6 +863,57 @@ paths:
       tags: [Admin]
       summary: Create a user.
       responses: { '201': { description: Created }, '403': { description: Not ADMIN } }
+  /api/v1/admin/user-analytics:
+    get:
+      tags: [Admin]
+      summary: Get aggregate user acquisition and login analytics.
+      description: ADMIN-only. Excludes utility accounts and returns no user identifiers.
+      responses:
+        '200':
+          description: Aggregate user analytics snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    required: [generatedAt, acquisitionPeriodStart, standardUserAccounts, newStandardAccounts, loggedInLast30Days, googleAuthUsers, recordedLoginUsers, signupMonths, loginRecency]
+                    properties:
+                      generatedAt: { type: string, format: date-time }
+                      acquisitionPeriodStart: { type: string, format: date-time }
+                      standardUserAccounts: { type: integer }
+                      newStandardAccounts: { type: integer }
+                      loggedInLast30Days:
+                        type: object
+                        properties:
+                          count: { type: integer }
+                          percentage: { type: integer }
+                      googleAuthUsers:
+                        type: object
+                        properties:
+                          count: { type: integer }
+                          percentage: { type: integer }
+                      recordedLoginUsers: { type: integer }
+                      signupMonths:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            month: { type: string, example: '2026-08' }
+                            count: { type: integer }
+                            recent: { type: boolean }
+                            partial: { type: boolean }
+                      loginRecency:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key: { type: string }
+                            label: { type: string }
+                            count: { type: integer }
+        '403': { description: Not ADMIN (ADMIN_REQUIRED) }
+        '500': { description: Analytics query failed (ADMIN_USER_ANALYTICS_ERROR) }
   /api/v1/admin/debug/clear-cache:
     get:
       tags: [Admin]

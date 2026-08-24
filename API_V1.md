@@ -1181,6 +1181,21 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 **Implementation:** `[AdminService](src/api/services/adminService.ts)` · HTTP `[admin.http.ts](src/api/http/admin.http.ts)`
 
+### `GET /api/v1/admin/user-analytics`
+
+Returns aggregate-only account analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts. No user identifiers are returned.
+
+**Response 200:** v1 envelope; `**data`** contains:
+
+- snapshot dates: `generatedAt`, `acquisitionPeriodStart`
+- aggregate KPIs: `standardUserAccounts`, `newStandardAccounts`, `loggedInLast30Days`, `googleAuthUsers`, `recordedLoginUsers`
+- rolling twelve-month `signupMonths` counts (latest month marked `partial`)
+- aggregate `loginRecency` buckets
+
+The acquisition period begins on the first day of the previous calendar month. Login activity uses rolling 7/30/60/90-day windows relative to `generatedAt`.
+
+**Response 500:** `**ADMIN_USER_ANALYTICS_ERROR`**.
+
 ### `GET /api/v1/admin/users`
 
 **Response 200:** v1 envelope; `**data`** = array of `{ "id", "name", "email", "role", "lastLoginAt" }` (no password hash).
@@ -1281,6 +1296,7 @@ Clears card repository caches.
 | PUT    | /api/v1/collections/me/cards/:cardId    | collections.http.ts |
 | DELETE | /api/v1/collections/me/cards/:cardId    | collections.http.ts |
 | GET    | /api/v1/admin/users                     | admin.http.ts       |
+| GET    | /api/v1/admin/user-analytics            | admin.http.ts       |
 | POST   | /api/v1/admin/users                     | admin.http.ts       |
 | GET    | /api/v1/admin/debug/clear-cache         | admin.http.ts       |
 | GET    | /api/v1/admin/debug/clear-card-cache    | admin.http.ts       |

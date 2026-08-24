@@ -30,6 +30,18 @@ function userToJson(u: User) {
 }
 
 export function registerAdminV1HttpRoutes(router: Router, deps: AdminV1HttpDeps): void {
+  router.get('/admin/user-analytics', deps.authenticateUser, async (req, res) => {
+    try {
+      if (!requireAdminV1(req, res)) return;
+      sendV1Success(res, await deps.adminService.getUserAnalytics());
+    } catch (error) {
+      console.error('v1 GET /admin/user-analytics error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'ADMIN_USER_ANALYTICS_ERROR', message: 'Failed to fetch user analytics' }
+      ]);
+    }
+  });
+
   router.get('/admin/users', deps.authenticateUser, async (req, res) => {
     try {
       if (!requireAdminV1(req, res)) return;

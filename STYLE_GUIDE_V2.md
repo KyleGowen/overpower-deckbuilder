@@ -552,4 +552,12 @@ Desktop band layout is unchanged. Home horizontal stats rail still shows **Winne
 | Chart tooltip | `--color-bg-elevated`, `--color-border-strong`, `--shadow-panel` |
 | View All dashboard | `DashboardGrid` 12-col; layout in `columbusDashboardLayout.ts` | Section icon `IconTrophy` in `.home__section-icon` |
 
+### Admin user analytics (`/admin/user-analytics`)
+
+- The route remains inside `AppShell`, preserving the desktop header and mobile bottom navigation, but is linked only from the ADMIN profile menu.
+- The analytics panel uses the standard deep navy surfaces, cyan accent, stat-value type, rounded bordered KPI cards, and the textless Excelsior emblem.
+- Desktop layout: four KPI cards, then a wide rolling 12-month acquisition chart beside login-recency bars. Below 1050px the chart sections stack; below 640px KPI cards become one column.
+- Acquisition bars use intelligence blue for earlier months and cyan for the rolling acquisition period. The y-axis scales to the observed maximum rounded to five, keeping low-volume months readable.
+- The page displays aggregate data only. Utility USER accounts are excluded by the backend and no identifiers are exposed to the browser.
+
 **Interaction:** Bar/pie segment or card click opens `CardDetailPanel`. Home rail bar charts show top 5 rows with `+N more` footnote when truncated.

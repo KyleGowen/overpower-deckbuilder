@@ -5,6 +5,9 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Added `GET /api/v1/admin/user-analytics` and the admin-only `/admin/user-analytics`
+  React view. The endpoint returns de-identified aggregate acquisition, authentication,
+  and login-recency metrics; it excludes the community/tournament utility accounts.
 - **`decks.is_valid` is now server-authoritative.** Deck card mutations
   (`POST`/`PUT`/`DELETE /api/v1/decks/:id/cards`) recompute the full deck legality
   via `DeckValidationService` and persist `is_valid`, and `importDeckFromExport`

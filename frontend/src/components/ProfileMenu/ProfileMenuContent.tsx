@@ -7,7 +7,7 @@ import { changeEmail, changePassword, setDisplayName } from '../../lib/api/accou
 import { resolveUserDisplayName } from '../../lib/auth/resolveUserDisplayName';
 import { isValidEmail } from '../../lib/validation/email';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
-import { IconPlus, IconLogout, IconLock, IconSettings, IconProfile } from '../icons';
+import { IconAnalytics, IconPlus, IconLogout, IconLock, IconSettings, IconProfile } from '../icons';
 import './ProfileMenuContent.css';
 
 type OpenForm = 'displayName' | 'email' | 'password' | null;
@@ -91,6 +91,11 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
   const handleCreateDeck = () => {
     onClose();
     navigate(`/users/${user.id}/decks?create=1`);
+  };
+
+  const handleUserAnalytics = () => {
+    onClose();
+    navigate('/admin/user-analytics');
   };
 
   const handleLogout = async () => {
@@ -189,6 +194,12 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
         <button type="button" className="profile-menu__item" role="menuitem" onClick={handleCreateDeck}>
           <IconPlus /> Create New Deck
         </button>
+
+        {user.role === 'ADMIN' ? (
+          <button type="button" className="profile-menu__item" role="menuitem" onClick={handleUserAnalytics}>
+            <IconAnalytics /> User Analytics
+          </button>
+        ) : null}
 
         {canSetDisplayName ? (
           <>

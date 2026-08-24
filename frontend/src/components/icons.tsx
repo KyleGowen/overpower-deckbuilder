@@ -218,6 +218,15 @@ export const IconUsers = (p: IconProps) => (
   </Svg>
 );
 
+export const IconAnalytics = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 20V10" />
+    <path d="M10 20V4" />
+    <path d="M16 20v-7" />
+    <path d="M22 20H2" />
+  </Svg>
+);
+
 export const IconSparkles = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6L12 4Z" />

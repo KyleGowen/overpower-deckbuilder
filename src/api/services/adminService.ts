@@ -1,9 +1,14 @@
 import type { User } from '../../types';
+import type { AdminUserAnalyticsDto } from '../dto/v1/AdminUserAnalyticsDto';
+import type { UserAnalyticsCounts, UserAnalyticsQuery } from '../../repository/UserRepository';
+
+const ANALYTICS_UTILITY_USERNAMES = ['community_decks', 'tournament_decks'] as const;
 
 export interface AdminServiceUserRepository {
   getAllUsers: () => Promise<User[]>;
   getUserByUsername: (username: string) => Promise<User | undefined>;
   createUser: (username: string, email: string, password: string, role: 'USER') => Promise<User>;
+  getUserAnalytics: (query: UserAnalyticsQuery) => Promise<UserAnalyticsCounts>;
 }
 
 export interface AdminServiceDeckRepository {
@@ -24,6 +29,7 @@ export interface AdminServiceDeps {
   deckRepository: AdminServiceDeckRepository;
   cardRepository: AdminServiceCardRepository;
   databaseInit: AdminServiceDatabaseInit;
+  now?: () => Date;
 }
 
 export class AdminService {
@@ -31,6 +37,53 @@ export class AdminService {
 
   listUsers(): Promise<User[]> {
     return this.deps.userRepository.getAllUsers();
+  }
+
+  async getUserAnalytics(): Promise<AdminUserAnalyticsDto> {
+    const asOf = this.deps.now?.() ?? new Date();
+    const currentMonthStart = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), 1));
+    const acquisitionStart = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth() - 1, 1));
+    const signupChartStart = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth() - 11, 1));
+    const signupChartEnd = new Date(Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth() + 1, 1));
+    const counts = await this.deps.userRepository.getUserAnalytics({
+      asOf,
+      acquisitionStart,
+      signupChartStart,
+      signupChartEnd,
+      excludedUsernames: ANALYTICS_UTILITY_USERNAMES
+    });
+    const percentage = (count: number) => counts.standardUserAccounts === 0
+      ? 0
+      : Math.round((count / counts.standardUserAccounts) * 100);
+    const currentMonth = currentMonthStart.toISOString().slice(0, 7);
+
+    return {
+      generatedAt: asOf.toISOString(),
+      acquisitionPeriodStart: acquisitionStart.toISOString(),
+      standardUserAccounts: counts.standardUserAccounts,
+      newStandardAccounts: counts.newStandardAccounts,
+      loggedInLast30Days: {
+        count: counts.loggedInLast30Days,
+        percentage: percentage(counts.loggedInLast30Days)
+      },
+      googleAuthUsers: {
+        count: counts.googleAuthUsers,
+        percentage: percentage(counts.googleAuthUsers)
+      },
+      recordedLoginUsers: counts.recordedLoginUsers,
+      signupMonths: counts.signupMonths.map((month) => ({
+        ...month,
+        recent: month.month >= acquisitionStart.toISOString().slice(0, 7),
+        partial: month.month === currentMonth
+      })),
+      loginRecency: [
+        { key: 'days0To7', label: '0–7 days', count: counts.loginRecency.days0To7 },
+        { key: 'days8To30', label: '8–30 days', count: counts.loginRecency.days8To30 },
+        { key: 'days31To60', label: '31–60 days', count: counts.loginRecency.days31To60 },
+        { key: 'days61To90', label: '61–90 days', count: counts.loginRecency.days61To90 },
+        { key: 'days90Plus', label: '90+ days', count: counts.loginRecency.days90Plus }
+      ]
+    };
   }
 
   async createUser(

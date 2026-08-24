@@ -63,6 +63,7 @@ to [`docs/openapi.yaml`](../openapi.yaml)) in the same PR.**
 | `USERNAME_EXISTS`             | 409  | Admin tried to create a user with a taken username.                      | Choose a different username.                                                         |
 | `ADMIN_USERS_LIST_ERROR`      | 500  | Admin user listing failed.                                               | Retry.                                                                                |
 | `ADMIN_USER_CREATE_ERROR`     | 500  | Admin user creation failed.                                              | Retry.                                                                                |
+| `ADMIN_USER_ANALYTICS_ERROR`  | 500  | Admin aggregate user analytics query failed.                             | Retry; report `requestId` if persistent.                                             |
 | `ADMIN_DEBUG_ERROR`           | 500  | Admin debug action failed.                                               | Retry.                                                                                |
 | `ADMIN_DATABASE_STATUS_ERROR` | 500  | Admin DB status call failed.                                             | Retry.                                                                                |
 | `NOT_IMPLEMENTED`             | 501  | Route intentionally unimplemented.                                       | Use documented alternative.                                                          |

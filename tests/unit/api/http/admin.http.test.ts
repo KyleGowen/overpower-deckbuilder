@@ -34,6 +34,17 @@ function buildApp(deps: AdminV1HttpDeps): express.Application {
 
 function stubAdminService(over: Partial<AdminService> = {}): AdminService {
   return {
+    getUserAnalytics: jest.fn().mockResolvedValue({
+      generatedAt: '2026-08-24T12:00:00.000Z',
+      acquisitionPeriodStart: '2026-07-01T00:00:00.000Z',
+      standardUserAccounts: 90,
+      newStandardAccounts: 40,
+      loggedInLast30Days: { count: 49, percentage: 54 },
+      googleAuthUsers: { count: 44, percentage: 49 },
+      recordedLoginUsers: 77,
+      signupMonths: [],
+      loginRecency: []
+    }),
     listUsers: jest.fn().mockResolvedValue([
       { id: '1', name: 'n', email: 'n@e.com', role: 'USER', lastLoginAt: null }
     ]),
@@ -52,6 +63,26 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
 }
 
 describe('admin.http', () => {
+  it('GET /admin/user-analytics returns 403 for non-admin without querying analytics', async () => {
+    const svc = stubAdminService();
+    const app = buildApp({ adminService: svc, authenticateUser: userAuth });
+    const res = await request(app).get('/admin/user-analytics').expect(403);
+    expect(res.body.errors[0].code).toBe('ADMIN_REQUIRED');
+    expect(svc.getUserAnalytics).not.toHaveBeenCalled();
+  });
+
+  it('GET /admin/user-analytics returns aggregate analytics for admin', async () => {
+    const svc = stubAdminService();
+    const app = buildApp({ adminService: svc, authenticateUser: adminAuth });
+    const res = await request(app).get('/admin/user-analytics').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data).toMatchObject({
+      standardUserAccounts: 90,
+      newStandardAccounts: 40,
+      loggedInLast30Days: { count: 49, percentage: 54 }
+    });
+  });
+
   it('GET /admin/users returns 403 for non-admin', async () => {
     const svc = stubAdminService();
     const app = buildApp({ adminService: svc, authenticateUser: userAuth });

@@ -1,5 +1,29 @@
 import { User, UserRole } from '../types';
 
+export interface UserAnalyticsQuery {
+  asOf: Date;
+  acquisitionStart: Date;
+  signupChartStart: Date;
+  signupChartEnd: Date;
+  excludedUsernames: readonly string[];
+}
+
+export interface UserAnalyticsCounts {
+  standardUserAccounts: number;
+  newStandardAccounts: number;
+  loggedInLast30Days: number;
+  googleAuthUsers: number;
+  recordedLoginUsers: number;
+  signupMonths: Array<{ month: string; count: number }>;
+  loginRecency: {
+    days0To7: number;
+    days8To30: number;
+    days31To60: number;
+    days61To90: number;
+    days90Plus: number;
+  };
+}
+
 export interface UserRepository {
   // Initialization
   initialize(): Promise<void>;
@@ -28,4 +52,5 @@ export interface UserRepository {
   getUserStats(): Promise<{
     users: number;
   }>;
+  getUserAnalytics(query: UserAnalyticsQuery): Promise<UserAnalyticsCounts>;
 }

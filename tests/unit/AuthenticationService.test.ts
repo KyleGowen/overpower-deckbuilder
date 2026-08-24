@@ -61,6 +61,7 @@ describe('AuthenticationService', () => {
       updateUserPassword: jest.fn(),
       deleteUser: jest.fn(),
       getUserStats: jest.fn(),
+      getUserAnalytics: jest.fn(),
       initialize: jest.fn()
     } as jest.Mocked<UserRepository>;
 

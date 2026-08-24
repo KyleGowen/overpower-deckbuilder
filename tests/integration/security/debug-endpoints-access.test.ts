@@ -34,6 +34,7 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
   });
 
   const getEndpoints = [
+    '/api/v1/admin/user-analytics',
     '/api/v1/admin/users',
     '/api/v1/admin/debug/clear-cache',
     '/api/v1/admin/debug/clear-card-cache',
