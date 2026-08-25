@@ -13,6 +13,8 @@ describe('SesFeedbackEmailSender', () => {
     await sender.sendFeedbackEmail({
       category: 'bug',
       message: 'Deck save failed after changing the background.',
+      submitterName: 'Player One',
+      submitterEmail: 'player@example.com',
       replyTo: 'player@example.com'
     });
 
@@ -26,7 +28,7 @@ describe('SesFeedbackEmailSender', () => {
         Body: {
           Text: {
             Charset: 'UTF-8',
-            Data: 'Category: Bug report\n\nDeck save failed after changing the background.'
+            Data: 'Category: Bug report\nSubmitted by: Player One\nEmail: player@example.com\n\nDeck save failed after changing the background.'
           }
         }
       },
@@ -38,11 +40,18 @@ describe('SesFeedbackEmailSender', () => {
     const send = jest.fn().mockResolvedValue({ MessageId: 'message-2' });
     const sender = new SesFeedbackEmailSender({ client: { send } as never });
 
-    await sender.sendFeedbackEmail({ category: 'feature', message: 'Add a sort option.' });
+    await sender.sendFeedbackEmail({
+      category: 'feature',
+      message: 'Add a sort option.',
+      submitterName: 'Guest',
+      submitterEmail: 'guest@example.com'
+    });
 
     const command = send.mock.calls[0][0] as SendEmailCommand;
     expect(command.input.Message?.Subject?.Data).toBe('[Excelsior] Feature or change request');
     expect(command.input.Message?.Body?.Text?.Data).toContain('Category: Feature or change request');
+    expect(command.input.Message?.Body?.Text?.Data).toContain('Submitted by: Guest');
+    expect(command.input.Message?.Body?.Text?.Data).toContain('Email: guest@example.com');
     expect(command.input.ReplyToAddresses).toBeUndefined();
   });
 });

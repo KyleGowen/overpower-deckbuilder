@@ -1,6 +1,7 @@
 import type { RequestHandler, Router } from 'express';
 import type { FeedbackSubmitV1DataDto } from '../dto/v1/FeedbackSubmitV1DataDto';
 import type { FeedbackService } from '../services/feedbackService';
+import { resolveUserDisplayName } from '../../utils/resolveUserDisplayName';
 import { createV1RateLimit } from './middleware/v1RateLimit';
 import { SubmitFeedbackRequestBody } from './models/feedback/SubmitFeedbackRequestBody';
 import { parseV1Body } from './parseV1Body';
@@ -31,8 +32,9 @@ export function registerFeedbackV1HttpRoutes(router: Router, deps: FeedbackV1Htt
         await deps.feedbackService.submit({
           category: parsed.value.category,
           message: parsed.value.message,
-          submitterRole: req.user.role,
-          ...(req.user.email ? { submitterEmail: req.user.email } : {})
+          submitterName: resolveUserDisplayName(req.user),
+          submitterEmail: req.user.email,
+          submitterRole: req.user.role
         });
         const data: FeedbackSubmitV1DataDto = { submitted: true };
         sendV1Success(res, data, 202);

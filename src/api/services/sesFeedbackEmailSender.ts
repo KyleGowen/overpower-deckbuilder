@@ -24,6 +24,13 @@ export class SesFeedbackEmailSender implements FeedbackEmailSender {
 
   async sendFeedbackEmail(feedback: FeedbackEmail): Promise<void> {
     const categoryLabel = feedback.category === 'bug' ? 'Bug report' : 'Feature or change request';
+    const body = [
+      `Category: ${categoryLabel}`,
+      `Submitted by: ${feedback.submitterName}`,
+      `Email: ${feedback.submitterEmail}`,
+      '',
+      feedback.message
+    ].join('\n');
     const command = new SendEmailCommand({
       Source: this.fromEmail,
       Destination: { ToAddresses: [this.toEmail] },
@@ -32,7 +39,7 @@ export class SesFeedbackEmailSender implements FeedbackEmailSender {
         Body: {
           Text: {
             Charset: 'UTF-8',
-            Data: `Category: ${categoryLabel}\n\n${feedback.message}`
+            Data: body
           }
         }
       },

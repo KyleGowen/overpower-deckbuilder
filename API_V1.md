@@ -309,7 +309,9 @@ The resolved public name everywhere in the app comes from `resolveUserDisplayNam
 
 Accepts an in-app bug report or feature/change request and delivers it to
 `kyle@excelsior.cards` through server-side SES. Feedback text is not persisted
-or written to application logs.
+or written to application logs. The email identifies the sender with the
+authenticated account's resolved display name and email address; registered-user
+addresses are also set as the email's reply-to address.
 
 **Auth:** Session cookie (`sessionId`). **GUEST**, **USER**, and **ADMIN** are accepted.
 

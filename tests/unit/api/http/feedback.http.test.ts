@@ -60,6 +60,7 @@ describe('feedback.http', () => {
     expect(feedbackService.submit).toHaveBeenCalledWith({
       category: 'bug',
       message: 'Deck save failed.',
+      submitterName: 'Feedback User',
       submitterEmail: 'feedback@example.com',
       submitterRole: 'USER'
     });
@@ -78,6 +79,7 @@ describe('feedback.http', () => {
     expect(feedbackService.submit).toHaveBeenCalledWith({
       category: 'feature',
       message: 'Add another filter.',
+      submitterName: 'Guest',
       submitterEmail: 'guest@example.com',
       submitterRole: 'GUEST'
     });

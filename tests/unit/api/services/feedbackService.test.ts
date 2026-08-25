@@ -10,13 +10,16 @@ describe('FeedbackService', () => {
     await service.submit({
       category: 'feature',
       message: '  Add a compact deck view.  ',
-      submitterEmail: 'player@example.com',
+      submitterName: '  Player One  ',
+      submitterEmail: '  player@example.com  ',
       submitterRole: 'USER'
     });
 
     expect(sender.sendFeedbackEmail).toHaveBeenCalledWith({
       category: 'feature',
       message: 'Add a compact deck view.',
+      submitterName: 'Player One',
+      submitterEmail: 'player@example.com',
       replyTo: 'player@example.com'
     });
   });
@@ -30,13 +33,16 @@ describe('FeedbackService', () => {
     await service.submit({
       category: 'bug',
       message: 'Something broke.',
+      submitterName: 'Guest',
       submitterEmail: 'guest@example.com',
       submitterRole: 'GUEST'
     });
 
     expect(sender.sendFeedbackEmail).toHaveBeenCalledWith({
       category: 'bug',
-      message: 'Something broke.'
+      message: 'Something broke.',
+      submitterName: 'Guest',
+      submitterEmail: 'guest@example.com'
     });
   });
 });

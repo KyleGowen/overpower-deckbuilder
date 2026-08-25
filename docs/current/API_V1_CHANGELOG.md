@@ -7,7 +7,8 @@ One line per change. Newest first. Keep this in sync with
 
 - Added authenticated `POST /api/v1/feedback` for bug reports and feature/change
   requests. The endpoint validates and rate-limits submissions, sends them to
-  `kyle@excelsior.cards` through SES, and does not persist feedback text.
+  `kyle@excelsior.cards` through SES with the authenticated sender's resolved
+  display name and email address, and does not persist feedback text.
 - Added `GET /api/v1/admin/user-analytics` and the admin-only `/admin/user-analytics`
   React view. The endpoint returns de-identified aggregate acquisition, authentication,
   and login-recency metrics; it excludes the community/tournament utility accounts.
