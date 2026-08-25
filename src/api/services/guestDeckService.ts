@@ -184,7 +184,7 @@ export class GuestDeckService {
   replaceCards(
     sessionId: string,
     deckId: string,
-    cards: Array<{ cardType: string; cardId: string; quantity?: number; exclude_from_draw?: boolean }>
+    cards: Array<{ cardType: string; cardId: string; quantity?: number; displayOrder?: number; exclude_from_draw?: boolean }>
   ): Ok<DeckData> | Fail {
     const existing = this.deps.guestDeckPersistence.getDeck(sessionId, deckId);
     if (!existing) {
@@ -219,6 +219,16 @@ export class GuestDeckService {
           `Card at index ${i}: quantity must be between 1 and ${MAX_CARD_QUANTITY_PER_ENTRY}`
         );
       }
+      if (
+        card.displayOrder !== undefined &&
+        (!Number.isInteger(card.displayOrder) || card.displayOrder < 0 || card.displayOrder >= MAX_CARD_QUANTITY_PER_ENTRY)
+      ) {
+        return fail(
+          400,
+          'VALIDATION_ERROR',
+          `Card at index ${i}: displayOrder must be an integer between 0 and ${MAX_CARD_QUANTITY_PER_ENTRY - 1}`
+        );
+      }
     }
     const cardCount = countCardsInDeck(cards);
     const mappedCards: DeckCard[] = cards.map((c, i) => ({
@@ -226,6 +236,7 @@ export class GuestDeckService {
       type: c.cardType as DeckCard['type'],
       cardId: c.cardId,
       quantity: c.quantity ?? 1,
+      ...(c.displayOrder !== undefined && { displayOrder: c.displayOrder }),
       ...(c.exclude_from_draw !== undefined && { exclude_from_draw: c.exclude_from_draw })
     }));
     const updated: DeckData = {

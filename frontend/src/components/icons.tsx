@@ -138,6 +138,23 @@ export const IconChevronDown = (p: IconProps) => (
   </Svg>
 );
 
+export const IconChevronUp = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m6 15 6-6 6 6" />
+  </Svg>
+);
+
+export const IconGripVertical = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="9" cy="6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="9" cy="18" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="18" r="1" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
 export const IconChevronRight = (p: IconProps) => (
   <Svg {...p}>
     <path d="m9 6 6 6-6 6" />

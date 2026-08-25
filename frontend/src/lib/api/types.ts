@@ -124,6 +124,8 @@ export interface DeckCardEntry {
   type: DeckCardType;
   cardId: string;
   quantity: number;
+  /** Stable zero-based order used by the deck editor and deck preview carousel. */
+  displayOrder?: number;
   /** Client-only deck-editor tile id (one tile per instance; not sent to API). */
   instanceId?: string;
   exclude_from_draw?: boolean;

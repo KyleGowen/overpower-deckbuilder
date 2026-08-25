@@ -5,7 +5,8 @@ Summary tile for a deck. Layout ("hero" art + info panel):
 - **Art zone:** feature character via `CardImage` with `card-image--contain` — full landscape card
   (380:280), 1px padding, no zoom/crop. **Location** slides use full-res art with `object-fit: cover`
   so the narrower location frame fills the hero slot (thumbs are letterboxed at 236:151). **Hover** (mouse / fine pointer): waits 1s, then
-  cycles every 1.5s through characters and, when set, the **location** card; pointer leave stops
+  cycles every 1.5s through the first four characters in saved deck-editor order, then the
+  **location**, then the **battleground** when set; pointer leave stops
   and keeps the last shown slide. **Press-and-hold** (touch): native `touchstart` / `touchend` on
   `.deck-tile__art`, which sets `touch-action: pan-x pan-y`. A still hold engages cycling after a
   ~0.75s delay (no OS long-press needed), then advances every 1.5s; a drag in either axis

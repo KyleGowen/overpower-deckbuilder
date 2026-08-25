@@ -265,6 +265,16 @@ export default function CommunityPage() {
 
   });
 
+  const battlegroundsQuery = useQuery({
+
+    queryKey: ['catalog', 'battlegrounds'],
+
+    queryFn: () => fetchCatalog('battlegrounds'),
+
+    staleTime: 30 * 60 * 1000,
+
+  });
+
 
 
   const favoriteToggle = useFavoriteToggle();
@@ -369,6 +379,8 @@ export default function CommunityPage() {
 
   const locations = locationsQuery.data;
 
+  const battlegrounds = battlegroundsQuery.data;
+
   const tournamentDecksWithFav = tournamentDecks.map((d) =>
 
     favoriteIds.has(d.metadata.id)
@@ -386,6 +398,8 @@ export default function CommunityPage() {
     characters,
 
     locations,
+
+    battlegrounds,
 
     missions,
 
@@ -622,4 +636,3 @@ export default function CommunityPage() {
   );
 
 }
-

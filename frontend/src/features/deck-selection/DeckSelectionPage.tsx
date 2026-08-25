@@ -121,6 +121,11 @@ export default function DeckSelectionPage() {
     queryFn: () => fetchCatalog('locations'),
     staleTime: 30 * 60 * 1000,
   });
+  const battlegroundsQuery = useQuery({
+    queryKey: ['catalog', 'battlegrounds'],
+    queryFn: () => fetchCatalog('battlegrounds'),
+    staleTime: 30 * 60 * 1000,
+  });
   const missionsQuery = useQuery({
     queryKey: ['catalog', 'missions'],
     queryFn: () => fetchCatalog('missions'),
@@ -212,8 +217,12 @@ export default function DeckSelectionPage() {
   );
 
   const previewCatalogImages = useMemo(
-    () => buildDeckPreviewCatalogImages(charactersQuery.data, locationsQuery.data),
-    [charactersQuery.data, locationsQuery.data],
+    () => buildDeckPreviewCatalogImages(
+      charactersQuery.data,
+      locationsQuery.data,
+      battlegroundsQuery.data,
+    ),
+    [charactersQuery.data, locationsQuery.data, battlegroundsQuery.data],
   );
 
   const missionSetByCardId = useMemo(
@@ -506,6 +515,7 @@ export default function DeckSelectionPage() {
               decks={favoriteDecks}
               characters={charactersQuery.data}
               locations={locationsQuery.data}
+              battlegrounds={battlegroundsQuery.data}
               missions={missionsQuery.data}
               viewerId={viewerId}
               canFavorite={canFavorite}
@@ -533,6 +543,7 @@ export default function DeckSelectionPage() {
               decks={communityDecks}
               characters={charactersQuery.data}
               locations={locationsQuery.data}
+              battlegrounds={battlegroundsQuery.data}
               missions={missionsQuery.data}
               viewerId={viewerId}
               canFavorite={canFavorite}
@@ -554,6 +565,7 @@ export default function DeckSelectionPage() {
             decks={tournamentDecks}
             characters={charactersQuery.data}
             locations={locationsQuery.data}
+            battlegrounds={battlegroundsQuery.data}
             missions={missionsQuery.data}
             viewerId={viewerId}
             canFavorite={canFavorite}

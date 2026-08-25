@@ -96,6 +96,7 @@ export interface DeckCardInput {
   cardType: string;
   cardId: string;
   quantity: number;
+  displayOrder?: number;
   exclude_from_draw?: boolean;
 }
 

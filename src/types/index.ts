@@ -291,6 +291,7 @@ export interface DeckCard {
   type: 'character' | 'location' | 'battleground' | 'special' | 'mission' | 'event' | 'aspect' | 'advanced-universe' | 'teamwork' | 'ally-universe' | 'training' | 'basic-universe' | 'power';
   cardId: string; // The ID from the original card table (now includes alternate cards as separate rows)
   quantity: number; // How many copies of this card
+  displayOrder?: number; // Stable deck-editor / preview order (zero-based)
   exclude_from_draw?: boolean; // Whether this card is excluded from Draw Hand (for Training cards with Spartan Training Ground)
   defaultImage?: string; // Preview image path populated when building deck list metadata
   name?: string; // Card name populated when building deck list metadata

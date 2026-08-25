@@ -61,8 +61,8 @@
   height: 100%;
 }
 
-/* Location art is 236×151; fill the 380×280 hero slot edge-to-edge (legacy deck-selection uses cover). */
-.deck-tile__hero--location .card-image__img {
+/* Location and battleground art fill the 380×280 hero slot edge-to-edge. */
+.deck-tile__hero--structural .card-image__img {
   object-fit: cover;
   object-position: center;
 }

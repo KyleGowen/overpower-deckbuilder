@@ -216,6 +216,7 @@ export type ReplaceCardInput = {
   cardType: string;
   cardId: string;
   quantity: number;
+  displayOrder?: number;
   exclude_from_draw?: boolean;
 };
 
@@ -232,13 +233,18 @@ export async function replaceAllCardsInDeck(
 
     const cardMap = new Map<
       string,
-      { cardType: string; cardId: string; quantity: number; exclude_from_draw?: boolean }
+      { cardType: string; cardId: string; quantity: number; displayOrder?: number; exclude_from_draw?: boolean }
     >();
     for (const card of cards) {
       const key = `${card.cardType}:${card.cardId}`;
       const existing = cardMap.get(key);
       if (existing) {
         existing.quantity += card.quantity;
+        if (card.displayOrder !== undefined) {
+          existing.displayOrder = existing.displayOrder === undefined
+            ? card.displayOrder
+            : Math.min(existing.displayOrder, card.displayOrder);
+        }
         if (card.exclude_from_draw !== undefined) {
           existing.exclude_from_draw = existing.exclude_from_draw || card.exclude_from_draw;
         }
@@ -270,17 +276,19 @@ export async function replaceAllCardsInDeck(
         throw new Error(errorMsg);
       }
 
-      if (card.exclude_from_draw !== undefined) {
-        await client.query(
-          'INSERT INTO deck_cards (deck_id, card_type, card_id, quantity, exclude_from_draw) VALUES ($1, $2, $3, $4, $5)',
-          [deckId, card.cardType, card.cardId, card.quantity, card.exclude_from_draw]
-        );
-      } else {
-        await client.query(
-          'INSERT INTO deck_cards (deck_id, card_type, card_id, quantity) VALUES ($1, $2, $3, $4)',
-          [deckId, card.cardType, card.cardId, card.quantity]
-        );
-      }
+      await client.query(
+        `INSERT INTO deck_cards
+          (deck_id, card_type, card_id, quantity, display_order, exclude_from_draw)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          deckId,
+          card.cardType,
+          card.cardId,
+          card.quantity,
+          card.displayOrder ?? null,
+          card.exclude_from_draw ?? false,
+        ]
+      );
     }
 
     const cardCountResult = await client.query<{ card_count: number }>(
@@ -343,7 +351,9 @@ export async function getDeckCards(
   const client = await ctx.pool.connect();
   try {
     const result = await client.query(
-      'SELECT * FROM deck_cards WHERE deck_id = $1 ORDER BY card_type, card_id',
+      `SELECT * FROM deck_cards
+       WHERE deck_id = $1
+       ORDER BY display_order ASC NULLS LAST, card_type, card_id`,
       [deckId]
     );
     const rows = result.rows as {
@@ -351,6 +361,7 @@ export async function getDeckCards(
       card_type: string;
       card_id: string;
       quantity: number;
+      display_order?: number | null;
       exclude_from_draw?: boolean;
     }[];
     return rows.map((card) => ({
@@ -358,6 +369,9 @@ export async function getDeckCards(
       type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
+      ...(card.display_order !== undefined && card.display_order !== null && {
+        displayOrder: card.display_order,
+      }),
       exclude_from_draw: card.exclude_from_draw ?? false,
     }));
   } finally {

@@ -43,4 +43,28 @@ describe('GuestDeckService', () => {
       ]),
     );
   });
+
+  it('preserves character display order in guest session decks', () => {
+    const service = new GuestDeckService({
+      guestDeckPersistence: persistence,
+      deckRepository: { getDecksByUserId: jest.fn() },
+      validateCardAddition: jest.fn(),
+      checkIfCardIsOnePerDeck: jest.fn(),
+      checkIfCardIsCataclysm: jest.fn(),
+    });
+    const created = service.createDeck('session-1', { name: 'Ordered team', description: '' });
+    if (!created.ok) throw new Error(created.message);
+
+    const result = service.replaceCards('session-1', created.data.id, [
+      { cardType: 'character', cardId: 'character-2', quantity: 1, displayOrder: 0 },
+      { cardType: 'character', cardId: 'character-1', quantity: 1, displayOrder: 1 },
+    ]);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.message);
+    expect(result.data.cards.map((card) => [card.cardId, card.displayOrder])).toEqual([
+      ['character-2', 0],
+      ['character-1', 1],
+    ]);
+  });
 });

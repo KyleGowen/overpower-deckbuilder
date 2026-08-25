@@ -3,9 +3,10 @@ import { CardImage } from '../CardImage';
 import { EmptyState } from '../EmptyState';
 import { IconCards, IconDots, IconHeart } from '../icons';
 import { StatIconBadge } from '../StatIconBadge';
-import type { DeckCardEntry, DeckListItem, CatalogType } from '../../lib/api/types';
+import type { DeckCardEntry, DeckListItem } from '../../lib/api/types';
 import type { StatIconType } from '../../lib/icons/statIconTypes';
 import { formatThreatTooltip } from '../../lib/decks/deckThreat';
+import { deckArtSlides } from '../../lib/decks/deckTileArtSlides';
 import { deckLegalityBadge, deckTileVisibilityBadge, legalityBadgeClass } from './deckTileLegality';
 import './DeckTile.css';
 
@@ -48,43 +49,8 @@ interface DeckTileProps {
   onOwnerClick?: () => void;
 }
 
-interface ArtSlide {
-  cardId: string;
-  name?: string;
-  imagePath?: string | null;
-  catalogType?: CatalogType;
-  isFoil?: boolean;
-}
-
-function deckCharacters(deck: DeckListItem): ArtSlide[] {
-  const cards = deck.cards ?? [];
-  return cards
-    .filter((c) => c.type === 'character')
-    .map((c) => ({
-      cardId: c.cardId,
-      name: c.name,
-      imagePath: c.defaultImage,
-      catalogType: 'characters' as const,
-      isFoil: Boolean(c.is_foil),
-    }));
-}
-
 function firstCardOfType(deck: DeckListItem, type: DeckCardEntry['type']): DeckCardEntry | undefined {
   return (deck.cards ?? []).find((c) => c.type === type);
-}
-
-function deckArtSlides(deck: DeckListItem): ArtSlide[] {
-  const slides = deckCharacters(deck);
-  const location = firstCardOfType(deck, 'location');
-  if (location?.defaultImage) {
-    slides.push({
-      cardId: location.cardId,
-      name: location.name ?? 'Location',
-      imagePath: location.defaultImage,
-      catalogType: 'locations',
-    });
-  }
-  return slides;
 }
 
 const STAT_DEFS: Array<{ key: keyof DeckStatLine; iconKey: StatIconType }> = [
@@ -123,7 +89,8 @@ export function DeckTile({
   const startArtCycleRef = useRef<(delayMs?: number) => void>(() => {});
   const stopArtCycleRef = useRef<() => void>(() => {});
   const shownSlide = artSlides[slideIndex] ?? artSlides[0];
-  const isLocationSlide = shownSlide?.catalogType === 'locations';
+  const isStructuralSlide =
+    shownSlide?.catalogType === 'locations' || shownSlide?.catalogType === 'battlegrounds';
 
   const stopArtCycle = useCallback(() => {
     if (cycleTimer.current != null) {
@@ -253,16 +220,16 @@ export function DeckTile({
       >
         {shownSlide ? (
           <div
-            className={`deck-tile__hero${isLocationSlide ? ' deck-tile__hero--location' : ''}`}
+            className={`deck-tile__hero${isStructuralSlide ? ' deck-tile__hero--structural' : ''}`}
             aria-hidden="true"
           >
             <CardImage
               imagePath={shownSlide.imagePath}
               catalogType={shownSlide.catalogType}
               alt={shownSlide.name || 'Character'}
-              useThumbnail={!isLocationSlide}
+              useThumbnail={!isStructuralSlide}
               loading="eager"
-              className={isLocationSlide ? undefined : 'card-image--contain'}
+              className={isStructuralSlide ? undefined : 'card-image--contain'}
               isFoil={shownSlide.isFoil}
               foilSeed={shownSlide.cardId}
               foilSize="hero"

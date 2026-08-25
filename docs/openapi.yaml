@@ -757,6 +757,26 @@ paths:
     put:
       tags: [Decks]
       summary: Replace cards in a deck.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cards]
+              properties:
+                cards:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    required: [cardType, cardId, quantity]
+                    properties:
+                      cardType: { type: string }
+                      cardId: { type: string }
+                      quantity: { type: integer, minimum: 1, maximum: 100 }
+                      displayOrder: { type: integer, minimum: 0, maximum: 99 }
+                      exclude_from_draw: { type: boolean }
       responses: { '200': { description: OK } }
     delete:
       tags: [Decks]

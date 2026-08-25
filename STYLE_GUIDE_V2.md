@@ -208,7 +208,8 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
   (`aspect-ratio: 380 / 280`): characters (and the location card when set) cycle on hover after a
-  1s delay. Character slides use `object-fit: contain`; location slides use full-res art with
+  1s delay. Slides follow the saved deck-editor order: first four characters → location →
+  battleground → repeat. Character slides use `object-fit: contain`; location and battleground slides use full-res art with
   `object-fit: cover` so the 236×151 location frame fills the hero slot without letterboxing. A bottom
   gradient scrim carries the deck **name** (`.deck-tile__name`: `calc(var(--font-size-lg) * 1.1)`;
   compact tiles use `calc(var(--font-size-base) * 1.1)`). The info panel opens with a single
@@ -406,6 +407,10 @@ Each physical copy is one deck tile (`instanceId` client-side). Owners remove vi
 | List view | Trash at row end | `.deck-editor__list-remove` (24×24 desktop, 44×44 mobile; icon-only default, danger tint on hover/focus) |
 
 List rows aggregate duplicate `type + cardId` copies; each trash click removes one instance (last in `instanceIds`). Character list rows keep Reserve + KO left of trash.
+
+### Deck Editor — Character preview order
+
+Owners arrange the Characters card grid to set the carousel order shared by compact and full `DeckTile` variants. Desktop cards use grab/grabbing cursors, a subtle grip hint, drag target lift, and accent border; hover/focus also reveals accessible earlier/later buttons. Mobile press-and-hold reveals a scrim pill with 44px up/down controls, slot count, and Done. The active card gets the accent ring. Reordering is local/dirty until Save; read-only decks show no controls.
 
 ### Deck Editor — Mobile bottom nav
 On `.layout-mobile`, the deck editor renders the shared `MobileBottomNav` (`--bottom-nav-height: 66px`,

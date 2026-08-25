@@ -15,12 +15,10 @@ import { integrationTestUtils } from '../setup-integration';
 import { fetchMinimalValidDeckCards } from './helpers/minimalValidDeckCards';
 
 describe('Deck list preview images integration tests', () => {
-  let server: unknown;
   let pool: Pool;
 
   beforeAll(async () => {
-    const { server: initializedServer } = await initializeTestServer();
-    server = initializedServer;
+    await initializeTestServer();
     pool = new Pool({
       connectionString:
         process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower',
@@ -36,6 +34,8 @@ describe('Deck list preview images integration tests', () => {
     let testDeckId: string;
     let authCookie: string;
     let characterIds: string[];
+    let locationId: string;
+    let battlegroundId: string;
 
     beforeAll(async () => {
       await integrationTestUtils.ensureGuestUser();
@@ -67,6 +67,23 @@ describe('Deck list preview images integration tests', () => {
       expect(charRows.rows.length).toBeGreaterThanOrEqual(4);
       characterIds = charRows.rows.map((r) => r.id);
 
+      const locationRow = await pool.query<{ id: string }>(
+        `SELECT id FROM locations
+         WHERE image_path IS NOT NULL AND TRIM(image_path) <> ''
+         ORDER BY id
+         LIMIT 1`,
+      );
+      const battlegroundRow = await pool.query<{ id: string }>(
+        `SELECT id FROM battlegrounds
+         WHERE image_path IS NOT NULL AND TRIM(image_path) <> ''
+         ORDER BY id
+         LIMIT 1`,
+      );
+      expect(locationRow.rows[0]?.id).toBeTruthy();
+      expect(battlegroundRow.rows[0]?.id).toBeTruthy();
+      locationId = locationRow.rows[0]!.id;
+      battlegroundId = battlegroundRow.rows[0]!.id;
+
       const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({ username: testUser.username, password: 'password123' });
@@ -85,12 +102,18 @@ describe('Deck list preview images integration tests', () => {
       }
     });
 
-    it('returns defaultImage for characters after PUT cards (bulk replace)', async () => {
-      const cards = characterIds.map((id) => ({
-        cardType: 'character',
-        cardId: id,
-        quantity: 1,
-      }));
+    it('persists character order through PUT, full reload, and deck-list preview', async () => {
+      const requestedOrder = [...characterIds].reverse();
+      const cards = [
+        ...requestedOrder.map((id, displayOrder) => ({
+          cardType: 'character',
+          cardId: id,
+          quantity: 1,
+          displayOrder,
+        })),
+        { cardType: 'location', cardId: locationId, quantity: 1, displayOrder: 4 },
+        { cardType: 'battleground', cardId: battlegroundId, quantity: 1, displayOrder: 5 },
+      ];
 
       const putResponse = await request(app)
         .put(`/api/v1/decks/${testDeckId}/cards`)
@@ -106,6 +129,22 @@ describe('Deck list preview images integration tests', () => {
         [testDeckId],
       );
       expect(decksRow.rows[0].character_1_id).toBeTruthy();
+      expect([
+        decksRow.rows[0].character_1_id,
+        decksRow.rows[0].character_2_id,
+        decksRow.rows[0].character_3_id,
+        decksRow.rows[0].character_4_id,
+      ]).toEqual(requestedOrder);
+
+      const fullResponse = await request(app)
+        .get(`/api/v1/decks/${testDeckId}/full`)
+        .set('Cookie', authCookie);
+      expect(fullResponse.status).toBe(200);
+      expect(
+        fullResponse.body.data.cards
+          .filter((c: { type?: string }) => c.type === 'character')
+          .map((c: { cardId?: string; displayOrder?: number }) => [c.cardId, c.displayOrder]),
+      ).toEqual(requestedOrder.map((id, index) => [id, index]));
 
       const listResponse = await request(app).get('/api/v1/decks').set('Cookie', authCookie);
       expect(listResponse.status).toBe(200);
@@ -119,7 +158,21 @@ describe('Deck list preview images integration tests', () => {
         (c: { type?: string }) => c.type === 'character',
       );
       expect(previewChars.length).toBeGreaterThanOrEqual(4);
+      expect(previewChars.map((c: { cardId?: string }) => c.cardId)).toEqual(requestedOrder);
       previewChars.forEach((c: { defaultImage?: string }) => {
+        expect(typeof c.defaultImage).toBe('string');
+        expect(c.defaultImage!.trim().length).toBeGreaterThan(0);
+      });
+
+      const carouselCards = (deck.cards ?? []).filter((c: { type?: string }) =>
+        ['character', 'location', 'battleground'].includes(c.type ?? ''),
+      );
+      expect(carouselCards.map((c: { type?: string; cardId?: string }) => [c.type, c.cardId])).toEqual([
+        ...requestedOrder.map((id) => ['character', id]),
+        ['location', locationId],
+        ['battleground', battlegroundId],
+      ]);
+      carouselCards.forEach((c: { defaultImage?: string }) => {
         expect(typeof c.defaultImage).toBe('string');
         expect(c.defaultImage!.trim().length).toBeGreaterThan(0);
       });

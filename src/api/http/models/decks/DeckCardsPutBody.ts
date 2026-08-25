@@ -7,6 +7,7 @@ export type ReplaceCardInput = {
   cardType: string;
   cardId: string;
   quantity: number;
+  displayOrder?: number;
   exclude_from_draw?: boolean;
 };
 
@@ -84,6 +85,17 @@ export class DeckCardsPutBody {
         cardId: cardId.trim(),
         quantity
       };
+
+      if (c.displayOrder !== undefined) {
+        if (!Number.isInteger(c.displayOrder) || (c.displayOrder as number) < 0 || (c.displayOrder as number) >= MAX_BULK) {
+          errors.push({
+            code: 'VALIDATION_ERROR',
+            message: `Card at index ${i}: displayOrder must be an integer between 0 and ${MAX_BULK - 1}`
+          });
+          break;
+        }
+        entry.displayOrder = c.displayOrder as number;
+      }
 
       if (c.exclude_from_draw !== undefined) {
         if (typeof c.exclude_from_draw !== 'boolean') {

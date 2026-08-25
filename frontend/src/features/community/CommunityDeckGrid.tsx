@@ -12,6 +12,7 @@ export interface CommunityDeckGridProps {
   decks: DeckListItem[];
   characters: Array<Partial<CatalogCard> & { id: string }> | undefined;
   locations?: Array<Partial<CatalogCard> & { id: string }> | undefined;
+  battlegrounds?: Array<Partial<CatalogCard> & { id: string }> | undefined;
   missions: Array<Partial<CatalogCard> & { id: string }> | undefined;
   /** Current viewer id (decks owned by the viewer never show a favorite heart). */
   viewerId: string | null;
@@ -32,6 +33,7 @@ export function CommunityDeckGrid({
   decks,
   characters,
   locations,
+  battlegrounds,
   missions,
   viewerId,
   canFavorite,
@@ -45,8 +47,8 @@ export function CommunityDeckGrid({
   const charStatsById = useMemo(() => buildCharStatsById(characters), [characters]);
   const missionSetByCardId = useMemo(() => buildMissionSetByCardId(missions ?? []), [missions]);
   const previewCatalogImages = useMemo(
-    () => buildDeckPreviewCatalogImages(characters, locations),
-    [characters, locations],
+    () => buildDeckPreviewCatalogImages(characters, locations, battlegrounds),
+    [characters, locations, battlegrounds],
   );
   const enrichedDecks = useMemo(
     () => enrichDeckListPreviewImages(decks, previewCatalogImages),

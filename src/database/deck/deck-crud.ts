@@ -4,7 +4,7 @@ import { invalidateUserDeckListCache, type DeckRepositoryContext } from './conte
 /** Deck row from SELECT * FROM decks */
 type DeckRow = Record<string, unknown>;
 
-/** Deck list row with joined character/location/mission preview columns */
+/** Deck list row with joined character/location/battleground/mission preview columns */
 interface DeckListRow extends DeckRow {
   character_1_id?: string;
   character_1_name?: string;
@@ -26,6 +26,9 @@ interface DeckListRow extends DeckRow {
   preview_location_id?: string;
   location_name?: string;
   location_default_image?: string;
+  battleground_id?: string;
+  battleground_name?: string;
+  battleground_default_image?: string;
   mission_1_id?: string;
   mission_1_name?: string;
   mission_1_default_image?: string;
@@ -46,6 +49,7 @@ interface DeckCardRow {
   card_type: string;
   card_id: string;
   quantity: number;
+  display_order?: number | null;
   exclude_from_draw?: boolean;
 }
 
@@ -110,7 +114,9 @@ function buildCharacterListSqlFragments(): { selectFragment: string; joinFragmen
               c.name AS char_name,
               c.image_path AS char_image,
               c.is_foil AS char_foil,
-              ROW_NUMBER() OVER (ORDER BY dc.created_at, dc.card_id) AS rn
+              ROW_NUMBER() OVER (
+                ORDER BY dc.display_order ASC NULLS LAST, dc.created_at, dc.card_id
+              ) AS rn
             FROM deck_cards dc
             JOIN characters c ON c.id = dc.card_id::uuid
             WHERE dc.deck_id = d.id
@@ -224,11 +230,22 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
     const locationImage = previewImagePath(deckRow.location_default_image);
     cards.push({
       id: `loc_${deckRow.id}`,
-      type: deckRow.location_card_type === 'battleground' ? 'battleground' : 'location',
+      type: 'location',
       cardId: locationId as string,
       quantity: 1,
       ...(locationImage !== undefined && { defaultImage: locationImage }),
       ...(deckRow.location_name !== undefined && { name: deckRow.location_name }),
+    });
+  }
+  if (deckRow.battleground_id) {
+    const battlegroundImage = previewImagePath(deckRow.battleground_default_image);
+    cards.push({
+      id: `bg_${deckRow.id}`,
+      type: 'battleground',
+      cardId: deckRow.battleground_id,
+      quantity: 1,
+      ...(battlegroundImage !== undefined && { defaultImage: battlegroundImage }),
+      ...(deckRow.battleground_name !== undefined && { name: deckRow.battleground_name }),
     });
   }
   pushMissionPreviewCards(cards, deckRow);
@@ -299,45 +316,43 @@ export function mapDeckRowBasic(deckRow: DeckRow): Deck {
 
 const LOCATION_FALLBACK_JOIN = `
         LEFT JOIN LATERAL (
-          SELECT structural.loc_id, structural.loc_name, structural.loc_image, structural.card_type
-          FROM (
-            SELECT
-              l.id::text AS loc_id,
-              l.name AS loc_name,
-              l.image_path AS loc_image,
-              'location'::text AS card_type,
-              dc.created_at,
-              dc.card_id,
-              0 AS type_order
-            FROM deck_cards dc
-            JOIN locations l ON l.id = dc.card_id::uuid
-            WHERE dc.deck_id = d.id
-              AND dc.card_type = 'location'
-              AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-            UNION ALL
-            SELECT
-              b.id::text,
-              b.name,
-              b.image_path,
-              'battleground'::text,
-              dc.created_at,
-              dc.card_id,
-              1 AS type_order
-            FROM deck_cards dc
-            JOIN battlegrounds b ON b.id = dc.card_id::uuid
-            WHERE dc.deck_id = d.id
-              AND dc.card_type = 'battleground'
-              AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-          ) structural
-          ORDER BY structural.type_order, structural.created_at, structural.card_id
+          SELECT
+            l.id::text AS loc_id,
+            l.name AS loc_name,
+            l.image_path AS loc_image
+          FROM deck_cards dc
+          JOIN locations l ON l.id = dc.card_id::uuid
+          WHERE dc.deck_id = d.id
+            AND dc.card_type = 'location'
+            AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          ORDER BY dc.display_order ASC NULLS LAST, dc.created_at, dc.card_id
           LIMIT 1
         ) dc_loc ON TRUE`;
 
 const LOCATION_LIST_SELECT = `
           COALESCE(d.location_id, dc_loc.loc_id::uuid) AS preview_location_id,
           COALESCE(l.name, dc_loc.loc_name) AS location_name,
-          COALESCE(l.image_path, dc_loc.loc_image) AS location_default_image,
-          CASE WHEN d.location_id IS NOT NULL THEN 'location' ELSE dc_loc.card_type END AS location_card_type`;
+          COALESCE(l.image_path, dc_loc.loc_image) AS location_default_image`;
+
+const BATTLEGROUND_FALLBACK_JOIN = `
+        LEFT JOIN LATERAL (
+          SELECT
+            b.id::text AS battleground_id,
+            b.name AS battleground_name,
+            b.image_path AS battleground_image
+          FROM deck_cards dc
+          JOIN battlegrounds b ON b.id = dc.card_id::uuid
+          WHERE dc.deck_id = d.id
+            AND dc.card_type = 'battleground'
+            AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          ORDER BY dc.display_order ASC NULLS LAST, dc.created_at, dc.card_id
+          LIMIT 1
+        ) dc_bg ON TRUE`;
+
+const BATTLEGROUND_LIST_SELECT = `
+          dc_bg.battleground_id::uuid AS battleground_id,
+          dc_bg.battleground_name AS battleground_name,
+          dc_bg.battleground_image AS battleground_default_image`;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -432,7 +447,9 @@ export async function getDeckById(
 
     const deck = deckResult.rows[0] as DeckRow;
     const cardsResult = await client.query(
-      'SELECT * FROM deck_cards WHERE deck_id = $1',
+      `SELECT * FROM deck_cards
+       WHERE deck_id = $1
+       ORDER BY display_order ASC NULLS LAST, card_type, card_id`,
       [id]
     );
     const cards: DeckCard[] = (cardsResult.rows as DeckCardRow[]).map((card) => ({
@@ -440,6 +457,9 @@ export async function getDeckById(
       type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
+      ...(card.display_order !== undefined && card.display_order !== null && {
+        displayOrder: card.display_order,
+      }),
       exclude_from_draw: card.exclude_from_draw ?? false,
     }));
 
@@ -476,6 +496,7 @@ export async function getDecksByUserId(
           d.*,
           ${characterSelectSql},
           ${LOCATION_LIST_SELECT},
+          ${BATTLEGROUND_LIST_SELECT},
           dm1.mission_id as mission_1_id,
           dm1.mission_name as mission_1_name,
           dm1.mission_image_path as mission_1_default_image
@@ -483,6 +504,7 @@ export async function getDecksByUserId(
 ${characterJoinSql}
         LEFT JOIN locations l ON d.location_id = l.id
 ${LOCATION_FALLBACK_JOIN}
+${BATTLEGROUND_FALLBACK_JOIN}
         LEFT JOIN LATERAL (
           SELECT 
             dc.card_id as mission_id,
@@ -539,6 +561,7 @@ function buildDeckListSelectSql(opts: {
           d.*,
           ${selectFragment},
           ${LOCATION_LIST_SELECT},
+          ${BATTLEGROUND_LIST_SELECT},
           dm1.mission_id as mission_1_id,
           dm1.mission_name as mission_1_name,
           dm1.mission_image_path as mission_1_default_image
@@ -546,6 +569,7 @@ function buildDeckListSelectSql(opts: {
 ${joinFragment}
         LEFT JOIN locations l ON d.location_id = l.id
 ${LOCATION_FALLBACK_JOIN}
+${BATTLEGROUND_FALLBACK_JOIN}
         LEFT JOIN LATERAL (
           SELECT 
             dc.card_id as mission_id,
@@ -754,7 +778,9 @@ export async function getDeckSummaryWithAllCards(
 
     const deck = deckResult.rows[0] as DeckRow;
     const cardsResult = await client.query(
-      'SELECT * FROM deck_cards WHERE deck_id = $1',
+      `SELECT * FROM deck_cards
+       WHERE deck_id = $1
+       ORDER BY display_order ASC NULLS LAST, card_type, card_id`,
       [deckId]
     );
     const cards: DeckCard[] = (cardsResult.rows as DeckCardRow[]).map((card) => ({
@@ -762,6 +788,9 @@ export async function getDeckSummaryWithAllCards(
       type: card.card_type as DeckCard['type'],
       cardId: card.card_id,
       quantity: card.quantity,
+      ...(card.display_order !== undefined && card.display_order !== null && {
+        displayOrder: card.display_order,
+      }),
       exclude_from_draw: card.exclude_from_draw ?? false,
     }));
 

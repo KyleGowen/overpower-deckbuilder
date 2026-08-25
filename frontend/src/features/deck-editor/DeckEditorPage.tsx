@@ -68,6 +68,9 @@ import {
   IconList,
   IconGrid,
   IconHeart,
+  IconChevronUp,
+  IconChevronDown,
+  IconGripVertical,
 } from '../../components/icons';
 import {
   buildKoDimmingContext,
@@ -109,6 +112,11 @@ import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cy
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { getDeckEditorReturnTo, getDeckEditorBackAriaLabel } from '../../lib/navigation/deckEditorReturn';
 import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
+import {
+  characterOrderPosition,
+  moveCharacterBy,
+  reorderCharacterTo,
+} from '../../lib/decks/characterOrder';
 import './DeckEditorPage.css';
 
 const AddCardsPanel = lazy(() =>
@@ -117,6 +125,9 @@ const AddCardsPanel = lazy(() =>
 const DrawHandPanel = lazy(() =>
   import('./DrawHandPanel').then((m) => ({ default: m.DrawHandPanel })),
 );
+
+const CHARACTER_REORDER_HOLD_MS = 500;
+const CHARACTER_REORDER_MOVE_TOLERANCE_PX = 10;
 
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   if (!catalogType) return 'deck-editor__card-img--portrait';
@@ -330,11 +341,20 @@ export default function DeckEditorPage() {
   const [drawnCards, setDrawnCards] = useState<DeckCardEntry[]>([]);
   const [mobileDeckTypeTab, setMobileDeckTypeTab] = useState<CatalogType | null>(null);
   const [deckViewMode, setDeckViewMode] = useState(readDeckViewMode);
+  const [activeCharacterReorderId, setActiveCharacterReorderId] = useState<string | null>(null);
+  const [draggedCharacterId, setDraggedCharacterId] = useState<string | null>(null);
+  const [dragOverCharacterId, setDragOverCharacterId] = useState<string | null>(null);
   const loadedRef = useRef(false);
   const savedReserveRef = useRef<string | null>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const typeTabsRef = useRef<HTMLDivElement>(null);
+  const characterHoldRef = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    x: number;
+    y: number;
+  } | null>(null);
+  const suppressCharacterOpenRef = useRef(false);
   const canSimulateKo = Boolean(user);
 
   const { close: closeCardDetail } = useDeckCardDetailHistory(Boolean(selected), () => setSelected(null));
@@ -346,7 +366,12 @@ export default function DeckEditorPage() {
     setDrawnCards([]);
     setAddOpen(false);
     setAddCardsMounted(false);
+    setActiveCharacterReorderId(null);
   }, [deckId]);
+
+  useEffect(() => () => {
+    if (characterHoldRef.current) clearTimeout(characterHoldRef.current.timer);
+  }, []);
 
   useEffect(() => {
     if (addOpen) setAddCardsMounted(true);
@@ -619,6 +644,53 @@ export default function DeckEditorPage() {
     setDirty(true);
   };
 
+  const reorderCharacter = (instanceId: string, delta: -1 | 1) => {
+    setCards((prev) => moveCharacterBy(prev, instanceId, delta));
+    setDirty(true);
+  };
+
+  const clearCharacterHold = () => {
+    if (!characterHoldRef.current) return;
+    clearTimeout(characterHoldRef.current.timer);
+    characterHoldRef.current = null;
+  };
+
+  const startCharacterHold = (
+    entry: DeckCardEntry,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => {
+    if (!isMobile || !isOwner || entry.type !== 'character' || !entry.instanceId) return;
+    clearCharacterHold();
+    characterHoldRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      timer: setTimeout(() => {
+        suppressCharacterOpenRef.current = true;
+        setActiveCharacterReorderId(entry.instanceId ?? null);
+        characterHoldRef.current = null;
+      }, CHARACTER_REORDER_HOLD_MS),
+    };
+  };
+
+  const moveCharacterHold = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const hold = characterHoldRef.current;
+    if (!hold) return;
+    if (
+      Math.abs(event.clientX - hold.x) > CHARACTER_REORDER_MOVE_TOLERANCE_PX ||
+      Math.abs(event.clientY - hold.y) > CHARACTER_REORDER_MOVE_TOLERANCE_PX
+    ) {
+      clearCharacterHold();
+    }
+  };
+
+  const finishCharacterHold = () => clearCharacterHold();
+
+  const dropCharacterOn = (targetInstanceId: string) => {
+    if (!draggedCharacterId || draggedCharacterId === targetInstanceId) return;
+    setCards((prev) => reorderCharacterTo(prev, draggedCharacterId, targetInstanceId));
+    setDirty(true);
+  };
+
   const selectReserveCharacter = (cardId: string) => {
     setReserveCharacterId(cardId);
     setDirty(true);
@@ -846,10 +918,11 @@ export default function DeckEditorPage() {
         savedReserveRef.current = reserveCharacterId;
         queryClient.setQueryData(['deck', deckId], updated);
       }
-      const payload: DeckCardInput[] = aggregateInstancesForSave(cards).map((c) => ({
+      const payload: DeckCardInput[] = aggregateInstancesForSave(cards).map((c, displayOrder) => ({
         cardType: c.type,
         cardId: c.cardId,
         quantity: c.quantity,
+        displayOrder,
         exclude_from_draw: c.exclude_from_draw,
       }));
       const updatedCards = await replaceDeckCards(deckId, payload, isGuest);
@@ -1222,7 +1295,22 @@ export default function DeckEditorPage() {
                   <h2 className="deck-editor__group-title">
                     {meta.label}
                     <span className="deck-editor__group-count">{entries.length}</span>
+                    {isOwner && meta.deckType === 'character' && entries.length > 1 ? (
+                      <span className="deck-editor__group-order-hint">
+                        <IconGripVertical />
+                        <span className="deck-editor__group-order-hint--desktop">Drag to set preview order</span>
+                        <span className="deck-editor__group-order-hint--mobile">Press and hold to reorder</span>
+                      </span>
+                    ) : null}
                   </h2>
+                ) : null}
+                {showMobileTypeTabs &&
+                isOwner &&
+                meta.deckType === 'character' &&
+                entries.length > 1 ? (
+                  <p className="deck-editor__mobile-order-hint">
+                    <IconGripVertical /> Press and hold a character to set preview order
+                  </p>
                 ) : null}
                 <div
                   className={`deck-editor__cards${
@@ -1264,19 +1352,63 @@ export default function DeckEditorPage() {
                       koCtx !== null && shouldDimDeckCard(entry, catalogCard, koCtx);
                     const entryIsFoil = Boolean(entry.is_foil || (catalogCard && isFoilCard(catalogCard)));
                     const foilSeed = buildFoilSeed(entry.cardId, entry.instanceId);
+                    const canReorderCharacter =
+                      isOwner && entry.type === 'character' && entries.length > 1 && Boolean(entry.instanceId);
+                    const orderState = entry.instanceId
+                      ? characterOrderPosition(cards, entry.instanceId)
+                      : { position: -1, total: 0 };
+                    const reorderActive =
+                      canReorderCharacter && activeCharacterReorderId === entry.instanceId;
+                    const dragTarget =
+                      canReorderCharacter && dragOverCharacterId === entry.instanceId &&
+                      draggedCharacterId !== entry.instanceId;
                     return (
                     <div
-                      className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}`}
+                      className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}${canReorderCharacter ? ' deck-editor__card--reorderable' : ''}${reorderActive ? ' deck-editor__card--reorder-active' : ''}${draggedCharacterId === entry.instanceId ? ' deck-editor__card--dragging' : ''}${dragTarget ? ' deck-editor__card--drag-target' : ''}`}
                       key={entry.instanceId ?? `${entry.type}:${entry.cardId}`}
+                      draggable={canReorderCharacter && !isMobile}
+                      onDragStart={(event) => {
+                        if (!canReorderCharacter || !entry.instanceId) return;
+                        setDraggedCharacterId(entry.instanceId);
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', entry.instanceId);
+                      }}
+                      onDragOver={(event) => {
+                        if (!canReorderCharacter || !draggedCharacterId || !entry.instanceId) return;
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = 'move';
+                        setDragOverCharacterId(entry.instanceId);
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        if (entry.instanceId) dropCharacterOn(entry.instanceId);
+                        setDraggedCharacterId(null);
+                        setDragOverCharacterId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedCharacterId(null);
+                        setDragOverCharacterId(null);
+                      }}
                     >
                       <div className="deck-editor__card-media">
                         <button
                           type="button"
                           className={`deck-editor__card-img ${deckCardImgOrientationClass(catalogType)}${isCardSelected ? ' is-selected' : ''}`}
                           onClick={() => {
+                            if (suppressCharacterOpenRef.current) {
+                              suppressCharacterOpenRef.current = false;
+                              return;
+                            }
                             if (catalogCard && catalogType && entry.instanceId) {
                               selectDeckCard(catalogCard, catalogType, entry.instanceId);
                             }
+                          }}
+                          onPointerDown={(event) => startCharacterHold(entry, event)}
+                          onPointerMove={moveCharacterHold}
+                          onPointerUp={finishCharacterHold}
+                          onPointerCancel={finishCharacterHold}
+                          onContextMenu={(event) => {
+                            if (canReorderCharacter && isMobile) event.preventDefault();
                           }}
                           disabled={!canOpenDetail}
                           aria-label={canOpenDetail ? `View ${cardName}` : cardName}
@@ -1291,6 +1423,55 @@ export default function DeckEditorPage() {
                             foilSeed={foilSeed}
                           />
                         </button>
+                        {canReorderCharacter && entry.instanceId ? (
+                          <div
+                            className="deck-editor__character-order"
+                            aria-label={`${cardName} preview position ${orderState.position + 1} of ${orderState.total}`}
+                          >
+                            <span className="deck-editor__character-order-grip" aria-hidden="true">
+                              <IconGripVertical />
+                            </span>
+                            <button
+                              type="button"
+                              className="deck-editor__character-order-btn"
+                              disabled={orderState.position <= 0}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                reorderCharacter(entry.instanceId!, -1);
+                              }}
+                              aria-label={`Move ${cardName} earlier in the deck preview`}
+                              title="Move earlier"
+                            >
+                              <IconChevronUp />
+                            </button>
+                            <span className="deck-editor__character-order-position">
+                              {orderState.position + 1} / {orderState.total}
+                            </span>
+                            <button
+                              type="button"
+                              className="deck-editor__character-order-btn"
+                              disabled={orderState.position >= orderState.total - 1}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                reorderCharacter(entry.instanceId!, 1);
+                              }}
+                              aria-label={`Move ${cardName} later in the deck preview`}
+                              title="Move later"
+                            >
+                              <IconChevronDown />
+                            </button>
+                            <button
+                              type="button"
+                              className="deck-editor__character-order-done"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setActiveCharacterReorderId(null);
+                              }}
+                            >
+                              Done
+                            </button>
+                          </div>
+                        ) : null}
                       </div>
                       {entry.type === 'character' &&
                       reserveRowState &&

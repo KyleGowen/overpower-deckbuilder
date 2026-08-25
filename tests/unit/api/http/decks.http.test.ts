@@ -958,9 +958,34 @@ describe('decks.http', () => {
       };
       const res = await request(buildApp(deps))
         .put('/decks/d1/cards')
-        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1 }] })
+        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1, displayOrder: 3 }] })
         .expect(200);
       expect(res.body.data).toEqual(sampleDetail);
+      expect(deckCardsService.putReplaceCards).toHaveBeenCalledWith(
+        'd1',
+        'user-1',
+        [{ cardType: 'character', cardId: 'x', quantity: 1, displayOrder: 3 }],
+      );
+    });
+
+    it('PUT rejects an invalid displayOrder', async () => {
+      const deckCardsService = stubDeckCards();
+      const deps: DecksV1HttpDeps = {
+        deckStatsService: stubDeckStats(),
+        deckListService,
+        deckWriteService,
+        deckDetailService: stubDetail(),
+        deckBackgroundService: noopDeckBackground,
+        deckCardsService,
+        deckUIPreferencesService: stubDeckUIPreferences(),
+        authenticateUser: passAuth
+      };
+      const res = await request(buildApp(deps))
+        .put('/decks/d1/cards')
+        .send({ cards: [{ cardType: 'character', cardId: 'x', quantity: 1, displayOrder: -1 }] })
+        .expect(400);
+      expect(res.body.errors[0].message).toContain('displayOrder');
+      expect(deckCardsService.putReplaceCards).not.toHaveBeenCalled();
     });
 
     it('PUT returns 403 for GUEST', async () => {

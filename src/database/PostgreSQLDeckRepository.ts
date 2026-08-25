@@ -202,6 +202,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
       cardType: string;
       cardId: string;
       quantity: number;
+      displayOrder?: number;
       selectedAlternateImage?: string;
       exclude_from_draw?: boolean;
     }>
@@ -213,6 +214,7 @@ export class PostgreSQLDeckRepository implements DeckRepository {
         cardType: c.cardType,
         cardId: c.cardId,
         quantity: c.quantity,
+        ...(c.displayOrder !== undefined && { displayOrder: c.displayOrder }),
         ...(c.exclude_from_draw !== undefined && {
           exclude_from_draw: c.exclude_from_draw,
         }),

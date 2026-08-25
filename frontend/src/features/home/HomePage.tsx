@@ -92,10 +92,19 @@ export default function HomePage() {
     queryFn: () => fetchCatalog('locations'),
     staleTime: 30 * 60 * 1000,
   });
+  const battlegroundsQuery = useQuery({
+    queryKey: ['catalog', 'battlegrounds'],
+    queryFn: () => fetchCatalog('battlegrounds'),
+    staleTime: 30 * 60 * 1000,
+  });
 
   const previewCatalogImages = useMemo(
-    () => buildDeckPreviewCatalogImages(charactersQuery.data, locationsQuery.data),
-    [charactersQuery.data, locationsQuery.data],
+    () => buildDeckPreviewCatalogImages(
+      charactersQuery.data,
+      locationsQuery.data,
+      battlegroundsQuery.data,
+    ),
+    [charactersQuery.data, locationsQuery.data, battlegroundsQuery.data],
   );
 
   const enrichedCommunityDecks = useMemo(

@@ -3,6 +3,7 @@ import type { CatalogCard, DeckCardEntry, DeckListItem } from '../api/types';
 export interface DeckPreviewCatalogImages {
   characters: Map<string, string>;
   locations: Map<string, string>;
+  battlegrounds: Map<string, string>;
 }
 
 function catalogImagePath(card?: Partial<CatalogCard> | null): string | undefined {
@@ -16,6 +17,7 @@ function catalogImagePath(card?: Partial<CatalogCard> | null): string | undefine
 export function buildDeckPreviewCatalogImages(
   characters: Array<Partial<CatalogCard> & { id: string }> | undefined,
   locations?: Array<Partial<CatalogCard> & { id: string }> | undefined,
+  battlegrounds?: Array<Partial<CatalogCard> & { id: string }> | undefined,
 ): DeckPreviewCatalogImages {
   const characterMap = new Map<string, string>();
   (characters ?? []).forEach((c) => {
@@ -29,7 +31,13 @@ export function buildDeckPreviewCatalogImages(
     if (path) locationMap.set(c.id, path);
   });
 
-  return { characters: characterMap, locations: locationMap };
+  const battlegroundMap = new Map<string, string>();
+  (battlegrounds ?? []).forEach((c) => {
+    const path = catalogImagePath(c);
+    if (path) battlegroundMap.set(c.id, path);
+  });
+
+  return { characters: characterMap, locations: locationMap, battlegrounds: battlegroundMap };
 }
 
 function enrichPreviewCard(
@@ -46,6 +54,8 @@ function enrichPreviewCard(
       ? images.characters
       : card.type === 'location'
         ? images.locations
+        : card.type === 'battleground'
+          ? images.battlegrounds
         : undefined;
   const fromCatalog = map?.get(card.cardId);
   if (!fromCatalog) return card;

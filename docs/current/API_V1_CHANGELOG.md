@@ -5,6 +5,7 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Deck-card bulk replace accepts optional zero-based `displayOrder`, and deck detail reads return cards in that stable order. The deck editor uses it to persist character arrangement and keep every deck-preview carousel in character → location → battleground order.
 - Added authenticated `POST /api/v1/feedback` for bug reports and feature/change
   requests. The endpoint validates and rate-limits submissions, sends them to
   `kyle@excelsior.cards` through SES with the authenticated sender's resolved

@@ -24,6 +24,13 @@ describe('deckPreviewImages', () => {
         image_path: '221_b_baker_st.webp',
       },
     ],
+    [
+      {
+        id: 'bg-1',
+        name: 'Global Defense Agency',
+        image_path: 'battlegrounds/global_defense_agency.webp',
+      },
+    ],
   );
 
   const baseDeck: DeckListItem = {
@@ -54,6 +61,13 @@ describe('deckPreviewImages', () => {
         quantity: 1,
         name: '221-B Baker St.',
       },
+      {
+        id: 'bg_deck-1',
+        type: 'battleground',
+        cardId: 'bg-1',
+        quantity: 1,
+        name: 'Global Defense Agency',
+      },
     ],
   };
 
@@ -67,6 +81,12 @@ describe('deckPreviewImages', () => {
     const enriched = enrichDeckListItemPreviewImages(baseDeck, catalogImages);
     const location = enriched.cards?.find((c) => c.type === 'location');
     expect(location?.defaultImage).toBe('221_b_baker_st.webp');
+  });
+
+  it('fills missing battleground defaultImage from catalog', () => {
+    const enriched = enrichDeckListItemPreviewImages(baseDeck, catalogImages);
+    const battleground = enriched.cards?.find((c) => c.type === 'battleground');
+    expect(battleground?.defaultImage).toBe('battlegrounds/global_defense_agency.webp');
   });
 
   it('preserves existing defaultImage values', () => {

@@ -856,7 +856,7 @@ The create request also accepts `is_private` (boolean): `true` keeps the deck ow
 
 Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid` (server-owned — recomputed/persisted on every card mutation, create, import, and sample-deck copy; read-only for clients), `is_private` (boolean — deck visibility; `true` = private/owner-only, `false` = public; defaults `true`), `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
 
-Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, `exclude_from_draw`.
+Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, optional `displayOrder` (stable zero-based deck-editor/preview order), and `exclude_from_draw`.
 
 **Caching:** `Cache-Control: no-store`. Deck contents and calculated counts are mutable and publicly readable, so clients and edge caches must fetch the persisted state for every read.
 
@@ -948,7 +948,7 @@ Deck card CRUD for a database-backed deck. **Legacy** `**/api/decks/:id/cards`**
 
 **Rate limiting / read-only:** Same as `**POST`**.
 
-**Request model:** `[DeckCardsPutBody.ts](src/api/http/models/decks/DeckCardsPutBody.ts)` — `**{ "cards": [ { "cardType", "cardId", "quantity", "exclude_from_draw"? }, … ] }`** (max **100** entries per request).
+**Request model:** `[DeckCardsPutBody.ts](src/api/http/models/decks/DeckCardsPutBody.ts)` — `**{ "cards": [ { "cardType", "cardId", "quantity", "displayOrder"?, "exclude_from_draw"? }, … ] }`** (max **100** entries per request). `displayOrder` is a zero-based integer used to preserve deck-editor character order and deck-preview carousel order; omitted values remain backward compatible and sort after explicitly ordered rows.
 
 **Response 200:** v1 envelope; `**data`** is updated deck detail after bulk replace.
 
@@ -1126,7 +1126,7 @@ Session-scoped decks for **GUEST** users: stored **in memory** keyed by `**sessi
 
 ### `PUT /api/v1/guest/decks/:id/cards`
 
-Replace all cards (max **100** entries; per-entry `**quantity`** 1–100). **Body:** `{ "cards": [ { "cardType", "cardId", "quantity"?, "exclude_from_draw"? }, ... ] }` — `[GuestDeckCardsPutBody.ts](src/api/http/models/guest-decks/GuestDeckCardsPutBody.ts)`
+Replace all cards (max **100** entries; per-entry `**quantity`** 1–100). **Body:** `{ "cards": [ { "cardType", "cardId", "quantity"?, "displayOrder"?, "exclude_from_draw"? }, ... ] }` — `[GuestDeckCardsPutBody.ts](src/api/http/models/guest-decks/GuestDeckCardsPutBody.ts)`. Guest decks retain the supplied zero-based `displayOrder` in session memory.
 
 **Response 200:** v1 envelope; `**data`** = full guest deck `{ "metadata", "cards" }`.
 

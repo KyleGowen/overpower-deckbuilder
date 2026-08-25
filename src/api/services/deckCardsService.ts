@@ -15,6 +15,7 @@ export interface DeckCardsRepository {
       cardType: string;
       cardId: string;
       quantity: number;
+      displayOrder?: number;
       selectedAlternateImage?: string;
       exclude_from_draw?: boolean;
     }>
@@ -203,7 +204,7 @@ export class DeckCardsService {
   async putReplaceCards(
     deckId: string,
     ownerUserId: string,
-    cards: Array<{ cardType: string; cardId: string; quantity: number }>
+    cards: Array<{ cardType: string; cardId: string; quantity: number; displayOrder?: number; exclude_from_draw?: boolean }>
   ): Promise<
     | { ok: true; data: DeckDetailView }
     | { ok: false; kind: 'forbidden'; message: string }

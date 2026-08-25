@@ -32,7 +32,9 @@ export async function refreshDeckPreviewMetadata(
           FROM (
             SELECT
               card_id,
-              ROW_NUMBER() OVER (ORDER BY created_at, card_id) AS row_num
+              ROW_NUMBER() OVER (
+                ORDER BY display_order ASC NULLS LAST, created_at, card_id
+              ) AS row_num
             FROM deck_cards
             WHERE deck_id = $1
               AND card_type = 'character'
