@@ -1,5 +1,6 @@
 // Use the built-in AWS SDK that's available in Node.js 16.x runtime
 const AWS = require('aws-sdk');
+const { stripResigningHeaders } = require('./email_forwarder_headers');
 
 // Configure AWS SDK
 AWS.config.update({ region: process.env.AWS_REGION || 'us-west-2' });
@@ -7,7 +8,7 @@ const s3 = new AWS.S3();
 const ses = new AWS.SES();
 
 exports.handler = async (event) => {
-    console.log('Received event:', JSON.stringify(event, null, 2));
+    console.log('Received email forwarding event');
     
     try {
         // Parse the S3 event (emails are stored in S3 by SES)
@@ -26,7 +27,7 @@ exports.handler = async (event) => {
                         Key: key 
                     }).promise();
                     
-                    const rawEmail = data.Body.toString();
+                    const rawEmail = stripResigningHeaders(data.Body.toString());
                 console.log('Raw email retrieved from S3');
                 
                 // Parse and modify the email headers for proper forwarding
@@ -35,11 +36,6 @@ exports.handler = async (event) => {
                 let inHeaders = true;
                 let originalFrom = '';
                 let originalTo = '';
-                
-                console.log('Environment variables:', {
-                    FORWARD_TO_EMAIL: process.env.FORWARD_TO_EMAIL,
-                    FROM_EMAIL: process.env.FROM_EMAIL
-                });
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
@@ -56,33 +52,24 @@ exports.handler = async (event) => {
                             modifiedEmail += line + '\n';
                         } else if (line.toLowerCase().startsWith('from:')) {
                             originalFrom = line.substring(5).trim();
-                            console.log('Original From header:', originalFrom);
                                 // Use verified excelsior.cards domain but preserve original sender's name
                                 const nameMatch = originalFrom.match(/^(.+?)\s*<(.+?)>$/);
                                 if (nameMatch) {
                                     const name = nameMatch[1];
                                     modifiedEmail += `From: ${name} <noreply@excelsior.cards>\n`;
-                                    console.log('Modified From header to:', `${name} <noreply@excelsior.cards>`);
                                 } else {
                                     // Fallback to using the verified excelsior.cards address
                                     modifiedEmail += `From: noreply@excelsior.cards\n`;
-                                    console.log('Modified From header to:', 'noreply@excelsior.cards');
                                 }
                         } else if (line.toLowerCase().startsWith('to:')) {
                             originalTo = line.substring(3).trim();
-                            console.log('Original To header:', originalTo);
                             // Change To header to forward address
                             modifiedEmail += `To: ${process.env.FORWARD_TO_EMAIL}\n`;
-                            console.log('Modified To header to:', process.env.FORWARD_TO_EMAIL);
                         } else if (line.toLowerCase().startsWith('return-path:')) {
-                            console.log('Original Return-Path header:', line);
                             // Change Return-Path header to use verified Gmail address
                             modifiedEmail += `Return-Path: <${process.env.FORWARD_TO_EMAIL}>\n`;
-                            console.log('Modified Return-Path header to:', process.env.FORWARD_TO_EMAIL);
                         } else if (line.toLowerCase().startsWith('reply-to:')) {
-                            console.log('Original Reply-To header:', line);
                             // Skip the original Reply-To header since we'll add our own
-                            console.log('Skipping original Reply-To header, will add our own');
                         } else {
                             // Keep other headers as-is
                             modifiedEmail += line + '\n';
@@ -102,8 +89,6 @@ exports.handler = async (event) => {
                         modifiedEmail += line + '\n';
                     }
                 }
-                
-                console.log('Modified email preview (first 500 chars):', modifiedEmail.substring(0, 500));
                 
                     // Forward the modified email using SES
                     const result = await ses.sendRawEmail({

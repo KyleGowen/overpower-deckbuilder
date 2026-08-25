@@ -1,13 +1,14 @@
 # ProfileMenu
 
 Account menu contents (file is `ProfileMenuContent.tsx`): user header, "Create New Deck", and
-inline subforms for display name / email / password, plus log out. Rendered inside a desktop
+inline subforms for display name / email / password, Help & Feedback, plus log out. Rendered inside a desktop
 dropdown or a mobile sheet by the nav.
 
 ## Props
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `onClose` | `() => void` | – | Closes the host dropdown/sheet (called before navigation and on logout). |
+| `onOpenHelp` | `() => void` | – | Closes the profile surface and opens the shared Help & Feedback workflow. |
 | `variant` | `'dropdown' \| 'sheet'` | `'dropdown'` | Root class `profile-menu--{variant}` for desktop vs mobile presentation. |
 
 ## Notes
@@ -15,12 +16,14 @@ dropdown or a mobile sheet by the nav.
   is no user. Header shows display name (or "Guest"), email, and deck count from
   `['decks','mine',userId]`.
 - Capability gating:
-  - Guests: only Create Deck + "Exit Guest" (no name/email/password forms).
+  - Guests: Create Deck + Help & Feedback + "Exit Guest" (no name/email/password forms).
   - Google (SSO) users: can set a separate **Display name** but cannot change email/password
     (those forms auto-close); password users edit their unique **Username**.
 - Only one subform open at a time (`openForm`). Mutations call `lib/api/account`
   (`setDisplayName`/`changeEmail`/`changePassword`), then `refresh()` +
   `invalidateQueries(['auth','me'])`. Password subform uses two
   [`PasswordInput`](../PasswordInput/PasswordInput.md)s with live match validation.
+- Help & Feedback is always placed before the divider above logout. Desktop renders its inspector
+  from `UserMenu`; mobile renders the same flow from `MobileBottomNav` after closing the account sheet.
 - Create Deck navigates to `/users/:id/decks?create=1`; logout clears auth and routes to
   `/login`. Styling in `ProfileMenuContent.css`.

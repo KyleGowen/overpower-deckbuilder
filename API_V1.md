@@ -34,6 +34,7 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 | `GET /api/v1/decks/favorites` | ✓ | ✓ | USER/ADMIN; guests→401/403 |
 | `POST/DELETE /api/v1/decks/:id/favorite` | ✓ | ✓ | USER/ADMIN; guests→403; cannot favorite own |
 | `POST /api/v1/users/display-name` | ✓ | — | USER/ADMIN; GUEST→403 |
+| `POST /api/v1/feedback` | ✓ | — | Any authenticated role; 5 submissions/minute |
 | `/api/v1/guest/decks*` | ✓ (GUEST only) | ✗ | GUEST role required; wrong role→403 |
 | `/api/v1/collections/me*` | ✓ | ✗ | USER/ADMIN; GUEST→401 (no collection) |
 | `/api/v1/admin/*` | ✓ | — | ADMIN role required; other roles→403 |
@@ -65,6 +66,7 @@ All v1 JSON responses use:
 | Code | Use                           |
 | ---- | ----------------------------- |
 | 200  | Success                       |
+| 202  | Accepted for delivery          |
 | 400  | Validation / bad request      |
 | 401  | Missing or invalid auth       |
 | 403  | Authenticated but not allowed |
@@ -78,23 +80,24 @@ All v1 JSON responses use:
 
 1. [Auth](#auth)
 2. [User account](#user-account)
-3. [DBV catalog](#dbv-catalog)
-4. [DBV support](#dbv-support)
-5. [Recent updates](#recent-updates)
-6. [User decks (list)](#user-decks-list)
-7. [User decks (create + validate)](#user-decks-create--validate)
-8. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
-9. [User decks (cards)](#user-decks-cards)
-10. [User decks (UI preferences)](#user-decks-ui-preferences)
-11. [Community, favorites, and public profiles](#community-favorites-and-public-profiles)
-12. [Guest decks (session memory)](#guest-decks-session-memory)
-13. [Collections (current user)](#collections-current-user)
-14. [Admin](#admin)
-15. [Image URL contract](#image-url-contract)
-16. [Caching & conditional GET](#caching--conditional-get)
-17. [Error catalog](#error-catalog)
-18. [Changelog](#changelog)
-19. [Deprecation policy](#deprecation-policy)
+3. [Feedback](#feedback)
+4. [DBV catalog](#dbv-catalog)
+5. [DBV support](#dbv-support)
+6. [Recent updates](#recent-updates)
+7. [User decks (list)](#user-decks-list)
+8. [User decks (create + validate)](#user-decks-create--validate)
+9. [User decks (single: get, full, update, delete)](#user-decks-single-get-full-update-delete)
+10. [User decks (cards)](#user-decks-cards)
+11. [User decks (UI preferences)](#user-decks-ui-preferences)
+12. [Community, favorites, and public profiles](#community-favorites-and-public-profiles)
+13. [Guest decks (session memory)](#guest-decks-session-memory)
+14. [Collections (current user)](#collections-current-user)
+15. [Admin](#admin)
+16. [Image URL contract](#image-url-contract)
+17. [Caching & conditional GET](#caching--conditional-get)
+18. [Error catalog](#error-catalog)
+19. [Changelog](#changelog)
+20. [Deprecation policy](#deprecation-policy)
 
 ---
 
@@ -297,6 +300,48 @@ The resolved public name everywhere in the app comes from `resolveUserDisplayNam
 **Response 409:** `USERNAME_TAKEN` (password user, name already in use).
 
 **Implementation:** `[UserAccountService.setDisplayName](src/api/services/userAccountService.ts)`, `[src/api/http/users.http.ts](src/api/http/users.http.ts)`.
+
+---
+
+## Feedback
+
+### `POST /api/v1/feedback`
+
+Accepts an in-app bug report or feature/change request and delivers it to
+`kyle@excelsior.cards` through server-side SES. Feedback text is not persisted
+or written to application logs.
+
+**Auth:** Session cookie (`sessionId`). **GUEST**, **USER**, and **ADMIN** are accepted.
+
+**Rate limit:** 5 submissions per authenticated user per minute.
+
+**Request model:** `[src/api/http/models/feedback/SubmitFeedbackRequestBody.ts](src/api/http/models/feedback/SubmitFeedbackRequestBody.ts)`
+
+**Body:**
+
+```json
+{ "category": "bug", "message": "Deck save failed after I changed the background." }
+```
+
+`category` is `bug` or `feature`; `message` is trimmed, required, and limited to 4,000 characters.
+
+**Response 202** (`data`):
+
+```json
+{ "submitted": true }
+```
+
+**Response 400:** `VALIDATION_ERROR`.
+
+**Response 401:** `UNAUTHORIZED`.
+
+**Response 429:** `RATE_LIMITED`.
+
+**Response 500:** `FEEDBACK_DELIVERY_ERROR`.
+
+**Implementation:** `[FeedbackService](src/api/services/feedbackService.ts)`,
+`[SesFeedbackEmailSender](src/api/services/sesFeedbackEmailSender.ts)`,
+`[src/api/http/feedback.http.ts](src/api/http/feedback.http.ts)`.
 
 ---
 
@@ -1246,6 +1291,7 @@ Clears card repository caches.
 | POST   | /api/v1/users/change-email              | users.http.ts       |
 | POST   | /api/v1/users/change-password           | users.http.ts       |
 | POST   | /api/v1/users/display-name              | users.http.ts       |
+| POST   | /api/v1/feedback                        | feedback.http.ts    |
 | GET    | /api/v1/catalog/characters              | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/locations               | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/special-cards           | dbv-catalog.http.ts |

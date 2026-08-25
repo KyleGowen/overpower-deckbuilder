@@ -32,6 +32,7 @@ import { GuestDeckService } from '../api/services/guestDeckService';
 import { AdminService } from '../api/services/adminService';
 import { UserAccountService } from '../api/services/userAccountService';
 import { CommunityService } from '../api/services/communityService';
+import { FeedbackService } from '../api/services/feedbackService';
 import { GUEST_USER_ID } from '../constants/guestUser';
 import { TOURNAMENT_DECKS_USER_ID } from '../constants/tournamentDecksUser';
 import { registerApiV1Routes } from '../api/http/registerApiV1Routes';
@@ -104,6 +105,9 @@ const adminService = new AdminService({
 });
 
 const userAccountService = new UserAccountService(userRepository);
+const feedbackService = new FeedbackService({
+  sendFeedbackEmail: async () => undefined
+});
 const communityService = new CommunityService(deckRepository, userRepository, [
   GUEST_USER_ID,
   TOURNAMENT_DECKS_USER_ID
@@ -233,7 +237,8 @@ registerApiV1Routes(app, {
   guestDeckService,
   adminService,
   userAccountService,
-  communityService
+  communityService,
+  feedbackService
 });
 
 registerLegacyDeckReadCompatRoutes(app, {

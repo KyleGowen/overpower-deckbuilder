@@ -195,6 +195,17 @@ Service: `UserAccountService` + `users.http.ts`. Legacy change-password delegate
 
 ---
 
+## P4c — In-app feedback (additive v1 route)
+
+| Legacy | v1 | Migrated | Service | Unit tests | Integration | Docs/OpenAPI |
+| ------ | -- | -------- | ------- | ---------- | ----------- | ------------ |
+| — | POST /api/v1/feedback | [x] | `FeedbackService` + `feedback.http.ts` | [x] | [x] | [x] |
+
+Feedback is authenticated, Zod-validated, limited to five submissions per user per minute,
+and delivered through SES without persisting the message body.
+
+---
+
 ## P5 — Admin only (`/api/v1/admin/...`)
 
 All elevated operations must live under `/api/v1/admin/...` (no client “admin” flags).

@@ -40,6 +40,7 @@ to [`docs/openapi.yaml`](../openapi.yaml)) in the same PR.**
 | `SESSION_REQUIRED`            | 401  | Guest deck APIs need a session cookie.                                   | Allow cookies or call `/api/auth/...` first.                                         |
 | `VALIDATION_ERROR`            | 400  | Body/params/query failed validation (zod).                               | Fix the field listed in `errors[].field` and retry.                                  |
 | `RATE_LIMITED`                | 429  | Too many requests per window.                                            | Honor `X-RateLimit-Reset`; retry after.                                              |
+| `FEEDBACK_DELIVERY_ERROR`     | 500  | In-app feedback could not be delivered through SES.                      | Retry; use email or Discord if the failure continues.                               |
 | `CATALOG_ERROR`               | 500  | Upstream catalog query failed.                                           | Retry; report `requestId` if persistent.                                             |
 | `DBV_SUPPORT_ERROR`           | 500  | DBV support lookup failed.                                               | Retry; report `requestId` if persistent.                                             |
 | `DECK_LIST_ERROR`             | 500  | Listing decks failed.                                                    | Retry.                                                                                |

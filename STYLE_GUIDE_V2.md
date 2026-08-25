@@ -258,6 +258,19 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
   scrim at `--z-drawer`, focus trapping, `Esc` to close, and slides in with `--ease-out`.
 - The New Deck form presents private/public visibility as a compact stacked radio group with
   readable labels and supporting text; private is selected by default and persisted with the deck.
+- **Help & feedback:** the profile menu places a question-mark action after account settings and
+  before the divider above Log Out / Exit Guest. It closes the profile surface before opening a
+  compact, top-right desktop inspector or mobile bottom sheet. Bug and feature/change rows use
+  48px accent-soft icon tiles and open a focused text-entry modal; Email support uses a `mailto:` link,
+  while Message on Discord shows `@GirlsGoneKyle` in its subtext and opens the OverPower invite in a
+  new tab. Contact-card hover and keyboard-focus states use the accent background and border without
+  underlining their text. The
+  success confirmation uses 24px internal spacing so its icon and Done action remain clear of the
+  dialog border.
+  Successful API delivery replaces the form with
+  a centered confirmation dialog. Feedback forms use the standard input surface, accent focus ring,
+  explicit category label, 4,000-character count, disabled sending state, Escape/backdrop dismissal,
+  and a stacked edge-to-edge sheet treatment below 560px.
 - The card **detail panel** shows the full art, type/set chips, an action slot (e.g. Add to
   Deck / + Collection), the color-coded stat row, and a Details key/value list
   (Set, **Is Foil** on Collection, **Has Foil** on Database, Set Number, abilities when present). Default width **504px** (20% wider

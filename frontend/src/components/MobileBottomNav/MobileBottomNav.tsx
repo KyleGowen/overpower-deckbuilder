@@ -6,6 +6,7 @@ import { Checkbox } from '../Checkbox';
 import { SlideOutPanel } from '../SlideOutPanel';
 import { ProfileMenuContent } from '../ProfileMenu/ProfileMenuContent';
 import { IconProfile } from '../icons';
+import { HelpFeedbackFlow } from '../HelpFeedback';
 import { MOBILE_NAV_ORDER, NAV_ITEMS } from './navConfig';
 import '../AppShell/AppShell.css';
 
@@ -14,12 +15,17 @@ export function MobileBottomNav() {
   const { preferDesktop, setPreferDesktop } = useLayoutMode();
   const location = useLocation();
   const [accountOpen, setAccountOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     setAccountOpen(false);
   }, [location.pathname]);
 
   const userId = user?.id ?? '';
+  const openHelp = () => {
+    setAccountOpen(false);
+    setHelpOpen(true);
+  };
 
   return (
     <>
@@ -55,7 +61,11 @@ export function MobileBottomNav() {
         ariaLabel="Account"
       >
         <div className="account-sheet">
-          <ProfileMenuContent onClose={() => setAccountOpen(false)} variant="sheet" />
+          <ProfileMenuContent
+            onClose={() => setAccountOpen(false)}
+            onOpenHelp={openHelp}
+            variant="sheet"
+          />
           <Checkbox
             className="account-sheet__toggle"
             label="Use desktop layout"
@@ -65,6 +75,7 @@ export function MobileBottomNav() {
           />
         </div>
       </SlideOutPanel>
+      <HelpFeedbackFlow open={helpOpen} onClose={() => setHelpOpen(false)} />
     </>
   );
 }

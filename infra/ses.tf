@@ -112,17 +112,17 @@ resource "aws_ses_receipt_rule" "kyle_forwarding" {
 resource "aws_lambda_function" "email_forwarder" {
   filename         = "email_forwarder.zip"
   function_name    = "${var.project_name}-email-forwarder"
-  role            = aws_iam_role.lambda_email_forwarder.arn
-  handler         = "index.handler"
+  role             = aws_iam_role.lambda_email_forwarder.arn
+  handler          = "index.handler"
   source_code_hash = data.archive_file.email_forwarder_zip.output_base64sha256
-      runtime         = "nodejs16.x"
-  timeout         = 30
-  memory_size     = 256
+  runtime          = "nodejs16.x"
+  timeout          = 30
+  memory_size      = 256
 
   environment {
     variables = {
       FORWARD_TO_EMAIL = var.forward_to_email
-      FROM_EMAIL      = var.forward_from_email
+      FROM_EMAIL       = var.forward_from_email
     }
   }
 
@@ -131,15 +131,19 @@ resource "aws_lambda_function" "email_forwarder" {
   })
 }
 
-    # Create the Lambda function code
-    data "archive_file" "email_forwarder_zip" {
-      type        = "zip"
-      output_path = "email_forwarder.zip"
-      source {
-        content = file("${path.module}/email_forwarder.js")
-        filename = "index.js"
-      }
-    }
+# Create the Lambda function code
+data "archive_file" "email_forwarder_zip" {
+  type        = "zip"
+  output_path = "email_forwarder.zip"
+  source {
+    content  = file("${path.module}/email_forwarder.js")
+    filename = "index.js"
+  }
+  source {
+    content  = file("${path.module}/email_forwarder_headers.js")
+    filename = "email_forwarder_headers.js"
+  }
+}
 
 # IAM role for Lambda function
 resource "aws_iam_role" "lambda_email_forwarder" {
@@ -214,7 +218,7 @@ resource "aws_lambda_permission" "ses_lambda_permission" {
   function_name = aws_lambda_function.email_forwarder.function_name
   principal     = "ses.amazonaws.com"
   # Use rule set ARN initially, will be updated after rule creation
-  source_arn    = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/${aws_ses_receipt_rule_set.email_forwarding.rule_set_name}"
+  source_arn = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/${aws_ses_receipt_rule_set.email_forwarding.rule_set_name}"
 }
 
 # Additional permission for SES to invoke Lambda (more permissive)
@@ -224,7 +228,7 @@ resource "aws_lambda_permission" "ses_lambda_permission_wide" {
   function_name = aws_lambda_function.email_forwarder.function_name
   principal     = "ses.amazonaws.com"
   # Allow from any SES source in this region
-  source_arn    = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"
+  source_arn = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"
 }
 
 # Additional permission with specific rule ARN (created after rule exists)
@@ -235,9 +239,9 @@ resource "aws_lambda_permission" "ses_lambda_permission_rule" {
   function_name = aws_lambda_function.email_forwarder.function_name
   principal     = "ses.amazonaws.com"
   source_arn    = aws_ses_receipt_rule.kyle_forwarding.arn
-  
+
   depends_on = [aws_ses_receipt_rule.kyle_forwarding]
-  
+
   # This will be created in a separate apply
   count = 0
 }

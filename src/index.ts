@@ -30,6 +30,8 @@ import { GuestDeckService } from './api/services/guestDeckService';
 import { AdminService } from './api/services/adminService';
 import { UserAccountService } from './api/services/userAccountService';
 import { CommunityService } from './api/services/communityService';
+import { FeedbackService } from './api/services/feedbackService';
+import { SesFeedbackEmailSender } from './api/services/sesFeedbackEmailSender';
 import { GUEST_USER_ID } from './constants/guestUser';
 import { TOURNAMENT_DECKS_USER_ID } from './constants/tournamentDecksUser';
 import { requireAdmin, blockGuestMutation, requireDeckOwner } from './middleware/authorizationHelpers';
@@ -129,6 +131,7 @@ const adminService = new AdminService({
 });
 
 const userAccountService = new UserAccountService(userRepository);
+const feedbackService = new FeedbackService(new SesFeedbackEmailSender());
 
 // Community feed excludes internal/curated accounts (guest + tournament).
 const communityService = new CommunityService(deckRepository, userRepository, [
@@ -313,6 +316,7 @@ registerApiV1Routes(app, {
   adminService,
   userAccountService,
   communityService,
+  feedbackService,
   pool: dataSource.getPool()
 });
 
@@ -321,4 +325,3 @@ registerLegacyDeckReadCompatRoutes(app, {
   optionalAuthenticate,
   deckDetailService
 });
-

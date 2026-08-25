@@ -59,5 +59,6 @@ Each row lists at least one integration test that exercises the route (happy pat
 | GET | `/api/v1/admin/debug/clear-cache` | `security/debug-endpoints-access.test.ts` |
 | GET | `/api/v1/admin/debug/clear-card-cache` | `security/debug-endpoints-access.test.ts` |
 | GET | `/api/v1/admin/database/status` | `security/debug-endpoints-access.test.ts` |
+| POST | `/api/v1/feedback` | `api-v1/v1-feedback.integration.test.ts` |
 
 Registration entrypoint: `src/api/http/registerApiV1Routes.ts`.

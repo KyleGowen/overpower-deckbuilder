@@ -35,7 +35,8 @@ export interface RateLimitBudget {
 const DEFAULT_BUDGETS: Record<string, RateLimitBudget> = {
   default: { limit: 120, windowMs: WINDOW_MS },
   login: { limit: 15, windowMs: WINDOW_MS },
-  mutation: { limit: 60, windowMs: WINDOW_MS }
+  mutation: { limit: 60, windowMs: WINDOW_MS },
+  feedback: { limit: 5, windowMs: WINDOW_MS }
 };
 
 const buckets = new Map<string, Bucket>();

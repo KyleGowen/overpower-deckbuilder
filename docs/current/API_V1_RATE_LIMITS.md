@@ -27,6 +27,7 @@ Defined inside `v1RateLimit.ts`:
 | `default`  | 120            |
 | `login`    | 15             |
 | `mutation` | 60             |
+| `feedback` | 5              |
 
 Specific routes can pass `{ budget: { limit, windowMs } }` when instantiating the middleware. New route groups should register a budget here rather than inline.
 
@@ -40,6 +41,7 @@ Specific routes can pass `{ budget: { limit, windowMs } }` when instantiating th
 ### Automated (unit)
 
 - `tests/unit/v1RateLimit.test.ts` — header math, 429 on exhaustion, per-user bucket separation, kill-switch no-op.
+- `tests/unit/api/http/feedback.http.test.ts` — feedback budget and sixth-request rejection.
 
 ### Automated (integration)
 

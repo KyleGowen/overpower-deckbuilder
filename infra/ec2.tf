@@ -95,6 +95,36 @@ resource "aws_iam_policy" "ecr_policy" {
   }
 }
 
+# Allow the application to send only Excelsior feedback mail through the
+# verified excelsior.cards SES identity. The app receives these credentials
+# from the EC2 instance profile; no static AWS keys are stored in its env file.
+resource "aws_iam_policy" "feedback_email_policy" {
+  name        = "${var.project_name}-feedback-email-policy"
+  description = "Policy for the app to send in-app feedback through SES"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "ses:SendEmail"
+        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"
+        Condition = {
+          StringEquals = {
+            "ses:FromAddress" = var.forward_from_email
+            "ses:Recipients"  = var.forward_from_email
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "${var.project_name}-feedback-email-policy"
+    Environment = var.environment
+  }
+}
+
 # Attach policies to role
 resource "aws_iam_role_policy_attachment" "ssm_attachment" {
   role       = aws_iam_role.ec2_role.name
@@ -104,6 +134,11 @@ resource "aws_iam_role_policy_attachment" "ssm_attachment" {
 resource "aws_iam_role_policy_attachment" "ecr_attachment" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.ecr_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "feedback_email_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.feedback_email_policy.arn
 }
 
 # Attach AWS managed SSM policy for EC2 instances
@@ -137,10 +172,18 @@ locals {
 resource "aws_instance" "app" {
   # Pin AMI to current running instance to avoid replacement on plan
   ami                    = "ami-020e631fda96bcccc"
-  instance_type          = "t2.micro"  # Free tier eligible
+  instance_type          = "t2.micro" # Free tier eligible
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   user_data              = local.user_data
+
+  # Docker bridge networking adds a hop between the app and IMDS. A hop limit
+  # of 2 lets the AWS SDK use the instance role while keeping IMDSv2 required.
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
 
   # Enable detailed monitoring
   monitoring = true
@@ -148,7 +191,7 @@ resource "aws_instance" "app" {
   # Root volume configuration
   root_block_device {
     volume_type           = "gp3"
-    volume_size           = 30  # Minimum required for Amazon Linux 2023
+    volume_size           = 30 # Minimum required for Amazon Linux 2023
     delete_on_termination = true
     encrypted             = true
 

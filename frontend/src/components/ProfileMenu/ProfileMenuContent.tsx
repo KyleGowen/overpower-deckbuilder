@@ -7,17 +7,18 @@ import { changeEmail, changePassword, setDisplayName } from '../../lib/api/accou
 import { resolveUserDisplayName } from '../../lib/auth/resolveUserDisplayName';
 import { isValidEmail } from '../../lib/validation/email';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
-import { IconAnalytics, IconPlus, IconLogout, IconLock, IconSettings, IconProfile } from '../icons';
+import { IconAnalytics, IconPlus, IconLogout, IconLock, IconSettings, IconProfile, IconHelp } from '../icons';
 import './ProfileMenuContent.css';
 
 type OpenForm = 'displayName' | 'email' | 'password' | null;
 
 export interface ProfileMenuContentProps {
   onClose: () => void;
+  onOpenHelp: () => void;
   variant?: 'dropdown' | 'sheet';
 }
 
-export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMenuContentProps) {
+export function ProfileMenuContent({ onClose, onOpenHelp, variant = 'dropdown' }: ProfileMenuContentProps) {
   const { user, isGuest, logout, refresh } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -323,6 +324,14 @@ export function ProfileMenuContent({ onClose, variant = 'dropdown' }: ProfileMen
           </>
         ) : null}
 
+        <button
+          type="button"
+          className="profile-menu__item"
+          role="menuitem"
+          onClick={onOpenHelp}
+        >
+          <IconHelp /> Help &amp; Feedback
+        </button>
         <div className="profile-menu__divider" />
         <button
           type="button"

@@ -47,6 +47,8 @@ tags:
     description: User card collections. Accepts session cookie OR Bearer JWT.
   - name: Guest Decks
     description: Session-scoped in-memory decks for GUEST users.
+  - name: Feedback
+    description: Authenticated in-app bug reports and feature/change requests.
   - name: Config
     description: Public app configuration (CDN base, etc.). No auth required.
   - name: Admin
@@ -139,6 +141,25 @@ components:
         role:
           type: string
           enum: [ADMIN, USER, GUEST]
+    FeedbackRequest:
+      type: object
+      additionalProperties: false
+      required: [category, message]
+      properties:
+        category:
+          type: string
+          enum: [bug, feature]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 4000
+    FeedbackAccepted:
+      type: object
+      required: [submitted]
+      properties:
+        submitted:
+          type: boolean
+          enum: [true]
     CatalogCharacterItem:
       type: object
       required: [id, name, set, energy, combat, brute_force, intelligence, threat_level, image, image_path, is_foil]
@@ -410,6 +431,36 @@ paths:
           description: PASSWORD_MISMATCH or validation error.
         '403':
           description: Forbidden (GUEST or GOOGLE_PASSWORD_LOCKED).
+  /api/v1/feedback:
+    post:
+      tags: [Feedback]
+      summary: Submit a bug report or feature/change request.
+      description: Session-authenticated. Accepts GUEST, USER, and ADMIN roles. Limited to five submissions per user per minute.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+      responses:
+        '202':
+          description: Feedback accepted and delivered.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/FeedbackAccepted'
+        '400':
+          description: VALIDATION_ERROR.
+        '401':
+          description: UNAUTHORIZED.
+        '429':
+          description: RATE_LIMITED.
+        '500':
+          description: FEEDBACK_DELIVERY_ERROR.
   /api/v1/catalog/characters:
     get:
       tags: [Catalog]
