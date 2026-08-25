@@ -7,11 +7,14 @@ const rule = new GdaAnyCharacterBattlegroundRule();
 function validate(
   cards: DeckCard[],
   specials: Array<Record<string, unknown>>,
-  locations: Array<Record<string, unknown>> = [],
+  battlegrounds: Array<Record<string, unknown>> = [],
 ) {
   const available = new Map<string, Record<string, unknown>>();
   specials.forEach((special) => available.set(`special_${special.id}`, { ...special, type: 'special' }));
-  locations.forEach((location) => available.set(`location_${location.id}`, { ...location, type: 'location' }));
+  battlegrounds.forEach((battleground) => available.set(
+    `battleground_${battleground.id}`,
+    { ...battleground, type: 'battleground' },
+  ));
   return rule.validate(buildDeckValidationContext(cards, available));
 }
 
@@ -35,16 +38,32 @@ describe('G.D.A. Any Character Battleground rule', () => {
     }]);
   });
 
-  it('allows the G.D.A. special when Global Defense Agency is the deck location', () => {
+  it('allows the G.D.A. special when Global Defense Agency is the deck Battleground', () => {
     const errors = validate(
       [
         { id: 'deck-shapesmith', type: 'special', cardId: 'shapesmith', quantity: 1 },
-        { id: 'deck-gda', type: 'location', cardId: 'gda', quantity: 1 },
+        { id: 'deck-gda', type: 'battleground', cardId: 'gda', quantity: 1 },
       ],
       [shapesmith],
       [{ id: 'gda', name: 'Global Defense Agency' }],
     );
     expect(errors).toEqual([]);
+  });
+
+  it('rejects mixing G.D.A. and non-G.D.A. Any Character specials', () => {
+    const errors = validate(
+      [
+        { id: 'deck-shapesmith', type: 'special', cardId: 'shapesmith', quantity: 1 },
+        { id: 'deck-wild', type: 'special', cardId: 'wild', quantity: 1 },
+        { id: 'deck-gda', type: 'battleground', cardId: 'gda', quantity: 1 },
+      ],
+      [shapesmith, { id: 'wild', name: 'Wild', character: 'Any Character', set: 'ERB' }],
+      [{ id: 'gda', name: 'Global Defense Agency' }],
+    );
+    expect(errors).toEqual([{
+      rule: 'gda_any_character_exclusive',
+      message: 'G.D.A. Any Character Special cards cannot be combined with non-G.D.A. Any Character Special cards',
+    }]);
   });
 
   it('does not apply to other Any Character cards or similarly numbered cards from another set', () => {

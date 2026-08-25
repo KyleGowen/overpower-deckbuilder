@@ -4,6 +4,7 @@ import type {
   SpecialCard,
   PowerCard,
   Location,
+  Battleground,
   Mission,
   Event,
   Aspect,
@@ -102,6 +103,20 @@ export function mapLocationRowWithSet(row: DbRow): Location & { set?: string; se
     set: (row.set as string) || 'ERB',
     set_number: (row.set_number as string) ?? null,
     rarity: (row.rarity as CardRarity | null) ?? null,
+  };
+}
+
+export function mapBattlegroundRow(row: DbRow): Battleground {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    special_ability: row.special_ability as string,
+    image: (row.image_path as string) ?? '',
+    image_path: row.image_path as string,
+    set: (row.set as string) || 'ERB',
+    set_number: (row.set_number as string) ?? null,
+    rarity: (row.rarity as CardRarity | null) ?? null,
+    is_foil: (row.is_foil as boolean) || false,
   };
 }
 

@@ -7,6 +7,7 @@ const DECK_ADD_RULES = {
   EXACT_CHARACTERS: 4,
   EXACT_MISSION_CARDS: 7,
   MAX_LOCATIONS: 1,
+  MAX_BATTLEGROUNDS: 1,
   MAX_COPIES_ONE_PER_DECK: 1
 } as const;
 
@@ -77,6 +78,7 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
     event: (id) => cardRepository.getEventById(id),
     aspect: (id) => cardRepository.getAspectById(id),
     location: (id) => cardRepository.getLocationById(id),
+    battleground: (id) => cardRepository.getBattlegroundById(id),
     'advanced-universe': (id) => cardRepository.getAdvancedUniverseById(id),
     teamwork: (id) => cardRepository.getTeamworkById(id),
     'ally-universe': (id) => cardRepository.getAllyUniverseById(id),
@@ -135,6 +137,15 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
       }
     }
 
+    if (cardType === 'battleground') {
+      const hasBattleground = currentCards.some(
+        c => c.type === 'battleground' && (c.quantity ?? 0) > 0
+      );
+      if (hasBattleground) {
+        return 'Cannot add more than 1 battleground to a deck';
+      }
+    }
+
     const testCards = [...currentCards];
 
     const existingCardIndex = testCards.findIndex(card => card.type === cardType && card.cardId === cardId);
@@ -154,6 +165,7 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
     const characterCards: CardForDeckAddValidation[] = [];
     const missionCards: CardForDeckAddValidation[] = [];
     const locationCards: CardForDeckAddValidation[] = [];
+    const battlegroundCards: CardForDeckAddValidation[] = [];
 
     for (const card of testCards) {
       const type = card.type;
@@ -163,6 +175,8 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
         missionCards.push(card);
       } else if (type === 'location') {
         locationCards.push(card);
+      } else if (type === 'battleground') {
+        battlegroundCards.push(card);
       }
     }
 
@@ -176,6 +190,10 @@ export function createDeckAddValidation(cardRepository: CardRepository) {
 
     if (cardType === 'location' && locationCards.length > DECK_ADD_RULES.MAX_LOCATIONS) {
       return `Deck cannot have more than ${DECK_ADD_RULES.MAX_LOCATIONS} location (would have ${locationCards.length})`;
+    }
+
+    if (cardType === 'battleground' && battlegroundCards.length > DECK_ADD_RULES.MAX_BATTLEGROUNDS) {
+      return `Deck cannot have more than ${DECK_ADD_RULES.MAX_BATTLEGROUNDS} battleground (would have ${battlegroundCards.length})`;
     }
 
     const isIncomingOnePerDeck = await checkIfCardIsOnePerDeck(cardType, cardId);

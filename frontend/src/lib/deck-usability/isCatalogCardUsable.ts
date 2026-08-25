@@ -21,8 +21,12 @@ function isSpecialCardUsable(card: CatalogCard, ctx: DeckUsabilityContext): bool
 
   if (!characterName || characterName === 'Any Character') {
     if (isGdaAnyCharacterSpecial(card)) {
-      return ctx.homebaseName === GLOBAL_DEFENSE_AGENCY_BATTLEGROUND_NAME;
+      return (
+        ctx.battlegroundName === GLOBAL_DEFENSE_AGENCY_BATTLEGROUND_NAME
+        && !ctx.hasNonGdaAnyCharacterSpecial
+      );
     }
+    if (characterName === 'Any Character' && ctx.hasGdaAnyCharacterSpecial) return false;
     return true;
   }
 

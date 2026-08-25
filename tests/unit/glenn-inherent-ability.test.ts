@@ -33,6 +33,9 @@ describe('Glenn inherent ability', () => {
             angryMobCharacterNames: [],
             missionSets: new Set(),
             homebaseName: '',
+            battlegroundName: '',
+            hasGdaAnyCharacterSpecial: false,
+            hasNonGdaAnyCharacterSpecial: false,
             characterCount: 1
         };
         const basicUniverse: CatalogCard = {

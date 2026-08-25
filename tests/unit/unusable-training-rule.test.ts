@@ -17,6 +17,7 @@ function makeCtx(
         missionCards: [],
         eventCards: [],
         locationCards: [],
+        battlegroundCards: [],
         characterNames: [],
         characterStats,
         angryMobCharacterNames: []

@@ -6,6 +6,7 @@ import {
 } from './card/context';
 import * as character from './card/character';
 import * as location from './card/location';
+import * as battleground from './card/battleground';
 import * as specialPower from './card/special-power';
 import * as missionEvent from './card/mission-event';
 import * as aspect from './card/aspect';
@@ -23,6 +24,7 @@ export class PostgreSQLCardRepository implements CardRepository {
     this.cache = {
       characters: null,
       locations: null,
+      battlegrounds: null,
       cacheTime: 0,
       cardStats: null,
       cardStatsCacheTime: 0,
@@ -41,6 +43,7 @@ export class PostgreSQLCardRepository implements CardRepository {
   public clearCaches(): void {
     this.cache.characters = null;
     this.cache.locations = null;
+    this.cache.battlegrounds = null;
     this.cache.cacheTime = 0;
     this.cache.cardStats = null;
     this.cache.cardStatsCacheTime = 0;
@@ -108,6 +111,14 @@ export class PostgreSQLCardRepository implements CardRepository {
 
   async getAllLocations() {
     return location.getAllLocations(this.getContext());
+  }
+
+  async getBattlegroundById(id: string) {
+    return battleground.getBattlegroundById(this.getContext(), id);
+  }
+
+  async getAllBattlegrounds() {
+    return battleground.getAllBattlegrounds(this.getContext());
   }
 
   async getMissionById(id: string) {

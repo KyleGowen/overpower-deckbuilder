@@ -7,6 +7,7 @@ export const CATALOG_CARD_TABLE: Record<string, string> = {
   special: 'special_cards',
   power: 'power_cards',
   location: 'locations',
+  battleground: 'battlegrounds',
   mission: 'missions',
   event: 'events',
   aspect: 'aspects',

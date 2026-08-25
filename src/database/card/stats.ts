@@ -17,6 +17,8 @@ export async function getCardStats(ctx: CardRepositoryContext): Promise<CardStat
       UNION ALL
       SELECT 'locations', COUNT(*) FROM locations
       UNION ALL
+      SELECT 'battlegrounds', COUNT(*) FROM battlegrounds
+      UNION ALL
       SELECT 'special_cards', COUNT(*) FROM special_cards
       UNION ALL
       SELECT 'missions', COUNT(*) FROM missions
@@ -42,6 +44,7 @@ export async function getCardStats(ctx: CardRepositoryContext): Promise<CardStat
       const key = row.table_name.replace(/_/g, '').replace('cards', 'Cards');
       if (key === 'characters') stats.characters = parseInt(row.count, 10);
       else if (key === 'locations') stats.locations = parseInt(row.count, 10);
+      else if (key === 'battlegrounds') stats.battlegrounds = parseInt(row.count, 10);
       else if (key === 'specialcards') stats.specialCards = parseInt(row.count, 10);
       else if (key === 'missions') stats.missions = parseInt(row.count, 10);
       else if (key === 'events') stats.events = parseInt(row.count, 10);

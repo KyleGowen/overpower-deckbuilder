@@ -6,6 +6,7 @@ import type {
     Character,
     Event,
     Location,
+    Battleground,
     Mission,
     PowerCard,
     SpecialCard,
@@ -20,6 +21,7 @@ export interface DeckCatalogBundle {
     allMissions: Mission[];
     allEvents: Event[];
     allLocations: Location[];
+    allBattlegrounds: Battleground[];
     allAspects: Aspect[];
     allAdvancedUniverse: AdvancedUniverse[];
     allTeamwork: Teamwork[];
@@ -54,6 +56,10 @@ export function buildAvailableCardsMap(bundle: DeckCatalogBundle): Map<string, R
     bundle.allLocations.forEach(card => {
         const key = `location_${card.id}`;
         availableCardsMap.set(key, { ...card, type: 'location' });
+    });
+    bundle.allBattlegrounds.forEach(card => {
+        const key = `battleground_${card.id}`;
+        availableCardsMap.set(key, { ...card, type: 'battleground' });
     });
     bundle.allAspects.forEach(card => {
         const key = `aspect_${card.id}`;

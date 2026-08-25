@@ -417,6 +417,18 @@ Fields: `id`, `name`, `threat_level`, `special_ability`, `image`, `image_path`, 
 
 **Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
 
+### `GET /api/v1/catalog/battlegrounds`
+
+**Auth:** Session cookie or Bearer JWT (see introduction above).
+
+**Request model:** none.
+
+**Response 200:** `data` is an array of Battleground objects. Fields: `id`, `name`, `special_ability`, `image`, `image_path`, `set`, `set_number` (string|null), `rarity` (string|null), and `is_foil`. Global Defense Agency (`SKY` #348) is the first catalog entry; Battlegrounds are distinct from Locations.
+
+**Response 500:** `errors` populated; `data` may be `null`.
+
+**Implementation:** `[src/api/services/catalogService.ts](src/api/services/catalogService.ts)` · HTTP `[src/api/http/dbv-catalog.http.ts](src/api/http/dbv-catalog.http.ts)`
+
 ### `GET /api/v1/catalog/special-cards`
 
 **Auth:** Session cookie or Bearer JWT (see introduction above).
@@ -1296,6 +1308,7 @@ Clears card repository caches.
 | POST   | /api/v1/feedback                        | feedback.http.ts    |
 | GET    | /api/v1/catalog/characters              | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/locations               | dbv-catalog.http.ts |
+| GET    | /api/v1/catalog/battlegrounds           | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/special-cards           | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/missions                | dbv-catalog.http.ts |
 | GET    | /api/v1/catalog/events                  | dbv-catalog.http.ts |

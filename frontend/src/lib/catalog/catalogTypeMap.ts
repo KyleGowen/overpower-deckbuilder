@@ -43,6 +43,7 @@ export const CATALOG_TYPES: CatalogTypeMeta[] = [
   { type: 'special-cards', label: 'Special Cards', shortLabel: 'Special', compactLabel: 'Spc', deckType: 'special', collectionType: 'special' },
   { type: 'power-cards', label: 'Power Cards', shortLabel: 'Power', compactLabel: 'Pow', deckType: 'power', collectionType: 'power' },
   { type: 'locations', label: 'Locations', shortLabel: 'Locations', compactLabel: 'Loc', deckType: 'location', collectionType: 'location' },
+  { type: 'battlegrounds', label: 'Battlegrounds', shortLabel: 'Battlegrounds', compactLabel: 'Btg', deckType: 'battleground', collectionType: 'battleground' },
   { type: 'missions', label: 'Missions', shortLabel: 'Missions', compactLabel: 'Mis', deckType: 'mission', collectionType: 'mission' },
   { type: 'events', label: 'Events', shortLabel: 'Events', compactLabel: 'Ev', deckType: 'event', collectionType: 'event' },
   { type: 'aspects', label: 'Aspects', shortLabel: 'Aspects', compactLabel: 'Asp', deckType: 'aspect', collectionType: 'aspect' },
@@ -119,9 +120,9 @@ export function isStatCardType(type: CatalogType): boolean {
   return type === 'characters';
 }
 
-/** Character, location, and event art use landscape tiles in the database grid. */
+/** Character, location, Battleground, and event art use landscape tiles in the database grid. */
 export function isLandscapeCatalogType(type: CatalogType): boolean {
-  return type === 'characters' || type === 'locations' || type === 'events';
+  return type === 'characters' || type === 'locations' || type === 'battlegrounds' || type === 'events';
 }
 
 /**

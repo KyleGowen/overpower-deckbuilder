@@ -3,6 +3,7 @@ const COLLECTION_CARD_TYPES = new Set([
   'special',
   'power',
   'location',
+  'battleground',
   'mission',
   'event',
   'aspect',

@@ -13,6 +13,7 @@ function ctxWithSpecial(deckCard: DeckCard, available: Record<string, unknown>):
         missionCards: [],
         eventCards: [],
         locationCards: [],
+        battlegroundCards: [],
         characterNames: [],
         characterStats: [],
         angryMobCharacterNames: []
@@ -47,6 +48,7 @@ describe('BannedCardsRule', () => {
             missionCards: [],
             eventCards: [],
             locationCards: [],
+            battlegroundCards: [],
             characterNames: [],
             characterStats: [],
             angryMobCharacterNames: []
@@ -66,6 +68,7 @@ describe('BannedCardsRule', () => {
             missionCards: [],
             eventCards: [],
             locationCards: [],
+            battlegroundCards: [],
             characterNames: [],
             characterStats: [],
             angryMobCharacterNames: []

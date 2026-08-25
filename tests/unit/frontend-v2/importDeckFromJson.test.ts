@@ -48,6 +48,16 @@ describe('extractCardsFromImportJson', () => {
     });
     expect(entries).toEqual([{ name: 'Hypnosis', type: 'special' }]);
   });
+
+  it('extracts Battlegrounds and upgrades legacy G.D.A. location exports', () => {
+    expect(extractCardsFromImportJson({
+      locations: ['Global Defense Agency'],
+      battlegrounds: ['Future Battleground'],
+    })).toEqual([
+      { name: 'Global Defense Agency', type: 'battleground' },
+      { name: 'Future Battleground', type: 'battleground' },
+    ]);
+  });
 });
 
 describe('resolveImportCardIds', () => {

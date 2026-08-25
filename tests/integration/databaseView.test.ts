@@ -179,12 +179,18 @@ describe('Database View Integration Tests', () => {
       const count = parseInt(result.rows[0].count);
       expect(count).toBeGreaterThan(0);
       
-      // Includes the eight Skybound locations (the G.D.A. Battleground is
-      // intentionally stored as a location until Battleground becomes a
-      // standalone catalog type).
-      expect(count).toBe(20);
+      expect(count).toBe(19);
       
       console.log('✅ Location count verified:', count);
+    });
+
+    it('should store Global Defense Agency as the only Battleground', async () => {
+      const result = await pool.query('SELECT name, set_number FROM battlegrounds');
+      expect(result.rows).toEqual([{ name: 'Global Defense Agency', set_number: '348' }]);
+      const locationResult = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM locations WHERE name = 'Global Defense Agency'"
+      );
+      expect(locationResult.rows[0].count).toBe(0);
     });
 
     it('should verify power cards count', async () => {

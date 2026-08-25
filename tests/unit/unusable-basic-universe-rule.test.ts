@@ -24,6 +24,7 @@ function makeCtx(characterName: string): DeckValidationContext {
         missionCards: [],
         eventCards: [],
         locationCards: [],
+        battlegroundCards: [],
         characterNames: [characterName],
         characterStats: [
             { name: characterName, energy: 2, combat: 3, brute_force: 3, intelligence: 5 }

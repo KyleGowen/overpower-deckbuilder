@@ -3,11 +3,12 @@ import { CATALOG_TYPES, type CatalogTypeMeta } from '../catalog/catalogTypeMap';
 
 /**
  * Deck editor Card/List section order (deck editor only — DBV and Add Cards use CATALOG_TYPES).
- * Characters → Location → Special → Power → Mission → Event → (universe types).
+ * Characters → Location/Battleground → Special → Power → Mission → Event → (universe types).
  */
 export const DECK_EDITOR_SECTION_ORDER: readonly DeckCardType[] = [
   'character',
   'location',
+  'battleground',
   'special',
   'power',
   'mission',

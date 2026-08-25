@@ -17,6 +17,7 @@ export interface ImportDeckCardsJson {
   characters?: string[];
   special_cards?: Record<string, string[]>;
   locations?: string[];
+  battlegrounds?: string[];
   missions?: Record<string, string[]>;
   events?: Record<string, string[]>;
   aspects?: string[];

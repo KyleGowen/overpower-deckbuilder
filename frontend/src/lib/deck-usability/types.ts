@@ -12,5 +12,8 @@ export interface DeckUsabilityContext {
   angryMobCharacterNames: string[];
   missionSets: Set<string>;
   homebaseName: string;
+  battlegroundName: string;
+  hasGdaAnyCharacterSpecial: boolean;
+  hasNonGdaAnyCharacterSpecial: boolean;
   characterCount: number;
 }

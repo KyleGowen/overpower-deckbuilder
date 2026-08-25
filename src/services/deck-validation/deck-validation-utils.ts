@@ -10,15 +10,34 @@ export function deckCardMapKey(card: Pick<DeckCard, 'type' | 'cardId'>): string 
     return `${deckCardTypeKeyPrefix(card.type)}_${card.cardId}`;
 }
 
-/** True when the deck contains a location whose catalog name matches `name` (exact). */
-export function deckHasLocationNamed(ctx: DeckValidationContext, name: string): boolean {
-    return ctx.locationCards.some((loc) => {
-        const available = ctx.availableCardsMap.get(deckCardMapKey(loc));
-        const locName = String(
+/** True when the deck contains a Battleground whose catalog name matches `name` (exact). */
+export function deckHasBattlegroundNamed(ctx: DeckValidationContext, name: string): boolean {
+    return ctx.battlegroundCards.some((battleground) => {
+        const available = ctx.availableCardsMap.get(deckCardMapKey(battleground));
+        const battlegroundName = String(
             (available?.name as string) || (available?.card_name as string) || ''
         ).trim();
-        return locName === name;
+        return battlegroundName === name;
     });
+}
+
+/** True when the deck contains a Location whose catalog name matches `name` (exact). */
+export function deckHasLocationNamed(ctx: DeckValidationContext, name: string): boolean {
+    return ctx.locationCards.some((location) => {
+        const available = ctx.availableCardsMap.get(deckCardMapKey(location));
+        const locationName = String(
+            (available?.name as string) || (available?.card_name as string) || ''
+        ).trim();
+        return locationName === name;
+    });
+}
+
+export function isAnyCharacterSpecial(special: {
+    character?: string;
+    character_name?: string;
+    characters?: string[];
+}): boolean {
+    return specialLinkedCharacterName(special).toLowerCase() === 'any character';
 }
 
 export function characterThreatValue(availableCard: { threat?: number; threat_level?: number }): number {

@@ -62,6 +62,15 @@ export function registerDbvCatalogV1HttpRoutes(router: Router, deps: DbvCatalogV
 
   registerCachedCatalogGet(
     router,
+    '/catalog/battlegrounds',
+    deps.catalogAuth,
+    () => deps.catalogService.getAllBattlegrounds(),
+    'CATALOG_ERROR',
+    'Failed to fetch battlegrounds'
+  );
+
+  registerCachedCatalogGet(
+    router,
     '/catalog/special-cards',
     deps.catalogAuth,
     () => deps.catalogService.getAllSpecialCards(),

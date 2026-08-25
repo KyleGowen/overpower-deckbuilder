@@ -26,6 +26,10 @@ function deckLocation(cardId: string): DeckCardEntry {
   return { type: 'location', cardId, quantity: 1 };
 }
 
+function deckBattleground(cardId: string): DeckCardEntry {
+  return { type: 'battleground', cardId, quantity: 1 };
+}
+
 describe('deck usability', () => {
   const spiderMan = charCard('char-1', 'Spider-Man', {
     energy: 5,
@@ -60,8 +64,8 @@ describe('deck usability', () => {
     ],
     locations: [
       { id: 'loc-1', name: 'Avengers Mansion' },
-      { id: 'gda', name: 'Global Defense Agency' },
     ],
+    battlegrounds: [{ id: 'gda', name: 'Global Defense Agency' }],
   };
 
   describe('buildDeckUsabilityContext', () => {
@@ -231,8 +235,31 @@ describe('deck usability', () => {
       const withoutGda = buildDeckUsabilityContext([], catalogByType);
       expect(isCatalogCardUsable(shapesmith, 'special-cards', withoutGda)).toBe(false);
 
-      const withGda = buildDeckUsabilityContext([deckLocation('gda')], catalogByType);
+      const withGda = buildDeckUsabilityContext([deckBattleground('gda')], catalogByType);
       expect(isCatalogCardUsable(shapesmith, 'special-cards', withGda)).toBe(true);
+    });
+
+    it('rejects candidate Any Character specials that would mix G.D.A. and non-G.D.A. cards', () => {
+      const shapesmith: CatalogCard = {
+        id: 'shapesmith', name: 'Shapesmith', character: 'Any Character', set: 'SKY', set_number: '370',
+      };
+      const wild: CatalogCard = { id: 'wild', name: 'Wild', character: 'Any Character', set: 'ERB' };
+      const withDeckSpecials = {
+        ...catalogByType,
+        'special-cards': [shapesmith, wild],
+      };
+
+      const gdaDeck = buildDeckUsabilityContext(
+        [deckBattleground('gda'), { type: 'special', cardId: 'shapesmith', quantity: 1 }],
+        withDeckSpecials,
+      );
+      expect(isCatalogCardUsable(wild, 'special-cards', gdaDeck)).toBe(false);
+
+      const nonGdaDeck = buildDeckUsabilityContext(
+        [deckBattleground('gda'), { type: 'special', cardId: 'wild', quantity: 1 }],
+        withDeckSpecials,
+      );
+      expect(isCatalogCardUsable(shapesmith, 'special-cards', nonGdaDeck)).toBe(false);
     });
 
     it('requires linked character in deck', () => {

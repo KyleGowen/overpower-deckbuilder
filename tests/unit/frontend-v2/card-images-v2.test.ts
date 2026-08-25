@@ -318,6 +318,17 @@ describe('catalogTypeUsesPortraitThumb', () => {
 });
 
 describe('CardTile database progressive wiring', () => {
+  it('uses the Location landscape frame for Battleground tiles', () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardTile/CardTile.tsx'),
+      'utf8',
+    );
+    expect(source).toContain(
+      "catalogType === 'locations' || catalogType === 'battlegrounds'",
+    );
+    expect(source).toContain("return 'card-tile--locations'");
+  });
+
   it('passes progressive and catalogType for database grid', () => {
     const source = fs.readFileSync(
       path.join(__dirname, '../../../frontend/src/components/CardTile/CardTile.tsx'),

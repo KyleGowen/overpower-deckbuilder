@@ -54,6 +54,7 @@ describe('Tooltip and Legality Icon Tests', () => {
                 { id: 'location1', name: 'Location 1', threat_level: 5 },
                 { id: 'location2', name: 'Location 2', threat_level: 3 }
             ]),
+            getAllBattlegrounds: jest.fn().mockResolvedValue([]),
             getAllAspects: jest.fn().mockResolvedValue([]),
             getAllAdvancedUniverse: jest.fn().mockResolvedValue([]),
             getAllTeamwork: jest.fn().mockResolvedValue([]),

@@ -514,7 +514,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | POST | `/api/v1/auth/refresh` | `src/api/http/auth.http.ts` |
 | GET | `/api/v1/auth/me` | `src/api/http/auth.http.ts` |
 | POST | `/api/v1/auth/logout` | `src/api/http/auth.http.ts` |
-| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
+| GET | `/api/v1/catalog/characters`, `/api/v1/catalog/locations`, `/api/v1/catalog/battlegrounds`, `/api/v1/catalog/special-cards`, `/api/v1/catalog/missions`, `/api/v1/catalog/events`, `/api/v1/catalog/aspects`, `/api/v1/catalog/advanced-universe`, `/api/v1/catalog/teamwork`, `/api/v1/catalog/ally-universe`, `/api/v1/catalog/training`, `/api/v1/catalog/basic-universe`, `/api/v1/catalog/power-cards`, `/api/v1/catalog/foil-card-map` | `src/api/http/dbv-catalog.http.ts` |
 | GET | `/api/v1/dbv/sets`, `/api/v1/dbv/deck-backgrounds` | `src/api/http/dbv-support.http.ts` |
 | GET | `/api/v1/collections/me`, `/api/v1/collections/me/cards`, `/api/v1/collections/me/history` | `src/api/http/collections.http.ts` |
 | POST | `/api/v1/collections/me/cards`, `/api/v1/collections/me/cards/remove-one` | `src/api/http/collections.http.ts` |

@@ -11,6 +11,7 @@ export interface ExportDeckCardsJson {
   characters: string[];
   special_cards: Record<string, string[]>;
   locations: string[];
+  battlegrounds: string[];
   missions: Record<string, string[]>;
   events: Record<string, string[]>;
   aspects: string[];
@@ -456,6 +457,7 @@ export function buildDeckExportJson(input: BuildDeckExportJsonInput): ExportDeck
       characters: createCharactersArray(cards, cardIndex),
       special_cards: createSpecialCardsByCharacter(cards, cardIndex),
       locations: createRepeatedCards(cards, 'location', cardIndex),
+      battlegrounds: createRepeatedCards(cards, 'battleground', cardIndex),
       missions: createMissionsByMissionSet(cards, cardIndex),
       events: createEventsByMissionSet(cards, cardIndex),
       aspects: createRepeatedCards(cards, 'aspect', cardIndex),

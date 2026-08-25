@@ -8,10 +8,11 @@ function tabAfterSwipe(tab: (typeof DBV_TAB_ORDER)[number], delta: 1 | -1) {
 
 describe('DBV_TAB_ORDER', () => {
   it('lists All first then catalog types in CATALOG_TYPES order', () => {
-    expect(DBV_TAB_ORDER).toHaveLength(13);
+    expect(DBV_TAB_ORDER).toHaveLength(14);
     expect(DBV_TAB_ORDER[0]).toBe('all');
-    expect(DBV_TAB_ORDER[12]).toBe('basic-universe');
+    expect(DBV_TAB_ORDER[13]).toBe('basic-universe');
     expect(DBV_TAB_ORDER[1]).toBe('characters');
+    expect(DBV_TAB_ORDER).toContain('battlegrounds');
   });
 });
 

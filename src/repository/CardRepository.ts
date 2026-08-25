@@ -1,4 +1,4 @@
-import { Character, Location, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse, PowerCard } from '../types';
+import { Character, Location, Battleground, SpecialCard, Mission, Event, Aspect, AdvancedUniverse, Teamwork, AllyUniverse, TrainingCard, BasicUniverse, PowerCard } from '../types';
 
 export interface CardRepository {
   // Initialization
@@ -19,6 +19,10 @@ export interface CardRepository {
   // Location management
   getLocationById(id: string): Promise<Location | undefined>;
   getAllLocations(): Promise<Location[]>;
+
+  // Battleground management
+  getBattlegroundById(id: string): Promise<Battleground | undefined>;
+  getAllBattlegrounds(): Promise<Battleground[]>;
 
   // Mission management
   getMissionById(id: string): Promise<Mission | undefined>;
@@ -61,6 +65,7 @@ export interface CardRepository {
   getCardStats(): Promise<{
     characters: number;
     locations: number;
+    battlegrounds: number;
     specialCards: number;
     missions: number;
     events: number;

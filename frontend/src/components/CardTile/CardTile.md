@@ -1,6 +1,6 @@
 # CardTile
 
-Grid tile for a single catalog card: portrait art + name + set/rarity, with optional
+Grid tile for a single catalog card: card art + name + set/rarity, with optional
 overlay and footer slots. Used by the Database and Collection grids.
 
 ## Props
@@ -18,7 +18,7 @@ overlay and footer slots. Used by the Database and Collection grids.
 
 ## Notes
 - Name comes from `cardDisplayName(card)`; art path from `card.image_path || card.image`.
-- With `catalogType`, characters use `380:280` landscape; locations/events use `236:151`; other types use `5:7` portrait. Images use `card-image--contain` (no crop) and `CardImage` `progressive` + `catalogType` (portrait/landscape thumb presets → full-res fade).
+- With `catalogType`, characters use `380:280` landscape; locations/battlegrounds/events use `236:151`; other types use `5:7` portrait. Images use `card-image--contain` (no crop) and `CardImage` `progressive` + `catalogType` (portrait/landscape thumb presets → full-res fade).
 - Set line shows `{set} {set_number}` when a number exists; set code only otherwise.
 - The art is a `<button>` labelled `View {name}` for keyboard/AT access.
 - Owned/selected emphasis and dimming are CSS-only (`.card-tile--dimmed`).

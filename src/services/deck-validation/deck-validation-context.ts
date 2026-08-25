@@ -16,6 +16,7 @@ export interface DeckValidationContext {
     missionCards: DeckCard[];
     eventCards: DeckCard[];
     locationCards: DeckCard[];
+    battlegroundCards: DeckCard[];
     characterNames: string[];
     characterStats: CharacterStatRow[];
     angryMobCharacterNames: string[];
@@ -29,6 +30,7 @@ export function buildDeckValidationContext(
     const missionCards = cards.filter(card => card.type === 'mission');
     const eventCards = cards.filter(card => card.type === 'event');
     const locationCards = cards.filter(card => card.type === 'location');
+    const battlegroundCards = cards.filter(card => card.type === 'battleground');
 
     const characterNames = characterCards.map(card => {
         const availableCard = availableCardsMap.get(deckCardMapKey(card));
@@ -59,6 +61,7 @@ export function buildDeckValidationContext(
         missionCards,
         eventCards,
         locationCards,
+        battlegroundCards,
         characterNames,
         characterStats,
         angryMobCharacterNames

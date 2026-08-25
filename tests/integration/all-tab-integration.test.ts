@@ -86,6 +86,7 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
         { endpoint: '/api/v1/catalog/power-cards', type: 'power' },
         { endpoint: '/api/v1/catalog/locations', type: 'location' },
+        { endpoint: '/api/v1/catalog/battlegrounds', type: 'battleground' },
         { endpoint: '/api/v1/catalog/aspects', type: 'aspect' },
         { endpoint: '/api/v1/catalog/missions', type: 'mission' },
         { endpoint: '/api/v1/catalog/events', type: 'event' },
@@ -179,6 +180,7 @@ describe('All Tab Integration Tests', () => {
         '/api/v1/catalog/special-cards',
         '/api/v1/catalog/power-cards',
         '/api/v1/catalog/locations',
+        '/api/v1/catalog/battlegrounds',
         '/api/v1/catalog/missions',
         '/api/v1/catalog/events'
       ];
@@ -448,7 +450,8 @@ describe('All Tab Integration Tests', () => {
         { endpoint: '/api/v1/catalog/characters', type: 'character' },
         { endpoint: '/api/v1/catalog/special-cards', type: 'special' },
         { endpoint: '/api/v1/catalog/power-cards', type: 'power' },
-        { endpoint: '/api/v1/catalog/locations', type: 'location' }
+        { endpoint: '/api/v1/catalog/locations', type: 'location' },
+        { endpoint: '/api/v1/catalog/battlegrounds', type: 'battleground' }
       ];
 
       for (const { endpoint } of endpoints) {
@@ -470,4 +473,3 @@ describe('All Tab Integration Tests', () => {
     });
   });
 });
-

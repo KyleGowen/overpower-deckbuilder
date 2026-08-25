@@ -1,9 +1,10 @@
 import { Pool } from 'pg';
-import type { Character, Location } from '../../types';
+import type { Battleground, Character, Location } from '../../types';
 
 export type CardStats = {
   characters: number;
   locations: number;
+  battlegrounds: number;
   specialCards: number;
   missions: number;
   events: number;
@@ -19,6 +20,7 @@ export type CardStats = {
 export interface CardCache {
   characters: Character[] | null;
   locations: Location[] | null;
+  battlegrounds: Battleground[] | null;
   cacheTime: number;
   cardStats: CardStats | null;
   cardStatsCacheTime: number;

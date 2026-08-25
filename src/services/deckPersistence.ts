@@ -15,10 +15,10 @@ export class DeckPersistenceService {
   private readonly decksFilePath: string;
   private decks: Map<string, DeckData> = new Map();
 
-  // Helper method to calculate card count excluding mission, character, and location cards
+  // Helper method to calculate card count excluding structural cards
   private calculateCardCount(cards: DeckCard[]): number {
     return cards
-      .filter(card => !['mission', 'character', 'location'].includes(card.type))
+      .filter(card => !['mission', 'character', 'location', 'battleground'].includes(card.type))
       .reduce((total, card) => total + card.quantity, 0);
   }
 

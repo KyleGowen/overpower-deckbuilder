@@ -2,7 +2,7 @@ import type { Deck, DeckCard, DeckData } from '../../types';
 import { transformDeckList, transformGuestDeckToListItem } from '../deckTransform';
 
 const MAX_CARD_QUANTITY_PER_ENTRY = 100;
-const NON_DECK_CARD_TYPES = new Set(['character', 'location', 'mission']);
+const NON_DECK_CARD_TYPES = new Set(['character', 'location', 'battleground', 'mission']);
 
 type CardCountInput = {
   cardType?: string;

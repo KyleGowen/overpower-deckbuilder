@@ -10,6 +10,7 @@ function makeCtx(cards: DeckCard[]): DeckValidationContext {
         missionCards: cards.filter(c => c.type === 'mission'),
         eventCards: cards.filter(c => c.type === 'event'),
         locationCards: cards.filter(c => c.type === 'location'),
+        battlegroundCards: cards.filter(c => c.type === 'battleground'),
         characterNames: [],
         characterStats: [],
         angryMobCharacterNames: []
@@ -19,8 +20,8 @@ function makeCtx(cards: DeckCard[]): DeckValidationContext {
 describe('DeckSizeRule', () => {
     const rule = new DeckSizeRule();
 
-    it('counts only the draw pile (excludes characters, missions, locations)', () => {
-        // 45 draw-pile cards + 4 characters + 7 missions = 56 total cards,
+    it('counts only the draw pile (excludes characters, missions, locations, and Battlegrounds)', () => {
+        // 45 draw-pile cards + 4 characters + 7 missions + 1 Battleground = 57 total cards,
         // but only 45 are in the draw pile, which is below the 51 minimum.
         const cards: DeckCard[] = [
             { id: 'c1', type: 'character', cardId: 'char1', quantity: 1 },
@@ -28,6 +29,7 @@ describe('DeckSizeRule', () => {
             { id: 'c3', type: 'character', cardId: 'char3', quantity: 1 },
             { id: 'c4', type: 'character', cardId: 'char4', quantity: 1 },
             { id: 'm1', type: 'mission', cardId: 'mission1', quantity: 7 },
+            { id: 'b1', type: 'battleground', cardId: 'gda', quantity: 1 },
             { id: 'p1', type: 'power', cardId: 'power1', quantity: 45 }
         ];
         const errors = rule.validate(makeCtx(cards));

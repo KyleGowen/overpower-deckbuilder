@@ -54,6 +54,17 @@ describe('dbv-catalog.http', () => {
     expect(res.headers['content-type']).toMatch(/application\/json/);
   });
 
+  it('GET /catalog/battlegrounds returns v1 envelope with data', async () => {
+    const cards: Partial<CatalogCardRepository> = {
+      getAllBattlegrounds: jest.fn().mockResolvedValue([
+        { id: 'b1', name: 'Global Defense Agency' },
+      ]),
+    };
+    const catalogService = new CatalogService(cards as CatalogCardRepository, foilStub());
+    const res = await request(buildApp(catalogService)).get('/catalog/battlegrounds').expect(200);
+    expect(res.body.data).toEqual([{ id: 'b1', name: 'Global Defense Agency' }]);
+  });
+
   it('GET /catalog/locations returns 500 on service error', async () => {
     const cards: Partial<CatalogCardRepository> = {
       getAllLocations: jest.fn().mockRejectedValue(new Error('db down'))

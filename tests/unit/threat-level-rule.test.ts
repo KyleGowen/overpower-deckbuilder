@@ -10,6 +10,7 @@ function makeContext(overrides: Partial<DeckValidationContext>): DeckValidationC
         missionCards: [],
         eventCards: [],
         locationCards: [],
+        battlegroundCards: [],
         characterNames: [],
         characterStats: [],
         angryMobCharacterNames: [],

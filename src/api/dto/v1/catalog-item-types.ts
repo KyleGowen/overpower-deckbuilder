@@ -37,6 +37,18 @@ export interface CatalogLocationItem {
   rarity: string | null;
 }
 
+export interface CatalogBattlegroundItem {
+  id: string;
+  name: string;
+  special_ability: string;
+  image: string;
+  image_path: string;
+  set: string;
+  set_number: string | null;
+  rarity: string | null;
+  is_foil: boolean;
+}
+
 /** Shared shape for special-cards, events, aspects, UA, TW, Ally, Training, Basic Universe. */
 export interface CatalogSpecialCardItem {
   id: string;

@@ -1,6 +1,7 @@
 import { DeckValidationRuleList } from '../deck-validation-rule-list';
 import { AngryMobLimitRule } from './angry-mob-limit.rule';
 import { BannedCardsRule } from './banned-cards.rule';
+import { BattlegroundCountRule } from './battleground-count.rule';
 import { CharacterCountRule } from './character-count.rule';
 import { DeckSizeRule } from './deck-size.rule';
 import { GdaAnyCharacterBattlegroundRule } from './gda-any-character-battleground.rule';
@@ -29,6 +30,7 @@ export function defaultDeckValidationRuleList(): DeckValidationRuleList {
         new BannedCardsRule(),
         new MissionCountAndSetRule(),
         new LocationCountRule(),
+        new BattlegroundCountRule(),
         new PrePlacedBasicUniverseRule(),
         new PrePlacedTrainingRule(),
         new ThreatLevelRule(),

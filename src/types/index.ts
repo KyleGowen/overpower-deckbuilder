@@ -75,6 +75,18 @@ export interface Location {
   rarity?: CardRarity | null;
 }
 
+export interface Battleground {
+  id: string;
+  name: string;
+  special_ability: string;
+  image: string;
+  image_path?: string;
+  set?: string;
+  set_number?: string | null;
+  rarity?: CardRarity | null;
+  is_foil?: boolean;
+}
+
 // Card types for future expansion
 export interface Card {
   id: string;
@@ -276,7 +288,7 @@ export interface FoilCardMapEntry {
 // Deck management interfaces
 export interface DeckCard {
   id: string;
-  type: 'character' | 'location' | 'special' | 'mission' | 'event' | 'aspect' | 'advanced-universe' | 'teamwork' | 'ally-universe' | 'training' | 'basic-universe' | 'power';
+  type: 'character' | 'location' | 'battleground' | 'special' | 'mission' | 'event' | 'aspect' | 'advanced-universe' | 'teamwork' | 'ally-universe' | 'training' | 'basic-universe' | 'power';
   cardId: string; // The ID from the original card table (now includes alternate cards as separate rows)
   quantity: number; // How many copies of this card
   exclude_from_draw?: boolean; // Whether this card is excluded from Draw Hand (for Training cards with Spartan Training Ground)

@@ -17,6 +17,9 @@ export const deckValidationMessages = {
     locationCount(found: number): string {
         return `Deck may have at most 1 location (found ${found})`;
     },
+    battlegroundCount(found: number): string {
+        return `Deck may have at most 1 battleground (found ${found})`;
+    },
     threatLevel(found: number): string {
         return `Deck threat level must be ${TOURNAMENT_LEGAL_THREAT_LIMIT} or less (found ${found})`;
     },
@@ -37,6 +40,9 @@ export const deckValidationMessages = {
     },
     gdaAnyCharacterNeedsBattleground(): string {
         return 'G.D.A. Any Character Special cards require the "Global Defense Agency" Battleground in your deck';
+    },
+    gdaAnyCharacterCannotMix(): string {
+        return 'G.D.A. Any Character Special cards cannot be combined with non-G.D.A. Any Character Special cards';
     },
     unusableEventMissionSet(cardName: string, missionSet: string): string {
         return `"${cardName}" requires mission set "${missionSet}" in your deck`;

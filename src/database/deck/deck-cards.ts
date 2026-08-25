@@ -288,7 +288,7 @@ export async function replaceAllCardsInDeck(
         SELECT COALESCE(SUM(quantity), 0)::int AS card_count
         FROM deck_cards
         WHERE deck_id = $1
-          AND card_type NOT IN ('character', 'location', 'mission')
+          AND card_type NOT IN ('character', 'location', 'battleground', 'mission')
           AND exclude_from_draw IS DISTINCT FROM TRUE
       `,
       [deckId]

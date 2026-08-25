@@ -4,6 +4,7 @@ import { CatalogService } from '../../../../src/api/services/catalogService';
 const emptyStats = {
   characters: 0,
   locations: 0,
+  battlegrounds: 0,
   specialCards: 0,
   missions: 0,
   events: 0,
@@ -20,6 +21,7 @@ function stubCards(overrides: Partial<CatalogCardRepository> = {}): CatalogCardR
   const base: CatalogCardRepository = {
     getAllCharacters: jest.fn().mockResolvedValue([]),
     getAllLocations: jest.fn().mockResolvedValue([]),
+    getAllBattlegrounds: jest.fn().mockResolvedValue([]),
     getAllSpecialCards: jest.fn().mockResolvedValue([]),
     getAllMissions: jest.fn().mockResolvedValue([]),
     getAllEvents: jest.fn().mockResolvedValue([]),

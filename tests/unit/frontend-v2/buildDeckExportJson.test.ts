@@ -174,6 +174,23 @@ describe('buildDeckExportJson', () => {
     });
   });
 
+  it('exports Battlegrounds separately from Locations', () => {
+    const cards: DeckCardEntry[] = [
+      { type: 'location', cardId: 'loc', quantity: 1, instanceId: 'a' },
+      { type: 'battleground', cardId: 'gda', quantity: 1, instanceId: 'b' },
+    ];
+    const result = buildDeckExportJson(baseInput({
+      cards,
+      cardIndex: buildDeckCardIndex(
+        ['location', 'battleground'],
+        [[{ id: 'loc', name: 'Spartan Training Ground' }], [{ id: 'gda', name: 'Global Defense Agency' }]],
+      ),
+    }));
+
+    expect(result.cards.locations).toEqual(['Spartan Training Ground']);
+    expect(result.cards.battlegrounds).toEqual(['Global Defense Agency']);
+  });
+
   it('groups special cards by character and sets reserve_character', () => {
     const specials: CatalogCard[] = [
       {

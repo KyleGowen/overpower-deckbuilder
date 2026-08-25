@@ -11,6 +11,7 @@ function makeCtx(powerRows: DeckCard[], map: Map<string, Record<string, unknown>
         missionCards: [],
         eventCards: [],
         locationCards: [],
+        battlegroundCards: [],
         characterNames: [],
         characterStats: [
             { name: 'Weak', energy: 2, combat: 2, brute_force: 2, intelligence: 2 }

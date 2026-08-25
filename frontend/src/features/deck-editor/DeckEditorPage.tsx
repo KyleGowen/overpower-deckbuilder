@@ -121,7 +121,7 @@ const DrawHandPanel = lazy(() =>
 function deckCardImgOrientationClass(catalogType?: CatalogType): string {
   if (!catalogType) return 'deck-editor__card-img--portrait';
   if (catalogType === 'characters') return 'deck-editor__card-img--characters';
-  if (catalogType === 'locations') return 'deck-editor__card-img--locations';
+  if (catalogType === 'locations' || catalogType === 'battlegrounds') return 'deck-editor__card-img--locations';
   if (catalogType === 'events') return 'deck-editor__card-img--events';
   return 'deck-editor__card-img--portrait';
 }
@@ -522,14 +522,21 @@ export default function DeckEditorPage() {
       map.set(c.type, arr);
     });
     return deckEditorCatalogTypes().map((meta) => {
-      const raw = map.get(meta.deckType) ?? [];
+      const raw = meta.deckType === 'location'
+        ? [...(map.get('location') ?? []), ...(map.get('battleground') ?? [])]
+        : meta.deckType === 'battleground'
+          ? []
+          : map.get(meta.deckType) ?? [];
       const entries =
         meta.deckType === 'power'
           ? sortDeckPowerEntries(raw, cardIndex)
           : meta.deckType === 'special'
             ? sortDeckSpecialEntries(raw, cardIndex)
             : raw;
-      return { meta, entries };
+      const sectionMeta = meta.deckType === 'location'
+        ? { ...meta, label: 'Location and Battleground', shortLabel: 'Location and Battleground' }
+        : meta;
+      return { meta: sectionMeta, entries };
     }).filter((g) => g.entries.length > 0);
   }, [cards, cardIndex]);
 

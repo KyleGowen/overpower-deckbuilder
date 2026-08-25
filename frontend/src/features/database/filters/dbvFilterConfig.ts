@@ -38,6 +38,7 @@ export const DBV_FILTER_CONFIG: Record<CatalogType, DbvTypeFilterConfig> = {
     groups: ['numeric'],
     numericFields: [{ key: 'threat_level', label: 'Threat', icon: 'threat_level', min: 0, max: 3 }],
   },
+  battlegrounds: { groups: [] },
   missions: { groups: ['missionSet'] },
   events: { groups: ['missionSet'] },
   aspects: { groups: ['powerTypes'], powerTypeKeys: POWER_FIVE_WITH_MP },

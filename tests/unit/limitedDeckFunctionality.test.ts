@@ -16,6 +16,7 @@ describe('Limited Deck Functionality', () => {
       getMissionById: jest.fn(),
       getEventById: jest.fn(),
       getLocationById: jest.fn(),
+      getBattlegroundById: jest.fn(),
       getAspectById: jest.fn(),
       getAdvancedUniverseById: jest.fn(),
       getTeamworkById: jest.fn(),
@@ -28,6 +29,7 @@ describe('Limited Deck Functionality', () => {
       getAllMissions: jest.fn(),
       getAllEvents: jest.fn(),
       getAllLocations: jest.fn(),
+      getAllBattlegrounds: jest.fn(),
       getAllAspects: jest.fn(),
       getAllAdvancedUniverse: jest.fn(),
       getAllTeamwork: jest.fn(),
@@ -48,6 +50,7 @@ describe('Limited Deck Functionality', () => {
     (mockCardRepository.getAllMissions as jest.Mock).mockResolvedValue([]);
     (mockCardRepository.getAllEvents as jest.Mock).mockResolvedValue([]);
     (mockCardRepository.getAllLocations as jest.Mock).mockResolvedValue([]);
+    (mockCardRepository.getAllBattlegrounds as jest.Mock).mockResolvedValue([]);
     (mockCardRepository.getAllAspects as jest.Mock).mockResolvedValue([]);
     (mockCardRepository.getAllAdvancedUniverse as jest.Mock).mockResolvedValue([]);
     (mockCardRepository.getAllTeamwork as jest.Mock).mockResolvedValue([]);

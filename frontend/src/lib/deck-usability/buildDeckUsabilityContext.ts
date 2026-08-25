@@ -2,6 +2,10 @@ import type { CatalogCard, CatalogType, DeckCardEntry } from '../api/types';
 import { metaForDeckType } from '../catalog/catalogTypeMap';
 import { deckCatalogIndexKey } from './deckCatalogIndex';
 import type { CharacterStatRow, DeckUsabilityContext } from './types';
+import {
+  isGdaAnyCharacterSpecial,
+  specialLinkedCharacterName,
+} from './deckUsabilityUtils';
 
 function findCatalogCardInList(
   catalogByType: Partial<Record<CatalogType, CatalogCard[]>>,
@@ -47,6 +51,8 @@ export function buildDeckUsabilityContext(
   const characterDeckCards = deckCards.filter((c) => c.type === 'character');
   const missionDeckCards = deckCards.filter((c) => c.type === 'mission');
   const locationDeckCards = deckCards.filter((c) => c.type === 'location');
+  const battlegroundDeckCards = deckCards.filter((c) => c.type === 'battleground');
+  const specialDeckCards = deckCards.filter((c) => c.type === 'special');
 
   const characterStats: CharacterStatRow[] = [];
   const characterNames: string[] = [];
@@ -76,12 +82,34 @@ export function buildDeckUsabilityContext(
     locationCatalog?.name ?? locationCatalog?.card_name ?? '',
   ).trim();
 
+  const firstBattleground = battlegroundDeckCards[0];
+  const battlegroundCatalog = firstBattleground
+    ? resolveDeckCatalogCard(firstBattleground, catalogByType, deckCatalogIndex)
+    : undefined;
+  const battlegroundName = String(
+    battlegroundCatalog?.name ?? battlegroundCatalog?.card_name ?? '',
+  ).trim();
+
+  let hasGdaAnyCharacterSpecial = false;
+  let hasNonGdaAnyCharacterSpecial = false;
+  for (const deckCard of specialDeckCards) {
+    const catalogCard = resolveDeckCatalogCard(deckCard, catalogByType, deckCatalogIndex);
+    if (!catalogCard || specialLinkedCharacterName(catalogCard).toLowerCase() !== 'any character') {
+      continue;
+    }
+    if (isGdaAnyCharacterSpecial(catalogCard)) hasGdaAnyCharacterSpecial = true;
+    else hasNonGdaAnyCharacterSpecial = true;
+  }
+
   return {
     characterNames,
     characterStats,
     angryMobCharacterNames,
     missionSets,
     homebaseName,
+    battlegroundName,
+    hasGdaAnyCharacterSpecial,
+    hasNonGdaAnyCharacterSpecial,
     characterCount: characterDeckCards.length,
   };
 }

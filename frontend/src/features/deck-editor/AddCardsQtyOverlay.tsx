@@ -23,6 +23,7 @@ export function AddCardsQtyOverlay({
         type="button"
         className="add-cards__add"
         aria-label="Add to deck"
+        disabled={max <= 0}
         onClick={(e) => {
           stop(e);
           onIncrement();

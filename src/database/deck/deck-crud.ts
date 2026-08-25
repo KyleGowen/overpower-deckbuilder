@@ -224,7 +224,7 @@ export function mapDeckRowToListDeck(deckRow: DeckListRow): Deck {
     const locationImage = previewImagePath(deckRow.location_default_image);
     cards.push({
       id: `loc_${deckRow.id}`,
-      type: 'location',
+      type: deckRow.location_card_type === 'battleground' ? 'battleground' : 'location',
       cardId: locationId as string,
       quantity: 1,
       ...(locationImage !== undefined && { defaultImage: locationImage }),
@@ -299,23 +299,45 @@ export function mapDeckRowBasic(deckRow: DeckRow): Deck {
 
 const LOCATION_FALLBACK_JOIN = `
         LEFT JOIN LATERAL (
-          SELECT
-            l.id::text AS loc_id,
-            l.name AS loc_name,
-            l.image_path AS loc_image
-          FROM deck_cards dc
-          JOIN locations l ON l.id = dc.card_id::uuid
-          WHERE dc.deck_id = d.id
-            AND dc.card_type = 'location'
-            AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-          ORDER BY dc.created_at, dc.card_id
+          SELECT structural.loc_id, structural.loc_name, structural.loc_image, structural.card_type
+          FROM (
+            SELECT
+              l.id::text AS loc_id,
+              l.name AS loc_name,
+              l.image_path AS loc_image,
+              'location'::text AS card_type,
+              dc.created_at,
+              dc.card_id,
+              0 AS type_order
+            FROM deck_cards dc
+            JOIN locations l ON l.id = dc.card_id::uuid
+            WHERE dc.deck_id = d.id
+              AND dc.card_type = 'location'
+              AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+            UNION ALL
+            SELECT
+              b.id::text,
+              b.name,
+              b.image_path,
+              'battleground'::text,
+              dc.created_at,
+              dc.card_id,
+              1 AS type_order
+            FROM deck_cards dc
+            JOIN battlegrounds b ON b.id = dc.card_id::uuid
+            WHERE dc.deck_id = d.id
+              AND dc.card_type = 'battleground'
+              AND dc.card_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          ) structural
+          ORDER BY structural.type_order, structural.created_at, structural.card_id
           LIMIT 1
         ) dc_loc ON TRUE`;
 
 const LOCATION_LIST_SELECT = `
           COALESCE(d.location_id, dc_loc.loc_id::uuid) AS preview_location_id,
           COALESCE(l.name, dc_loc.loc_name) AS location_name,
-          COALESCE(l.image_path, dc_loc.loc_image) AS location_default_image`;
+          COALESCE(l.image_path, dc_loc.loc_image) AS location_default_image,
+          CASE WHEN d.location_id IS NOT NULL THEN 'location' ELSE dc_loc.card_type END AS location_card_type`;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

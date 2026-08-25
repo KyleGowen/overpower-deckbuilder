@@ -7,7 +7,7 @@ import {
 } from './deckCardCatalog';
 import { deckEditorSectionIndex } from './deckEditorSectionOrder';
 
-const NON_PLAYABLE_TYPES = new Set(['character', 'location', 'mission']);
+const NON_PLAYABLE_TYPES = new Set(['character', 'location', 'battleground', 'mission']);
 
 function isPlayableType(type: string): boolean {
   return !NON_PLAYABLE_TYPES.has(type);

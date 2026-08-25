@@ -75,7 +75,7 @@ All calls go through [`lib/api/client.ts`](../../frontend/src/lib/api/client.ts)
 - throws a typed `ApiError` on failure.
 
 Data endpoints used:
-- Catalog: `GET /api/v1/catalog/:slug` (full arrays; pagination/sort/filter is **client
+- Catalog: `GET /api/v1/catalog/:slug` (including separate `locations` and `battlegrounds` catalogs; full arrays; pagination/sort/filter is **client
   side** — the catalog endpoints do not paginate).
 - Decks: `GET/POST/PUT/DELETE /api/v1/decks*`, guest equivalents under
   `/api/v1/guest/decks*` (guest deck ids are prefixed `guest_`), `GET /api/v1/decks/community`,

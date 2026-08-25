@@ -33,7 +33,15 @@ export function extractCardsFromExportJson(cardsData: ExportDeckCardsJson): Expo
   pushObjectArrayCards(result, cardsData.special_cards, 'special');
 
   if (Array.isArray(cardsData.locations)) {
-    cardsData.locations.forEach((cardName) => addCard(result, cardName, 'location'));
+    cardsData.locations.forEach((cardName) => addCard(
+      result,
+      cardName,
+      cardName.trim() === 'Global Defense Agency' ? 'battleground' : 'location'
+    ));
+  }
+
+  if (Array.isArray(cardsData.battlegrounds)) {
+    cardsData.battlegrounds.forEach((cardName) => addCard(result, cardName, 'battleground'));
   }
 
   pushObjectArrayCards(result, cardsData.missions, 'mission');

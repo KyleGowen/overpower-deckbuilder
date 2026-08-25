@@ -17,7 +17,7 @@ import {
   qtyInDeckForRepresentative,
 } from '../../lib/catalog/defaultCatalogCards';
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
-import { isOnePerDeckCatalogCard } from '../../lib/decks/deckCardControls';
+import { maxCopiesForAddCards } from '../../lib/decks/addCardsLimits';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { CardImage } from '../../components/CardImage';
 import { CardTile } from '../../components/CardTile';
@@ -77,7 +77,7 @@ import { calculateDeckTotalThreat, MAX_TOTAL_THREAT } from '../../lib/decks/deck
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
 /** Catalog slugs needed for hide-unusable deck context when tab-scoped data is incomplete. */
-const DECK_USABILITY_CONTEXT_TYPES = ['characters', 'missions', 'locations'] as const;
+const DECK_USABILITY_CONTEXT_TYPES = ['characters', 'missions', 'locations', 'battlegrounds'] as const;
 
 const ADD_CARDS_SEARCH_PLACEHOLDER = 'Search name, character, or card text...';
 const STACKS_SEARCH_PLACEHOLDER = 'Search character names...';
@@ -154,6 +154,17 @@ function AddCardsTeamStats({
       .filter((entry) => entry.type === 'location')
       .map((entry) => deckCatalogIndex?.get(`${entry.type}:${entry.cardId}`) ?? null)
       .find(Boolean) ?? null;
+  const battlegroundCard =
+    cards
+      .filter((entry) => entry.type === 'battleground')
+      .map((entry) => deckCatalogIndex?.get(`${entry.type}:${entry.cardId}`) ?? null)
+      .find(Boolean) ?? null;
+  const structuralCard = locationCard ?? battlegroundCard;
+  const structuralCatalogType: CatalogType = locationCard ? 'locations' : 'battlegrounds';
+  const structuralName = [locationCard, battlegroundCard]
+    .filter((card): card is CatalogCard => Boolean(card))
+    .map(cardDisplayName)
+    .join(' & ');
   const totalThreat = calculateDeckTotalThreat(
     cards,
     reserveCharacterId,
@@ -211,20 +222,20 @@ function AddCardsTeamStats({
         ))}
         <div
           className={`add-cards__team-row add-cards__team-row--location${
-            locationCard ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'
+            structuralCard ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'
           }`}
-          tabIndex={locationCard ? 0 : undefined}
+          tabIndex={structuralCard ? 0 : undefined}
           onPointerEnter={() => {
-            if (locationCard) onCardHover(locationCard, 'locations');
+            if (structuralCard) onCardHover(structuralCard, structuralCatalogType);
           }}
-          onPointerLeave={locationCard ? onCardHoverEnd : undefined}
+          onPointerLeave={structuralCard ? onCardHoverEnd : undefined}
           onFocus={() => {
-            if (locationCard) onCardHover(locationCard, 'locations');
+            if (structuralCard) onCardHover(structuralCard, structuralCatalogType);
           }}
-          onBlur={locationCard ? onCardHoverEnd : undefined}
+          onBlur={structuralCard ? onCardHoverEnd : undefined}
         >
           <span className="add-cards__team-name">
-            {locationCard ? cardDisplayName(locationCard) : 'No Location Set'}
+            {structuralName || 'No Location or Battleground Set'}
           </span>
           {locationCard ? (
             <span className="add-cards__team-stat-list" aria-label="Location threat value">
@@ -603,7 +614,9 @@ export function AddCardsPanel({
     return qtyInDeckForRepresentative(card, catalogType, cards, deckType, variantMap);
   };
 
-  const maxCopiesForCard = (card: CatalogCard) => (isOnePerDeckCatalogCard(card) ? 1 : 99);
+  const maxCopiesForCard = (card: CatalogCard) => {
+    return maxCopiesForAddCards(card);
+  };
 
   const handleAddCard = (card: CatalogCard, catalogType: CatalogType) => {
     if (qtyInDeck(card, catalogType) >= maxCopiesForCard(card)) return;

@@ -8,6 +8,7 @@ export type CatalogCardRepository = Pick<
   CardRepository,
   | 'getAllCharacters'
   | 'getAllLocations'
+  | 'getAllBattlegrounds'
   | 'getAllSpecialCards'
   | 'getAllMissions'
   | 'getAllEvents'
@@ -41,6 +42,10 @@ export class CatalogService {
 
   getAllLocations(): Promise<unknown[]> {
     return this.cards.getAllLocations();
+  }
+
+  getAllBattlegrounds(): Promise<unknown[]> {
+    return this.cards.getAllBattlegrounds();
   }
 
   getAllSpecialCards(): Promise<unknown[]> {

@@ -29,7 +29,7 @@ interface CardTileProps {
 function tileOrientationClass(catalogType?: CatalogType): string {
   if (!catalogType) return '';
   if (catalogType === 'characters') return 'card-tile--characters';
-  if (catalogType === 'locations') return 'card-tile--locations';
+  if (catalogType === 'locations' || catalogType === 'battlegrounds') return 'card-tile--locations';
   if (catalogType === 'events') return 'card-tile--events';
   return 'card-tile--portrait';
 }

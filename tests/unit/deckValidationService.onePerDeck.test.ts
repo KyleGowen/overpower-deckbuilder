@@ -10,6 +10,7 @@ const mockCardRepository: jest.Mocked<CardRepository> = {
     getAllMissions: jest.fn(),
     getAllEvents: jest.fn(),
     getAllLocations: jest.fn(),
+    getAllBattlegrounds: jest.fn(),
     getAllAspects: jest.fn(),
     getAllAdvancedUniverse: jest.fn(),
     getAllTeamwork: jest.fn(),
@@ -22,6 +23,7 @@ const mockCardRepository: jest.Mocked<CardRepository> = {
     getMissionById: jest.fn(),
     getEventById: jest.fn(),
     getLocationById: jest.fn(),
+    getBattlegroundById: jest.fn(),
     getAspectById: jest.fn(),
     getAdvancedUniverseById: jest.fn(),
     getTeamworkById: jest.fn(),
@@ -40,6 +42,7 @@ describe('DeckValidationService - One Per Deck Validation', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockCardRepository.getAllBattlegrounds.mockResolvedValue([]);
         validationService = new DeckValidationService(mockCardRepository);
     });
 
