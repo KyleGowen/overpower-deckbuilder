@@ -132,7 +132,9 @@ Shipping is not complete at `git push`.
 #### Delayed or stalled Actions runs
 
 - A run that is absent, or is `queued` with `jobs: []`, is still in GitHub's event/job allocation layer. Wait through the 5-minute window; do not create an empty commit during that window.
-- After 5 minutes, inspect the exact run, other queued/in-progress runs, the workflow state, and [GitHub Status](https://www.githubstatus.com/). If accessible, also check Actions usage or billing because GitHub may expose runner-allocation blocks only in account settings.
+- Before any recovery mutation, query GitHub's live status API (`https://www.githubstatus.com/api/v2/summary.json`) and inspect the `Actions` component plus unresolved incidents. Do not rely on a cached search result or an older status-page render.
+- If Actions is not `operational`, do not cancel, rerun, manually dispatch, or push a trigger commit. Record the exact shipped SHA and run URL (if one exists), report the active GitHub incident, and wait for GitHub to restore service. Platform outages do not consume the one allowed recovery attempt.
+- If GitHub reports Actions operational after 5 minutes, inspect the exact run, other queued/in-progress runs, and workflow state. If accessible, also check Actions usage or billing because GitHub may expose runner-allocation blocks only in account settings.
 - Allow **one** recovery attempt:
   - If the run is terminal with `startup_failure`, wait until the API consistently reports a terminal state, then use `gh run rerun <run-id>` once.
   - If it is genuinely queued and cancellable, cancel it once, wait for terminal cancellation, then dispatch `.github/workflows/deploy.yml` on `main` with `gh workflow run deploy.yml --ref main`. The workflow's `workflow_dispatch` path runs the same production chain as a push.
@@ -150,6 +152,7 @@ Shipping is not complete at `git push`.
 | Endpoint diff and SOC 2 script exits non-zero | Fix or update checks, re-run step 3 |
 | Audit required and vulnerabilities with fixes remain | Fix or stop and notify the user |
 | Debug noise left in diff | Remove and re-check step 5 |
+| GitHub status reports an Actions incident | Make no recovery mutation; report and wait for GitHub service recovery |
 | No matching Actions run after 5 minutes | Perform the bounded diagnostics in step 7; do not create a trigger commit |
 | Replacement run also stalls or `startup_failure` repeats | Stop after one restart, report the run URL and external blocker, and do not claim production success |
 | Production health does not report the shipped commit | Keep monitoring only while the deployment is active; otherwise report the release as incomplete |
