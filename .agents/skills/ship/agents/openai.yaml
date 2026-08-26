@@ -1,4 +1,4 @@
 interface:
   display_name: "Ship Excelsior"
-  short_description: "Run Excelsior release gates, commit, and push"
-  default_prompt: "Use $ship to run Excelsior ship checks, then stage, commit, and push the approved changes."
+  short_description: "Validate, deploy, and verify Excelsior releases"
+  default_prompt: "Use $ship to validate the approved changes, commit and push them, follow deployment, and verify production health."

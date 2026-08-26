@@ -4,12 +4,13 @@ description: >-
   Runs lint, conditional unit tests (and optional conditional integration tests)
   via scripts/ship-conditional-test.sh so suites re-run only after working-tree
   changes, SOC 2 when HTTP paths change, optional daily npm audit, removes debug
-  logging, then stages, commits, and pushes. Prefers parallel tool runs for
-  independent checks. Use when the user says "ship", "ship it", or asks to commit
-  and push after checks; also for the Excelsior release gate.
+  logging, stages and pushes the approved changes, then follows GitHub Actions
+  through deployment and production health. Includes bounded recovery for delayed
+  or stalled runs. Use when the user says "ship", "ship it", or asks for the
+  Excelsior release gate.
 ---
 
-# Ship (commit and push)
+# Ship (validate, push, deploy, verify)
 
 ## Canonical definition
 
@@ -17,7 +18,7 @@ Project rules in [`AGENTS.md`](../../../AGENTS.md) and [`.cursorrules`](../../..
 
 ## Meaning
 
-When the user says **"ship"**, it means: **run the required gates, then stage, commit, and push the intended repository changes**. Kyle has confirmed that "ship" authorizes `git add`, `git commit`, and `git push` for this project.
+When the user says **"ship"**, it means: **run the required gates, stage and push the intended repository changes, follow the matching GitHub Actions deployment to completion, and verify production health for that commit**. Kyle has confirmed that "ship" authorizes `git add`, `git commit`, and `git push` for this project. It also authorizes normal monitoring and one bounded restart of that deployment; it does not authorize repeated trigger commits, workflow rewrites, or unrelated production changes.
 
 ## Parallel execution (user preference — fast turnaround)
 
@@ -48,6 +49,8 @@ Ship progress:
 - [ ] 4. npm audit (when required — see below)
 - [ ] 5. No debug statements
 - [ ] 6. Stage, commit, push
+- [ ] 7. Matching GitHub Actions run passes
+- [ ] 8. Cache-bypassed production health reports the shipped commit, database OK, and expected migration
 ```
 
 ### 1. Lint
@@ -113,6 +116,30 @@ Because "ship" is explicit authorization in this project, Codex may run `git add
 
 **Checks (lint, unit tests, SOC 2, audit):** Prefer parallel tool runs per **Parallel execution** above. **Git** steps remain serial.
 
+### 7. Deployment and production verification
+
+Shipping is not complete at `git push`.
+
+1. Resolve the full pushed SHA with `git rev-parse HEAD` and confirm `origin/main` points to it.
+2. Find the run for that exact SHA with `gh run list --commit <sha> --json databaseId,status,conclusion,url,headSha,createdAt`.
+   - GitHub webhook processing can lag. Poll every 30-60 seconds for up to 5 minutes before calling a missing run stalled.
+3. Follow the run with `gh run view <run-id> --json status,conclusion,jobs,url`. For long migration or deployment stages, keep using bounded `gh run view` checks rather than `gh run watch`.
+4. After success, request the production `/health` endpoint with a cache-busting query and `Cache-Control: no-cache`. Confirm the response reports:
+   - the shipped commit,
+   - database status `OK`, and
+   - the expected latest migration.
+
+#### Delayed or stalled Actions runs
+
+- A run that is absent, or is `queued` with `jobs: []`, is still in GitHub's event/job allocation layer. Wait through the 5-minute window; do not create an empty commit during that window.
+- After 5 minutes, inspect the exact run, other queued/in-progress runs, the workflow state, and [GitHub Status](https://www.githubstatus.com/). If accessible, also check Actions usage or billing because GitHub may expose runner-allocation blocks only in account settings.
+- Allow **one** recovery attempt:
+  - If the run is terminal with `startup_failure`, wait until the API consistently reports a terminal state, then use `gh run rerun <run-id>` once.
+  - If it is genuinely queued and cancellable, cancel it once, wait for terminal cancellation, then dispatch `.github/workflows/deploy.yml` on `main` with `gh workflow run deploy.yml --ref main`. The workflow's `workflow_dispatch` path runs the same production chain as a push.
+- If cancel, force-cancel, and rerun endpoints disagree about run state, stop mutating Actions. Report the run URL and the contradictory API states; do not stack another run.
+- Never create or push an empty "restart deployment" commit as automatic recovery. Only do that when Kyle explicitly requests that exact fallback after seeing the stalled-run evidence.
+- At most one restart is part of `ship`. If the replacement also fails to allocate jobs, treat deployment as externally blocked and do not claim production is updated.
+
 ## Hard stops
 
 | Condition | Action |
@@ -123,6 +150,9 @@ Because "ship" is explicit authorization in this project, Codex may run `git add
 | Endpoint diff and SOC 2 script exits non-zero | Fix or update checks, re-run step 3 |
 | Audit required and vulnerabilities with fixes remain | Fix or stop and notify the user |
 | Debug noise left in diff | Remove and re-check step 5 |
+| No matching Actions run after 5 minutes | Perform the bounded diagnostics in step 7; do not create a trigger commit |
+| Replacement run also stalls or `startup_failure` repeats | Stop after one restart, report the run URL and external blocker, and do not claim production success |
+| Production health does not report the shipped commit | Keep monitoring only while the deployment is active; otherwise report the release as incomplete |
 
 ## Optional cross-checks
 

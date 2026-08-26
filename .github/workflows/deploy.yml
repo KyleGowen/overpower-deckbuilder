@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-west-2
@@ -273,7 +274,7 @@ jobs:
     name: ${{ matrix.category }}
     runs-on: ubuntu-latest
     needs: [build, unit-tests]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     # Must exceed the slowest matrix step timeout + setup (migrate, npm ci, Flyway).
     timeout-minutes: 45
     strategy:
@@ -489,7 +490,7 @@ jobs:
     name: Build & Push Docker Image
     needs: [build, unit-tests, knip, semgrep, trivy, soc2-compliance, integration-tests]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     
     steps:
     - name: Checkout code
@@ -664,7 +665,7 @@ jobs:
     name: Sync Card Images to S3
     needs: [build, unit-tests, knip, semgrep, trivy, soc2-compliance, integration-tests]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
     steps:
     - name: Checkout code
@@ -739,7 +740,7 @@ jobs:
     name: Run Production Migrations
     needs: [build-docker, sync-images]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     
     steps:
     - name: Checkout code
@@ -895,7 +896,7 @@ jobs:
     name: Deploy to Production
     needs: [run-migrations]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     concurrency:
       group: production-deploy-${{ github.ref }}
       cancel-in-progress: false
@@ -1186,7 +1187,7 @@ jobs:
     name: Post Production
     needs: [deploy]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     
     steps:
         
