@@ -13,12 +13,13 @@ overlay and footer slots. Used by the Database and Collection grids.
 | `dimmed` | `boolean` | `false` | Dims art (unowned cards in Collection). |
 | `showMeta` | `boolean` | `true` | Toggle the name/set line. |
 | `catalogType` | `CatalogType` | – | Database grid: landscape vs portrait art frame + `contain` fit. |
-| `hasFoilVersion` | `boolean` | `false` | Silver ✦ on tile (bottom-right of full tile, `title="has foil"`). |
+| `hasFoilVersion` | `boolean` | `false` | Silver ✦ at the right of the card-name row (`title="has foil"`). |
 | `showFoilEffect` | `boolean` | `true` | When false, suppresses the prismatic foil overlay on foil printings. |
 
 ## Notes
 - Name comes from `cardDisplayName(card)`; art path from `card.image_path || card.image`.
 - With `catalogType`, characters use `380:280` landscape; locations/battlegrounds/events use `236:151`; other types use `5:7` portrait. Images use `card-image--contain` (no crop) and `CardImage` `progressive` + `catalogType` (portrait/landscape thumb presets → full-res fade).
-- Set line shows `{set} {set_number}` when a number exists; set code only otherwise.
+- The name row keeps the silver foil indicator beside the name. The metadata row below
+  shows `{set} {set_number}` on the left and rarity on the right.
 - The art is a `<button>` labelled `View {name}` for keyboard/AT access.
 - Owned/selected emphasis and dimming are CSS-only (`.card-tile--dimmed`).

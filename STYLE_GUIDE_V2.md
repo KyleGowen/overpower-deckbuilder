@@ -188,7 +188,9 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   images are also excluded; foil rows reuse their non-foil image and receive the existing sheen.
 - Card tiles (`CardTile`) use a type-aware aspect frame (`catalogType` prop): portrait
   `5:7` by default; characters `380:280`; locations and events `236:151`. Tiles use
-  `--radius-md` corners, subtle border, and a label + set line beneath. Owned/selected tiles
+  `--radius-md` corners, subtle border, and a name row + set/rarity row beneath. The Database
+  foil ✦ sits at the right of the name row; set/collector number and rarity stay paired on the
+  row below. Owned/selected tiles
   get the accent glow; unowned tiles in the Collection are dimmed. Database and Collection
   grids use 4 columns for landscape types and 6 for portrait (1 on mobile).
 - **All tab** (first tab on Database and Collection; Collection defaults to **All**): cross-type **text list** via

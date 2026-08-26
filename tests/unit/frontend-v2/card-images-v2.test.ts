@@ -353,6 +353,22 @@ describe('CardTile database progressive wiring', () => {
     expect(imageSource).toContain('showFoilEffect === false');
     expect(imageSource).toContain('showFoilEffect = true');
   });
+
+  it('places the foil indicator with the name and keeps rarity in the set row', () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '../../../frontend/src/components/CardTile/CardTile.tsx'),
+      'utf8',
+    );
+    const nameRowIndex = source.indexOf('className="card-tile__name-row"');
+    const foilBadgeIndex = source.indexOf('className="card-tile__foil-badge"');
+    const subRowIndex = source.indexOf('className="card-tile__sub"');
+    const rarityIndex = source.indexOf('className="card-tile__rarity"');
+
+    expect(nameRowIndex).toBeGreaterThan(-1);
+    expect(foilBadgeIndex).toBeGreaterThan(nameRowIndex);
+    expect(foilBadgeIndex).toBeLessThan(subRowIndex);
+    expect(rarityIndex).toBeGreaterThan(subRowIndex);
+  });
 });
 
 describe('per-screen foil effect wiring', () => {

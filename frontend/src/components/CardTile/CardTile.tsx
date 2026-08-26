@@ -92,7 +92,15 @@ export const CardTile = memo(function CardTile({
       </div>
       {showMeta ? (
         <div className="card-tile__meta">
-          <span className="card-tile__name" title={name}>{name}</span>
+          <span className="card-tile__name-row">
+            <span className="card-tile__name" title={name}>{name}</span>
+            {hasFoilVersion ? (
+              <span className="card-tile__foil-badge" title="has foil">
+                <span className="card-tile__foil-badge-icon" aria-hidden>✦</span>
+                <span className="sr-only">has foil</span>
+              </span>
+            ) : null}
+          </span>
           <span className="card-tile__sub">
             {setLabel ? <span>{setLabel}</span> : null}
             {card.rarity ? <span className="card-tile__rarity">{card.rarity}</span> : null}
@@ -100,12 +108,6 @@ export const CardTile = memo(function CardTile({
         </div>
       ) : null}
       {footer ? <div className="card-tile__footer">{footer}</div> : null}
-      {hasFoilVersion ? (
-        <span className="card-tile__foil-badge" title="has foil">
-          <span className="card-tile__foil-badge-icon" aria-hidden>✦</span>
-          <span className="sr-only">has foil</span>
-        </span>
-      ) : null}
     </article>
   );
 });
