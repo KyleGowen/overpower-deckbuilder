@@ -12,6 +12,7 @@ import type { CountEntry } from '../../lib/tournaments/types';
 import { CardImage } from '../CardImage';
 import { DashboardTile, type DashboardTileVariant } from '../dashboard';
 import './TournamentCharts.css';
+import { getTournamentCharacterMosaicColumns } from './tournamentCharacterMosaic';
 
 const ART_CYCLE_MS = 1500;
 const ART_CYCLE_HOVER_DELAY_MS = 1000;
@@ -60,7 +61,7 @@ function TournamentCharacterMosaic({
   onEntryClick: (entry: CountEntry) => void;
   isClickable: (entry: CountEntry) => boolean;
 }) {
-  const columns = items.length > 8 ? 3 : 2;
+  const columns = getTournamentCharacterMosaicColumns(items.length);
   const rows = Math.ceil(items.length / columns);
 
   return (

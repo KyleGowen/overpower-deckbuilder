@@ -557,8 +557,10 @@ stable links for 1st and 2nd place; its 3rd-place row remains visible and disabl
 The newcomer tiles (`New Winning Characters` and `New Top 8 Characters`) deliberately use two
 presentations. The constrained Home rail mirrors `DeckTile`: the visible character advances after a
 1s desktop hover or 750ms touch hold, then every 1.5s; a quick click/tap opens the currently visible
-card. The expanded Regionals dashboard replaces the cycle with a two-column artwork mosaic (three
-columns above eight entries) so the complete newcomer list is visible and each card remains clickable.
+card. The expanded Regionals dashboard replaces the cycle with an artwork mosaic: one newcomer fills
+the full art width, two columns are used for 2–8 entries, and three columns are used above eight entries.
+Multi-card vertical slices crop from each card's left edge and retain that anchor during hover zoom so
+the character art is not clipped from the leading side. Every card remains clickable.
 
 ### Shared caption typography
 

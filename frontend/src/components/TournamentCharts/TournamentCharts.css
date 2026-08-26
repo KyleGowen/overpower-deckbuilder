@@ -195,8 +195,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 28%;
   transition: transform 180ms ease;
+}
+
+.tournament-character-roster__mosaic-item .card-image__img {
+  object-position: left 28%;
+  transform-origin: left center;
+}
+
+.tournament-character-roster__cycle-button .card-image__img {
+  object-position: center 28%;
 }
 
 .tournament-character-roster__mosaic-item:hover:not(:disabled) .card-image__img {

@@ -40,7 +40,7 @@ Generic text-only preview tile (no chart art zone). Single content column with t
 |---------|---------|
 | Empty list | Empty message in art |
 | Home rail (`rail`) | One full-bleed character at a time; desktop hover or touch press-and-hold cycles through the list, matching deck-preview timing; quick click/tap opens the visible character |
-| View All (`sm`/`md`/`lg`/`wide`/`tall`) | Full clickable artwork mosaic showing every newcomer at once |
+| View All (`sm`/`md`/`lg`/`wide`/`tall`) | Full clickable artwork mosaic showing every newcomer at once; one newcomer fills the art width, while multi-card vertical slices crop from each card's left edge |
 
 ## Chart props (preview mode)
 
