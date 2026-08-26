@@ -244,12 +244,10 @@ export default function UserAnalyticsPage() {
               </div>
             </article>
             <article className="user-analytics-average-card user-analytics-average-card--collection">
-              <strong>{formatDecimal(analytics.collectionStatistics.averageCardsPerUser)}</strong>
+              <strong>{formatDecimal(analytics.collectionStatistics.averageCardsPerCollector)}</strong>
               <div>
-                <h4>Average cards per user</h4>
-                <p>
-                  Includes users with zero cards · {formatDecimal(analytics.collectionStatistics.averageCardsPerCollector)} among active collectors
-                </p>
+                <h4>Average cards per collector</h4>
+                <p>Includes only users with non-zero collection counts</p>
               </div>
             </article>
           </div>
