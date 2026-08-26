@@ -33,6 +33,7 @@ export interface KoDimmingContext {
   koCharacterIds: Set<string>;
   activeCharacters: ActiveCharacter[];
   activeCharacterNames: string[];
+  startingCharacterNames: string[];
   teamStats: KoTeamStats;
   shouldDimTeamworkAndAllyForSingleCharacter: boolean;
   deckCards: DeckCardEntry[];
@@ -83,8 +84,11 @@ function sumOfTwoHighestStats(
   return (stats[0] || 0) + (stats[1] || 0);
 }
 
-function effectiveStatsForPowerTraining(char: ActiveCharacter): CharacterStatRow {
-  return effectiveCharacterStats(char);
+function effectiveStatsForPowerTraining(
+  char: ActiveCharacter,
+  startingCharacterNames: string[],
+): CharacterStatRow {
+  return effectiveCharacterStats(char, startingCharacterNames);
 }
 
 function statFromEffectiveStats(eff: CharacterStatRow, statLabel: string): number {
@@ -147,9 +151,20 @@ export function buildKoDimmingContext(
   cardIndex: DeckCardIndex,
   koCharacterIds: Set<string>,
 ): KoDimmingContext {
+  const startingCharacterNames = deckCards
+    .filter((card) => card.type === 'character')
+    .flatMap((card) => {
+      const catalogCard = resolveCatalogCard(card, cardIndex);
+      return catalogCard
+        ? [String(catalogCard.name ?? catalogCard.card_name ?? 'Unknown')]
+        : [];
+    });
   const activeCharacters = getActiveCharacters(deckCards, cardIndex, koCharacterIds);
   const activeCharacterNames = activeCharacters.map((char) => char.name);
-  const teamStats = calculateActiveTeamStatsFromCharacters(activeCharacters);
+  const teamStats = calculateActiveTeamStatsFromCharacters(
+    activeCharacters,
+    startingCharacterNames,
+  );
   const totalCharacters = deckCards.filter((card) => card.type === 'character').length;
   const hasKOdCharacters = koCharacterIds.size > 0;
   const hasOnlyOneActiveCharacter = activeCharacters.length === 1;
@@ -160,6 +175,7 @@ export function buildKoDimmingContext(
     koCharacterIds,
     activeCharacters,
     activeCharacterNames,
+    startingCharacterNames,
     teamStats,
     shouldDimTeamworkAndAllyForSingleCharacter,
     deckCards,
@@ -167,14 +183,17 @@ export function buildKoDimmingContext(
   };
 }
 
-function calculateActiveTeamStatsFromCharacters(activeCharacters: ActiveCharacter[]): KoTeamStats {
+function calculateActiveTeamStatsFromCharacters(
+  activeCharacters: ActiveCharacter[],
+  startingCharacterNames: string[],
+): KoTeamStats {
   let maxEnergy = 0;
   let maxCombat = 0;
   let maxBruteForce = 0;
   let maxIntelligence = 0;
 
   for (const char of activeCharacters) {
-    const eff = effectiveStatsForPowerTraining(char);
+    const eff = effectiveStatsForPowerTraining(char, startingCharacterNames);
     if (eff.energy > maxEnergy) maxEnergy = eff.energy;
     if (eff.combat > maxCombat) maxCombat = eff.combat;
     if (eff.brute_force > maxBruteForce) maxBruteForce = eff.brute_force;
@@ -243,7 +262,10 @@ function dimAllyCard(cardData: CatalogCard, ctx: KoDimmingContext): boolean {
   const isLessThan = valueMatch[2].toLowerCase() === 'less';
 
   const canUse = ctx.activeCharacters.some((char) => {
-    const characterStat = statForPowerType(char, statTypeToUse);
+    const characterStat = statForPowerType(
+      effectiveStatsForPowerTraining(char, ctx.startingCharacterNames),
+      statTypeToUse,
+    );
     return isLessThan ? characterStat <= requiredValue : characterStat >= requiredValue;
   });
 
@@ -257,7 +279,7 @@ function dimTrainingCard(cardData: CatalogCard, ctx: KoDimmingContext): boolean 
   if (!trainingType1 || !trainingType2 || trainingValue <= 0) return false;
 
   const canUse = ctx.activeCharacters.some((char) => {
-    const eff = effectiveStatsForPowerTraining(char);
+    const eff = effectiveStatsForPowerTraining(char, ctx.startingCharacterNames);
     const type1Stat = statFromEffectiveStats(eff, trainingType1);
     const type2Stat = statFromEffectiveStats(eff, trainingType2);
     return type1Stat <= trainingValue || type2Stat <= trainingValue;
@@ -273,7 +295,10 @@ function dimBasicUniverseCard(cardData: CatalogCard, ctx: KoDimmingContext): boo
   if (!buType || buRequiredValue <= 0) return false;
 
   const canUse = ctx.activeCharacters.some((char) => {
-    const characterStat = statForPowerType(char, buType);
+    const characterStat = statForPowerType(
+      effectiveStatsForPowerTraining(char, ctx.startingCharacterNames),
+      buType,
+    );
     return characterStat >= buRequiredValue;
   });
 
@@ -286,7 +311,7 @@ function dimPowerCard(cardData: CatalogCard, ctx: KoDimmingContext): boolean {
   if (!powerType || powerValue <= 0) return false;
 
   const canUse = ctx.activeCharacters.some((char) => {
-    const eff = effectiveStatsForPowerTraining(char);
+    const eff = effectiveStatsForPowerTraining(char, ctx.startingCharacterNames);
     let characterStat = 0;
 
     switch (powerType) {

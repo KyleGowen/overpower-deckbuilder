@@ -111,6 +111,7 @@ import { clearProgressiveImageSession } from '../../lib/images/progressiveImageL
 import { resolveMobileDeckTypeTab, stepCyclicalIndex } from '../../lib/layout/cyclicalIndex';
 import { useHorizontalSwipe } from '../../lib/layout/useHorizontalSwipe';
 import { getDeckEditorReturnTo, getDeckEditorBackAriaLabel } from '../../lib/navigation/deckEditorReturn';
+import { effectiveTeamCharacterStats } from '../../lib/deck-usability';
 import { deckEditorCardImageLoadingProps } from './deckEditorCardImage';
 import {
   characterOrderPosition,
@@ -502,21 +503,31 @@ export default function DeckEditorPage() {
     if (koCtx) {
       return calculateActiveTeamStats(koCtx);
     }
-    const statById = new Map<string, ReturnType<typeof cardStats>>();
+    const statById = new Map<string, { name: string; stats: NonNullable<ReturnType<typeof cardStats>> }>();
     allCharactersCatalog.forEach((c) => {
       const s = cardStats(c);
-      if (s) statById.set(c.id, s);
+      if (s) statById.set(c.id, { name: String(c.name ?? 'Unknown'), stats: s });
     });
     const chars = cards.filter((c) => c.type === 'character');
+    const effectiveCharacterStats = effectiveTeamCharacterStats(
+      chars.flatMap((c) => {
+        const resolved = statById.get(c.cardId);
+        if (!resolved) return [];
+        return [{
+          name: resolved.name,
+          energy: resolved.stats.energy,
+          combat: resolved.stats.combat,
+          brute_force: resolved.stats.bruteForce,
+          intelligence: resolved.stats.intelligence,
+        }];
+      }),
+    );
     const acc = { energy: 0, combat: 0, bruteForce: 0, intelligence: 0 };
-    chars.forEach((c) => {
-      const s = statById.get(c.cardId);
-      if (s) {
-        acc.energy = Math.max(acc.energy, s.energy);
-        acc.combat = Math.max(acc.combat, s.combat);
-        acc.bruteForce = Math.max(acc.bruteForce, s.bruteForce);
-        acc.intelligence = Math.max(acc.intelligence, s.intelligence);
-      }
+    effectiveCharacterStats.forEach((stats) => {
+      acc.energy = Math.max(acc.energy, stats.energy);
+      acc.combat = Math.max(acc.combat, stats.combat);
+      acc.bruteForce = Math.max(acc.bruteForce, stats.brute_force);
+      acc.intelligence = Math.max(acc.intelligence, stats.intelligence);
     });
     return acc;
   }, [cards, allCharactersCatalog, koCtx]);

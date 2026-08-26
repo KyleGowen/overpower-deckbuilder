@@ -3,6 +3,7 @@ import { metaForDeckType } from '../catalog/catalogTypeMap';
 import { deckCatalogIndexKey } from './deckCatalogIndex';
 import type { CharacterStatRow, DeckUsabilityContext } from './types';
 import {
+  effectiveTeamCharacterStats,
   isGdaAnyCharacterSpecial,
   specialLinkedCharacterName,
 } from './deckUsabilityUtils';
@@ -103,7 +104,7 @@ export function buildDeckUsabilityContext(
 
   return {
     characterNames,
-    characterStats,
+    characterStats: effectiveTeamCharacterStats(characterStats),
     angryMobCharacterNames,
     missionSets,
     homebaseName,

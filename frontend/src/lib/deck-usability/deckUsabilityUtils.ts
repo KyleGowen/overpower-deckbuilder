@@ -95,16 +95,52 @@ export function normalizeAngryMobVariant(v: string): string {
   return v.toLowerCase().replace(/\s+/g, ' ').trim().replace(/s$/, '');
 }
 
-/** John Carter / Time Traveler effective stats for power-card usability (v1 parity). */
-export function effectiveCharacterStats(char: CharacterStatRow): CharacterStatRow {
-  const nameLower = char.name.toLowerCase();
+function baseCharacterName(name: string): string {
+  return name.split(' (')[0].trim().toLowerCase();
+}
+
+function teamHasCharacterNamed(characterNames: string[], expectedName: string): boolean {
+  const normalizedExpected = expectedName.toLowerCase();
+  return characterNames.some((name) => baseCharacterName(name) === normalizedExpected);
+}
+
+function effectiveStartingTeamGridStats(
+  char: CharacterStatRow,
+  startingCharacterNames: string[],
+): CharacterStatRow {
+  const michonneConditionMet =
+    baseCharacterName(char.name) === 'michonne'
+    && teamHasCharacterNamed(startingCharacterNames, 'Rick Grimes')
+    && teamHasCharacterNamed(startingCharacterNames, 'Alexandria');
   return {
     ...char,
+    combat: Math.max(char.combat || 0, michonneConditionMet ? 8 : 0),
+  };
+}
+
+/** Power-card overrides plus starting-team grid conditions. */
+export function effectiveCharacterStats(
+  char: CharacterStatRow,
+  startingCharacterNames: string[] = [char.name],
+): CharacterStatRow {
+  const nameLower = char.name.toLowerCase();
+  return {
+    ...effectiveStartingTeamGridStats(char, startingCharacterNames),
     brute_force: Math.max(char.brute_force || 0, nameLower.includes('john carter') ? 8 : 0),
     intelligence: Math.max(char.intelligence || 0, nameLower.includes('time traveler') ? 8 : 0),
   };
 }
 
-export function statForPowerTypeWithSpecialCases(char: CharacterStatRow, powerType: string): number {
-  return statForPowerType(effectiveCharacterStats(char), powerType);
+export function effectiveTeamCharacterStats(characterStats: CharacterStatRow[]): CharacterStatRow[] {
+  const startingCharacterNames = characterStats.map((character) => character.name);
+  return characterStats.map((character) =>
+    effectiveStartingTeamGridStats(character, startingCharacterNames));
+}
+
+export function statForPowerTypeWithSpecialCases(
+  char: CharacterStatRow,
+  powerType: string,
+  startingCharacterNames: string[] = [char.name],
+): number {
+  return statForPowerType(effectiveCharacterStats(char, startingCharacterNames), powerType);
 }

@@ -1,5 +1,5 @@
 import type { DeckCard } from '../../types';
-import { deckCardMapKey } from './deck-validation-utils';
+import { deckCardMapKey, effectiveTeamCharacterStats } from './deck-validation-utils';
 
 export interface CharacterStatRow {
     name: string;
@@ -37,7 +37,7 @@ export function buildDeckValidationContext(
         return availableCard ? (availableCard.name as string) : 'Unknown';
     });
 
-    const characterStats = characterCards
+    const characterStats = effectiveTeamCharacterStats(characterCards
         .map(card => {
             const availableCard = availableCardsMap.get(deckCardMapKey(card));
             return availableCard
@@ -50,7 +50,7 @@ export function buildDeckValidationContext(
                   }
                 : null;
         })
-        .filter((char): char is NonNullable<typeof char> => char !== null);
+        .filter((char): char is NonNullable<typeof char> => char !== null));
 
     const angryMobCharacterNames = characterNames.filter(name => name.startsWith('Angry Mob'));
 

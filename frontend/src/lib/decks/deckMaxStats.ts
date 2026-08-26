@@ -1,17 +1,19 @@
 import { cardStats } from '../catalog/catalogTypeMap';
 import type { CatalogCard, DeckListItem } from '../api/types';
 import type { DeckStatLine } from '../../components/DeckTile';
+import { effectiveTeamCharacterStats } from '../deck-usability';
 
 type CharStats = NonNullable<ReturnType<typeof cardStats>>;
+type NamedCharStats = CharStats & { name: string };
 
 /** Build a characterId → stat line map from the characters catalog. */
 export function buildCharStatsById(
   characters: Array<Partial<CatalogCard> & { id: string }> | undefined,
-): Map<string, CharStats> {
-  const m = new Map<string, CharStats>();
+): Map<string, NamedCharStats> {
+  const m = new Map<string, NamedCharStats>();
   (characters ?? []).forEach((c) => {
     const s = cardStats(c);
-    if (s) m.set(c.id, s);
+    if (s) m.set(c.id, { ...s, name: String(c.name ?? 'Unknown') });
   });
   return m;
 }
@@ -22,7 +24,7 @@ export function buildCharStatsById(
  */
 export function deckMaxStats(
   deck: DeckListItem,
-  charStatsById: Map<string, CharStats>,
+  charStatsById: Map<string, NamedCharStats>,
 ): DeckStatLine | null {
   const chars = (deck.cards ?? []).filter((c) => c.type === 'character');
   if (chars.length === 0) return null;
@@ -30,16 +32,22 @@ export function deckMaxStats(
   let combat = 0;
   let bruteForce = 0;
   let intelligence = 0;
-  let found = false;
-  chars.forEach((c) => {
-    const s = charStatsById.get(c.cardId);
-    if (s) {
-      found = true;
-      energy = Math.max(energy, s.energy);
-      combat = Math.max(combat, s.combat);
-      bruteForce = Math.max(bruteForce, s.bruteForce);
-      intelligence = Math.max(intelligence, s.intelligence);
-    }
+  const characterStats = effectiveTeamCharacterStats(chars.flatMap((c) => {
+    const stats = charStatsById.get(c.cardId);
+    if (!stats) return [];
+    return [{
+      name: stats.name,
+      energy: stats.energy,
+      combat: stats.combat,
+      brute_force: stats.bruteForce,
+      intelligence: stats.intelligence,
+    }];
+  }));
+  characterStats.forEach((stats) => {
+    energy = Math.max(energy, stats.energy);
+    combat = Math.max(combat, stats.combat);
+    bruteForce = Math.max(bruteForce, stats.brute_force);
+    intelligence = Math.max(intelligence, stats.intelligence);
   });
-  return found ? { energy, combat, bruteForce, intelligence } : null;
+  return characterStats.length > 0 ? { energy, combat, bruteForce, intelligence } : null;
 }

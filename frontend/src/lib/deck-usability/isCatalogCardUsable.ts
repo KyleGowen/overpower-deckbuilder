@@ -65,7 +65,7 @@ function isPowerCardUsable(card: CatalogCard, ctx: DeckUsabilityContext): boolea
   if (isMultiPowerPowerCardType(powerType)) return true;
 
   return ctx.characterStats.some(
-    (char) => statForPowerTypeWithSpecialCases(char, powerType) >= value,
+    (char) => statForPowerTypeWithSpecialCases(char, powerType, ctx.characterNames) >= value,
   );
 }
 

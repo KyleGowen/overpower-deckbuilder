@@ -73,6 +73,7 @@ import { AddCardsFilterBar } from './AddCardsFilterBar';
 import { buildDeckUsabilityContext, effectiveHideUnusablesForTab, tabSupportsHideUnusables } from '../../lib/deck-usability';
 import { useDbvFilters } from '../database/filters/useDbvFilters';
 import { calculateDeckTotalThreat, MAX_TOTAL_THREAT } from '../../lib/decks/deckThreat';
+import { buildAddCardsEffectiveCharacterStats } from './addCardsTeamStats';
 
 const STACK_CATALOG_TYPES = ['characters', 'special-cards', 'advanced-universe'] as const;
 
@@ -149,6 +150,7 @@ function AddCardsTeamStats({
     ...characterCards,
     ...Array.from({ length: Math.max(0, EMPTY_CHARACTER_SLOT_COUNT - characterCards.length) }, () => null),
   ];
+  const effectiveCharacterStats = buildAddCardsEffectiveCharacterStats(cards, deckCatalogIndex);
   const locationCard =
     cards
       .filter((entry) => entry.type === 'location')
@@ -190,36 +192,41 @@ function AddCardsTeamStats({
         </span>
       </div>
       <div className="add-cards__team-rows">
-        {rows.map((card, index) => (
-          <div
-            key={card?.id ?? `empty-${index}`}
-            className={`add-cards__team-row${card ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'}`}
-            tabIndex={card ? 0 : undefined}
-            onPointerEnter={() => {
-              if (card) onCardHover(card, 'characters');
-            }}
-            onPointerLeave={card ? onCardHoverEnd : undefined}
-            onFocus={() => {
-              if (card) onCardHover(card, 'characters');
-            }}
-            onBlur={card ? onCardHoverEnd : undefined}
-          >
-            <span className="add-cards__team-name">
-              {card ? cardDisplayName(card) : `Character ${index + 1}`}
-            </span>
-            <span className="add-cards__team-stat-list">
-              {CHARACTER_STAT_ROWS.map(({ key, icon, label }) => (
-                <StatIconBadge
-                  key={key}
-                  type={icon}
-                  value={card ? numericStat(card, key) : 0}
-                  size="md"
-                  title={card ? `${cardDisplayName(card)} ${label}` : `Empty slot ${label}`}
-                />
-              ))}
-            </span>
-          </div>
-        ))}
+        {rows.map((card, index) => {
+          const displayCard = card
+            ? { ...card, ...(effectiveCharacterStats.get(card.id) ?? {}) }
+            : null;
+          return (
+            <div
+              key={card?.id ?? `empty-${index}`}
+              className={`add-cards__team-row${card ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'}`}
+              tabIndex={card ? 0 : undefined}
+              onPointerEnter={() => {
+                if (card) onCardHover(card, 'characters');
+              }}
+              onPointerLeave={card ? onCardHoverEnd : undefined}
+              onFocus={() => {
+                if (card) onCardHover(card, 'characters');
+              }}
+              onBlur={card ? onCardHoverEnd : undefined}
+            >
+              <span className="add-cards__team-name">
+                {card ? cardDisplayName(card) : `Character ${index + 1}`}
+              </span>
+              <span className="add-cards__team-stat-list">
+                {CHARACTER_STAT_ROWS.map(({ key, icon, label }) => (
+                  <StatIconBadge
+                    key={key}
+                    type={icon}
+                    value={displayCard ? numericStat(displayCard, key) : 0}
+                    size="md"
+                    title={card ? `${cardDisplayName(card)} ${label}` : `Empty slot ${label}`}
+                  />
+                ))}
+              </span>
+            </div>
+          );
+        })}
         <div
           className={`add-cards__team-row add-cards__team-row--location${
             structuralCard ? ' add-cards__team-row--interactive' : ' add-cards__team-row--empty'

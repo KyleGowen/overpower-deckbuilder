@@ -1,5 +1,6 @@
 import type { DeckCard } from '../../types';
 import type { DeckValidationContext } from './deck-validation-context';
+import type { CharacterStatRow } from './deck-validation-context';
 
 /** API / editor deck rows use hyphenated types; map keys use underscores. */
 export function deckCardTypeKeyPrefix(type: string): string {
@@ -68,6 +69,33 @@ export function statForPowerType(
         default:
             return 0;
     }
+}
+
+function baseCharacterName(name: string): string {
+    return name.split(' (')[0].trim().toLowerCase();
+}
+
+function teamHasCharacterNamed(characterNames: string[], expectedName: string): boolean {
+    const normalizedExpected = expectedName.toLowerCase();
+    return characterNames.some(name => baseCharacterName(name) === normalizedExpected);
+}
+
+/** Apply starting-team inherent abilities that change a character's effective grid. */
+export function effectiveTeamCharacterStats(characterStats: CharacterStatRow[]): CharacterStatRow[] {
+    const characterNames = characterStats.map(character => character.name);
+    const michonneConditionMet =
+        teamHasCharacterNamed(characterNames, 'Rick Grimes') &&
+        teamHasCharacterNamed(characterNames, 'Alexandria');
+
+    return characterStats.map(character => {
+        if (baseCharacterName(character.name) !== 'michonne' || !michonneConditionMet) {
+            return character;
+        }
+        return {
+            ...character,
+            combat: Math.max(character.combat, 8)
+        };
+    });
 }
 
 type CharacterStatGrid = {
