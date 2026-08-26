@@ -94,9 +94,15 @@ curl -s http://localhost:8085/health | jq -r '
 └─────────────────────────────────────────────────────────────┘"'
 ```
 
+### Deployments
+
+Pushes to `main` run the full **Build, Test, and Deploy** workflow. If GitHub
+stalls before allocating jobs, maintainers can manually dispatch `deploy.yml`
+from `main`; the manual path runs the same production deployment and health
+checks as a push.
+
 ### Docs
 
 - **Current**: `docs/current/`
 - **History**: `docs/history/`
 - **Product/UI**: `docs/`
-
