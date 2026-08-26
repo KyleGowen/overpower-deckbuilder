@@ -118,6 +118,12 @@ variable "forward_to_email" {
   default     = "kyle.gowen@gmail.com"
 }
 
+variable "ses_default_configuration_set_name" {
+  description = "Existing SES configuration set automatically applied to mail sent from the domain identity"
+  type        = string
+  default     = "my-first-configuration-set"
+}
+
 # Firebase (for Google Sign-In)
 variable "firebase_api_key" {
   description = "Firebase API key for web client"

@@ -1,168 +1,150 @@
 ---
 name: ship
 description: >-
-  Runs lint, conditional unit tests (and optional conditional integration tests)
-  via scripts/ship-conditional-test.sh so suites re-run only after working-tree
-  changes, SOC 2 when HTTP paths change, optional daily npm audit, removes debug
-  logging, stages and pushes the approved changes, then follows GitHub Actions
-  through deployment and production health. Includes bounded recovery for delayed
-  or stalled runs. Use when the user says "ship", "ship it", or asks for the
-  Excelsior release gate.
+  Ships approved Excelsior changes with one scope snapshot, cached and parallel
+  release gates, a dedicated low-cost Git execution agent, exact-SHA GitHub
+  Actions monitoring, and production health verification. Use when the user says
+  "ship", "ship it", or asks for the Excelsior release gate.
 ---
 
-# Ship (validate, push, deploy, verify)
+# Ship (fast validate, push, deploy, verify)
 
-## Canonical definition
+## Outcome and authority
 
-Project rules in [`AGENTS.md`](../../../AGENTS.md) and [`.cursorrules`](../../../.cursorrules) are the source of truth. This skill repeats the ship workflow so Codex discovers and applies it without relying on chat memory.
+Project rules in [`AGENTS.md`](../../../AGENTS.md) and [`.cursorrules`](../../../.cursorrules) remain authoritative.
 
-## Meaning
+**Ship** means: validate the intended changes, commit and push only that scope, follow the matching deployment, and verify production health for the pushed commit. The word **ship** authorizes `git add`, `git commit`, `git push`, normal deployment monitoring, and one bounded Actions recovery attempt. It does not authorize unrelated changes, repeated trigger commits, workflow rewrites, or other production mutations.
 
-When the user says **"ship"**, it means: **run the required gates, stage and push the intended repository changes, follow the matching GitHub Actions deployment to completion, and verify production health for that commit**. Kyle has confirmed that "ship" authorizes `git add`, `git commit`, and `git push` for this project. It also authorizes normal monitoring and one bounded restart of that deployment; it does not authorize repeated trigger commits, workflow rewrites, or unrelated production changes.
+## Model and responsibility boundary
 
-## Parallel execution (user preference — fast turnaround)
+The originating/main agent owns every decision-bearing phase:
 
-**Default:** Use as much safe parallelism as practical. The owner wants **short wall-clock time** for ship, not strictly serial check execution.
+- determine intended versus unrelated changes;
+- select and run gates, interpret failures, and make fixes;
+- choose the exact staged path list and commit message;
+- inspect Actions, decide whether recovery is safe, and verify production.
 
-1. **Quick triage first** (main agent is fine): determine whether SOC 2 applies (endpoint path diff — see §3) and whether `npm audit` is required today (see §4). These are cheap; do not spawn agents just for this unless remote-heavy.
-2. **Run independent gates concurrently:** start independent shell/tool runs in parallel when the commands do not depend on one another, for example:
-   - `npx eslint src --ext .ts --max-warnings 0`
-   - `bash scripts/ship-conditional-test.sh unit` (re-runs `npm run test:unit` only if the working tree changed since the last successful unit run — see **§2**)
-   - `bash scripts/ship-conditional-test.sh integration` (only when integration tests are in scope for this ship — same skip logic)
-   - `bash scripts/soc2-compliance-checks.sh` (only if §3 triggered)
-   - `npm audit` (only if §4 required)
-3. **Collect results** after all parallel tasks finish. **All must pass** before proceeding. If several fail, fix issues, then **re-run only what failed** (again in parallel if multiple reruns).
-4. **Keep serial on purpose:** debug cleanup (edits in the repo) and the **git** workflow (stage / commit / push) happen **after** checks are green; use subagent(s) for git per §6, not parallel pushes.
+Do **not** move any of those phases to a lower-cost model.
+Do not spawn additional lower-cost agents for triage, validation, fixes, Actions monitoring, or health checks.
 
-**Rule of thumb:** If two commands do not depend on each other’s output, run them in parallel rather than back-to-back in one shell.
+After all gates pass, delegate only the mechanical Git commands to one dedicated agent created with:
 
-## Checklist (execute in order)
+- model: `gpt-5.6-luna`
+- reasoning effort: `medium`
+- context: `fork_turns: "none"`
+- task name: `ship_git`
 
-Copy and track progress:
+Luna medium is sufficient because the main agent supplies a complete, exact handoff and retains all judgment. If that model is unavailable, use the least-cost available model adequate for this bounded Git task; do not move any other ship work to it.
 
-```
-Ship progress:
-- [ ] 1. ESLint clean
-- [ ] 2. Unit tests pass (`bash scripts/ship-conditional-test.sh unit` — ok if skipped when tree unchanged)
-- [ ] 2b. Integration tests (only if in scope — `bash scripts/ship-conditional-test.sh integration`)
-- [ ] 3. SOC 2 script (when endpoint paths changed — see below)
-- [ ] 4. npm audit (when required — see below)
-- [ ] 5. No debug statements
-- [ ] 6. Stage, commit, push
-- [ ] 7. Matching GitHub Actions run passes
-- [ ] 8. Cache-bypassed production health reports the shipped commit, database OK, and expected migration
+## Fast path
+
+### 1. Freeze scope once
+
+At ship start, take one compact snapshot:
+
+```bash
+git status --short --branch
+git diff --name-only HEAD
+git diff --check
 ```
 
-### 1. Lint
+Record:
 
-- Run from repo root: `npx eslint src --ext .ts --max-warnings 0`
-- Fix every warning and error before continuing
-- **Do not commit** if lint is not clean (matches CI zero-warning policy)
+- current branch;
+- exact intended paths to include;
+- every pre-existing or unrelated path to exclude;
+- whether the triggers below apply.
 
-### 2. Unit tests (conditional re-run)
+Once required current-session instructions are loaded, do not repeatedly reread project documentation, rescan the entire repository, or ask Kyle to reconfirm Git authorization when the current request and scope are clear. Reuse validation already completed in the current task when it was run against the exact same working-tree fingerprint.
 
-- Run from repo root: `bash scripts/ship-conditional-test.sh unit`
-- This invokes `npm run test:unit` **only when** the repo fingerprint changed since the last **successful** unit run (HEAD + staged/unstaged diffs + untracked files and their hashes). If nothing relevant changed, the script exits **0** and prints a skip line — treat that as **pass** for ship.
-- To **always** run unit tests regardless of cache: `SHIP_TESTS_FORCE=1 bash scripts/ship-conditional-test.sh unit`
-- Fix failures before continuing; **never commit** if unit tests fail
-- For an unconditional run outside ship (e.g. explicit “run all unit tests”), use `npm run test:unit` directly
+Before expensive gates, inspect newly added diff lines for temporary `console.log`, `console.debug`, or equivalent debug output and remove only genuine temporary logging. This prevents cleanup edits from invalidating completed gates.
 
-### 2b. Integration tests (when included in this ship)
+### 2. Classify conditional gates
 
-- When [`AGENTS.md`](../../../AGENTS.md), [`.cursorrules`](../../../.cursorrules), or the user implies integration tests before push: `bash scripts/ship-conditional-test.sh integration` (same fingerprint/skip behavior vs. last successful IT run)
-- `SHIP_TESTS_FORCE=1` forces a full `npm run test:integration`
-- Skip message + exit 0 counts as pass for ship
+- **Unit tests:** always invoke `bash scripts/ship-conditional-test.sh unit`. Its exact-tree cache may safely skip a previously successful run.
+- **Integration tests:** invoke `bash scripts/ship-conditional-test.sh integration` only when the user, `AGENTS.md`, path-specific instructions, or the risk of the change requires integration coverage. A successful exact-tree cache hit counts as pass.
+- **SOC 2:** run `bash scripts/soc2-compliance-checks.sh` only when the ship scope includes `src/index.ts`, `src/routes/**`, or `src/api/http/**`.
+- **Dependency audit:** run `npm audit` before the first push of the calendar day in Kyle's Pacific time and whenever `package.json` or `package-lock.json` changed. Reuse same-day evidence only when its timestamp is known and no dependency manifest changed afterward; when uncertain, run it.
+- **Changed-area checks:** include any focused typecheck, build, or verification required by `AGENTS.md` or nested instructions for the files being shipped. Do not invent unrelated broad checks.
 
-### 3. SOC 2 compliance checks (conditional)
+### 3. Run one parallel gate batch
 
-**When required:** If the change set about to be shipped touches **HTTP endpoint surfaces**, run the same technical compliance script as CI (**Run SOC 2 technical compliance checks** in `.github/workflows/deploy.yml`).
+Start every applicable independent read-only gate together, not in separate tool round trips:
 
-**Trigger paths** — if any file matches (use `git diff --name-only HEAD` against the last commit, including staged and unstaged):
+```text
+npx eslint src --ext .ts --max-warnings 0
+bash scripts/ship-conditional-test.sh unit
+bash scripts/ship-conditional-test.sh integration   # only when triggered
+bash scripts/soc2-compliance-checks.sh              # only when triggered
+npm audit                                            # only when triggered
+changed-area checks                                  # only when required
+```
 
-- `src/index.ts`
-- anything under `src/routes/`
-- anything under `src/api/http/`
+Collect all results once. All applicable gates must pass before Git delegation.
 
-**Command** (repo root): `bash scripts/soc2-compliance-checks.sh`
+If a gate fails, fix the cause and rerun only checks whose inputs or coverage changed. Let the conditional test script decide whether unit or integration tests need to execute again. Do not force a full rerun merely because a command was already used earlier in the conversation.
 
-- Exit code **0** required before continuing
-- If it fails, update code or [scripts/soc2-compliance-checks.sh](scripts/soc2-compliance-checks.sh) so the controls still reflect reality (e.g. after route migrations), then re-run
+Known fast recoveries:
 
-**When skipped:** No changes under those paths (e.g. docs-only, CSS-only, tests-only outside route wiring).
+- If a socket-based test fails only with sandbox `listen EPERM`, rerun that same command once with the required local-network permission before treating it as a code regression.
+- If integration tests alone rewrite `data/sessions.json`, restore it only when the initial scope snapshot proved it had no user change, then rerun the conditional integration command. Never overwrite a pre-existing edit.
+- If multiple gates fail independently, correct them and rerun the affected gates together.
 
-### 4. Dependency audit (`npm audit`)
+### GitHub two-failure circuit breaker
 
-Aligned with **Dependency Vulnerability Audit (Daily)** in [`.cursorrules`](../../../.cursorrules):
+Apply this to any command whose success depends on GitHub, Git transport, the GitHub API, or Actions—for example `git push`, `git ls-remote`, `gh run`, `gh workflow`, or `gh api`.
 
-- Run **`npm audit`** before the **first `git push` of each calendar day**
-- If the audit reports vulnerabilities **with available fixes**, run **`npm audit fix`**, then re-run **`npm audit`** until clean (or stop and explain what cannot be auto-fixed)
-- **Once per day** is enough for routine pushes **unless** `package.json` or `package-lock.json` changed — **always re-audit** after lockfile or dependency manifest changes, even if the daily audit already ran
-- Mirrors CI Trivy expectations: address fixable issues rather than ignoring them
+- Do not blindly retry. After the first transient-looking failure, inspect the error and allow at most one retry.
+- If the same **logical operation** fails twice consecutively, stop before a third attempt or any alternate mutation. Switching subcommands, endpoints, agents, or from cancel to force-cancel does not reset the count.
+- The originating/main agent must then read [Actions recovery](references/actions-recovery.md), query GitHub's live status and unresolved incidents, and run the appropriate read-only availability probe. This diagnosis must not be delegated to Luna.
+- Reset the counter only after the logical operation succeeds. Errors accumulated by the Git agent and main agent count together.
+- Deterministic errors such as invalid arguments, authentication denial, authorization denial, or branch protection are not transient: do not spend a second attempt before diagnosing or reporting them.
 
-### 5. Debug cleanup
+### 4. Delegate the serial Git handoff
 
-- Remove temporary debug output: `console.log`, `console.debug`, and similar
-- Keep appropriate production logging (e.g. `console.error` where the codebase already uses it for real errors)
+The main agent prepares a self-contained prompt for `ship_git` containing:
 
-### 6. Git: stage, commit, push
+- repository root, expected branch, and exact remote/ref to push;
+- exact paths to stage, listed individually;
+- exact paths that must remain untouched;
+- descriptive commit message;
+- confirmation that required gates passed for the current tree.
 
-- **Stage all** intended changes (`git add -A` or equivalent for the full ship intent)
-- **Commit** with a **descriptive message** (see [`.cursorrules`](../../../.cursorrules) Git Workflow)
-- **Push** to the configured remote
+The Git agent must:
 
-#### Git execution (this workspace)
+1. Run `git status --short --branch` and confirm the expected branch and path scope.
+2. Stage only the supplied paths with explicit pathspecs. Never use `git add -A`, `git add .`, or a broad directory when unrelated changes exist.
+3. Run `git diff --cached --check` and `git diff --cached --name-only`; stop if the staged set differs from the supplied manifest.
+4. Commit with the supplied message, push only the supplied remote/ref, and return the full commit SHA plus push result.
+5. Retry a transient GitHub-facing failure at most once. After two consecutive failures of the same logical operation, stop and return both exact errors so the main agent can execute the GitHub circuit breaker.
 
-Because "ship" is explicit authorization in this project, Codex may run `git add`, `git commit`, and `git push` after the gates pass. Keep git operations serial and report the branch, commit hash, and push result.
+The Git agent must not edit files, choose scope, run gates, pull, fetch, merge, rebase, reset, switch branches, create empty commits, recover Actions, or monitor deployment. Git commands remain serial. The main agent waits for this agent to finish before continuing.
 
-**Checks (lint, unit tests, SOC 2, audit):** Prefer parallel tool runs per **Parallel execution** above. **Git** steps remain serial.
+### 5. Monitor the exact deployment
 
-### 7. Deployment and production verification
+Back on the originating model:
 
-Shipping is not complete at `git push`.
+1. Confirm the returned SHA is local `HEAD` and the remote branch points to it.
+2. Look up the workflow once by exact SHA:
+   `gh run list --commit <sha> --json databaseId,status,conclusion,url,headSha,createdAt`.
+3. If the exact run already exists and is progressing, attach to it. Never create a second run merely because an older run is queued or GitHub Status still shows recovery in progress.
+4. Once the run ID is known, stop listing runs. Use one compact request per check:
+   `gh run view <run-id> --json status,conclusion,jobs,url,headSha`.
+5. Poll no more often than the workflow can materially change—normally every 60 seconds while active. Report only meaningful phase changes or failures, not every unchanged poll.
+6. After success, make a cache-bypassed request to production `/health` and confirm the exact shipped commit, database status `OK`, and expected latest migration. Do not poll production before deployment succeeds.
 
-1. Resolve the full pushed SHA with `git rev-parse HEAD` and confirm `origin/main` points to it.
-2. Find the run for that exact SHA with `gh run list --commit <sha> --json databaseId,status,conclusion,url,headSha,createdAt`.
-   - GitHub webhook processing can lag. Poll every 30-60 seconds for up to 5 minutes before calling a missing run stalled.
-3. Follow the run with `gh run view <run-id> --json status,conclusion,jobs,url`. For long migration or deployment stages, keep using bounded `gh run view` checks rather than `gh run watch`.
-4. After success, request the production `/health` endpoint with a cache-busting query and `Cache-Control: no-cache`. Confirm the response reports:
-   - the shipped commit,
-   - database status `OK`, and
-   - the expected latest migration.
-
-#### Delayed or stalled Actions runs
-
-- A run that is absent, or is `queued` with `jobs: []`, is still in GitHub's event/job allocation layer. Wait through the 5-minute window; do not create an empty commit during that window.
-- Before any recovery mutation, query GitHub's live status API (`https://www.githubstatus.com/api/v2/summary.json`) and inspect the `Actions` component plus unresolved incidents. Do not rely on a cached search result or an older status-page render.
-- If Actions is not `operational`, do not cancel, rerun, manually dispatch, or push a trigger commit. Record the exact shipped SHA and run URL (if one exists), report the active GitHub incident, and wait for GitHub to restore service. Platform outages do not consume the one allowed recovery attempt.
-- If GitHub reports Actions operational after 5 minutes, inspect the exact run, other queued/in-progress runs, and workflow state. If accessible, also check Actions usage or billing because GitHub may expose runner-allocation blocks only in account settings.
-- Allow **one** recovery attempt:
-  - If the run is terminal with `startup_failure`, wait until the API consistently reports a terminal state, then use `gh run rerun <run-id>` once.
-  - If it is genuinely queued and cancellable, cancel it once, wait for terminal cancellation, then dispatch `.github/workflows/deploy.yml` on `main` with `gh workflow run deploy.yml --ref main`. The workflow's `workflow_dispatch` path runs the same production chain as a push.
-- If cancel, force-cancel, and rerun endpoints disagree about run state, stop mutating Actions. Report the run URL and the contradictory API states; do not stack another run.
-- Never create or push an empty "restart deployment" commit as automatic recovery. Only do that when Kyle explicitly requests that exact fallback after seeing the stalled-run evidence.
-- At most one restart is part of `ship`. If the replacement also fails to allocate jobs, treat deployment as externally blocked and do not claim production is updated.
+If the exact run is absent, has `jobs: []`, returns `startup_failure`, GitHub APIs disagree, or a GitHub-dependent operation fails twice, read [Actions recovery](references/actions-recovery.md). Do not load or execute that recovery path during a normal progressing deployment.
 
 ## Hard stops
 
-| Condition | Action |
-|-----------|--------|
-| ESLint warnings/errors | Fix and re-run step 1 (can parallel with other reruns) |
-| Unit test failures | Fix and re-run step 2 (can parallel with other reruns). Same tree after a failed run: use `SHIP_TESTS_FORCE=1` so tests run again |
-| Integration test failures (when step 2b applies) | Fix and re-run `bash scripts/ship-conditional-test.sh integration`; use `SHIP_TESTS_FORCE=1` if the fingerprint is unchanged |
-| Endpoint diff and SOC 2 script exits non-zero | Fix or update checks, re-run step 3 |
-| Audit required and vulnerabilities with fixes remain | Fix or stop and notify the user |
-| Debug noise left in diff | Remove and re-check step 5 |
-| GitHub status reports an Actions incident | Make no recovery mutation; report and wait for GitHub service recovery |
-| No matching Actions run after 5 minutes | Perform the bounded diagnostics in step 7; do not create a trigger commit |
-| Replacement run also stalls or `startup_failure` repeats | Stop after one restart, report the run URL and external blocker, and do not claim production success |
-| Production health does not report the shipped commit | Keep monitoring only while the deployment is active; otherwise report the release as incomplete |
+- Never commit unless all applicable gates passed for the final tree.
+- Never stage files outside the frozen manifest.
+- Any edit after validation invalidates only the gates that cover that edit; rerun those before delegating Git.
+- Never treat `git push` as completion. Exact-SHA Actions success and cache-bypassed production health are required.
+- Do not ask for information that can be derived safely from the repository or current run.
+- Do not create a trigger-only or empty commit unless Kyle explicitly requests that exact fallback after seeing the evidence.
+- Never make a third attempt at a twice-failed GitHub operation until the main agent has checked live GitHub status and availability; stop entirely if either check is unhealthy.
 
-## Optional cross-checks
+## Reporting cadence
 
-- If the change touched HTTP contracts, follow [`.cursorrules`](../../../.cursorrules) / [AGENTS.md](../../../AGENTS.md) for updating **API_DOCUMENTATION.md** (legacy) or **API_V1.md** (`/api/v1`) as applicable
-- **Ship** does not substitute for integration tests when the change is large; [`.cursorrules`](../../../.cursorrules) still recommends running them after significant changes
-
-## Related project rules (not duplicated here)
-
-- **Linting Requirements**, **Testing Requirements**, **Git Workflow** — [`.cursorrules`](../../../.cursorrules)
-- **API migration** layering — [AGENTS.md](../../../AGENTS.md), [MIGRATION_ARCHITECTURE.md](../../../MIGRATION_ARCHITECTURE.md)
+Use concise updates at four points: scope/gates started, actionable validation failure, pushed SHA/run URL, and final production result. During long checks, provide only the brief progress updates needed to avoid leaving Kyle without status; do not narrate every command or unchanged poll.

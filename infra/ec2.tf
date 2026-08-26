@@ -106,13 +106,18 @@ resource "aws_iam_policy" "feedback_email_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = "ses:SendEmail"
-        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}"
+        Effect = "Allow"
+        Action = "ses:SendEmail"
+        Resource = [
+          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain_name}",
+          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:configuration-set/${var.ses_default_configuration_set_name}"
+        ]
         Condition = {
           StringEquals = {
             "ses:FromAddress" = var.forward_from_email
-            "ses:Recipients"  = var.forward_from_email
+          }
+          "ForAllValues:StringEquals" = {
+            "ses:Recipients" = [var.forward_from_email]
           }
         }
       }
