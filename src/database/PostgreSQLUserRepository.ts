@@ -337,7 +337,7 @@ export class PostgreSQLUserRepository implements UserRepository {
     const client = await this.pool.connect();
     const excludedUsernames = [...query.excludedUsernames];
     try {
-      const [summaryResult, monthlyResult, recencyResult] = await Promise.all([
+      const [summaryResult, monthlyResult, recencyResult, deckResult, collectionResult] = await Promise.all([
         client.query(
           `SELECT
              COUNT(*)::int AS standard_user_accounts,
@@ -383,11 +383,41 @@ export class PostgreSQLUserRepository implements UserRepository {
            WHERE role = 'USER'
              AND NOT (LOWER(username) = ANY($2::text[]))`,
           [query.asOf, excludedUsernames]
+        ),
+        client.query(
+          `SELECT
+             COUNT(*)::int AS total_decks,
+             COUNT(*) FILTER (WHERE decks.is_valid = TRUE)::int AS legal_decks,
+             COUNT(*) FILTER (WHERE decks.is_limited = TRUE)::int AS limited_decks
+           FROM decks
+           INNER JOIN users ON users.id = decks.user_id
+           WHERE users.role = 'USER'
+             AND NOT (LOWER(users.username) = ANY($1::text[]))`,
+          [excludedUsernames]
+        ),
+        client.query(
+          `WITH owned_by_user AS (
+             SELECT users.id,
+                    COALESCE(SUM(collection_cards.quantity), 0)::bigint AS owned_cards
+             FROM users
+             LEFT JOIN collections ON collections.user_id = users.id
+             LEFT JOIN collection_cards ON collection_cards.collection_id = collections.id
+             WHERE users.role = 'USER'
+               AND NOT (LOWER(users.username) = ANY($1::text[]))
+             GROUP BY users.id
+           )
+           SELECT
+             COUNT(*) FILTER (WHERE owned_cards > 0)::int AS users_with_non_zero_collections,
+             COALESCE(SUM(owned_cards), 0)::bigint AS total_owned_cards
+           FROM owned_by_user`,
+          [excludedUsernames]
         )
       ]);
 
       const summary = summaryResult.rows[0] as Record<string, number>;
       const recency = recencyResult.rows[0] as Record<string, number>;
+      const deckStatistics = deckResult.rows[0] as Record<string, number>;
+      const collectionStatistics = collectionResult.rows[0] as Record<string, number | string>;
       return {
         standardUserAccounts: summary.standard_user_accounts ?? 0,
         newStandardAccounts: summary.new_standard_accounts ?? 0,
@@ -404,6 +434,15 @@ export class PostgreSQLUserRepository implements UserRepository {
           days31To60: recency.days_31_to_60 ?? 0,
           days61To90: recency.days_61_to_90 ?? 0,
           days90Plus: recency.days_90_plus ?? 0
+        },
+        deckStatistics: {
+          totalDecks: deckStatistics.total_decks ?? 0,
+          legalDecks: deckStatistics.legal_decks ?? 0,
+          limitedDecks: deckStatistics.limited_decks ?? 0
+        },
+        collectionStatistics: {
+          usersWithNonZeroCollections: Number(collectionStatistics.users_with_non_zero_collections ?? 0),
+          totalOwnedCards: Number(collectionStatistics.total_owned_cards ?? 0)
         }
       };
     } finally {

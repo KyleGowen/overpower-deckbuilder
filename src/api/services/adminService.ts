@@ -52,9 +52,15 @@ export class AdminService {
       signupChartEnd,
       excludedUsernames: ANALYTICS_UTILITY_USERNAMES
     });
-    const percentage = (count: number) => counts.standardUserAccounts === 0
+    const userPercentage = (count: number) => counts.standardUserAccounts === 0
       ? 0
       : Math.round((count / counts.standardUserAccounts) * 100);
+    const percentage = (count: number, total: number) => total === 0
+      ? 0
+      : Math.round((count / total) * 1000) / 10;
+    const average = (count: number, total: number) => total === 0
+      ? 0
+      : Math.round((count / total) * 10) / 10;
     const currentMonth = currentMonthStart.toISOString().slice(0, 7);
 
     return {
@@ -64,11 +70,11 @@ export class AdminService {
       newStandardAccounts: counts.newStandardAccounts,
       loggedInLast30Days: {
         count: counts.loggedInLast30Days,
-        percentage: percentage(counts.loggedInLast30Days)
+        percentage: userPercentage(counts.loggedInLast30Days)
       },
       googleAuthUsers: {
         count: counts.googleAuthUsers,
-        percentage: percentage(counts.googleAuthUsers)
+        percentage: userPercentage(counts.googleAuthUsers)
       },
       recordedLoginUsers: counts.recordedLoginUsers,
       signupMonths: counts.signupMonths.map((month) => ({
@@ -82,7 +88,31 @@ export class AdminService {
         { key: 'days31To60', label: '31–60 days', count: counts.loginRecency.days31To60 },
         { key: 'days61To90', label: '61–90 days', count: counts.loginRecency.days61To90 },
         { key: 'days90Plus', label: '90+ days', count: counts.loginRecency.days90Plus }
-      ]
+      ],
+      deckStatistics: {
+        totalDecks: counts.deckStatistics.totalDecks,
+        legalDecks: counts.deckStatistics.legalDecks,
+        legalPercentage: percentage(counts.deckStatistics.legalDecks, counts.deckStatistics.totalDecks),
+        limitedDecks: counts.deckStatistics.limitedDecks,
+        limitedPercentage: percentage(counts.deckStatistics.limitedDecks, counts.deckStatistics.totalDecks),
+        averageDecksPerUser: average(counts.deckStatistics.totalDecks, counts.standardUserAccounts),
+        averageLegalDecksPerUser: average(counts.deckStatistics.legalDecks, counts.standardUserAccounts)
+      },
+      collectionStatistics: {
+        usersWithNonZeroCollections: counts.collectionStatistics.usersWithNonZeroCollections,
+        adoptionPercentage: percentage(
+          counts.collectionStatistics.usersWithNonZeroCollections,
+          counts.standardUserAccounts
+        ),
+        averageCardsPerUser: average(
+          counts.collectionStatistics.totalOwnedCards,
+          counts.standardUserAccounts
+        ),
+        averageCardsPerCollector: average(
+          counts.collectionStatistics.totalOwnedCards,
+          counts.collectionStatistics.usersWithNonZeroCollections
+        )
+      }
     };
   }
 

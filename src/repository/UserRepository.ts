@@ -22,6 +22,15 @@ export interface UserAnalyticsCounts {
     days61To90: number;
     days90Plus: number;
   };
+  deckStatistics: {
+    totalDecks: number;
+    legalDecks: number;
+    limitedDecks: number;
+  };
+  collectionStatistics: {
+    usersWithNonZeroCollections: number;
+    totalOwnedCards: number;
+  };
 }
 
 export interface UserRepository {

@@ -937,11 +937,11 @@ paths:
   /api/v1/admin/user-analytics:
     get:
       tags: [Admin]
-      summary: Get aggregate user acquisition and login analytics.
+      summary: Get aggregate user, deck, and collection analytics.
       description: ADMIN-only. Excludes utility accounts and returns no user identifiers.
       responses:
         '200':
-          description: Aggregate user analytics snapshot.
+          description: Aggregate user, deck, and collection analytics snapshot.
           content:
             application/json:
               schema:
@@ -949,7 +949,7 @@ paths:
                 properties:
                   data:
                     type: object
-                    required: [generatedAt, acquisitionPeriodStart, standardUserAccounts, newStandardAccounts, loggedInLast30Days, googleAuthUsers, recordedLoginUsers, signupMonths, loginRecency]
+                    required: [generatedAt, acquisitionPeriodStart, standardUserAccounts, newStandardAccounts, loggedInLast30Days, googleAuthUsers, recordedLoginUsers, signupMonths, loginRecency, deckStatistics, collectionStatistics]
                     properties:
                       generatedAt: { type: string, format: date-time }
                       acquisitionPeriodStart: { type: string, format: date-time }
@@ -983,6 +983,25 @@ paths:
                             key: { type: string }
                             label: { type: string }
                             count: { type: integer }
+                      deckStatistics:
+                        type: object
+                        required: [totalDecks, legalDecks, legalPercentage, limitedDecks, limitedPercentage, averageDecksPerUser, averageLegalDecksPerUser]
+                        properties:
+                          totalDecks: { type: integer }
+                          legalDecks: { type: integer }
+                          legalPercentage: { type: number, format: float }
+                          limitedDecks: { type: integer }
+                          limitedPercentage: { type: number, format: float }
+                          averageDecksPerUser: { type: number, format: float }
+                          averageLegalDecksPerUser: { type: number, format: float }
+                      collectionStatistics:
+                        type: object
+                        required: [usersWithNonZeroCollections, adoptionPercentage, averageCardsPerUser, averageCardsPerCollector]
+                        properties:
+                          usersWithNonZeroCollections: { type: integer }
+                          adoptionPercentage: { type: number, format: float }
+                          averageCardsPerUser: { type: number, format: float }
+                          averageCardsPerCollector: { type: number, format: float }
         '403': { description: Not ADMIN (ADMIN_REQUIRED) }
         '500': { description: Analytics query failed (ADMIN_USER_ANALYTICS_ERROR) }
   /api/v1/admin/debug/clear-cache:

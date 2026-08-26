@@ -38,6 +38,15 @@ describe('AdminService user analytics', () => {
         days31To60: 7,
         days61To90: 5,
         days90Plus: 16
+      },
+      deckStatistics: {
+        totalDecks: 247,
+        legalDecks: 184,
+        limitedDecks: 32
+      },
+      collectionStatistics: {
+        usersWithNonZeroCollections: 38,
+        totalOwnedCards: 4822
       }
     };
     const deps = buildDeps(counts);
@@ -51,7 +60,22 @@ describe('AdminService user analytics', () => {
       standardUserAccounts: 90,
       newStandardAccounts: 40,
       loggedInLast30Days: { count: 49, percentage: 54 },
-      googleAuthUsers: { count: 44, percentage: 49 }
+      googleAuthUsers: { count: 44, percentage: 49 },
+      deckStatistics: {
+        totalDecks: 247,
+        legalDecks: 184,
+        legalPercentage: 74.5,
+        limitedDecks: 32,
+        limitedPercentage: 13,
+        averageDecksPerUser: 2.7,
+        averageLegalDecksPerUser: 2
+      },
+      collectionStatistics: {
+        usersWithNonZeroCollections: 38,
+        adoptionPercentage: 42.2,
+        averageCardsPerUser: 53.6,
+        averageCardsPerCollector: 126.9
+      }
     });
     expect(result.signupMonths).toEqual([
       { month: '2026-06', count: 2, recent: false, partial: false },
@@ -81,10 +105,30 @@ describe('AdminService user analytics', () => {
         days31To60: 0,
         days61To90: 0,
         days90Plus: 0
+      },
+      deckStatistics: {
+        totalDecks: 0,
+        legalDecks: 0,
+        limitedDecks: 0
+      },
+      collectionStatistics: {
+        usersWithNonZeroCollections: 0,
+        totalOwnedCards: 0
       }
     });
     const result = await new AdminService(deps).getUserAnalytics();
     expect(result.loggedInLast30Days.percentage).toBe(0);
     expect(result.googleAuthUsers.percentage).toBe(0);
+    expect(result.deckStatistics).toMatchObject({
+      legalPercentage: 0,
+      limitedPercentage: 0,
+      averageDecksPerUser: 0,
+      averageLegalDecksPerUser: 0
+    });
+    expect(result.collectionStatistics).toMatchObject({
+      adoptionPercentage: 0,
+      averageCardsPerUser: 0,
+      averageCardsPerCollector: 0
+    });
   });
 });

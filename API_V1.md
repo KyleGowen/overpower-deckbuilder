@@ -1242,7 +1242,7 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 ### `GET /api/v1/admin/user-analytics`
 
-Returns aggregate-only account analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts. No user identifiers are returned.
+Returns aggregate-only account, deck, and collection analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts from every metric. No user identifiers are returned.
 
 **Response 200:** v1 envelope; `**data`** contains:
 
@@ -1250,8 +1250,10 @@ Returns aggregate-only account analytics for the admin User Analytics view. The 
 - aggregate KPIs: `standardUserAccounts`, `newStandardAccounts`, `loggedInLast30Days`, `googleAuthUsers`, `recordedLoginUsers`
 - rolling twelve-month `signupMonths` counts (latest month marked `partial`)
 - aggregate `loginRecency` buckets
+- `deckStatistics`: total, legal, and Limited deck counts; legal/Limited percentages; average decks per standard user with all decks and with legal decks only
+- `collectionStatistics`: users with a positive owned-card quantity, collection adoption percentage, average owned-card quantity per standard user, and average owned-card quantity per active collector
 
-The acquisition period begins on the first day of the previous calendar month. Login activity uses rolling 7/30/60/90-day windows relative to `generatedAt`.
+The acquisition period begins on the first day of the previous calendar month. Login activity uses rolling 7/30/60/90-day windows relative to `generatedAt`. Deck legality reads the server-authoritative `decks.is_valid` value. Collection averages sum card quantities rather than unique collection-card rows; the per-user average includes users with no collection cards.
 
 **Response 500:** `**ADMIN_USER_ANALYTICS_ERROR`**.
 

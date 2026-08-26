@@ -23,4 +23,19 @@ export interface AdminUserAnalyticsDto {
     label: string;
     count: number;
   }>;
+  deckStatistics: {
+    totalDecks: number;
+    legalDecks: number;
+    legalPercentage: number;
+    limitedDecks: number;
+    limitedPercentage: number;
+    averageDecksPerUser: number;
+    averageLegalDecksPerUser: number;
+  };
+  collectionStatistics: {
+    usersWithNonZeroCollections: number;
+    adoptionPercentage: number;
+    averageCardsPerUser: number;
+    averageCardsPerCollector: number;
+  };
 }

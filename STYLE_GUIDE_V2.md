@@ -581,7 +581,9 @@ Desktop band layout is unchanged. Home horizontal stats rail still shows **Winne
 - The route remains inside `AppShell`, preserving the desktop header and mobile bottom navigation, but is linked only from the ADMIN profile menu.
 - The analytics panel uses the standard deep navy surfaces, cyan accent, stat-value type, rounded bordered KPI cards, and the textless Excelsior emblem.
 - Desktop layout: four KPI cards, then a wide rolling 12-month acquisition chart beside login-recency bars. Below 1050px the chart sections stack; below 640px KPI cards become one column.
+- A strong full-width divider separates the user/account analytics from the second **Decks & collections** section. That section uses three deck-count KPI cards followed by two-up average-stat cards for deck depth and collection adoption; all cards stack on mobile.
+- The deck section shows total, legal, and Limited deck counts; all-deck and legal-only averages per standard user; users with positive collection quantities; and average summed card quantities both across all standard users and active collectors.
 - Acquisition bars use intelligence blue for earlier months and cyan for the rolling acquisition period. The y-axis scales to the observed maximum rounded to five, keeping low-volume months readable.
-- The page displays aggregate data only. Utility USER accounts are excluded by the backend and no identifiers are exposed to the browser.
+- The page displays aggregate data only. Utility USER accounts are excluded by the backend and no identifiers are exposed to the browser. Deck legality uses `decks.is_valid`; collection size sums quantities rather than unique card rows.
 
 **Interaction:** Bar/pie segment or card click opens `CardDetailPanel`. Home rail bar charts show top 5 rows with `+N more` footnote when truncated.

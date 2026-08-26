@@ -43,7 +43,22 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
       googleAuthUsers: { count: 44, percentage: 49 },
       recordedLoginUsers: 77,
       signupMonths: [],
-      loginRecency: []
+      loginRecency: [],
+      deckStatistics: {
+        totalDecks: 247,
+        legalDecks: 184,
+        legalPercentage: 74.5,
+        limitedDecks: 32,
+        limitedPercentage: 13,
+        averageDecksPerUser: 2.7,
+        averageLegalDecksPerUser: 2
+      },
+      collectionStatistics: {
+        usersWithNonZeroCollections: 38,
+        adoptionPercentage: 42.2,
+        averageCardsPerUser: 53.6,
+        averageCardsPerCollector: 126.9
+      }
     }),
     listUsers: jest.fn().mockResolvedValue([
       { id: '1', name: 'n', email: 'n@e.com', role: 'USER', lastLoginAt: null }
@@ -79,7 +94,9 @@ describe('admin.http', () => {
     expect(res.body.data).toMatchObject({
       standardUserAccounts: 90,
       newStandardAccounts: 40,
-      loggedInLast30Days: { count: 49, percentage: 54 }
+      loggedInLast30Days: { count: 49, percentage: 54 },
+      deckStatistics: { totalDecks: 247, legalDecks: 184, limitedDecks: 32 },
+      collectionStatistics: { usersWithNonZeroCollections: 38, averageCardsPerUser: 53.6 }
     });
   });
 

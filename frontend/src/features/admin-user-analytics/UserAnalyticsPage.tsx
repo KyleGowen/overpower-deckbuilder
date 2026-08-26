@@ -31,6 +31,10 @@ function formatMonth(value: string): string {
     .format(new Date(Date.UTC(year ?? 2000, (month ?? 1) - 1, 1)));
 }
 
+function formatDecimal(value: number): string {
+  return value.toFixed(1);
+}
+
 const RECENCY_COLORS = ['#00d6e8', '#f6a623', '#3aa0ff', '#3aa0ff', '#61749a'];
 
 export default function UserAnalyticsPage() {
@@ -170,6 +174,89 @@ export default function UserAnalyticsPage() {
               ))}
             </div>
           </div>
+        </section>
+
+        <div className="user-analytics-divider" role="separator" />
+
+        <section className="user-analytics-inventory" aria-labelledby="user-analytics-inventory-title">
+          <header className="user-analytics-inventory-heading">
+            <div className="user-analytics-eyebrow">DECKS &amp; COLLECTIONS</div>
+            <h2 id="user-analytics-inventory-title">Site inventory pulse</h2>
+            <p>Saved deck legality, per-user deck averages, and collection adoption.</p>
+          </header>
+
+          <div className="user-analytics-inventory-kpis" aria-label="Deck totals">
+            <article className="user-analytics-kpi">
+              <strong>{analytics.deckStatistics.totalDecks}</strong>
+              <span>total decks<br />saved by standard users</span>
+            </article>
+            <article className="user-analytics-kpi user-analytics-kpi--accent">
+              <strong>{analytics.deckStatistics.legalDecks}</strong>
+              <span>legal decks<br />({formatDecimal(analytics.deckStatistics.legalPercentage)}% of all decks)</span>
+              <div
+                className="user-analytics-inventory-meter"
+                role="progressbar"
+                aria-label="Legal decks"
+                aria-valuenow={analytics.deckStatistics.legalPercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <i style={{ width: `${analytics.deckStatistics.legalPercentage}%` }} />
+              </div>
+            </article>
+            <article className="user-analytics-kpi user-analytics-kpi--warning">
+              <strong>{analytics.deckStatistics.limitedDecks}</strong>
+              <span>Limited decks<br />({formatDecimal(analytics.deckStatistics.limitedPercentage)}% of all decks)</span>
+            </article>
+          </div>
+
+          <div className="user-analytics-inventory-subheading">
+            <h3>Decks per user</h3>
+            <span />
+          </div>
+          <div className="user-analytics-average-grid" aria-label="Average decks per user">
+            <article className="user-analytics-average-card">
+              <strong>{formatDecimal(analytics.deckStatistics.averageDecksPerUser)}</strong>
+              <div>
+                <h4>Average decks per user</h4>
+                <p>Includes legal and non-legal decks</p>
+              </div>
+            </article>
+            <article className="user-analytics-average-card">
+              <strong>{formatDecimal(analytics.deckStatistics.averageLegalDecksPerUser)}</strong>
+              <div>
+                <h4>Average legal decks per user</h4>
+                <p>Excludes every non-legal deck</p>
+              </div>
+            </article>
+          </div>
+
+          <div className="user-analytics-inventory-subheading">
+            <h3>Collection adoption</h3>
+            <span />
+          </div>
+          <div className="user-analytics-average-grid" aria-label="Collection statistics">
+            <article className="user-analytics-average-card user-analytics-average-card--collection">
+              <strong>{analytics.collectionStatistics.usersWithNonZeroCollections}</strong>
+              <div>
+                <h4>Users with a non-zero collection</h4>
+                <p>{formatDecimal(analytics.collectionStatistics.adoptionPercentage)}% of standard users</p>
+              </div>
+            </article>
+            <article className="user-analytics-average-card user-analytics-average-card--collection">
+              <strong>{formatDecimal(analytics.collectionStatistics.averageCardsPerUser)}</strong>
+              <div>
+                <h4>Average cards per user</h4>
+                <p>
+                  Includes users with zero cards · {formatDecimal(analytics.collectionStatistics.averageCardsPerCollector)} among active collectors
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <p className="user-analytics-inventory-footnote">
+            Collection totals sum card quantities, not unique card entries. Legal and Limited are independent deck attributes and may overlap.
+          </p>
         </section>
       </article>
     </div>

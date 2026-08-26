@@ -60,6 +60,29 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
     });
   }
 
+  it('returns aggregate deck and collection statistics for an admin', async () => {
+    const res = await request(app)
+      .get('/api/v1/admin/user-analytics')
+      .set('Cookie', adminCookie);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.deckStatistics).toEqual(expect.objectContaining({
+      totalDecks: expect.any(Number),
+      legalDecks: expect.any(Number),
+      legalPercentage: expect.any(Number),
+      limitedDecks: expect.any(Number),
+      limitedPercentage: expect.any(Number),
+      averageDecksPerUser: expect.any(Number),
+      averageLegalDecksPerUser: expect.any(Number)
+    }));
+    expect(res.body.data.collectionStatistics).toEqual(expect.objectContaining({
+      usersWithNonZeroCollections: expect.any(Number),
+      adoptionPercentage: expect.any(Number),
+      averageCardsPerUser: expect.any(Number),
+      averageCardsPerCollector: expect.any(Number)
+    }));
+  });
+
   describe('POST /api/v1/admin/users', () => {
     it('requires authentication', async () => {
       const res = await request(app)

@@ -183,10 +183,119 @@
   border-radius: inherit;
 }
 
+.user-analytics-divider {
+  height: 1px;
+  margin: clamp(48px, 8vw, 96px) 0;
+  background: var(--color-border-strong);
+}
+
+.user-analytics-inventory-heading h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: var(--line-tight);
+}
+
+.user-analytics-inventory-heading p,
+.user-analytics-average-card p,
+.user-analytics-inventory-footnote {
+  color: var(--color-text-muted);
+}
+
+.user-analytics-inventory-heading p {
+  margin: var(--space-2) 0 0;
+}
+
+.user-analytics-inventory-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: var(--space-8) 0 var(--space-10);
+}
+
+.user-analytics-inventory-meter {
+  height: 6px;
+  margin-top: var(--space-4);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+}
+
+.user-analytics-inventory-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent-bright);
+}
+
+.user-analytics-inventory-subheading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-8) 0 var(--space-4);
+}
+
+.user-analytics-inventory-subheading h3 {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.user-analytics-inventory-subheading span {
+  height: 1px;
+  flex: 1;
+  background: var(--color-border);
+}
+
+.user-analytics-average-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.user-analytics-average-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.user-analytics-average-card > strong {
+  min-width: 84px;
+  color: var(--color-accent-bright);
+  font-family: var(--font-stat-value);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.user-analytics-average-card--collection > strong { color: var(--color-warning); }
+
+.user-analytics-average-card h4 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-base);
+}
+
+.user-analytics-average-card p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.user-analytics-inventory-footnote {
+  margin: var(--space-5) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
 @media (max-width: 1050px) {
   .user-analytics-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .user-analytics-charts { grid-template-columns: 1fr; }
   .user-analytics-recency { margin-top: var(--space-6); }
+  .user-analytics-inventory-kpis { grid-template-columns: 1fr; }
 }
 
 .layout-mobile .user-analytics-page {
@@ -207,4 +316,7 @@
   .user-analytics-bar-chart { height: 280px; }
   .user-analytics-legend { padding-left: 28px; gap: var(--space-4); }
   .user-analytics-recency-row { grid-template-columns: 78px minmax(80px, 1fr) 24px; }
+  .user-analytics-average-grid { grid-template-columns: 1fr; }
+  .user-analytics-average-card { grid-template-columns: 76px minmax(0, 1fr); }
+  .user-analytics-average-card > strong { min-width: 0; }
 }
