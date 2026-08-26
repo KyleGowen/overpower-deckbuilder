@@ -167,3 +167,30 @@ describe('Columbus S1 committed stats snapshot', () => {
     expect(stats.highestTop8Rate?.name).toBe('Sun Wukong');
   });
 });
+
+describe('Niagara S1 committed stats snapshot', () => {
+  it('contains Niagara-only aggregates from all 42 decks', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const stats = require('../../../frontend/src/data/tournaments/s1-niagara.json');
+
+    expect(stats.meta).toMatchObject({
+      id: 's1-niagara',
+      playerCount: 42,
+      winnerName: 'Jessica Simms',
+      date: '2026-08-01',
+    });
+    expect(stats.meta.location).toEqual({
+      venueName: 'Mecha Games',
+      city: 'St. Catharines',
+      region: 'ON',
+      country: 'Canada',
+      mapUrl: 'https://maps.google.com/?q=370+Ontario+Street+St+Catharines',
+    });
+    expect(stats.characterAppearances[0]).toMatchObject({ name: 'Wicked Witch', count: 15 });
+    expect(stats.top8CharacterAppearances[0]).toMatchObject({ name: 'Wicked Witch', count: 5 });
+    expect(stats.mostPlaysWithoutTop8).toMatchObject({ name: 'Zorro', totalPlays: 8 });
+    expect(stats.highestTop8Rate).toMatchObject({ name: 'Joan of Arc', top8Plays: 3 });
+    expect(stats.topHomebases[0]).toMatchObject({ name: 'Asclepieion', count: 14, wins: 1 });
+    expect(stats.cataclysmReportedCount).toBe(37);
+  });
+});

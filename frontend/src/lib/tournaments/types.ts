@@ -35,8 +35,12 @@ export interface SpotlightEntry {
 
 export interface TournamentEventLocation {
   venueName?: string;
+  addressLine?: string;
   city: string;
   region: string;
+  postalCode?: string;
+  country?: string;
+  mapUrl?: string;
 }
 
 export interface TournamentEventMeta {
@@ -47,7 +51,16 @@ export interface TournamentEventMeta {
   playerCount: number;
   winnerName: string;
   seasonLabel: string;
-  location: TournamentEventLocation;
+  location?: TournamentEventLocation;
+}
+
+export const TOURNAMENT_PODIUM_PLACEMENTS = ['1st', '2nd', '3rd'] as const;
+
+export type TournamentPodiumPlacement = (typeof TOURNAMENT_PODIUM_PLACEMENTS)[number];
+
+export interface TournamentPodiumResult {
+  placement: TournamentPodiumPlacement;
+  playerName: string;
 }
 
 export interface TournamentEventStats {

@@ -7,7 +7,7 @@ import { AdminRoute } from './AdminRoute';
 const LoginPage = lazy(() => import('../features/login/LoginPage'));
 const HomePage = lazy(() => import('../features/home/HomePage'));
 const HomeUpdatesPage = lazy(() => import('../features/home/HomeUpdatesPage'));
-const ColumbusRegionalPage = lazy(() => import('../features/home/ColumbusRegionalPage'));
+const RegionalsPage = lazy(() => import('../features/home/RegionalsPage'));
 const DatabasePage = lazy(() => import('../features/database/DatabasePage'));
 const CollectionPage = lazy(() => import('../features/collection/CollectionPage'));
 const DeckSelectionPage = lazy(() => import('../features/deck-selection/DeckSelectionPage'));
@@ -42,7 +42,11 @@ export const router = createBrowserRouter([
           { path: '/', element: <Navigate to="/home" replace /> },
           { path: '/home', element: <HomePage /> },
           { path: '/home/updates', element: <HomeUpdatesPage /> },
-          { path: '/home/columbus-regional', element: <ColumbusRegionalPage /> },
+          { path: '/home/regionals', element: <RegionalsPage /> },
+          {
+            path: '/home/columbus-regional',
+            element: <Navigate to="/home/regionals?event=s1-columbus" replace />,
+          },
           { path: '/data', element: <DatabasePage /> },
           { path: '/community', element: <CommunityPage /> },
           {

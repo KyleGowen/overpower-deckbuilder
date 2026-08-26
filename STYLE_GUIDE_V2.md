@@ -23,7 +23,7 @@ guide describes the dark, neon, card-game-companion theme derived from the mocks
 11. [Per-Screen Notes](#per-screen-notes)
 12. [Database Filter Rail](#database-filter-rail)
 13. [Home Recent Updates](#home-recent-updates)
-14. [Home — Columbus Regional stats rail](#home--columbus-regional-stats-rail)
+14. [Home — Regionals stats rail](#home--regionals-stats-rail)
 
 ---
 
@@ -476,9 +476,12 @@ News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Share
 **Home rail:** shows 3 newest tiles; View All appears when total count exceeds 3.
 **Updates page:** 10 tiles per page via shared `Pagination`; no global nav entry.
 
-## Home — Columbus Regional stats rail (Preview Data Tiles)
+## Home — Regionals stats rail (Preview Data Tiles)
 
-Tournament metagame tiles on `/home` (horizontal **rail**) and `/home/columbus-regional` (**12-column dashboard**).
+The newest tournament is featured on `/home` as a horizontal **rail** containing the event placard
+plus all nine statistical infographic tiles from the full dashboard. **View All** opens
+`/home/regionals?event=...`, a reusable **12-column dashboard** with a Tournament selector. The selector
+is newest-first and keeps prior events available; the legacy Columbus URL redirects to its selected view.
 Shell uses **shadcn/ui `Card`** via [`DashboardTile`](frontend/src/components/dashboard/DashboardTile.tsx) with **`.deck-tile` outer parity** (`--color-bg-panel`, `1px solid var(--color-border)`, `--radius-lg`, no default shadow). See
 [`SHADCN_UI.md`](docs/current/SHADCN_UI.md), [`DashboardGrid.md`](frontend/src/components/dashboard/DashboardGrid.md),
 and [`TournamentCharts.md`](frontend/src/components/TournamentCharts/TournamentCharts.md).
@@ -491,7 +494,7 @@ Components: [`TournamentStatsRail.tsx`](frontend/src/features/home/TournamentSta
 | Surface | Layout | Tile shell |
 |---|---|---|
 | Home rail | `DashboardRail` — `clamp(230px, 25%, 280px)` columns (deck-tile parity) | `DashboardTile` variant **`rail`**: art `aspect-ratio: 380/280`; body `min-height: 4.875rem` |
-| View All dashboard | `ColumbusDashboardGrid` — **12 columns** desktop in two horizontal bands; each band uses **column stacks** (`flex-col`) so tiles pack vertically without shared row-track dead space; wireframe col spans in [`columbusDashboardLayout.ts`](frontend/src/lib/tournaments/columbusDashboardLayout.ts) | Variants `sm`–`wide`: fluid art `min-height` (280–480px); charts scale `maxRows` / pie radius |
+| View All dashboard | Shared regional dashboard — **12 columns** desktop with column stacks (`flex-col`) so tiles pack vertically without shared row-track dead space; current layout implementation remains in [`columbusDashboardLayout.ts`](frontend/src/lib/tournaments/columbusDashboardLayout.ts) | Variants `sm`–`wide`: fluid art `min-height` (280–480px); charts scale `maxRows` / pie radius |
 
 ### Desktop grid map (View All — 12×12 wireframe reference)
 
@@ -512,7 +515,7 @@ Rendered via **three column stacks** in one band (left 2-col, center 6-col, righ
 
 Rows 11–12 cols 4–8 remain empty (no deck-size tile). Vertical gap between stacked tiles: **`gap-y-3`** (`12px` / `var(--space-3)`) on `.columbus-dashboard__column` (desktop and mobile); `gap-x-4` preserved between horizontal columns.
 
-### Mobile View All tile order (`layout-mobile`, `/home/columbus-regional`)
+### Mobile View All tile order (`layout-mobile`, `/home/regionals`)
 
 On mobile, `ColumbusDashboardGrid` uses `COLUMBUS_MOBILE_BANDS` — a single full-width column (no `pairFirstRow` side-by-side spotlights). Stacked tiles use **`gap-y-3`** (`12px` / `var(--space-3)`) on `.columbus-dashboard__column` so each tile is separated by a small buffer (same as desktop column stacks). Order:
 
@@ -527,11 +530,15 @@ On mobile, `ColumbusDashboardGrid` uses `COLUMBUS_MOBILE_BANDS` — a single ful
 9. `newWinningCharacters`
 10. `newTop8Characters`
 
-Desktop band layout is unchanged. Home horizontal stats rail still shows **Winner Name** in the meta placard (no deck links, no tournament deck fetch).
+Desktop band layout is unchanged. The Home horizontal stats rail uses the complete dashboard tile order.
+It shows **Winner Name** in the meta placard (no deck links, no tournament deck fetch).
 
 **Placard footer classes:** `.preview-text-tile__footer` wraps `.tournament-podium-tile__list` inside `.tournament-placard-tile` on View All (desktop + mobile). `.preview-text-tile__content`, footer, and list all use **`width: 100%`** so percentage row widths resolve against the full placard (DashboardTile text layout uses `items-start`, which otherwise shrink-wraps the list). Podium rows use a **stair-step width** (left-aligned via `align-items: flex-start`): `--podium-row-width-1st` **calc(100% - var(--space-1))**, `--podium-row-width-2nd` **75%**, `--podium-row-width-3rd` **60%**; row buttons fill each item (`width: 100%`).
 
-**Podium deck IDs (prod-stable):** `81d73769-e987-4c85-a9f8-6629980a1807` (1st), `a6df76ba-c073-4e65-bc68-2046ee3919b1` (2nd), `bb9a2144-9c15-4cb3-9c38-851e66972c74` (3rd). Seeded via [`V309__Seed_columbus_podium_decks.sql`](migrations/V309__Seed_columbus_podium_decks.sql).
+**Podium deck resolution:** the regional registry supplies podium names, optional production-stable deck
+IDs, and the tournament label used for title-prefix fallback. Columbus retains its three stable IDs from
+[`V309__Seed_columbus_podium_decks.sql`](migrations/V309__Seed_columbus_podium_decks.sql). Niagara has
+stable links for 1st and 2nd place; its 3rd-place row remains visible and disabled until that deck is supplied.
 
 **Tile chrome (match `DeckTile`):** `.dashboard-tile` — `background: var(--color-bg-panel)`; `border: 1px solid var(--color-border)`; `border-radius: var(--radius-lg)`; `box-shadow: none`. Art zone `.stats-chart-tile__art` uses `--color-bg-elevated` with **no** art/body divider. Body inherits panel background (same as `.deck-tile__body`).
 
@@ -545,7 +552,13 @@ Desktop band layout is unchanged. Home horizontal stats rail still shows **Winne
 | Bar chart | `StatsChartTile` + `TournamentBarChart` | Horizontal bars, `fillContainer`, max 5 rows on rail | Title + subtitle + footnote, **bottom-center** |
 | Pie chart | `StatsChartTile` + `TournamentPieChart` | Donut fills art (42% outer when labeled); preview portion labels use **straight radial** leader lines to tile edge (~2.12× slice radius), `clamp()`/radius-scaled font; **2-slice pies** stagger labels top-right / bottom-left (~22° off vertical) | Title + subtitle, **bottom-center** |
 | Card spotlight | `TournamentHighlightTile` | Card full-bleed (no text overlay) | Label (caps) + detail + name, **bottom-center** |
-| Character list | `TournamentCharacterListTile` | 0: empty; 1: spotlight; 2–4: pie; 5+: bar | Title **bottom-center** |
+| Character newcomers | `TournamentCharacterListTile` | Home rail: one full-bleed artwork cycles on desktop hover or touch press-and-hold; View All: clickable full-roster artwork mosaic | Title + newcomer count **bottom-center** |
+
+The newcomer tiles (`New Winning Characters` and `New Top 8 Characters`) deliberately use two
+presentations. The constrained Home rail mirrors `DeckTile`: the visible character advances after a
+1s desktop hover or 750ms touch hold, then every 1.5s; a quick click/tap opens the currently visible
+card. The expanded Regionals dashboard replaces the cycle with a two-column artwork mosaic (three
+columns above eight entries) so the complete newcomer list is visible and each card remains clickable.
 
 ### Shared caption typography
 

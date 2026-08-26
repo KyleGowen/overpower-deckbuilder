@@ -8,6 +8,8 @@ export interface PreviewTextTileSection {
   variant?: 'default' | 'accent';
   /** Allow value to wrap (e.g. long location lines). */
   wrap?: boolean;
+  /** Optional external destination for the complete value. */
+  href?: string;
 }
 
 export interface PreviewTextTileProps {
@@ -51,7 +53,16 @@ export function PreviewTextTile({
                   .filter(Boolean)
                   .join(' ')}
               >
-                {section.value}
+                {section.href ? (
+                  <a
+                    className="preview-text-tile__section-link"
+                    href={section.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {section.value}
+                  </a>
+                ) : section.value}
               </p>
             </div>
           </div>

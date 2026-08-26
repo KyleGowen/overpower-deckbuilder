@@ -1,12 +1,12 @@
 # TournamentCharts — Preview Data Tiles
 
 Reusable tiles for tournament metagame stats. **Home rail** uses `DashboardTile` variant `rail`
-(deck-tile dimensions: 380×280 art + compact body). **View All** (`/home/columbus-regional`) uses
+(deck-tile dimensions: 380×280 art + compact body). **View All** (`/home/regionals`) uses
 larger dashboard variants on a 12-column grid — see [`DashboardGrid.md`](../dashboard/DashboardGrid.md).
 
 Shell: shadcn **Card** via [`DashboardTile`](../dashboard/DashboardTile.tsx). Setup: [`SHADCN_UI.md`](../../../../docs/current/SHADCN_UI.md).
 
-Visual spec: [`STYLE_GUIDE_V2.md`](../../../../STYLE_GUIDE_V2.md) § Home — Columbus Regional stats rail.
+Visual spec: [`STYLE_GUIDE_V2.md`](../../../../STYLE_GUIDE_V2.md) § Home — Regionals stats rail.
 
 ## Shell: `StatsChartTile` → `DashboardTile`
 
@@ -32,16 +32,15 @@ Generic text-only preview tile (no chart art zone). Single content column with t
 | Bar chart | `StatsChartTile` + `TournamentBarChart` | Ranked counts (characters, homebases, reserves, …) |
 | Pie chart | `StatsChartTile` + `TournamentPieChart` | Small categorical sets (cataclysms, ≤4 character groups) |
 | Card spotlight | `TournamentHighlightTile` | Single highlighted card + stat label |
-| Character list | `TournamentCharacterListTile` | Auto-routes by entry count (see below) |
+| Character newcomers | `TournamentCharacterListTile` | Artwork cycle on Home; clickable artwork mosaic on View All |
 
-### `TournamentCharacterListTile` routing
+### `TournamentCharacterListTile` presentation
 
-| `entries.length` | Preview |
-|------------------|---------|
-| 0 | Empty message in art |
-| 1 | `TournamentHighlightTile` |
-| 2–4 | Pie chart (no legend in preview) |
-| 5+ | Bar chart (max 5 rows) |
+| Context | Preview |
+|---------|---------|
+| Empty list | Empty message in art |
+| Home rail (`rail`) | One full-bleed character at a time; desktop hover or touch press-and-hold cycles through the list, matching deck-preview timing; quick click/tap opens the visible character |
+| View All (`sm`/`md`/`lg`/`wide`/`tall`) | Full clickable artwork mosaic showing every newcomer at once |
 
 ## Chart props (preview mode)
 
@@ -75,9 +74,9 @@ import {
 
 ## Data
 
-Columbus Regional uses static JSON from `npm run build:regional-stats` →
-`frontend/src/data/tournaments/s1-columbus.json`. Card slideout resolution:
-`resolveTournamentCard` + `useAllCatalogCards()`.
+Regional events are registered in `regionalTournaments.ts` and use committed static JSON in
+`frontend/src/data/tournaments/`. Card slideout resolution: `resolveTournamentCard` +
+`useAllCatalogCards()`.
 
 ## Files
 
@@ -90,7 +89,8 @@ Columbus Regional uses static JSON from `npm run build:regional-stats` →
 | `TournamentHighlightTile.tsx` | Single-card spotlight |
 | `TournamentPodiumDeckRows.tsx` | 1st/2nd/3rd deck link rows (placard footer) |
 | `TournamentPodiumDecksTile.tsx` | Standalone podium tile (legacy export; View All uses placard footer) |
-| `TournamentCharacterListTile.tsx` | List auto-routing |
+| `TournamentCharacterListTile.tsx` | Selects rail cycle or dashboard mosaic presentation |
+| `TournamentCharacterRosterTile.tsx` | Clickable artwork mosaic and deck-style cycling roster |
 | `TournamentBarChart.tsx` / `TournamentPieChart.tsx` | Recharts previews |
 | `TournamentCharts.css` | Layout + `.preview-tile__*` tokens |
 | `chartTheme.ts` | Colors and axis tick theme |

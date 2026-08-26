@@ -4,6 +4,7 @@ export interface DeckEditorLocationState {
 
 export const DECK_EDITOR_RETURN_HOME = '/home';
 export const DECK_EDITOR_RETURN_COLUMBUS = '/home/columbus-regional';
+export const DECK_EDITOR_RETURN_REGIONALS = '/home/regionals';
 
 function isSafeInternalPath(path: string): boolean {
   return path.startsWith('/') && !path.startsWith('//');
@@ -27,7 +28,11 @@ export function buildDeckSelectionReturnPath(userId: string): string {
 export function getDeckEditorBackAriaLabel(returnTo?: string): string {
   if (!returnTo) return 'Back to decks';
   if (returnTo === DECK_EDITOR_RETURN_HOME) return 'Back to home';
-  if (returnTo === DECK_EDITOR_RETURN_COLUMBUS) return 'Back to tournament stats';
+  if (
+    returnTo === DECK_EDITOR_RETURN_COLUMBUS
+    || returnTo === DECK_EDITOR_RETURN_REGIONALS
+    || returnTo.startsWith(`${DECK_EDITOR_RETURN_REGIONALS}?`)
+  ) return 'Back to tournament stats';
   if (returnTo.endsWith('/decks')) return 'Back to decks';
   return 'Back';
 }

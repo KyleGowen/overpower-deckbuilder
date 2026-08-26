@@ -1,10 +1,10 @@
 import { DashboardTile, type DashboardTileVariant } from '../dashboard';
-import type { ColumbusPodiumDeckEntry } from '../../lib/tournaments/columbusPodiumDecks';
+import type { TournamentPodiumDeckEntry } from '../../lib/tournaments/tournamentPodiumDecks';
 import { TournamentPodiumDeckRows } from './TournamentPodiumDeckRows';
 import './TournamentCharts.css';
 
 interface TournamentPodiumDecksTileProps {
-  entries: ColumbusPodiumDeckEntry[];
+  entries: TournamentPodiumDeckEntry[];
   onOpenDeck: (deckId: string, userId: string) => void;
   variant?: DashboardTileVariant;
 }

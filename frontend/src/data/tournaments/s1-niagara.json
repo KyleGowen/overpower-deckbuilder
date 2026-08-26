@@ -1,0 +1,514 @@
+{
+  "meta": {
+    "id": "s1-niagara",
+    "title": "Niagara Regional",
+    "subtitle": "Season One Regional",
+    "date": "2026-08-01",
+    "playerCount": 42,
+    "winnerName": "Jessica Simms",
+    "seasonLabel": "2nd Season One Regional",
+    "location": {
+      "venueName": "Mecha Games",
+      "city": "St. Catharines",
+      "region": "ON",
+      "country": "Canada",
+      "mapUrl": "https://maps.google.com/?q=370+Ontario+Street+St+Catharines"
+    }
+  },
+  "characterAppearances": [
+    {
+      "name": "Wicked Witch",
+      "count": 15,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 12,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Billy the Kid",
+      "count": 11,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Leonidas",
+      "count": 9,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sun Wukong",
+      "count": 9,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Jane Porter",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Mummy",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zorro",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 6,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dejah Thoris",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Joan of Arc",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "John Carter of Mars",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Merlin",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "King Arthur",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Korak",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Poseidon",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Van Helsing",
+      "count": 4,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Count of Monte Cristo",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sherlock Holmes",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Carson of Venus",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dracula",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Hercules",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Lancelot",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Robin Hood",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tarzan",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Angry Mob (Middle Ages)",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Angry Mob (Modern Age)",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Captain Nemo",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Invisible Man",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mr. Hyde",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sheriff of Nottingham",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tars Tarkas",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Three Musketeers",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Time Traveler",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Zeus",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "top8CharacterAppearances": [
+    {
+      "name": "Wicked Witch",
+      "count": 5,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Billy the Kid",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Joan of Arc",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Jane Porter",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Merlin",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Captain Nemo",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Count of Monte Cristo",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "King Arthur",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Lancelot",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Leonidas",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Robin Hood",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sherlock Holmes",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sun Wukong",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tarzan",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Mummy",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Van Helsing",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "mostPlaysWithoutTop8": {
+    "name": "Zorro",
+    "catalogType": "characters",
+    "totalPlays": 8,
+    "top8Plays": 0,
+    "label": "Most plays w/o Top 8",
+    "detail": "8"
+  },
+  "highestTop8Rate": {
+    "name": "Joan of Arc",
+    "catalogType": "characters",
+    "totalPlays": 5,
+    "top8Plays": 3,
+    "label": "Highest Top 8 %",
+    "detail": "3 of 5 (60.0%)"
+  },
+  "newWinningCharacters": [
+    {
+      "name": "Joan of Arc",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "newTop8Characters": [
+    {
+      "name": "Captain Nemo",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Count of Monte Cristo",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Lancelot",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sherlock Holmes",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tarzan",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Van Helsing",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "topReserves": [
+    {
+      "name": "Billy the Kid",
+      "count": 10,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Dr. Watson",
+      "count": 8,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Jane Porter",
+      "count": 7,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Morgan le Fay",
+      "count": 3,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Lancelot",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mina Harker",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Ra",
+      "count": 2,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Carson of Venus",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Cthulhu",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Korak",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Mr. Hyde",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Sheriff of Nottingham",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Tarzan",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "The Mummy",
+      "count": 1,
+      "catalogType": "characters"
+    },
+    {
+      "name": "Time Traveler",
+      "count": 1,
+      "catalogType": "characters"
+    }
+  ],
+  "topHomebases": [
+    {
+      "name": "Asclepieion",
+      "count": 14,
+      "catalogType": "locations",
+      "top8": 4,
+      "top3": 1,
+      "wins": 1
+    },
+    {
+      "name": "The Round Table",
+      "count": 13,
+      "catalogType": "locations",
+      "top8": 1,
+      "top3": 1,
+      "wins": 0
+    },
+    {
+      "name": "221-B Baker St.",
+      "count": 9,
+      "catalogType": "locations",
+      "top8": 1,
+      "top3": 0,
+      "wins": 0
+    },
+    {
+      "name": "Barsoom",
+      "count": 3,
+      "catalogType": "locations",
+      "top8": 0,
+      "top3": 0,
+      "wins": 0
+    },
+    {
+      "name": "Spartan Training Ground",
+      "count": 3,
+      "catalogType": "locations",
+      "top8": 2,
+      "top3": 1,
+      "wins": 0
+    }
+  ],
+  "topCataclysms": [
+    {
+      "name": "Fairy Protection",
+      "count": 30,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Lady of the Lake",
+      "count": 4,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Heimdall",
+      "count": 2,
+      "catalogType": "special-cards"
+    },
+    {
+      "name": "Tanupa",
+      "count": 1,
+      "catalogType": "special-cards"
+    }
+  ],
+  "cataclysmReportedCount": 37
+}

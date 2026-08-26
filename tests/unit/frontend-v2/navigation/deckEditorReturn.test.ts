@@ -2,6 +2,7 @@ import {
   buildDeckEditorNavigateState,
   buildDeckSelectionReturnPath,
   DECK_EDITOR_RETURN_HOME,
+  DECK_EDITOR_RETURN_REGIONALS,
   getDeckEditorBackAriaLabel,
   getDeckEditorReturnTo,
 } from '../../../../frontend/src/lib/navigation/deckEditorReturn';
@@ -35,6 +36,8 @@ describe('deckEditorReturn', () => {
     expect(getDeckEditorBackAriaLabel()).toBe('Back to decks');
     expect(getDeckEditorBackAriaLabel('/home')).toBe('Back to home');
     expect(getDeckEditorBackAriaLabel('/home/columbus-regional')).toBe('Back to tournament stats');
+    expect(getDeckEditorBackAriaLabel(DECK_EDITOR_RETURN_REGIONALS)).toBe('Back to tournament stats');
+    expect(getDeckEditorBackAriaLabel('/home/regionals?event=s1-niagara')).toBe('Back to tournament stats');
     expect(getDeckEditorBackAriaLabel('/users/u1/decks')).toBe('Back to decks');
   });
 });

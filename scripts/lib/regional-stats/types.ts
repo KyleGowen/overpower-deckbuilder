@@ -34,8 +34,12 @@ export interface SpotlightEntry {
 
 export interface TournamentEventLocation {
   venueName?: string;
+  addressLine?: string;
   city: string;
   region: string;
+  postalCode?: string;
+  country?: string;
+  mapUrl?: string;
 }
 
 export interface TournamentEventMeta {
@@ -46,7 +50,7 @@ export interface TournamentEventMeta {
   playerCount: number;
   winnerName: string;
   seasonLabel: string;
-  location: TournamentEventLocation;
+  location?: TournamentEventLocation;
 }
 
 export interface TournamentEventStats {

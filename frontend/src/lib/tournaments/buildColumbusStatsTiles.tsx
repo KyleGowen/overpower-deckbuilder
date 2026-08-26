@@ -3,7 +3,7 @@ import type { CatalogCard } from '../../lib/api/types';
 import type { CountEntry, SpotlightEntry, TournamentEventStats } from '../../lib/tournaments/types';
 import type { DashboardTileVariant } from '../../components/dashboard';
 import type { ColumbusDashboardTileId } from './columbusDashboardLayout';
-import type { ColumbusPodiumDeckEntry } from './columbusPodiumDecks';
+import type { TournamentPodiumDeckEntry } from './tournamentPodiumDecks';
 import {
   StatsChartTile,
   TournamentBarChart,
@@ -26,7 +26,7 @@ export interface BuildColumbusTilesOptions {
   isClickable: (entry: CountEntry) => boolean;
   resolveCard: (entry: CountEntry) => CatalogCard | null;
   renderSpotlight: (spot: SpotlightEntry | null, key: string) => ReactNode;
-  podiumEntries?: ColumbusPodiumDeckEntry[];
+  podiumEntries?: TournamentPodiumDeckEntry[];
   onOpenPodiumDeck?: (deckId: string, userId: string) => void;
 }
 
@@ -120,7 +120,6 @@ export function buildColumbusTileById(
           variant={variant}
           title="New Winning Characters"
           entries={stats.newWinningCharacters}
-          compact={chartCompact}
           onEntryClick={openEntry}
           resolveCard={resolveCard}
           isClickable={isClickable}
@@ -133,7 +132,6 @@ export function buildColumbusTileById(
           variant={variant}
           title="New Top 8 Characters"
           entries={stats.newTop8Characters}
-          compact={chartCompact}
           onEntryClick={openEntry}
           resolveCard={resolveCard}
           isClickable={isClickable}

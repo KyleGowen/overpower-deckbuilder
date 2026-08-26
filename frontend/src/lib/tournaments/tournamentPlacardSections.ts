@@ -6,6 +6,7 @@ export interface TournamentPlacardSection {
   value: string;
   variant?: 'default' | 'accent';
   wrap?: boolean;
+  href?: string;
 }
 
 function formatEventDate(iso: string): string {
@@ -18,11 +19,14 @@ export function getTournamentPlacardSections(
   showPodium: boolean,
 ): TournamentPlacardSection[] {
   return [
-    {
-      label: 'Location',
-      value: formatEventLocation(meta.location),
-      wrap: true,
-    },
+    ...(meta.location
+      ? [{
+          label: 'Location',
+          value: formatEventLocation(meta.location),
+          wrap: true,
+          ...(meta.location.mapUrl ? { href: meta.location.mapUrl } : {}),
+        }]
+      : []),
     {
       label: 'Date',
       value: formatEventDate(meta.date),

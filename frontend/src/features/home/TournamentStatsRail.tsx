@@ -9,8 +9,12 @@ import { fetchFoilCardMap } from '../../lib/api/catalog';
 import { buildFoilCardMapLookup } from '../../lib/catalog/foilCatalog';
 import { useAllCatalogCards } from '../../lib/catalog/useAllCatalogCards';
 import { useCardDetailHistory } from '../../lib/layout/useCardDetailHistory';
-import { getColumbusRegionalStats } from '../../lib/tournaments/columbusStats';
-import { resolveColumbusPodiumDecks } from '../../lib/tournaments/columbusPodiumDecks';
+import { resolveTournamentPodiumDecks } from '../../lib/tournaments/tournamentPodiumDecks';
+import {
+  buildRegionalEventPath,
+  FEATURED_TOURNAMENT_ID,
+  getRegionalTournament,
+} from '../../lib/tournaments/regionalTournaments';
 import { resolveTournamentCard, isTournamentCardClickable } from '../../lib/tournaments/resolveTournamentCard';
 import {
   COLUMBUS_TILE_ORDER,
@@ -18,21 +22,27 @@ import {
   type ColumbusDashboardTileId,
 } from '../../lib/tournaments/columbusDashboardLayout';
 import { buildColumbusTileById, HOME_CHART_LIMIT } from '../../lib/tournaments/buildColumbusStatsTiles';
-import { buildDeckEditorNavigateState, DECK_EDITOR_RETURN_COLUMBUS } from '../../lib/navigation/deckEditorReturn';
+import { buildDeckEditorNavigateState } from '../../lib/navigation/deckEditorReturn';
 import { TournamentHighlightTile } from '../../components/TournamentCharts';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import type { CountEntry, HomebaseCountEntry, SpotlightEntry } from '../../lib/tournaments/types';
 import './TournamentStatsRail.css';
 
-const VIEW_ALL_PATH = '/home/columbus-regional';
+const HOME_TILE_ORDER: ColumbusDashboardTileId[] = COLUMBUS_TILE_ORDER;
 
 interface TournamentStatsRailProps {
   /** When true, show full data on the 12-column dashboard grid. */
   expanded?: boolean;
+  /** Tournament registry ID. Home defaults to the newest featured regional. */
+  tournamentId?: string;
 }
 
-export function TournamentStatsRail({ expanded = false }: TournamentStatsRailProps) {
-  const stats = getColumbusRegionalStats();
+export function TournamentStatsRail({
+  expanded = false,
+  tournamentId = FEATURED_TOURNAMENT_ID,
+}: TournamentStatsRailProps) {
+  const tournament = getRegionalTournament(tournamentId);
+  const stats = tournament.stats;
   const navigate = useNavigate();
   const { cards: allCards } = useAllCatalogCards();
   const tournamentQuery = useQuery({
@@ -42,8 +52,8 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
     enabled: expanded,
   });
   const podiumEntries = useMemo(
-    () => resolveColumbusPodiumDecks(tournamentQuery.data ?? []),
-    [tournamentQuery.data],
+    () => resolveTournamentPodiumDecks(tournamentQuery.data ?? [], tournament),
+    [tournament, tournamentQuery.data],
   );
   const foilMapQuery = useQuery({
     queryKey: ['foil-card-map'],
@@ -117,10 +127,10 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
   const openPodiumDeck = useCallback(
     (deckId: string, userId: string) => {
       navigate(`/users/${userId}/decks/${deckId}?readonly=true`, {
-        state: buildDeckEditorNavigateState(DECK_EDITOR_RETURN_COLUMBUS),
+        state: buildDeckEditorNavigateState(buildRegionalEventPath(tournament.id)),
       });
     },
-    [navigate],
+    [navigate, tournament.id],
   );
 
   const tileBuildOptions = useMemo(
@@ -176,7 +186,7 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
     );
   }
 
-  const railTiles = COLUMBUS_TILE_ORDER.map((id) => (
+  const railTiles = HOME_TILE_ORDER.map((id) => (
     <DashboardRailItem key={id}>
       {buildColumbusTileById(id, tileBuildOptions)}
     </DashboardRailItem>
@@ -187,9 +197,9 @@ export function TournamentStatsRail({ expanded = false }: TournamentStatsRailPro
       <header className="home__section-head">
         <h2 className="home__section-title">
           <span className="home__section-icon"><IconTrophy /></span>
-          Columbus Regional
+          {stats.meta.title}
         </h2>
-        <Link className="home__view-all" to={VIEW_ALL_PATH}>
+        <Link className="home__view-all" to={buildRegionalEventPath(tournament.id)}>
           View All <IconChevronRight />
         </Link>
       </header>

@@ -26,13 +26,13 @@
   grid-auto-columns: clamp(210px, 78vw, 280px);
 }
 
-/* ---- View All page ---- */
-.columbus-regional {
+/* ---- Regionals archive page ---- */
+.regionals-page {
   flex: 1;
   width: 100%;
 }
 
-.columbus-regional__inner {
+.regionals-page__inner {
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-6);
@@ -41,37 +41,89 @@
   gap: var(--space-6);
 }
 
-.columbus-regional__head {
+.regionals-page__head {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.columbus-regional__title {
+.regionals-page__title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.regionals-page__title {
   font-size: var(--font-size-2xl);
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-.columbus-regional__title-icon {
+.regionals-page__title-icon {
   color: var(--color-accent-bright);
 }
 
-.columbus-regional__back {
+.regionals-page__back {
   align-self: flex-start;
   font-size: var(--font-size-sm);
   color: var(--color-accent-bright);
   font-weight: var(--font-weight-semibold);
 }
 
-.layout-mobile .columbus-regional__inner {
+.regionals-page__subtitle {
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+}
+
+.regionals-page__event-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: min(19rem, 100%);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.regionals-page__event-picker select {
+  min-height: 2.75rem;
+  padding: 0 var(--space-8) 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.regionals-page__event-picker select:focus-visible {
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: 2px;
+}
+
+.layout-mobile .regionals-page__inner {
   padding: var(--space-4);
   padding-bottom: calc(
     var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-4)
   );
 }
 
-.layout-mobile .columbus-regional__title {
+.layout-mobile .regionals-page__title-row {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.layout-mobile .regionals-page__title {
   font-size: var(--font-size-xl);
+}
+
+.layout-mobile .regionals-page__event-picker {
+  width: 100%;
 }

@@ -21,13 +21,24 @@ describe('GET /api/v1/recent-updates', () => {
 
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(7);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(8);
 
     const titles = res.body.data.map((r: { title: string }) => r.title);
     expect(titles).toContain('The Community Deck Section');
     expect(titles).toContain('New Mobile Layout and Controls');
     expect(titles).toContain('The Columbus Regional Breakdown');
+    expect(titles).toContain('The Niagara Regional Breakdown');
     expect(titles).toContain('Skybound is here!');
+
+    const niagaraRow = res.body.data.find(
+      (r: { title: string }) => r.title === 'The Niagara Regional Breakdown',
+    );
+    expect(niagaraRow).toMatchObject({
+      type: 'feature',
+      cardImageUrl: 'characters/sherlock_holmes.webp',
+      description:
+        'Season One continued in Niagara with 42 players at Mecha Games, and Jessica Simms claimed victory.\u00a0 Explore the full tournament breakdown by clicking "View All" on the Tournament rail.',
+    });
 
     const row = res.body.data.find(
       (r: { title: string }) => r.title === 'The Community Deck Section',

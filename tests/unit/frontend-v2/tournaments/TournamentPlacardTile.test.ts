@@ -26,4 +26,24 @@ describe('getTournamentPlacardSections', () => {
     expect(labels).toEqual(['Location', 'Date', 'Players']);
     expect(labels).not.toContain('Winner Name');
   });
+
+  it('omits the location section when the source data has no venue or city', () => {
+    const { location: _location, ...metaWithoutLocation } = meta;
+    const sections = getTournamentPlacardSections(metaWithoutLocation, false);
+    expect(sections.map((section) => section.label)).toEqual(['Date', 'Players', 'Winner Name']);
+  });
+
+  it('passes a location map URL through to the placard section', () => {
+    const sections = getTournamentPlacardSections({
+      ...meta,
+      location: {
+        venueName: 'Heroes and Games',
+        city: 'Columbus',
+        region: 'OH',
+        mapUrl: 'https://maps.google.com/?q=Mecha+Games',
+      },
+    }, false);
+    expect(sections.find((section) => section.label === 'Location')?.href)
+      .toBe('https://maps.google.com/?q=Mecha+Games');
+  });
 });

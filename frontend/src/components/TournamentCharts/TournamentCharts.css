@@ -134,6 +134,155 @@
   text-align: center;
 }
 
+/* ---- Character newcomers: full-page mosaic + rail artwork cycle ---- */
+.tournament-character-roster__mosaic {
+  display: grid;
+  grid-template-columns: repeat(var(--tournament-roster-columns, 2), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--tournament-roster-rows, 1), minmax(0, 1fr));
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--color-border);
+}
+
+.tournament-character-roster__mosaic-item,
+.tournament-character-roster__cycle-button {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.tournament-character-roster__mosaic-item:not(:disabled),
+.tournament-character-roster__cycle-button:not(:disabled) {
+  cursor: pointer;
+}
+
+.tournament-character-roster__mosaic-item:disabled,
+.tournament-character-roster__cycle-button:disabled {
+  opacity: 1;
+}
+
+.tournament-character-roster__mosaic-item:focus-visible,
+.tournament-character-roster__cycle-button:focus-visible {
+  z-index: 2;
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: -2px;
+}
+
+.tournament-character-roster__mosaic-item .card-image,
+.tournament-character-roster__mosaic-item .foil-card,
+.tournament-character-roster__cycle-button .card-image,
+.tournament-character-roster__cycle-button .foil-card,
+.tournament-character-roster__cycle-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tournament-character-roster__mosaic-item .card-image__img,
+.tournament-character-roster__cycle-button .card-image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 28%;
+  transition: transform 180ms ease;
+}
+
+.tournament-character-roster__mosaic-item:hover:not(:disabled) .card-image__img {
+  transform: scale(1.035);
+}
+
+.tournament-character-roster__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 48%, rgb(4 12 25 / 88%) 100%);
+}
+
+.tournament-character-roster__name,
+.tournament-character-roster__position {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tournament-character-roster__name {
+  right: var(--space-3);
+  bottom: var(--space-2);
+  left: var(--space-3);
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: clamp(0.6875rem, 5.5cqw, 1rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-tight);
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 90%);
+  white-space: nowrap;
+}
+
+.tournament-character-roster__position {
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 0.2rem 0.45rem;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: var(--radius-full);
+  background: rgb(4 12 25 / 78%);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  backdrop-filter: blur(4px);
+}
+
+.tournament-character-roster__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.tournament-character-roster__cycle {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  touch-action: pan-x pan-y;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.tournament-character-roster__cycle-image {
+  animation: tournament-character-roster-fade 180ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes tournament-character-roster-fade {
+  from {
+    opacity: 0.72;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 /* ---- Tooltips ---- */
 .tournament-chart-tooltip {
   background: var(--color-bg-elevated);
@@ -438,11 +587,23 @@
 }
 
 .preview-text-tile__section-value--wrap {
-  white-space: normal;
+  white-space: pre-line;
   overflow: visible;
   text-overflow: unset;
   line-height: 1.25;
   overflow-wrap: anywhere;
+}
+
+.preview-text-tile__section-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.preview-text-tile__section-link:hover,
+.preview-text-tile__section-link:focus-visible {
+  color: var(--color-accent-bright);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .layout-mobile .preview-text-tile__content {

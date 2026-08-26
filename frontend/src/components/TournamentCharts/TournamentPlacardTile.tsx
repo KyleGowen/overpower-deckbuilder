@@ -1,5 +1,5 @@
 import type { TournamentEventMeta } from '../../lib/tournaments/types';
-import type { ColumbusPodiumDeckEntry } from '../../lib/tournaments/columbusPodiumDecks';
+import type { TournamentPodiumDeckEntry } from '../../lib/tournaments/tournamentPodiumDecks';
 import { getTournamentPlacardSections } from '../../lib/tournaments/tournamentPlacardSections';
 import type { DashboardTileVariant } from '../dashboard';
 import { PreviewTextTile } from './PreviewTextTile';
@@ -9,7 +9,7 @@ import './TournamentCharts.css';
 interface TournamentPlacardTileProps {
   meta: TournamentEventMeta;
   variant?: DashboardTileVariant;
-  podiumEntries?: ColumbusPodiumDeckEntry[];
+  podiumEntries?: TournamentPodiumDeckEntry[];
   onOpenPodiumDeck?: (deckId: string, userId: string) => void;
 }
 
