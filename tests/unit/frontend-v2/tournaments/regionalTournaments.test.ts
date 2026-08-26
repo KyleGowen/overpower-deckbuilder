@@ -19,4 +19,16 @@ describe('regionalTournaments', () => {
     expect(buildRegionalEventPath('s1-columbus')).toBe('/home/regionals?event=s1-columbus');
     expect(getRegionalTournament('unknown').id).toBe('s1-niagara');
   });
+
+  it('uses the corrected Niagara historical comparison lists', () => {
+    const niagara = getRegionalTournament('s1-niagara');
+
+    expect(niagara.stats.newWinningCharacters.map((entry) => entry.name)).toEqual([
+      'Mina Harker',
+    ]);
+    expect(niagara.stats.newTop8Characters.map((entry) => entry.name)).toEqual([
+      'Lancelot',
+      'Van Helsing',
+    ]);
+  });
 });

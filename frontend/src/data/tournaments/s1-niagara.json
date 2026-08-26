@@ -327,11 +327,6 @@
   },
   "newWinningCharacters": [
     {
-      "name": "Joan of Arc",
-      "count": 1,
-      "catalogType": "characters"
-    },
-    {
       "name": "Mina Harker",
       "count": 1,
       "catalogType": "characters"
@@ -339,27 +334,7 @@
   ],
   "newTop8Characters": [
     {
-      "name": "Captain Nemo",
-      "count": 1,
-      "catalogType": "characters"
-    },
-    {
-      "name": "Count of Monte Cristo",
-      "count": 1,
-      "catalogType": "characters"
-    },
-    {
       "name": "Lancelot",
-      "count": 1,
-      "catalogType": "characters"
-    },
-    {
-      "name": "Sherlock Holmes",
-      "count": 1,
-      "catalogType": "characters"
-    },
-    {
-      "name": "Tarzan",
       "count": 1,
       "catalogType": "characters"
     },
