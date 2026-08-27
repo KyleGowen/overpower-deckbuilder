@@ -223,34 +223,43 @@ describe('deck usability', () => {
       expect(isCatalogCardUsable(card, 'special-cards', ctx)).toBe(true);
     });
 
-    it('requires Global Defense Agency for Skybound G.D.A. Any Character specials', () => {
-      const shapesmith: CatalogCard = {
-        id: 'shapesmith',
-        name: 'Shapesmith',
+    it('requires Global Defense Agency for the full Skybound G.D.A. Any Character block', () => {
+      const greenGhost: CatalogCard = {
+        id: 'green-ghost',
+        name: 'Green Ghost',
         character: 'Any Character',
         set: 'SKY',
-        set_number: '370',
+        set_number: '349',
+      };
+      const assist: CatalogCard = {
+        id: 'assist',
+        name: 'Assist!',
+        character: 'Any Character',
+        set: 'SKY',
+        set_number: '360',
       };
 
       const withoutGda = buildDeckUsabilityContext([], catalogByType);
-      expect(isCatalogCardUsable(shapesmith, 'special-cards', withoutGda)).toBe(false);
+      expect(isCatalogCardUsable(greenGhost, 'special-cards', withoutGda)).toBe(false);
+      expect(isCatalogCardUsable(assist, 'special-cards', withoutGda)).toBe(false);
 
       const withGda = buildDeckUsabilityContext([deckBattleground('gda')], catalogByType);
-      expect(isCatalogCardUsable(shapesmith, 'special-cards', withGda)).toBe(true);
+      expect(isCatalogCardUsable(greenGhost, 'special-cards', withGda)).toBe(true);
+      expect(isCatalogCardUsable(assist, 'special-cards', withGda)).toBe(true);
     });
 
     it('rejects candidate Any Character specials that would mix G.D.A. and non-G.D.A. cards', () => {
-      const shapesmith: CatalogCard = {
-        id: 'shapesmith', name: 'Shapesmith', character: 'Any Character', set: 'SKY', set_number: '370',
+      const greenGhost: CatalogCard = {
+        id: 'green-ghost', name: 'Green Ghost', character: 'Any Character', set: 'SKY', set_number: '349',
       };
       const wild: CatalogCard = { id: 'wild', name: 'Wild', character: 'Any Character', set: 'ERB' };
       const withDeckSpecials = {
         ...catalogByType,
-        'special-cards': [shapesmith, wild],
+        'special-cards': [greenGhost, wild],
       };
 
       const gdaDeck = buildDeckUsabilityContext(
-        [deckBattleground('gda'), { type: 'special', cardId: 'shapesmith', quantity: 1 }],
+        [deckBattleground('gda'), { type: 'special', cardId: 'green-ghost', quantity: 1 }],
         withDeckSpecials,
       );
       expect(isCatalogCardUsable(wild, 'special-cards', gdaDeck)).toBe(false);
@@ -259,7 +268,7 @@ describe('deck usability', () => {
         [deckBattleground('gda'), { type: 'special', cardId: 'wild', quantity: 1 }],
         withDeckSpecials,
       );
-      expect(isCatalogCardUsable(shapesmith, 'special-cards', nonGdaDeck)).toBe(false);
+      expect(isCatalogCardUsable(greenGhost, 'special-cards', nonGdaDeck)).toBe(false);
     });
 
     it('requires linked character in deck', () => {

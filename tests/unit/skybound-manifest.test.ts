@@ -10,6 +10,7 @@ type SkyboundCard = {
   name?: string;
   character_name?: string;
   mission_set?: string;
+  one_per_deck?: boolean;
 };
 
 type SkyboundManifest = {
@@ -62,6 +63,14 @@ describe('Skybound import manifest', () => {
       is_foil: true,
       image_path: byNumber.get('227')?.image_path,
     });
+  });
+
+  it('does not infer One Per Deck from rules text that only references another card', () => {
+    const byNumber = new Map(manifest.cards.map((card) => [card.collector_number, card]));
+    expect(byNumber.get('057')).toMatchObject({ name: 'Portal To Dimensional Home' });
+    expect(byNumber.get('057')?.one_per_deck).toBe(true);
+    expect(byNumber.get('172')?.one_per_deck).toBe(false);
+    expect(byNumber.get('214')?.one_per_deck).toBe(false);
   });
 
   it('keeps Walking Dead ownership and mission-set identity source-correct', () => {

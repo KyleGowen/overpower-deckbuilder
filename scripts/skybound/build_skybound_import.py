@@ -227,8 +227,11 @@ def rarity(row: dict[str, Any]) -> str | None:
 
 
 def one_per_deck(row: dict[str, Any]) -> bool:
-    combined = f"{clean(row.get('keywords'))} {clean(row.get('card_text'))}".lower()
-    return "one per deck" in combined or "1 per deck" in combined
+    # The workbook keyword identifies the card itself as One Per Deck. Rules
+    # text can instead mention another One Per Deck card, which must not mark
+    # the current card (for example, Tactical Rescue and Ezekiel's Wisdom).
+    keywords = clean(row.get("keywords")).lower()
+    return "one per deck" in keywords or "1 per deck" in keywords
 
 
 def filename_label(filename: str, marker: str) -> str:

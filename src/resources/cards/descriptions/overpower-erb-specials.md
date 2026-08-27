@@ -412,7 +412,7 @@
 
 | Card Name | Card Type | Character | Card Effect | One Per Deck | Cataclysm! | Ambush! | Assist! |
 |-----------|-----------|-----------|--------------|-------------|------------|---------|----------|
-| All For One | Special Card | The Three Musketeers | Sort through Draw Pile or Dead Pile for any 1 Teamwork card and put it in hand. For remainder of game, The Three Musketeers may replace and play any Teamwork card, regardless of grid requirement, and may make 0 or both follow-up attacks. **One Per Deck** | true | false | false | false |
+| All For One | Special Card | The Three Musketeers | Sort through Draw Pile or Dead Pile for any 1 Teamwork card and put it in hand. For remainder of game, The Three Musketeers may place and play any Teamwork card, regardless of grid requirement, and may make 1 or both follow-up attacks. **One Per Deck** | true | false | false | false |
 | Aramis | Special Card | The Three Musketeers | Acts as a level 5 Intelligence attack. The Three Musketeers may play 1 additional Special card.  | false | false | false | false |
 | Athos | Special Card | The Three Musketeers | Acts as a level 7 Combat attack. If successful, target character is KO'd by the next level 1 Power card, regardless of Inherent Abilities and other Special cards in play. **One Per Deck** | true | false | false | false |
 | D'Artagnan | Special Card | The Three Musketeers | Acts as a level 8 MultiPower attack. **One Per Deck** | true | false | false | false |
