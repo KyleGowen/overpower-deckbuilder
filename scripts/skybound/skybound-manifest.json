@@ -7912,15 +7912,15 @@
       "is_foil": false,
       "hidden_art": false,
       "source_file": "317_OP02_CMN_UNIVERSE_6E_BF_INT__EN_26 copy_trimmed.png",
-      "name": "6 Energy",
-      "card_description": "Teamwork card: 6 Energy acts as 4 Attack with Brute Force + Intelligence followup",
-      "to_use": "6 Energy",
+      "name": "7 Energy",
+      "card_description": "Teamwork card: 7 Energy acts as 4 Attack with Brute Force + Intelligence followup",
+      "to_use": "7 Energy",
       "acts_as": "4 Attack",
       "followup_attack_types": "Brute Force + Intelligence",
-      "first_attack_bonus": "0",
+      "first_attack_bonus": "1",
       "second_attack_bonus": "1",
       "one_per_deck": false,
-      "image_path": "sky/teamwork/317_6_energy.png"
+      "image_path": "sky/teamwork/317_7_energy.png"
     },
     {
       "collector_number": "318",
@@ -7931,15 +7931,15 @@
       "is_foil": false,
       "hidden_art": false,
       "source_file": "318_OP02_UNC_UNIVERSE_7 E BF INT TEAMWORK_EN copy_trimmed.png",
-      "name": "7 Energy",
-      "card_description": "Teamwork card: 7 Energy acts as 4 Attack with Combat + Brute Force followup",
-      "to_use": "7 Energy",
+      "name": "8 Energy",
+      "card_description": "Teamwork card: 8 Energy acts as 4 Attack with Combat + Brute Force followup",
+      "to_use": "8 Energy",
       "acts_as": "4 Attack",
       "followup_attack_types": "Combat + Brute Force",
       "first_attack_bonus": "1",
-      "second_attack_bonus": "1",
+      "second_attack_bonus": "2",
       "one_per_deck": false,
-      "image_path": "sky/teamwork/318_7_energy.png"
+      "image_path": "sky/teamwork/318_8_energy.png"
     },
     {
       "collector_number": "319",
@@ -12869,11 +12869,11 @@
     },
     {
       "source_file": "317_OP02_CMN_UNIVERSE_6E_BF_INT__EN_26 copy_trimmed.png",
-      "target_path": "sky/teamwork/317_6_energy.png"
+      "target_path": "sky/teamwork/317_7_energy.png"
     },
     {
       "source_file": "318_OP02_UNC_UNIVERSE_7 E BF INT TEAMWORK_EN copy_trimmed.png",
-      "target_path": "sky/teamwork/318_7_energy.png"
+      "target_path": "sky/teamwork/318_8_energy.png"
     },
     {
       "source_file": "319_OP02_UNC_UNIVERSE_8 E C INT TEAMWORK_EN copy_trimmed.png",

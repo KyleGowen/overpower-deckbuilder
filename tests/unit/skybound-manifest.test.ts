@@ -11,6 +11,11 @@ type SkyboundCard = {
   character_name?: string;
   mission_set?: string;
   one_per_deck?: boolean;
+  to_use?: string;
+  acts_as?: string;
+  followup_attack_types?: string;
+  first_attack_bonus?: string;
+  second_attack_bonus?: string;
 };
 
 type SkyboundManifest = {
@@ -85,6 +90,28 @@ describe('Skybound import manifest', () => {
       name: 'Bite',
       character_name: 'Battle Beast',
       image_path: 'sky/specials/082_bite.png',
+    });
+  });
+
+  it('keeps the corrected Energy Teamwork cards aligned with their printed faces', () => {
+    const byNumber = new Map(manifest.cards.map((card) => [card.collector_number, card]));
+    expect(byNumber.get('317')).toMatchObject({
+      name: '7 Energy',
+      to_use: '7 Energy',
+      acts_as: '4 Attack',
+      followup_attack_types: 'Brute Force + Intelligence',
+      first_attack_bonus: '1',
+      second_attack_bonus: '1',
+      image_path: 'sky/teamwork/317_7_energy.png',
+    });
+    expect(byNumber.get('318')).toMatchObject({
+      name: '8 Energy',
+      to_use: '8 Energy',
+      acts_as: '4 Attack',
+      followup_attack_types: 'Combat + Brute Force',
+      first_attack_bonus: '1',
+      second_attack_bonus: '2',
+      image_path: 'sky/teamwork/318_8_energy.png',
     });
   });
 

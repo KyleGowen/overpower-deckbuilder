@@ -24,6 +24,13 @@ SET_NAME = "Skybound"
 CARD_BACK_PATH = "sky/card-back/overpowerback.png"
 WALKING_DEAD_MISSION_SET = "The Walking Dead: All Out War"
 
+# The supplier filenames for these two Teamwork cards contain stale use values.
+# The printed card faces are authoritative: #317 is 7 Energy and #318 is 8 Energy.
+TEAMWORK_USE_VALUE_OVERRIDES = {
+    317: 7,
+    318: 8,
+}
+
 TABLE_TO_CARD_TYPE = {
     "characters": "character",
     "special_cards": "special",
@@ -499,7 +506,10 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
                 icon_astral_plane=False,
             )
         elif table == "teamwork_cards":
-            first_number = int(re.search(r"_UNIVERSE_(\d+)", clean(row["file"]), re.IGNORECASE).group(1))
+            filename_use_value = int(
+                re.search(r"_UNIVERSE_(\d+)", clean(row["file"]), re.IGNORECASE).group(1)
+            )
+            first_number = TEAMWORK_USE_VALUE_OVERRIDES.get(number, filename_use_value)
             if number in {392, 393}:
                 to_use = f"{first_number} Any-Power"
                 acts_as = "6 Attack"
