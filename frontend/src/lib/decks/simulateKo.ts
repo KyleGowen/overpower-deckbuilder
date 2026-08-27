@@ -4,6 +4,7 @@ import {
   effectiveCharacterStats,
   specialLinkedCharacterName,
   statForPowerType,
+  trainingTypeAtOrBelowCap,
 } from '../deck-usability/deckUsabilityUtils';
 import {
   type DeckCardIndex,
@@ -89,10 +90,6 @@ function effectiveStatsForPowerTraining(
   startingCharacterNames: string[],
 ): CharacterStatRow {
   return effectiveCharacterStats(char, startingCharacterNames);
-}
-
-function statFromEffectiveStats(eff: CharacterStatRow, statLabel: string): number {
-  return statForPowerType(eff, statLabel);
 }
 
 function maxTeamStatForTeamwork(teamStats: KoTeamStats, requiredType: string): number {
@@ -280,9 +277,10 @@ function dimTrainingCard(cardData: CatalogCard, ctx: KoDimmingContext): boolean 
 
   const canUse = ctx.activeCharacters.some((char) => {
     const eff = effectiveStatsForPowerTraining(char, ctx.startingCharacterNames);
-    const type1Stat = statFromEffectiveStats(eff, trainingType1);
-    const type2Stat = statFromEffectiveStats(eff, trainingType2);
-    return type1Stat <= trainingValue || type2Stat <= trainingValue;
+    return (
+      trainingTypeAtOrBelowCap(eff, trainingType1, trainingValue) ||
+      trainingTypeAtOrBelowCap(eff, trainingType2, trainingValue)
+    );
   });
 
   return !canUse;

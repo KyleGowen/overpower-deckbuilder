@@ -331,6 +331,48 @@ describe('simulateKo (v2)', () => {
   });
 
   describe('training and basic universe', () => {
+    it('keeps Any-Power Training playable when an active character has any stat at or below its cap', () => {
+      const knockedOutCharacter = deckEntry('character', 'char-1');
+      const activeCharacter = deckEntry('character', 'char-2');
+      const training = deckEntry('training', 'train-any-power');
+      const deck = [knockedOutCharacter, activeCharacter, training];
+      const index = buildCardIndex([
+        {
+          deckType: 'character',
+          cardId: 'char-1',
+          card: catalogCard('char-1', {
+            name: 'Doc Seismic',
+            energy: 8,
+            combat: 8,
+            brute_force: 8,
+            intelligence: 8,
+          }),
+        },
+        {
+          deckType: 'character',
+          cardId: 'char-2',
+          card: catalogCard('char-2', {
+            name: 'Spencer Dales',
+            energy: 8,
+            combat: 6,
+            brute_force: 8,
+            intelligence: 5,
+          }),
+        },
+        {
+          deckType: 'training',
+          cardId: 'train-any-power',
+          card: catalogCard('train-any-power', {
+            type_1: 'Any-Power',
+            type_2: 'Any-Power',
+            value_to_use: '5 or less',
+          }),
+        },
+      ]);
+
+      expect(dim(training, deck, index, new Set(['char-1']))).toBe(false);
+    });
+
     it('dims training when no active character can use it', () => {
       const char1 = deckEntry('character', 'char-1');
       const training = deckEntry('training', 'train-1');
