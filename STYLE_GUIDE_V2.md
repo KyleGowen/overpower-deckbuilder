@@ -404,6 +404,8 @@ On desktop viewports **above 1200px**, Add Cards expands the right `SlideOutPane
 ### Deck Editor — Instance tiles
 Each physical copy is one deck tile (`instanceId` client-side). Owners remove via trash on every type; **Save** aggregates instances by `(type, cardId)` for the API.
 
+In card view, the Special Cards grid keeps character-linked and Any Character specials in one section. When the deck contains at least one of each, a full-width `--color-border` divider (`.deck-editor__special-category-divider`) starts a fresh row before the first Any Character special; no divider appears when either category is absent.
+
 | View | Control | Class |
 |---|---|---|
 | Card view | Trash in tile footer | `.deck-editor__card-remove` (26×26, scrim + border) |

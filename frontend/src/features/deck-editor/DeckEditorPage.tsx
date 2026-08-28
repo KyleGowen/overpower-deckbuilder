@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../app/AuthProvider';
@@ -89,6 +89,8 @@ import {
   buildDeckCardIndex,
   catalogSlugForDeckType,
   deckCardDisplayName,
+  hasMixedSpecialCardCategories,
+  isAnyCharacterSpecialEntry,
   normalizeDeckCardType,
   resolveDeckCatalogCard,
   sortDeckPowerEntries,
@@ -572,7 +574,12 @@ export default function DeckEditorPage() {
       const sectionMeta = meta.deckType === 'location'
         ? { ...meta, label: 'Location and Battleground', shortLabel: 'Location and Battleground' }
         : meta;
-      return { meta: sectionMeta, entries };
+      return {
+        meta: sectionMeta,
+        entries,
+        hasSpecialCategoryDivider:
+          meta.deckType === 'special' && hasMixedSpecialCardCategories(entries, cardIndex),
+      };
     }).filter((g) => g.entries.length > 0);
   }, [cards, cardIndex]);
 
@@ -1300,7 +1307,7 @@ export default function DeckEditorPage() {
               onRemoveInstance={removeDeckInstance}
             />
           ) : (
-            visibleGroups.map(({ meta, entries }) => (
+            visibleGroups.map(({ meta, entries, hasSpecialCategoryDivider }) => (
               <section className="deck-editor__group" key={meta.type}>
                 {!showMobileTypeTabs ? (
                   <h2 className="deck-editor__group-title">
@@ -1328,7 +1335,11 @@ export default function DeckEditorPage() {
                     isLandscapeCatalogType(meta.type) ? ' deck-editor__cards--landscape' : ''
                   }`}
                 >
-                  {entries.map((entry) => {
+                  {entries.map((entry, index) => {
+                    const showAnyCharacterDivider =
+                      hasSpecialCategoryDivider &&
+                      isAnyCharacterSpecialEntry(entry, cardIndex) &&
+                      !isAnyCharacterSpecialEntry(entries[index - 1] ?? entry, cardIndex);
                     const catalogCard = resolveDeckCatalogCard(entry, cardIndex);
                     const imagePath =
                       entry.defaultImage ||
@@ -1374,33 +1385,40 @@ export default function DeckEditorPage() {
                       canReorderCharacter && dragOverCharacterId === entry.instanceId &&
                       draggedCharacterId !== entry.instanceId;
                     return (
-                    <div
-                      className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}${canReorderCharacter ? ' deck-editor__card--reorderable' : ''}${reorderActive ? ' deck-editor__card--reorder-active' : ''}${draggedCharacterId === entry.instanceId ? ' deck-editor__card--dragging' : ''}${dragTarget ? ' deck-editor__card--drag-target' : ''}`}
-                      key={entry.instanceId ?? `${entry.type}:${entry.cardId}`}
-                      draggable={canReorderCharacter && !isMobile}
-                      onDragStart={(event) => {
+                      <Fragment key={entry.instanceId ?? `${entry.type}:${entry.cardId}`}>
+                        {showAnyCharacterDivider ? (
+                          <div
+                            className="deck-editor__special-category-divider"
+                            role="separator"
+                            aria-label="Any Character specials"
+                          />
+                        ) : null}
+                        <div
+                          className={`deck-editor__card${koDimmed ? ' deck-editor__card--ko-dimmed' : ''}${canReorderCharacter ? ' deck-editor__card--reorderable' : ''}${reorderActive ? ' deck-editor__card--reorder-active' : ''}${draggedCharacterId === entry.instanceId ? ' deck-editor__card--dragging' : ''}${dragTarget ? ' deck-editor__card--drag-target' : ''}`}
+                          draggable={canReorderCharacter && !isMobile}
+                          onDragStart={(event) => {
                         if (!canReorderCharacter || !entry.instanceId) return;
                         setDraggedCharacterId(entry.instanceId);
                         event.dataTransfer.effectAllowed = 'move';
                         event.dataTransfer.setData('text/plain', entry.instanceId);
                       }}
-                      onDragOver={(event) => {
+                          onDragOver={(event) => {
                         if (!canReorderCharacter || !draggedCharacterId || !entry.instanceId) return;
                         event.preventDefault();
                         event.dataTransfer.dropEffect = 'move';
                         setDragOverCharacterId(entry.instanceId);
                       }}
-                      onDrop={(event) => {
+                          onDrop={(event) => {
                         event.preventDefault();
                         if (entry.instanceId) dropCharacterOn(entry.instanceId);
                         setDraggedCharacterId(null);
                         setDragOverCharacterId(null);
                       }}
-                      onDragEnd={() => {
+                          onDragEnd={() => {
                         setDraggedCharacterId(null);
                         setDragOverCharacterId(null);
                       }}
-                    >
+                        >
                       <div className="deck-editor__card-media">
                         <button
                           type="button"
@@ -1537,7 +1555,8 @@ export default function DeckEditorPage() {
                           </div>
                         </div>
                       ) : null}
-                    </div>
+                        </div>
+                      </Fragment>
                     );
                   })}
                 </div>

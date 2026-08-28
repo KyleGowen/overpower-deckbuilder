@@ -3,6 +3,7 @@ import {
   cardDisplayName,
   compareDeckPowerCatalogCards,
   compareCharacterNames,
+  isAnyCharacterName,
   metaForDeckType,
 } from '../catalog/catalogTypeMap';
 import type { CatalogCard, CatalogType, DeckCardEntry } from '../api/types';
@@ -95,6 +96,36 @@ export function sortDeckSpecialEntries(
 ): DeckCardEntry[] {
   if (entries.length <= 1) return entries;
   return [...entries].sort((a, b) => compareDeckSpecialEntries(a, b, cardIndex));
+}
+
+/** True when a special is linked to the shared Any Character card pool. */
+export function isAnyCharacterSpecialEntry(
+  entry: DeckCardEntry,
+  cardIndex: DeckCardIndex,
+): boolean {
+  return isAnyCharacterName(cardCharacterName(resolveDeckCatalogCard(entry, cardIndex)));
+}
+
+/** A visual divider is useful only when both special-card categories are present. */
+export function hasMixedSpecialCardCategories(
+  entries: DeckCardEntry[],
+  cardIndex: DeckCardIndex,
+): boolean {
+  let hasCharacterSpecial = false;
+  let hasAnyCharacterSpecial = false;
+
+  for (const entry of entries) {
+    const characterName = cardCharacterName(resolveDeckCatalogCard(entry, cardIndex));
+    if (!characterName) continue;
+    if (isAnyCharacterName(characterName)) {
+      hasAnyCharacterSpecial = true;
+    } else {
+      hasCharacterSpecial = true;
+    }
+    if (hasCharacterSpecial && hasAnyCharacterSpecial) return true;
+  }
+
+  return false;
 }
 
 /** Build lookup map for deck editor / draw hand (normalized keys + id-only). */

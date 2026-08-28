@@ -313,6 +313,12 @@
   grid-template-columns: repeat(auto-fill, 285px);
   justify-content: start;
 }
+.deck-editor__special-category-divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: var(--color-border);
+}
 .deck-editor__card {
   position: relative;
   display: flex;

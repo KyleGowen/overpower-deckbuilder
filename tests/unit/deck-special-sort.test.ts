@@ -2,6 +2,8 @@ import type { CatalogCard, DeckCardEntry } from '../../frontend/src/lib/api/type
 import {
   buildDeckCardIndex,
   compareDeckSpecialEntries,
+  hasMixedSpecialCardCategories,
+  isAnyCharacterSpecialEntry,
   sortDeckSpecialEntries,
 } from '../../frontend/src/lib/decks/deckCardCatalog';
 
@@ -35,5 +37,16 @@ describe('deck special sort', () => {
     expect(
       compareDeckSpecialEntries(specialEntry('s4', 'a'), specialEntry('s3', 'b'), index),
     ).toBeLessThan(0);
+  });
+
+  it('identifies the Any Character boundary only when both special categories are selected', () => {
+    const characterSpecial = specialEntry('s1', 'i1');
+    const anyCharacterSpecial = specialEntry('s2', 'i2');
+
+    expect(isAnyCharacterSpecialEntry(anyCharacterSpecial, index)).toBe(true);
+    expect(isAnyCharacterSpecialEntry(characterSpecial, index)).toBe(false);
+    expect(hasMixedSpecialCardCategories([characterSpecial, anyCharacterSpecial], index)).toBe(true);
+    expect(hasMixedSpecialCardCategories([characterSpecial], index)).toBe(false);
+    expect(hasMixedSpecialCardCategories([anyCharacterSpecial], index)).toBe(false);
   });
 });
