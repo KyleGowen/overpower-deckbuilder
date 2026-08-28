@@ -1240,6 +1240,25 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 **Implementation:** `[AdminService](src/api/services/adminService.ts)` · HTTP `[admin.http.ts](src/api/http/admin.http.ts)`
 
+### `GET /api/v1/admin/biz-ops-dashboard`
+
+Returns the ledger-backed AWS cost snapshot for the admin-only Biz Ops Dashboard. The server reads the committed `business-operations/metrics/aws-costs.csv` file through `AwsCostLedgerRepository`; the browser never receives the source CSV, record hashes, source identifiers, or ingestion internals.
+
+**Response 200:** v1 envelope; `data` contains:
+
+- `generatedAt`, `currency`
+- finalized-invoice coverage: `coverage.finalizedInvoiceCount`, `finalizedPeriodStart`, `finalizedPeriodEnd`
+- current estimated month: month, through date, estimated total, daily average, simple month-end projection, previous finalized invoice comparison, and historic-high flag
+- year-to-date finalized, estimated, and tracked totals
+- `monthlyCosts[]` with finalized/estimated identity for charting
+- `serviceCosts[]` with service name, amount, and percentage of current estimated spend
+- `serviceTrends[]` with each active service's rolling twelve-month window: the previous eleven finalized invoice-row amounts plus the current Cost Explorer amount marked as estimated
+- the latest scheduled weekly digest period and amount when present
+
+**Response 500:** `ADMIN_BIZ_OPS_DASHBOARD_ERROR`.
+
+**Implementation:** [`AdminBizOpsDashboardService`](src/api/services/adminBizOpsDashboardService.ts) · [`AwsCostLedgerRepository`](src/repository/AwsCostLedgerRepository.ts) · HTTP [`admin.http.ts`](src/api/http/admin.http.ts)
+
 ### `GET /api/v1/admin/user-analytics`
 
 Returns aggregate-only account, deck, and collection analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts from every metric. No user identifiers are returned.
@@ -1359,6 +1378,7 @@ Clears card repository caches.
 | PUT    | /api/v1/collections/me/cards/:cardId    | collections.http.ts |
 | DELETE | /api/v1/collections/me/cards/:cardId    | collections.http.ts |
 | GET    | /api/v1/admin/users                     | admin.http.ts       |
+| GET    | /api/v1/admin/biz-ops-dashboard         | admin.http.ts       |
 | GET    | /api/v1/admin/user-analytics            | admin.http.ts       |
 | POST   | /api/v1/admin/users                     | admin.http.ts       |
 | GET    | /api/v1/admin/debug/clear-cache         | admin.http.ts       |

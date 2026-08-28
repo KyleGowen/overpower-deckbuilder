@@ -607,4 +607,13 @@ the character art is not clipped from the leading side. Every card remains click
 - Acquisition bars use intelligence blue for earlier months and cyan for the rolling acquisition period. The y-axis scales to the observed maximum rounded to five, keeping low-volume months readable.
 - The page displays aggregate data only. Utility USER accounts are excluded by the backend and no identifiers are exposed to the browser. Deck legality uses `decks.is_valid`; collection size sums quantities rather than unique card rows.
 
+### Admin Biz Ops Dashboard (`/admin/biz-ops`)
+
+- The ADMIN-only route stays inside `AppShell` and is linked from the ADMIN profile menu immediately after User Analytics. `AdminRoute` hides it from non-admin clients, while the `/api/v1/admin/biz-ops-dashboard` endpoint independently enforces authenticated ADMIN access.
+- The page mirrors the AWS cost dashboard concept: deep navy background, cyan title icon, thin bordered shadcn `Card` surfaces without default shadows, three compact KPI cards, a finalized-versus-estimated cost trend, a ranked service-cost panel, and eight rolling twelve-month service-row trend cards arranged four per row on wide desktops.
+- Final invoice data is cyan. The current incomplete month is always labeled estimated and uses the warning color plus a dashed trend segment. Finalized and estimated values must never be visually blended or summed twice.
+- Desktop uses a wide trend panel beside the service breakdown, followed by a four-column service-trend grid. Below 1100px the main panels stack and service trends use two columns; below 760px the KPIs and service trends stack and the year-to-date card becomes a compact two-column summary.
+- The monthly Recharts tooltip shows invoice status, exact amount, and month-over-month change. Service bars expose keyboard- and pointer-accessible hover details with the full AWS service name, four-decimal cost, and current-month share. Each service line chart tracks the exact dollar value of that individual invoice row across the current month and previous eleven finalized months; its pointer tooltip identifies the month, finalized-versus-estimated status, and four-decimal amount. The rolling window advances with newly ingested months, and the trend cards do not display service-share percentages.
+- The API response contains only chart-ready aggregates. Source record keys, hashes, email identifiers, and the raw ledger are never sent to the browser.
+
 **Interaction:** Bar/pie segment or card click opens `CardDetailPanel`. Home rail bar charts show top 5 rows with `+N more` footnote when truncated.

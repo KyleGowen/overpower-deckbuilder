@@ -28,6 +28,8 @@ import { DeckCardsService } from './api/services/deckCardsService';
 import { DeckUIPreferencesService } from './api/services/deckUIPreferencesService';
 import { GuestDeckService } from './api/services/guestDeckService';
 import { AdminService } from './api/services/adminService';
+import { AdminBizOpsDashboardService } from './api/services/adminBizOpsDashboardService';
+import { AwsCostLedgerRepository } from './repository/AwsCostLedgerRepository';
 import { UserAccountService } from './api/services/userAccountService';
 import { CommunityService } from './api/services/communityService';
 import { FeedbackService } from './api/services/feedbackService';
@@ -123,6 +125,8 @@ const guestDeckService = new GuestDeckService({
   checkIfCardIsCataclysm
 });
 
+const awsCostLedgerRepository = new AwsCostLedgerRepository();
+const bizOpsDashboardService = new AdminBizOpsDashboardService(awsCostLedgerRepository);
 const adminService = new AdminService({
   userRepository,
   deckRepository,
@@ -314,6 +318,7 @@ registerApiV1Routes(app, {
   collectionService,
   guestDeckService,
   adminService,
+  bizOpsDashboardService,
   userAccountService,
   communityService,
   feedbackService,

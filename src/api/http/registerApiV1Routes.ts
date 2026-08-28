@@ -23,6 +23,7 @@ import { registerRecentUpdatesV1HttpRoutes } from './recent-updates.http';
 import { registerUsersV1HttpRoutes } from './users.http';
 import { registerFeedbackV1HttpRoutes } from './feedback.http';
 import type { AdminService } from '../services/adminService';
+import type { AdminBizOpsDashboardService } from '../services/adminBizOpsDashboardService';
 import type { CollectionService } from '../../services/collectionService';
 import type { GuestDeckService } from '../services/guestDeckService';
 import type { DeckListService } from '../services/deckListService';
@@ -72,6 +73,7 @@ export interface RegisterApiV1Deps {
   collectionService: CollectionService;
   guestDeckService: GuestDeckService;
   adminService: AdminService;
+  bizOpsDashboardService: AdminBizOpsDashboardService;
   userAccountService: UserAccountService;
   communityService: CommunityService;
   feedbackService: FeedbackService;
@@ -197,6 +199,7 @@ export function createApiV1Router(deps: RegisterApiV1Deps): IRouter {
 
   registerAdminV1HttpRoutes(router, {
     adminService: deps.adminService,
+    bizOpsDashboardService: deps.bizOpsDashboardService,
     authenticateUser: deps.authenticateUser
   });
 

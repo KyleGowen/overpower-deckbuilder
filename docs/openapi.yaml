@@ -1004,6 +1004,57 @@ paths:
                           averageCardsPerCollector: { type: number, format: float }
         '403': { description: Not ADMIN (ADMIN_REQUIRED) }
         '500': { description: Analytics query failed (ADMIN_USER_ANALYTICS_ERROR) }
+  /api/v1/admin/biz-ops-dashboard:
+    get:
+      tags: [Admin]
+      summary: Get the AWS cost business operations dashboard.
+      description: ADMIN-only. Returns chart-ready aggregates from the committed AWS cost ledger without source identifiers or raw rows.
+      responses:
+        '200':
+          description: AWS cost dashboard snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    required: [generatedAt, currency, coverage, currentMonth, yearToDate, monthlyCosts, serviceCosts, serviceTrends, latestWeeklyDigest]
+                    properties:
+                      generatedAt: { type: string, format: date-time }
+                      currency: { type: string, example: USD }
+                      coverage: { type: object }
+                      currentMonth: { type: object }
+                      yearToDate: { type: object }
+                      monthlyCosts:
+                        type: array
+                        items: { type: object }
+                      serviceCosts:
+                        type: array
+                        items: { type: object }
+                      serviceTrends:
+                        type: array
+                        items:
+                          type: object
+                          required: [service, currentAmount, points]
+                          properties:
+                            service: { type: string }
+                            currentAmount: { type: number, format: double }
+                            points:
+                              type: array
+                              items:
+                                type: object
+                                required: [month, amount, estimated]
+                                properties:
+                                  month: { type: string, pattern: '^\\d{4}-\\d{2}$' }
+                                  amount: { type: number, format: double }
+                                  estimated: { type: boolean }
+                      latestWeeklyDigest:
+                        nullable: true
+                        type: object
+        '401': { description: Authentication required }
+        '403': { description: Not ADMIN (ADMIN_REQUIRED) }
+        '500': { description: Ledger read or aggregation failed (ADMIN_BIZ_OPS_DASHBOARD_ERROR) }
   /api/v1/admin/debug/clear-cache:
     get:
       tags: [Admin]

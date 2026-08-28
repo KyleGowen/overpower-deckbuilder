@@ -2,6 +2,7 @@ import express, { type Request, type RequestHandler } from 'express';
 import request from 'supertest';
 import { registerAdminV1HttpRoutes, type AdminV1HttpDeps } from '../../../../src/api/http/admin.http';
 import type { AdminService } from '../../../../src/api/services/adminService';
+import type { AdminBizOpsDashboardService } from '../../../../src/api/services/adminBizOpsDashboardService';
 
 const adminAuth: RequestHandler = (req: Request, _res, next) => {
   (req as Request & { user?: unknown }).user = {
@@ -23,11 +24,52 @@ const userAuth: RequestHandler = (req: Request, _res, next) => {
   next();
 };
 
-function buildApp(deps: AdminV1HttpDeps): express.Application {
+type BuildAdminV1HttpDeps = Omit<AdminV1HttpDeps, 'bizOpsDashboardService'> & {
+  bizOpsDashboardService?: AdminBizOpsDashboardService;
+};
+
+function stubBizOpsDashboardService(
+  over: Partial<AdminBizOpsDashboardService> = {}
+): AdminBizOpsDashboardService {
+  return {
+    getDashboard: jest.fn().mockResolvedValue({
+      generatedAt: '2026-08-28T18:03:19.000Z',
+      currency: 'USD',
+      coverage: {
+        finalizedInvoiceCount: 71,
+        finalizedPeriodStart: '2020-09',
+        finalizedPeriodEnd: '2026-07'
+      },
+      currentMonth: {
+        month: '2026-08',
+        throughDate: '2026-08-28',
+        estimatedTotal: 78.396132,
+        dailyAverage: 2.799862,
+        projectedTotal: 86.795718,
+        previousFinalizedMonth: '2026-07',
+        previousFinalizedTotal: 88.62,
+        percentOfPrevious: 88.5,
+        projectedDeltaPercentage: -2.1,
+        previousIsHistoricHigh: true
+      },
+      yearToDate: { year: 2026, finalizedTotal: 526.98, estimatedTotal: 78.396132, trackedTotal: 605.376132 },
+      monthlyCosts: [],
+      serviceCosts: [],
+      serviceTrends: [],
+      latestWeeklyDigest: null
+    }),
+    ...over
+  } as unknown as AdminBizOpsDashboardService;
+}
+
+function buildApp(deps: BuildAdminV1HttpDeps): express.Application {
   const app = express();
   app.use(express.json());
   const router = express.Router();
-  registerAdminV1HttpRoutes(router, deps);
+  registerAdminV1HttpRoutes(router, {
+    ...deps,
+    bizOpsDashboardService: deps.bizOpsDashboardService ?? stubBizOpsDashboardService()
+  });
   app.use(router);
   return app;
 }
@@ -78,6 +120,52 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
 }
 
 describe('admin.http', () => {
+  it('GET /admin/biz-ops-dashboard returns 403 for non-admin without reading the ledger', async () => {
+    const bizOpsDashboardService = stubBizOpsDashboardService();
+    const app = buildApp({
+      adminService: stubAdminService(),
+      bizOpsDashboardService,
+      authenticateUser: userAuth
+    });
+    const res = await request(app).get('/admin/biz-ops-dashboard').expect(403);
+    expect(res.body.errors[0].code).toBe('ADMIN_REQUIRED');
+    expect(bizOpsDashboardService.getDashboard).not.toHaveBeenCalled();
+  });
+
+  it('GET /admin/biz-ops-dashboard returns AWS cost analytics for an admin', async () => {
+    const bizOpsDashboardService = stubBizOpsDashboardService();
+    const app = buildApp({
+      adminService: stubAdminService(),
+      bizOpsDashboardService,
+      authenticateUser: adminAuth
+    });
+    const res = await request(app).get('/admin/biz-ops-dashboard').expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data).toMatchObject({
+      currency: 'USD',
+      coverage: { finalizedInvoiceCount: 71 },
+      currentMonth: { estimatedTotal: 78.396132 },
+      yearToDate: { trackedTotal: 605.376132 }
+    });
+  });
+
+  it('GET /admin/biz-ops-dashboard returns the scoped error when the ledger cannot be read', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      const app = buildApp({
+        adminService: stubAdminService(),
+        bizOpsDashboardService: stubBizOpsDashboardService({
+          getDashboard: jest.fn().mockRejectedValue(new Error('unavailable'))
+        }),
+        authenticateUser: adminAuth
+      });
+      const res = await request(app).get('/admin/biz-ops-dashboard').expect(500);
+      expect(res.body.errors[0].code).toBe('ADMIN_BIZ_OPS_DASHBOARD_ERROR');
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it('GET /admin/user-analytics returns 403 for non-admin without querying analytics', async () => {
     const svc = stubAdminService();
     const app = buildApp({ adminService: svc, authenticateUser: userAuth });

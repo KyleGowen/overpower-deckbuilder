@@ -19,6 +19,7 @@ dropdown or a mobile sheet by the nav.
   - Guests: Create Deck + Help & Feedback + "Exit Guest" (no name/email/password forms).
   - Google (SSO) users: can set a separate **Display name** but cannot change email/password
     (those forms auto-close); password users edit their unique **Username**.
+  - ADMIN users additionally see **User Analytics** and **Biz Ops Dashboard** links. Both destination routes are wrapped in `AdminRoute`, and their `/api/v1/admin/*` endpoints independently require the server-side ADMIN role.
 - Only one subform open at a time (`openForm`). Mutations call `lib/api/account`
   (`setDisplayName`/`changeEmail`/`changePassword`), then `refresh()` +
   `invalidateQueries(['auth','me'])`. Password subform uses two

@@ -34,6 +34,7 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
   });
 
   const getEndpoints = [
+    '/api/v1/admin/biz-ops-dashboard',
     '/api/v1/admin/user-analytics',
     '/api/v1/admin/users',
     '/api/v1/admin/debug/clear-cache',
@@ -59,6 +60,35 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
       expect(res.body.errors).toEqual([]);
     });
   }
+
+  it('returns ledger-backed AWS cost analytics for an admin', async () => {
+    const res = await request(app)
+      .get('/api/v1/admin/biz-ops-dashboard')
+      .set('Cookie', adminCookie);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(expect.objectContaining({
+      currency: 'USD',
+      coverage: expect.objectContaining({ finalizedInvoiceCount: expect.any(Number) }),
+      currentMonth: expect.objectContaining({ estimatedTotal: expect.any(Number) }),
+      yearToDate: expect.objectContaining({ trackedTotal: expect.any(Number) }),
+      monthlyCosts: expect.any(Array),
+      serviceCosts: expect.any(Array),
+      serviceTrends: expect.arrayContaining([
+        expect.objectContaining({
+          service: expect.any(String),
+          currentAmount: expect.any(Number),
+          points: expect.arrayContaining([
+            expect.objectContaining({
+              month: expect.any(String),
+              amount: expect.any(Number),
+              estimated: expect.any(Boolean)
+            })
+          ])
+        })
+      ])
+    }));
+  });
 
   it('returns aggregate deck and collection statistics for an admin', async () => {
     const res = await request(app)

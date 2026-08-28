@@ -216,6 +216,7 @@ All elevated operations must live under `/api/v1/admin/...` (no client “admin�
 | GET/POST /api/users (admin) | /api/v1/admin/users…          | [x]      |
 | GET /api/debug/*            | /api/v1/admin/debug/*         | [x]      |
 | GET /api/database/status    | /api/v1/admin/database/status | [x]      |
+| —                           | /api/v1/admin/biz-ops-dashboard | [x]    |
 
 
 ---

@@ -140,6 +140,12 @@ additional decks via `npm run import:tournament-deck` or the
 [`frontend/src/features/home/TOURNAMENT_DECKS.md`](../../frontend/src/features/home/TOURNAMENT_DECKS.md)
 and `src/constants/tournamentDecksUser.ts`.
 
+## Admin dashboards
+
+- `/admin/user-analytics` and `/admin/biz-ops` are both wrapped in `AdminRoute` and linked only from the ADMIN profile menu.
+- Client gating is presentation defense-in-depth only. Their data comes exclusively from `/api/v1/admin/user-analytics` and `/api/v1/admin/biz-ops-dashboard`, which independently require an authenticated ADMIN session.
+- Biz Ops renders eight individual service rows as rolling twelve-month line charts in a four-column desktop grid; chart hover details show the exact finalized invoice-row value, with the current Cost Explorer month clearly marked estimated. Each new ingested month advances the window automatically.
+
 ## Build & serving
 - **Dev:** Run **both** processes — repo root `npm run dev` (Express API on **:8085**) and
   `frontend/npm run dev` (Vite on **:5173**). Browse **`http://localhost:5173`**; Vite

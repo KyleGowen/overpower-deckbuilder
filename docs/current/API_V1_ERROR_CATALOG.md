@@ -65,6 +65,7 @@ to [`docs/openapi.yaml`](../openapi.yaml)) in the same PR.**
 | `ADMIN_USERS_LIST_ERROR`      | 500  | Admin user listing failed.                                               | Retry.                                                                                |
 | `ADMIN_USER_CREATE_ERROR`     | 500  | Admin user creation failed.                                              | Retry.                                                                                |
 | `ADMIN_USER_ANALYTICS_ERROR`  | 500  | Admin aggregate user analytics query failed.                             | Retry; report `requestId` if persistent.                                             |
+| `ADMIN_BIZ_OPS_DASHBOARD_ERROR` | 500 | Admin AWS cost ledger read or aggregation failed.                        | Verify the deployed ledger exists and retry; report `requestId` if persistent.       |
 | `ADMIN_DEBUG_ERROR`           | 500  | Admin debug action failed.                                               | Retry.                                                                                |
 | `ADMIN_DATABASE_STATUS_ERROR` | 500  | Admin DB status call failed.                                             | Retry.                                                                                |
 | `NOT_IMPLEMENTED`             | 501  | Route intentionally unimplemented.                                       | Use documented alternative.                                                          |

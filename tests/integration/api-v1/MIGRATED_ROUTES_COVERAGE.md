@@ -54,6 +54,7 @@ Each row lists at least one integration test that exercises the route (happy pat
 | POST | `/api/v1/guest/decks/:id/cards` | `guest-deck-api.test.ts` |
 | DELETE | `/api/v1/guest/decks/:id` | `guest-deck-api.test.ts`, `security/guest-deck-session-isolation.test.ts` |
 | GET | `/api/v1/admin/users` | `security/debug-endpoints-access.test.ts`, `createUserIntegration.test.ts` |
+| GET | `/api/v1/admin/biz-ops-dashboard` | `security/debug-endpoints-access.test.ts` |
 | GET | `/api/v1/admin/user-analytics` | `security/debug-endpoints-access.test.ts` |
 | POST | `/api/v1/admin/users` | `createUserIntegration.test.ts`, `security/debug-endpoints-access.test.ts` |
 | GET | `/api/v1/admin/debug/clear-cache` | `security/debug-endpoints-access.test.ts` |

@@ -1,11 +1,13 @@
 import type { Request, RequestHandler, Response, Router } from 'express';
 import type { User } from '../../types';
 import type { AdminService } from '../services/adminService';
+import type { AdminBizOpsDashboardService } from '../services/adminBizOpsDashboardService';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 import { CreateAdminUserBody } from './models/admin/CreateAdminUserBody';
 
 export interface AdminV1HttpDeps {
   adminService: AdminService;
+  bizOpsDashboardService: AdminBizOpsDashboardService;
   authenticateUser: RequestHandler;
 }
 
@@ -30,6 +32,18 @@ function userToJson(u: User) {
 }
 
 export function registerAdminV1HttpRoutes(router: Router, deps: AdminV1HttpDeps): void {
+  router.get('/admin/biz-ops-dashboard', deps.authenticateUser, async (req, res) => {
+    try {
+      if (!requireAdminV1(req, res)) return;
+      sendV1Success(res, await deps.bizOpsDashboardService.getDashboard());
+    } catch (error) {
+      console.error('v1 GET /admin/biz-ops-dashboard error:', error);
+      sendV1Json(res, 500, null, [
+        { code: 'ADMIN_BIZ_OPS_DASHBOARD_ERROR', message: 'Failed to fetch business operations dashboard' }
+      ]);
+    }
+  });
+
   router.get('/admin/user-analytics', deps.authenticateUser, async (req, res) => {
     try {
       if (!requireAdminV1(req, res)) return;

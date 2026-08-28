@@ -523,7 +523,7 @@ Full contract, examples, and envelopes: **[API_V1.md](API_V1.md)**. Registration
 | GET/POST | `/api/v1/guest/decks` | `src/api/http/guest-decks.http.ts` |
 | GET/PUT/DELETE | `/api/v1/guest/decks/:id` | `src/api/http/guest-decks.http.ts` |
 | PUT/POST | `/api/v1/guest/decks/:id/cards` | `src/api/http/guest-decks.http.ts` |
-| GET | `/api/v1/admin/users`, `/api/v1/admin/database/status`, `/api/v1/admin/debug/clear-cache`, `/api/v1/admin/debug/clear-card-cache` | `src/api/http/admin.http.ts` |
+| GET | `/api/v1/admin/users`, `/api/v1/admin/user-analytics`, `/api/v1/admin/biz-ops-dashboard`, `/api/v1/admin/database/status`, `/api/v1/admin/debug/clear-cache`, `/api/v1/admin/debug/clear-card-cache` | `src/api/http/admin.http.ts` |
 | POST | `/api/v1/admin/users` | `src/api/http/admin.http.ts` |
 | POST | `/api/v1/feedback` | `src/api/http/feedback.http.ts` |
 

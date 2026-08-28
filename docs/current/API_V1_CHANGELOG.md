@@ -5,6 +5,11 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Added `GET /api/v1/admin/biz-ops-dashboard` and the ADMIN-only `/admin/biz-ops`
+  React view. The endpoint aggregates the committed AWS cost ledger into finalized invoice
+  history, the current Cost Explorer estimate, year-to-date totals, service share, rolling
+  twelve-month per-service invoice-row trends, and the latest weekly digest without exposing the source CSV or
+  ingestion identifiers.
 - Deck-card bulk replace accepts optional zero-based `displayOrder`, and deck detail reads return cards in that stable order. The deck editor uses it to persist character arrangement and keep every deck-preview carousel in character → location → battleground order.
 - Added authenticated `POST /api/v1/feedback` for bug reports and feature/change
   requests. The endpoint validates and rate-limits submissions, sends them to

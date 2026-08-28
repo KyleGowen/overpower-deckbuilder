@@ -7,7 +7,7 @@ import { changeEmail, changePassword, setDisplayName } from '../../lib/api/accou
 import { resolveUserDisplayName } from '../../lib/auth/resolveUserDisplayName';
 import { isValidEmail } from '../../lib/validation/email';
 import { PasswordInput } from '../PasswordInput/PasswordInput';
-import { IconAnalytics, IconPlus, IconLogout, IconLock, IconSettings, IconProfile, IconHelp } from '../icons';
+import { IconAnalytics, IconChartBar, IconPlus, IconLogout, IconLock, IconSettings, IconProfile, IconHelp } from '../icons';
 import './ProfileMenuContent.css';
 
 type OpenForm = 'displayName' | 'email' | 'password' | null;
@@ -97,6 +97,11 @@ export function ProfileMenuContent({ onClose, onOpenHelp, variant = 'dropdown' }
   const handleUserAnalytics = () => {
     onClose();
     navigate('/admin/user-analytics');
+  };
+
+  const handleBizOpsDashboard = () => {
+    onClose();
+    navigate('/admin/biz-ops');
   };
 
   const handleLogout = async () => {
@@ -197,9 +202,14 @@ export function ProfileMenuContent({ onClose, onOpenHelp, variant = 'dropdown' }
         </button>
 
         {user.role === 'ADMIN' ? (
-          <button type="button" className="profile-menu__item" role="menuitem" onClick={handleUserAnalytics}>
-            <IconAnalytics /> User Analytics
-          </button>
+          <>
+            <button type="button" className="profile-menu__item" role="menuitem" onClick={handleUserAnalytics}>
+              <IconAnalytics /> User Analytics
+            </button>
+            <button type="button" className="profile-menu__item" role="menuitem" onClick={handleBizOpsDashboard}>
+              <IconChartBar /> Biz Ops Dashboard
+            </button>
+          </>
         ) : null}
 
         {canSetDisplayName ? (

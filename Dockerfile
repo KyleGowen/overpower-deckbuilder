@@ -20,6 +20,7 @@ COPY dist ./dist
 COPY frontend/dist ./frontend/dist
 COPY src/resources ./src/resources
 COPY migrations ./migrations
+COPY business-operations/metrics/aws-costs.csv ./business-operations/metrics/aws-costs.csv
 
 
 # 2) Runtime stage - minimal Node + Flyway + Postgres client
@@ -73,6 +74,7 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/frontend/dist ./frontend/dist
 COPY --from=build /app/src/resources ./src/resources
 COPY --from=build /app/migrations ./migrations
+COPY --from=build /app/business-operations/metrics/aws-costs.csv ./business-operations/metrics/aws-costs.csv
 # Optional: copy flyway.conf if present (won't fail if missing)
 COPY flyway.conf /app/flyway.conf
 
