@@ -37,7 +37,7 @@ FIELDNAMES = [
     "ingested_at_utc",
 ]
 
-SOURCE_TYPES = {"email_pdf", "aws_cost_explorer"}
+SOURCE_TYPES = {"email_pdf", "aws_cost_explorer", "aws_invoice_pdf"}
 
 
 def parse_args() -> argparse.Namespace:
