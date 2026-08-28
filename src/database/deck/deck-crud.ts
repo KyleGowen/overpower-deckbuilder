@@ -659,7 +659,8 @@ export async function getCommunityFeedDecks(
 
 /**
  * Community search: same public/legal/non-limited pool, filtered to decks whose
- * any-of-4 character, reserve character, or location name matches `search`.
+ * title, owner's username, any-of-4 character, reserve character, or location
+ * name matches `search`.
  */
 export async function searchCommunityDecks(
   ctx: DeckRepositoryContext,
@@ -668,10 +669,12 @@ export async function searchCommunityDecks(
   const client = await ctx.pool.connect();
   try {
     const sql = buildDeckListSelectSql({
-      extraJoins: 'LEFT JOIN characters rc ON d.reserve_character::uuid = rc.id',
+      extraJoins:
+        'LEFT JOIN characters rc ON d.reserve_character::uuid = rc.id ' +
+        'JOIN users owner ON d.user_id = owner.id',
       where:
         'd.is_private = false AND d.is_valid = true AND d.is_limited = false AND d.user_id <> ALL($1::uuid[]) ' +
-        'AND (c1.name ILIKE $2 OR c2.name ILIKE $2 OR c3.name ILIKE $2 OR c4.name ILIKE $2 OR rc.name ILIKE $2 OR l.name ILIKE $2)',
+        'AND (d.name ILIKE $2 OR owner.username ILIKE $2 OR c1.name ILIKE $2 OR c2.name ILIKE $2 OR c3.name ILIKE $2 OR c4.name ILIKE $2 OR rc.name ILIKE $2 OR l.name ILIKE $2)',
       orderBy: 'd.updated_at DESC',
       limit: opts.limit ?? 50,
     });

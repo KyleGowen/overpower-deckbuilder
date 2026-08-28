@@ -18,7 +18,8 @@ Tournament** (`DECK_SELECTION_TAB_ORDER`) — built with `useHorizontalSwipe` +
 `stepCyclicalIndex` and `DECK_SELECTION_SWIPE_BLOCK_SELECTOR` (from
 `frontend/src/lib/layout/useHorizontalSwipe.ts`). The bottom nav is **unchanged** (no new
 buttons). Per-tab rules match desktop: My Decks editable; Favorites/Community/Tournament
-read-only with favorite hearts; the Community tab keeps the character/location search bar.
+read-only with favorite hearts; the Community tab search matches deck titles, usernames,
+characters, and locations.
 
 ## Capabilities
 - **New Deck**: opens a `SlideOutPanel` form (name + optional description + private/public visibility) → `createDeck` →

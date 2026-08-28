@@ -80,7 +80,7 @@ export class CommunityService {
     });
   }
 
-  /** Community feed (no search → 20 most-recent; with search → name match). */
+  /** Community feed (no search → 20 most-recent; with search → deck, owner, or card-name match). */
   async getCommunityDecks(
     viewerUserId: string | null,
     search?: string

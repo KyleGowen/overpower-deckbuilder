@@ -3,7 +3,7 @@ name: ship
 description: >-
   Ships approved Excelsior changes with one scope snapshot, cached and parallel
   release gates, a dedicated low-cost Git execution agent, exact-SHA GitHub
-  Actions monitoring, and production health verification. Use when the user says
+  Actions monitor, and production health verification. Use when the user says
   "ship", "ship it", or asks for the Excelsior release gate.
 ---
 
@@ -22,10 +22,13 @@ The originating/main agent owns every decision-bearing phase:
 - determine intended versus unrelated changes;
 - select and run gates, interpret failures, and make fixes;
 - choose the exact staged path list and commit message;
-- inspect Actions, decide whether recovery is safe, and verify production.
+- find and interpret the exact Actions run, decide whether recovery is safe,
+  and verify production.
 
 Do **not** move any of those phases to a lower-cost model.
-Do not spawn additional lower-cost agents for triage, validation, fixes, Actions monitoring, or health checks.
+Do not spawn additional lower-cost agents for triage, validation, fixes, Actions
+recovery, or health checks. The passive Actions monitor defined below is the
+only exception.
 
 After all gates pass, delegate only the mechanical Git commands to one dedicated agent created with:
 
@@ -128,10 +131,33 @@ Back on the originating model:
 2. Look up the workflow once by exact SHA:
    `gh run list --commit <sha> --json databaseId,status,conclusion,url,headSha,createdAt`.
 3. If the exact run already exists and is progressing, attach to it. Never create a second run merely because an older run is queued or GitHub Status still shows recovery in progress.
-4. Once the run ID is known, stop listing runs. Use one compact request per check:
+4. Once the exact run ID is known, delegate only passive polling to one dedicated agent created with:
+
+   - model: `gpt-5.6-luna`
+   - reasoning effort: `minimal`
+   - context: `fork_turns: "none"`
+   - task name: `ship_actions_monitor`
+
+   Supply the repository root, pushed SHA, run ID, and run URL. Luna minimal
+   is sufficient for this fixed, read-only wait loop; the main agent retains
+   all status interpretation, recovery decisions, and production verification.
+   If unavailable, use the least-cost available model with minimal reasoning
+   effort that can execute this bounded command. Do not move any other ship
+   responsibility to the monitor.
+5. The monitor may run only this compact read-only query, normally no more
+   often than every 60 seconds while the run is active:
    `gh run view <run-id> --json status,conclusion,jobs,url,headSha`.
-5. Poll no more often than the workflow can materially change—normally every 60 seconds while active. Report only meaningful phase changes or failures, not every unchanged poll.
-6. After success, make a cache-bypassed request to production `/health` and confirm the exact shipped commit, database status `OK`, and expected latest migration. Do not poll production before deployment succeeds.
+   It reports only a meaningful status change, terminal result, or the exact
+   error, then returns control to the main agent. It must not list runs,
+   trigger, rerun, cancel, or recover workflows; retry a GitHub command; make
+   Git changes; inspect GitHub Status; poll production; or diagnose a failure.
+   On any GitHub error it stops immediately and returns the raw error for the
+   main agent to handle under the circuit breaker.
+6. After the monitor reports a terminal result, the main agent verifies that
+   the returned `headSha` is the shipped SHA and interprets the conclusion.
+   On success, it makes a cache-bypassed request to production `/health` and
+   confirms the exact shipped commit, database status `OK`, and expected latest
+   migration. Do not poll production before deployment succeeds.
 
 If the exact run is absent, has `jobs: []`, returns `startup_failure`, GitHub APIs disagree, or a GitHub-dependent operation fails twice, read [Actions recovery](references/actions-recovery.md). Do not load or execute that recovery path during a normal progressing deployment.
 

@@ -434,10 +434,10 @@ export default function DeckSelectionPage() {
               <IconSearch />
               <input
                 type="search"
-                placeholder="Search by character or location name"
+                placeholder="Search deck names, users, characters, or locations"
                 value={communitySearchInput}
                 onChange={(e) => setCommunitySearchInput(e.target.value)}
-                aria-label="Search community decks by character or location"
+                aria-label="Search community decks by deck name, user, character, or location"
               />
             </form>
           ) : null}
@@ -534,7 +534,7 @@ export default function DeckSelectionPage() {
           ) : communityDecks.length === 0 ? (
             <EmptyState
               title={communitySearch ? 'No decks match' : 'Nothing here yet'}
-              message={communitySearch ? 'Try a different character or location name.' : 'Public decks will appear here as they are shared.'}
+              message={communitySearch ? 'Try a different deck, username, character, or location.' : 'Public decks will appear here as they are shared.'}
               icon={<IconUsers />}
             />
           ) : (

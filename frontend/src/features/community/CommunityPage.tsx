@@ -487,13 +487,13 @@ export default function CommunityPage() {
 
                 type="search"
 
-                placeholder="Search by character or location name"
+                placeholder="Search deck names, users, characters, or locations"
 
                 value={searchInput}
 
                 onChange={(e) => setSearchInput(e.target.value)}
 
-                aria-label="Search community decks by character or location"
+                aria-label="Search community decks by deck name, user, character, or location"
 
               />
 
@@ -559,7 +559,7 @@ export default function CommunityPage() {
 
                   search
 
-                    ? 'Try a different character or location name.'
+                    ? 'Try a different deck, username, character, or location.'
 
                     : 'Public decks will appear here as they are shared.'
 

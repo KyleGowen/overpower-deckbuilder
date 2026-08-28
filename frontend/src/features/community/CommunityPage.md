@@ -12,11 +12,11 @@ collection at a time; only the active tab's deck grid is shown.
 
    public/legal/non-limited). The **search bar** (`.community__search`, placeholder "Search
 
-   by character or location name") appears in the toolbar when this tab is active; it calls
+   decks, usernames, characters, or locations") appears in the toolbar when this tab is active; it calls
 
    `/community/decks?search=` and replaces the recent list with name matches across
 
-   characters (slots 1–4 + reserve) and location.
+   deck titles, owner usernames, characters (slots 1–4 + reserve), and location.
 
 2. **Your Favorites** (`#favorites`) — logged-in users only; current user's favorites
 
@@ -73,4 +73,3 @@ deck owner and for guests.
 See also: `API_V1.md` (§ Community, favorites, and public profiles),
 
 `STYLE_GUIDE_V2.md` (§ Community page).
-

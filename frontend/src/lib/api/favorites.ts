@@ -15,7 +15,7 @@ export function removeFavorite(deckId: string): Promise<{ deckId: string; isFavo
   return api.del<{ deckId: string; isFavorited: boolean }>(`/api/v1/decks/${deckId}/favorite`);
 }
 
-/** Community feed. With `search`, filters by character/location name; otherwise 20 most recent. */
+/** Community feed. With `search`, filters by deck, owner, character, or location name; otherwise 20 most recent. */
 export function fetchCommunityFeed(search?: string): Promise<DeckListItem[]> {
   const q = search && search.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
   return api.get<DeckListItem[]>(`/api/v1/community/decks${q}`);

@@ -1030,7 +1030,7 @@ Read-only community feed, deck favorites, and public user profiles. These power 
 
 **Auth:** Optional session cookie or Bearer. Authenticated viewers get `isFavorited` populated; guests are allowed and always see `isFavorited: false`.
 
-**Query:** optional `**search**` — when omitted/blank, returns the **20 most-recent** public, legal, non-limited decks; when present, name-matches characters (slots 1–4 + reserve) or location across **all** public/legal/non-limited decks.
+**Query:** optional `**search**` — when omitted/blank, returns the **20 most-recent** public, legal, non-limited decks; when present, name-matches deck titles, owner usernames, characters (slots 1–4 + reserve), or location across **all** public/legal/non-limited decks.
 
 **Response 200:** v1 envelope; `**data`** = array of enriched deck list items.
 

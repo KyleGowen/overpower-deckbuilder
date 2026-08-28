@@ -219,6 +219,9 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   catalog `mission_set`), and `threat.png` + threat on the right. Max-stat bar follows on `full` tiles. A **footer** row
   shows the updated date (left) and optional legality badge lower-right (**Limited** or **Not Legal**
   only; legal decks show date only).
+- **Community search** uses the standard search input and matches deck titles, owner usernames,
+  character names, and location names with the same query. Its accent focus ring surrounds the
+  outer search pill, keeping the icon and text aligned in one control.
 - **Foil laminate (per screen):** The prismatic `FoilCard` overlay is controlled by `showFoilEffect`
   on `CardImage` / `CardTile` / `CardDetailPanel` (default `true`). Base cards that merely have a
   foil variant show a silver ✦ badge (`.card-tile__foil-badge`) instead of the laminate.

@@ -84,17 +84,23 @@
   color: var(--color-accent-bright);
 }
 
-/* Community-tab search (character/location name) — pill input matching DBV search. */
+/* Community-tab search — pill input matching DBV search. */
 .dsel__community-search {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: 0 var(--space-3);
-  min-width: 240px;
-  flex: 1 1 240px;
+  min-width: 360px;
+  flex: 1 1 460px;
   background: var(--color-bg-input, var(--color-bg-panel));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
+  transition: border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.dsel__community-search:focus-within {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 .dsel__community-search svg {
   color: var(--color-text-muted);
@@ -110,6 +116,10 @@
   width: 100%;
   outline: none;
   font-size: var(--font-size-sm);
+}
+.dsel__community-search input:focus {
+  border-color: transparent;
+  box-shadow: none;
 }
 .dsel__search {
   width: 220px;

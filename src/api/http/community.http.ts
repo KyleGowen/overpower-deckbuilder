@@ -75,7 +75,7 @@ export function registerCommunityV1HttpRoutes(router: Router, deps: CommunityV1H
     }
   });
 
-  // Community feed (?search= filters by character/location name). Guest-viewable.
+  // Community feed (?search= filters by deck, owner, character, or location name). Guest-viewable.
   router.get('/community/decks', deps.optionalAuth, async (req, res) => {
     try {
       const viewerId = req.user?.id ?? null;
