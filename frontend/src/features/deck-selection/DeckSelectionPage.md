@@ -9,7 +9,8 @@ per-deck actions. Titled "My Decks" (or "Guest Decks").
   `GET /api/v1/users/:userId/public-decks` via `fetchPublicDecksForUser`, hides
   create/import/edit/delete and the search bar, renders tiles via `CommunityDeckGrid`
   (tiles open `?readonly=true`, show favorite hearts + clickable owner name), and shows a
-  friendly empty state when the user has no public decks.
+  friendly empty state when the user has no public decks. Unlisted decks never appear in this
+  view, even though their direct deck URL remains readable.
 
 ## Mobile tabs (owner mode only)
 On `.layout-mobile`, four swipeable pill tabs — **My Decks / Favorites / Community /

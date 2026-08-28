@@ -259,8 +259,9 @@ OverPower stat colors (also exposed as `.stat-energy` etc. utility classes):
 - `SlideOutPanel` is the standard right-hand drawer for details and forms (card detail,
   create deck, deck actions, add cards). It uses `--color-bg-panel`, `--shadow-pop`, a
   scrim at `--z-drawer`, focus trapping, `Esc` to close, and slides in with `--ease-out`.
-- The New Deck form presents private/public visibility as a compact stacked radio group with
-  readable labels and supporting text; private is selected by default and persisted with the deck.
+- The New Deck form presents unlisted/public Community-listing choices as a compact stacked radio
+  group with readable supporting text; unlisted is selected by default, remains link-readable, and
+  is persisted with the deck.
 - **Help & feedback:** the profile menu places a question-mark action after account settings and
   before the divider above Log Out / Exit Guest. It closes the profile surface before opening a
   compact, top-right desktop inspector or mobile bottom sheet. Bug and feature/change rows use

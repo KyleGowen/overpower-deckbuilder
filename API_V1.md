@@ -26,7 +26,7 @@ Versioned JSON API for Excelsior. **Legacy** routes remain documented in [API_DO
 | `GET /api/v1/dbv/*` | ✓ (optional) | ✓ (optional) | Same as catalog |
 | `GET /api/v1/recent-updates` | ✓ (optional) | ✓ (optional) | Same as catalog |
 | `GET /api/v1/config/app` | — | — | Open — no auth required |
-| `GET /api/v1/decks/:id` (+ `/full`) | ✓ (optional) | ✓ (optional) | Public decks readable without login; private→404 |
+| `GET /api/v1/decks/:id` (+ `/full`) | ✓ (optional) | ✓ (optional) | Any persistent deck readable by direct URL; guest-session decks remain session-only |
 | `GET /api/v1/decks` (list), `/stats`, `/community`, `/tournament` | ✓ | ✓ | Auth required |
 | `POST/PUT/DELETE /api/v1/decks*` | ✓ | ✓ | Owner only; GUEST→403 |
 | `GET /api/v1/community/decks` | ✓ (optional) | ✓ (optional) | Public read; guests allowed (`isFavorited:false`) |
@@ -731,7 +731,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is backed by the internal **`community_decks`** user account (`communityDecksUserId` = `00000000-0000-0000-0000-000000000002`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Private or not-legal WIP decks remain visible to the owner via `GET /api/v1/decks`. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-community-deck/SKILL.md` for importing decks.
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **community pool**. The pool is backed by the internal **`community_decks`** user account (`communityDecksUserId` = `00000000-0000-0000-0000-000000000002`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Unlisted or not-legal WIP decks are excluded from this rail but remain readable by direct URL. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-community-deck/SKILL.md` for importing decks.
 
 **Response 500:** v1 envelope — `errors` with code `**COMMUNITY_DECKS_ERROR**`.
 
@@ -743,7 +743,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Request model:** none.
 
-**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **tournament pool**. The pool is backed by the internal **`tournament_decks`** user account (`tournamentDecksUserId` = `00000000-0000-0000-0000-000000000003`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Private or not-legal WIP decks remain visible to the owner via `GET /api/v1/decks`. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-tournament-deck/SKILL.md` for importing decks.
+**Response 200:** v1 envelope; `**data**` is the deck-list array (same tile shape as `GET /api/v1/decks`) for the **tournament pool**. The pool is backed by the internal **`tournament_decks`** user account (`tournamentDecksUserId` = `00000000-0000-0000-0000-000000000003`, also surfaced in `GET /api/v1/config/app`), sorted by `updated_at` descending. Only decks with **`is_private = false`** and **`is_valid = true`** are returned (Limited decks are included when legal). Unlisted or not-legal WIP decks are excluded from this rail but remain readable by direct URL. See [docs/current/FRONTEND_V2.md](docs/current/FRONTEND_V2.md) and `.cursor/skills/add-tournament-deck/SKILL.md` for importing decks.
 
 **Response 500:** v1 envelope — `errors` with code `**TOURNAMENT_DECKS_ERROR**`.
 
@@ -771,7 +771,7 @@ Hand-maintained news cards for the Home screen (v2 SPA). Rows live in the `recen
 
 **Response 400:** v1 envelope — validation (`VALIDATION_ERROR` / field hints) or `**Maximum 4 characters allowed per deck`** in `errors`.
 
-The create request also accepts `is_private` (boolean): `true` keeps the deck owner-only, while `false` makes it public. When omitted, the database default remains private.
+The create request also accepts `is_private` (boolean): `true` makes the deck **unlisted** (excluded from Community, public profiles, and favorites), while `false` makes it public. Either persistent-deck setting is readable by direct URL. When omitted, the database default remains unlisted.
 
 **Response 500:** v1 envelope — `errors` with code `**DECK_CREATE_ERROR`**.
 
@@ -811,7 +811,7 @@ The create request also accepts `is_private` (boolean): `true` keeps the deck ow
 
 ### `GET /api/v1/decks/:id`
 
-**Auth:** Optional **session cookie** or Bearer JWT (`optionalOwnedAuth`). Unauthenticated requests succeed only when `**is_private**` is `false`; private decks return **404** `DECK_NOT_FOUND` (no existence leak). Owners always see their own decks.
+**Auth:** Optional **session cookie** or Bearer JWT (`optionalOwnedAuth`). Any persistent deck can be fetched by its direct URL, whether `**is_private**` is `true` or `false`. This makes `is_private` an **unlisted/discovery** setting, not an access-control setting. Guest-session decks remain available only through their guest session endpoints.
 
 **Request model:** none (path param `**id`** = deck UUID).
 
@@ -854,7 +854,7 @@ The create request also accepts `is_private` (boolean): `true` keeps the deck ow
 }
 ```
 
-Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid` (server-owned — recomputed/persisted on every card mutation, create, import, and sample-deck copy; read-only for clients), `is_private` (boolean — deck visibility; `true` = private/owner-only, `false` = public; defaults `true`), `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
+Metadata fields: `id`, `name`, `description`, `created` (ISO string), `lastModified` (ISO string), `cardCount`, `threat`, `is_valid` (server-owned — recomputed/persisted on every card mutation, create, import, and sample-deck copy; read-only for clients), `is_private` (boolean — deck listing; `true` = unlisted from Community, public profiles, and favorites, while still link-readable; `false` = public; defaults `true`), `userId`, `uiPreferences` (object or null — see [ui-preferences](#get-apiv1decksidui-preferences)), `isOwner`, `is_limited`, `reserve_character` (UUID or null), `display_mission_card_id` (UUID or null), `background_image_path`.
 
 Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (catalog card id), `quantity`, optional `displayOrder` (stable zero-based deck-editor/preview order), and `exclude_from_draw`.
 
@@ -868,7 +868,7 @@ Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (ca
 
 ### `GET /api/v1/decks/:id/full`
 
-**Auth:** Same optional auth as `GET /api/v1/decks/:id` (public decks readable without login).
+**Auth:** Same optional auth as `GET /api/v1/decks/:id` (all persistent decks readable by direct URL).
 
 **Request model:** none.
 
@@ -884,7 +884,7 @@ Card entry fields: `id` (deck-card row id), `type` (card category), `cardId` (ca
 
 **Rate limiting / read-only:** Same pattern as `**POST /api/v1/decks`** (**429** `RATE_LIMIT_EXCEEDED`, **403** `READ_ONLY_MODE`).
 
-**Request model:** partial JSON (same fields as legacy `**PUT /api/decks/:id`**): optional `**name`**, `**description**`, `**is_limited**`, `**is_private**` (boolean — flip deck visibility public/private; owner-only), `**reserve_character**`, `**display_mission_card_id**`, `**background_image_path**` (non-empty paths validated via `**DeckBackgroundService.validateBackgroundPath**`). Validated in `[UpdateDeckRequestBody.ts](src/api/http/models/decks/UpdateDeckRequestBody.ts)`. **`is_valid` is server-owned and ignored on this route** — it is recomputed and persisted from the deck's cards on every card mutation, create, import, and sample-deck copy; clients cannot set it.
+**Request model:** partial JSON (same fields as legacy `**PUT /api/decks/:id`**): optional `**name`**, `**description**`, `**is_limited**`, `**is_private**` (boolean — toggle Community/public-profile listing; `true` means unlisted and `false` means public; owner-only), `**reserve_character**`, `**display_mission_card_id**`, `**background_image_path**` (non-empty paths validated via `**DeckBackgroundService.validateBackgroundPath**`). Validated in `[UpdateDeckRequestBody.ts](src/api/http/models/decks/UpdateDeckRequestBody.ts)`. **`is_valid` is server-owned and ignored on this route** — it is recomputed and persisted from the deck's cards on every card mutation, create, import, and sample-deck copy; clients cannot set it.
 
 **Response 200:** v1 envelope; `**data`** = `{ "metadata", "cards": [] }` (updated metadata, empty cards array on success path).
 

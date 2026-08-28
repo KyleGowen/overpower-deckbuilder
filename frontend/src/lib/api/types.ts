@@ -143,7 +143,7 @@ export interface DeckMetadata {
   cardCount: number;
   threat?: number;
   is_valid?: boolean;
-  /** Deck visibility. true = private (owner only), false = public. */
+  /** Deck listing. true = unlisted, false = public; persistent deck links are always readable. */
   is_private?: boolean;
   userId: string;
   isOwner: boolean;

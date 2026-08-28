@@ -13,20 +13,8 @@ function deck(overrides: Partial<Deck> = {}): Deck {
 }
 
 describe('canViewDeck', () => {
-  it('allows anyone to view a public deck', () => {
-    expect(canViewDeck(deck({ is_private: false }), null)).toBe(true);
-    expect(canViewDeck(deck({ is_private: false }), 'stranger')).toBe(true);
-  });
-
-  it('allows only the owner to view a private deck', () => {
-    expect(canViewDeck(deck({ is_private: true }), null)).toBe(false);
-    expect(canViewDeck(deck({ is_private: true }), 'stranger')).toBe(false);
-    expect(canViewDeck(deck({ is_private: true }), 'owner-1')).toBe(true);
-  });
-
-  it('treats missing is_private as private', () => {
-    expect(canViewDeck(deck(), 'stranger')).toBe(false);
-    expect(canViewDeck(deck(), 'owner-1')).toBe(true);
+  it('allows anyone with a direct URL to view persistent decks', () => {
+    expect(canViewDeck()).toBe(true);
   });
 });
 
@@ -45,7 +33,7 @@ describe('DeckDetailService visibility', () => {
     cards: [],
   });
 
-  it('getDeckFullDetail hides private decks from strangers', async () => {
+  it('getDeckFullDetail returns unlisted private decks for unsigned viewers', async () => {
     const repo = {
       getDeckById: jest.fn(),
       getDeckSummaryWithAllCards: jest.fn().mockResolvedValue(privateDeck),
@@ -54,7 +42,9 @@ describe('DeckDetailService visibility', () => {
       deleteDeck: jest.fn(),
     };
     const service = new DeckDetailService(repo);
-    await expect(service.getDeckFullDetail('d2', 'stranger')).resolves.toBeNull();
+    const detail = await service.getDeckFullDetail('d2', '');
+    expect(detail?.metadata.isOwner).toBe(false);
+    expect(detail?.metadata.name).toBe('Private');
   });
 
   it('getDeckFullDetail returns public decks for unsigned viewers', async () => {

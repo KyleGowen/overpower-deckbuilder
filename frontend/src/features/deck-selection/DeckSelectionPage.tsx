@@ -601,8 +601,8 @@ export default function DeckSelectionPage() {
                     onChange={() => setNewDeckPrivate(true)}
                   />
                   <span>
-                    <strong>Private</strong>
-                    <small>Only you can view this deck.</small>
+                    <strong>Unlisted</strong>
+                    <small>Hidden from Community. Anyone with its link can view it.</small>
                   </span>
                 </label>
                 <label className={`dsel__visibility-option${!newDeckPrivate ? ' is-selected' : ''}`}>
@@ -615,7 +615,7 @@ export default function DeckSelectionPage() {
                   />
                   <span>
                     <strong>Public</strong>
-                    <small>Visible in Community when legal.</small>
+                    <small>Eligible for Community when legal.</small>
                   </span>
                 </label>
               </div>

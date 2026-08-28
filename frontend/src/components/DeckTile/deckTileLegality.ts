@@ -53,11 +53,11 @@ export interface VisibilityBadgeInfo {
   variant: VisibilityBadgeVariant;
 }
 
-/** Public/Private chip (independent of legality). Defaults to private when unknown. */
+/** Public/Unlisted chip (independent of legality). Defaults to unlisted when unknown. */
 export function deckTileVisibilityBadge(
   meta: Pick<DeckMetadata, 'is_private'>,
 ): VisibilityBadgeInfo {
   return (meta.is_private ?? true)
-    ? { label: 'Private', variant: 'private' }
+    ? { label: 'Unlisted', variant: 'private' }
     : { label: 'Public', variant: 'public' };
 }

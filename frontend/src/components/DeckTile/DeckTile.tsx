@@ -37,7 +37,7 @@ interface DeckTileProps {
   rankLabel?: string;
   onOpen?: () => void;
   onMenu?: () => void;
-  /** Show the Public/Private chip (display-only). Use on the owner's own decks. */
+  /** Show the Public/Unlisted chip (display-only). Use on the owner's own decks. */
   showVisibility?: boolean;
   /** When provided, renders an upper-right favorite heart (for decks not owned by the viewer). */
   onToggleFavorite?: () => void;

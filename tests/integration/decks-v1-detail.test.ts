@@ -10,7 +10,7 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
     await initializeTestServer();
   });
 
-  it('returns 404 without session for GET :id on a private deck', async () => {
+  it('returns 200 without session for GET :id on an unlisted private deck', async () => {
     const login = await request(app).post('/api/auth/login').send({ username: 'kyle', password: 'test' });
     expect(login.status).toBe(200);
     const cookie = login.headers['set-cookie'][0].split(';')[0];
@@ -24,9 +24,19 @@ describe('GET/PUT/DELETE /api/v1/decks/:id and /full', () => {
     const id = create.body.data.id as string;
     integrationTestUtils.trackTestDeck(id);
 
-    const res = await request(app).get(`/api/v1/decks/${id}`).expect(404);
-    expect(res.body.errors?.[0]?.code).toBe('DECK_NOT_FOUND');
-    expect(res.body.data).toBeNull();
+    const res = await request(app).get(`/api/v1/decks/${id}`).expect(200);
+    expect(res.body.errors).toEqual([]);
+    expect(res.body.data.metadata.id).toBe(id);
+    expect(res.body.data.metadata.is_private).toBe(true);
+    expect(res.body.data.metadata.isOwner).toBe(false);
+
+    // A direct URL may reveal an unlisted deck, but the owner's Deck Selection
+    // page must remain a public-only listing.
+    const profile = await request(app)
+      .get(`/api/v1/users/${res.body.data.metadata.userId}/public-decks`)
+      .expect(200);
+    const profileDeckIds = profile.body.data.map((deck: { metadata: { id: string } }) => deck.metadata.id);
+    expect(profileDeckIds).not.toContain(id);
 
     await request(app).delete(`/api/v1/decks/${id}`).set('Cookie', cookie).expect(200);
     integrationTestUtils.untrackTestDeck(id);

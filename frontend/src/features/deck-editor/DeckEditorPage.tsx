@@ -1150,18 +1150,18 @@ export default function DeckEditorPage() {
                     disabled={privacyBusy}
                     title={
                       (deck.metadata.is_private ?? true)
-                        ? 'Private — only you can see this deck. Click to make it public.'
-                        : 'Public — visible in Community. Click to make it private.'
+                        ? 'Unlisted — hidden from Community, but anyone with this link can view it. Click to make it public.'
+                        : 'Public — eligible for Community when legal. Click to make it unlisted.'
                     }
                     aria-pressed={!(deck.metadata.is_private ?? true)}
                   >
-                    {(deck.metadata.is_private ?? true) ? 'Private' : 'Public'}
+                    {(deck.metadata.is_private ?? true) ? 'Unlisted' : 'Public'}
                   </button>
                 ) : (
                   <span
                     className={`badge badge-visibility--${(deck.metadata.is_private ?? true) ? 'private' : 'public'}`}
                   >
-                    {(deck.metadata.is_private ?? true) ? 'Private' : 'Public'}
+                    {(deck.metadata.is_private ?? true) ? 'Unlisted' : 'Public'}
                   </span>
                 )}
                 {isMobile ? <DeckThreatStat totalThreat={totalThreat} /> : null}

@@ -12,13 +12,15 @@ export interface DeckDetailRepository {
 export type DeckDetailView = ReturnType<typeof transformDeckDetail>;
 export type DeckMetadataUpdateView = ReturnType<typeof transformDeckAfterMetadataUpdate>;
 
-/** Public decks are readable by anyone; private decks only by the owner. */
-export function canViewDeck(deck: Deck, viewerUserId: string | null | undefined): boolean {
-  const isPrivate = deck.is_private ?? true;
-  if (!isPrivate) {
-    return true;
-  }
-  return Boolean(viewerUserId) && deck.user_id === viewerUserId;
+/**
+ * Persistent decks are link-readable regardless of their listing choice.
+ *
+ * `is_private` controls whether a deck appears in discovery surfaces (Community,
+ * public profiles, and favorites), not whether its direct URL can be opened.
+ * Guest-session decks remain protected by their separate, session-scoped routes.
+ */
+export function canViewDeck(): boolean {
+  return true;
 }
 
 export class DeckDetailService {
@@ -26,7 +28,7 @@ export class DeckDetailService {
 
   async getDeckDetail(deckId: string, viewerUserId: string): Promise<DeckDetailView | null> {
     const deck = await this.deckRepository.getDeckById(deckId);
-    if (!deck || !canViewDeck(deck, viewerUserId)) {
+    if (!deck || !canViewDeck()) {
       return null;
     }
     return transformDeckDetail(deck, viewerUserId);
@@ -34,7 +36,7 @@ export class DeckDetailService {
 
   async getDeckFullDetail(deckId: string, viewerUserId: string): Promise<DeckDetailView | null> {
     const deck = await this.deckRepository.getDeckSummaryWithAllCards(deckId);
-    if (!deck || !canViewDeck(deck, viewerUserId)) {
+    if (!deck || !canViewDeck()) {
       return null;
     }
     return transformDeckDetail(deck, viewerUserId);
