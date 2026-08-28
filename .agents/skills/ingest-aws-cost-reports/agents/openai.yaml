@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ingest AWS Cost Reports"
+  short_description: "Track Excelsior AWS cost report rows"
+  default_prompt: "Use $ingest-aws-cost-reports to process new Excelsior AWS cost report emails."

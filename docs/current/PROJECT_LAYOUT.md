@@ -7,6 +7,7 @@ This document provides a comprehensive overview of the Excelsior Deckbuilder pro
 ```
 /Users/kyle/cursored/
 ├── 📁 .agentos/                    # Compact global AgentOS inheritance cache + provenance
+├── 📁 business-operations/         # Append-only business metrics and operational statistics
 ├── 📄 README.md                    # Main project documentation
 ├── 📄 STYLE_GUIDE_V2.md            # v2 React SPA visual source of truth
 ├── 📁 frontend/                    # v2 React SPA (production UI)

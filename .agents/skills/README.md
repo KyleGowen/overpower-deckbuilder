@@ -13,6 +13,7 @@ Repo-local Codex skills live here. They are the project source of truth for recu
 | `fix-trivy` | Trivy CI failure, dependency scanner failure | Active | Existing Codex skill |
 | `orange-king-price` | The Orange King, theOrangeKing, Orange King, OverPower retail price | Active | Repo-local Shopify price scraper |
 | `generate-card-checklist` | set checklist, collection checklist, priced personal checklist | Active | Repo-local standalone checklist generator |
+| `ingest-aws-cost-reports` | AWS cost email, Excelsior AWS cost backfill | Active guarded workflow | Gmail PDF ingestion and business-operations ledger |
 
 Skipped by choice:
 
