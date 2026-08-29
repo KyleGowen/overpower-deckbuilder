@@ -96,7 +96,7 @@ export async function fetchAppConfig(): Promise<AppConfig> {
 
 /* ---- Google sign-in (Firebase) ---- */
 
-interface FirebaseClientConfig {
+export interface FirebaseClientConfig {
   apiKey: string;
   authDomain: string;
   projectId: string;

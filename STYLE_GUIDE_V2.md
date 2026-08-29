@@ -117,6 +117,9 @@ Defined in [`frontend/src/styles/global.css`](frontend/src/styles/global.css).
 - **DBV detail slide-out actions** (`.db__detail-actions .btn`): same accent-outline pill family for Add to Deck / Collection under `CardDetailPanel` on `/data`.
 - Disabled buttons drop to ~50% opacity and `cursor: not-allowed`; loading buttons show
   text like `Saving...` / `Creating...` and are disabled.
+- Login authentication failures use the existing danger panel. Recoverable Google popup
+  failures add one underlined inline action, **Continue with Google in this window**, which
+  keeps the recovery path inside the alert instead of adding another persistent auth button.
 - Inputs/selects/textareas use `--color-bg-input`, `--color-border`, `--radius-md`, and a
   cyan focus ring (`--color-border-accent`).
 

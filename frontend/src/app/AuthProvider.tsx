@@ -7,7 +7,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useState,
   type ReactNode,
 } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,9 +20,10 @@ import {
   signUp as apiSignUp,
   loginAsGuest as apiLoginAsGuest,
   logout as apiLogout,
-  fetchFirebaseConfig,
   completeGoogleSignIn,
 } from '../lib/api/auth';
+import { preloadGoogleAuthClient } from '../lib/auth/googleAuthClient';
+import { describeGoogleSignInError } from '../lib/auth/googleSignInErrors';
 import type { AppUser } from '../lib/api/types';
 
 interface AuthContextValue {
@@ -34,6 +37,10 @@ interface AuthContextValue {
   signUp: (username: string, email: string, password: string) => Promise<AppUser | null>;
   loginAsGuest: () => Promise<AppUser | null>;
   signInWithGoogle: () => Promise<AppUser | null>;
+  signInWithGoogleRedirect: () => Promise<void>;
+  isGoogleSignInReady: boolean;
+  googleRedirectError: string | null;
+  clearGoogleRedirectError: () => void;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -42,6 +49,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const [googleRedirectError, setGoogleRedirectError] = useState<string | null>(null);
 
   const userQuery = useQuery({
     queryKey: ['auth', 'me'],
@@ -53,6 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ['app-config'],
     queryFn: () => fetchAppConfig(),
     staleTime: 30 * 60 * 1000,
+  });
+
+  const googleAuthQuery = useQuery({
+    queryKey: ['auth', 'google-client'],
+    queryFn: preloadGoogleAuthClient,
+    staleTime: Infinity,
+    retry: false,
   });
 
   const user = userQuery.data ?? null;
@@ -89,20 +104,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [setUser]);
 
   const signInWithGoogle = useCallback(async () => {
-    const cfg = await fetchFirebaseConfig();
-    if (!cfg) throw new Error('Google sign-in is not configured.');
-    const [{ initializeApp, getApps }, { getAuth, GoogleAuthProvider, signInWithPopup }] =
-      await Promise.all([import('firebase/app'), import('firebase/auth')]);
-    const app = getApps().length ? getApps()[0] : initializeApp(cfg);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    const result = await signInWithPopup(auth, provider);
+    const googleAuth = googleAuthQuery.data;
+    if (!googleAuth) throw new Error('Google sign-in is still loading. Please try again.');
+    setGoogleRedirectError(null);
+    const result = await googleAuth.signInWithPopup();
     const idToken = await result.user.getIdToken();
     const u = await completeGoogleSignIn(idToken);
     setUser(u);
     return u;
-  }, [setUser]);
+  }, [googleAuthQuery.data, setUser]);
+
+  const signInWithGoogleRedirect = useCallback(async () => {
+    const googleAuth = googleAuthQuery.data;
+    if (!googleAuth) throw new Error('Google sign-in is still loading. Please try again.');
+    setGoogleRedirectError(null);
+    await googleAuth.signInWithRedirect();
+  }, [googleAuthQuery.data]);
+
+  const clearGoogleRedirectError = useCallback(() => setGoogleRedirectError(null), []);
+
+  useEffect(() => {
+    const googleAuth = googleAuthQuery.data;
+    if (!googleAuth) return;
+
+    let active = true;
+    void googleAuth
+      .getRedirectResult()
+      .then(async (result) => {
+        if (!result || !active) return;
+        const idToken = await result.user.getIdToken();
+        const u = await completeGoogleSignIn(idToken);
+        if (active) setUser(u);
+      })
+      .catch((error: unknown) => {
+        if (active) setGoogleRedirectError(describeGoogleSignInError(error).message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [googleAuthQuery.data, setUser]);
 
   const logout = useCallback(async () => {
     await apiLogout();
@@ -126,6 +167,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       loginAsGuest,
       signInWithGoogle,
+      signInWithGoogleRedirect,
+      isGoogleSignInReady: googleAuthQuery.isSuccess,
+      googleRedirectError,
+      clearGoogleRedirectError,
       logout,
       refresh,
     }),
@@ -138,6 +183,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       loginAsGuest,
       signInWithGoogle,
+      signInWithGoogleRedirect,
+      googleAuthQuery.isSuccess,
+      googleRedirectError,
+      clearGoogleRedirectError,
       logout,
       refresh,
     ],

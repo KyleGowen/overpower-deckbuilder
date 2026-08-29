@@ -34,9 +34,10 @@ with the enlarged Excelsior wordmark (`Logo height={210}`). Right: the auth card
 - **Sign up** (username, email, password) → `signUp`.
 - **Continue as Guest** → `loginAsGuest` (shared `guest` session; decks/collection are
   session/local only).
-- **Sign in with Google** → Firebase popup → `signInWithGoogle`.
-- Shows inline validation/error messages; buttons disable + show a busy label while
-  submitting.
+- **Sign in with Google** preloads Firebase, then opens the popup directly from the click
+  handler. Popup-blocked/closed and network failures show actionable, sanitized copy plus a
+  **Continue with Google in this window** redirect fallback.
+- Shows inline validation/error messages; buttons disable + show a busy label while submitting.
 
 ## After auth
 On success the user is routed into the app (`/home`). `ProtectedRoute` sends unauthenticated

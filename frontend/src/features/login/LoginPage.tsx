@@ -4,6 +4,7 @@ import { useAuth } from '../../app/AuthProvider';
 import { AppBackground } from '../../components/AppBackground';
 import { Logo } from '../../components/Logo';
 import { IconBuild, IconCollection, IconDatabase, IconEye, IconEyeOff, IconGoogle, IconProfile, IconLock } from '../../components/icons';
+import { describeGoogleSignInError } from '../../lib/auth/googleSignInErrors';
 import './LoginPage.css';
 
 const CALLOUTS = [
@@ -15,7 +16,17 @@ const CALLOUTS = [
 type Mode = 'login' | 'signup';
 
 export default function LoginPage() {
-  const { user, login, signUp, loginAsGuest, signInWithGoogle } = useAuth();
+  const {
+    user,
+    login,
+    signUp,
+    loginAsGuest,
+    signInWithGoogle,
+    signInWithGoogleRedirect,
+    isGoogleSignInReady,
+    googleRedirectError,
+    clearGoogleRedirectError,
+  } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<Mode>('login');
@@ -24,15 +35,24 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [offerGoogleRedirect, setOfferGoogleRedirect] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (user) navigate('/home', { replace: true });
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (!googleRedirectError) return;
+    setError(googleRedirectError);
+    setOfferGoogleRedirect(false);
+    clearGoogleRedirectError();
+  }, [googleRedirectError, clearGoogleRedirectError]);
+
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
     setError(null);
+    setOfferGoogleRedirect(false);
     try {
       await fn();
       navigate('/home', { replace: true });
@@ -51,6 +71,33 @@ export default function LoginPage() {
     } else {
       void run(() => signUp(username.trim(), email.trim(), password));
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    if (busy || !isGoogleSignInReady) return;
+    setBusy(true);
+    setError(null);
+    setOfferGoogleRedirect(false);
+    void signInWithGoogle()
+      .then(() => navigate('/home', { replace: true }))
+      .catch((signInError: unknown) => {
+        const info = describeGoogleSignInError(signInError);
+        setError(info.message);
+        setOfferGoogleRedirect(info.offerRedirect);
+      })
+      .finally(() => setBusy(false));
+  };
+
+  const handleGoogleRedirect = () => {
+    if (busy || !isGoogleSignInReady) return;
+    setBusy(true);
+    setError(null);
+    setOfferGoogleRedirect(false);
+    void signInWithGoogleRedirect()
+      .catch((signInError: unknown) => {
+        setError(describeGoogleSignInError(signInError).message);
+      })
+      .finally(() => setBusy(false));
   };
 
   return (
@@ -148,7 +195,21 @@ export default function LoginPage() {
             </div>
           </label>
 
-          {error ? <div className="login__error" role="alert">{error}</div> : null}
+          {error ? (
+            <div className="login__error" role="alert">
+              <span>{error}</span>
+              {offerGoogleRedirect ? (
+                <button
+                  type="button"
+                  className="login__error-action"
+                  onClick={handleGoogleRedirect}
+                  disabled={busy || !isGoogleSignInReady}
+                >
+                  Continue with Google in this window
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
           <button type="submit" className="btn btn-primary login__submit" disabled={busy}>
             {busy ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
@@ -160,8 +221,8 @@ export default function LoginPage() {
         <button
           type="button"
           className="btn btn-secondary login__google"
-          onClick={() => void run(() => signInWithGoogle())}
-          disabled={busy}
+          onClick={handleGoogleSignIn}
+          disabled={busy || !isGoogleSignInReady}
         >
           <IconGoogle /> Sign in with Google
         </button>
