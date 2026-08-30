@@ -27,26 +27,9 @@ COPY business-operations/metrics/aws-costs.csv ./business-operations/metrics/aws
 FROM node:20-alpine
 WORKDIR /app
 
-# Accept build arguments from build stage
-ARG GIT_COMMIT=unknown
-ARG GIT_SHORT_COMMIT=unknown
-ARG GIT_BRANCH=unknown
-ARG GIT_COMMIT_DATE=unknown
-ARG GIT_COMMIT_MESSAGE=unknown
-ARG GIT_COMMIT_AUTHOR=unknown
-ARG GIT_COMMIT_EMAIL=unknown
-ARG BUILD_TIMESTAMP=0
-
 ENV NODE_ENV=production \
     PORT=3000 \
-    FLYWAY_VERSION=9.22.3 \
-    GIT_COMMIT=${GIT_COMMIT} \
-    GIT_SHORT_COMMIT=${GIT_SHORT_COMMIT} \
-    GIT_BRANCH=${GIT_BRANCH} \
-    GIT_COMMIT_DATE=${GIT_COMMIT_DATE} \
-    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE} \
-    GIT_COMMIT_AUTHOR=${GIT_COMMIT_AUTHOR} \
-    GIT_COMMIT_EMAIL=${GIT_COMMIT_EMAIL}
+    FLYWAY_VERSION=9.22.3
 
 # Install runtime tools:
 # - bash (Flyway scripts may invoke bash)
@@ -77,6 +60,24 @@ COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/business-operations/metrics/aws-costs.csv ./business-operations/metrics/aws-costs.csv
 # Optional: copy flyway.conf if present (won't fail if missing)
 COPY flyway.conf /app/flyway.conf
+
+# Apply commit-specific metadata only after the reusable runtime layers.
+ARG GIT_COMMIT=unknown
+ARG GIT_SHORT_COMMIT=unknown
+ARG GIT_BRANCH=unknown
+ARG GIT_COMMIT_DATE=unknown
+ARG GIT_COMMIT_MESSAGE=unknown
+ARG GIT_COMMIT_AUTHOR=unknown
+ARG GIT_COMMIT_EMAIL=unknown
+ARG BUILD_TIMESTAMP=0
+
+ENV GIT_COMMIT=${GIT_COMMIT} \
+    GIT_SHORT_COMMIT=${GIT_SHORT_COMMIT} \
+    GIT_BRANCH=${GIT_BRANCH} \
+    GIT_COMMIT_DATE=${GIT_COMMIT_DATE} \
+    GIT_COMMIT_MESSAGE=${GIT_COMMIT_MESSAGE} \
+    GIT_COMMIT_AUTHOR=${GIT_COMMIT_AUTHOR} \
+    GIT_COMMIT_EMAIL=${GIT_COMMIT_EMAIL}
 
 # Build metadata at end so it does not invalidate layer cache
 RUN echo "Build timestamp: ${BUILD_TIMESTAMP}" > /tmp/build_info.txt
