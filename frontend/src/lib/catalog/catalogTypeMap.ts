@@ -11,7 +11,7 @@ import type {
   CollectionCardType,
   CatalogCard,
 } from '../api/types';
-import { compareSetThenSetNumber } from './catalogSetSort';
+import { compareSetThenSetNumber, parseSetNumber } from './catalogSetSort';
 import { isFoilCard } from './foilCatalog';
 
 export const ADD_CARDS_ANY_CHARACTER_SPECIALS_TAB = 'any-character-specials' as const;
@@ -298,6 +298,17 @@ export function compareDbvAllSetsCatalogCards(
 
   const nameCmp = compareAlphabetic(cardDisplayName(a), cardDisplayName(b));
   if (nameCmp !== 0) return nameCmp;
+
+  // Character alternates share a display name. Keep their default/earliest
+  // printing first by using the numeric collector number before the stable ID.
+  if (type === 'characters') {
+    const numberA = parseSetNumber(a);
+    const numberB = parseSetNumber(b);
+    if (numberA !== null && numberB !== null && numberA !== numberB) return numberA - numberB;
+    if (numberA !== null && numberB === null) return -1;
+    if (numberA === null && numberB !== null) return 1;
+  }
+
   return compareAlphabetic(a.id, b.id);
 }
 
@@ -319,8 +330,16 @@ export function compareDeckPowerCatalogCards(a: CatalogCard, b: CatalogCard): nu
   return cardDisplayName(a).localeCompare(cardDisplayName(b), undefined, { sensitivity: 'base' });
 }
 
-/** Card Database grid sort for a selected set; Power Cards always use type/value order. */
+/**
+ * Card Database grid sort for a selected set. Character printings retain the
+ * same name/collector grouping as All Sets so alternate art stays beside its
+ * default; Power Cards always use type/value order.
+ */
 export function compareDbvCatalogCards(a: CatalogCard, b: CatalogCard, type: CatalogType): number {
+  if (type === 'characters') {
+    return compareDbvAllSetsCatalogCards(a, b, type);
+  }
+
   if (type === 'power-cards') {
     return comparePowerCatalogCardTiebreakers(a, b);
   }

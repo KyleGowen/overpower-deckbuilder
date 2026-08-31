@@ -184,11 +184,14 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
 - Two-faced cards expose a compact circular flip control at the lower-right of the
   detail image. The control uses the elevated/input surface, strong border, standard
   pop shadow, and accent focus ring; flipping changes art only and never mutates deck state.
-- Unreleased Skybound alternate art (collectors 419–472) always renders the standard
-  card back. When that back represents a landscape card (Character, Location, or Event),
-  it is rotated 90° counter-clockwise inside the landscape frame; portrait types remain upright.
-  The protected source images are not public UI assets. All Skybound printing-production foil
-  images are also excluded; foil rows reuse their non-foil image and receive the existing sheen.
+- Released Skybound alternate art (collectors 419–472) renders its own non-foil source image
+  through the standard landscape character frame and progressive image pipeline. Collector 450
+  exposes the same compact flip control as collector 226 for its reverse face. Skybound
+  printing-production foil images remain excluded; foil rows reuse their non-foil image and
+  receive the existing sheen. Character tiles with the same alphabetic name use numeric collector
+  order so the default/earliest art appears before alternates. The Database foil marker, Has Foil
+  filter, and detail value are printing-specific: collector `N` is foil-capable only when its own
+  `NF` mapping exists, never because a different alternate printing has a foil.
 - Card tiles (`CardTile`) use a type-aware aspect frame (`catalogType` prop): portrait
   `5:7` by default; characters `380:280`; locations and events `236:151`. Tiles use
   `--radius-md` corners, subtle border, and a name row + set/rarity row beneath. The Database
@@ -209,7 +212,9 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
 - **Database per-type grids with All Sets selected** ignore set/collector number: linked
   character/location or mission-set alphabetic order applies to named categories, while Power
   and Universe value cards use OverPower type order then ascending value. Selecting a specific
-  set restores collector-number order. Database All and every Collection view retain checklist order.
+  set keeps Characters in that same name → numeric collector order so default and alternate art
+  stay adjacent; other tabs restore collector-number order. Database All and every Collection view
+  retain checklist order.
 - Missing art shows a neutral "No image" placeholder frame (no broken-image icon).
 - **Deck tiles (`DeckTile`)** use a feature-character art zone at landscape card ratio
   (`aspect-ratio: 380 / 280`): characters (and the location card when set) cycle on hover after a
@@ -475,6 +480,7 @@ News/announcement tiles on `/home` (rail) and `/home/updates` (full list). Share
 | Open tile (`.home__news-item--open`) | `flex-grow: 2.4` (horizontal expand on desktop rail) |
 | Thumbnail (`.home__news-thumb`) | `72×72px`, `--radius-md`, `object-position: center 22%` |
 | Skybound launch thumbnail (`.home__news-thumb-image--skybound-launch`) | Invincible #003 art centered near the upper action pose with a `1.78×` crop, keeping the printed yellow name rail, card frame, and rules text outside the thumbnail |
+| Skybound alternate-art reveal thumbnail (`.home__news-thumb-image--skybound-alt-art`) | Omni-Man #420 enlarged to `1.15×`, anchored at left center with matching `object-position` and `transform-origin` |
 | Type badge (`.home__news-tag`) | `10px` bold caps; default accent soft; `.home__news-tag--feature` uses `--color-info` |
 | Summary clamped (`.home__news-summary--clamped`) | `-webkit-line-clamp: 2` |
 | Summary expanded (`.home__news-summary--expanded`) | `-webkit-line-clamp: 6` |

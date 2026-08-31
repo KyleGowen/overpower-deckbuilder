@@ -21,7 +21,6 @@ from xml.etree import ElementTree as ET
 NS = {"a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 SET_CODE = "SKY"
 SET_NAME = "Skybound"
-CARD_BACK_PATH = "sky/card-back/overpowerback.png"
 WALKING_DEAD_MISSION_SET = "The Walking Dead: All Out War"
 
 # The supplier filenames for these two Teamwork cards contain stale use values.
@@ -222,7 +221,14 @@ def source_number(row: dict[str, Any]) -> int:
 
 
 def is_foil_source(row: dict[str, Any]) -> bool:
-    return bool(re.fullmatch(r"\d{3}F", clean(row.get("collector_number")), re.IGNORECASE))
+    return bool(
+        re.fullmatch(r"\d{3}F", clean(row.get("collector_number")), re.IGNORECASE)
+        or re.match(r"^\d{3}F_", clean(row.get("file")), re.IGNORECASE)
+    )
+
+
+def is_printing_foil_file(row: dict[str, Any]) -> bool:
+    return bool(re.match(r"^\d{3}F_", clean(row.get("file")), re.IGNORECASE))
 
 
 def rarity(row: dict[str, Any]) -> str | None:
@@ -298,9 +304,7 @@ def numeric_icons(row: dict[str, Any]) -> tuple[list[str], int | None]:
     return icons, value
 
 
-def public_image_path(table: str, set_number: str, display_name: str, hidden: bool) -> str:
-    if hidden:
-        return CARD_BACK_PATH
+def public_image_path(table: str, set_number: str, display_name: str) -> str:
     return f"sky/{TABLE_TO_DIR[table]}/{set_number.lower()}_{slugify(display_name)}.png"
 
 
@@ -319,21 +323,23 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
         raise ValueError(f"Collector coverage is not 001-472; missing={missing}")
 
     base_rows: list[dict[str, Any]] = []
-    reverse_226: dict[str, Any] | None = None
+    reverse_rows: dict[int, dict[str, Any]] = {}
     for number in range(1, 473):
         variants = grouped[number]
         table = variants[0]["_table"]
         if any(row["_table"] != table for row in variants):
             raise ValueError(f"Collector {number:03d} spans multiple tables")
         non_foil = [row for row in variants if not row["_foil"]]
+        base_art_rows = [row for row in non_foil if not is_printing_foil_file(row)]
+        if not base_art_rows:
+            raise ValueError(f"Collector {number:03d} has no non-foil source image")
         if table == "missions":
-            selected = next(row for row in non_foil if "_FRONT_" in clean(row["file"]).upper())
+            selected = next(row for row in base_art_rows if "_FRONT_" in clean(row["file"]).upper())
         elif number in {226, 450}:
-            selected = next(row for row in non_foil if "_FRONT_" in clean(row["file"]).upper())
-            if number == 226:
-                reverse_226 = next(row for row in non_foil if row is not selected)
+            selected = next(row for row in base_art_rows if "_FRONT_" in clean(row["file"]).upper())
+            reverse_rows[number] = next(row for row in base_art_rows if row is not selected)
         else:
-            selected = non_foil[0]
+            selected = base_art_rows[0]
         base_rows.append(selected)
 
     latest_character = ""
@@ -344,7 +350,6 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
     for row in base_rows:
         number = row["_number"]
         table = row["_table"]
-        hidden = 419 <= number <= 472
         set_number = f"{number:03d}"
         card: dict[str, Any] = {
             "collector_number": set_number,
@@ -353,7 +358,6 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
             "set": SET_CODE,
             "rarity": rarity(row),
             "is_foil": False,
-            "hidden_art": hidden,
             "source_file": clean(row["file"]),
         }
 
@@ -371,7 +375,7 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
                 description=f"{name} character from Skybound",
             )
             normalized_name = re.sub(r"[^a-z0-9]", "", name.lower())
-            if hidden:
+            if 419 <= number <= 472:
                 canonical = canonical_characters.get(normalized_name)
                 if canonical is None:
                     raise ValueError(
@@ -390,13 +394,13 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
                     card[field] = canonical[field]
             else:
                 canonical_characters.setdefault(normalized_name, card)
-            if number == 226:
-                assert reverse_226 is not None
-                reverse_name = smart_title(reverse_226.get("name"))
-                reverse_path = public_image_path(table, set_number, reverse_name, False)
+            if number in reverse_rows:
+                reverse_row = reverse_rows[number]
+                reverse_name = smart_title(reverse_row.get("name"))
+                reverse_path = public_image_path(table, set_number, reverse_name)
                 card["reverse_image_path"] = reverse_path
-                card["reverse_source_file"] = clean(reverse_226["file"])
-                assets.append({"source_file": clean(reverse_226["file"]), "target_path": reverse_path})
+                card["reverse_source_file"] = clean(reverse_row["file"])
+                assets.append({"source_file": clean(reverse_row["file"]), "target_path": reverse_path})
         elif table == "special_cards":
             if 228 <= number <= 233:
                 owner = "Walkers: Herd"
@@ -614,17 +618,16 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
                 one_per_deck=one_per_deck(row),
             )
 
-        card["image_path"] = public_image_path(table, set_number, card["name"], hidden)
+        card["image_path"] = public_image_path(table, set_number, card["name"])
         cards.append(card)
-        if not hidden:
-            assets.append({"source_file": card["source_file"], "target_path": card["image_path"]})
+        assets.append({"source_file": card["source_file"], "target_path": card["image_path"]})
 
     foil_rows = sorted(
         (row for row in rows if row["_foil"]),
         key=lambda row: row["_number"],
     )
-    if len(foil_rows) != 19:
-        raise ValueError(f"Expected 19 foil rows from the workbook, got {len(foil_rows)}")
+    if len(foil_rows) != 53:
+        raise ValueError(f"Expected 53 foil rows from the workbook, got {len(foil_rows)}")
 
     for foil_row in foil_rows:
         base_number = f"{foil_row['_number']:03d}"
@@ -653,10 +656,10 @@ def build_cards(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[
             counts[card["table"]] = counts.get(card["table"], 0) + 1
     if counts != EXPECTED_BASE_COUNTS:
         raise ValueError(f"Unexpected normalized counts: {counts}")
-    if len(cards) != 491:
-        raise ValueError(f"Expected 491 public DB records, got {len(cards)}")
-    if len(assets) != 419:
-        raise ValueError(f"Expected 419 public source assets, got {len(assets)}")
+    if len(cards) != 525:
+        raise ValueError(f"Expected 525 public DB records, got {len(cards)}")
+    if len(assets) != 474:
+        raise ValueError(f"Expected 474 public source assets, got {len(assets)}")
     if len({asset["target_path"] for asset in assets}) != len(assets):
         raise ValueError("Two Skybound source assets resolve to the same target path")
     return cards, assets
@@ -763,7 +766,7 @@ SET base_card_id = EXCLUDED.base_card_id,
 DECLARE
   total_rows INTEGER;
   base_numbers INTEGER;
-  hidden_rows INTEGER;
+  alternate_art_rows INTEGER;
 BEGIN
   SELECT COUNT(*) INTO total_rows FROM (
     SELECT set_number FROM characters WHERE set = 'SKY'
@@ -779,8 +782,8 @@ BEGIN
     UNION ALL SELECT set_number FROM training_cards WHERE set = 'SKY'
     UNION ALL SELECT set_number FROM basic_universe_cards WHERE set = 'SKY'
   ) sky;
-  IF total_rows <> 491 THEN
-    RAISE EXCEPTION 'Skybound migration expected 491 rows, found %', total_rows;
+  IF total_rows <> 525 THEN
+    RAISE EXCEPTION 'Skybound migration expected 525 rows, found %', total_rows;
   END IF;
 
   SELECT COUNT(DISTINCT set_number::INTEGER) INTO base_numbers FROM (
@@ -801,13 +804,14 @@ BEGIN
     RAISE EXCEPTION 'Skybound migration expected 472 base collector numbers, found %', base_numbers;
   END IF;
 
-  SELECT COUNT(*) INTO hidden_rows
+  SELECT COUNT(*) INTO alternate_art_rows
   FROM characters
   WHERE set = 'SKY'
     AND CASE WHEN set_number ~ '^[0-9]+$' THEN set_number::INTEGER END BETWEEN 419 AND 472
-    AND image_path = 'sky/card-back/overpowerback.png' AND is_foil = FALSE;
-  IF hidden_rows <> 54 THEN
-    RAISE EXCEPTION 'Skybound migration expected 54 back-only alternate-art rows, found %', hidden_rows;
+    AND image_path LIKE 'sky/characters/%'
+    AND is_foil = FALSE;
+  IF alternate_art_rows <> 54 THEN
+    RAISE EXCEPTION 'Skybound migration expected 54 released alternate-art rows, found %', alternate_art_rows;
   END IF;
 END $$;
 """)
@@ -821,12 +825,12 @@ def main() -> None:
     manifest = {
         "set": {"code": SET_CODE, "name": SET_NAME},
         "source_workbook": args.workbook.name,
-        "redacted_collectors": {"start": 419, "end": 472, "public_image_path": CARD_BACK_PATH},
+        "alternate_art_collectors": {"start": 419, "end": 472, "released": True},
         "counts": {
             "base_cards": 472,
-            "public_foil_cards": 19,
-            "database_rows": 491,
-            "public_source_assets": 419,
+            "public_foil_cards": 53,
+            "database_rows": 525,
+            "public_source_assets": 474,
             "by_table_base": EXPECTED_BASE_COUNTS,
         },
         "cards": cards,

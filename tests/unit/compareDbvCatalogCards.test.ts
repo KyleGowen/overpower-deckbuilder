@@ -7,7 +7,7 @@ function card(partial: Partial<CatalogCard> & { id: string }): CatalogCard {
 
 describe('compareDbvCatalogCards', () => {
   describe('default tabs (e.g. characters)', () => {
-    it('sorts by set then set_number before name', () => {
+    it('sorts characters alphabetically by name', () => {
       const unsorted: CatalogCard[] = [
         card({ id: 'c3', name: 'Charlie', set: 'ERB', set_number: '3' }),
         card({ id: 'c1', name: 'Alpha', set: 'ERB', set_number: '1' }),
@@ -17,7 +17,7 @@ describe('compareDbvCatalogCards', () => {
 
       const sorted = [...unsorted].sort((a, b) => compareDbvCatalogCards(a, b, 'characters'));
 
-      expect(sorted.map((c) => c.id)).toEqual(['c1', 'c4', 'c3', 'c2']);
+      expect(sorted.map((c) => c.id)).toEqual(['c1', 'c2', 'c3', 'c4']);
     });
   });
 

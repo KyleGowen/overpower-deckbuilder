@@ -12,7 +12,6 @@ import {
   resolveThumbUrl,
   placeholderImageUrl,
   reverseImagePathForImagePath,
-  shouldRotateSkyboundCardBack,
 } from '../../lib/images/cardImages';
 import {
   isFullResRevealed,
@@ -133,10 +132,7 @@ export function CardImage({
   const activeImagePath = showReverse && effectiveReverseImagePath
     ? effectiveReverseImagePath
     : imagePath;
-  const rotatedBackClass = shouldRotateSkyboundCardBack(activeImagePath, catalogType)
-    ? ` card-image--rotated-back card-image--rotated-back--${catalogType}`
-    : '';
-  const resolvedClassName = `${className}${rotatedBackClass}`.trim();
+  const resolvedClassName = className.trim();
 
   useEffect(() => {
     setShowReverse(false);

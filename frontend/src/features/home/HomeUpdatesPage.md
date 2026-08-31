@@ -5,6 +5,8 @@ Full paginated list of hand-maintained feature/update cards. Reachable only via 
 ## Data
 - Same source as Home: `GET /api/v1/recent-updates` via `useRecentUpdates()` (`['recent-updates']` query key).
 - Sorted by `updatedAt` descending (server-side).
+- The Skybound launch and alternate-art reveal remain separate historical entries; the reveal uses
+  collector `#420` Omni-Man and points users to the database's **Hide Alts** control.
 
 ## Layout
 - Vertical stacked accordion tiles (`RecentUpdatesList` with `layout="stacked"`).

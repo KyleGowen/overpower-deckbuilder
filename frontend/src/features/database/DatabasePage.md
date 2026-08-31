@@ -30,25 +30,26 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   **collapse** via left chevron (default expanded; collapsed state is a thin
   rule with left-aligned chevron-down; collapse preference persists across tab switches).
 - **Has Foil** toggle (`.dbv-filter-rail__foil-toggle`, trailing end of filter rail): when
-  checked, only cards with a foil variant per `foil_card_map` remain (base rows with a foil
-  counterpart or foil-only promos). Uses `matchesHasFoilFilter` with the complete logical-card
-  variant group after foil dedup. Persists across type tab switches; off restores the full
-  deduped catalog.
+  checked, only exact printings with a foil variant per `foil_card_map` remain (base rows with a
+  same-collector-number `F` counterpart or foil-only promos). Foil status never carries across
+  alternate printings of the same logical card. Persists across type tab switches; off restores
+  the full deduped catalog.
 - **Hide Alts** toggle (`.dbv-filter-rail__hide-alts-toggle`, beside Has Foil): on by
   default. When checked, each logical card is represented by its canonical main printing using
   `dedupeToDefaultCatalogCards`; turning it off restores alternate-art and cross-set printing
   rows. Search and Set filtering happen before canonical-printing selection so a selected set
-  keeps that set's main printing. Stat filters apply to that representative; Has Foil evaluates
-  every printing in the representative's hidden variant group, so enabling both toggles shows the
-  main printing for each foil-capable logical card without restoring alternate rows. The toggle
-  persists across type tab switches and does not affect **All**.
+  keeps that set's main printing. Stat and Has Foil filters apply to that exact representative;
+  a default printing without its own `F` collector does not inherit a hidden alternate's foil.
+  The toggle persists across type tab switches and does not affect **All**.
 - Per-type grid sorting depends on the Set dropdown:
-  - **All Sets:** ignores set and collector number. Characters and Locations sort by card name;
+  - **All Sets:** ignores set grouping. Characters sort by card name and then numeric collector
+    number so the default/earliest printing leads same-name alternate art; Locations sort by name;
     Specials and Advanced Universe by linked character; Aspects by linked location; Missions and
     Events by mission-set name; Power/Ally/Basic/Training/Teamwork by OverPower type order then
     ascending requirement/value. Alphabetical card name is the stable tiebreaker.
-  - **Specific set:** retains checklist order by **set_number**, then the existing tab tiebreakers,
-    except Power Cards, which always use OverPower type order then ascending value.
+  - **Specific set:** Characters retain the same card-name → numeric collector order as All Sets,
+    keeping default art and alternate printings together. Other tabs retain checklist order by
+    **set_number**, except Power Cards, which always use OverPower type order then ascending value.
   - **All** tab is intentionally unchanged: set → foil tier → set_number → name
     (`compareAllCatalogCards`). Collection sorting is also unaffected.
 
@@ -67,8 +68,11 @@ Browse, search, filter, and sort the full modern OverPower catalog.
   one card per row for all types. Images use `contain` (no crop).
   Tile art uses **progressive** thumb → full-res loading (`CardImage` `progressive` prop).
   Set line shows code + number when available.
-- A protected Skybound card back in a landscape frame is rotated 90° counter-clockwise while
-  portrait hidden cards retain the normal upright back.
+- Released Skybound alternate-art collectors 419–472 use their own landscape character images;
+  collector 450 exposes its reverse face through the standard card flip control.
+- Skybound character foil relationships follow all 53 `F`-marked source filenames. The filename
+  marker is authoritative when the workbook collector-number cell omits the suffix (including
+  alternate Angstrom Levy `#430F`); `#448` and `#450` have no foil source file.
 - **Foil dedup:** `fetchFoilCardMap` hides foil rows when the base card is in the same tab;
   foil-only rows remain. Base (or foil-only) tiles show a silver ✦ (`has foil` tooltip) when a
   foil variant exists per the map. Grid tiles suppress the prismatic laminate (`showFoilEffect={false}` on `CardTile`).

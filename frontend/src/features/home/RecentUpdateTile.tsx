@@ -14,6 +14,12 @@ export function RecentUpdateTile({ item, isOpen, onToggle }: RecentUpdateTilePro
   const typeLabel = formatUpdateTypeLabel(item.type);
   const typeClass = item.type.replace(/_/g, '-');
   const isSkyboundLaunch = item.id === 'a1000001-0000-4000-8000-000000000007';
+  const isSkyboundAltArtReveal = item.id === 'a1000001-0000-4000-8000-000000000009';
+  const thumbnailClassName = isSkyboundLaunch
+    ? 'home__news-thumb-image--skybound-launch'
+    : isSkyboundAltArtReveal
+      ? 'home__news-thumb-image--skybound-alt-art'
+      : undefined;
 
   return (
     <button
@@ -25,7 +31,7 @@ export function RecentUpdateTile({ item, isOpen, onToggle }: RecentUpdateTilePro
       <div className="home__news-thumb">
         {item.cardImageUrl ? (
           <img
-            className={isSkyboundLaunch ? 'home__news-thumb-image--skybound-launch' : undefined}
+            className={thumbnailClassName}
             src={resolveThumbUrl(item.cardImageUrl)}
             alt=""
             loading="lazy"

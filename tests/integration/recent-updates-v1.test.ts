@@ -21,7 +21,7 @@ describe('GET /api/v1/recent-updates', () => {
 
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(8);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(9);
 
     const titles = res.body.data.map((r: { title: string }) => r.title);
     expect(titles).toContain('The Community Deck Section');
@@ -29,6 +29,17 @@ describe('GET /api/v1/recent-updates', () => {
     expect(titles).toContain('The Columbus Regional Breakdown');
     expect(titles).toContain('The Niagara Regional Breakdown');
     expect(titles).toContain('Skybound is here!');
+    expect(titles).toContain('Skybound alternate art revealed!');
+
+    const skyboundRevealRow = res.body.data.find(
+      (r: { title: string }) => r.title === 'Skybound alternate art revealed!',
+    );
+    expect(skyboundRevealRow).toMatchObject({
+      type: 'new_cards',
+      cardImageUrl: 'sky/characters/420_omni_man.png',
+      description:
+        'The Skybound alternate-art character cards are officially revealed. Open Skybound Characters in the card database and turn off "Hide Alts" to browse every alternate printing, including the two-sided Walkers: Herd.',
+    });
 
     const niagaraRow = res.body.data.find(
       (r: { title: string }) => r.title === 'The Niagara Regional Breakdown',

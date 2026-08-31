@@ -25,6 +25,22 @@ describe('Database type tabs with All Sets selected', () => {
     },
   );
 
+  it('sorts same-name character printings by numeric collector number', () => {
+    const cards = [
+      card('allen-470', { name: 'Allen The Alien', set: 'SKY', set_number: '470' }),
+      card('allen-425', { name: 'Allen The Alien', set: 'SKY', set_number: '425' }),
+      card('allen-043', { name: 'Allen The Alien', set: 'SKY', set_number: '043' }),
+      card('allen-462', { name: 'Allen The Alien', set: 'SKY', set_number: '462' }),
+    ];
+
+    expect(sortedIds(cards, 'characters')).toEqual([
+      'allen-043',
+      'allen-425',
+      'allen-462',
+      'allen-470',
+    ]);
+  });
+
   it('sorts specials and advanced universe by linked character, then card name', () => {
     const specials = [
       card('z', { name: 'First', character: 'Zulu', set: 'ERB', set_number: '001' }),
@@ -75,11 +91,17 @@ describe('Database type tabs with All Sets selected', () => {
     expect(sortedIds(cards, type)).toEqual(['energy-low', 'energy-high', 'combat']);
   });
 
-  it('keeps selected-set sorting on collector number', () => {
-    const high = card('high', { name: 'Alpha', set: 'SKY', set_number: '200' });
-    const low = card('low', { name: 'Zulu', set: 'SKY', set_number: '001' });
-    expect([high, low].sort((a, b) => compareDbvCatalogCards(a, b, 'characters')).map((c) => c.id))
-      .toEqual(['low', 'high']);
+  it('keeps selected-set character alternates grouped by name, then collector number', () => {
+    const cards = [
+      card('zulu-001', { name: 'Zulu', set: 'SKY', set_number: '001' }),
+      card('allen-470', { name: 'Allen The Alien', set: 'SKY', set_number: '470' }),
+      card('allen-043', { name: 'Allen The Alien', set: 'SKY', set_number: '043' }),
+      card('allen-425', { name: 'Allen The Alien', set: 'SKY', set_number: '425' }),
+      card('allen-462', { name: 'Allen The Alien', set: 'SKY', set_number: '462' }),
+    ];
+
+    expect(cards.sort((a, b) => compareDbvCatalogCards(a, b, 'characters')).map((c) => c.id))
+      .toEqual(['allen-043', 'allen-425', 'allen-462', 'allen-470', 'zulu-001']);
   });
 
   it('sorts selected-set power cards by type then value instead of collector number', () => {

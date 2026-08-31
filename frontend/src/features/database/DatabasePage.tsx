@@ -4,10 +4,10 @@ import { useAuth } from '../../app/AuthProvider';
 import { fetchCatalog, fetchFoilCardMap, fetchSets } from '../../lib/api/catalog';
 import {
   buildFoilCardMapLookup,
+  cardHasFoilVersion,
   dedupeFoilCatalogCards,
   isFoilCard,
   matchesHasFoilFilter,
-  variantGroupHasFoilVersion,
 } from '../../lib/catalog/foilCatalog';
 import { fetchUserDecks, addCardToDeck } from '../../lib/api/decks';
 import {
@@ -186,8 +186,7 @@ export default function DatabasePage() {
     const catalogType = tab;
     const result = gridPrintingSelection.cards.filter((c) => {
       if (!cardMatchesDbvFilters(c, catalogType, dbvFilters.state)) return false;
-      const variantIds = gridPrintingSelection.variantIdsByRepresentative.get(c.id);
-      if (!matchesHasFoilFilter(c, foilLookup.baseToFoil, hasFoilFilter, variantIds)) return false;
+      if (!matchesHasFoilFilter(c, foilLookup.baseToFoil, hasFoilFilter)) return false;
       return true;
     });
     result.sort((a, b) =>
@@ -365,13 +364,7 @@ export default function DatabasePage() {
                   key={card.id}
                   card={card}
                   catalogType={tab}
-                  hasFoilVersion={variantGroupHasFoilVersion(
-                    card,
-                    foilLookup.baseToFoil,
-                    Array.isArray(gridPrintingSelection)
-                      ? undefined
-                      : gridPrintingSelection.variantIdsByRepresentative.get(card.id),
-                  )}
+                  hasFoilVersion={cardHasFoilVersion(card, foilLookup.baseToFoil)}
                   showFoilEffect={false}
                   onClick={() => selectCard(card, tab)}
                 />
@@ -387,13 +380,7 @@ export default function DatabasePage() {
         type={detailCatalogType}
         open={Boolean(selected)}
         onClose={closeCardDetail}
-        hasFoil={selected ? variantGroupHasFoilVersion(
-          selected,
-          foilLookup.baseToFoil,
-          Array.isArray(gridPrintingSelection)
-            ? undefined
-            : gridPrintingSelection.variantIdsByRepresentative.get(selected.id),
-        ) : undefined}
+        hasFoil={selected ? cardHasFoilVersion(selected, foilLookup.baseToFoil) : undefined}
         isFoil={selected ? isFoilCard(selected) : undefined}
         setDisplayName={selected ? resolveSetDisplayName(selected.set, setNameLookup) : undefined}
         printings={detailPrintingRows}

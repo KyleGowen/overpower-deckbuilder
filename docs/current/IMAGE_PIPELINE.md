@@ -43,7 +43,7 @@ src/resources/cards/images/
 │   ├── characters/, locations/, events/
 │   ├── specials/, power/, missions/, aspects/
 │   ├── advanced-universe/, teamwork/, ally/, training/, basic-universe/
-│   ├── card-back/                  ← public back used for unreleased alternate art
+│   ├── card-back/                  ← retained Skybound card-back source
 │   └── thumb/                      ← generated; mirrors all folders above
 └── tfacp/                          ← The Few and the Cursed - Promos
     ├── ally/                       ← portrait ally promos (e.g. White Demon Of Mazandaran)
@@ -105,9 +105,11 @@ After changing fit or padding behavior without changing dimensions, regenerate t
 
 Skybound `F`-suffixed workbook images are printing-production files and remain outside the
 public image tree. Foil database rows reuse the matching non-foil `image_path`; the established
-frontend sheen supplies the visual treatment. For protected collectors 419–472, both base and
-foil rows therefore point to `sky/card-back/overpowerback.png`; only that back and its generated
-thumbnail may be hosted until the art is explicitly released.
+frontend sheen supplies the visual treatment. Released alternate-art collectors 419–472 use
+their original non-foil sources under `sky/characters/`; collector 450 publishes both front and
+reverse faces. The source filename's `F` marker is authoritative even when the workbook's
+collector-number cell omits it; the complete source-derived character map has 53 foils, including
+alternate Angstrom Levy `#430F`. Collectors `#448` and `#450` have no foil source file.
 
 ---
 

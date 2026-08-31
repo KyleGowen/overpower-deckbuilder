@@ -7,6 +7,8 @@ Landing page after login. Sections, top to bottom:
    `GET /api/v1/recent-updates` (`useRecentUpdates`; rows in `recent_updates` table).
    Shows the **3 newest** tiles (`HOME_RECENT_UPDATES_LIMIT`). When more than 3 exist,
    a **View All** link in the section header navigates to [`/home/updates`](./HomeUpdatesPage.md).
+   The Skybound alternate-art reveal is a distinct `new_cards` announcement using collector
+   `#420` Omni-Man and directs users to turn off **Hide Alts** in Skybound Characters.
    The Niagara Regional announcement uses the default Sherlock Holmes character card thumbnail.
    Tiles use shared `RecentUpdateTile` / `RecentUpdatesList` (`layout="rail"`). The cards
    form a single-open accordion: every card is a button (`aria-expanded`). On desktop the

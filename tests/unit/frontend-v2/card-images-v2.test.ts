@@ -7,9 +7,7 @@ import {
   canProgressiveLoad,
   imagePathFromCard,
   imageElementMatchesUrl,
-  isSkyboundHiddenArtCard,
   reverseImagePathForImagePath,
-  shouldRotateSkyboundCardBack,
   normalizeRawImagePath,
   resolveImageUrl,
   resolveThumbUrl,
@@ -83,27 +81,15 @@ describe('location progressive load paths', () => {
   });
 });
 
-describe('Skybound alternate-art redaction', () => {
-  it('uses the card back for collector numbers 419 through 472, including suffixes', () => {
-    for (const setNumber of ['419', '450', '472', '472F']) {
-      const card = { id: setNumber, set: 'SKY', set_number: setNumber, image_path: 'secret.png' };
-      expect(isSkyboundHiddenArtCard(card)).toBe(true);
-      expect(imagePathFromCard(card)).toBe('sky/card-back/overpowerback.png');
-    }
-  });
-
-  it('does not redact adjacent or non-Skybound cards', () => {
-    expect(isSkyboundHiddenArtCard({ id: '418', set: 'SKY', set_number: '418' })).toBe(false);
-    expect(isSkyboundHiddenArtCard({ id: '419', set: 'ERB', set_number: '419' })).toBe(false);
-  });
-
-  it('rotates the protected back only for landscape card frames', () => {
-    const back = 'sky/card-back/overpowerback.png';
-    expect(shouldRotateSkyboundCardBack(back, 'characters')).toBe(true);
-    expect(shouldRotateSkyboundCardBack(back, 'locations')).toBe(true);
-    expect(shouldRotateSkyboundCardBack(back, 'events')).toBe(true);
-    expect(shouldRotateSkyboundCardBack(back, 'special-cards')).toBe(false);
-    expect(shouldRotateSkyboundCardBack('sky/characters/001_invincible.png', 'characters')).toBe(false);
+describe('Skybound alternate art', () => {
+  it('uses each catalog printing image without collector-number redaction', () => {
+    const card = {
+      id: '419',
+      set: 'SKY',
+      set_number: '419',
+      image_path: 'sky/characters/419_invincible.png',
+    };
+    expect(imagePathFromCard(card)).toBe('sky/characters/419_invincible.png');
   });
 });
 
@@ -111,6 +97,9 @@ describe('Skybound two-faced character art', () => {
   it('derives the Walkers reverse face when a surface only has the front image path', () => {
     expect(reverseImagePathForImagePath('sky/characters/226_walkers_herd.png')).toBe(
       'sky/characters/226_walkers.png',
+    );
+    expect(reverseImagePathForImagePath('sky/characters/450_walkers_herd.png')).toBe(
+      'sky/characters/450_walkers.png',
     );
     expect(reverseImagePathForImagePath('sky/characters/001_invincible.png')).toBeNull();
   });
@@ -277,19 +266,6 @@ describe('CardImage progressive CSS', () => {
     expect(detailSource).toContain('reverseImagePath={card.reverse_image_path');
   });
 
-  it('wires the landscape protected-back class to a counter-clockwise rotation', () => {
-    const imageSource = fs.readFileSync(
-      path.join(__dirname, '../../../frontend/src/components/CardImage/CardImage.tsx'),
-      'utf8',
-    );
-    const css = fs.readFileSync(
-      path.join(__dirname, '../../../frontend/src/components/CardImage/CardImage.css'),
-      'utf8',
-    );
-    expect(imageSource).toContain('card-image--rotated-back');
-    expect(css).toContain('.card-image--rotated-back .card-image__img');
-    expect(css).toContain('transform: rotate(-90deg)');
-  });
 });
 
 describe('contain painted size parity', () => {

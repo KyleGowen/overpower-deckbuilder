@@ -93,29 +93,6 @@
   visibility: hidden;
 }
 
-/* Protected portrait back shown for landscape cards: swap the image box dimensions,
-   then rotate counter-clockwise so the back remains undistorted and centered. */
-.card-image--rotated-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  container-type: size;
-}
-
-.card-image--rotated-back .card-image__media {
-  position: relative;
-  inset: auto;
-  flex: 0 0 auto;
-  width: 100cqh;
-  height: 100cqw;
-  transform: rotate(-90deg);
-  transform-origin: center;
-}
-
-.card-image--rotated-back .card-image__img {
-  object-fit: contain;
-}
-
 .card-image__flip {
   position: absolute;
   right: 0.45rem;

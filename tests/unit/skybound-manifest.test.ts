@@ -6,6 +6,8 @@ type SkyboundCard = {
   table: string;
   image_path: string;
   reverse_image_path?: string;
+  set_number_foil?: string;
+  base_collector_number?: string;
   is_foil: boolean;
   name?: string;
   character_name?: string;
@@ -36,19 +38,25 @@ describe('Skybound import manifest', () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(repoRoot, 'scripts/skybound/skybound-manifest.json'), 'utf8'),
   ) as SkyboundManifest;
+  const byNumber = new Map(manifest.cards.map((card) => [card.collector_number, card]));
 
   it('has complete base coverage and all workbook-declared foil rows', () => {
     expect(manifest.counts).toMatchObject({
       base_cards: 472,
-      public_foil_cards: 19,
-      database_rows: 491,
-      public_source_assets: 419,
+      public_foil_cards: 53,
+      database_rows: 525,
+      public_source_assets: 474,
     });
-    expect(manifest.cards).toHaveLength(491);
-    expect(manifest.assets).toHaveLength(419);
+    expect(manifest.cards).toHaveLength(525);
+    expect(manifest.assets).toHaveLength(474);
     const foilNumbers = [
-      '227F', '419F', '423F', '424F', '425F', '427F', '432F', '436F', '437F',
-      '438F', '442F', '446F', '452F', '456F', '461F', '465F', '466F', '467F', '471F',
+      '227F',
+      '419F', '420F', '421F', '422F', '423F', '424F', '425F', '426F', '427F',
+      '428F', '429F', '430F', '431F', '432F', '433F', '434F', '435F', '436F',
+      '437F', '438F', '439F', '440F', '441F', '442F', '443F', '444F', '445F',
+      '446F', '447F', '449F', '451F', '452F', '453F', '454F', '455F', '456F',
+      '457F', '458F', '459F', '460F', '461F', '462F', '463F', '464F', '465F',
+      '466F', '467F', '468F', '469F', '470F', '471F', '472F',
     ];
     expect(new Set(manifest.cards.map((card) => card.collector_number))).toEqual(
       new Set([...Array.from({ length: 472 }, (_, i) => String(i + 1).padStart(3, '0')), ...foilNumbers]),
@@ -62,6 +70,11 @@ describe('Skybound import manifest', () => {
     expect(byNumber.get('226')).toMatchObject({
       table: 'characters',
       reverse_image_path: 'sky/characters/226_walkers.png',
+    });
+    expect(byNumber.get('450')).toMatchObject({
+      table: 'characters',
+      image_path: 'sky/characters/450_walkers_herd.png',
+      reverse_image_path: 'sky/characters/450_walkers.png',
     });
     expect(byNumber.get('227F')).toMatchObject({
       table: 'characters',
@@ -125,28 +138,56 @@ describe('Skybound import manifest', () => {
     }
   });
 
-  it('publishes only the card back for 419-472 and never lists their source art', () => {
-    const hidden = manifest.cards.filter((card) => {
+  it('publishes every non-foil alternate-art source for 419-472', () => {
+    const alternateArt = manifest.cards.filter((card) => {
       const number = Number.parseInt(card.collector_number, 10);
       return number >= 419 && number <= 472;
     });
-    expect(hidden.filter((card) => !card.is_foil)).toHaveLength(54);
-    expect(new Set(hidden.map((card) => card.image_path))).toEqual(
-      new Set(['sky/card-back/overpowerback.png']),
+    expect(alternateArt.filter((card) => !card.is_foil)).toHaveLength(54);
+    expect(alternateArt.every((card) => card.image_path.startsWith('sky/characters/'))).toBe(true);
+    expect(manifest.assets.filter((asset) => /^(?:419|4[2-6]\d|47[0-2])(?:_|_FRONT_|_BACK_)/.test(asset.source_file))).toHaveLength(55);
+    expect(manifest.assets.some((asset) => /^\d{3}F_/i.test(asset.source_file))).toBe(false);
+  });
+
+  it('maps every released alternate-art printing through Flyway V334', () => {
+    const revealSql = fs.readFileSync(
+      path.join(repoRoot, 'migrations/V334__Reveal_skybound_alternate_art.sql'),
+      'utf8',
     );
-    expect(manifest.assets.some((asset) => /^(?:419|4[2-6]\d|47[0-2])F?_/.test(asset.source_file))).toBe(false);
+    const alternateArt = manifest.cards.filter((card) => {
+      const number = Number.parseInt(card.collector_number, 10);
+      return !card.is_foil && number >= 419 && number <= 472;
+    });
+
+    for (const card of alternateArt) {
+      expect(revealSql).toContain(`('${card.collector_number}', '${card.image_path}',`);
+    }
+    expect(revealSql).toContain("'sky/characters/450_walkers.png'");
+    expect(revealSql).toContain('Foil rows keep the existing application sheen');
   });
 
   it('reuses non-foil art for every foil row and publishes no foil printing files', () => {
     const byNumber = new Map(manifest.cards.map((card) => [card.collector_number, card]));
     const foils = manifest.cards.filter((card) => card.is_foil);
-    expect(foils).toHaveLength(19);
+    expect(foils).toHaveLength(53);
     for (const foil of foils) {
       const base = byNumber.get(foil.collector_number.replace(/F$/, ''));
       expect(base).toBeDefined();
       expect(foil.image_path).toBe(base?.image_path);
     }
     expect(manifest.assets.some((asset) => /^\d{3}F_/i.test(asset.source_file))).toBe(false);
+  });
+
+  it('recognizes filename-only foil markers from the original workbook', () => {
+    expect(byNumber.get('430')).toMatchObject({ set_number_foil: '430F' });
+    expect(byNumber.get('430F')).toMatchObject({
+      name: 'Angstrom Levy',
+      base_collector_number: '430',
+      is_foil: true,
+      image_path: 'sky/characters/430_angstrom_levy.png',
+    });
+    expect(byNumber.has('448F')).toBe(false);
+    expect(byNumber.has('450F')).toBe(false);
   });
 
   const verifiesLocalImageTree = fs.existsSync(localImageRoot) ? it : it.skip;

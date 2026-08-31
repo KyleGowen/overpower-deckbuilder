@@ -1,5 +1,8 @@
 import type { CatalogCard } from '../../frontend/src/lib/api/types';
-import { matchesHasFoilFilter } from '../../frontend/src/lib/catalog/foilCatalog';
+import {
+  cardHasFoilVersion,
+  matchesHasFoilFilter,
+} from '../../frontend/src/lib/catalog/foilCatalog';
 
 function card(overrides: Partial<CatalogCard> & { id: string }): CatalogCard {
   return { name: 'Test', set: 'ERB', ...overrides } as CatalogCard;
@@ -30,13 +33,13 @@ describe('matchesHasFoilFilter', () => {
     expect(matchesHasFoilFilter(foilOnly, baseToFoil, true)).toBe(true);
   });
 
-  it('passes a main printing when a hidden alternate printing has the foil counterpart', () => {
-    const main = card({ id: 'main-1', is_foil: false });
-    expect(matchesHasFoilFilter(main, baseToFoil, true, ['main-1', 'base-1'])).toBe(true);
-  });
+  it('does not inherit foil status from another printing in the same character group', () => {
+    const allenDefault = card({ id: 'allen-043', name: 'Allen The Alien', set: 'SKY', set_number: '043' });
+    const allenAlternate = card({ id: 'base-1', name: 'Allen The Alien', set: 'SKY', set_number: '425' });
 
-  it('rejects a variant group when none of its printings has a foil counterpart', () => {
-    const main = card({ id: 'main-1', is_foil: false });
-    expect(matchesHasFoilFilter(main, baseToFoil, true, ['main-1', 'alt-1'])).toBe(false);
+    expect(cardHasFoilVersion(allenDefault, baseToFoil)).toBe(false);
+    expect(cardHasFoilVersion(allenAlternate, baseToFoil)).toBe(true);
+    expect(matchesHasFoilFilter(allenDefault, baseToFoil, true)).toBe(false);
+    expect(matchesHasFoilFilter(allenAlternate, baseToFoil, true)).toBe(true);
   });
 });

@@ -14,12 +14,10 @@
  *    from a card id.
  */
 import type { CatalogCard, CatalogType } from '../api/types';
-import { isLandscapeCatalogType } from '../catalog/catalogTypeMap';
 
 const CARD_IMAGES_BASE = '/src/resources/cards/images';
 const PLACEHOLDER = `${CARD_IMAGES_BASE}/placeholder.webp`;
 const ASSET_MARKER = 'cards/images/';
-export const SKYBOUND_CARD_BACK_PATH = 'sky/card-back/overpowerback.png';
 
 let cdnBase = '';
 
@@ -134,45 +132,17 @@ function thumbify(raw: string): string {
 
 export function imagePathFromCard(card: Partial<CatalogCard> | null | undefined): string {
   if (!card) return '';
-  if (isSkyboundHiddenArtCard(card)) return SKYBOUND_CARD_BACK_PATH;
   return (card.image_path as string) || (card.image as string) || '';
-}
-
-/** Defense-in-depth for unreleased Skybound alternate art. */
-export function isSkyboundHiddenArtCard(
-  card: Partial<CatalogCard> | null | undefined,
-): boolean {
-  if (!card || String(card.set ?? '').trim().toUpperCase() !== 'SKY') return false;
-  const match = String(card.set_number ?? '').trim().match(/^(\d+)/);
-  if (!match) return false;
-  const collectorNumber = Number.parseInt(match[1], 10);
-  return collectorNumber >= 419 && collectorNumber <= 472;
-}
-
-/** True for the protected Skybound back asset regardless of path prefix or CDN base. */
-export function isSkyboundCardBackPath(path: string | null | undefined): boolean {
-  if (!path) return false;
-  const normalized = path.split(/[?#]/, 1)[0].replace(/\\/g, '/').replace(/^\/+/, '');
-  return normalized === SKYBOUND_CARD_BACK_PATH
-    || normalized.endsWith(`/${SKYBOUND_CARD_BACK_PATH}`);
-}
-
-/** Landscape card frames rotate the portrait protected-art back counter-clockwise. */
-export function shouldRotateSkyboundCardBack(
-  path: string | null | undefined,
-  catalogType?: CatalogType,
-): boolean {
-  return Boolean(catalogType && isLandscapeCatalogType(catalogType) && isSkyboundCardBackPath(path));
 }
 
 /** Known two-faced card fallback for surfaces that only carry an image path. */
 export function reverseImagePathForImagePath(
   imagePath: string | null | undefined,
 ): string | null {
-  if (!imagePath || !/(^|\/)sky\/characters\/226_walkers_herd\.png$/i.test(imagePath)) {
+  if (!imagePath || !/(^|\/)sky\/characters\/(226|450)_walkers_herd\.png$/i.test(imagePath)) {
     return null;
   }
-  return imagePath.replace(/226_walkers_herd\.png$/i, '226_walkers.png');
+  return imagePath.replace(/(226|450)_walkers_herd\.png$/i, '$1_walkers.png');
 }
 
 /** Full-resolution image URL (detail slide-out, deck card view, hero). */
