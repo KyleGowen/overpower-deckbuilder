@@ -192,6 +192,8 @@ describe('Collection API Endpoints Integration Tests', () => {
 
       expect(response.body.errors).toEqual([]);
       expect(response.body.data).toEqual([]);
+      expect(response.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+      expect(response.headers.vary).toContain('Cookie');
     });
 
     it('should return all cards in collection', async () => {
@@ -785,4 +787,3 @@ describe('Collection API Endpoints Integration Tests', () => {
     });
   });
 });
-

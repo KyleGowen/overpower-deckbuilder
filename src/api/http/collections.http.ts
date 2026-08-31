@@ -2,6 +2,7 @@ import type { RequestHandler, Router } from 'express';
 import type { CollectionService } from '../../services/collectionService';
 import type { CollectionMeV1DataDto } from '../dto/v1/CollectionMeV1DataDto';
 import { isValidCollectionCardType } from '../../validation/collectionCardType';
+import { setPrivateUserCacheHeaders } from './privateUserCache';
 import { sendV1Json, sendV1Success } from './v1Envelope';
 
 export interface CollectionsV1HttpDeps {
@@ -21,6 +22,7 @@ export function registerCollectionsV1HttpRoutes(router: Router, deps: Collection
       const userId = req.user!.id;
       const collectionId = await deps.collectionService.getOrCreateCollection(userId);
       const data: CollectionMeV1DataDto = { id: collectionId, user_id: userId };
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, data);
     } catch (error) {
       console.error('v1 GET /collections/me error:', error);
@@ -32,6 +34,7 @@ export function registerCollectionsV1HttpRoutes(router: Router, deps: Collection
     try {
       const collectionId = await deps.collectionService.getOrCreateCollection(req.user!.id);
       const cards = await deps.collectionService.getCollectionCards(collectionId);
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, cards);
     } catch (error) {
       console.error('v1 GET /collections/me/cards error:', error);
@@ -57,6 +60,7 @@ export function registerCollectionsV1HttpRoutes(router: Router, deps: Collection
 
       const collectionId = await deps.collectionService.getOrCreateCollection(req.user!.id);
       const history = await deps.collectionService.getCollectionHistory(collectionId, limit);
+      setPrivateUserCacheHeaders(res);
       sendV1Success(res, history);
     } catch (error) {
       console.error('v1 GET /collections/me/history error:', error);

@@ -3,7 +3,7 @@ import type { Response } from 'express';
 /**
  * Per-viewer API responses must not be cached at CloudFront without revalidation.
  * The default CloudFront behavior uses a 1-day TTL when the origin omits
- * Cache-Control; favorites/community reads include viewer-specific `isFavorited`.
+ * Cache-Control; favorites/community reads and collections contain viewer-specific data.
  *
  * Matches `GET /api/v1/decks` in decks.http.ts (see CLOUDFRONT_CDN.md).
  */

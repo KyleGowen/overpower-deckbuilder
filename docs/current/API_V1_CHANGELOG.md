@@ -5,6 +5,9 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Collection GET responses now emit `Cache-Control: private, max-age=0, must-revalidate`
+  and `Vary: Cookie`, preventing CloudFront's default one-day TTL from restoring stale
+  quantities after a successful collection mutation.
 - Added `GET /api/v1/admin/biz-ops-dashboard` and the ADMIN-only `/admin/biz-ops`
   React view. The endpoint aggregates the committed AWS cost ledger into finalized invoice
   history, the current Cost Explorer estimate, year-to-date totals, service share, rolling

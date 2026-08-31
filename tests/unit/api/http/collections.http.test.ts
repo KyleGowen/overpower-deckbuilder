@@ -51,6 +51,8 @@ describe('collections.http', () => {
     expect(res.body.errors).toEqual([]);
     expect(res.body.meta).toEqual({});
     expect(res.body.data).toEqual({ id: 'col-uuid', user_id: 'user-1' });
+    expect(res.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+    expect(res.headers.vary).toContain('Cookie');
     expect(collectionService.getOrCreateCollection).toHaveBeenCalledWith('user-1');
   });
 
@@ -76,6 +78,8 @@ describe('collections.http', () => {
     const res = await request(buildApp(deps)).get('/collections/me/cards').expect(200);
     expect(res.body.errors).toEqual([]);
     expect(res.body.data).toEqual(rows);
+    expect(res.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+    expect(res.headers.vary).toContain('Cookie');
   });
 
   it('GET /collections/me/cards returns 500 on error', async () => {
@@ -270,6 +274,8 @@ describe('collections.http', () => {
     const res = await request(buildApp(deps)).get('/collections/me/history').expect(200);
     expect(res.body.errors).toEqual([]);
     expect(res.body.data).toEqual(entries);
+    expect(res.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
+    expect(res.headers.vary).toContain('Cookie');
     expect(collectionService.getCollectionHistory).toHaveBeenCalledWith('col-uuid', undefined);
   });
 

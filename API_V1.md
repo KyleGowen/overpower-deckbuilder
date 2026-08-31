@@ -1148,6 +1148,10 @@ Add one card; same validation rules as DB deck add (one-per-deck, cataclysm, etc
 
 > **GUEST users have no server-side collection.** The GUEST role (`POST /api/auth/login` with username `guest` and no password) is denied by `authenticateUser` on all `/api/v1/collections/*` endpoints (**401**). The web app tracks the guest collection entirely in **`localStorage`** (key: `guestCollection`) on the client — no collection API calls are made for GUEST sessions. A new frontend must replicate this localStorage read/write when the user role is `GUEST`.
 
+**Caching (all collection GETs):** `Cache-Control: private, max-age=0, must-revalidate`
+and `Vary: Cookie`. Collection responses are mutable and user-specific, so CloudFront
+must not reuse an older response after a card mutation or share one between sessions.
+
 ### `GET /api/v1/collections/me`
 
 **Auth:** Valid **session cookie** (`authenticateUser`). Unauthenticated requests receive **401** with the v1 envelope: `{ "data": null, "errors": [{ "code": "UNAUTHORIZED", "message": "..." }], "success": false }`.
