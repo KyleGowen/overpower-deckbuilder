@@ -19,6 +19,7 @@ export interface DeckIconTotals {
 }
 
 export interface IconCatalogFields {
+  card_effect?: string;
   icons?: string[];
   power_type?: string;
   to_use?: string;
@@ -63,6 +64,16 @@ function iconsForCard(
     const src = String(catalog.stat_type_to_use ?? '');
     const matched = ICON_TYPES.find((t) => new RegExp(t, 'i').test(src));
     return matched ? [matched] : [];
+  }
+
+  const successfulPowerHit = String(catalog.card_effect ?? '').match(
+    /\bif\s+successful\b[\s\S]*?\bacts\s+as\s+(?:a\s+)?level\s+\d+\s+(Energy|Combat|Brute Force|Intelligence)\s+Power\s+card\s+hit\b/i,
+  );
+  if (successfulPowerHit) {
+    const hitType = ICON_TYPES.find(
+      (type) => type.toLowerCase() === successfulPowerHit[1].toLowerCase(),
+    );
+    return hitType ? [hitType] : [];
   }
 
   const icons = Array.isArray(catalog.icons) ? catalog.icons : [];

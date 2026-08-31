@@ -24,6 +24,7 @@ interface MockDeckCard {
 interface MockCardData {
     name?: string;
     card_name?: string;
+    card_effect?: string;
     icons?: string[];
     power_type?: string;
     to_use?: string;
@@ -197,6 +198,27 @@ describe('calculateIconTotals', () => {
     });
 
     describe('Special Cards', () => {
+        it.each([
+            ['Energy', 'Brute Force'],
+            ['Combat', 'Energy'],
+            ['Brute Force', 'Intelligence'],
+            ['Intelligence', 'Combat'],
+        ])('counts the successful Power card hit as %s -> %s', (printedType, hitType) => {
+            const deckCards: MockDeckCard[] = [
+                { id: '1', type: 'special', cardId: 'special1', quantity: 1 }
+            ];
+
+            availableCardsMap.set('special1', {
+                card_effect: `Acts as a level 2 ${printedType} attack. If successful, acts as a level 8 ${hitType} Power card hit.`,
+                icons: [printedType]
+            });
+
+            const totals = calculateIconTotals(deckCards, availableCardsMap);
+
+            expect(totals[printedType as keyof typeof totals]).toBe(0);
+            expect(totals[hitType as keyof typeof totals]).toBe(1);
+        });
+
         it('should count special card with single icon', () => {
             const deckCards: MockDeckCard[] = [
                 { id: '1', type: 'special', cardId: 'special1', quantity: 1 }
@@ -822,4 +844,3 @@ describe('calculateIconTotals', () => {
         });
     });
 });
-
