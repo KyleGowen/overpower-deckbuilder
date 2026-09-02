@@ -131,6 +131,76 @@ describe('simulateKo (v2)', () => {
       ]);
       expect(dim(anySpecial, anyDeck, anyIndex, new Set(['char-1']))).toBe(false);
     });
+
+    it.each([
+      ['Angry Mob', true],
+      ['Angry Mob: Middle Ages', true],
+      ['Angry Mob - Middle Age', true],
+      ['Angry Mob: Industrial Age', false],
+    ])(
+      'dims Angry Mob special ownership %s correctly after the matching variant is KO\'d',
+      (specialCharacter, expected) => {
+        const mob = deckEntry('character', 'angry-mob-middle-ages');
+        const mobSpecial = deckEntry('special', 'mob-special');
+        const mobDeck = [mob, mobSpecial];
+        const mobIndex = buildCardIndex([
+          {
+            deckType: 'character',
+            cardId: 'angry-mob-middle-ages',
+            card: catalogCard('angry-mob-middle-ages', {
+              name: 'Angry Mob (Middle Ages)',
+            }),
+          },
+          {
+            deckType: 'special',
+            cardId: 'mob-special',
+            card: catalogCard('mob-special', {
+              character: specialCharacter,
+              name: 'Mob Special',
+            }),
+          },
+        ]);
+
+        expect(dim(mobSpecial, mobDeck, mobIndex, new Set(['angry-mob-middle-ages']))).toBe(
+          expected,
+        );
+      },
+    );
+
+    it('keeps shared Angry Mob specials active while another Angry Mob variant remains active', () => {
+      const middleAges = deckEntry('character', 'angry-mob-middle-ages');
+      const industrialAge = deckEntry('character', 'angry-mob-industrial-age');
+      const sharedSpecial = deckEntry('special', 'shared-mob-special');
+      const mobDeck = [middleAges, industrialAge, sharedSpecial];
+      const mobIndex = buildCardIndex([
+        {
+          deckType: 'character',
+          cardId: 'angry-mob-middle-ages',
+          card: catalogCard('angry-mob-middle-ages', {
+            name: 'Angry Mob (Middle Ages)',
+          }),
+        },
+        {
+          deckType: 'character',
+          cardId: 'angry-mob-industrial-age',
+          card: catalogCard('angry-mob-industrial-age', {
+            name: 'Angry Mob (Industrial Age)',
+          }),
+        },
+        {
+          deckType: 'special',
+          cardId: 'shared-mob-special',
+          card: catalogCard('shared-mob-special', {
+            character: 'Angry Mob',
+            name: 'Shared Mob Special',
+          }),
+        },
+      ]);
+
+      expect(
+        dim(sharedSpecial, mobDeck, mobIndex, new Set(['angry-mob-middle-ages'])),
+      ).toBe(false);
+    });
   });
 
   describe('power cards', () => {

@@ -83,7 +83,7 @@ State: `koCharacterIds: Set<string>` in React (`DeckEditorPage.tsx`).
 **Dimming logic** (in `simulateKo.ts`):
 
 - **Characters**: dimmed if card ID is in `koCharacterIds`
-- **Special / Advanced Universe**: dimmed if they belong to a KO'd character (by name); "Any Character" specials never dim
+- **Special / Advanced Universe**: dimmed if they belong to a KO'd character; Angry Mob specials use their generic or variant-specific ownership rules, and "Any Character" specials never dim
 - **Power**: dimmed if no active character meets requirement (Any-Power = max of four; Multi-Power = sum of two highest)
 - **Teamwork / Ally**: team stat rules + single-character rule when only one active remains
 - **Training / Basic Universe**: dimmed if no active character can use the card
@@ -152,6 +152,12 @@ Multi-Power requires the **sum of a character's two highest stats** (not Math.ma
 - **John Carter**: Brute Force treated as 8
 - **Time Traveler**: Intelligence treated as 8
 
+### Angry Mob Special Ownership
+
+- Generic `Angry Mob` specials are usable by any Angry Mob variant and dim only when every matching variant in the deck is KO'd.
+- Variant-specific labels such as `Angry Mob: Middle Ages` and `Angry Mob - Middle Age` match `Angry Mob (Middle Ages)` and dim when that matching variant is KO'd.
+- Specials for a different Angry Mob variant are not treated as belonging to the KO'd character.
+
 ---
 
 ## Troubleshooting
@@ -187,4 +193,4 @@ KO dimming in Draw Hand is automatic via React state — see [`DRAW_HAND_FEATURE
 
 ---
 
-*Last Updated: 2026-07-02*
+*Last Updated: 2026-09-02*

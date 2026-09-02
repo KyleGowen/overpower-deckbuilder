@@ -1,4 +1,5 @@
 import type { CatalogCard, DeckCardEntry } from '../api/types';
+import { specialCardMatchesCharacter } from '../catalog/characterStacks';
 import type { CharacterStatRow } from '../deck-usability/types';
 import {
   effectiveCharacterStats,
@@ -230,6 +231,24 @@ function shouldDimNamedCharacterCard(ctx: KoDimmingContext, characterName: strin
   return belongsToKOdCharacter && !activeCharacterNames.includes(characterName);
 }
 
+function shouldDimSpecialCard(ctx: KoDimmingContext, cardData: CatalogCard): boolean {
+  const belongsToKOdCharacter = ctx.deckCards.some((deckCard) => {
+    if (deckCard.type !== 'character' || !ctx.koCharacterIds.has(deckCard.cardId)) {
+      return false;
+    }
+    const character = resolveCatalogCard(deckCard, ctx.cardIndex);
+    const characterName = character
+      ? String(character.name ?? character.card_name ?? '')
+      : '';
+    return specialCardMatchesCharacter(cardData, characterName);
+  });
+  const belongsToActiveCharacter = ctx.activeCharacterNames.some((characterName) =>
+    specialCardMatchesCharacter(cardData, characterName),
+  );
+
+  return belongsToKOdCharacter && !belongsToActiveCharacter;
+}
+
 function dimTeamworkCard(cardData: CatalogCard, ctx: KoDimmingContext): boolean {
   if (ctx.shouldDimTeamworkAndAllyForSingleCharacter) {
     return true;
@@ -365,7 +384,7 @@ function shouldDimNonCharacterByType(
       const isAnyCharacter =
         characterName === 'Any Character' || characters.includes('Any Character');
       if (isAnyCharacter || !characterName) return false;
-      return shouldDimNamedCharacterCard(ctx, characterName);
+      return shouldDimSpecialCard(ctx, cardData);
     }
     case 'advanced-universe': {
       const auCharacterName = String(cardData.character ?? '').trim();
