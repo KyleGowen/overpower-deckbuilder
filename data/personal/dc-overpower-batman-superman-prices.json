@@ -1,0 +1,1338 @@
+{
+  "fetchedAt": "2026-09-01",
+  "prices": {
+    "Character|Azrael": {
+      "price": "$4.00",
+      "url": "https://theorangeking.com/products/azrael-dc-hero-vr"
+    },
+    "Character|Bane": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/bane-dc-character-vr"
+    },
+    "Character|Batman": {
+      "price": "$22.50",
+      "url": "https://theorangeking.com/products/batman-dc-character-r"
+    },
+    "Character|Brainiac": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/brainiac-dc-character-r"
+    },
+    "Character|Catwoman": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/catwoman-dc-hero-r"
+    },
+    "Character|Comm. Gordon and the G.C.P.D.": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/comm-gordon-and-the-g-c-p-d-dc-hero-u"
+    },
+    "Character|Cyborg": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/cyborg-dc-hero-r"
+    },
+    "Character|Doomsday": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/doomsday-dc-hero-vr"
+    },
+    "Character|Eradicator": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eradicator-dc-hero-u"
+    },
+    "Character|Hazard": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/hazard-dc-hero-r"
+    },
+    "Character|Huntress": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/huntress-dc-hero-r"
+    },
+    "Character|Joker": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/joker-dc-hero-r"
+    },
+    "Character|Killer Croc": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/killer-croc-dc-hero-u"
+    },
+    "Character|Knockout": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/knockout-dc-hero-u"
+    },
+    "Character|Lex Luthor": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/lex-luthor-dc-hero-u"
+    },
+    "Character|Metallo": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metallo-dc-hero-u"
+    },
+    "Character|Metropolis S.C.U.": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-dc-hero-u"
+    },
+    "Character|Nightwing": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/nightwing-dc-hero-r"
+    },
+    "Character|Parasite": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/parasite-dc-hero-u"
+    },
+    "Character|Penguin": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/penguin-dc-hero-r"
+    },
+    "Character|Poison Ivy": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/poison-ivy-dc-hero-r"
+    },
+    "Character|Ra's Al Ghul (sic)": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/ras-al-ghul-dc-hero-r"
+    },
+    "Character|Riddler": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/riddler-dc-hero-r"
+    },
+    "Character|Robin": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/robin-dc-hero-u"
+    },
+    "Character|Steel": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/steel-dc-hero-r"
+    },
+    "Character|Superboy": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/superboy-dc-hero-r"
+    },
+    "Character|Supergirl": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/supergirl-dc-hero-r"
+    },
+    "Character|Superman": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/superman-dc-hero-r"
+    },
+    "Character|Thorn": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/thorn-dc-hero-u"
+    },
+    "Character|Two-Face": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/two-face-dc-hero-r"
+    },
+    "Event|Eye of the Storm - Justice League Case Files #061906.01": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-event-file-01-dc-c-green-lantern-superman"
+    },
+    "Event|Eye of the Storm - Justice League Case Files #061906.02": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-event-file-02-dc-c-green-lantern-superman"
+    },
+    "Event|Eye of the Storm - Justice League Case Files #061906.05": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-event-file-05-dc-c-green-lantern-parasite"
+    },
+    "Event|Eye of the Storm - Justice League Case Files #061906.08": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-event-file-08-dc-c-green-lantern-superman"
+    },
+    "Event|Eye of the Storm - Justice League Case Files #061906.10": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-event-file-10-dc-c-superman-parasite"
+    },
+    "Event|Into the Depths - Justice League Case File #271266.02": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/into-the-depths-event-file-02-dc-c-batman-aquaman"
+    },
+    "Event|Into the Depths - Justice League Case File #271266.04": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/into-the-depths-event-file-04-dc-c-batman-aquaman"
+    },
+    "Event|Into the Depths - Justice League Case File #271266.07": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/into-the-depths-event-file-07-dc-c-batman-aquaman"
+    },
+    "Event|Into the Depths - Justice League Case File #271266.09": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/into-the-depths-event-file-09-dc-c-batman-aquaman"
+    },
+    "Event|Into the Depths - Justice League Case File #271266.10": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/into-the-depths-event-file-10-dc-c-batman-aquaman"
+    },
+    "Event|Might over Mind - Justice League Case Files #179603.01": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-event-file-01-dc-c-brainiac"
+    },
+    "Event|Might over Mind - Justice League Case Files #179603.04": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-event-file-04-dc-c-superman-brainiac"
+    },
+    "Event|Might over Mind - Justice League Case Files #179603.06": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-event-file-06-dc-c-superman-orion"
+    },
+    "Event|Might over Mind - Justice League Case Files #179603.08": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-event-file-08-dc-c-superman-wonder-woman"
+    },
+    "Event|Might over Mind - Justice League Case Files #179603.11": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-event-file-11-dc-c-superman"
+    },
+    "Event|Race Against Crime - Justice League Case Files #661216.01": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-event-file-01-dc-c-riddler"
+    },
+    "Event|Race Against Crime - Justice League Case Files #661216.04": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-event-file-04-dc-c-flash"
+    },
+    "Event|Race Against Crime - Justice League Case Files #661216.06": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-event-file-06-dc-c-hawkman-batman"
+    },
+    "Event|Race Against Crime - Justice League Case Files #661216.09": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-event-file-09-dc-c-flash"
+    },
+    "Event|Race Against Crime - Justice League Case Files #661216.10": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-event-file-10-dc-c-flash-batman"
+    },
+    "Mission|Eye of the Storm 1 - \"Power Breakfast!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-1-power-breakfast-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 2 - \"Pig Out!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-2-pig-out-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 3 - \"Self Service!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-3-self-service-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 4 - \"Stewing!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-4-stewing-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 5 - \"Leftovers!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-5-leftovers-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 6 - \"Take Out!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-6-take-out-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Eye of the Storm 7 - \"Over Easy!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eye-of-the-storm-mission-7-over-easy-superman-gl-kyle-rayner-dc-c"
+    },
+    "Mission|Into the Depths 1 - \"Aquattack!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-1-aquattack-dc-c"
+    },
+    "Mission|Into the Depths 2 - \"Fireball!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-3-rat-pack-dc-c"
+    },
+    "Mission|Into the Depths 3 - \"Rat Pack!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-2-fireball-dc-c"
+    },
+    "Mission|Into the Depths 4 - \"Maelstrom!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-5-whitewater-dc-c"
+    },
+    "Mission|Into the Depths 5 - \"Whitewater!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-4-maelstrom-dc-c"
+    },
+    "Mission|Into the Depths 6 - \"Swamp-Things!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-6-swamp-things-dc-c"
+    },
+    "Mission|Into the Depths 7 - \"Monster!\"": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/into-the-depths-mission-7-monster-dc-c"
+    },
+    "Mission|Might over Mind 1 - \"We Have A Problem!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-1-dc-c"
+    },
+    "Mission|Might over Mind 2 - \"Failsafe!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-2-dc-c"
+    },
+    "Mission|Might over Mind 3 - \"Abort!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-3-dc-c"
+    },
+    "Mission|Might over Mind 4 - \"Liftoff!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-4-dc-c"
+    },
+    "Mission|Might over Mind 5 - \"Target Acquisition!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-5-dc-c"
+    },
+    "Mission|Might over Mind 6 - \"Launch!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-6-dc-c"
+    },
+    "Mission|Might over Mind 7 - \"Impact!\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/might-over-mind-mission-7-dc-c"
+    },
+    "Mission|Race Against Crime 1 - \"Why?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-1-dc-c"
+    },
+    "Mission|Race Against Crime 2 - \"Where?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-3-dc-c"
+    },
+    "Mission|Race Against Crime 3 - \"How?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-2-dc-c"
+    },
+    "Mission|Race Against Crime 4 - \"When?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-4-dc-c"
+    },
+    "Mission|Race Against Crime 5 - \"Which?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-5-dc-c"
+    },
+    "Mission|Race Against Crime 6 - \"What?'": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-6-dc-c"
+    },
+    "Mission|Race Against Crime 7 - \"Who?\"": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/race-against-crime-mission-7-dc-c"
+    },
+    "Power|1 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1e-dc-c-bane"
+    },
+    "Power|1 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1f-dc-c-parasite"
+    },
+    "Power|1 Intellect": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1i-dc-c-killer-croc"
+    },
+    "Power|1 MultiPower": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1m-dc-u-joker"
+    },
+    "Power|1 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-1s-dc-c-penguin"
+    },
+    "Power|2 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2e-dc-c-nightwing"
+    },
+    "Power|2 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2f-dc-c-eradicator"
+    },
+    "Power|2 Intellect": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2i-dc-c-knockout"
+    },
+    "Power|2 MultiPower": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2m-dc-r-lex-luthor"
+    },
+    "Power|2 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-2s-dc-c-robin"
+    },
+    "Power|3 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3e-dc-c-catwoman"
+    },
+    "Power|3 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3f-dc-c-steel"
+    },
+    "Power|3 Intellect": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3i-dc-c-hazard"
+    },
+    "Power|3 MultiPower": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/power-3m-dc-vr-batman"
+    },
+    "Power|3 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-3s-dc-c-huntress"
+    },
+    "Power|4 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4e-dc-c-poison-ivy"
+    },
+    "Power|4 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4f-dc-c-riddler"
+    },
+    "Power|4 Intellect": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4i-dc-c-ras-al-ghul"
+    },
+    "Power|4 MultiPower": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/power-4m-dc-vr-superman"
+    },
+    "Power|4 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-4s-dc-c-supergirl"
+    },
+    "Power|5 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5e-dc-u-metallo"
+    },
+    "Power|5 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5f-dc-u-metropolis-s-c-u"
+    },
+    "Power|5 Intellect": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5i-dc-u-two-face"
+    },
+    "Power|5 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-5s-dc-u-comm-gordon-the-g-c-p-d"
+    },
+    "Power|6 Energy": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-6e-dc-u-cyborg"
+    },
+    "Power|6 Fighting": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-6f-dc-u-thorn"
+    },
+    "Power|6 Intellect": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/power-6i-dc-u-joker"
+    },
+    "Power|6 Strength": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/power-6s-dc-u-superboy"
+    },
+    "Power|7 Energy": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/power-7e-dc-r-superman"
+    },
+    "Power|7 Fighting": {
+      "price": "$17.50",
+      "url": "https://theorangeking.com/products/power-7f-dc-r-batman"
+    },
+    "Power|7 Intellect": {
+      "price": "$17.50",
+      "url": "https://theorangeking.com/products/power-7i-dc-r-batman"
+    },
+    "Power|7 Strength": {
+      "price": "$14.50",
+      "url": "https://theorangeking.com/products/power-7s-dc-r-superman"
+    },
+    "Power|8 Energy": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/power-8e-dc-vr-brainiac"
+    },
+    "Power|8 Fighting": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/power-8f-dc-vr-azrael"
+    },
+    "Power|8 Intellect": {
+      "price": "$16.50",
+      "url": "https://theorangeking.com/products/power-8i-dc-vr-lex-luthor"
+    },
+    "Power|8 Strength": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/power-8s-dc-vr-doomsday"
+    },
+    "Special|Azrael - Avenging Angel": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/azrael-avenging-angel-dc-u"
+    },
+    "Special|Azrael - Battle Armor": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/azrael-battle-armor-dc-c"
+    },
+    "Special|Azrael - Divine Inspiration": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/azrael-divine-inspiration-dc-r"
+    },
+    "Special|Azrael - Flaming Sword": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/azrael-flaming-sword-dc-r"
+    },
+    "Special|Azrael - The System": {
+      "price": "$9.00",
+      "url": "https://theorangeking.com/products/azrael-the-system-dc-opd-vr"
+    },
+    "Special|Bane - Enhanced Physique": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/bane-enhanced-physique-dc-r"
+    },
+    "Special|Bane - Feral Rage": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/bane-feral-rage-dc-u"
+    },
+    "Special|Bane - Intimidation": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/bane-intimidation-dc-u"
+    },
+    "Special|Bane - Vengeance of Bane": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/bane-vengeance-of-bane-dc-r"
+    },
+    "Special|Bane - Venom Injection": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/bane-venom-injection-dc-opd-vr"
+    },
+    "Special|Batman - Batarang": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/batman-batarang-dc-u"
+    },
+    "Special|Batman - Magnesium Flare": {
+      "price": "$5.00",
+      "url": "https://theorangeking.com/products/batman-magnesium-flare-dc-u"
+    },
+    "Special|Batman - Martial Arts Expert": {
+      "price": "$15.00",
+      "url": "https://theorangeking.com/products/batman-martial-arts-expert-dc-opd-vr"
+    },
+    "Special|Batman - Master Detective": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/batman-master-detective-dc-r"
+    },
+    "Special|Batman - Olympic Level Athlete": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/batman-olympic-level-athlete-dc-r"
+    },
+    "Special|Brainiac - Force Field": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/brainiac-force-field-dc-r"
+    },
+    "Special|Brainiac - Force of Mind": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/brainiac-force-of-mind-dc-c"
+    },
+    "Special|Brainiac - Lord of Warworld": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/brainiac-lord-of-warworld-dc-r"
+    },
+    "Special|Brainiac - Mental Control": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/brainiac-mental-control-dc-opd-vr"
+    },
+    "Special|Brainiac - Mental Illusions": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/brainiac-mental-illusions-dc-u"
+    },
+    "Special|Catwoman - Cat-Like Reflexes": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/catwoman-cat-like-reflexes-dc-u"
+    },
+    "Special|Catwoman - Cunning Thief": {
+      "price": "$10.50",
+      "url": "https://theorangeking.com/products/catwoman-cunning-thief-dc-opd-vr"
+    },
+    "Special|Catwoman - Nine Lives": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/catwoman-nine-lives-dc-u"
+    },
+    "Special|Catwoman - Razor Sharp Claws": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/catwoman-razor-sharp-claws-dc-r"
+    },
+    "Special|Catwoman - Whip Strike": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/catwoman-whip-strike-dc-r"
+    },
+    "Special|Comm. Gordon & G.C.P.D. - Reinforcements": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/comm-gordon-reinforcements-dc-u"
+    },
+    "Special|Comm. Gordon & G.C.P.D. - Riot Gear": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/comm-gordon-riot-gear-dc-u"
+    },
+    "Special|Comm. Gordon & G.C.P.D. - SWAT Team": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/comm-gordon-swat-team-dc-opd-vr"
+    },
+    "Special|Comm. Gordon & G.C.P.D. - Sting Operation": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/comm-gordon-sting-operation-dc-opd-vr"
+    },
+    "Special|Comm. Gordon & G.C.P.D. - Tear Gas Guns": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/comm-gordon-tear-gas-guns-dc-u"
+    },
+    "Special|Cyborg - Cold-Blooded Killer": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/cyborg-cold-blooded-killer-dc-r"
+    },
+    "Special|Cyborg - Doom from Above": {
+      "price": "$2.00",
+      "url": "https://theorangeking.com/products/cyborg-doom-from-above-dc-opd-vr"
+    },
+    "Special|Cyborg - Laser Vision": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/cyborg-laser-vision-dc-u"
+    },
+    "Special|Cyborg - Mechanical Metamorph": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/cyborg-mechanical-metamorph-dc-opd-vr"
+    },
+    "Special|Cyborg - Regeneration": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/cyborg-regeneration-dc-r"
+    },
+    "Special|Doomsday - Bony Protrusions": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/doomsday-bony-protrusions-dc-r"
+    },
+    "Special|Doomsday - Irresistible Force": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/doomsday-irresistible-force-dc-r"
+    },
+    "Special|Doomsday - Out for Blood": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/doomsday-out-for-blood-dc-u"
+    },
+    "Special|Doomsday - Tough Hide": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/doomsday-tough-hide-dc-c"
+    },
+    "Special|Doomsday - Unearthly Strength": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/doomsday-unearthly-strength-dc-opd-vr"
+    },
+    "Special|Eradicator - Airborne Assault": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eradicator-airborne-assault-dc-u"
+    },
+    "Special|Eradicator - Energy Blast": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/eradicator-energy-blast-dc-vr"
+    },
+    "Special|Eradicator - Power Punch": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/eradicator-power-punch-dc-opd-vr"
+    },
+    "Special|Eradicator - Self Healing": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eradicator-self-healing-dc-r"
+    },
+    "Special|Eradicator - Vengeful Protector": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/eradicator-vengeful-protector-dc-c"
+    },
+    "Special|Hazard - Cutting Laser": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/hazard-cutting-laser-dc-r"
+    },
+    "Special|Hazard - Cybernetic Strength": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/hazard-cybernetic-strength-dc-r"
+    },
+    "Special|Hazard - Flight Pack": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/hazard-flight-pack-dc-c"
+    },
+    "Special|Hazard - Split": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/hazard-split-dc-u"
+    },
+    "Special|Hazard - Telekinetic Fist": {
+      "price": "$5.00",
+      "url": "https://theorangeking.com/products/hazard-telekinetic-fist-dc-opd-vr"
+    },
+    "Special|Huntress - Crossbow": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/huntress-crossbow-dc-u"
+    },
+    "Special|Huntress - Expert Tracker": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/huntress-expert-tracker-dc-r"
+    },
+    "Special|Huntress - Sneak Attack": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/huntress-sneak-attack-dc-opd-vr"
+    },
+    "Special|Huntress - Throwing Knives": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/huntress-throwing-knives-dc-u"
+    },
+    "Special|Huntress - Trained Gymnast": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/huntress-trained-gymnast-dc-r"
+    },
+    "Special|Joker - Acid Spray Flower": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/joker-acid-spray-flower-dc-r"
+    },
+    "Special|Joker - Double Cross": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/joker-double-cross-dc-u"
+    },
+    "Special|Joker - High Voltage Joy Buzzer": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/joker-high-voltage-joy-buzzer-dc-r"
+    },
+    "Special|Joker - Joker Venom": {
+      "price": "$13.50",
+      "url": "https://theorangeking.com/products/joker-joker-venom-dc-opd-vr"
+    },
+    "Special|Joker - Maniacal Genius": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/joker-maniacal-genius-dc-c"
+    },
+    "Special|Killer Croc - Brute Force": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/killer-croc-brute-force-dc-r"
+    },
+    "Special|Killer Croc - Rampage": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/killer-croc-rampage-dc-u"
+    },
+    "Special|Killer Croc - Scaly Skin": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/killer-croc-scaly-skin-dc-u"
+    },
+    "Special|Killer Croc - Slippery Escape": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/killer-croc-slippery-escape-dc-r"
+    },
+    "Special|Killer Croc - Wrestling Hold": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/killer-croc-wrestling-hold-dc-opd-vr"
+    },
+    "Special|Knockout - Female Fury": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/knockout-female-fury-dc-u"
+    },
+    "Special|Knockout - Hot Tempered": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/knockout-hot-tempered-dc-r"
+    },
+    "Special|Knockout - Killer Physique": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/knockout-killer-physique-dc-u"
+    },
+    "Special|Knockout - Mighty Blow": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/knockout-mighty-blow-dc-r"
+    },
+    "Special|Knockout - Picking a Fight": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/knockout-picking-a-fight-dc-opd-vr"
+    },
+    "Special|Lex Luthor - Global Resources": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/lex-luthor-global-resources-dc-r"
+    },
+    "Special|Lex Luthor - Power Hungry": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/lex-luthor-power-hungry-dc-c"
+    },
+    "Special|Lex Luthor - Prototype Blaster": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/lex-luthor-prototype-blaster-r"
+    },
+    "Special|Lex Luthor - Ruthless Adversary": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/lex-luthor-ruthless-adversary-dc-opd-vr"
+    },
+    "Special|Lex Luthor - Skilled Martial Artist": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/lex-luthor-skilled-martial-artist-dc-u"
+    },
+    "Special|Metallo - Damage Control": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/metallo-damage-control-dc-r"
+    },
+    "Special|Metallo - Eye Beams": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/metallo-eye-beams-dc-opd-vr"
+    },
+    "Special|Metallo - Mechanical Juggernaut": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/metallo-mechanical-juggernaut-dc-opd-r"
+    },
+    "Special|Metallo - Servo-Assisted Strength": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metallo-servo-assisted-strength-dc-c"
+    },
+    "Special|Metallo - Walking Arsenal": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metallo-walking-arsenal-dc-u"
+    },
+    "Special|Metropolis S.C.U. - Battlesuit Brigade": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-battlesuit-brigade-dc-r"
+    },
+    "Special|Metropolis S.C.U. - Heavy Artillery": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-heavy-artillery-dc-opd-vr"
+    },
+    "Special|Metropolis S.C.U. - Paramilitary Training": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-paramilitary-training-dc-c"
+    },
+    "Special|Metropolis S.C.U. - Sniper Fire": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-sniper-fire-dc-r"
+    },
+    "Special|Metropolis S.C.U. - Stun Guns": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/metropolis-s-c-u-stun-guns-dc-u"
+    },
+    "Special|Nightwing - Circus Acrobat": {
+      "price": "$11.50",
+      "url": "https://theorangeking.com/products/nightwing-circus-acrobat-dc-r"
+    },
+    "Special|Nightwing - Escrima Sticks": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/nightwing-escrima-sticks-dc-u"
+    },
+    "Special|Nightwing - Expert Sleuth": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/nightwing-expert-sleuth-dc-u"
+    },
+    "Special|Nightwing - Glider Wings": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/nightwing-glider-wings-dc-c"
+    },
+    "Special|Nightwing - Titans Founder": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/nightwing-titans-founder-dc-r"
+    },
+    "Special|Parasite - Cellular Reconstruction": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/parasite-cellular-reconstruction-dc-opd-vr"
+    },
+    "Special|Parasite - Kinetic Absorption": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/parasite-kinetic-absorption-dc-u"
+    },
+    "Special|Parasite - Power Theft": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/parasite-power-theft-dc-r"
+    },
+    "Special|Parasite - Sucking the City Dry": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/parasite-sucking-the-city-dry-dc-u"
+    },
+    "Special|Parasite - Vitality Drain": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/parasite-vitality-drain-dc-r"
+    },
+    "Special|Penguin - Feathery Distraction": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/penguin-feathery-distraction-dc-opd-vr"
+    },
+    "Special|Penguin - Flame Thrower Umbrella": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/penguin-flame-thrower-umbrella-dc-u"
+    },
+    "Special|Penguin - Master Planner": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/penguin-master-planner-dc-r"
+    },
+    "Special|Penguin - Smoke Umbrella": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/penguin-smoke-umbrella-dc-r"
+    },
+    "Special|Poison Ivy - Master Manipulator": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/poison-ivy-master-manipulator-dc-r"
+    },
+    "Special|Poison Ivy - Poison Kiss": {
+      "price": "$10.50",
+      "url": "https://theorangeking.com/products/poison-ivy-poison-kiss-dc-opd-vr"
+    },
+    "Special|Poison Ivy - Seductress": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/poison-ivy-seductress-dc-c"
+    },
+    "Special|Poison Ivy - Strangle Vines": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/poison-ivy-strangle-vines-dc-opd-vr"
+    },
+    "Special|Poison Ivy - Venus Flytrap": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/poison-ivy-venus-flytrap-dc-u"
+    },
+    "Special|Ra's Al Ghul - Demon's Head": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ras-al-ghul-demons-head-dc-u"
+    },
+    "Special|Ra's Al Ghul - Lazarus Pit": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/ras-al-ghul-lazarus-pit-dc-opd-vr"
+    },
+    "Special|Ra's Al Ghul - Master Swordsman": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ras-al-ghul-master-swordsman-dc-u"
+    },
+    "Special|Ra's Al Ghul - Talia": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/ras-al-ghul-talia-dc-r"
+    },
+    "Special|Ra's al Ghul - Megalomaniac": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/ras-al-ghul-megalomaniac-dc-r"
+    },
+    "Special|Riddler - Colt Revolver": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/riddler-colt-revolver-dc-u"
+    },
+    "Special|Riddler - Death Trap": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/riddler-death-trap-dc-opd-r"
+    },
+    "Special|Riddler - Dirty Cheat": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/riddler-dirty-cheat-dc-u"
+    },
+    "Special|Riddler - Master of Misdirection": {
+      "price": "$8.00",
+      "url": "https://theorangeking.com/products/riddler-master-of-misdirection-dc-opd-vr"
+    },
+    "Special|Riddler - Query and Echo": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/riddler-query-and-echo-dc-r"
+    },
+    "Special|Robin - Bo Staff": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/robin-bo-staff-dc-r"
+    },
+    "Special|Robin - Expert Training": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/robin-expert-training-dc-c"
+    },
+    "Special|Robin - Insignia Dart": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/robin-insignia-dart-dc-r"
+    },
+    "Special|Robin - Loyal Partner": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/robin-loyal-partner-dc-u"
+    },
+    "Special|Robin - Quick Thinking": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/robin-quick-thinking-dc-opd-vr"
+    },
+    "Special|Steel - Boot Jets": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/steel-boot-jets-dc-r"
+    },
+    "Special|Steel - Exo-Skeleton": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/steel-exo-skeleton-dc-u"
+    },
+    "Special|Steel - Hammer": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/steel-hammer-dc-opd-vr"
+    },
+    "Special|Steel - Human Shield": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/steel-human-shield-dc-u"
+    },
+    "Special|Steel - Rivet Gun": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/steel-rivet-gun-dc-r"
+    },
+    "Special|Superboy - Cool Shades": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/superboy-cool-shades-dc-r"
+    },
+    "Special|Superboy - Dubbilex": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/superboy-dubbilex-dc-opd-vr"
+    },
+    "Special|Superboy - Kid of Steel": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/superboy-kid-of-steel-dc-u"
+    },
+    "Special|Superboy - Tactile Telekinesis": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/superboy-tactile-telekinesis-dc-r"
+    },
+    "Special|Superboy - Up, Up, and Away": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/superboy-up-up-and-away-dc-u"
+    },
+    "Special|Supergirl - Cloaking Shield": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/supergirl-cloaking-shield-dc-r"
+    },
+    "Special|Supergirl - Levitation": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/supergirl-levitation-dc-u"
+    },
+    "Special|Supergirl - Psychokinetic Bolt": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/supergirl-psychokinetic-bolt-dc-u"
+    },
+    "Special|Supergirl - Shapeshift": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/supergirl-shapeshift-dc-opd-vr"
+    },
+    "Special|Supergirl - Telekinetic Shield": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/supergirl-telekinetic-shield-ag-ad-dc-r"
+    },
+    "Special|Superman - Defying Earth's Gravity": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/superman-defying-earths-gravity-dc-u"
+    },
+    "Special|Superman - Earth's Greatest Hero": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/superman-earths-greatest-hero-dc-r"
+    },
+    "Special|Superman - Heat Vision": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/superman-heat-vision-dc-u"
+    },
+    "Special|Superman - Last Son of Krypton": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/superman-last-son-of-krypton-dc-opd-vr"
+    },
+    "Special|Superman - Man of Steel": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/superman-man-of-steel-dc-r"
+    },
+    "Special|Thorn - Barbed Lash": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/thorn-barbed-lash-dc-r"
+    },
+    "Special|Thorn - Battle Instinct": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/thorn-battle-instinct-dc-r"
+    },
+    "Special|Thorn - Combat Daggers": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/thorn-combat-daggers-dc-u"
+    },
+    "Special|Thorn - Explosive Charge": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/thorn-explosive-charge-dc-opd-vr"
+    },
+    "Special|Thorn - Street Fighter": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/thorn-street-fighter-dc-c"
+    },
+    "Special|Two-Face - .45 Automatic": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/two-face-45-automatic-dc-r"
+    },
+    "Special|Two-Face - Criminal Mastermind": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/two-face-criminal-mastermind-dc-r"
+    },
+    "Special|Two-Face - Double Trouble": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/two-face-double-trouble-dc-u"
+    },
+    "Special|Two-Face - Flip of the Coin": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/two-face-flip-of-the-coin-dc-u"
+    },
+    "Special|Two-Face - Tommygun": {
+      "price": "$3.00",
+      "url": "https://theorangeking.com/products/two-face-tommy-gun-dc-opd-vr"
+    },
+    "Universe - Basic|Advance Warning": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7i-1-dc-c-joker"
+    },
+    "Universe - Basic|Alfred Pennyworth": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/ally-6i-1i-dc-c-alfred-pennyworth-batman-robin"
+    },
+    "Universe - Basic|Ambush": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8i-2-dc-u-lex-luthor"
+    },
+    "Universe - Basic|Back Flip": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8f-3-dc-u-azrael"
+    },
+    "Universe - Basic|Black Mask": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/ally-7s-2s-dc-c-black-mask-joker"
+    },
+    "Universe - Basic|Blackout": {
+      "price": "$8.50",
+      "url": "https://theorangeking.com/products/universe-6i-3-dc-u-robin"
+    },
+    "Universe - Basic|Blindside": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6i-1-dc-c-robin"
+    },
+    "Universe - Basic|Bluff": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/universe-7i-3-dc-c-joker-bluff"
+    },
+    "Universe - Basic|Body Slam": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8s-2-dc-u-doomsday"
+    },
+    "Universe - Basic|Choke Hold": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7s-2-dc-c-superman"
+    },
+    "Universe - Basic|Clever Escape": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-8i-1-dc-u-lex-luthor"
+    },
+    "Universe - Basic|Combination Maneuver": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-6s-3-dc-u-bane"
+    },
+    "Universe - Basic|Crippling Blow": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-8s-3-dc-u-doomsday"
+    },
+    "Universe - Basic|Dive for Cover": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/universe-6f-3-dc-u-catwoman"
+    },
+    "Universe - Basic|Diversion": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-6i-2-dc-c-robin"
+    },
+    "Universe - Basic|Dodge": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6f-1-dc-c-catwoman"
+    },
+    "Universe - Basic|Flying Kick": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7f-2-dc-c-batman"
+    },
+    "Universe - Basic|Gangbuster": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-5s-3s-dc-u-gangbuster-superman"
+    },
+    "Universe - Basic|Haymaker": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-7s-1-dc-c-superman"
+    },
+    "Universe - Basic|Home Turf": {
+      "price": "$2.50",
+      "url": "https://theorangeking.com/products/universe-8i-3-dc-r-lex-luthor"
+    },
+    "Universe - Basic|Knife Hand": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6s-2-dc-c-bane"
+    },
+    "Universe - Basic|Kryptonite": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8e-2-dc-c-brainiac"
+    },
+    "Universe - Basic|Lady Shiva": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-7f-2f-dc-c-lady-shiva-joker"
+    },
+    "Universe - Basic|Laser": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6e-1-dc-c-penguin"
+    },
+    "Universe - Basic|Leap Aside": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8f-2-dc-c-azrael"
+    },
+    "Universe - Basic|Lois Lane": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-5i-3i-dc-u-lois-lane-superman"
+    },
+    "Universe - Basic|Lunge": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8f-1-dc-c-azrael"
+    },
+    "Universe - Basic|Magnetic": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6e-2-dc-c-penguin"
+    },
+    "Universe - Basic|Mental": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8e-1-dc-c-brainiac"
+    },
+    "Universe - Basic|Microwave": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-7e-2-dc-c-eradicator"
+    },
+    "Universe - Basic|Mr. Mxyzptlk": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-7e-2e-dc-c-mr-mxyzptlk-lex-luthor"
+    },
+    "Universe - Basic|Nerve Pinch": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7s-3-dc-u-superman"
+    },
+    "Universe - Basic|Nuclear": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6e-3-dc-c-penguin"
+    },
+    "Universe - Basic|Oracle": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-7i-2i-dc-c-oracle-batman"
+    },
+    "Universe - Basic|Photon": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7e-1-dc-c-eradicator"
+    },
+    "Universe - Basic|Quantum": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7e-3-dc-u-eradicator"
+    },
+    "Universe - Basic|Sabotage": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-7i-2-dc-c-joker"
+    },
+    "Universe - Basic|Scarecrow": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-5e-3e-dc-c-scarecrow-joker"
+    },
+    "Universe - Basic|Shadowdragon": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/ally-5f-3f-dc-u-shadowdragon-superman"
+    },
+    "Universe - Basic|Silver Banshee": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/ally-6e-1e-dc-c-silver-banshee-lex-luthor"
+    },
+    "Universe - Basic|Spinning Kick": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/universe-6f-2-dc-c-catwoman"
+    },
+    "Universe - Basic|Sweep": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-7f-1-dc-c-batman"
+    },
+    "Universe - Basic|Takedown": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8s-1-dc-u-doomsday"
+    },
+    "Universe - Basic|Temporal": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-8e-3-dc-c-brainiac"
+    },
+    "Universe - Basic|Throw": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/universe-7f-3-dc-u-batman"
+    },
+    "Universe - Basic|Uppercut": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/universe-6s-1-dc-c-bane"
+    },
+    "Universe - Teamwork|6 Energy Intellect/Fighting +1 +2": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/tw-6e-fi-1-2-dc-u-steel-superboy-eradicator"
+    },
+    "Universe - Teamwork|6 Fighting Intellect/Energy +1 +2": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/tw-6f-ei-1-2-dc-u-catwoman-joker-poison-ivy"
+    },
+    "Universe - Teamwork|6 Intellect Fighting/Strength +1 +2": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/tw-6i-fs-1-2-dc-c-penguin-riddler-two-face"
+    },
+    "Universe - Teamwork|6 Strength Intellect/Fighting +1 +2": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/tw-6s-fi-1-2-dc-c-nightwing-robin-supergirl"
+    },
+    "Universe - Teamwork|7 Energy Intellect/Strength +2 +2": {
+      "price": "$4.50",
+      "url": "https://theorangeking.com/products/tw-7e-si-2-2-dc-vr-superman-supergirl-metropolis-s-c-u"
+    },
+    "Universe - Teamwork|7 Fighting Intellect/Strength +2 +2": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/tw-7f-si-2-2-dc-vr-batman-robin-comm-gordon-harvey-bullock"
+    },
+    "Universe - Teamwork|7 Intellect Fighting/Energy +2 +2": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/tw-7i-fe-2-2-dc-vr-robin-huntress-batman"
+    },
+    "Universe - Teamwork|7 Strength Intellect/Energy +2 +2": {
+      "price": "$9.50",
+      "url": "https://theorangeking.com/products/tw-7s-ei-2-2-dc-vr-batman-superman"
+    },
+    "Universe - Teamwork|8 Energy Fighting/Strength +2 +3": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/tw-8e-fs-2-3-dc-r-lex-luthor-brainiac-hazard"
+    },
+    "Universe - Teamwork|8 Fighting Energy/Strength +2 +3": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/tw-8f-es-2-3-dc-vr-nightwing-azrael-thorn"
+    },
+    "Universe - Teamwork|8 Intellect Energy/Strength +2 +3": {
+      "price": "$1.00",
+      "url": "https://theorangeking.com/products/tw-8i-es-2-3-dc-vr-lex-luthor-ras-al-ghul-bane"
+    },
+    "Universe - Teamwork|8 Strength Energy/Fighting +2 +3": {
+      "price": "$1.50",
+      "url": "https://theorangeking.com/products/tw-8s-ef-2-3-dc-r-parasite-metallo-cyborg"
+    },
+    "Universe - Training|5 Energy Fighting +3": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/training-5ef-3-ps-u-black-cat"
+    },
+    "Universe - Training|5 Energy Intellect +4": {
+      "price": "$6.50",
+      "url": "https://theorangeking.com/products/training-5ei-4-dc-vr-killer-croc"
+    },
+    "Universe - Training|5 Fighting Energy +3": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/training-5fe-3-dc-c-steel"
+    },
+    "Universe - Training|5 Fighting Energy +4": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/training-5fe-4-dc-u-joker"
+    },
+    "Universe - Training|5 Fighting Intellect +3": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/training-5fi-3-dc-c-superman"
+    },
+    "Universe - Training|5 Fighting Intellect +4": {
+      "price": "$7.50",
+      "url": "https://theorangeking.com/products/training-5fi-4-dc-u-superman"
+    },
+    "Universe - Training|5 Strength Energy +3": {
+      "price": "$0.50",
+      "url": "https://theorangeking.com/products/training-5se-3-dc-c-batman"
+    },
+    "Universe - Training|5 Strength Energy +4": {
+      "price": "$1.25",
+      "url": "https://theorangeking.com/products/training-5se-4-dc-u-batman"
+    },
+    "Universe - Training|5 Strength Fighting +3": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/training-5sf-3-dc-c-riddler"
+    },
+    "Universe - Training|5 Strength Fighting +4": {
+      "price": "$0.75",
+      "url": "https://theorangeking.com/products/training-5sf-4-dc-u-brainiac"
+    },
+    "Universe - Training|5 Strength Intellect +3": {
+      "price": "$0.25",
+      "url": "https://theorangeking.com/products/training-5si-3-dc-c-azrael"
+    },
+    "Universe - Training|5 Strength Intellect +4": {
+      "price": "$5.50",
+      "url": "https://theorangeking.com/products/training-5si-4-dc-r-thorn"
+    }
+  },
+  "source": "The Orange King"
+}

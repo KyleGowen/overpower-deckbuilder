@@ -1,9 +1,9 @@
 ---
 name: ship
 description: >-
-  Ships approved Excelsior changes with one scope snapshot, cached and parallel
-  release gates, a dedicated low-cost Git execution agent, exact-SHA GitHub
-  Actions monitor, and production health verification. Use when the user says
+  Ships approved Excelsior changes with deterministic scope checks, cached and
+  parallel release gates, a low-cost Git execution agent, exact-SHA GitHub
+  Actions watching, and production health verification. Use when the user says
   "ship", "ship it", or asks for the Excelsior release gate.
 ---
 
@@ -27,40 +27,43 @@ The originating/main agent owns every decision-bearing phase:
 
 Do **not** move any of those phases to a lower-cost model.
 Do not spawn additional lower-cost agents for triage, validation, fixes, Actions
-recovery, or health checks. The passive Actions monitor defined below is the
+recovery, health checks, or passive waiting. Mechanical Git execution is the
 only exception.
 
 After all gates pass, delegate only the mechanical Git commands to one dedicated agent created with:
 
 - model: `gpt-5.6-luna`
-- reasoning effort: `medium`
+- reasoning effort: `low`
 - context: `fork_turns: "none"`
 - task name: `ship_git`
 
-Luna medium is sufficient because the main agent supplies a complete, exact handoff and retains all judgment. If that model is unavailable, use the least-cost available model adequate for this bounded Git task; do not move any other ship work to it.
+Luna low is sufficient because the main agent supplies a complete, exact handoff and verifies the resulting commit against the frozen manifest. If that model is unavailable, use the least-cost available model adequate for this bounded Git task; do not move any other ship work to it.
 
 ## Fast path
 
 ### 1. Freeze scope once
 
-At ship start, take one compact snapshot:
+At ship start, infer the intended paths from the approved task and run the deterministic preflight with one `--include` argument per intended path:
 
 ```bash
-git status --short --branch
-git diff --name-only HEAD
-git diff --check
+node .agents/skills/ship/scripts/preflight.mjs \
+  --include path/one \
+  --include path/two
 ```
 
-Record:
+Use its JSON to record:
 
 - current branch;
 - exact intended paths to include;
 - every pre-existing or unrelated path to exclude;
-- whether the triggers below apply.
+- exact working-tree fingerprint and conditional gate triggers;
+- whitespace errors, missing intended paths, and newly added debug logging.
+
+Stop and resolve any missing intended path or whitespace error. Inspect each reported debug line and remove only genuine temporary logging. The script collects evidence; the main agent still decides scope, whether integration coverage is required, and whether reported logging is intentional.
 
 Once required current-session instructions are loaded, do not repeatedly reread project documentation, rescan the entire repository, or ask Kyle to reconfirm Git authorization when the current request and scope are clear. Reuse validation already completed in the current task when it was run against the exact same working-tree fingerprint.
 
-Before expensive gates, inspect newly added diff lines for temporary `console.log`, `console.debug`, or equivalent debug output and remove only genuine temporary logging. This prevents cleanup edits from invalidating completed gates.
+The preflight fingerprint uses `scripts/ship-tree-fingerprint.mjs`, the same implementation used by the conditional test cache. Do not recreate fingerprint logic in prompts or ad hoc commands.
 
 ### 2. Classify conditional gates
 
@@ -72,7 +75,7 @@ Before expensive gates, inspect newly added diff lines for temporary `console.lo
 
 ### 3. Run one parallel gate batch
 
-Start every applicable independent read-only gate together, not in separate tool round trips:
+Start every applicable independent read-only gate together in one direct parallel tool batch, not through additional subagents or separate tool round trips:
 
 ```text
 npx eslint src --ext .ts --max-warnings 0
@@ -85,12 +88,14 @@ changed-area checks                                  # only when required
 
 Collect all results once. All applicable gates must pass before Git delegation.
 
+The unit and integration cache entries are separate atomic files under `.ship-test-cache.d/`, so parallel successful writes cannot overwrite each other. `UserPersistenceService` uses temporary persistence storage when `NODE_ENV=test`, so integration tests must not rewrite repository `data/users.json` or `data/sessions.json`. Treat either file changing as a test-isolation regression; do not normalize it as an expected cleanup step.
+
 If a gate fails, fix the cause and rerun only checks whose inputs or coverage changed. Let the conditional test script decide whether unit or integration tests need to execute again. Do not force a full rerun merely because a command was already used earlier in the conversation.
 
 Known fast recoveries:
 
 - If a socket-based test fails only with sandbox `listen EPERM`, rerun that same command once with the required local-network permission before treating it as a code regression.
-- If integration tests alone rewrite `data/sessions.json`, restore it only when the initial scope snapshot proved it had no user change, then rerun the conditional integration command. Never overwrite a pre-existing edit.
+- If a test rewrites `data/users.json` or `data/sessions.json`, stop and diagnose the isolation regression. Restore a file only when the preflight proved it had no user change, then rerun the affected conditional test command. Never overwrite a pre-existing edit.
 - If multiple gates fail independently, correct them and rerun the affected gates together.
 
 ### GitHub two-failure circuit breaker
@@ -123,6 +128,17 @@ The Git agent must:
 
 The Git agent must not edit files, choose scope, run gates, pull, fetch, merge, rebase, reset, switch branches, create empty commits, recover Actions, or monitor deployment. Git commands remain serial. The main agent waits for this agent to finish before continuing.
 
+Before any remote or Actions interpretation, the main agent must verify that `HEAD` and the commit's exact path set match the returned SHA and frozen manifest:
+
+```bash
+node .agents/skills/ship/scripts/verify-commit.mjs \
+  --sha <full-sha> \
+  --include path/one \
+  --include path/two
+```
+
+Any mismatch is a hard stop. This postcondition is required when using the lower-cost Git model.
+
 ### 5. Monitor the exact deployment
 
 Back on the originating model:
@@ -131,33 +147,16 @@ Back on the originating model:
 2. Look up the workflow once by exact SHA:
    `gh run list --commit <sha> --json databaseId,status,conclusion,url,headSha,createdAt`.
 3. If the exact run already exists and is progressing, attach to it. Never create a second run merely because an older run is queued or GitHub Status still shows recovery in progress.
-4. Once the exact run ID is known, delegate only passive polling to one dedicated agent created with:
+4. Once the exact run ID is known, start the deterministic watcher with the GitHub network permission already required for `gh`:
 
-   - model: `gpt-5.6-luna`
-   - reasoning effort: `minimal`
-   - context: `fork_turns: "none"`
-   - task name: `ship_actions_monitor`
+   ```bash
+   node .agents/skills/ship/scripts/watch-actions.mjs \
+     --run-id <run-id> \
+     --sha <full-sha>
+   ```
 
-   Supply the repository root, pushed SHA, run ID, and run URL. Luna minimal
-   is sufficient for this fixed, read-only wait loop; the main agent retains
-   all status interpretation, recovery decisions, and production verification.
-   If unavailable, use the least-cost available model with minimal reasoning
-   effort that can execute this bounded command. Do not move any other ship
-   responsibility to the monitor.
-5. The monitor may run only this compact read-only query, normally no more
-   often than every 60 seconds while the run is active:
-   `gh run view <run-id> --json status,conclusion,jobs,url,headSha`.
-   It reports only a meaningful status change, terminal result, or the exact
-   error, then returns control to the main agent. It must not list runs,
-   trigger, rerun, cancel, or recover workflows; retry a GitHub command; make
-   Git changes; inspect GitHub Status; poll production; or diagnose a failure.
-   On any GitHub error it stops immediately and returns the raw error for the
-   main agent to handle under the circuit breaker.
-6. After the monitor reports a terminal result, the main agent verifies that
-   the returned `headSha` is the shipped SHA and interprets the conclusion.
-   On success, it makes a cache-bypassed request to production `/health` and
-   confirms the exact shipped commit, database status `OK`, and expected latest
-   migration. Do not poll production before deployment succeeds.
+   Let the command yield a long-running session instead of blocking a tool call for more than 60 seconds. It polls no more often than every 60 seconds, emits only changed states, verifies `headSha` on every response, and exits on terminal success, terminal failure, or the first GitHub error. It never retries or mutates GitHub. The main agent handles any returned error under the circuit breaker and retains all status interpretation, recovery decisions, and production verification. Do not create a model-bearing subagent for this fixed wait loop.
+5. After the watcher returns a terminal result, the main agent interprets the conclusion. On success, it makes a cache-bypassed request to production `/health` and confirms the exact shipped commit, database status `OK`, and expected latest migration. Do not poll production before deployment succeeds.
 
 If the exact run is absent, has `jobs: []`, returns `startup_failure`, GitHub APIs disagree, or a GitHub-dependent operation fails twice, read [Actions recovery](references/actions-recovery.md). Do not load or execute that recovery path during a normal progressing deployment.
 

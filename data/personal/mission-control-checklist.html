@@ -1,0 +1,2077 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mission Control Checklist</title>
+  <style>
+    :root {
+      --color-bg-base: #070b16;
+      --color-bg-surface: #0d1526;
+      --color-bg-elevated: #141f35;
+      --color-bg-input: #0a1220;
+      --color-bg-hover: #18243d;
+      --color-accent: #00c8e8;
+      --color-accent-bright: #00e5ff;
+      --color-accent-soft: rgba(0, 200, 232, .14);
+      --color-accent-glow: rgba(0, 229, 255, .35);
+      --color-text: #e8edf7;
+      --color-text-muted: #8aa0c2;
+      --color-text-on-accent: #021018;
+      --color-border: #1d2c47;
+      --color-border-strong: #2a3e63;
+      --color-border-accent: rgba(0, 200, 232, .45);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(0, 200, 232, .10), transparent 28rem), var(--color-bg-base);
+      color: var(--color-text);
+    }
+
+    .shell {
+      width: min(1480px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 36px 0 48px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-6);
+      align-items: flex-start;
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    h1 {
+      margin: 0 0 var(--space-2);
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 760px;
+      color: var(--color-text-muted);
+      line-height: 1.55;
+    }
+
+    .progress-card {
+      min-width: 220px;
+      padding: var(--space-4);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg-surface);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, .25);
+    }
+
+    .progress-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-accent-bright);
+    }
+
+    .progress-label {
+      color: var(--color-text-muted);
+      font-size: .9rem;
+    }
+
+    progress {
+      width: 100%;
+      height: 10px;
+      margin-top: var(--space-3);
+      accent-color: var(--color-accent);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) minmax(170px, 230px) max-content;
+      gap: 10px;
+      align-items: center;
+      margin: var(--space-6) 0;
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: rgba(13, 21, 38, .96);
+      backdrop-filter: blur(14px);
+    }
+
+    .toolbar-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    input[type="search"], select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-input);
+      color: var(--color-text);
+      padding: 0 var(--space-3);
+      font: inherit;
+    }
+
+    button, .file-button {
+      min-height: 34px;
+      border: 1px solid var(--color-border-accent);
+      border-radius: var(--radius-md);
+      background: var(--color-accent-soft);
+      color: var(--color-text);
+      padding: 0 13px;
+      font: inherit;
+      font-size: .8rem;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover, .file-button:hover { background: var(--color-bg-hover); }
+    button.is-connected { background: var(--color-accent); border-color: var(--color-accent-bright); color: var(--color-text-on-accent); }
+    .file-button input { display: none; }
+
+    .persist-status {
+      margin: calc(var(--space-6) * -1 + 8px) 0 var(--space-5);
+      color: var(--color-text-muted);
+      font-size: .85rem;
+      line-height: 1.45;
+    }
+
+    .persist-status strong { color: var(--color-text); }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 6px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      background: var(--color-bg-surface);
+      color: var(--color-text-muted);
+      font-size: .85rem;
+    }
+
+    .chip strong { color: var(--color-text); }
+
+    .checklist-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: var(--space-5);
+      align-items: start;
+    }
+
+    .list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+      min-width: 0;
+    }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: var(--space-3);
+      align-items: start;
+      min-height: 62px;
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-surface);
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .card-row:hover { border-color: var(--color-border-accent); background: var(--color-bg-hover); }
+    .card-row.is-previewed { border-color: var(--color-border-accent); box-shadow: inset 3px 0 0 var(--color-accent); }
+    .card-row.is-checked { border-color: var(--color-border-accent); background: var(--color-accent-soft); }
+    .card-row input { position: absolute; opacity: 0; pointer-events: none; }
+
+    .check-face {
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-bg-input);
+      display: grid;
+      place-items: center;
+    }
+
+    .card-row input:focus-visible + .check-face { outline: 2px solid var(--color-border-accent); outline-offset: 2px; }
+    .card-row input:checked + .check-face { border-color: var(--color-border-accent); background: var(--color-accent-soft); box-shadow: 0 0 0 1px var(--color-accent-glow); }
+    .card-row input:checked + .check-face::after {
+      content: "";
+      width: 10px;
+      height: 6px;
+      border-left: 2px solid var(--color-accent-bright);
+      border-bottom: 2px solid var(--color-accent-bright);
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .card-main { min-width: 0; }
+    .card-name { display: block; color: var(--color-text); font-weight: 650; line-height: 1.25; overflow-wrap: anywhere; }
+    .card-row.is-checked .card-name { text-decoration: line-through; text-decoration-color: var(--color-accent-bright); }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      color: var(--color-text-muted);
+      font-size: .8rem;
+    }
+
+    .card-meta span, .preview-panel__meta span {
+      padding: 2px 7px;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      background: rgba(10, 18, 32, .75);
+    }
+
+    .card-meta .card-price,
+    .preview-panel__meta .card-price {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .card-meta .card-price.is-missing,
+    .preview-panel__meta .card-price.is-missing {
+      font-variant-numeric: normal;
+      color: var(--color-text-muted);
+    }
+
+    .price-tier-050 {
+      color: #56647a;
+      border-color: #1b283f !important;
+      background: rgba(10, 18, 32, .72) !important;
+    }
+
+    .price-tier-199 {
+      color: #8895a8;
+      border-color: #24344f !important;
+      background: rgba(14, 23, 38, .78) !important;
+    }
+
+    .price-tier-499 {
+      color: #c7d0df;
+      border-color: #344762 !important;
+      background: rgba(18, 29, 48, .82) !important;
+    }
+
+    .price-tier-999 {
+      color: #f2f6fb;
+      border-color: #455b79 !important;
+      background: rgba(23, 36, 58, .88) !important;
+    }
+
+    .price-tier-1999 {
+      color: var(--color-accent-bright);
+      border-color: var(--color-border-accent) !important;
+      background: var(--color-accent-soft) !important;
+    }
+
+    .price-tier-2000 {
+      color: #ff6b6b;
+      border-color: rgba(255, 107, 107, .55) !important;
+      background: rgba(255, 107, 107, .12) !important;
+    }
+
+    .preview-panel {
+      position: sticky;
+      top: calc(var(--space-4) + 82px);
+      display: grid;
+      grid-template-rows: max-content minmax(0, 1fr) max-content;
+      gap: var(--space-3);
+      max-height: calc(100vh - 112px);
+      min-height: 540px;
+      padding: var(--space-4);
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg-surface);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, .25);
+    }
+
+    .preview-panel__header { min-width: 0; padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border); }
+    .preview-panel__eyebrow { margin: 0 0 6px; color: var(--color-accent-bright); font-size: .78rem; font-weight: 700; text-transform: uppercase; }
+    .preview-panel__title { margin: 0; color: var(--color-text); font-size: 1.05rem; line-height: 1.25; overflow-wrap: anywhere; }
+    .preview-panel__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; color: var(--color-text-muted); font-size: .78rem; }
+    .preview-panel__image-wrap { display: flex; align-items: center; justify-content: center; min-height: 0; overflow: hidden; }
+    .preview-panel__image { display: block; width: 100%; height: 100%; max-height: 100%; object-fit: contain; border-radius: var(--radius-md); }
+    .preview-panel__empty { display: none; align-items: center; justify-content: center; width: 100%; min-height: 320px; border: 1px dashed var(--color-border); border-radius: var(--radius-md); color: var(--color-text-muted); text-align: center; }
+    .preview-panel.is-empty .preview-panel__image { display: none; }
+    .preview-panel.is-empty .preview-panel__empty { display: flex; }
+    .preview-panel__note { margin: 0; padding-top: var(--space-3); border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: .82rem; line-height: 1.45; }
+    .source-note { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: .9rem; line-height: 1.55; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1180px) {
+      .checklist-workbench { grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); }
+      .list { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      header, .toolbar { grid-template-columns: 1fr; display: grid; }
+      .progress-card { min-width: 0; }
+      .checklist-workbench { grid-template-columns: 1fr; }
+      .preview-panel { position: static; min-height: 420px; max-height: none; }
+      .shell { width: min(100vw - 24px, 1180px); padding-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>Mission Control Checklist</h1>
+        <p class="subtitle">Standalone personal checklist generated from Excelsior&#x27;s local Mission Control documentation. Checkbox progress is saved in this browser and can be exported or connected to a portable JSON file.</p>
+      </div>
+      <section class="progress-card" aria-label="Checklist progress">
+        <span class="progress-number" id="progressText">0 / 145</span>
+        <span class="progress-label">cards checked</span>
+        <progress id="progressBar" max="145" value="0"></progress>
+      </section>
+    </header>
+
+    <section class="toolbar" aria-label="Checklist controls">
+      <input id="search" type="search" placeholder="Search cards" autocomplete="off" />
+      <select id="typeFilter" aria-label="Filter by type">
+        <option value="all">All types (145)</option>
+          <option value="Character">Character (10)</option>
+          <option value="Special">Special (68)</option>
+          <option value="Mission">Mission (14)</option>
+          <option value="Event">Event (52)</option>
+          <option value="Insert">Insert (1)</option>
+      </select>
+      <select id="sortOrder" aria-label="Sort cards">
+        <option value="number" selected>Sort: Card number</option>
+        <option value="type">Sort: Type, then name</option>
+        <option value="name">Sort: Name</option>
+        <option value="rarity">Sort: Rarity, then name</option>
+      </select>
+      <div class="toolbar-actions" aria-label="Progress actions">
+        <button id="connectProgressFile" type="button">Connect File</button>
+        <button id="clearVisible" type="button">Clear Visible</button>
+        <button id="exportProgress" type="button">Export</button>
+        <label class="file-button">Import<input id="importProgress" type="file" accept="application/json" /></label>
+      </div>
+    </section>
+
+    <p class="persist-status" id="persistStatus">
+      Progress is cached in this browser. Connect <strong>mission-control-checklist-progress.json</strong> to write every checkbox change into the Excelsior project.
+    </p>
+
+    <section class="chips" aria-label="Card type counts">
+        <span class="chip"><span>Character</span><strong>10</strong></span>
+        <span class="chip"><span>Special</span><strong>68</strong></span>
+        <span class="chip"><span>Mission</span><strong>14</strong></span>
+        <span class="chip"><span>Event</span><strong>52</strong></span>
+        <span class="chip"><span>Insert</span><strong>1</strong></span>
+    </section>
+
+    <div class="checklist-workbench">
+      <section class="list" id="cardList" aria-label="Cards">
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair sabotage" data-number="001" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/annihilation-affair-event-sabotage-mc-c-red-skull">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:8:AnnihilationAffair-Sabotage-MCOP_cb20200301170449.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Sabotage</span>
+          <span class="card-meta"><span>#001</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="age of apocalypse mutant rebels held captive" data-number="002" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-mutant-rebels-held-captive-mc-u-jean-grey-dark-beast">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:1:AgeOfApocalypseMutantRebelsHeldCaptive-MCOP_cb20200227181953.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Age of Apocalypse - Mutant Rebels Held Captive!</span>
+          <span class="card-meta"><span>#002</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair infinity army scatters" data-number="003" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-infinite-army-scatters-mc-u-morph">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:7:AgeOfApocalypseInfinityArmyScatters-MCOP_cb20200227173818.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Infinity Army Scatters!</span>
+          <span class="card-meta"><span>#003</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="age of apocalypse strategy destroyed" data-number="004" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-strategy-destroyed-mc-u-strong-guy">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:3:AgeOfApocalypseStrategyDestroyed-MCOP_cb20200301173116.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Age of Apocalypse - Strategy Destroyed!</span>
+          <span class="card-meta"><span>#004</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair hostage crisis" data-number="005" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/annihilation-affair-event-hostage-crisis-mc-c-bullseye-elektra">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:6:AnnihilationAffairHostageCrisis-MCOP_cb20200301170938.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Hostage Crisis!</span>
+          <span class="card-meta"><span>#005</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Promo" data-name="age of apocalypse mutant rebels held captive" data-number="006" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-mutant-rebels-held-captive-mc-u-jean-grey-dark-beast">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-52df3a7d15.md:0:AgeOfApocalypseMutantRebelsHeldCaptive-MCOP-P_cb20200227182337.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Age of Apocalypse - Mutant Rebels Held Captive!</span>
+          <span class="card-meta"><span>#006</span><span>Event</span><span>Promo</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="age of apocalypse martyr for the cause" data-number="007" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-martyr-for-the-cause-mc-u-angel">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:0:AgeOfApocalypseMartyrForTheCause-MCOP_cb20200227165106.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Age of Apocalypse - Martyr for the Cause</span>
+          <span class="card-meta"><span>#007</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair special delivery" data-number="008" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/annihilation-affair-event-special-delivery-mc-c-sidewinder">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:9:AnnihilationAffairSpecialDelivery-MCOP_cb20200225204514.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Special Delivery</span>
+          <span class="card-meta"><span>#008</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair heroic standoff" data-number="009" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/annihilation-affair-event-heroic-standoff-mc-c-doc-samson-hulk">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:5:AnnihilationAffairHeroicStandoff-MCOP_cb20200301171504.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Heroic Standoff!</span>
+          <span class="card-meta"><span>#009</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero confusion" data-number="010" data-price="$5.00" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/ah-confusion-opd-mc-r-rogue">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:0:AnyHeroConfusion-MCOP_cb20200313145453.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Confusion</span>
+          <span class="card-meta"><span>#010</span><span>Special</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$5.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="annihilation affair chaos at gamma base" data-number="011" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/annihilation-affair-event-chaos-at-gamma-base-mc-c-whirlwind">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:4:AnnihilationAffairChaosAtGammaBase-MCOP_cb20200301172150.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Chaos at Gamma Base</span>
+          <span class="card-meta"><span>#011</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="age of apocalypse rebel forces regroup" data-number="012" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/age-of-apocalypse-event-rebel-forces-regroup-mc-u-gambit-jubilee">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:2:AgeOfApocalypseRebelForcesRegroup-MCOP_cb20200301173507.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Age of Apocalypse - Rebel Forces Regroup!</span>
+          <span class="card-meta"><span>#012</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero savage land" data-number="013" data-price="$1.00" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/ah-savage-land-df-bl-mc-opd-r-ka-zar">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:5:AnyHeroSavageLand-MCOP_cb20200313141826.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Savage Land</span>
+          <span class="card-meta"><span>#013</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero unlucky at love" data-number="014" data-price="$1.00" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/ah-unlucky-at-love-mc-opd-r-typhoid-mary">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:6:AnyHeroUnluckyAtLove-MCOP_cb20200313142228.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Unlucky at Love</span>
+          <span class="card-meta"><span>#014</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero web headed wizard" data-number="015" data-price="$5.00" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/ah-web-headed-wizard-mc-opd-r-captain-universe-spider-man">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:7:AnyHeroWebHeadedWizard-MCOP_cb20200313203528.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Web-Headed Wizard</span>
+          <span class="card-meta"><span>#015</span><span>Special</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$5.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero death from above" data-number="016" data-price="$7.00" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/ah-death-from-above-mc-opd-r-green-goblin">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:1:AnyHeroDeathFromAbove-MCOP_cb20200313144837.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Death from Above</span>
+          <span class="card-meta"><span>#016</span><span>Special</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$7.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero god of mischief" data-number="017" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/ah-god-of-mischief-mc-opd-r-mephisto">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:3:AnyHeroGodOfMischief-MCOP_cb20200313144015.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - God of Mischief</span>
+          <span class="card-meta"><span>#017</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="black widow" data-number="018" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/black-widow-mc-character-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-512ae0986a.md:0:BlackWidow-MCOP_cb20200221231011.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow</span>
+          <span class="card-meta"><span>#018</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="black widow avenging agent" data-number="019" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/black-widow-avenging-agent-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:8:BlackWidowAvengingAgent-MCOP_cb20200313204732.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Avenging Agent</span>
+          <span class="card-meta"><span>#019</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero gamma terror" data-number="020" data-price="$5.00" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/ah-gamma-terror-mc-opd-r-doc-samson">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:2:AnyHeroGammaTerror-MCOP_cb20200313144512.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Gamma Terror</span>
+          <span class="card-meta"><span>#020</span><span>Special</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$5.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="any hero guardian angel" data-number="021" data-price="$5.00" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/ah-guardian-angel-mc-opd-vr-guardian">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:4:AnyHeroGuardianAngel-MCOP_cb20200313142748.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Any Hero - Guardian Angel</span>
+          <span class="card-meta"><span>#021</span><span>Special</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$5.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="black widow widow s line" data-number="022" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/black-widow-widows-line-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:13:BlackWidowWidowsLine-MCOP_cb20200313161506.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Widow&#x27;s Line</span>
+          <span class="card-meta"><span>#022</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="brood bony exoskeleton" data-number="023" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-bony-exoskeleton-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:15:BroodBonyExoskeleton-MCOP_cb20200314185551.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Bony Exoskeleton</span>
+          <span class="card-meta"><span>#023</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="brood" data-number="024" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-mc-character-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-512ae0986a.md:1:Brood-MCOP_cb20200224151556.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood</span>
+          <span class="card-meta"><span>#024</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="brood alien hunger" data-number="025" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-alien-hunger-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:14:BroodAlienHunger-MCOP_cb20200314185834.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Alien Hunger</span>
+          <span class="card-meta"><span>#025</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="black widow widow s bite" data-number="026" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/black-widow-widows-bite-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:12:BlackWidowWidowsBite-MCOP_cb20200313151709.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Widow&#x27;s Bite</span>
+          <span class="card-meta"><span>#026</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="black widow combat gymnast" data-number="027" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/black-widow-combat-gymnast-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:9:BlackWidowCombatGymnast-MCOP_cb20200313204019.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Combat Gymnast</span>
+          <span class="card-meta"><span>#027</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="brood brood spawn" data-number="028" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-brood-spawn-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:16:BroodBroodSpawn-MCOP_cb20200313205522.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Brood Spawn</span>
+          <span class="card-meta"><span>#028</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="brood overwhelm" data-number="029" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-overwhelm-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:18:BroodOverwhelm-MCOP_cb20200314190346.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Overwhelm</span>
+          <span class="card-meta"><span>#029</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="brood insectoid incursion" data-number="030" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-insectoid-incursion-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:17:BroodInsectoidIncursion-MCOP_cb20200313205138.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Insectoid Incursion</span>
+          <span class="card-meta"><span>#030</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="black widow defense tactics" data-number="031" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/black-widow-defense-tactics-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:10:BlackWidowDefenseTactics-MCOP_cb20200313150820.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Defense Tactics</span>
+          <span class="card-meta"><span>#031</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="black widow espionage" data-number="032" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/black-widow-espionage-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:11:BlackWidowEspionage-MCOP_cb20200313145755.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Black Widow - Espionage</span>
+          <span class="card-meta"><span>#032</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="brood pestilent horde" data-number="033" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/brood-pestilent-horde-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:19:BroodPestilentHorde-MCOP_cb20200314190102.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Brood - Pestilent Horde</span>
+          <span class="card-meta"><span>#033</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="dark phoenix saga battle on the moon" data-number="034" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-event-battle-on-the-moon-mc-c-cyclops">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:10:DarkPhoenixSagaBattleOnTheMoon-MCOP_cb20200227174251.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga - Battle on the Moon!</span>
+          <span class="card-meta"><span>#034</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="dark phoenix saga phoenix rises from ashes" data-number="035" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-saga-event-phoenix-rises-from-ashes-mc-c-dark-phoenix">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:13:DarkPhoenixSagaPhoenixRisesFromAshes-MCOP_cb20200227182829.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga - Phoenix Rises from Ashes!</span>
+          <span class="card-meta"><span>#035</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="dark phoenix saga hellfire club attacked" data-number="036" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/dark-phoenix-saga-event-hellfire-club-attacked-mc-c-nightcrawler">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:11:DarkPhoenixSaga-HellfireClubAttacked-MCOP_cb20200227175129.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga - Hellfire Club Attacked!</span>
+          <span class="card-meta"><span>#036</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="dark phoenix saga new lease on life" data-number="037" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-event-new-lease-on-life-mc-u-jean-grey-phoenix">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:12:DarkPhoenixSagaNewLeashOnLife-MCOP_cb20200227180140.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga - New Lease on Life</span>
+          <span class="card-meta"><span>#037</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="dark phoenix saga shi ar power play" data-number="038" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/dark-phoenix-saga-event-shiar-power-play-mc-c-lilandra-gladiator">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:14:DarkPhoenixSagaShiarPowerPlay-MCOP_cb20200228172603.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga - Shi&#x27;ar Power Play</span>
+          <span class="card-meta"><span>#038</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 3 kings and queens" data-number="039" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-3-kings-and-queens-mc-u-black-queen">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:2:DarkPhoenixSaga3-MCOP_cb20200312191330.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 3 - &quot;Kings and Queens&quot;</span>
+          <span class="card-meta"><span>#039</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 2 inner circles" data-number="040" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-2-inner-circles-mc-u-jean-grey">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:1:DarkPhoenixSaga2-MCOP_cb20200312191721.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 2 - &quot;Inner Circles&quot;</span>
+          <span class="card-meta"><span>#040</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 6 deady rebirth" data-number="041" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-6-deadly-rebirt-mc-u-dark-phoenix">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:5:DarkPhoenixSaga6-MCOP_cb20200305203832.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 6 - &quot;Deady Rebirth&quot;</span>
+          <span class="card-meta"><span>#041</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 5 imperial abduction" data-number="042" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-5-imperial-abduction-mc-u-lilandra">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:4:DarkPhoenixSaga5-MCOP_cb20200305202803.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 5 - &quot;Imperial Abduction&quot;</span>
+          <span class="card-meta"><span>#042</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 7 the cost of life" data-number="043" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-7-the-cost-of-life-mc-u-cyclops-phoenix">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:6:DarkPhoenixSaga7-MCOP_cb20200312184436.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 7 - &quot;The Cost of Life&quot;</span>
+          <span class="card-meta"><span>#043</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 4 knowledge is power" data-number="044" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-4-knowledge-is-power-mc-u-nightcrawler">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:3:DarkPhoenixSaga4-MCOP_cb20200305180714.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 4 - &quot;Knowledge is Power&quot;</span>
+          <span class="card-meta"><span>#044</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="doc samson analytical assault" data-number="045" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-analytical-assault-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:20:DocSamsonAnalyticalAssault-MCOP_cb20200313132659.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Analytical Assault</span>
+          <span class="card-meta"><span>#045</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="dark phoenix saga 1 troubling thoughts" data-number="046" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/dark-phoenix-sage-mission-1-troubling-thoughts-mc-u-mastermind">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:0:DarkPhoenixSaga1-MCOP_cb20200312191906.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Dark Phoenix Saga 1 - &quot;Troubling Thoughts&quot;</span>
+          <span class="card-meta"><span>#046</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="doc samson gamma muscle" data-number="047" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-gamma-muscle-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:21:DocSamsonGammaMuscle-MCOP_cb20200313132323.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Gamma Muscle</span>
+          <span class="card-meta"><span>#047</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="doc samson green haired hero" data-number="048" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-green-haired-hero-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:22:DocSamsonGreenHairedHero-MCOP_cb20200313132013.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Green Haired Hero</span>
+          <span class="card-meta"><span>#048</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="doc samson" data-number="049" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:0:DocSamson-MCOP_cb20200224183539.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson</span>
+          <span class="card-meta"><span>#049</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="doc samson theoretical treatment" data-number="050" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-theoretical-treatment-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:25:DocSamsonTheoreticalTreatment-MCOP_cb20200313140946.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Theoretical Treatment</span>
+          <span class="card-meta"><span>#050</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="fatal attractions a call to arms" data-number="051" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/fatal-attractions-event-a-call-to-arms-mc-u-quicksilver">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:15:FatalAttractionsACallToArms-MCOP_cb20200227183449.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Fatal Attractions - A Call to Arms</span>
+          <span class="card-meta"><span>#051</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="doc samson psychoanalyze" data-number="052" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-psychoanalyze-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:24:DocSamsonPsychoanalyze-MCOP_cb20200313140150.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Psychoanalyze</span>
+          <span class="card-meta"><span>#052</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="fatal attractions down but not out" data-number="053" data-price="$1.25" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/fatal-attractions-event-down-but-not-out-mc-u-wolverine-ue-no-tm-date">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-a98f8e960f.md:0:FatalAttractionsDownButNot_Out-MCOP_cb20200227190247.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Fatal Attractions - Down But Not Out!</span>
+          <span class="card-meta"><span>#053</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="doc samson power punch" data-number="054" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/doc-samson-power-punch-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:23:DocSamsonPowerPunch-MCOP_cb20200313140551.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Doc Samson - Power Punch</span>
+          <span class="card-meta"><span>#054</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="fatal attractions shockwave rocks the world" data-number="055" data-price="$1.00" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/fatal-attractions-event-shockwave-rocks-the-world-mc-u-magneto">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:17:FatalAttractionsShockwaveRocksTheWorld-MCOP_cb20200228173410.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Fatal Attractions - Shockwave Rocks the World!</span>
+          <span class="card-meta"><span>#055</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="fatal attractions the best laid plans" data-number="056" data-price="$1.00" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/fatal-attractions-event-the-best-laid-pans-mc-u-bishop">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:18:FatalAttractionsTheBestLaidPlans-MCOP_cb20200228194300.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Fatal Attractions - The Best Laid Plans...</span>
+          <span class="card-meta"><span>#056</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="fatal attractions hospital becomes war zone" data-number="057" data-price="$1.00" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/fatal-attractions-event-hospital-becomes-war-zone-mc-u-exodus">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:16:FatalAttractionsHospitalBecomesWarZone-MCOP_cb20200228175336.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Fatal Attractions - Hospital Becomes War Zone!</span>
+          <span class="card-meta"><span>#057</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="hawkeye avenging archer" data-number="058" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/hawkeye-avenging-archer-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:27:HawkeyeAvengingArcher-MCOP_cb20200313124556.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Avenging Archer</span>
+          <span class="card-meta"><span>#058</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="hawkeye pinpoint accuracy" data-number="059" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/hawkeye-pinpoint-accuracy-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:30:HawkeyePinpointAccuracy-MCOP_cb20200313131637.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Pinpoint Accuracy</span>
+          <span class="card-meta"><span>#059</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="hawkeye dynamite delivery" data-number="060" data-price="$1.25" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/hawkeye-dynamite-delivery-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:29:HawkeyeDynamiteDelivery-MCOP_cb20200313131341.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Dynamite Delivery</span>
+          <span class="card-meta"><span>#060</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Insert" data-rarity="Insert" data-name="annihilation affair special delivery" data-number="061" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/annihilation-affair-event-special-delivery-mc-c-sidewinder">
+        <input type="checkbox" data-card-id="type--rarity-27763a2b54.md:0:FandomFireLogo_cb20210713142711.png" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Annihilation Affair - Special Delivery</span>
+          <span class="card-meta"><span>#061</span><span>Insert</span><span>Insert</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="hawkeye triple shot" data-number="062" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/hawkeye-triple-shot-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:31:HawkeyeTripleShot-MCOP_cb20200313123531.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Triple Shot</span>
+          <span class="card-meta"><span>#062</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="hawkeye arrow assault" data-number="063" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/hawkeye-arrow-assault-aa-gj-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:26:HawkeyeArrowAssault-MCOP_cb20200313123850.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Arrow Assault</span>
+          <span class="card-meta"><span>#063</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infestation incident alien creature rampages" data-number="064" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infestation-incident-event-alien-creature-rampages-u-professor-x">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:19:InfestationIncidentAlienCreatureRampages-MCOP_cb20200228195140.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Alien Creature Rampages!</span>
+          <span class="card-meta"><span>#064</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="hawkeye" data-number="065" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/hawkeye-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:1:Hawkeye-MCOP_cb20200224184704.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye</span>
+          <span class="card-meta"><span>#065</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Promo" data-name="infestation incident alien creature rampages" data-number="066" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infestation-incident-event-alien-creature-rampages-u-professor-x">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-a98f8e960f.md:1:InfestationIncidentAlienCreatureRampages-MCOP-P_cb20200228194729.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Alien Creature Rampages!</span>
+          <span class="card-meta"><span>#066</span><span>Event</span><span>Promo</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="hawkeye combat ready" data-number="067" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/hawkeye-combat-ready-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:28:HawkeyeCombatReady-MCOP_cb20200313130737.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Hawkeye - Combat Ready</span>
+          <span class="card-meta"><span>#067</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infestation incident caught off guard" data-number="068" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infestation-incident-event-caught-off-guard-mc-u-rogue">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:20:InfestationIncidentCaughtOffGuard-MCOP_cb20200228195628.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Caught Off Guard!</span>
+          <span class="card-meta"><span>#068</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infestation incident second wind" data-number="069" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/infestation-incident-event-second-wind-mc-u-gambit-brood">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:23:InfestationIncidentSecondWind-MCOP_cb20200301165610.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Second Wind</span>
+          <span class="card-meta"><span>#069</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infestation incident monsters attack" data-number="070" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/infestation-incident-event-monsters-attack-mc-u-colossus-brood">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:22:InfestationIncidentMonstersAttack-MCOP_cb20200228200808.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Monsters Attack!</span>
+          <span class="card-meta"><span>#070</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infinity gauntlet gods of stone" data-number="071" data-price="$5.50" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/infinity-gauntlet-event-gods-of-stone-mc-u-galactus">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:25:InfinityGauntletGodsOfStone-MCOP_cb20200301180814.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infinity Gauntlet - Gods of Stone!</span>
+          <span class="card-meta"><span>#071</span><span>Event</span><span>Rare</span><span class="card-price price-tier-999" title="The Orange King listed price">$5.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infinity gauntlet cosmic sneak attack" data-number="072" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infinity-gauntlet-event-cosmic-sneak-attack-mc-u-adam-warlock">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:24:InfinityGauntletCosmicSneakAttack-MCOP_cb20200301170100.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infinity Gauntlet - Cosmic Sneak Attack!</span>
+          <span class="card-meta"><span>#072</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infinity gauntlet heroes resurrected" data-number="073" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infinity-gauntlet-event-heroes-resurrected-mc-u-pip-gammora">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-a98f8e960f.md:2:InfinityGauntletHeroesResurrected-MCOP_cb20200301180334.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infinity Gauntlet - Heroes Resurrected!</span>
+          <span class="card-meta"><span>#073</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infestation incident here comes the cavalry" data-number="074" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/infestation-incident-event-here-comes-the-cavalry-mc-u-ghost-rider-brood">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:21:InfestationIncidentHereComesTheCavalry-MCOP_cb20200228200156.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infestation Incident - Here Comes the Cavalry!</span>
+          <span class="card-meta"><span>#074</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="maximum carnage friends and allies" data-number="075" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/maximum-carnage-event-friends-and-allies-mc-c-morbius">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:28:MaximumCarnageFriendsAndAllies-MCOP_cb20200301182954.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Maximum Carnage - Friends and Allies</span>
+          <span class="card-meta"><span>#075</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="maximum carnage lambs to the slaughter" data-number="076" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/maximum-carnage-event-lambs-to-the-slaughter-mc-c-carnage">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:29:MaximumCarnageLambsToTheSlaughter-MCOP_cb20200301182658.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Maximum Carnage - Lambs to the Slaughter</span>
+          <span class="card-meta"><span>#076</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="morbius" data-number="077" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:2:Morbius-MCOP_cb20200224193601.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius</span>
+          <span class="card-meta"><span>#077</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="maximum carnage let the silence speak" data-number="078" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/maximum-carnage-event-let-the-silence-speak-mc-c-iron-fist">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:30:MaximumCarnageLetTheSilenceSpeak-MCOP_cb20200301174024.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Maximum Carnage - Let the Silence Speak!</span>
+          <span class="card-meta"><span>#078</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="maximum carnage symbiotic hero captured" data-number="079" data-price="$1.25" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/maximum-carngae-event-symbiotic-hero-captured-mc-c-venom">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:32:MaximumCarnageSymbioticHeroCaptured-MCOP_cb20200301175927.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Maximum Carnage - Symbiotic Hero Captured!</span>
+          <span class="card-meta"><span>#079</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="morbius blood hunger" data-number="080" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-blood-hunger-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:32:MorbiusBloodHunger-MCOP_cb20200318174128.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Blood Hunger</span>
+          <span class="card-meta"><span>#080</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infinity gauntlet silver tongued devil" data-number="081" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/infinity-gauntlet-event-silver-tongued-devil-mc-u-mephisto-thanos">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:27:InfinityGauntletSilverTonguedDevil-MCOP_cb20200301181406.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infinity Gauntlet - Silver Tongued Devil</span>
+          <span class="card-meta"><span>#081</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="infinity gauntlet mad god raises dead" data-number="082" data-price="$3.50" data-price-tier="price-tier-499" data-price-source="https://theorangeking.com/products/infinity-gauntlet-event-mad-god-raises-dead-mc-u-thanos-nebula">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:26:InfinityGauntletMadGodRaisesDead-MCOP_cb20200301181841.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Infinity Gauntlet - Mad God Raises Dead!</span>
+          <span class="card-meta"><span>#082</span><span>Event</span><span>Rare</span><span class="card-price price-tier-499" title="The Orange King listed price">$3.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="morbius dread champion" data-number="083" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-dread-champion-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:33:MorbiusDreadChampion-MCOP_cb20200318132146.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Dread Champion</span>
+          <span class="card-meta"><span>#083</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="maximum carnage miracle worker alive" data-number="084" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/maximum-carnage-event-miracle-worker-alive-mc-c-dagger-cloak">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:31:MaximumCarnageMiracleWorkerAlive-MCOP_cb20200301174801.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Maximum Carnage - Miracle Worker Alive!</span>
+          <span class="card-meta"><span>#084</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morbius savage combat" data-number="085" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-savage-combat-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:35:MorbiusSavageCombat-MCOP_cb20200318150437.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Savage Combat</span>
+          <span class="card-meta"><span>#085</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morbius supernatural strength" data-number="086" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-supernatural-strength-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:36:MorbiusSupernaturalStrength-MCOP_cb20200318150739.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Supernatural Strength</span>
+          <span class="card-meta"><span>#086</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morph changeling" data-number="087" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-changeling-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:39:MorphChangeling-MCOP_cb20200318123456.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - Changeling</span>
+          <span class="card-meta"><span>#087</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="morph amazing x man" data-number="088" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-amazing-x-man-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:38:MorphAmazingXman-MCOP_cb20200318145656.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - Amazing X-Man</span>
+          <span class="card-meta"><span>#088</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="morph" data-number="089" data-price="$1.25" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/morph-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:3:Morph-MCOP_cb20200225175706.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph</span>
+          <span class="card-meta"><span>#089</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morbius living vampire" data-number="090" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-living-vampire-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:34:MorbiusLivingVampire-MCOP_cb20200318145350.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Living Vampire</span>
+          <span class="card-meta"><span>#090</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morph copy teammate" data-number="091" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-copy-teammate-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:40:MorphCopyTeammate-MCOP_cb20200318112412.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - Copy Teammate</span>
+          <span class="card-meta"><span>#091</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="morph power mimic" data-number="092" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-power-mimic-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:43:MorphPowerMimic-MCOP_cb20200318123113.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - Power Mimic</span>
+          <span class="card-meta"><span>#092</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="nightcrawler" data-number="093" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/nightcrawler-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-a98b10208a.md:0:Nightcrawler-MCOP_cb20200225181200.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler</span>
+          <span class="card-meta"><span>#093</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="morbius undead stamina" data-number="094" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morbius-undead-stamina-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:37:MorbiusUndeadStamina-MCOP_cb20200318150047.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morbius - Undead Stamina</span>
+          <span class="card-meta"><span>#094</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="morph one big fist" data-number="095" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-one-big-fist-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:42:MorphOneBigFist-MCOP_cb20200318130949.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - One Big Fist</span>
+          <span class="card-meta"><span>#095</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="morph maximum morph" data-number="096" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/morph-maximum-morph-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:41:MorphMaximumMorph-MCOP_cb20200318131700.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Morph - Maximum Morph</span>
+          <span class="card-meta"><span>#096</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="nightcrawler prehensile tail" data-number="097" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/nightcrawler-prehensile-tail-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:46:NightcrawlerPrehensileTail-MCOP_cb20200318113113.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Prehensile Tail</span>
+          <span class="card-meta"><span>#097</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="nightcrawler disappearing act" data-number="098" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/nightcrawler-disappearing-act-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:45:NightcrawlerDisappearingAct-MCOP_cb20200318114946.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Disappearing Act</span>
+          <span class="card-meta"><span>#098</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="nightcrawler swashbuckler" data-number="099" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/nightcrawler-swashbuckler-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:47:NightcrawlerSwashbuckler-MCOP_cb20200318111023.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Swashbuckler</span>
+          <span class="card-meta"><span>#099</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="quicksilver" data-number="100" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:4:Quicksilver-MCOP_cb20200225202958.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver</span>
+          <span class="card-meta"><span>#100</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="nightcrawler vicious teleport" data-number="101" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/nightcrawler-vicious-teleport-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:49:NightcrawlerViciousTeleport-MCOP_cb20200314212514.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Vicious Teleport</span>
+          <span class="card-meta"><span>#101</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="quicksilver agile avenger" data-number="102" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-agile-avenger-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:50:QuicksilverAgileAvenger-MCOP_cb20200314211951.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Agile Avenger</span>
+          <span class="card-meta"><span>#102</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="nightcrawler bamf" data-number="103" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/nightcrawler-bamf-ag-ad-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:44:NightcrawlerBamf-MCOP_cb20200318122724.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Bamf!</span>
+          <span class="card-meta"><span>#103</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="quicksilver mutant momentum" data-number="104" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-mutant-momentum-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:53:QuicksilverMutantMomentum-MCOP_cb20200314193930.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Mutant Momentum</span>
+          <span class="card-meta"><span>#104</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="quicksilver rapid rip off" data-number="105" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-rapid-rip-off-dg-id-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:54:QuicksilverRapidRipOff-MCOP_cb20200314193609.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Rapid Rip Off</span>
+          <span class="card-meta"><span>#105</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="quicksilver superspeed" data-number="106" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-superspeed-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:55:QuicksilverSuperSpeed-MCOP_cb20200318175411.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Superspeed</span>
+          <span class="card-meta"><span>#106</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="nightcrawler trick transport" data-number="107" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/nightcrawler-trick-transport-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:48:NightcrawlerTrickTransport-MCOP_cb20200318111948.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Nightcrawler - Trick Transport</span>
+          <span class="card-meta"><span>#107</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="quicksilver fast and furious" data-number="108" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-fast-and-furious-bv-bx-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:51:QuicksilverFastAndFurious-MCOP_cb20200314194700.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Fast and Furious</span>
+          <span class="card-meta"><span>#108</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="sentinels hunter killer" data-number="109" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/sentinels-hunter-killer-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:56:SentinelsHunterKiller-MCOP_cb20200318174623.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Hunter/Killer</span>
+          <span class="card-meta"><span>#109</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="sentinels learning circuits" data-number="110" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/sentinels-learning-circuits-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:57:SentinelsLearningCircuits-MCOP_cb20200318175040.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Learning Circuits</span>
+          <span class="card-meta"><span>#110</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="quicksilver hit and run" data-number="111" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/quicksilver-hit-and-run-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:52:QuicksilverHitAndRun-MCOP_cb20200314194101.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Quicksilver - Hit and Run</span>
+          <span class="card-meta"><span>#111</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="sentinels master mold" data-number="112" data-price="$6.50" data-price-tier="price-tier-999" data-price-source="https://theorangeking.com/products/sentinels-master-mold-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:58:SentinelsMasterMold-MCOP_cb20200319191702.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Master Mold</span>
+          <span class="card-meta"><span>#112</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-999" title="The Orange King listed price">$6.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="sentinels" data-number="113" data-price="$2.00" data-price-tier="price-tier-499" data-price-source="https://theorangeking.com/products/sentinels-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:5:Sentinels-MCOP_cb20200225203523.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels</span>
+          <span class="card-meta"><span>#113</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-499" title="The Orange King listed price">$2.00</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="sentinels nimrod" data-number="114" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sentinels-nimrod-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:59:SentinelsNimrod-MCOP_cb20200318175658.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Nimrod</span>
+          <span class="card-meta"><span>#114</span><span>Special</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="separation anxiety imprisoned for science" data-number="115" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/separation-anxiety-event-imprisoned-for-science-mc-u-the-jury-symbiote">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:35:FandomFireLogo_cb20210713142711.png" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Separation Anxiety - Imprisoned for Science</span>
+          <span class="card-meta"><span>#115</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="sentinels overhaul" data-number="116" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/sentinels-overhaul-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:60:SentinelsOverhaul-MCOP_cb20200319192726.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Overhaul</span>
+          <span class="card-meta"><span>#116</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="separation anxiety caught by surprise" data-number="117" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/separation-anxiety-event-caught-by-surprise-mc-u-spider-man">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:34:SeparationAnxietyCaughtBySurprise-MCOP_cb20200301183326.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Separation Anxiety - Caught by Surprise</span>
+          <span class="card-meta"><span>#117</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="separation anxiety symbiotic samples taken" data-number="118" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/separation-anxiety-event-symbiotic-samples-taken-mc-u-symbiote">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:37:SeparationAnxietySymbioticSamplesTaken-MCOP_cb20200301185511.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Separation Anxiety - Symbiotic Samples Taken</span>
+          <span class="card-meta"><span>#118</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="separation anxiety symbiotic achilles heel" data-number="119" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/separation-anxiety-event-symbiotic-achilles-heel-mc-u-venom">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:36:SeparationAnxietySymbioticAchillesHeel-MCOP_cb20200301184916.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Separation Anxiety - Symbiotic Achilles Heel</span>
+          <span class="card-meta"><span>#119</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="separation anxiety breakout" data-number="120" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/separation-anxiety-event-breakout-mc-u-venom">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:33:SeparationAnxietyBreakout-MCOP_cb20200303180852.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Separation Anxiety - Breakout</span>
+          <span class="card-meta"><span>#120</span><span>Event</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="sins of the future assassination attempt" data-number="121" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sins-of-the-future-event-assassination-attempt-mc-u-mystique-destiny">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:38:SinsOfTheFutureAssassinationAttempt-MCOP_cb20200303163114.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sins of the Future - Assassination Attempt!</span>
+          <span class="card-meta"><span>#121</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="sins of the future mutants in hiding" data-number="122" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sins-of-the-future-event-mutants-in-hiding-mc-u-cannonball">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:40:SinsOfTheFutureMutantsInHiding-MCOP_cb20200303165216.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sins of the Future - Mutants in Hiding!</span>
+          <span class="card-meta"><span>#122</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="sins of the future rude awakening" data-number="123" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sins-of-the-future-event-rude-awakening-mc-u-sentinels">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:42:SinsOfTheFutureRudeAwakening-MCOP_cb20200303170929.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sins of the Future - Rude Awakening</span>
+          <span class="card-meta"><span>#123</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="sentinels reaction program" data-number="124" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/sentinels-reaction-program-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:61:SentinelsReactionProgram-MCOP_cb20200319193248.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sentinels - Reaction Program</span>
+          <span class="card-meta"><span>#124</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="the crossing avengers assemble" data-number="125" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/the-crossing-event-avengers-assemble-mc-c-hawkeye-vision-scarlet-witch">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:43:TheCrossingAvengersAssemble-MCOP_cb20200303194236.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing - Avengers Assemble!</span>
+          <span class="card-meta"><span>#125</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="sins of the future mutants neutralized" data-number="126" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sins-of-the-future-event-mutants-neutralized-mc-u-storm">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:39:SinsOfTheFutureMutantsNeutralized-MCOP_cb20200303165940.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sins of the Future - Mutants Neutralized</span>
+          <span class="card-meta"><span>#126</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="the crossing avengers attack headquarters" data-number="127" data-price="$1.50" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/the-crossing-event-avengers-attack-headquarters-mc-c-thor">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:44:TheCrossingAvengersAttackHeadquarters-MCOP_cb20200303181400.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing - Avengers Attack Headquarters</span>
+          <span class="card-meta"><span>#127</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="the crossing heroes avenge murder" data-number="128" data-price="$2.50" data-price-tier="price-tier-499" data-price-source="https://theorangeking.com/products/the-crossing-event-heroes-avenge-murder-mc-c-iron-man">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:45:TheCrossingHeroesAvengeMurder-MCOP_cb20200303181906.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing - Heroes Avenge Murder</span>
+          <span class="card-meta"><span>#128</span><span>Event</span><span>Rare</span><span class="card-price price-tier-499" title="The Orange King listed price">$2.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="sins of the future one step closer" data-number="129" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/sins-of-the-future-event-one-step-closer-mc-u-dr-trask">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:41:SinsOfTheFutureOneStepCloser-MCOP_cb20200303170405.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Sins of the Future - One Step Closer</span>
+          <span class="card-meta"><span>#129</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="the crossing otherworldly plot" data-number="130" data-price="$0.75" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/the-crossing-event-otherworldly-plot-mc-c-kang">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:46:TheCrossingOtherworldlyPlot-MCOP_cb20200303182511.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing - Otherworldly Plot</span>
+          <span class="card-meta"><span>#130</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$0.75</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 1 murder most foul" data-number="131" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-1-mc-u-iron-man">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:7:TheCrossing1-MCOP_cb20200312195411.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 1 - &quot;Murder Most Foul&quot;</span>
+          <span class="card-meta"><span>#131</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 2 deception and revelation" data-number="132" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-2-mc-u-vision">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:8:TheCrossing2-MCOP_cb20200312193713.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 2 - &quot;Deception and Revelation&quot;</span>
+          <span class="card-meta"><span>#132</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 3 blood and friendship" data-number="133" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-3-mc-u-giant-man-wasp-hercules">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:9:TheCrossing3-MCOP_cb20200312193850.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 3 - &quot;Blood and Friendship&quot;</span>
+          <span class="card-meta"><span>#133</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 5 back in the day" data-number="134" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-5-mc-u-capt-america-black-widow-jarvis">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:11:TheCrossing5-MCOP_cb20200312200329.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 5 - &quot;Back in the Day&quot;</span>
+          <span class="card-meta"><span>#134</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 6 my enemy my self" data-number="135" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-6-mc-u-stark-and-stark">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:12:TheCrossing6-MCOP_cb20200312200122.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 6 - &quot;My Enemy, My Self&quot;</span>
+          <span class="card-meta"><span>#135</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Event" data-rarity="Rare" data-name="the crossing time travellers vanquished" data-number="136" data-price="$1.50" data-price-tier="price-tier-199" data-price-source="https://theorangeking.com/products/the-crossing-event-time-travellers-vanquished-mc-c-mantis">
+        <input type="checkbox" data-card-id="type--game-text--characters--rarity-132451d720.md:47:TheCrossingTimeTravellersVanquished-MCOP_cb20200303183335.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing - Time Travellers Vanquished</span>
+          <span class="card-meta"><span>#136</span><span>Event</span><span>Rare</span><span class="card-price price-tier-199" title="The Orange King listed price">$1.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="vision analytical expert" data-number="137" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-analytical-expert-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:62:VisionAnalyticalExpert-MCOP_cb20200319194534.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Analytical Expert</span>
+          <span class="card-meta"><span>#137</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Character" data-rarity="Uncommon" data-name="vision" data-number="138" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-mc-hero-u">
+        <input type="checkbox" data-card-id="type--numbers--characters--rarity-5e94e1f2a0.md:6:Vision-MCOP_cb20200225203828.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision</span>
+          <span class="card-meta"><span>#138</span><span>Character</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="vision android endurance" data-number="139" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-android-endurance-mc-opd-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:63:VisionAndroidEndurance-MCOP_cb20200320163532.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Android Endurance</span>
+          <span class="card-meta"><span>#139</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="vision double density" data-number="140" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-double-density-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:64:VisionDoubleDensity-MCOP_cb20200323140758.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Double Density</span>
+          <span class="card-meta"><span>#140</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 4 redeemed" data-number="141" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-4-mc-u-hawkeye-black-widow">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:10:TheCrossing4-MCOP_cb20200312194856.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 4 - &quot;Redeemed&quot;</span>
+          <span class="card-meta"><span>#141</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Mission" data-rarity="Uncommon" data-name="the crossing 7 a time for evil" data-number="142" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/the-crossing-mission-7-mc-u-kang-mantis">
+        <input type="checkbox" data-card-id="type--characters--rarity-6bdcb47e99.md:13:TheCrossing7-MCOP_cb20200313123139.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">The Crossing 7 - &quot;A Time for Evil&quot;</span>
+          <span class="card-meta"><span>#142</span><span>Mission</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Common" data-name="vision optic energy" data-number="143" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-optic-energy-mc-c">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:66:VisionOpticEnergy-MCOP_cb20200323142638.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Optic Energy</span>
+          <span class="card-meta"><span>#143</span><span>Special</span><span>Common</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Uncommon" data-name="vision phase form" data-number="144" data-price="$0.25" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-phase-form-mc-u">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:67:VisionPhaseForm-MCOP_cb20200323191909.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Phase Form</span>
+          <span class="card-meta"><span>#144</span><span>Special</span><span>Uncommon</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.25</span></span>
+        </span>
+      </label>
+
+      <label class="card-row" data-card-row data-type="Special" data-rarity="Rare" data-name="vision intangible strike" data-number="145" data-price="$0.50" data-price-tier="price-tier-050" data-price-source="https://theorangeking.com/products/vision-intangible-strike-mc-opd-r">
+        <input type="checkbox" data-card-id="type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md:65:VisionIntangibleStrike-MCOP_cb20200323141516.jpg" />
+        <span class="check-face" aria-hidden="true"></span>
+        <span class="card-main">
+          <span class="card-name">Vision - Intangible Strike</span>
+          <span class="card-meta"><span>#145</span><span>Special</span><span>Rare</span><span class="card-price price-tier-050" title="The Orange King listed price">$0.50</span></span>
+        </span>
+      </label>
+      </section>
+
+      <aside class="preview-panel is-empty" id="previewPanel" aria-label="Card image preview">
+        <header class="preview-panel__header">
+          <p class="preview-panel__eyebrow">Card Preview</p>
+          <h2 class="preview-panel__title" id="previewTitle">Hover a card</h2>
+          <div class="preview-panel__meta" id="previewMeta">
+            <span>Images load from the local Excelsior card folder</span>
+          </div>
+        </header>
+        <div class="preview-panel__image-wrap">
+          <img class="preview-panel__image" id="previewImage" alt="" />
+          <div class="preview-panel__empty" id="previewEmpty">Hover a checklist row to see the full card image.</div>
+        </div>
+        <p class="preview-panel__note" id="previewNote">143 cards have local scans. Placeholder rows use the local source placeholder art.</p>
+      </aside>
+    </div>
+
+    <p class="source-note">Source files: <code>src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-512ae0986a.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-5e94e1f2a0.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-a98b10208a.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--characters--rarity-6bdcb47e99.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-132451d720.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-52df3a7d15.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-a98f8e960f.md</code>, <code>src/resources/legacy/missioncontrolop/mission-control-md/type--rarity-27763a2b54.md</code>. Images load from <code>/Users/kyle/cursored/src/resources/legacy/missioncontrolop/mission-control-images</code>. Generated on 2026-08-31 from local files. Card-number order comes from <code>src/resources/legacy/missioncontrolop/manifest.csv</code>. Prices are listed product prices from The Orange King Shopify data fetched on 2026-08-31; shipping, tax, discounts, and cart behavior are not included. 145 cards have matched prices and 0 cards are marked <code>No TOK price</code>.</p>
+  </main>
+
+  <script>
+    const progressSchema = 'mission-control-checklist-progress/v1';
+    const storageKey = 'mission-control-checklist:v1';
+    const fileHandleDbName = 'mission-control-checklist';
+    const fileHandleStoreName = 'file-handles';
+    const fileHandleKey = 'portable-progress-json';
+    const seedState = {};
+    const boxes = Array.from(document.querySelectorAll('input[type="checkbox"][data-card-id]'));
+    const rows = Array.from(document.querySelectorAll('[data-card-row]'));
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+    const search = document.getElementById('search');
+    const typeFilter = document.getElementById('typeFilter');
+    const sortOrder = document.getElementById('sortOrder');
+    const cardList = document.getElementById('cardList');
+    const connectProgressFile = document.getElementById('connectProgressFile');
+    const persistStatus = document.getElementById('persistStatus');
+    const previewPanel = document.getElementById('previewPanel');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewMeta = document.getElementById('previewMeta');
+    const previewImage = document.getElementById('previewImage');
+    const previewEmpty = document.getElementById('previewEmpty');
+    const previewNote = document.getElementById('previewNote');
+    const imageBaseUrl = 'file:///Users/kyle/cursored/src/resources/legacy/missioncontrolop/mission-control-images/';
+    const placeholderImage = 'FandomFireLogo_cb20210713142711.png';
+    let previewedRow = null;
+    let portableFileHandle = null;
+    let portableWriteQueue = Promise.resolve();
+    const typeRank = {"Character":1,"Special":2,"Mission":3,"Event":4,"Insert":5};
+    const rarityRank = { 'Common': 1, 'Uncommon': 2, 'Rare': 3, 'Ultra Rare': 4, 'SuperCommon': 5 };
+
+    rows.forEach((row, index) => {
+      row.dataset.sourceOrder = String(index);
+      row.dataset.price = row.querySelector('.card-price')?.textContent.trim() || '';
+    });
+
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+      catch { return {}; }
+    }
+
+    function normalizeProgressPayload(payload) {
+      if (!payload || typeof payload !== 'object') return {};
+      const checked = payload.checked && typeof payload.checked === 'object' ? payload.checked : payload;
+      return Object.fromEntries(Object.entries(checked).filter(([, value]) => Boolean(value)));
+    }
+
+    function currentState() {
+      const state = {};
+      boxes.forEach((box) => { if (box.checked) state[box.dataset.cardId] = true; });
+      return state;
+    }
+
+    function buildProgressPayload(state = currentState()) {
+      return {
+        schema: progressSchema,
+        updatedAt: new Date().toISOString(),
+        cardCount: boxes.length,
+        checkedCount: Object.keys(state).length,
+        checked: state
+      };
+    }
+
+    function setPersistStatus(message, connected = Boolean(portableFileHandle)) {
+      persistStatus.innerHTML = message;
+      connectProgressFile.classList.toggle('is-connected', connected);
+      connectProgressFile.textContent = connected ? 'File Connected' : 'Connect File';
+    }
+
+    function saveState() {
+      const state = currentState();
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      updateProgress();
+      persistPortableState(state);
+    }
+
+    function openFileHandleStore() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(fileHandleDbName, 1);
+        request.onupgradeneeded = () => request.result.createObjectStore(fileHandleStoreName);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+    }
+
+    async function getStoredFileHandle() {
+      const db = await openFileHandleStore();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(fileHandleStoreName, 'readonly');
+        const request = transaction.objectStore(fileHandleStoreName).get(fileHandleKey);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result || null);
+      });
+    }
+
+    async function setStoredFileHandle(handle) {
+      const db = await openFileHandleStore();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(fileHandleStoreName, 'readwrite');
+        transaction.objectStore(fileHandleStoreName).put(handle, fileHandleKey);
+        transaction.onerror = () => reject(transaction.error);
+        transaction.oncomplete = () => resolve();
+      });
+    }
+
+    async function ensureReadWritePermission(handle) {
+      const options = { mode: 'readwrite' };
+      if ((await handle.queryPermission(options)) === 'granted') return true;
+      return (await handle.requestPermission(options)) === 'granted';
+    }
+
+    async function readPortableState(handle) {
+      try {
+        const file = await handle.getFile();
+        return normalizeProgressPayload(JSON.parse(await file.text() || '{}'));
+      } catch {
+        return {};
+      }
+    }
+
+    async function writePortableState(state = currentState()) {
+      if (!portableFileHandle) return false;
+      if (!(await ensureReadWritePermission(portableFileHandle))) {
+        setPersistStatus('Progress is cached in this browser. File permission is needed to write the portable JSON.', false);
+        return false;
+      }
+      const writable = await portableFileHandle.createWritable();
+      await writable.write(JSON.stringify(buildProgressPayload(state), null, 2) + '\n');
+      await writable.close();
+      setPersistStatus(`Every checkbox change is writing to <strong>${portableFileHandle.name}</strong>. Last saved ${new Date().toLocaleTimeString()}.`, true);
+      return true;
+    }
+
+    function persistPortableState(state = currentState()) {
+      if (!portableFileHandle) return;
+      const snapshot = { ...state };
+      portableWriteQueue = portableWriteQueue.then(() => writePortableState(snapshot)).catch((error) => {
+        setPersistStatus(`Progress is cached in this browser. Portable file write failed: ${error.message}`, false);
+      });
+    }
+
+    function applyState(state) {
+      boxes.forEach((box) => { box.checked = Boolean(state[box.dataset.cardId]); });
+      localStorage.setItem(storageKey, JSON.stringify(currentState()));
+      updateProgress();
+    }
+
+    async function connectExistingProgressFile() {
+      if (!('showOpenFilePicker' in window) && !('showSaveFilePicker' in window)) {
+        setPersistStatus('This browser does not expose direct file writes from a local HTML page. Use Export as a manual fallback.', false);
+        return;
+      }
+      let handle = null;
+      if ('showOpenFilePicker' in window) {
+        [handle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: 'Checklist progress', accept: { 'application/json': ['.json'] } }] });
+      } else {
+        handle = await window.showSaveFilePicker({ suggestedName: 'mission-control-checklist-progress.json', types: [{ description: 'Checklist progress', accept: { 'application/json': ['.json'] } }] });
+      }
+      if (!(await ensureReadWritePermission(handle))) {
+        setPersistStatus('Progress is cached in this browser. File permission was not granted.', false);
+        return;
+      }
+      portableFileHandle = handle;
+      await setStoredFileHandle(handle);
+      const mergedState = { ...await readPortableState(handle), ...currentState() };
+      applyState(mergedState);
+      await writePortableState(mergedState);
+    }
+
+    async function restoreConnectedProgressFile() {
+      try {
+        const handle = await getStoredFileHandle();
+        if (!handle) return;
+        portableFileHandle = handle;
+        if (!(await ensureReadWritePermission(handle))) {
+          portableFileHandle = null;
+          setPersistStatus('Progress is cached in this browser. Reconnect the project JSON file to resume automatic writes.', false);
+          return;
+        }
+        const mergedState = { ...await readPortableState(handle), ...normalizeProgressPayload(loadState()) };
+        applyState(mergedState);
+        await writePortableState(mergedState);
+      } catch {
+        portableFileHandle = null;
+      }
+    }
+
+    function updateProgress() {
+      let checked = 0;
+      boxes.forEach((box) => {
+        const row = box.closest('[data-card-row]');
+        row.classList.toggle('is-checked', box.checked);
+        if (box.checked) checked += 1;
+      });
+      progressText.textContent = checked + ' / ' + boxes.length;
+      progressBar.value = checked;
+    }
+
+    function cardInfoFromRow(row) {
+      const input = row.querySelector('input[type="checkbox"]');
+      const idParts = input.dataset.cardId.split(':');
+      const imageName = idParts.slice(2).join(':');
+      const meta = Array.from(row.querySelectorAll('.card-meta span')).map((span) => span.textContent.trim());
+      return {
+        name: row.querySelector('.card-name').textContent.trim(),
+        number: row.dataset.number || '',
+        type: row.dataset.type || meta[0] || '',
+        rarity: row.dataset.rarity || '',
+        price: row.dataset.price || '',
+        priceTier: row.dataset.priceTier || '',
+        imageName,
+        hasPlaceholderImage: imageName === placeholderImage || !imageName
+      };
+    }
+
+    function previewRow(row) {
+      if (!row) {
+        previewPanel.classList.add('is-empty');
+        previewTitle.textContent = 'Hover a card';
+        previewMeta.innerHTML = '<span>Images load from the local Excelsior card folder</span>';
+        previewImage.removeAttribute('src');
+        previewImage.alt = '';
+        previewEmpty.textContent = 'Hover a checklist row to see the full card image.';
+        previewNote.textContent = '143 cards have local scans. Placeholder rows use the local source placeholder art.';
+        return;
+      }
+      if (previewedRow) previewedRow.classList.remove('is-previewed');
+      previewedRow = row;
+      previewedRow.classList.add('is-previewed');
+      const card = cardInfoFromRow(row);
+      previewPanel.classList.remove('is-empty');
+      previewTitle.textContent = card.name;
+      previewMeta.innerHTML = '';
+      [
+        { value: card.number ? '#' + card.number : '' },
+        { value: card.type },
+        { value: card.rarity },
+        { value: card.price, className: ['card-price', card.priceTier].filter(Boolean).join(' ') }
+      ].filter((item) => item.value).forEach((item) => {
+        const chip = document.createElement('span');
+        chip.textContent = item.value;
+        if (item.className) chip.className = item.className;
+        previewMeta.appendChild(chip);
+      });
+      if (card.imageName) {
+        previewImage.src = imageBaseUrl + encodeURIComponent(card.imageName);
+        previewImage.alt = card.name;
+      } else {
+        previewImage.removeAttribute('src');
+      }
+      previewNote.textContent = card.hasPlaceholderImage
+        ? 'The local source has placeholder art for this row.'
+        : 'Hover or focus another row to keep comparing cards while you search your collection.';
+    }
+
+    previewImage.addEventListener('error', () => {
+      previewPanel.classList.add('is-empty');
+      previewEmpty.textContent = 'No local scan found for this row.';
+    });
+
+    function applyFilters() {
+      const needle = search.value.trim().toLowerCase();
+      const type = typeFilter.value;
+      rows.forEach((row) => {
+        const matchesName = !needle || row.dataset.name.includes(needle);
+        const matchesType = type === 'all' || row.dataset.type === type;
+        row.classList.toggle('hidden', !(matchesName && matchesType));
+      });
+      if (!previewedRow || previewedRow.classList.contains('hidden')) {
+        previewRow(rows.find((row) => !row.classList.contains('hidden')) || null);
+      }
+    }
+
+    function applySort() {
+      const mode = sortOrder.value;
+      const sortedRows = rows.slice().sort((a, b) => {
+        if (mode === 'type') {
+          const typeDelta = (typeRank[a.dataset.type] || 99) - (typeRank[b.dataset.type] || 99);
+          if (typeDelta) return typeDelta;
+        }
+        if (mode === 'number') {
+          const aNumber = Number(a.dataset.number || 999999);
+          const bNumber = Number(b.dataset.number || 999999);
+          if (aNumber !== bNumber) return aNumber - bNumber;
+        }
+        if (mode === 'rarity') {
+          const rarityDelta = (rarityRank[a.dataset.rarity] || 99) - (rarityRank[b.dataset.rarity] || 99);
+          if (rarityDelta) return rarityDelta;
+        }
+        const nameDelta = a.dataset.name.localeCompare(b.dataset.name, 'en', { sensitivity: 'base' });
+        if (nameDelta) return nameDelta;
+        return Number(a.dataset.sourceOrder) - Number(b.dataset.sourceOrder);
+      });
+      sortedRows.forEach((row) => cardList.appendChild(row));
+    }
+
+    const state = { ...seedState, ...normalizeProgressPayload(loadState()) };
+    boxes.forEach((box) => {
+      box.checked = Boolean(state[box.dataset.cardId]);
+      box.addEventListener('change', saveState);
+    });
+    rows.forEach((row) => {
+      row.addEventListener('pointerenter', () => previewRow(row));
+      row.addEventListener('focusin', () => previewRow(row));
+      row.addEventListener('click', () => previewRow(row));
+    });
+    updateProgress();
+    applySort();
+    applyFilters();
+
+    search.addEventListener('input', applyFilters);
+    typeFilter.addEventListener('change', applyFilters);
+    sortOrder.addEventListener('change', () => { applySort(); applyFilters(); });
+    connectProgressFile.addEventListener('click', () => {
+      connectExistingProgressFile().catch((error) => {
+        if (error && error.name === 'AbortError') return;
+        setPersistStatus(`Progress is cached in this browser. File connection failed: ${error.message}`, false);
+      });
+    });
+    document.getElementById('clearVisible').addEventListener('click', () => {
+      rows.filter((row) => !row.classList.contains('hidden')).forEach((row) => {
+        row.querySelector('input[type="checkbox"]').checked = false;
+      });
+      saveState();
+    });
+    document.getElementById('exportProgress').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(buildProgressPayload(), null, 2) + '\n'], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'mission-control-checklist-progress.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+    document.getElementById('importProgress').addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const imported = normalizeProgressPayload(JSON.parse(await file.text()));
+      applyState(imported);
+      persistPortableState(imported);
+      event.target.value = '';
+    });
+    restoreConnectedProgressFile();
+  </script>
+</body>
+</html>

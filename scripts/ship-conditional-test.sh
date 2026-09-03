@@ -11,7 +11,8 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 1
-CACHE_FILE="$ROOT/.ship-test-cache"
+CACHE_DIR="$ROOT/.ship-test-cache.d"
+LEGACY_CACHE_FILE="$ROOT/.ship-test-cache"
 MODE="${1:-}"
 
 if [[ "$MODE" != "unit" && "$MODE" != "integration" ]]; then
@@ -20,46 +21,27 @@ if [[ "$MODE" != "unit" && "$MODE" != "integration" ]]; then
   exit 2
 fi
 
-fingerprint_stream() {
-  git rev-parse HEAD 2>/dev/null || printf 'NO_HEAD\n'
-  git diff --no-ext-diff 2>/dev/null || true
-  git diff --cached --no-ext-diff 2>/dev/null || true
-  git ls-files -o --exclude-standard 2>/dev/null | LC_ALL=C sort | while IFS= read -r f; do
-    [[ -n "$f" && -f "$f" ]] || continue
-    printf '%s\t' "$f"
-    if command -v sha256sum >/dev/null 2>&1; then
-      sha256sum "$f" | awk '{print $1}'
-    else
-      shasum -a 256 "$f" | awk '{print $1}'
-    fi
-  done
-}
-
 current_fp() {
-  if command -v sha256sum >/dev/null 2>&1; then
-    fingerprint_stream | sha256sum | awk '{print $1}'
-  else
-    fingerprint_stream | shasum -a 256 | awk '{print $1}'
-  fi
+  node "$ROOT/scripts/ship-tree-fingerprint.mjs" "$ROOT"
 }
 
 read_stored_fp() {
   local key="$1"
-  [[ -f "$CACHE_FILE" ]] || { echo ""; return 0; }
-  grep "^${key}=" "$CACHE_FILE" 2>/dev/null | tail -1 | cut -d= -f2- || echo ""
+  if [[ -f "$CACHE_DIR/$key" ]]; then
+    cat "$CACHE_DIR/$key"
+    return 0
+  fi
+  [[ -f "$LEGACY_CACHE_FILE" ]] || { echo ""; return 0; }
+  grep "^${key}=" "$LEGACY_CACHE_FILE" 2>/dev/null | tail -1 | cut -d= -f2- || echo ""
 }
 
 write_stored_fp() {
   local key="$1" val="$2"
   local tmp
-  tmp="$(mktemp)"
-  if [[ -f "$CACHE_FILE" ]]; then
-    grep -v "^${key}=" "$CACHE_FILE" >"$tmp" 2>/dev/null || true
-  else
-    : >"$tmp"
-  fi
-  printf '%s=%s\n' "$key" "$val" >>"$tmp"
-  mv "$tmp" "$CACHE_FILE"
+  mkdir -p "$CACHE_DIR"
+  tmp="$(mktemp "$CACHE_DIR/.${key}.XXXXXX")"
+  printf '%s\n' "$val" >"$tmp"
+  mv "$tmp" "$CACHE_DIR/$key"
 }
 
 if [[ "${SHIP_TESTS_FORCE:-}" == "1" || "${SHIP_TESTS_FORCE:-}" == "true" ]]; then

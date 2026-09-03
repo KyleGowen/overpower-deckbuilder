@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { User, UserRole } from '../types';
 
@@ -17,6 +18,30 @@ export interface UserSession {
   expiresAt: Date;
 }
 
+let testPersistenceDirectory: string | undefined;
+
+function resolvePersistenceDirectory(): string {
+  const configuredDirectory = process.env.USER_PERSISTENCE_DATA_DIR?.trim();
+  if (configuredDirectory) {
+    fs.mkdirSync(configuredDirectory, { recursive: true });
+    return configuredDirectory;
+  }
+
+  if (process.env.NODE_ENV === 'test') {
+    if (!testPersistenceDirectory) {
+      testPersistenceDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'excelsior-test-persistence-'));
+      process.once('exit', () => {
+        if (testPersistenceDirectory) {
+          fs.rmSync(testPersistenceDirectory, { recursive: true, force: true });
+        }
+      });
+    }
+    return testPersistenceDirectory;
+  }
+
+  return path.join(process.cwd(), 'data');
+}
+
 export class UserPersistenceService {
   private users: Map<string, LegacyUser> = new Map();
   private sessions: Map<string, UserSession> = new Map();
@@ -24,8 +49,9 @@ export class UserPersistenceService {
   private sessionsFilePath: string;
 
   constructor() {
-    this.usersFilePath = path.join(process.cwd(), 'data/users.json');
-    this.sessionsFilePath = path.join(process.cwd(), 'data/sessions.json');
+    const persistenceDirectory = resolvePersistenceDirectory();
+    this.usersFilePath = path.join(persistenceDirectory, 'users.json');
+    this.sessionsFilePath = path.join(persistenceDirectory, 'sessions.json');
     this.loadUsers();
     this.loadSessions();
   }

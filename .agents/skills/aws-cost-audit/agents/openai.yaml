@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit AWS Costs"
+  short_description: "Find safe Excelsior AWS savings"
+  default_prompt: "Use $aws-cost-audit to audit Excelsior production AWS costs and report safe savings opportunities."

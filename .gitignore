@@ -156,6 +156,7 @@ src/resources/images/icons/candidates/
 
 # Local ship gate: last successful unit/integration test fingerprint (see scripts/ship-conditional-test.sh)
 .ship-test-cache
+.ship-test-cache.d/
 
 # Backup files
 *_backup_*/
@@ -170,6 +171,6 @@ infra/tfplan
 # Firebase service account (sensitive - used for Terraform)
 infra/firebase-service-account.json
 
+
 # Firebase service account (sensitive - used for Terraform)
 infra/firebase-service-account.json
-

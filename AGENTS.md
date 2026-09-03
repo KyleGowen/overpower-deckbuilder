@@ -52,6 +52,7 @@ Repo-local Codex skills live in [`.agents/skills/`](.agents/skills/README.md). U
 - **Start AWS DB Tunnel**: use [`start-aws-db-tunnel`](.agents/skills/start-aws-db-tunnel/SKILL.md) for guarded production DB tunnel work.
 - **PDF to PNG**: use [`pdf-to-png`](.agents/skills/pdf-to-png/SKILL.md) for native-resolution card-art PDF exports.
 - **Fix Trivy**: use [`fix-trivy`](.agents/skills/fix-trivy/SKILL.md) for dependency scanner failures.
+- **AWS Cost Audit**: use [`aws-cost-audit`](.agents/skills/aws-cost-audit/SKILL.md) for read-only Excelsior production AWS cost, waste, cleanup, and production-risk reviews.
 
 `add-community-deck`, `add-tournament-deck`, and `split-to-prs` were intentionally not migrated.
 

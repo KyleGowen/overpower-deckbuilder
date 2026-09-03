@@ -34,6 +34,24 @@ python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py \
   --output data/personal/powersurge-checklist.html
 ```
 
+For Mission Control:
+
+```bash
+python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py \
+  --preset mission-control \
+  --with-prices \
+  --output data/personal/mission-control-checklist.html
+```
+
+For DC OverPower Batman/Superman:
+
+```bash
+python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py \
+  --preset dc-overpower-batman-superman \
+  --with-prices \
+  --output data/personal/dc-overpower-batman-superman-checklist.html
+```
+
 ## Workflow
 
 1. Confirm the set and source files. Prefer existing local structured data:
@@ -56,6 +74,8 @@ The bundled script supports these presets:
 ```bash
 python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py --preset original-overpower-1995
 python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py --preset powersurge
+python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py --preset mission-control
+python3 .agents/skills/generate-card-checklist/scripts/generate_checklist.py --preset dc-overpower-batman-superman
 ```
 
 Important options:

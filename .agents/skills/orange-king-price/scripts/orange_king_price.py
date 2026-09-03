@@ -25,6 +25,12 @@ COLLECTION_HANDLES = {
     "original-overpower-1995": "overpower-original-set",
     "powersurge": "powersurge",
     "power-surge": "powersurge",
+    "mission-control": "mission-control",
+    "missioncontrol": "mission-control",
+    "dc": "dc",
+    "dc-overpower": "dc",
+    "batman-superman": "dc",
+    "dc-batman-superman": "dc",
 }
 USER_AGENT = "Mozilla/5.0 (compatible; Codex OrangeKingPrice/1.0)"
 

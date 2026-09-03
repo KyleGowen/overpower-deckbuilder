@@ -22,6 +22,13 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[4]
 ORANGE_SKILL = REPO_ROOT / ".agents/skills/orange-king-price/scripts/orange_king_price.py"
 PLACEHOLDER_IMAGE = "FandomFireLogo_cb20210713142711.png"
+CARD_NAME_FIXES_BY_IMAGE = {
+    "EyeOfTheStorm4-DCOP_cb20200627161456.jpg": 'Eye of the Storm 4 - "Stewing!"',
+    "HuntressCrossbow-DCOP_cb20200415181030.jpg": "Huntress - Crossbow",
+    "PenguinFlameThrowerUmbrella-DCOP_cb20200421112155.jpg": "Penguin - Flame Thrower Umbrella",
+    "RaceAgainstCrime1-DCOP_cb20200627190059.jpg": 'Race Against Crime 1 - "Why?"',
+    "SuperboyCoolShades-DCOP_cb20200425202754.jpg": "Superboy - Cool Shades",
+}
 
 
 @dataclass(frozen=True)
@@ -106,6 +113,75 @@ PRESETS = {
         order_file=REPO_ROOT / "src/resources/legacy/powersurgeop/manifest.csv",
         default_sort="number",
     ),
+    "mission-control": Preset(
+        slug="mission-control",
+        title="Mission Control Checklist",
+        subtitle=(
+            "Standalone personal checklist generated from Excelsior's local Mission Control documentation. "
+            "Checkbox progress is saved in this browser and can be exported or connected to a portable JSON file."
+        ),
+        source_files=(
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-512ae0986a.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-5e94e1f2a0.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--numbers--characters--rarity-a98b10208a.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--control--numbers--game-text--characters--rarity-bd1d49c1d0.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--characters--rarity-6bdcb47e99.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-132451d720.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-52df3a7d15.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--game-text--characters--rarity-a98f8e960f.md",
+            REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-md/type--rarity-27763a2b54.md",
+        ),
+        image_dir=REPO_ROOT / "src/resources/legacy/missioncontrolop/mission-control-images",
+        price_collection="mission-control",
+        type_order=(
+            "Character",
+            "Special",
+            "Mission",
+            "Event",
+            "Insert",
+        ),
+        output=REPO_ROOT / "data/personal/mission-control-checklist.html",
+        progress_output=REPO_ROOT / "data/personal/mission-control-checklist-progress.json",
+        price_cache=REPO_ROOT / "data/personal/mission-control-prices.json",
+        order_file=REPO_ROOT / "src/resources/legacy/missioncontrolop/manifest.csv",
+        default_sort="number",
+    ),
+    "dc-overpower-batman-superman": Preset(
+        slug="dc-overpower-batman-superman",
+        title="DC OverPower Batman/Superman Checklist",
+        subtitle=(
+            "Standalone personal checklist generated from Excelsior's local DC OverPower Batman/Superman documentation. "
+            "Checkbox progress is saved in this browser and can be exported or connected to a portable JSON file."
+        ),
+        source_files=(
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--characters--rarity-6bdcb47e99.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--characters--rarity-f98bb0d3db.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--control--numbers--game-text--characters--rarity-3028e2ea6e.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--game-text--characters--rarity-132451d720.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--numbers--characters--rarity-5db0deff64.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--numbers--characters--rarity-a5c928cd31.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--numbers--characters--rarity-bcc6a4c707.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--numbers--game-text--characters--rarity-b6d9cb625e.md",
+            REPO_ROOT / "src/resources/legacy/dcop/mission-control-md/type--numbers--game-text--characters--rarity-baddda311d.md",
+        ),
+        image_dir=REPO_ROOT / "src/resources/legacy/dcop/mission-control-images",
+        price_collection="dc",
+        type_order=(
+            "Character",
+            "Special",
+            "Power",
+            "Universe - Basic",
+            "Universe - Training",
+            "Universe - Teamwork",
+            "Mission",
+            "Event",
+        ),
+        output=REPO_ROOT / "data/personal/dc-overpower-batman-superman-checklist.html",
+        progress_output=REPO_ROOT / "data/personal/dc-overpower-batman-superman-checklist-progress.json",
+        price_cache=REPO_ROOT / "data/personal/dc-overpower-batman-superman-prices.json",
+        order_file=REPO_ROOT / "src/resources/legacy/dcop/manifest.csv",
+        default_sort="number",
+    ),
 }
 
 
@@ -183,7 +259,9 @@ def load_card_number_map(preset: Preset) -> dict[str, int]:
     for index, row in enumerate(rows, start=1):
         image = row.get("ImageName", "").strip()
         name = normalize_ascii(row.get("Name", ""))
-        if image:
+        if image and name:
+            order[f"card:{slug_text(name)}|{image}"] = index
+        if image and image != PLACEHOLDER_IMAGE:
             order[f"image:{image}"] = index
         if name:
             order[f"name:{slug_text(name)}"] = index
@@ -196,11 +274,17 @@ def load_cards(preset: Preset) -> list[Card]:
     for source_path in preset.source_files:
         rows = parse_markdown_table(source_path)
         for index, row in enumerate(rows):
-            name = normalize_ascii(row.get("Name", ""))
+            source_name = normalize_ascii(row.get("Name", ""))
             image = row.get("Image", "").strip()
+            name = CARD_NAME_FIXES_BY_IMAGE.get(image, source_name)
             if not name:
                 continue
-            card_number = card_numbers.get(f"image:{image}") or card_numbers.get(f"name:{slug_text(name)}") or len(cards) + 1
+            card_number = (
+                card_numbers.get(f"card:{slug_text(source_name)}|{image}")
+                or card_numbers.get(f"image:{image}")
+                or card_numbers.get(f"name:{slug_text(source_name)}")
+                or len(cards) + 1
+            )
             cards.append(
                 Card(
                     card_id=f"{source_path.name}:{index}:{image}",
@@ -261,27 +345,35 @@ def clean_mission_title(value: str) -> str:
 
 
 def stat_abbrev(value: str) -> str:
-    return {"Energy": "E", "Fighting": "F", "Strength": "S", "MultiPower": "M"}.get(value, value[:1])
+    return {"Energy": "E", "Fighting": "F", "Strength": "S", "Intellect": "I", "MultiPower": "M"}.get(value, value[:1])
 
 
 def power_product_stat(value: str) -> str:
-    return {"Energy": "energy", "Fighting": "fight", "Strength": "strength", "MultiPower": "multi"}.get(value, value.lower())
+    return {
+        "Energy": "energy",
+        "Fighting": "fight",
+        "Strength": "strength",
+        "Intellect": "intellect",
+        "MultiPower": "multi",
+    }.get(value, value.lower())
 
 
 def compact_stat_pair(first: str, second: str) -> str:
     letters = [stat_abbrev(first), stat_abbrev(second)]
-    order = {"E": 1, "F": 2, "S": 3}
+    order = {"E": 1, "F": 2, "S": 3, "I": 4}
     return "".join(sorted(letters, key=lambda letter: order.get(letter, 99)))
 
 
 def price_query_variants(card: Card) -> list[str]:
     name = card.name
-    variants = [name]
+    variants: list[str] = []
     typo_fixes = {
+        "Annihilation Affair - Infinity Army Scatters!": "Age of Apocalypse - Infinite Army Scatters!",
         "Bishop - Absorp Energy": "Bishop - Absorb Energy",
         "Inivisible Woman - Invisibility": "Invisible Woman - Invisibility",
         "Blac Cat - Cat Fight": "Black Cat - Cat Fight",
         "Blob - Absorp Impact": "Blob - Absorb Impact",
+        "Comm. Gordon and the G.C.P.D.": "Comm. Gordon & G.C.P.D.",
         "Doctor Doom - Expandable Ally": "Doctor Doom - Expendable Ally",
         "Domino - Trip Wire": "Domino - Tripwire",
         "Dr. Strange - Crimson Band of Cytorak": "Doctor Strange - Crimson Bands of Cytorak",
@@ -290,16 +382,25 @@ def price_query_variants(card: Card) -> list[str]:
         "Dr. Strange - Mists of Morpheus": "Doctor Strange - Mists of Morpheus",
         "Dr. Strange - Necromancy": "Doctor Strange - Necromancy",
         "Dr. Strange - Sorcerer Supreme": "Doctor Strange - Sorcerer Supreme",
+        "Dark Phoenix Saga 6 - \"Deady Rebirth\"": "Dark Phoenix Saga 6 - \"Deadly Rebirth\"",
+        "Fatal Attractions - The Best Laid Plans...": "Fatal Attractions - The Best Laid Pans...",
+        "Huntres - Crossbow": "Huntress - Crossbow",
         "Inivisible Woman - Invisible Saboteur": "Invisible Woman - Invisible Saboteur",
         "Omega Red - Secret Pheromones": "Omega Red - Secrete Pheromones",
+        "Penguin - Flamethrower Umbrella": "Penguin - Flame Thrower Umbrella",
+        "Superboy - Cool Glasses": "Superboy - Cool Shades",
+        "Two-Face - Tommygun": "Two-Face - Tommy Gun",
         "Maximum Carnage 1 of 7 - \"A Luncatic on the Loose\"": "Maximum Carnage 1 A Lunatic on the Loose",
     }
     if name in typo_fixes:
         variants.insert(0, typo_fixes[name])
+    canonical_name = typo_fixes.get(name, name)
 
     without_sic = re.sub(r"\s+\(sic\)", "", name)
     if without_sic != name:
         variants.append(without_sic)
+    if card.type == "Character":
+        variants.insert(0, f"{without_sic} DC character")
     if "She Hulk" in without_sic:
         variants.append(without_sic.replace("She Hulk", "She-Hulk"))
     if "Super Skrull" in without_sic:
@@ -308,24 +409,46 @@ def price_query_variants(card: Card) -> list[str]:
     if "Dr. Strange" in name:
         variants.append(name.replace("Dr. Strange", "Doctor Strange"))
 
-    mission = re.match(r"^(.+?)\s+(\d+)\s+of\s+7\s+-\s+\"?(.*?)\"?$", name)
+    mission = re.match(r"^(.+?)\s+(\d+)(?:\s+of\s+7)?\s+-\s+\"?(.*?)\"?$", canonical_name)
     if card.type == "Mission" and mission:
         series, number, title = mission.groups()
         title = clean_mission_title(title)
+        series_variants = [series]
+        if series.casefold().startswith("the "):
+            series_variants.append(f"{series[4:]}, The")
         if title:
-            variants.extend(
-                [
-                    f"{series} Mission {number} {title}",
-                    f"{series} {number} of 7 {title}",
-                    f"{series} {number} {title}",
-                    f"{series} Mission {number}",
-                    f"{series} {number}",
-                ]
-            )
+            for series_variant in series_variants:
+                variants.extend(
+                    [
+                        f"{series_variant} Mission {number} DC",
+                        f"{series_variant} Mission {number} {title}",
+                        f"{series_variant} {number} of 7 {title}",
+                        f"{series_variant} {number} {title}",
+                        f"{series_variant} Mission {number}",
+                        f"{series_variant} {number}",
+                    ]
+                )
         else:
-            variants.extend([f"{series} Mission {number}", f"{series} {number}"])
+            for series_variant in series_variants:
+                variants.extend(
+                    [
+                        f"{series_variant} Mission {number} DC",
+                        f"{series_variant} Mission {number}",
+                        f"{series_variant} {number}",
+                    ]
+                )
 
-    power = re.match(r"^(\d+)\s+(Energy|Fighting|Strength|MultiPower)$", name)
+    event = re.match(r"^(.+?)\s+-\s+Justice League Case Files?\s+#\d+\.(\d+)$", canonical_name)
+    if card.type == "Event" and event:
+        series, file_number = event.groups()
+        variants.extend(
+            [
+                f"{series} Event - File {file_number}",
+                f"{series} Event File {file_number}",
+            ]
+        )
+
+    power = re.match(r"^(\d+)\s+(Energy|Fighting|Strength|Intellect|MultiPower)$", name)
     if card.type == "Power" and power:
         number, stat = power.groups()
         variants.extend(
@@ -338,7 +461,10 @@ def price_query_variants(card: Card) -> list[str]:
             ]
         )
 
-    training = re.match(r"^(\d+)\s+(Energy|Fighting|Strength)\s+(Energy|Fighting|Strength)\s+(\+\d+)$", name)
+    training = re.match(
+        r"^(\d+)\s+(Energy|Fighting|Strength|Intellect)\s+(Energy|Fighting|Strength|Intellect)\s+(\+\d+)$",
+        name,
+    )
     if card.type == "Universe - Training" and training:
         cap, first, second, bonus = training.groups()
         variants.extend(
@@ -351,7 +477,7 @@ def price_query_variants(card: Card) -> list[str]:
         )
 
     teamwork = re.match(
-        r"^(\d+)\s+(Energy|Fighting|Strength)\s+(Energy|Fighting|Strength)/(Energy|Fighting|Strength)\s+(\+\d+)\s+(\+\d+)$",
+        r"^(\d+)\s+(Energy|Fighting|Strength|Intellect)\s+(Energy|Fighting|Strength|Intellect)/(Energy|Fighting|Strength|Intellect)\s+(\+\d+)\s+(\+\d+)$",
         name,
     )
     if card.type == "Universe - Teamwork" and teamwork:
@@ -380,6 +506,8 @@ def price_query_variants(card: Card) -> list[str]:
     if card.type == "Universe - Basic":
         variants.extend([f"{name} Universe", f"{name} OP"])
 
+    variants.append(name)
+
     deduped: list[str] = []
     seen: set[str] = set()
     for variant in variants:
@@ -406,7 +534,12 @@ def import_orange_price_module() -> Any:
         raise RuntimeError(f"Could not import {ORANGE_SKILL}")
     module = importlib.util.module_from_spec(spec)
     sys.modules["orange_king_price"] = module
-    spec.loader.exec_module(module)
+    previous_bytecode_setting = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.dont_write_bytecode = previous_bytecode_setting
     return module
 
 
@@ -416,6 +549,10 @@ def attach_prices(cards: list[Card], cache_path: Path, collection: str) -> tuple
     products = orange.fetch_collection_products(orange.collection_handle(collection) or collection)
     priced = 0
     missing = 0
+
+    def is_single_card_product(product: Any) -> bool:
+        title = slug_text(str(product.title))
+        return not re.search(r"\b(?:lot|player|set)\b", title)
 
     for card in cards:
         key = f"{card.type}|{card.name}"
@@ -429,6 +566,8 @@ def attach_prices(cards: list[Card], cache_path: Path, collection: str) -> tuple
             for query in price_query_variants(card):
                 try:
                     product, _ranked = orange.find_best(query, products)
+                    if not is_single_card_product(product):
+                        continue
                     card.price = f"${Decimal(product.price):.2f}"
                     card.price_source = product.url
                     break
@@ -437,7 +576,10 @@ def attach_prices(cards: list[Card], cache_path: Path, collection: str) -> tuple
             if not card.price_source:
                 for query in price_query_variants(card)[:4]:
                     try:
-                        product, _ranked = orange.lookup_price(query, 10, collection)
+                        suggested_products = orange.fetch_suggest_products(query, 10)
+                        product, _ranked = orange.find_best(query, suggested_products)
+                        if not is_single_card_product(product):
+                            continue
                         card.price = f"${Decimal(product.price):.2f}"
                         card.price_source = product.url
                         break

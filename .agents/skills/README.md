@@ -14,6 +14,7 @@ Repo-local Codex skills live here. They are the project source of truth for recu
 | `orange-king-price` | The Orange King, theOrangeKing, Orange King, OverPower retail price | Active | Repo-local Shopify price scraper |
 | `generate-card-checklist` | set checklist, collection checklist, priced personal checklist | Active | Repo-local standalone checklist generator |
 | `ingest-aws-cost-reports` | AWS cost email, Excelsior AWS cost backfill | Active guarded workflow | Gmail PDF ingestion and business-operations ledger |
+| `aws-cost-audit` | AWS cost savings, infrastructure cleanup, ECR/RDS/VPC cost review | Active read-only workflow | Excelsior-only live AWS audit with savings estimates and production-risk assessment |
 
 Skipped by choice:
 

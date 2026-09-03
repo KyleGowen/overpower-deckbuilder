@@ -109,6 +109,7 @@ Unit and integration tests use separate Jest configs in `tests/config/`. Integra
 - Config: `tests/config/jest.integration.config.js`
 - Match: `**/tests/integration/**/*.test.ts` (with some files excluded and run by category configs)
 - Run: `npm run test:integration`
+- Legacy JSON user/session persistence is automatically redirected to a process-scoped temporary directory whenever `NODE_ENV=test`. Tests must not rewrite repository `data/users.json` or `data/sessions.json`. Set `USER_PERSISTENCE_DATA_DIR` only when a test needs an explicit isolated location.
 
 **Integration test categories** (each has its own config in `tests/config/`)
 
