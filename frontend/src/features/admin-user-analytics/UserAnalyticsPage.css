@@ -260,43 +260,8 @@
   margin-top: var(--space-6);
 }
 
-.user-analytics-radar-legend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-5);
-  margin-top: var(--space-1);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-  text-align: center;
-}
-
-.user-analytics-radar-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.user-analytics-radar-legend i {
-  width: 22px;
-  height: 4px;
-  flex: 0 0 auto;
-  border-radius: var(--radius-full);
-}
-
-.user-analytics-radar-legend .is-last-day {
-  background: var(--color-accent-bright);
-  box-shadow: 0 0 0 4px rgba(0, 200, 232, 0.16);
-}
-
-.user-analytics-radar-legend .is-all-time {
-  height: 3px;
-  background: #3a7bd5;
-}
-
 .user-analytics-radar-guide {
-  margin-top: var(--space-3);
+  margin-top: var(--space-1);
   color: var(--color-text-dim);
   font-size: var(--font-size-xs);
   text-align: center;

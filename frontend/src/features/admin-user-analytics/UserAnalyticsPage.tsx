@@ -40,18 +40,6 @@ function formatDecimal(value: number): string {
   return value.toFixed(1);
 }
 
-function formatPacificDateTime(value: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'America/Los_Angeles',
-    timeZoneName: 'short',
-  }).format(new Date(value));
-}
-
 function formatClockTick(hour: number): string {
   if (hour % 3 !== 0) return '';
   if (hour === 0) return '12 AM';
@@ -90,7 +78,7 @@ export default function UserAnalyticsPage() {
     : Math.round((analytics.newStandardAccounts / analytics.standardUserAccounts) * 100);
   const maxRecencyCount = Math.max(...analytics.loginRecency.map((bucket) => bucket.count), 1);
   const maxLoginHourCount = Math.max(
-    ...analytics.loginTimeDistribution.hours.flatMap((hour) => [hour.count, hour.allTimeCount]),
+    ...analytics.loginTimeDistribution.hours.map((hour) => hour.allTimeCount),
     1,
   );
 
@@ -255,15 +243,14 @@ export default function UserAnalyticsPage() {
               <div className="user-analytics-section-heading">
                 <h3>Sign-ins by Pacific hour</h3>
                 <p>
-                  {analytics.loginTimeDistribution.totalLogins.toLocaleString()} successful session starts in the
-                  rolling 24-hour window since {formatPacificDateTime(analytics.loginTimeDistribution.windowStart)};
-                  {' '}{analytics.loginTimeDistribution.allTimeTotalLogins.toLocaleString()} known across tracked history.
+                  {analytics.loginTimeDistribution.allTimeTotalLogins.toLocaleString()} successful session starts
+                  across tracked history.
                 </p>
               </div>
               <div
                 className="user-analytics-login-radar"
                 role="img"
-                aria-label="Twenty-four-point radar chart of successful standard-user sign-ins by Pacific hour"
+                aria-label="Twenty-four-point radar chart of tracked standard-user sign-ins by Pacific hour"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart
@@ -290,36 +277,23 @@ export default function UserAnalyticsPage() {
                       content={({ active, payload }) => {
                         const hour = payload?.[0]?.payload as {
                           label: string;
-                          count: number;
                           allTimeCount: number;
                         } | undefined;
                         return active && hour ? (
                           <div className="user-analytics-tooltip">
                             <strong>{hour.label}</strong>
-                            <span>{hour.count.toLocaleString()} in the last 24 hours</span>
-                            <span>{hour.allTimeCount.toLocaleString()} across tracked history</span>
+                            <span>{hour.allTimeCount.toLocaleString()} tracked sign-ins</span>
                           </div>
                         ) : null;
                       }}
                     />
                     <Radar
-                      name="Sign-ins"
-                      dataKey="count"
-                      stroke="#00e5ff"
-                      strokeWidth={2.5}
-                      fill="#00c8e8"
-                      fillOpacity={0.28}
-                      dot={{ r: 3, fill: '#00e5ff', stroke: '#0d1526', strokeWidth: 1.5 }}
-                      activeDot={{ r: 5, fill: '#e8edf7', stroke: '#00e5ff', strokeWidth: 2 }}
-                      isAnimationActive={false}
-                    />
-                    <Radar
-                      name="Tracked history"
+                      name="Tracked sign-ins"
                       dataKey="allTimeCount"
                       stroke="#3a7bd5"
                       strokeWidth={2.5}
-                      fill="transparent"
-                      fillOpacity={0}
+                      fill="#3a7bd5"
+                      fillOpacity={0.12}
                       dot={false}
                       activeDot={{ r: 5, fill: '#e8edf7', stroke: '#3a7bd5', strokeWidth: 2 }}
                       isAnimationActive={false}
@@ -327,12 +301,8 @@ export default function UserAnalyticsPage() {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="user-analytics-radar-legend" aria-label="Sign-in chart legend">
-                <span><i className="is-last-day" aria-hidden="true" /> Last 24 hours</span>
-                <span><i className="is-all-time" aria-hidden="true" /> Tracked history</span>
-              </div>
               <div className="user-analytics-radar-guide">
-                Distance from center represents sign-in count; hover for the exact hour.
+                Distance from center represents tracked sign-in count; hover for the exact hour.
               </div>
               <p className="user-analytics-method-note">
                 Counts include successful standard-user session starts, including the session created at signup.
