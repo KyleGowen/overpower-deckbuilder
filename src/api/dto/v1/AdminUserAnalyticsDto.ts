@@ -53,10 +53,12 @@ export interface AdminUserAnalyticsDto {
     timeZone: 'America/Los_Angeles';
     windowStart: string;
     totalLogins: number;
+    allTimeTotalLogins: number;
     hours: Array<{
       hour: number;
       label: string;
       count: number;
+      allTimeCount: number;
     }>;
   };
 }

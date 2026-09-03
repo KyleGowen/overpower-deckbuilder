@@ -5,6 +5,11 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Expanded the User Analytics Pacific-hour distribution with an all-known-history
+  total and per-hour counts alongside the rolling 24-hour values. The paired radar
+  series use the same aggregate, identifier-free telemetry table; the historical
+  series begins with the limited V341 recent-login backfill and is not presented as
+  complete pre-telemetry history.
 - Expanded `GET /api/v1/admin/user-analytics` with unique standard accounts signed in
   during the last 24 hours, accounts inactive over 30 days (including never-signed-in
   accounts), cumulative API request share across Home/Database/Decks/Collection, and a

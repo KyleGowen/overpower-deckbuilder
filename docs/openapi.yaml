@@ -1002,22 +1002,24 @@ paths:
                                 percentage: { type: number, format: float }
                       loginTimeDistribution:
                         type: object
-                        required: [timeZone, windowStart, totalLogins, hours]
+                        required: [timeZone, windowStart, totalLogins, allTimeTotalLogins, hours]
                         properties:
                           timeZone: { type: string, enum: [America/Los_Angeles] }
                           windowStart: { type: string, format: date-time, description: Start of the rolling 24-hour login window. }
-                          totalLogins: { type: integer, format: int64 }
+                          totalLogins: { type: integer, format: int64, description: Successful standard-user session starts in the rolling 24-hour window. }
+                          allTimeTotalLogins: { type: integer, format: int64, description: Successful standard-user session starts across all available aggregate counter history. }
                           hours:
                             type: array
                             minItems: 24
                             maxItems: 24
                             items:
                               type: object
-                              required: [hour, label, count]
+                              required: [hour, label, count, allTimeCount]
                               properties:
                                 hour: { type: integer, minimum: 0, maximum: 23 }
                                 label: { type: string, example: '1 PM' }
-                                count: { type: integer, format: int64 }
+                                count: { type: integer, format: int64, description: Rolling-24-hour count for this Pacific hour. }
+                                allTimeCount: { type: integer, format: int64, description: Count across all available aggregate counter history for this Pacific hour. }
                       deckStatistics:
                         type: object
                         required: [totalDecks, legalDecks, legalPercentage, limitedDecks, limitedPercentage, averageDecksPerUser, averageLegalDecksPerUser]

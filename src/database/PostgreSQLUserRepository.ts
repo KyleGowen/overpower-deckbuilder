@@ -462,15 +462,21 @@ export class PostgreSQLUserRepository implements UserRepository {
            ), counts_by_hour AS (
              SELECT
                EXTRACT(HOUR FROM hour_start AT TIME ZONE 'America/Los_Angeles')::int AS hour,
-               SUM(login_count)::bigint AS login_count
+               COALESCE(
+                 SUM(login_count) FILTER (
+                   WHERE hour_start >= $1::timestamptz - INTERVAL '24 hours'
+                 ),
+                 0
+               )::bigint AS login_count,
+               SUM(login_count)::bigint AS all_time_login_count
              FROM standard_user_login_hourly_counts
-             WHERE hour_start >= $1::timestamptz - INTERVAL '24 hours'
-               AND hour_start <= $1::timestamptz
+             WHERE hour_start <= $1::timestamptz
              GROUP BY EXTRACT(HOUR FROM hour_start AT TIME ZONE 'America/Los_Angeles')
            )
            SELECT
              hours.hour,
-             COALESCE(counts_by_hour.login_count, 0)::bigint AS login_count
+             COALESCE(counts_by_hour.login_count, 0)::bigint AS login_count,
+             COALESCE(counts_by_hour.all_time_login_count, 0)::bigint AS all_time_login_count
            FROM hours
            LEFT JOIN counts_by_hour USING (hour)
            ORDER BY hours.hour`,
@@ -515,9 +521,14 @@ export class PostgreSQLUserRepository implements UserRepository {
           hitCount: Number(row.hit_count)
         })),
         loginTimeDistribution: {
-          hours: loginTimeResult.rows.map((row: { hour: number; login_count: number | string }) => ({
+          hours: loginTimeResult.rows.map((row: {
+            hour: number;
+            login_count: number | string;
+            all_time_login_count: number | string;
+          }) => ({
             hour: Number(row.hour),
-            count: Number(row.login_count)
+            count: Number(row.login_count),
+            allTimeCount: Number(row.all_time_login_count)
           }))
         }
       };

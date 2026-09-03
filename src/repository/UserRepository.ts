@@ -41,6 +41,7 @@ export interface UserAnalyticsCounts {
     hours: Array<{
       hour: number;
       count: number;
+      allTimeCount: number;
     }>;
   };
 }

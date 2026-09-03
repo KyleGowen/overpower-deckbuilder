@@ -111,6 +111,7 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
         timeZone: 'America/Los_Angeles',
         windowStart: '2026-08-23T12:00:00.000Z',
         totalLogins: 0,
+        allTimeTotalLogins: 0,
         hours: []
       }
     }),

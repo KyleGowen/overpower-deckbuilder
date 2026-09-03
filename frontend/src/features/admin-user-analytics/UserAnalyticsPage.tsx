@@ -90,7 +90,7 @@ export default function UserAnalyticsPage() {
     : Math.round((analytics.newStandardAccounts / analytics.standardUserAccounts) * 100);
   const maxRecencyCount = Math.max(...analytics.loginRecency.map((bucket) => bucket.count), 1);
   const maxLoginHourCount = Math.max(
-    ...analytics.loginTimeDistribution.hours.map((hour) => hour.count),
+    ...analytics.loginTimeDistribution.hours.flatMap((hour) => [hour.count, hour.allTimeCount]),
     1,
   );
 
@@ -256,7 +256,8 @@ export default function UserAnalyticsPage() {
                 <h3>Sign-ins by Pacific hour</h3>
                 <p>
                   {analytics.loginTimeDistribution.totalLogins.toLocaleString()} successful session starts in the
-                  rolling 24-hour window since {formatPacificDateTime(analytics.loginTimeDistribution.windowStart)}.
+                  rolling 24-hour window since {formatPacificDateTime(analytics.loginTimeDistribution.windowStart)};
+                  {' '}{analytics.loginTimeDistribution.allTimeTotalLogins.toLocaleString()} known across tracked history.
                 </p>
               </div>
               <div
@@ -286,12 +287,20 @@ export default function UserAnalyticsPage() {
                       tickCount={5}
                     />
                     <Tooltip
-                      content={({ active, payload }) => active && payload?.[0] ? (
-                        <div className="user-analytics-tooltip">
-                          <strong>{payload[0].payload.label}</strong>
-                          <span>{Number(payload[0].value ?? 0).toLocaleString()} sign-ins</span>
-                        </div>
-                      ) : null}
+                      content={({ active, payload }) => {
+                        const hour = payload?.[0]?.payload as {
+                          label: string;
+                          count: number;
+                          allTimeCount: number;
+                        } | undefined;
+                        return active && hour ? (
+                          <div className="user-analytics-tooltip">
+                            <strong>{hour.label}</strong>
+                            <span>{hour.count.toLocaleString()} in the last 24 hours</span>
+                            <span>{hour.allTimeCount.toLocaleString()} across tracked history</span>
+                          </div>
+                        ) : null;
+                      }}
                     />
                     <Radar
                       name="Sign-ins"
@@ -304,18 +313,33 @@ export default function UserAnalyticsPage() {
                       activeDot={{ r: 5, fill: '#e8edf7', stroke: '#00e5ff', strokeWidth: 2 }}
                       isAnimationActive={false}
                     />
+                    <Radar
+                      name="Tracked history"
+                      dataKey="allTimeCount"
+                      stroke="#3a7bd5"
+                      strokeWidth={2.5}
+                      fill="transparent"
+                      fillOpacity={0}
+                      dot={false}
+                      activeDot={{ r: 5, fill: '#e8edf7', stroke: '#3a7bd5', strokeWidth: 2 }}
+                      isAnimationActive={false}
+                    />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="user-analytics-radar-key">
-                <i aria-hidden="true" />
+              <div className="user-analytics-radar-legend" aria-label="Sign-in chart legend">
+                <span><i className="is-last-day" aria-hidden="true" /> Last 24 hours</span>
+                <span><i className="is-all-time" aria-hidden="true" /> Tracked history</span>
+              </div>
+              <div className="user-analytics-radar-guide">
                 Distance from center represents sign-in count; hover for the exact hour.
               </div>
               <p className="user-analytics-method-note">
                 Counts include successful standard-user session starts, including the session created at signup.
                 Guest, admin, and utility accounts are excluded. Pacific conversion uses America/Los_Angeles,
-                including daylight-saving transitions. The initial pre-counter hours are reconstructed from each
-                account&apos;s most recent login; ongoing hours count every successful session start.
+                including daylight-saving transitions. Tracked history includes the initial recent-login backfill
+                plus every successful session start recorded after counters began; it is not a complete record of
+                sign-ins from before telemetry existed.
               </p>
             </article>
           </div>

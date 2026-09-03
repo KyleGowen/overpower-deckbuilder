@@ -108,13 +108,20 @@ export class AdminService {
     const totalSectionRequests = Array.from(sectionRequestCounts.values())
       .reduce((sum, count) => sum + count, 0);
     const loginCountsByHour = new Map(
-      counts.loginTimeDistribution.hours.map(({ hour, count }) => [hour, count])
+      counts.loginTimeDistribution.hours.map(({ hour, count, allTimeCount }) => [
+        hour,
+        { count, allTimeCount }
+      ])
     );
-    const loginHours = Array.from({ length: 24 }, (_, hour) => ({
-      hour,
-      label: formatPacificHour(hour),
-      count: loginCountsByHour.get(hour) ?? 0
-    }));
+    const loginHours = Array.from({ length: 24 }, (_, hour) => {
+      const countsForHour = loginCountsByHour.get(hour);
+      return {
+        hour,
+        label: formatPacificHour(hour),
+        count: countsForHour?.count ?? 0,
+        allTimeCount: countsForHour?.allTimeCount ?? 0
+      };
+    });
 
     return {
       generatedAt: asOf.toISOString(),
@@ -184,6 +191,7 @@ export class AdminService {
         timeZone: 'America/Los_Angeles',
         windowStart: new Date(asOf.getTime() - (24 * 60 * 60 * 1000)).toISOString(),
         totalLogins: loginHours.reduce((sum, hour) => sum + hour.count, 0),
+        allTimeTotalLogins: loginHours.reduce((sum, hour) => sum + hour.allTimeCount, 0),
         hours: loginHours
       }
     };

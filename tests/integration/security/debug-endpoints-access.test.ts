@@ -111,11 +111,24 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
       timeZone: 'America/Los_Angeles',
       windowStart: expect.any(String),
       totalLogins: expect.any(Number),
+      allTimeTotalLogins: expect.any(Number),
       hours: expect.arrayContaining([
-        expect.objectContaining({ hour: 0, label: '12 AM', count: expect.any(Number) }),
-        expect.objectContaining({ hour: 23, label: '11 PM', count: expect.any(Number) })
+        expect.objectContaining({
+          hour: 0,
+          label: '12 AM',
+          count: expect.any(Number),
+          allTimeCount: expect.any(Number)
+        }),
+        expect.objectContaining({
+          hour: 23,
+          label: '11 PM',
+          count: expect.any(Number),
+          allTimeCount: expect.any(Number)
+        })
       ])
     }));
+    expect(res.body.data.loginTimeDistribution.allTimeTotalLogins)
+      .toBeGreaterThanOrEqual(res.body.data.loginTimeDistribution.totalLogins);
     expect(res.body.data.deckStatistics).toEqual(expect.objectContaining({
       totalDecks: expect.any(Number),
       legalDecks: expect.any(Number),

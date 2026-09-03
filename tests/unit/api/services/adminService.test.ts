@@ -65,8 +65,8 @@ describe('AdminService user analytics', () => {
       ],
       loginTimeDistribution: {
         hours: [
-          { hour: 0, count: 2 },
-          { hour: 13, count: 6 }
+          { hour: 0, count: 2, allTimeCount: 20 },
+          { hour: 13, count: 6, allTimeCount: 60 }
         ]
       }
     };
@@ -111,12 +111,23 @@ describe('AdminService user analytics', () => {
       loginTimeDistribution: {
         timeZone: 'America/Los_Angeles',
         windowStart: '2026-08-23T12:00:00.000Z',
-        totalLogins: 8
+        totalLogins: 8,
+        allTimeTotalLogins: 80
       }
     });
     expect(result.loginTimeDistribution.hours).toHaveLength(24);
-    expect(result.loginTimeDistribution.hours[0]).toEqual({ hour: 0, label: '12 AM', count: 2 });
-    expect(result.loginTimeDistribution.hours[13]).toEqual({ hour: 13, label: '1 PM', count: 6 });
+    expect(result.loginTimeDistribution.hours[0]).toEqual({
+      hour: 0,
+      label: '12 AM',
+      count: 2,
+      allTimeCount: 20
+    });
+    expect(result.loginTimeDistribution.hours[13]).toEqual({
+      hour: 13,
+      label: '1 PM',
+      count: 6,
+      allTimeCount: 60
+    });
     expect(result.signupMonths).toEqual([
       { month: '2026-06', count: 2, recent: false, partial: false },
       { month: '2026-07', count: 27, recent: true, partial: false },
@@ -180,6 +191,7 @@ describe('AdminService user analytics', () => {
     expect(result.siteSectionUsage.sections.every((section) => section.percentage === 0)).toBe(true);
     expect(result.loginTimeDistribution.hours).toHaveLength(24);
     expect(result.loginTimeDistribution.windowStart).toBe('2026-08-23T12:00:00.000Z');
+    expect(result.loginTimeDistribution.allTimeTotalLogins).toBe(0);
   });
 
   it('classifies only API families that represent the four requested site sections', () => {
