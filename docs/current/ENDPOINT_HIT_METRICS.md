@@ -26,6 +26,22 @@ FROM endpoint_hit_counts
 ORDER BY hit_count DESC;
 ```
 
+## User Analytics section grouping
+
+The admin User Analytics dashboard classifies cumulative non-zero counters into four
+feature areas:
+
+- **Home:** `/api/v1/recent-updates`.
+- **Database:** `/api/v1/catalog/*` and `/api/v1/dbv/sets`.
+- **Decks:** `/api/v1/decks*`, `/api/v1/guest/decks*`, `/api/v1/community/decks`,
+  `/api/v1/users/:userId/public-decks`, and `/api/v1/dbv/deck-backgrounds`.
+- **Collection:** `/api/v1/collections/*`.
+
+This is API request share, not time spent, page views, or unique-user share. Shared route
+families can serve more than one screen, and different screens produce different numbers
+of requests. Auth, admin, feedback, and account-management traffic is intentionally
+unclassified.
+
 ## Tests
 
 - [`tests/unit/metrics/endpointHitMetrics.test.ts`](../../tests/unit/metrics/endpointHitMetrics.test.ts) covers enumeration, key formatting, and stale-row pruning (mock pool).

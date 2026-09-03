@@ -3,10 +3,12 @@ export interface AdminUserAnalyticsDto {
   acquisitionPeriodStart: string;
   standardUserAccounts: number;
   newStandardAccounts: number;
+  loggedInLast24Hours: number;
   loggedInLast30Days: {
     count: number;
     percentage: number;
   };
+  inactiveOver30Days: number;
   googleAuthUsers: {
     count: number;
     percentage: number;
@@ -37,5 +39,24 @@ export interface AdminUserAnalyticsDto {
     adoptionPercentage: number;
     averageCardsPerUser: number;
     averageCardsPerCollector: number;
+  };
+  siteSectionUsage: {
+    totalRequests: number;
+    sections: Array<{
+      key: 'home' | 'database' | 'decks' | 'collection';
+      label: string;
+      requests: number;
+      percentage: number;
+    }>;
+  };
+  loginTimeDistribution: {
+    timeZone: 'America/Los_Angeles';
+    windowStart: string;
+    totalLogins: number;
+    hours: Array<{
+      hour: number;
+      label: string;
+      count: number;
+    }>;
   };
 }

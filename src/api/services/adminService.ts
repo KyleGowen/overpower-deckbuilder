@@ -1,8 +1,42 @@
 import type { User } from '../../types';
 import type { AdminUserAnalyticsDto } from '../dto/v1/AdminUserAnalyticsDto';
 import type { UserAnalyticsCounts, UserAnalyticsQuery } from '../../repository/UserRepository';
+import { USER_ANALYTICS_UTILITY_USERNAMES } from '../../constants/userAnalytics';
 
-const ANALYTICS_UTILITY_USERNAMES = ['community_decks', 'tournament_decks'] as const;
+type SiteSectionKey = AdminUserAnalyticsDto['siteSectionUsage']['sections'][number]['key'];
+
+const SITE_SECTIONS: Array<{ key: SiteSectionKey; label: string }> = [
+  { key: 'home', label: 'Home' },
+  { key: 'database', label: 'Database' },
+  { key: 'decks', label: 'Decks' },
+  { key: 'collection', label: 'Collection' }
+];
+
+export function classifyUserAnalyticsEndpoint(endpointKey: string): SiteSectionKey | null {
+  const separator = endpointKey.indexOf(' ');
+  const path = separator >= 0 ? endpointKey.slice(separator + 1) : endpointKey;
+
+  if (path === '/api/v1/recent-updates') return 'home';
+  if (path === '/api/v1/dbv/sets' || path.startsWith('/api/v1/catalog/')) return 'database';
+  if (path === '/api/v1/collections/me' || path.startsWith('/api/v1/collections/')) return 'collection';
+  if (
+    path === '/api/v1/decks'
+    || path.startsWith('/api/v1/decks/')
+    || path === '/api/v1/guest/decks'
+    || path.startsWith('/api/v1/guest/decks/')
+    || path === '/api/v1/community/decks'
+    || path === '/api/v1/users/:userId/public-decks'
+    || path === '/api/v1/dbv/deck-backgrounds'
+  ) return 'decks';
+
+  return null;
+}
+
+function formatPacificHour(hour: number): string {
+  if (hour === 0) return '12 AM';
+  if (hour === 12) return '12 PM';
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+}
 
 export interface AdminServiceUserRepository {
   getAllUsers: () => Promise<User[]>;
@@ -50,7 +84,7 @@ export class AdminService {
       acquisitionStart,
       signupChartStart,
       signupChartEnd,
-      excludedUsernames: ANALYTICS_UTILITY_USERNAMES
+      excludedUsernames: USER_ANALYTICS_UTILITY_USERNAMES
     });
     const userPercentage = (count: number) => counts.standardUserAccounts === 0
       ? 0
@@ -62,16 +96,37 @@ export class AdminService {
       ? 0
       : Math.round((count / total) * 10) / 10;
     const currentMonth = currentMonthStart.toISOString().slice(0, 7);
+    const sectionRequestCounts = new Map<SiteSectionKey, number>(
+      SITE_SECTIONS.map(({ key }) => [key, 0])
+    );
+    for (const endpoint of counts.endpointHits) {
+      const section = classifyUserAnalyticsEndpoint(endpoint.endpointKey);
+      if (section) {
+        sectionRequestCounts.set(section, (sectionRequestCounts.get(section) ?? 0) + endpoint.hitCount);
+      }
+    }
+    const totalSectionRequests = Array.from(sectionRequestCounts.values())
+      .reduce((sum, count) => sum + count, 0);
+    const loginCountsByHour = new Map(
+      counts.loginTimeDistribution.hours.map(({ hour, count }) => [hour, count])
+    );
+    const loginHours = Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      label: formatPacificHour(hour),
+      count: loginCountsByHour.get(hour) ?? 0
+    }));
 
     return {
       generatedAt: asOf.toISOString(),
       acquisitionPeriodStart: acquisitionStart.toISOString(),
       standardUserAccounts: counts.standardUserAccounts,
       newStandardAccounts: counts.newStandardAccounts,
+      loggedInLast24Hours: counts.loggedInLast24Hours,
       loggedInLast30Days: {
         count: counts.loggedInLast30Days,
         percentage: userPercentage(counts.loggedInLast30Days)
       },
+      inactiveOver30Days: counts.inactiveOver30Days,
       googleAuthUsers: {
         count: counts.googleAuthUsers,
         percentage: userPercentage(counts.googleAuthUsers)
@@ -112,6 +167,24 @@ export class AdminService {
           counts.collectionStatistics.totalOwnedCards,
           counts.collectionStatistics.usersWithNonZeroCollections
         )
+      },
+      siteSectionUsage: {
+        totalRequests: totalSectionRequests,
+        sections: SITE_SECTIONS.map(({ key, label }) => {
+          const requests = sectionRequestCounts.get(key) ?? 0;
+          return {
+            key,
+            label,
+            requests,
+            percentage: percentage(requests, totalSectionRequests)
+          };
+        })
+      },
+      loginTimeDistribution: {
+        timeZone: 'America/Los_Angeles',
+        windowStart: new Date(asOf.getTime() - (24 * 60 * 60 * 1000)).toISOString(),
+        totalLogins: loginHours.reduce((sum, hour) => sum + hour.count, 0),
+        hours: loginHours
       }
     };
   }

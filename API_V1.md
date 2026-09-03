@@ -1265,18 +1265,24 @@ Returns the ledger-backed AWS cost snapshot for the admin-only Biz Ops Dashboard
 
 ### `GET /api/v1/admin/user-analytics`
 
-Returns aggregate-only account, deck, and collection analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts from every metric. No user identifiers are returned.
+Returns aggregate-only account, feature-usage, login-time, deck, and collection analytics for the admin User Analytics view. The query includes `USER` role accounts and excludes the `community_decks` and `tournament_decks` utility accounts from user and login metrics. No user identifiers are returned.
 
 **Response 200:** v1 envelope; `**data`** contains:
 
 - snapshot dates: `generatedAt`, `acquisitionPeriodStart`
-- aggregate KPIs: `standardUserAccounts`, `newStandardAccounts`, `loggedInLast30Days`, `googleAuthUsers`, `recordedLoginUsers`
+- aggregate KPIs: `standardUserAccounts`, `newStandardAccounts`, `loggedInLast24Hours`, `loggedInLast30Days`, `inactiveOver30Days`, `googleAuthUsers`, `recordedLoginUsers`
 - rolling twelve-month `signupMonths` counts (latest month marked `partial`)
 - aggregate `loginRecency` buckets
+- `siteSectionUsage`: cumulative classified request counts and percentage share for Home, Database, Decks, and Collection, derived from `endpoint_hit_counts`
+- `loginTimeDistribution`: 24 Pacific-hour buckets, aggregate successful session-start count, IANA timezone, and the rolling window start
 - `deckStatistics`: total, legal, and Limited deck counts; legal/Limited percentages; average decks per standard user with all decks and with legal decks only
 - `collectionStatistics`: users with a positive owned-card quantity, collection adoption percentage, average owned-card quantity per standard user, and average owned-card quantity per active collector
 
-The acquisition period begins on the first day of the previous calendar month. Login activity uses rolling 7/30/60/90-day windows relative to `generatedAt`. Deck legality reads the server-authoritative `decks.is_valid` value. Collection averages sum card quantities rather than unique collection-card rows; the per-user average includes users with no collection cards.
+The acquisition period begins on the first day of the previous calendar month. Recent and inactive account counts use rolling 24-hour and 30-day windows relative to `generatedAt`; inactive accounts include accounts with no recorded login. Login-time telemetry stores no user identifiers, counts successful standard-user session starts (including signup) during the rolling 24-hour window, and groups UTC hourly counters with `America/Los_Angeles` so daylight-saving transitions are handled correctly. Migration V341 seeds the pre-counter portion of the first window from each account's most recent login timestamp; later windows use the live counters throughout.
+
+`siteSectionUsage` is API request share, not time spent, page views, or unique users. Home includes recent-updates traffic; Database includes catalog and set traffic; Decks includes deck, community, public-deck, and deck-background traffic; Collection includes collection traffic. Shared endpoints may support more than one screen, and auth/admin/feedback/account traffic is not classified.
+
+Deck legality reads the server-authoritative `decks.is_valid` value. Collection averages sum card quantities rather than unique collection-card rows; the per-user average includes users with no collection cards.
 
 **Response 500:** `**ADMIN_USER_ANALYTICS_ERROR`**.
 

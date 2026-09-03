@@ -144,6 +144,7 @@ and `src/constants/tournamentDecksUser.ts`.
 
 - `/admin/user-analytics` and `/admin/biz-ops` are both wrapped in `AdminRoute` and linked only from the ADMIN profile menu.
 - Client gating is presentation defense-in-depth only. Their data comes exclusively from `/api/v1/admin/user-analytics` and `/api/v1/admin/biz-ops-dashboard`, which independently require an authenticated ADMIN session.
+- User Analytics includes six account KPIs, cumulative feature-area API request share for Home/Database/Decks/Collection, a rolling-last-24-hours Pacific login radar chart arranged as a clock, acquisition and login-recency charts, and deck/collection inventory. Section usage is explicitly labeled as request share rather than time spent or unique users.
 - Biz Ops renders eight individual service rows as rolling twelve-month line charts in a four-column desktop grid; chart hover details show the exact finalized invoice-row value, with the current Cost Explorer month clearly marked estimated. Each new ingested month advances the window automatically.
 
 ## Build & serving

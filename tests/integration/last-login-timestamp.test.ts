@@ -34,6 +34,16 @@ describe('Last Login Timestamp Integration', () => {
       throw err;
     }
 
+    const loginHour = await pool.query(
+      `SELECT TO_TIMESTAMP(FLOOR(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) / 3600) * 3600) AS hour_start`
+    );
+    const hourStart = loginHour.rows[0].hour_start;
+    const beforeResult = await pool.query(
+      'SELECT login_count FROM standard_user_login_hourly_counts WHERE hour_start = $1',
+      [hourStart]
+    );
+    const beforeCount = Number(beforeResult.rows[0]?.login_count ?? 0);
+
     // Login
     await request(app)
       .post('/api/auth/login')
@@ -49,7 +59,12 @@ describe('Last Login Timestamp Integration', () => {
     expect(Number.isFinite(ageSeconds)).toBe(true);
     expect(ageSeconds).toBeGreaterThanOrEqual(0);
     expect(ageSeconds).toBeLessThan(5 * 60);
+
+    const loginCountResult = await pool.query(
+      'SELECT login_count FROM standard_user_login_hourly_counts WHERE hour_start = $1',
+      [hourStart]
+    );
+    expect(Number(loginCountResult.rows[0]?.login_count)).toBe(beforeCount + 1);
   });
 });
-
 

@@ -11,7 +11,9 @@ export interface UserAnalyticsQuery {
 export interface UserAnalyticsCounts {
   standardUserAccounts: number;
   newStandardAccounts: number;
+  loggedInLast24Hours: number;
   loggedInLast30Days: number;
+  inactiveOver30Days: number;
   googleAuthUsers: number;
   recordedLoginUsers: number;
   signupMonths: Array<{ month: string; count: number }>;
@@ -30,6 +32,16 @@ export interface UserAnalyticsCounts {
   collectionStatistics: {
     usersWithNonZeroCollections: number;
     totalOwnedCards: number;
+  };
+  endpointHits: Array<{
+    endpointKey: string;
+    hitCount: number;
+  }>;
+  loginTimeDistribution: {
+    hours: Array<{
+      hour: number;
+      count: number;
+    }>;
   };
 }
 

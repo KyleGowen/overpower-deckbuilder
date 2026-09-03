@@ -937,11 +937,11 @@ paths:
   /api/v1/admin/user-analytics:
     get:
       tags: [Admin]
-      summary: Get aggregate user, deck, and collection analytics.
-      description: ADMIN-only. Excludes utility accounts and returns no user identifiers.
+      summary: Get aggregate user, usage, login-time, deck, and collection analytics.
+      description: ADMIN-only. Excludes utility accounts and returns no user identifiers. Usage is cumulative API request share, not time spent.
       responses:
         '200':
-          description: Aggregate user, deck, and collection analytics snapshot.
+          description: Aggregate user, usage, login-time, deck, and collection analytics snapshot.
           content:
             application/json:
               schema:
@@ -949,17 +949,19 @@ paths:
                 properties:
                   data:
                     type: object
-                    required: [generatedAt, acquisitionPeriodStart, standardUserAccounts, newStandardAccounts, loggedInLast30Days, googleAuthUsers, recordedLoginUsers, signupMonths, loginRecency, deckStatistics, collectionStatistics]
+                    required: [generatedAt, acquisitionPeriodStart, standardUserAccounts, newStandardAccounts, loggedInLast24Hours, loggedInLast30Days, inactiveOver30Days, googleAuthUsers, recordedLoginUsers, signupMonths, loginRecency, siteSectionUsage, loginTimeDistribution, deckStatistics, collectionStatistics]
                     properties:
                       generatedAt: { type: string, format: date-time }
                       acquisitionPeriodStart: { type: string, format: date-time }
                       standardUserAccounts: { type: integer }
                       newStandardAccounts: { type: integer }
+                      loggedInLast24Hours: { type: integer, description: Unique standard accounts whose latest successful sign-in is within the rolling 24-hour window. }
                       loggedInLast30Days:
                         type: object
                         properties:
                           count: { type: integer }
                           percentage: { type: integer }
+                      inactiveOver30Days: { type: integer, description: Standard accounts with no recorded sign-in or a latest sign-in older than 30 rolling days. }
                       googleAuthUsers:
                         type: object
                         properties:
@@ -983,6 +985,39 @@ paths:
                             key: { type: string }
                             label: { type: string }
                             count: { type: integer }
+                      siteSectionUsage:
+                        type: object
+                        required: [totalRequests, sections]
+                        properties:
+                          totalRequests: { type: integer, format: int64 }
+                          sections:
+                            type: array
+                            items:
+                              type: object
+                              required: [key, label, requests, percentage]
+                              properties:
+                                key: { type: string, enum: [home, database, decks, collection] }
+                                label: { type: string }
+                                requests: { type: integer, format: int64 }
+                                percentage: { type: number, format: float }
+                      loginTimeDistribution:
+                        type: object
+                        required: [timeZone, windowStart, totalLogins, hours]
+                        properties:
+                          timeZone: { type: string, enum: [America/Los_Angeles] }
+                          windowStart: { type: string, format: date-time, description: Start of the rolling 24-hour login window. }
+                          totalLogins: { type: integer, format: int64 }
+                          hours:
+                            type: array
+                            minItems: 24
+                            maxItems: 24
+                            items:
+                              type: object
+                              required: [hour, label, count]
+                              properties:
+                                hour: { type: integer, minimum: 0, maximum: 23 }
+                                label: { type: string, example: '1 PM' }
+                                count: { type: integer, format: int64 }
                       deckStatistics:
                         type: object
                         required: [totalDecks, legalDecks, legalPercentage, limitedDecks, limitedPercentage, averageDecksPerUser, averageLegalDecksPerUser]

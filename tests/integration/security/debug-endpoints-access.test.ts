@@ -90,12 +90,32 @@ describe('Debug/User Endpoint Access Control Integration Tests', () => {
     }));
   });
 
-  it('returns aggregate deck and collection statistics for an admin', async () => {
+  it('returns aggregate account, usage, login-time, deck, and collection statistics for an admin', async () => {
     const res = await request(app)
       .get('/api/v1/admin/user-analytics')
       .set('Cookie', adminCookie);
 
     expect(res.status).toBe(200);
+    expect(res.body.data.loggedInLast24Hours).toEqual(expect.any(Number));
+    expect(res.body.data.inactiveOver30Days).toEqual(expect.any(Number));
+    expect(res.body.data.siteSectionUsage).toEqual(expect.objectContaining({
+      totalRequests: expect.any(Number),
+      sections: expect.arrayContaining([
+        expect.objectContaining({ key: 'home', requests: expect.any(Number), percentage: expect.any(Number) }),
+        expect.objectContaining({ key: 'database', requests: expect.any(Number), percentage: expect.any(Number) }),
+        expect.objectContaining({ key: 'decks', requests: expect.any(Number), percentage: expect.any(Number) }),
+        expect.objectContaining({ key: 'collection', requests: expect.any(Number), percentage: expect.any(Number) })
+      ])
+    }));
+    expect(res.body.data.loginTimeDistribution).toEqual(expect.objectContaining({
+      timeZone: 'America/Los_Angeles',
+      windowStart: expect.any(String),
+      totalLogins: expect.any(Number),
+      hours: expect.arrayContaining([
+        expect.objectContaining({ hour: 0, label: '12 AM', count: expect.any(Number) }),
+        expect.objectContaining({ hour: 23, label: '11 PM', count: expect.any(Number) })
+      ])
+    }));
     expect(res.body.data.deckStatistics).toEqual(expect.objectContaining({
       totalDecks: expect.any(Number),
       legalDecks: expect.any(Number),

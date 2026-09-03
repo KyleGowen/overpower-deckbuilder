@@ -1,4 +1,8 @@
-import { AdminService, type AdminServiceDeps } from '../../../../src/api/services/adminService';
+import {
+  AdminService,
+  classifyUserAnalyticsEndpoint,
+  type AdminServiceDeps
+} from '../../../../src/api/services/adminService';
 import type { UserAnalyticsCounts, UserAnalyticsQuery } from '../../../../src/repository/UserRepository';
 
 function buildDeps(counts: UserAnalyticsCounts): AdminServiceDeps {
@@ -24,7 +28,9 @@ describe('AdminService user analytics', () => {
     const counts: UserAnalyticsCounts = {
       standardUserAccounts: 90,
       newStandardAccounts: 40,
+      loggedInLast24Hours: 7,
       loggedInLast30Days: 49,
+      inactiveOver30Days: 41,
       googleAuthUsers: 44,
       recordedLoginUsers: 77,
       signupMonths: [
@@ -47,6 +53,21 @@ describe('AdminService user analytics', () => {
       collectionStatistics: {
         usersWithNonZeroCollections: 38,
         totalOwnedCards: 4822
+      },
+      endpointHits: [
+        { endpointKey: 'GET /api/v1/recent-updates', hitCount: 10 },
+        { endpointKey: 'GET /api/v1/catalog/characters', hitCount: 100 },
+        { endpointKey: 'GET /api/v1/dbv/sets', hitCount: 20 },
+        { endpointKey: 'GET /api/v1/decks', hitCount: 80 },
+        { endpointKey: 'GET /api/v1/community/decks', hitCount: 20 },
+        { endpointKey: 'GET /api/v1/collections/me/cards', hitCount: 30 },
+        { endpointKey: 'POST /api/v1/auth/login', hitCount: 999 }
+      ],
+      loginTimeDistribution: {
+        hours: [
+          { hour: 0, count: 2 },
+          { hour: 13, count: 6 }
+        ]
       }
     };
     const deps = buildDeps(counts);
@@ -59,7 +80,9 @@ describe('AdminService user analytics', () => {
       acquisitionPeriodStart: '2026-07-01T00:00:00.000Z',
       standardUserAccounts: 90,
       newStandardAccounts: 40,
+      loggedInLast24Hours: 7,
       loggedInLast30Days: { count: 49, percentage: 54 },
+      inactiveOver30Days: 41,
       googleAuthUsers: { count: 44, percentage: 49 },
       deckStatistics: {
         totalDecks: 247,
@@ -75,8 +98,25 @@ describe('AdminService user analytics', () => {
         adoptionPercentage: 42.2,
         averageCardsPerUser: 53.6,
         averageCardsPerCollector: 126.9
+      },
+      siteSectionUsage: {
+        totalRequests: 260,
+        sections: [
+          { key: 'home', label: 'Home', requests: 10, percentage: 3.8 },
+          { key: 'database', label: 'Database', requests: 120, percentage: 46.2 },
+          { key: 'decks', label: 'Decks', requests: 100, percentage: 38.5 },
+          { key: 'collection', label: 'Collection', requests: 30, percentage: 11.5 }
+        ]
+      },
+      loginTimeDistribution: {
+        timeZone: 'America/Los_Angeles',
+        windowStart: '2026-08-23T12:00:00.000Z',
+        totalLogins: 8
       }
     });
+    expect(result.loginTimeDistribution.hours).toHaveLength(24);
+    expect(result.loginTimeDistribution.hours[0]).toEqual({ hour: 0, label: '12 AM', count: 2 });
+    expect(result.loginTimeDistribution.hours[13]).toEqual({ hour: 13, label: '1 PM', count: 6 });
     expect(result.signupMonths).toEqual([
       { month: '2026-06', count: 2, recent: false, partial: false },
       { month: '2026-07', count: 27, recent: true, partial: false },
@@ -95,7 +135,9 @@ describe('AdminService user analytics', () => {
     const deps = buildDeps({
       standardUserAccounts: 0,
       newStandardAccounts: 0,
+      loggedInLast24Hours: 0,
       loggedInLast30Days: 0,
+      inactiveOver30Days: 0,
       googleAuthUsers: 0,
       recordedLoginUsers: 0,
       signupMonths: [],
@@ -114,6 +156,10 @@ describe('AdminService user analytics', () => {
       collectionStatistics: {
         usersWithNonZeroCollections: 0,
         totalOwnedCards: 0
+      },
+      endpointHits: [],
+      loginTimeDistribution: {
+        hours: []
       }
     });
     const result = await new AdminService(deps).getUserAnalytics();
@@ -130,5 +176,18 @@ describe('AdminService user analytics', () => {
       averageCardsPerUser: 0,
       averageCardsPerCollector: 0
     });
+    expect(result.siteSectionUsage.totalRequests).toBe(0);
+    expect(result.siteSectionUsage.sections.every((section) => section.percentage === 0)).toBe(true);
+    expect(result.loginTimeDistribution.hours).toHaveLength(24);
+    expect(result.loginTimeDistribution.windowStart).toBe('2026-08-23T12:00:00.000Z');
+  });
+
+  it('classifies only API families that represent the four requested site sections', () => {
+    expect(classifyUserAnalyticsEndpoint('GET /api/v1/recent-updates')).toBe('home');
+    expect(classifyUserAnalyticsEndpoint('GET /api/v1/catalog/characters')).toBe('database');
+    expect(classifyUserAnalyticsEndpoint('PUT /api/v1/decks/:id')).toBe('decks');
+    expect(classifyUserAnalyticsEndpoint('DELETE /api/v1/collections/me/cards/:cardId')).toBe('collection');
+    expect(classifyUserAnalyticsEndpoint('POST /api/v1/auth/login')).toBeNull();
+    expect(classifyUserAnalyticsEndpoint('GET /api/v1/admin/user-analytics')).toBeNull();
   });
 });

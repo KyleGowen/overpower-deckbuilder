@@ -5,6 +5,12 @@ One line per change. Newest first. Keep this in sync with
 
 ## Unreleased — Phase 3 (scale + docs)
 
+- Expanded `GET /api/v1/admin/user-analytics` with unique standard accounts signed in
+  during the last 24 hours, accounts inactive over 30 days (including never-signed-in
+  accounts), cumulative API request share across Home/Database/Decks/Collection, and a
+  privacy-bounded rolling-24-hour Pacific login distribution. Login-hour counters begin
+  collecting after migration V340 and store no user identifiers; V341 seeds the first
+  window's earlier hours from existing most-recent-login timestamps.
 - Collection GET responses now emit `Cache-Control: private, max-age=0, must-revalidate`
   and `Vary: Cookie`, preventing CloudFront's default one-day TTL from restoring stale
   quantities after a successful collection mutation.

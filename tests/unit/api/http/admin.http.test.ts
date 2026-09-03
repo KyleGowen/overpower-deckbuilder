@@ -81,7 +81,9 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
       acquisitionPeriodStart: '2026-07-01T00:00:00.000Z',
       standardUserAccounts: 90,
       newStandardAccounts: 40,
+      loggedInLast24Hours: 7,
       loggedInLast30Days: { count: 49, percentage: 54 },
+      inactiveOver30Days: 41,
       googleAuthUsers: { count: 44, percentage: 49 },
       recordedLoginUsers: 77,
       signupMonths: [],
@@ -100,6 +102,16 @@ function stubAdminService(over: Partial<AdminService> = {}): AdminService {
         adoptionPercentage: 42.2,
         averageCardsPerUser: 53.6,
         averageCardsPerCollector: 126.9
+      },
+      siteSectionUsage: {
+        totalRequests: 260,
+        sections: []
+      },
+      loginTimeDistribution: {
+        timeZone: 'America/Los_Angeles',
+        windowStart: '2026-08-23T12:00:00.000Z',
+        totalLogins: 0,
+        hours: []
       }
     }),
     listUsers: jest.fn().mockResolvedValue([
@@ -182,7 +194,9 @@ describe('admin.http', () => {
     expect(res.body.data).toMatchObject({
       standardUserAccounts: 90,
       newStandardAccounts: 40,
+      loggedInLast24Hours: 7,
       loggedInLast30Days: { count: 49, percentage: 54 },
+      inactiveOver30Days: 41,
       deckStatistics: { totalDecks: 247, legalDecks: 184, limitedDecks: 32 },
       collectionStatistics: { usersWithNonZeroCollections: 38, averageCardsPerUser: 53.6 }
     });

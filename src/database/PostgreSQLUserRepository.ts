@@ -6,6 +6,14 @@ import {
   type UserAnalyticsQuery
 } from '../repository/UserRepository';
 import { PasswordUtils } from '../utils/passwordUtils';
+import { USER_ANALYTICS_UTILITY_USERNAMES } from '../constants/userAnalytics';
+
+function isUndefinedTableError(error: unknown): boolean {
+  return typeof error === 'object'
+    && error !== null
+    && 'code' in error
+    && (error as { code: string }).code === '42P01';
+}
 
 export class PostgreSQLUserRepository implements UserRepository {
   private pool: Pool;
@@ -316,6 +324,26 @@ export class PostgreSQLUserRepository implements UserRepository {
     const client = await this.pool.connect();
     try {
       await client.query('UPDATE users SET last_login_at = NOW(), updated_at = NOW() WHERE id = $1', [id]);
+      try {
+        await client.query(
+          `INSERT INTO standard_user_login_hourly_counts (hour_start, login_count)
+           SELECT
+             TO_TIMESTAMP(FLOOR(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) / 3600) * 3600),
+             1
+           FROM users
+           WHERE id = $1
+             AND role = 'USER'
+             AND NOT (LOWER(username) = ANY($2::text[]))
+           ON CONFLICT (hour_start)
+           DO UPDATE SET login_count = standard_user_login_hourly_counts.login_count + 1`,
+          [id, [...USER_ANALYTICS_UTILITY_USERNAMES]]
+        );
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+        console.warn('standard_user_login_hourly_counts table missing; login telemetry was not recorded.');
+      }
     } finally {
       client.release();
     }
@@ -337,12 +365,22 @@ export class PostgreSQLUserRepository implements UserRepository {
     const client = await this.pool.connect();
     const excludedUsernames = [...query.excludedUsernames];
     try {
-      const [summaryResult, monthlyResult, recencyResult, deckResult, collectionResult] = await Promise.all([
+      const [
+        summaryResult,
+        monthlyResult,
+        recencyResult,
+        deckResult,
+        collectionResult,
+        endpointHitsResult,
+        loginTimeResult
+      ] = await Promise.all([
         client.query(
           `SELECT
              COUNT(*)::int AS standard_user_accounts,
              COUNT(*) FILTER (WHERE created_at >= $2::timestamp AND created_at < $1::timestamp)::int AS new_standard_accounts,
+             COUNT(*) FILTER (WHERE last_login_at >= $1::timestamp - INTERVAL '24 hours' AND last_login_at <= $1::timestamp)::int AS logged_in_last_24_hours,
              COUNT(*) FILTER (WHERE last_login_at >= $1::timestamp - INTERVAL '30 days' AND last_login_at <= $1::timestamp)::int AS logged_in_last_30_days,
+             COUNT(*) FILTER (WHERE last_login_at IS NULL OR last_login_at < $1::timestamp - INTERVAL '30 days')::int AS inactive_over_30_days,
              COUNT(*) FILTER (WHERE LOWER(COALESCE(auth_provider, 'password')) = 'google')::int AS google_auth_users,
              COUNT(*) FILTER (WHERE last_login_at IS NOT NULL)::int AS recorded_login_users
            FROM users
@@ -411,6 +449,32 @@ export class PostgreSQLUserRepository implements UserRepository {
              COALESCE(SUM(owned_cards), 0)::bigint AS total_owned_cards
            FROM owned_by_user`,
           [excludedUsernames]
+        ),
+        client.query(
+          `SELECT endpoint_key, hit_count
+           FROM endpoint_hit_counts
+           WHERE hit_count > 0
+           ORDER BY endpoint_key`
+        ),
+        client.query(
+          `WITH hours AS (
+             SELECT generate_series(0, 23)::int AS hour
+           ), counts_by_hour AS (
+             SELECT
+               EXTRACT(HOUR FROM hour_start AT TIME ZONE 'America/Los_Angeles')::int AS hour,
+               SUM(login_count)::bigint AS login_count
+             FROM standard_user_login_hourly_counts
+             WHERE hour_start >= $1::timestamptz - INTERVAL '24 hours'
+               AND hour_start <= $1::timestamptz
+             GROUP BY EXTRACT(HOUR FROM hour_start AT TIME ZONE 'America/Los_Angeles')
+           )
+           SELECT
+             hours.hour,
+             COALESCE(counts_by_hour.login_count, 0)::bigint AS login_count
+           FROM hours
+           LEFT JOIN counts_by_hour USING (hour)
+           ORDER BY hours.hour`,
+          [query.asOf]
         )
       ]);
 
@@ -421,7 +485,9 @@ export class PostgreSQLUserRepository implements UserRepository {
       return {
         standardUserAccounts: summary.standard_user_accounts ?? 0,
         newStandardAccounts: summary.new_standard_accounts ?? 0,
+        loggedInLast24Hours: summary.logged_in_last_24_hours ?? 0,
         loggedInLast30Days: summary.logged_in_last_30_days ?? 0,
+        inactiveOver30Days: summary.inactive_over_30_days ?? 0,
         googleAuthUsers: summary.google_auth_users ?? 0,
         recordedLoginUsers: summary.recorded_login_users ?? 0,
         signupMonths: monthlyResult.rows.map((row: { month: string; count: number }) => ({
@@ -443,6 +509,16 @@ export class PostgreSQLUserRepository implements UserRepository {
         collectionStatistics: {
           usersWithNonZeroCollections: Number(collectionStatistics.users_with_non_zero_collections ?? 0),
           totalOwnedCards: Number(collectionStatistics.total_owned_cards ?? 0)
+        },
+        endpointHits: endpointHitsResult.rows.map((row: { endpoint_key: string; hit_count: number | string }) => ({
+          endpointKey: row.endpoint_key,
+          hitCount: Number(row.hit_count)
+        })),
+        loginTimeDistribution: {
+          hours: loginTimeResult.rows.map((row: { hour: number; login_count: number | string }) => ({
+            hour: Number(row.hour),
+            count: Number(row.login_count)
+          }))
         }
       };
     } finally {

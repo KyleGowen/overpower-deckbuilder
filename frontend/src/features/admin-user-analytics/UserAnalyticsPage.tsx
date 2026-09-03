@@ -4,6 +4,11 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -33,6 +38,25 @@ function formatMonth(value: string): string {
 
 function formatDecimal(value: number): string {
   return value.toFixed(1);
+}
+
+function formatPacificDateTime(value: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Los_Angeles',
+    timeZoneName: 'short',
+  }).format(new Date(value));
+}
+
+function formatClockTick(hour: number): string {
+  if (hour % 3 !== 0) return '';
+  if (hour === 0) return '12 AM';
+  if (hour === 12) return '12 PM';
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
 }
 
 const RECENCY_COLORS = ['#00d6e8', '#f6a623', '#3aa0ff', '#3aa0ff', '#61749a'];
@@ -65,6 +89,10 @@ export default function UserAnalyticsPage() {
     ? 0
     : Math.round((analytics.newStandardAccounts / analytics.standardUserAccounts) * 100);
   const maxRecencyCount = Math.max(...analytics.loginRecency.map((bucket) => bucket.count), 1);
+  const maxLoginHourCount = Math.max(
+    ...analytics.loginTimeDistribution.hours.map((hour) => hour.count),
+    1,
+  );
 
   return (
     <div className="user-analytics-page">
@@ -73,7 +101,7 @@ export default function UserAnalyticsPage() {
           <div>
             <div className="user-analytics-eyebrow">ADMIN SNAPSHOT</div>
             <h1>Excelsior user pulse</h1>
-            <p>Account acquisition, authentication, and login recency.</p>
+            <p>Account acquisition, authentication, product usage, and login timing.</p>
           </div>
           <div className="user-analytics-snapshot">
             <Logo variant="emblem" height={38} />
@@ -90,6 +118,14 @@ export default function UserAnalyticsPage() {
           <div className="user-analytics-kpi user-analytics-kpi--accent">
             <strong>{analytics.newStandardAccounts}</strong>
             <span>new standard accounts<br />since {formatDate(analytics.acquisitionPeriodStart)}</span>
+          </div>
+          <div className="user-analytics-kpi user-analytics-kpi--accent">
+            <strong>{analytics.loggedInLast24Hours}</strong>
+            <span>unique standard accounts<br />signed in during the last 24 hours</span>
+          </div>
+          <div className="user-analytics-kpi user-analytics-kpi--warning">
+            <strong>{analytics.inactiveOver30Days}</strong>
+            <span>accounts inactive for over 30 days<br />including accounts that never signed in</span>
           </div>
           <div className="user-analytics-kpi user-analytics-kpi--warning">
             <strong>{analytics.loggedInLast30Days.percentage}%</strong>
@@ -173,6 +209,115 @@ export default function UserAnalyticsPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <div className="user-analytics-divider" role="separator" />
+
+        <section className="user-analytics-engagement" aria-labelledby="user-analytics-engagement-title">
+          <header className="user-analytics-inventory-heading">
+            <div className="user-analytics-eyebrow">USAGE &amp; TIMING</div>
+            <h2 id="user-analytics-engagement-title">Engagement signals</h2>
+            <p>Feature-area API demand and the Pacific-time distribution of successful sign-ins.</p>
+          </header>
+
+          <div className="user-analytics-engagement-grid">
+            <article className="user-analytics-engagement-card">
+              <div className="user-analytics-section-heading">
+                <h3>Site-section API usage</h3>
+                <p>
+                  {analytics.siteSectionUsage.totalRequests.toLocaleString()} classified requests from the
+                  lifetime endpoint counters.
+                </p>
+              </div>
+              <div className="user-analytics-section-usage">
+                {analytics.siteSectionUsage.sections.map((section) => (
+                  <div className="user-analytics-section-usage-row" key={section.key}>
+                    <div>
+                      <strong>{section.label}</strong>
+                      <span>{section.requests.toLocaleString()} requests</span>
+                    </div>
+                    <div className="user-analytics-section-usage-track" aria-hidden="true">
+                      <i style={{ width: `${section.percentage}%` }} />
+                    </div>
+                    <strong>{formatDecimal(section.percentage)}%</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="user-analytics-method-note">
+                This is request share, not time or unique-user share. Home uses recent-updates traffic;
+                Database uses catalog and set traffic; Decks uses deck, community, and background traffic;
+                Collection uses collection traffic. Shared APIs can serve more than one screen.
+              </p>
+            </article>
+
+            <article className="user-analytics-engagement-card">
+              <div className="user-analytics-section-heading">
+                <h3>Sign-ins by Pacific hour</h3>
+                <p>
+                  {analytics.loginTimeDistribution.totalLogins.toLocaleString()} successful session starts in the
+                  rolling 24-hour window since {formatPacificDateTime(analytics.loginTimeDistribution.windowStart)}.
+                </p>
+              </div>
+              <div
+                className="user-analytics-login-radar"
+                role="img"
+                aria-label="Twenty-four-point radar chart of successful standard-user sign-ins by Pacific hour"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart
+                    data={analytics.loginTimeDistribution.hours}
+                    startAngle={90}
+                    endAngle={-270}
+                    outerRadius="72%"
+                  >
+                    <PolarGrid gridType="circle" stroke="#2a3e63" />
+                    <PolarAngleAxis
+                      dataKey="hour"
+                      tickFormatter={formatClockTick}
+                      tick={{ fill: '#8aa0c2', fontSize: 11 }}
+                      tickLine={false}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, maxLoginHourCount]}
+                      axisLine={false}
+                      tick={false}
+                      tickCount={5}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => active && payload?.[0] ? (
+                        <div className="user-analytics-tooltip">
+                          <strong>{payload[0].payload.label}</strong>
+                          <span>{Number(payload[0].value ?? 0).toLocaleString()} sign-ins</span>
+                        </div>
+                      ) : null}
+                    />
+                    <Radar
+                      name="Sign-ins"
+                      dataKey="count"
+                      stroke="#00e5ff"
+                      strokeWidth={2.5}
+                      fill="#00c8e8"
+                      fillOpacity={0.28}
+                      dot={{ r: 3, fill: '#00e5ff', stroke: '#0d1526', strokeWidth: 1.5 }}
+                      activeDot={{ r: 5, fill: '#e8edf7', stroke: '#00e5ff', strokeWidth: 2 }}
+                      isAnimationActive={false}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="user-analytics-radar-key">
+                <i aria-hidden="true" />
+                Distance from center represents sign-in count; hover for the exact hour.
+              </div>
+              <p className="user-analytics-method-note">
+                Counts include successful standard-user session starts, including the session created at signup.
+                Guest, admin, and utility accounts are excluded. Pacific conversion uses America/Los_Angeles,
+                including daylight-saving transitions. The initial pre-counter hours are reconstructed from each
+                account&apos;s most recent login; ongoing hours count every successful session start.
+              </p>
+            </article>
           </div>
         </section>
 
