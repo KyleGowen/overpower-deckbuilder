@@ -11,7 +11,7 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 1
-CACHE_DIR="$ROOT/.ship-test-cache.d"
+CACHE_DIR="${SHIP_TEST_CACHE_DIR:-$ROOT/.ship-test-cache.d}"
 LEGACY_CACHE_FILE="$ROOT/.ship-test-cache"
 MODE="${1:-}"
 
@@ -44,9 +44,17 @@ write_stored_fp() {
   mv "$tmp" "$CACHE_DIR/$key"
 }
 
+run_tests() {
+  if [[ "$MODE" == "integration" ]]; then
+    npm run test:integration:sharded
+  else
+    npm run "test:${MODE}"
+  fi
+}
+
 if [[ "${SHIP_TESTS_FORCE:-}" == "1" || "${SHIP_TESTS_FORCE:-}" == "true" ]]; then
   echo "ship-conditional-test: SHIP_TESTS_FORCE set — running ${MODE} tests"
-  npm run "test:${MODE}"
+  run_tests
   EC=$?
   if [[ $EC -eq 0 ]]; then
     FP="$(current_fp)"
@@ -65,7 +73,7 @@ if [[ -n "$STORED" && "$STORED" == "$FP" ]]; then
 fi
 
 echo "ship-conditional-test: running ${MODE} tests (fp=${FP:0:12}...)"
-npm run "test:${MODE}"
+run_tests
 EC=$?
 if [[ $EC -eq 0 ]]; then
   write_stored_fp "$MODE" "$FP"

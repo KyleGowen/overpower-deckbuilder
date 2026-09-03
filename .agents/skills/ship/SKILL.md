@@ -90,6 +90,8 @@ Collect all results once. All applicable gates must pass before Git delegation.
 
 The unit and integration cache entries are separate atomic files under `.ship-test-cache.d/`, so parallel successful writes cannot overwrite each other. `UserPersistenceService` uses temporary persistence storage when `NODE_ENV=test`, so integration tests must not rewrite repository `data/users.json` or `data/sessions.json`. Treat either file changing as a test-isolation regression; do not normalize it as an expected cleanup step.
 
+When the integration cache misses, the conditional runner uses the guarded two-shard command. It verifies exact, non-overlapping Jest coverage and gives each shard its own disposable PostgreSQL container, ports, Jest cache, and persistence directory. Docker is therefore required for a fresh Ship integration gate. Do not replace this with concurrent Jest processes against one database.
+
 If a gate fails, fix the cause and rerun only checks whose inputs or coverage changed. Let the conditional test script decide whether unit or integration tests need to execute again. Do not force a full rerun merely because a command was already used earlier in the conversation.
 
 Known fast recoveries:

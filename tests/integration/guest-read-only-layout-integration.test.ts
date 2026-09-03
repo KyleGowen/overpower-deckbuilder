@@ -15,11 +15,7 @@ describe('Guest User Read-Only Layout Integration Tests', () => {
 
     beforeAll(async () => {
         pool = new Pool({
-            host: 'localhost',
-            port: 1337,
-            database: 'overpower',
-            user: 'postgres',
-            password: 'password'
+            connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:1337/overpower'
         });
     });
 

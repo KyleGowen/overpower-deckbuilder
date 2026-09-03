@@ -7,6 +7,8 @@ const repositoryRoot = path.resolve(__dirname, '../..');
 const preflightScript = path.join(repositoryRoot, '.agents/skills/ship/scripts/preflight.mjs');
 const verifyCommitScript = path.join(repositoryRoot, '.agents/skills/ship/scripts/verify-commit.mjs');
 const watchActionsScript = path.join(repositoryRoot, '.agents/skills/ship/scripts/watch-actions.mjs');
+const integrationShardScript = path.join(repositoryRoot, 'scripts/run-integration-shards.mjs');
+const conditionalTestScript = path.join(repositoryRoot, 'scripts/ship-conditional-test.sh');
 
 function git(cwd: string, args: string[]): string {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
@@ -195,5 +197,68 @@ describe('UserPersistenceService test isolation', () => {
       if (previousDirectory === undefined) delete process.env.USER_PERSISTENCE_DATA_DIR;
       else process.env.USER_PERSISTENCE_DATA_DIR = previousDirectory;
     }
+  });
+});
+
+describe('integration shard runner', () => {
+  const shardRunnerTemporaryDirectories: string[] = [];
+
+  afterEach(() => {
+    for (const directory of shardRunnerTemporaryDirectories.splice(0)) {
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('assigns every integration test file to exactly one balanced shard', () => {
+    const output = execFileSync(
+      process.execPath,
+      [integrationShardScript, '--shards=2', '--plan-only'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    );
+    const result = JSON.parse(output.trim().split('\n').at(-1) as string);
+
+    expect(result.shards).toBe(2);
+    expect(result.testCount).toBeGreaterThan(0);
+    expect(result.counts).toHaveLength(2);
+    expect(result.counts.reduce((total: number, count: number) => total + count, 0)).toBe(result.testCount);
+    expect(Math.abs(result.counts[0] - result.counts[1])).toBeLessThanOrEqual(1);
+  });
+
+  it('routes the Ship integration gate through the guarded sharded runner', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'excelsior-conditional-test-'));
+    shardRunnerTemporaryDirectories.push(directory);
+    const binaryDirectory = path.join(directory, 'bin');
+    const invocationFile = path.join(directory, 'npm-arguments');
+    fs.mkdirSync(binaryDirectory);
+    fs.writeFileSync(
+      path.join(binaryDirectory, 'npm'),
+      '#!/usr/bin/env bash\nprintf \'%s\\n\' "$*" > "$MOCK_NPM_ARGS"\n',
+      { mode: 0o755 },
+    );
+
+    execFileSync('bash', [conditionalTestScript, 'integration'], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        MOCK_NPM_ARGS: invocationFile,
+        PATH: `${binaryDirectory}:${process.env.PATH}`,
+        SHIP_TEST_CACHE_DIR: path.join(directory, 'cache'),
+        SHIP_TESTS_FORCE: '1',
+      },
+    });
+
+    expect(fs.readFileSync(invocationFile, 'utf8').trim()).toBe('run test:integration:sharded');
+  });
+
+  it('rejects an unsafe shard count before starting Docker', () => {
+    const result = spawnSync(
+      process.execPath,
+      [integrationShardScript, '--shards=0', '--plan-only'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('--shards must be an integer between 1 and 8');
   });
 });

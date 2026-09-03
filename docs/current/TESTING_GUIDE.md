@@ -110,6 +110,10 @@ Unit and integration tests use separate Jest configs in `tests/config/`. Integra
 - Match: `**/tests/integration/**/*.test.ts` (with some files excluded and run by category configs)
 - Run: `npm run test:integration`
 - Legacy JSON user/session persistence is automatically redirected to a process-scoped temporary directory whenever `NODE_ENV=test`. Tests must not rewrite repository `data/users.json` or `data/sessions.json`. Set `USER_PERSISTENCE_DATA_DIR` only when a test needs an explicit isolated location.
+- Run `npm run test:integration:isolated` for the complete suite against a disposable PostgreSQL database without touching the development database.
+- Run `npm run test:integration:sharded` for the same complete suite split across two concurrent Jest processes. The runner starts and migrates one disposable PostgreSQL container per shard, assigns distinct server ports, Jest caches, and persistence directories, and verifies before execution that every test file occurs in exactly one shard.
+- Run `npm run test:integration:shard-plan` to verify and print the two-shard test-file counts without Docker or database changes.
+- A fresh Ship integration gate uses the guarded two-shard runner. The original `npm run test:integration` command remains available for compatibility and focused local debugging against a caller-provided database.
 
 **Integration test categories** (each has its own config in `tests/config/`)
 
