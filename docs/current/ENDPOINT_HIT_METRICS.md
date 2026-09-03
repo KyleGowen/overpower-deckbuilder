@@ -48,9 +48,10 @@ unclassified.
 aggregate successful standard-user session starts by UTC hour without user identifiers.
 The User Analytics API groups those rows into Pacific hours and returns two views of the
 same counters: a rolling 24-hour count and an all-known tracked-history count. Migration
-V341 reconstructed only the pre-counter portion of its first 24-hour window from each
-account's most recent login, so the all-time series must not be described as complete
-history from before telemetry began.
+V341 reconstructed the pre-counter portion of its first 24-hour window from each
+account's most recent login. V342 completed that initial baseline with one older known
+last-login event per standard account, without overlapping V341's window. The counters
+cannot reconstruct additional earlier sessions that were never collected.
 
 ## Tests
 

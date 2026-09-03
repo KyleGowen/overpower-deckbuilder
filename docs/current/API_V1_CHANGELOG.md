@@ -8,7 +8,7 @@ One line per change. Newest first. Keep this in sync with
 - Expanded the User Analytics Pacific-hour distribution with an all-known-history
   total and per-hour counts alongside the rolling 24-hour values. The paired radar
   series use the same aggregate, identifier-free telemetry table; the historical
-  series begins with the limited V341 recent-login backfill and is not presented as
+  series begins with the V341/V342 known-last-login backfill and is not presented as
   complete pre-telemetry history.
 - Expanded `GET /api/v1/admin/user-analytics` with unique standard accounts signed in
   during the last 24 hours, accounts inactive over 30 days (including never-signed-in

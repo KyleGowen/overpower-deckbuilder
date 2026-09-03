@@ -307,9 +307,9 @@ export default function UserAnalyticsPage() {
               <p className="user-analytics-method-note">
                 Counts include successful standard-user session starts, including the session created at signup.
                 Guest, admin, and utility accounts are excluded. Pacific conversion uses America/Los_Angeles,
-                including daylight-saving transitions. Tracked history includes the initial recent-login backfill
-                plus every successful session start recorded after counters began; it is not a complete record of
-                sign-ins from before telemetry existed.
+                including daylight-saving transitions. Tracked history includes each account&apos;s known latest login
+                plus every successful session start recorded after counters began; it cannot reconstruct additional
+                earlier sign-ins from before telemetry existed.
               </p>
             </article>
           </div>
