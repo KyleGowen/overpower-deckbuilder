@@ -7,7 +7,20 @@
  * frontend SDK generators, integration tests, or the OpenAPI spec.
  */
 
-export interface CatalogCharacterItem {
+export interface CatalogErrataItem {
+  id: string;
+  source_section: number;
+  entry_title: string;
+  entry_text: string;
+  source_url: string;
+}
+
+export interface CatalogItemWithErrata {
+  /** Present only when this exact card printing has linked official errata. */
+  errata?: CatalogErrataItem[];
+}
+
+export interface CatalogCharacterItem extends CatalogItemWithErrata {
   id: string;
   name: string;
   set: string;
@@ -25,7 +38,7 @@ export interface CatalogCharacterItem {
   is_foil: boolean;
 }
 
-export interface CatalogLocationItem {
+export interface CatalogLocationItem extends CatalogItemWithErrata {
   id: string;
   name: string;
   threat_level: number;
@@ -37,7 +50,7 @@ export interface CatalogLocationItem {
   rarity: string | null;
 }
 
-export interface CatalogBattlegroundItem {
+export interface CatalogBattlegroundItem extends CatalogItemWithErrata {
   id: string;
   name: string;
   special_ability: string;
@@ -50,7 +63,7 @@ export interface CatalogBattlegroundItem {
 }
 
 /** Shared shape for special-cards, events, aspects, UA, TW, Ally, Training, Basic Universe. */
-export interface CatalogSpecialCardItem {
+export interface CatalogSpecialCardItem extends CatalogItemWithErrata {
   id: string;
   name: string;
   character: string;
@@ -77,7 +90,7 @@ export interface CatalogSpecialCardItem {
   is_foil: boolean;
 }
 
-export interface CatalogMissionItem {
+export interface CatalogMissionItem extends CatalogItemWithErrata {
   id: string;
   mission_set: string;
   card_name: string;
@@ -90,7 +103,7 @@ export interface CatalogMissionItem {
   is_foil: boolean;
 }
 
-export interface CatalogPowerCardItem {
+export interface CatalogPowerCardItem extends CatalogItemWithErrata {
   id: string;
   name: string;
   power_type: string;

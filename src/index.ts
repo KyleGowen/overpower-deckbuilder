@@ -13,6 +13,7 @@ import { CollectionService } from './services/collectionService';
 import { DeckBackgroundService } from './services/deckBackgroundService';
 import { GuestDeckPersistenceService } from './services/guestDeckPersistence';
 import { FoilCardMapRepository } from './database/foilCardMapRepository';
+import { CardErrataRepository } from './database/cardErrataRepository';
 import { registerRoutes, type RouteDependencies } from './routes';
 import { transformDeckList } from './api/deckTransform';
 import { CatalogService } from './api/services/catalogService';
@@ -98,8 +99,9 @@ export { databaseInit, guestDeckPersistence };
 
 // Initialize foil card map repository
 const foilCardMapRepository = new FoilCardMapRepository(dataSource.getPool());
+const cardErrataRepository = new CardErrataRepository(dataSource.getPool());
 
-const catalogService = new CatalogService(cardRepository, foilCardMapRepository);
+const catalogService = new CatalogService(cardRepository, foilCardMapRepository, cardErrataRepository);
 const dbvSupportService = new DbvSupportService(() => dataSource.getPool());
 const recentUpdatesService = new RecentUpdatesService(() => dataSource.getPool());
 const deckListService = new DeckListService(deckRepository);

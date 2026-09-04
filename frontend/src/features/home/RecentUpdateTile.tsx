@@ -15,11 +15,14 @@ export function RecentUpdateTile({ item, isOpen, onToggle }: RecentUpdateTilePro
   const typeClass = item.type.replace(/_/g, '-');
   const isSkyboundLaunch = item.id === 'a1000001-0000-4000-8000-000000000007';
   const isSkyboundAltArtReveal = item.id === 'a1000001-0000-4000-8000-000000000009';
+  const isErrataFeature = item.id === 'a1000001-0000-4000-8000-000000000010';
   const thumbnailClassName = isSkyboundLaunch
     ? 'home__news-thumb-image--skybound-launch'
     : isSkyboundAltArtReveal
       ? 'home__news-thumb-image--skybound-alt-art'
-      : undefined;
+      : isErrataFeature
+        ? 'home__news-thumb-image--errata-feature'
+        : undefined;
 
   return (
     <button

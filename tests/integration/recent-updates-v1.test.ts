@@ -21,7 +21,7 @@ describe('GET /api/v1/recent-updates', () => {
 
     expect(res.body.errors).toEqual([]);
     expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(9);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(10);
 
     const titles = res.body.data.map((r: { title: string }) => r.title);
     expect(titles).toContain('The Community Deck Section');
@@ -30,6 +30,17 @@ describe('GET /api/v1/recent-updates', () => {
     expect(titles).toContain('The Niagara Regional Breakdown');
     expect(titles).toContain('Skybound is here!');
     expect(titles).toContain('Skybound alternate art revealed!');
+    expect(titles).toContain('Official errata, right on the card');
+
+    const errataFeatureRow = res.body.data.find(
+      (r: { title: string }) => r.title === 'Official errata, right on the card',
+    );
+    expect(errataFeatureRow).toMatchObject({
+      type: 'feature',
+      cardImageUrl: 'sky/specials/374_damien_darkblood.png',
+      description:
+        'Cards with official errata now show the relevant ruling at the bottom of their detail panel, along with a direct link to LRG’s official source.',
+    });
 
     const skyboundRevealRow = res.body.data.find(
       (r: { title: string }) => r.title === 'Skybound alternate art revealed!',

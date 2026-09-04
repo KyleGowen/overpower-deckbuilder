@@ -379,6 +379,21 @@ Shown in [`CardDetailPanel`](frontend/src/components/CardDetailPanel/CardDetailP
 | Apply (`.card-detail__printing-apply`) | `--color-accent` border/text; `--radius-sm`; hover fills accent |
 | Current / disabled (`.card-detail__printing-apply--current`) | `opacity: 0.45`; `--color-border` border; `--color-text-muted` text; `cursor: not-allowed` |
 
+### Card detail — More disclosure and official errata
+
+The shared card-detail slide-out keeps commonly useful metadata visible. Secondary rules
+metadata (One Per Deck, function-icon flags, and Banned) is collapsed by default beneath
+a native **More** disclosure. Official errata always sits at the bottom of the drawer so
+it follows the card's printed ability and catalog details.
+
+| Element | Tokens / values |
+|---|---|
+| More summary (`.card-detail__more-summary`) | Native `<summary>` keyboard semantics; centered uppercase `font-size-xs` label with 16px chevron; `--color-border` horizontal rules on both sides; muted text, accent-bright hover/focus |
+| Expanded state (`.card-detail__more[open]`) | Chevron rotates 180 degrees; secondary rows use the standard `.card-detail__field` treatment |
+| Errata list / entry (`.card-detail__errata-list`, `.card-detail__errata-entry`) | Flat content using the slide panel background; standard `--color-border` horizontal separators; no nested card border, accent rail, radius, tint, or gradient; `--space-3`/`--space-4` vertical rhythm |
+| Errata title/text | Title uses `font-size-sm`, semibold, `--color-text`; full plain text matches the slide's readable `--color-text` and 1.6 line-height while preserving paragraph breaks |
+| Source link (`.card-detail__errata-link`) | `font-size-xs`, semibold, quieter `--color-accent`; underline on hover; visible 2px accent focus ring; opens canonical source in a new tab |
+
 ### Deck Editor — Add Cards quantity overlay
 Top-right overlay on Add Cards catalog tiles ([`AddCardsQtyOverlay.css`](frontend/src/features/deck-editor/AddCardsQtyOverlay.css)). Positioned via `.card-tile__overlay`.
 

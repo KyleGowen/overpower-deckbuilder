@@ -355,6 +355,8 @@ addresses are also set as the email's reply-to address.
 
 > **Full-catalog download:** There are no server-side pagination or filtering parameters on these endpoints. Each call returns the **complete** array for that card type. The existing frontend downloads all catalogs at page load and filters entirely client-side. A new frontend should do the same — or cache the responses using the `ETag`/`If-None-Match` conditional GET pattern documented in [Caching & conditional GET](#caching--conditional-get) to avoid re-downloading unchanged catalogs. See `meta.catalogDataVersion` and `meta.catalogLastUpdated` in the response for cache keying.
 
+**Official errata:** Any catalog item linked through `card_errata` includes an `errata` array ordered by `source_section`. Each entry contains `id`, `source_section`, `entry_title`, `entry_text` (card-scoped plain text with shared guidance and paragraph breaks preserved), and `source_url` (the canonical deep link on overpowercardgame.com). The canonical full source transcription remains in `errata.entry_text`; an association may narrow the returned text through `card_errata.display_text` when one source entry discusses multiple cards. Unlinked cards omit the field.
+
 ### `GET /api/v1/catalog/characters`
 
 **Auth:** Session cookie or Bearer JWT (see introduction above).
@@ -383,7 +385,7 @@ addresses are also set as the email's reply-to address.
 }
 ```
 
-Fields: `id`, `name`, `set`, `set_number` (string|null), `rarity` (`"Common"|"Uncommon"|"Rare"|"Ultra Rare"|null`), `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` (all numbers), `special_abilities` (string), `image`, `image_path`, `reverse_image_path` (string|null; second face for two-faced characters), `is_foil`.
+Fields: `id`, `name`, `set`, `set_number` (string|null), `rarity` (`"Common"|"Uncommon"|"Rare"|"Ultra Rare"|null`), `energy`, `combat`, `brute_force`, `intelligence`, `threat_level` (all numbers), `special_abilities` (string), `image`, `image_path`, `reverse_image_path` (string|null; second face for two-faced characters), `is_foil`, and optional `errata`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 
@@ -466,7 +468,7 @@ Fields: `id`, `name`, `threat_level`, `special_ability`, `image`, `image_path`, 
 }
 ```
 
-Fields: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons` (string[]), `value` (number|null), `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans (`icon_offensive_swords` etc.), `banned`, `is_foil`.
+Fields: `id`, `name`, `character`, `card_effect`, `image`, `image_path`, `set`, `set_number`, `rarity`, `icons` (string[]), `value` (number|null), `is_cataclysm`, `is_assist`, `is_ambush`, `one_per_deck`, icon booleans (`icon_offensive_swords` etc.), `banned`, `is_foil`, and optional `errata`.
 
 **Response 500:** `errors` populated; `data` may be `null`.
 

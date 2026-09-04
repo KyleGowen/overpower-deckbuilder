@@ -6,6 +6,17 @@ import { app } from '../../../src/test-server';
 import { DataSourceConfig } from '../../../src/config/DataSourceConfig';
 import { integrationTestUtils } from '../../setup-integration';
 
+interface CatalogTestCard {
+  name?: string;
+  set?: string;
+  set_number?: string | null;
+  errata?: Array<{
+    source_section: number;
+    entry_text: string;
+    source_url: string;
+  }>;
+}
+
 describe('API v1 integration', () => {
   let username: string;
   let password: string;
@@ -52,6 +63,95 @@ describe('API v1 integration', () => {
       expect(res.body.errors).toEqual([]);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
+    });
+
+    it('catalogs include official errata on every linked card printing', async () => {
+      const [characters, locations, specials, events] = await Promise.all([
+        request(app).get('/api/v1/catalog/characters').expect(200),
+        request(app).get('/api/v1/catalog/locations').expect(200),
+        request(app).get('/api/v1/catalog/special-cards').expect(200),
+        request(app).get('/api/v1/catalog/events').expect(200)
+      ]);
+
+      const immortal = (specials.body.data as CatalogTestCard[])
+        .find((card) => card.set === 'SKY' && card.set_number === '073');
+      expect(immortal?.errata?.map((entry) => entry.source_section)).toEqual([1, 12]);
+      expect(immortal?.errata?.[0]?.entry_text).toContain('normal KO process is followed');
+      expect(immortal?.errata?.[0]?.entry_text).toContain('Immortal - When Immortal is KO’d');
+      expect(immortal?.errata?.[0]?.entry_text).not.toContain('Allen the Alien -');
+      expect(immortal?.errata?.[0]?.entry_text).not.toContain('Mauler Twins -');
+      expect(immortal?.errata?.[0]?.entry_text).not.toContain('Walkers: Herd -');
+      expect(immortal?.errata?.[1]).toEqual(expect.objectContaining({
+        entry_text: expect.stringContaining('Remainder of Game Full Hourglass'),
+        source_url: 'https://overpowercardgame.com/errata/#s12'
+      }));
+
+      const friendlyManipulation = (specials.body.data as CatalogTestCard[])
+        .find((card) => card.set === 'SKY' && card.set_number === '049');
+      expect(friendlyManipulation?.errata?.[0]?.entry_text).toContain(
+        'all Universe cards with grid requirements now check the character’s grid'
+      );
+      expect(friendlyManipulation?.errata?.[0]?.entry_text).toContain(
+        'Allen the Alien’s “Friendly Manipulation”'
+      );
+      expect(friendlyManipulation?.errata?.[0]?.entry_text).not.toContain(
+        'The Flaxans “City Leveling Invasion”'
+      );
+
+      const forGuineveresLove = (specials.body.data as CatalogTestCard[])
+        .find((card) => card.set === 'ERB' && card.set_number === '134');
+      const knightOfTheRoundTable = (specials.body.data as CatalogTestCard[])
+        .find((card) => card.set === 'ERB' && card.set_number === '136');
+      expect(forGuineveresLove?.errata?.[0]?.entry_text).toContain('For Guinevere’s Love');
+      expect(forGuineveresLove?.errata?.[0]?.entry_text).not.toContain('Knight of the Round Table');
+      expect(knightOfTheRoundTable?.errata?.[0]?.entry_text).toContain('Knight of the Round Table');
+      expect(knightOfTheRoundTable?.errata?.[0]?.entry_text).not.toContain('For Guinevere’s Love');
+
+      const glennPrintings = (characters.body.data as CatalogTestCard[]).filter(
+        (card) => card.name === 'Glenn' && Boolean(card.set_number && ['170', '442', '442F'].includes(card.set_number))
+      );
+      expect(glennPrintings).toHaveLength(3);
+      expect(glennPrintings.every((card) => card.errata?.[0]?.source_section === 9)).toBe(true);
+      expect(glennPrintings.every((card) => (
+        card.errata?.[0]?.entry_text.includes('The practical implication is that Glenn can use an 8')
+          && !card.errata[0].entry_text.includes('Strategically,')
+          && !card.errata[0].entry_text.includes('Shapesmith')
+      ))).toBe(true);
+
+      const monstrousLeadership = (specials.body.data as CatalogTestCard[]).find(
+        (card) => card.set === 'SKY' && card.set_number === '055' && card.name === 'Monstrous Leadership'
+      );
+      expect(monstrousLeadership?.errata?.[0]?.source_section).toBe(7);
+      expect(monstrousLeadership?.errata?.[0]?.entry_text).toContain(
+        'occasionally the Player may have 4 Front Line characters',
+      );
+      expect(monstrousLeadership?.errata?.[0]?.entry_text).not.toContain('rarely a strategic advantage');
+
+      const salamandersToxikinesis = (specials.body.data as CatalogTestCard[]).find(
+        (card) => card.set === 'SKY' && card.set_number === '118' && card.name === "Salamander's Toxikinesis"
+      );
+      expect(salamandersToxikinesis?.errata?.[0]?.source_section).toBe(19);
+      expect(salamandersToxikinesis?.errata?.[0]?.entry_text).toContain(
+        'It does prevent itself from being removed',
+      );
+      expect(salamandersToxikinesis?.errata?.[0]?.entry_text).not.toContain(
+        'powerful effect for this Max 6',
+      );
+
+      const linkedLocations = (locations.body.data as CatalogTestCard[]).filter(
+        (card) => (card.name === 'Barsoom' && card.set_number === '468')
+          || (card.name === 'Mars' && card.set_number === '384')
+      );
+      expect(linkedLocations).toHaveLength(2);
+      expect(linkedLocations.every((card) => card.errata?.[0]?.source_section === 6)).toBe(true);
+
+      const newGuardians = (events.body.data as CatalogTestCard[]).find(
+        (card) => card.name === 'The New Guardians' && card.set_number === '402'
+      );
+      expect(newGuardians?.errata?.[0]).toEqual(expect.objectContaining({
+        source_section: 16,
+        source_url: 'https://overpowercardgame.com/errata/#s16'
+      }));
     });
 
     it('GET /api/v1/catalog/missions returns v1 envelope and mission rows', async () => {

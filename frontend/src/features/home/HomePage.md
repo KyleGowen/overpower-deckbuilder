@@ -10,6 +10,10 @@ Landing page after login. Sections, top to bottom:
    The Skybound alternate-art reveal is a distinct `new_cards` announcement using collector
    `#420` Omni-Man and directs users to turn off **Hide Alts** in Skybound Characters.
    The Niagara Regional announcement uses the default Sherlock Holmes character card thumbnail.
+   The card-errata feature announcement uses the G.D.A. Any Character Damien Darkblood
+   special (`sky/specials/374_damien_darkblood.png`) and explains the card-scoped ruling
+   text plus canonical LRG source link. Its thumbnail uses a dedicated zoomed crop centered
+   on Damien so the card's yellow frame stays outside the tile image.
    Tiles use shared `RecentUpdateTile` / `RecentUpdatesList` (`layout="rail"`). The cards
    form a single-open accordion: every card is a button (`aria-expanded`). On desktop the
    cards have a fixed height, so clicking a card expands it **horizontally only** (the flex

@@ -18,4 +18,12 @@ describe('Recent Updates thumbnail framing', () => {
       /\.home__news-thumb img\.home__news-thumb-image--skybound-alt-art\s*\{[\s\S]*object-position: left center;[\s\S]*transform: scale\(1\.15\);[\s\S]*transform-origin: left center;[\s\S]*\}/,
     );
   });
+
+  it('crops the errata feature artwork inside the yellow card frame', () => {
+    expect(tileSource).toContain("item.id === 'a1000001-0000-4000-8000-000000000010'");
+    expect(tileSource).toContain("'home__news-thumb-image--errata-feature'");
+    expect(styles).toMatch(
+      /\.home__news-thumb img\.home__news-thumb-image--errata-feature\s*\{[\s\S]*?object-position: 58% 24%;[\s\S]*?transform: translate\(-6%, -3%\) scale\(1\.5\);[\s\S]*?transform-origin: 58% 24%;[\s\S]*?\}/,
+    );
+  });
 });

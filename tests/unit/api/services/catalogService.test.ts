@@ -38,6 +38,9 @@ function stubCards(overrides: Partial<CatalogCardRepository> = {}): CatalogCardR
 }
 
 const stubFoil = () => ({ getFoilCardMap: jest.fn().mockResolvedValue([]) });
+const stubErrata = (entries: any[] = []) => ({
+  getAllCardErrata: jest.fn().mockResolvedValue(entries)
+});
 
 describe('CatalogService', () => {
   it('getAllCharacters delegates to card repository', async () => {
@@ -66,5 +69,59 @@ describe('CatalogService', () => {
     const stats = await svc.getCardStats();
     expect(stats.characters).toBe(5);
     expect(cards.getCardStats).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds ordered errata only to the linked card type and printing', async () => {
+    const cards = stubCards({
+      getAllSpecialCards: jest.fn().mockResolvedValue([
+        { id: 'special-1', name: 'I am Immortal' },
+        { id: 'special-2', name: 'Unlinked' }
+      ])
+    });
+    const errata = stubErrata([
+      {
+        card_type: 'special',
+        card_id: 'special-1',
+        id: 'errata-12',
+        source_section: 12,
+        entry_title: 'I am Immortal',
+        entry_text: 'Second ruling.',
+        source_url: 'https://overpowercardgame.com/errata/#s12'
+      },
+      {
+        card_type: 'special',
+        card_id: 'special-1',
+        id: 'errata-1',
+        source_section: 1,
+        entry_title: 'Absolute KO',
+        entry_text: 'First ruling.',
+        source_url: 'https://overpowercardgame.com/errata/#s1'
+      },
+      {
+        card_type: 'character',
+        card_id: 'special-1',
+        id: 'wrong-type',
+        source_section: 18,
+        entry_title: 'Wrong type',
+        entry_text: 'Must not appear.',
+        source_url: 'https://overpowercardgame.com/errata/#s18'
+      }
+    ]);
+
+    const svc = new CatalogService(cards, stubFoil(), errata);
+    const output = await svc.getAllSpecialCards();
+
+    expect(output).toEqual([
+      {
+        id: 'special-1',
+        name: 'I am Immortal',
+        errata: [
+          expect.objectContaining({ id: 'errata-1', source_section: 1 }),
+          expect.objectContaining({ id: 'errata-12', source_section: 12 })
+        ]
+      },
+      { id: 'special-2', name: 'Unlinked' }
+    ]);
+    expect(errata.getAllCardErrata).toHaveBeenCalledTimes(1);
   });
 });

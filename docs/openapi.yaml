@@ -160,6 +160,15 @@ components:
         submitted:
           type: boolean
           enum: [true]
+    CatalogErrataItem:
+      type: object
+      required: [id, source_section, entry_title, entry_text, source_url]
+      properties:
+        id: { type: string, format: uuid }
+        source_section: { type: integer, minimum: 1 }
+        entry_title: { type: string }
+        entry_text: { type: string, description: Card-scoped plain text with shared guidance and paragraph breaks preserved. }
+        source_url: { type: string, format: uri }
     CatalogCharacterItem:
       type: object
       required: [id, name, set, energy, combat, brute_force, intelligence, threat_level, image, image_path, is_foil]
@@ -178,6 +187,9 @@ components:
         image: { type: string }
         image_path: { type: string }
         is_foil: { type: boolean }
+        errata:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogErrataItem' }
     CatalogLocationItem:
       type: object
       required: [id, name, threat_level, image, image_path]
@@ -191,6 +203,9 @@ components:
         set: { type: string }
         set_number: { type: string, nullable: true }
         rarity: { type: string, nullable: true }
+        errata:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogErrataItem' }
     CatalogSpecialCardItem:
       type: object
       description: |
@@ -222,6 +237,9 @@ components:
         icon_first_action_only: { type: boolean }
         banned: { type: boolean }
         is_foil: { type: boolean }
+        errata:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogErrataItem' }
     CatalogMissionItem:
       type: object
       required: [id, mission_set, card_name, name, image, image_path]
@@ -235,6 +253,9 @@ components:
         set: { type: string }
         set_number: { type: string, nullable: true }
         rarity: { type: string, nullable: true }
+        errata:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogErrataItem' }
     CatalogPowerCardItem:
       type: object
       required: [id, name, power_type, value, image, image_path, one_per_deck, is_foil]
@@ -251,6 +272,9 @@ components:
         set_name: { type: string }
         one_per_deck: { type: boolean }
         is_foil: { type: boolean }
+        errata:
+          type: array
+          items: { $ref: '#/components/schemas/CatalogErrataItem' }
     CatalogFoilCardMapItem:
       type: object
       required: [foilCardId, baseCardId, cardType]

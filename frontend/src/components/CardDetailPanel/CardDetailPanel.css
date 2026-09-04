@@ -119,6 +119,122 @@
   word-break: break-word;
 }
 
+.card-detail__more {
+  margin-top: var(--space-2);
+}
+
+.card-detail__more-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card-detail__more-summary::-webkit-details-marker {
+  display: none;
+}
+
+.card-detail__more-summary::before,
+.card-detail__more-summary::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--color-border);
+}
+
+.card-detail__more-summary:hover {
+  color: var(--color-accent-bright);
+}
+
+.card-detail__more-summary:focus-visible {
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.card-detail__more-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.card-detail__more-chevron {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.16s ease;
+}
+
+.card-detail__more[open] .card-detail__more-chevron {
+  transform: rotate(180deg);
+}
+
+.card-detail__fields--more {
+  padding-top: var(--space-1);
+}
+
+.card-detail__errata-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.card-detail__errata-entry {
+  padding: var(--space-3) 0 var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card-detail__errata-entry:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.card-detail__errata-title {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.45;
+}
+
+.card-detail__errata-text {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.card-detail__errata-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.card-detail__errata-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.card-detail__errata-link:focus-visible {
+  outline: 2px solid var(--color-accent-bright);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .card-detail__printings {
   list-style: none;
   margin: 0;

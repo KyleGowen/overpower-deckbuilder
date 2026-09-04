@@ -61,6 +61,11 @@
   transform: scale(1.15);
   transform-origin: left center;
 }
+.home__news-thumb img.home__news-thumb-image--errata-feature {
+  object-position: 58% 24%;
+  transform: translate(-6%, -3%) scale(1.5);
+  transform-origin: 58% 24%;
+}
 .home__news-thumb-icon {
   color: var(--color-accent-dim);
   font-size: 1.5rem;

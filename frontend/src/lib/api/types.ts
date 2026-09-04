@@ -76,6 +76,14 @@ export type CollectionCardType =
   | 'training'
   | 'basic_universe';
 
+export interface CatalogErrataEntry {
+  id: string;
+  source_section: number;
+  entry_title: string;
+  entry_text: string;
+  source_url: string;
+}
+
 export interface CatalogCard {
   id: string;
   /** Characters/specials/power/missions/events use `name`. */
@@ -91,6 +99,8 @@ export interface CatalogCard {
   image_path?: string;
   reverse_image_path?: string | null;
   is_foil?: boolean;
+  /** Official errata linked to this exact persisted card printing. */
+  errata?: CatalogErrataEntry[];
 
   /* Character / stat fields */
   energy?: number;

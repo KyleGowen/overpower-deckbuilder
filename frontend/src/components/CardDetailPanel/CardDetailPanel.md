@@ -1,7 +1,8 @@
 # CardDetailPanel
 
 Slide-out panel showing full detail for a catalog card: full art, type/set/rarity/number
-chips, an action slot, an Ability section, and an auto-generated Details key/value list.
+chips, an action slot, an Ability section, an auto-generated Details key/value list, and
+linked official errata at the bottom.
 
 ## Props
 | Prop | Type | Notes |
@@ -29,6 +30,22 @@ values are skipped. Pass `hasFoil` to show foil availability from the foil-card 
 and the linked character is **Any Character** (`cardCharacterName` + `isAnyCharacterName`).
 Character-linked specials omit these rows. Logic lives in `cardDetailFields.ts`
 (`shouldShowCardDetailField`).
+
+**Collapsed secondary metadata:** `one_per_deck` / `is_one_per_deck`, all function-icon
+booleans, and `banned` live in a native `<details>` disclosure labeled **More**. It is
+collapsed whenever a card is opened and uses the browser's built-in keyboard and screen
+reader semantics. Set, foil state/availability, character, set number, rarity, and every
+other eligible row remain visible.
+
+## Official errata
+Catalog cards linked through `card_errata` carry an ordered `errata` array. The panel
+renders every linked entry after Details with its title, card-scoped plain text (shared
+guidance retained and paragraph breaks preserved), and canonical **View official errata**
+deep link. The database can narrow a multi-card source entry for each association without
+changing the canonical transcription. Cards without errata do not render an empty section.
+Entries use the same flat panel surface and horizontal dividers as the surrounding detail
+rows; they intentionally avoid nested cards, accent rails, tinted fills, and gradients so
+long rulings remain easy to scan.
 
 ## Landscape art frames (characters, locations, events)
 - **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280` (matches DB grid `CardTile`).

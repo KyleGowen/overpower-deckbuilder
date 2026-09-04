@@ -2,12 +2,13 @@ import type { ReactNode } from 'react';
 import { SlideOutPanel } from '../SlideOutPanel';
 import { CardImage } from '../CardImage';
 import { isFoilCard } from '../../lib/catalog/foilCatalog';
+import { IconChevronDown } from '../icons';
 import {
   cardDisplayName,
   cardAbilityText,
   labelForCatalogType,
 } from '../../lib/catalog/catalogTypeMap';
-import { shouldShowCardDetailField } from './cardDetailFields';
+import { isMoreCardDetailField, shouldShowCardDetailField } from './cardDetailFields';
 import type { CatalogCard, CatalogType } from '../../lib/api/types';
 import { imagePathFromCard } from '../../lib/images/cardImages';
 import './CardDetailPanel.css';
@@ -75,6 +76,7 @@ const HIDDEN_FIELDS = new Set([
   'is_foil',
   'threat_level',
   'set',
+  'errata',
 ]);
 
 function humanizeKey(key: string): string {
@@ -128,6 +130,10 @@ export function CardDetailContent({
     .filter(([key]) => shouldShowCardDetailField(key, type, card))
     .map(([key, value]) => [key, formatValue(value)] as const)
     .filter(([, value]) => value !== null);
+
+  const primaryFields = extraFields.filter(([key]) => !isMoreCardDetailField(key));
+  const moreFields = extraFields.filter(([key]) => isMoreCardDetailField(key));
+  const errata = card.errata ?? [];
 
   const showDetails = Boolean(card.set) || hasFoil !== undefined || isFoil !== undefined || extraFields.length > 0;
   const setLabel = card.set ? (setDisplayName ?? String(card.set)) : null;
@@ -246,13 +252,53 @@ export function CardDetailContent({
                 <dd>{hasFoil ? 'Yes' : 'No'}</dd>
               </div>
             ) : null}
-            {extraFields.map(([key, value]) => (
+            {primaryFields.map(([key, value]) => (
               <div className="card-detail__field" key={key}>
                 <dt>{humanizeKey(key)}</dt>
                 <dd>{value}</dd>
               </div>
             ))}
           </dl>
+          {moreFields.length ? (
+            <details className="card-detail__more" key={`${card.id}-more`}>
+              <summary className="card-detail__more-summary">
+                <span className="card-detail__more-label">
+                  <IconChevronDown className="card-detail__more-chevron" aria-hidden />
+                  More
+                </span>
+              </summary>
+              <dl className="card-detail__fields card-detail__fields--more">
+                {moreFields.map(([key, value]) => (
+                  <div className="card-detail__field" key={key}>
+                    <dt>{humanizeKey(key)}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </details>
+          ) : null}
+        </section>
+      ) : null}
+
+      {errata.length ? (
+        <section className="card-detail__section card-detail__errata" aria-label="Official errata">
+          <h4 className="card-detail__section-title">Errata</h4>
+          <div className="card-detail__errata-list">
+            {errata.map((entry) => (
+              <article className="card-detail__errata-entry" key={entry.id}>
+                <h5 className="card-detail__errata-title">{entry.entry_title}</h5>
+                <p className="card-detail__errata-text">{entry.entry_text}</p>
+                <a
+                  className="card-detail__errata-link"
+                  href={entry.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View official errata <span aria-hidden>↗</span>
+                </a>
+              </article>
+            ))}
+          </div>
         </section>
       ) : null}
     </div>

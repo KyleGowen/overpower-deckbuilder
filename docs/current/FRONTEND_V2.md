@@ -77,6 +77,8 @@ All calls go through [`lib/api/client.ts`](../../frontend/src/lib/api/client.ts)
 Data endpoints used:
 - Catalog: `GET /api/v1/catalog/:slug` (including separate `locations` and `battlegrounds` catalogs; full arrays; pagination/sort/filter is **client
   side** — the catalog endpoints do not paginate).
+  Linked card printings include an optional ordered `errata` array with the official plain
+  text and canonical source deep link; the shared `CardDetailPanel` displays it.
 - Decks: `GET/POST/PUT/DELETE /api/v1/decks*`, guest equivalents under
   `/api/v1/guest/decks*` (guest deck ids are prefixed `guest_`), `GET /api/v1/decks/community`,
   `GET /api/v1/decks/tournament`.
