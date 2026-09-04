@@ -4,6 +4,15 @@
   gap: var(--space-5);
 }
 
+.layout-mobile .card-detail-slideout .slideout__body {
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-5)
+  );
+  scroll-padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-5)
+  );
+}
+
 .card-detail__image {
   width: 100%;
   border-radius: var(--radius-md);

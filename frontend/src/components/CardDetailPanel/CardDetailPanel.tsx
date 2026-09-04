@@ -311,7 +311,14 @@ export function CardDetailPanel({ card, type, open, onClose, ...contentProps }: 
   const name = cardDisplayName(card);
 
   return (
-    <SlideOutPanel open={open} onClose={onClose} title={name} ariaLabel={`${name} details`} width={CARD_DETAIL_PANEL_WIDTH}>
+    <SlideOutPanel
+      open={open}
+      onClose={onClose}
+      title={name}
+      ariaLabel={`${name} details`}
+      width={CARD_DETAIL_PANEL_WIDTH}
+      className="card-detail-slideout"
+    >
       <CardDetailContent card={card} type={type} {...contentProps} />
     </SlideOutPanel>
   );

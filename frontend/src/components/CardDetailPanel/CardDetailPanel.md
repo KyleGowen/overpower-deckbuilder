@@ -47,6 +47,12 @@ Entries use the same flat panel surface and horizontal dividers as the surroundi
 rows; they intentionally avoid nested cards, accent rails, tinted fills, and gradients so
 long rulings remain easy to scan.
 
+## Mobile scrolling
+The card-detail drawer adds bottom scroll clearance equal to the fixed mobile navigation,
+the device safe-area inset, and the panel's standard spacing. This keeps the final detail or
+errata row fully visible above the bottom navigation at the end of the drawer without changing
+desktop spacing or other slide-out panels.
+
 ## Landscape art frames (characters, locations, events)
 - **Characters**: `.card-detail__image--characters` — `aspect-ratio: 380 / 280` (matches DB grid `CardTile`).
 - **Locations & events**: `.card-detail__image--locations` / `.card-detail__image--events` — `aspect-ratio: 236 / 151` (matches DB grid `CardTile`).
