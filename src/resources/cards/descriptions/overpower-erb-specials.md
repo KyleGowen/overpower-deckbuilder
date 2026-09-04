@@ -235,7 +235,7 @@
 | Card Name | Card Type | Character | Card Effect | One Per Deck | Cataclysm! | Ambush! | Assist! |
 |-----------|-----------|-----------|--------------|-------------|------------|---------|----------|
 | Chivalrous Protector | Special Card | Lancelot | Attack made on teammate is now made on Lancelot, who may defend. Any follow-up attacks must be made on Lancelot and are -2 to attack.  | false | false | false | false |
-| For Guinevere's Love | Special Card | Lancelot | Sort through Dead Pile and find "Sword and Shield" and immediately put it into play. Lancelot's team is +2 to Venture Total this battle. This card may be placed.  | false | false | false | false |
+| For Guinevere's Love | Special Card | Lancelot | Sort through Dead Pile and find "Sword and Shield" and immediately put it into play. Lancelot's team is +2 to Venture Total this battle. This card may not be negated.  | false | false | false | false |
 | For the Queen! | Special Card | Lancelot | Acts as a level 5 Combat or Brute Force MultiPower attack. If "Sword and Shield" is in play, this card may be used to defend.  | false | false | false | false |
 
 ## Lancelot (continued)
