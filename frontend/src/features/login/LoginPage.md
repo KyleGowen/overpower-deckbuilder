@@ -19,6 +19,9 @@ with the enlarged Excelsior wordmark (`Logo height={210}`). Right: the auth card
 - **Card logo:** `.login__card-logo` is a sibling above `.login__card` (not inside it), so the
   Excelsior wordmark (`Logo height={200}`) sits above the teal `::before` gradient bar; then
   "Welcome Back" and the form follow inside the card.
+- **Visible viewport fit:** the mobile login surface uses `100dvh`, safe-area-aware top and
+  bottom padding, and safe centering. It remains centered when the full stack fits; on shorter
+  browser viewports it starts below the browser chrome and scrolls instead of clipping the logo.
 
 ## Copy
 - **Brand sub (DTV only):** "Excelsior is a modern OverPower deckbuilding hub and card database.

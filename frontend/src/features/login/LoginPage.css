@@ -2,6 +2,7 @@
   position: relative;
   flex: 1;
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: max-content 1fr;
   align-items: center;
@@ -267,8 +268,16 @@
 /* ---- Mobile ---- */
 .layout-mobile .login {
   grid-template-columns: 1fr;
-  padding: var(--space-6) var(--space-5) var(--space-10);
-  align-content: center;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding:
+    max(var(--space-6), env(safe-area-inset-top, 0px))
+    var(--space-5)
+    max(var(--space-10), env(safe-area-inset-bottom, 0px));
+  align-content: safe center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .layout-mobile .login__brand {
   display: none;
