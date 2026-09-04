@@ -13,12 +13,15 @@ with the enlarged Excelsior wordmark (`Logo height={210}`). Right: the auth card
 - **Auth card top glow:** `.login__card` has a bright teal top edge — a 1px accent border,
   an outer cyan glow, and a centered `::before` gradient bar — over the frosted
   `rgba(13,21,38,0.82)` + `backdrop-filter: blur(16px)` surface.
+- **Authentication order:** username/password form, `OR` divider, then Google sign-in.
 
 ## Visuals (MV)
 - **Brand column hidden:** `.layout-mobile .login__brand` is not shown.
 - **Card logo:** `.login__card-logo` is a sibling above `.login__card` (not inside it), so the
-  Excelsior wordmark (`Logo height={200}`) sits above the teal `::before` gradient bar; then
+  Excelsior wordmark (`Logo height={250}`) sits above the teal `::before` gradient bar; then
   "Welcome Back" and the form follow inside the card.
+- **Authentication order:** Google sign-in, `OR` divider, then the username/password form. The
+  responsive JSX order matches the visual and keyboard-focus order.
 - **Visible viewport fit:** the mobile login surface uses `100dvh`, safe-area-aware top and
   bottom padding, and safe centering. It remains centered when the full stack fits; on shorter
   browser viewports it starts below the browser chrome and scrolls instead of clipping the logo.

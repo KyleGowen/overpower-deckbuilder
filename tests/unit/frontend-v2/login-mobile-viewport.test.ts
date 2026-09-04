@@ -6,6 +6,10 @@ describe('Login mobile viewport styling', () => {
     path.join(process.cwd(), 'frontend/src/features/login/LoginPage.css'),
     'utf8',
   );
+  const pageSource = fs.readFileSync(
+    path.join(process.cwd(), 'frontend/src/features/login/LoginPage.tsx'),
+    'utf8',
+  );
 
   const loginRule = css.match(/\.login\s*\{([^}]*)\}/)?.[1] ?? '';
   const mobileLoginRule = css.match(/\.layout-mobile \.login\s*\{([^}]*)\}/)?.[1] ?? '';
@@ -22,5 +26,18 @@ describe('Login mobile viewport styling', () => {
     expect(mobileLoginRule).toContain('env(safe-area-inset-bottom, 0px)');
     expect(mobileLoginRule).toContain('align-content: safe center');
     expect(mobileLoginRule).toContain('overflow-y: auto');
+  });
+
+  it('prioritizes Google sign-in on mobile without changing desktop order', () => {
+    const responsiveOrder = pageSource.match(
+      /\{isMobile \? \(\s*<>\s*([\s\S]*?)\s*<\/>\s*\) : \(\s*<>\s*([\s\S]*?)\s*<\/>\s*\)\}/,
+    );
+
+    expect(responsiveOrder?.[1]).toMatch(
+      /\{googleButton\}[\s\S]*\{divider\}[\s\S]*\{credentialsForm\}/,
+    );
+    expect(responsiveOrder?.[2]).toMatch(
+      /\{credentialsForm\}[\s\S]*\{divider\}[\s\S]*\{googleButton\}/,
+    );
   });
 });

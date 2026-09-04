@@ -5,6 +5,7 @@ import { AppBackground } from '../../components/AppBackground';
 import { Logo } from '../../components/Logo';
 import { IconBuild, IconCollection, IconDatabase, IconEye, IconEyeOff, IconGoogle, IconProfile, IconLock } from '../../components/icons';
 import { describeGoogleSignInError } from '../../lib/auth/googleSignInErrors';
+import { useLayoutMode } from '../../lib/layout/LayoutModeProvider';
 import './LoginPage.css';
 
 const CALLOUTS = [
@@ -28,6 +29,7 @@ export default function LoginPage() {
     clearGoogleRedirectError,
   } = useAuth();
   const navigate = useNavigate();
+  const { isMobile } = useLayoutMode();
 
   const [mode, setMode] = useState<Mode>('login');
   const [username, setUsername] = useState('');
@@ -100,6 +102,98 @@ export default function LoginPage() {
       .finally(() => setBusy(false));
   };
 
+  const credentialsForm = (
+    <form className="login__form" onSubmit={handleSubmit}>
+      <label className="login__field">
+        <span className="login__label">{mode === 'login' ? 'Email or Username' : 'Username'}</span>
+        <div className="login__input-wrap">
+          <IconProfile className="login__input-icon" />
+          <input
+            type="text"
+            autoComplete="username"
+            placeholder={mode === 'login' ? 'Enter your email or username' : 'Choose a username'}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+      </label>
+
+      {mode === 'signup' ? (
+        <label className="login__field">
+          <span className="login__label">Email</span>
+          <div className="login__input-wrap">
+            <IconProfile className="login__input-icon" />
+            <input
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+        </label>
+      ) : null}
+
+      <label className="login__field">
+        <span className="login__label">Password</span>
+        <div className="login__input-wrap">
+          <IconLock className="login__input-icon" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="login__eye"
+            onClick={() => setShowPassword((s) => !s)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <IconEyeOff /> : <IconEye />}
+          </button>
+        </div>
+      </label>
+
+      {error ? (
+        <div className="login__error" role="alert">
+          <span>{error}</span>
+          {offerGoogleRedirect ? (
+            <button
+              type="button"
+              className="login__error-action"
+              onClick={handleGoogleRedirect}
+              disabled={busy || !isGoogleSignInReady}
+            >
+              Continue with Google in this window
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      <button type="submit" className="btn btn-primary login__submit" disabled={busy}>
+        {busy ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
+      </button>
+    </form>
+  );
+
+  const divider = <div className="login__divider"><span>OR</span></div>;
+
+  const googleButton = (
+    <button
+      type="button"
+      className="btn btn-secondary login__google"
+      onClick={handleGoogleSignIn}
+      disabled={busy || !isGoogleSignInReady}
+    >
+      <IconGoogle /> Sign in with Google
+    </button>
+  );
+
   return (
     <div className="login">
       <AppBackground variant="hero" className="login__bg" />
@@ -126,7 +220,7 @@ export default function LoginPage() {
       </aside>
 
       <div className="login__card-logo">
-        <Logo height={200} className="login__card-logo-img" alt="Excelsior" />
+        <Logo height={250} className="login__card-logo-img" alt="Excelsior" />
       </div>
 
       <main className="login__card panel">
@@ -139,93 +233,19 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="login__form" onSubmit={handleSubmit}>
-          <label className="login__field">
-            <span className="login__label">{mode === 'login' ? 'Email or Username' : 'Username'}</span>
-            <div className="login__input-wrap">
-              <IconProfile className="login__input-icon" />
-              <input
-                type="text"
-                autoComplete="username"
-                placeholder={mode === 'login' ? 'Enter your email or username' : 'Choose a username'}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-          </label>
-
-          {mode === 'signup' ? (
-            <label className="login__field">
-              <span className="login__label">Email</span>
-              <div className="login__input-wrap">
-                <IconProfile className="login__input-icon" />
-                <input
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </label>
-          ) : null}
-
-          <label className="login__field">
-            <span className="login__label">Password</span>
-            <div className="login__input-wrap">
-              <IconLock className="login__input-icon" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="login__eye"
-                onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <IconEyeOff /> : <IconEye />}
-              </button>
-            </div>
-          </label>
-
-          {error ? (
-            <div className="login__error" role="alert">
-              <span>{error}</span>
-              {offerGoogleRedirect ? (
-                <button
-                  type="button"
-                  className="login__error-action"
-                  onClick={handleGoogleRedirect}
-                  disabled={busy || !isGoogleSignInReady}
-                >
-                  Continue with Google in this window
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-
-          <button type="submit" className="btn btn-primary login__submit" disabled={busy}>
-            {busy ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="login__divider"><span>OR</span></div>
-
-        <button
-          type="button"
-          className="btn btn-secondary login__google"
-          onClick={handleGoogleSignIn}
-          disabled={busy || !isGoogleSignInReady}
-        >
-          <IconGoogle /> Sign in with Google
-        </button>
+        {isMobile ? (
+          <>
+            {googleButton}
+            {divider}
+            {credentialsForm}
+          </>
+        ) : (
+          <>
+            {credentialsForm}
+            {divider}
+            {googleButton}
+          </>
+        )}
 
         <div className="login__alt-actions">
           <button

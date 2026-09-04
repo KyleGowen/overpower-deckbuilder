@@ -161,8 +161,11 @@ account-sheet row (`.account-sheet__toggle`) with `justify-content: space-betwee
   tabs). Top nav is hidden. Deck editor (outside AppShell) uses the same bottom nav on mobile;
   `.deck-editor__content` bottom padding clears the fixed bar (`--bottom-nav-height` + safe area).
 - **Mobile login viewport:** `.login` uses `100dvh` with safe-area-aware block padding,
-  `align-content: safe center`, and vertical scrolling. The full auth stack stays centered when it
-  fits, but short browser viewports anchor it below the visible top instead of clipping the logo.
+  `align-content: safe center`, and vertical scrolling. The mobile login wordmark renders at
+  `250px` high. Google sign-in appears above the `OR` divider and username/password form on mobile;
+  desktop retains username/password first. The responsive DOM order matches keyboard focus. The
+  full auth stack stays centered when it fits, but short browser viewports anchor it below the
+  visible top instead of clipping the logo.
 - Nav, dropdowns, and tooltips sit at `--z-nav: 9999` so they always clear page content.
 
 ### Branding & favicon
